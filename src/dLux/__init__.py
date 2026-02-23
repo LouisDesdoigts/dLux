@@ -58,6 +58,7 @@ from .optical_systems import (
     AngularOpticalSystem as AngularOpticalSystem,
     CartesianOpticalSystem as CartesianOpticalSystem,
     LayeredOpticalSystem as LayeredOpticalSystem,
+    ConvergingBeamOpticalSystem as ConvergingBeamOpticalSystem,
 )
 
 from .sources import (

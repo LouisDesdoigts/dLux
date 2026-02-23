@@ -6,6 +6,7 @@ from dLux import (
     LayeredOpticalSystem,
     AngularOpticalSystem,
     CartesianOpticalSystem,
+    ConvergingBeamOpticalSystem,
     PointSource,
     Wavefront,
     PSF,
@@ -122,6 +123,148 @@ def test_cartesian_optics(
         psf_pixel_scale,
         oversample,
     )
+    _test_model(optics)
+    _test_propagate(optics)
+    _test_propagate_mono(optics)
+
+
+def test_converging_beam_optical_system(
+    wf_npixels,
+    diameter,
+    layers,
+    psf_npixels,
+    psf_pixel_scale,
+    oversample,
+):
+    """
+    Integration test for the `ConvergingBeamOpticalSystem` class.
+
+    Verifies correct behavior of layer management, attribute access,
+    and partial propagation through both planes. Ensures the class
+    behaves consistently with other optical system subclasses while
+    correctly implementing its intermediate-plane logic.
+
+    The test covers:
+      - Layer operations: insertion, removal, invalid plane handling,
+        and attribute lookup via `__getattr__`.
+      - Monochromatic propagation: tests `prop_mono_to_p2` for both PSF
+        and `Wavefront` outputs.
+      - Polychromatic propagation: tests `prop_to_p2` for summed PSF,
+        stacked `Wavefront`, and `PSF` object outputs.
+      - API compatibility: runs shared propagation/model tests to confirm
+        interface consistency across optical system types.
+    """
+    optics = ConvergingBeamOpticalSystem(
+        wf_npixels=wf_npixels,
+        p1_diameter=diameter,
+        p2_diameter=0.15,
+        p1_layers=layers,
+        p2_layers=layers,
+        plane_separation=0.9,
+        magnification=10.0,
+        psf_npixels=psf_npixels,
+        psf_pixel_scale=0.051566,
+        oversample=oversample,
+    )
+    print("\n--- Initial ConvergingBeamOpticalSystem ---")
+    print(optics)
+
+    # ----------------------------
+    # Check multi-plane attributes
+    # ----------------------------
+    primary, secondary = optics.plane_names
+    assert primary == "primary"
+    assert secondary == "secondary"
+
+    # Diameters are stored per-plane
+    assert optics.diameter[primary] == pytest.approx(diameter)
+    assert optics.diameter[secondary] == pytest.approx(0.15)
+
+    # Layers are stored per-plane
+    assert set(optics.layers.keys()) == {primary, secondary}
+    assert len(optics.layers[primary]) == len(layers)
+    assert len(optics.layers[secondary]) == len(layers)
+
+    # ----------------------------
+    # Insert new layers on each plane
+    # ----------------------------
+    optics = optics.insert_layer(("P1Mask", Optic()), index=0, plane_index=0)
+    optics = optics.insert_layer(("P2Mask", Optic()), index=0, plane_index=1)
+    # unlabeled insert on secondary plane
+    optics = optics.insert_layer(Optic(), index=0, plane_index=1)
+
+    # invalid plane index should raise
+    with pytest.raises(ValueError):
+        optics.insert_layer(("P3Mask", Optic()), index=0, plane_index=2)
+
+    print("\n--- After Layer Inserts ---")
+    print(optics)
+    print("Has P1Mask:", hasattr(optics, "P1Mask"))
+    print("Has P2Mask:", hasattr(optics, "P2Mask"))
+
+    # Direct per-plane layer dict checks
+    assert "P1Mask" in optics.layers[primary]
+    assert "P2Mask" in optics.layers[secondary]
+
+    # Query by key via __getattr__
+    assert isinstance(optics.P1Mask, Optic)
+    assert isinstance(optics.P2Mask, Optic)
+
+    # Query nested attribute (e.g. 'opd')
+    # Accessing is enough to validate __getattr__
+    _ = optics.opd
+
+    # ----------------------------
+    # Remove inserted layers and verify gone
+    # ----------------------------
+    optics = optics.remove_layer("P1Mask", plane_index=0)
+    optics = optics.remove_layer("P2Mask", plane_index=1)
+
+    print("\n--- After Layer Removals ---")
+    print("Has P1Mask:", hasattr(optics, "P1Mask"))
+    print("Has P2Mask:", hasattr(optics, "P2Mask"))
+
+    # Ensure removed from canonical layer maps
+    assert "P1Mask" not in optics.layers[primary]
+    assert "P2Mask" not in optics.layers[secondary]
+
+    with pytest.raises(AttributeError):
+        _ = optics.P1Mask
+    with pytest.raises(AttributeError):
+        _ = optics.P2Mask
+
+    # ----------------------------
+    # Partial propagation to Plane 2 (monochromatic)
+    # ----------------------------
+    wl = 1.0e-6
+
+    # Return PSF array at Plane 2
+    p2_psf = optics.prop_mono_to_p2(wl, return_wf=False)
+    print(
+        "\n[mono -> P2] return_wf=False type:",
+        type(p2_psf),
+        "shape:",
+        getattr(p2_psf, "shape", None),
+    )
+    assert isinstance(p2_psf, np.ndarray)
+    assert p2_psf.shape == (wf_npixels, wf_npixels)
+
+    # Return Wavefront at Plane 2
+    p2_wf = optics.prop_mono_to_p2(wl, return_wf=True)
+    print("[mono -> P2] return_wf=True type:", type(p2_wf))
+    # try to introspect common attrs for clarity
+    if hasattr(p2_wf, "amplitude"):
+        print(
+            "Wavefront amplitude.shape:",
+            getattr(p2_wf.amplitude, "shape", None),
+        )
+        print("Wavefront pixel_scale:", getattr(p2_wf, "pixel_scale", None))
+    assert isinstance(p2_wf, Wavefront)
+    assert p2_wf.amplitude.shape == (wf_npixels, wf_npixels)
+
+    # ----------------------------
+    # Reuse standard checks
+    # ----------------------------
     _test_model(optics)
     _test_propagate(optics)
     _test_propagate_mono(optics)

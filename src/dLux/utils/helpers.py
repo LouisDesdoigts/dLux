@@ -2,9 +2,17 @@ from collections import OrderedDict
 from typing import Any, Callable
 import jax.numpy as np
 import jax.tree as jtu
-from jax import Array
+from jax import vmap, Array
+from dLux.utils.interpolation import scale
 
-__all__ = ["map2array", "list2dictionary", "insert_layer", "remove_layer"]
+
+__all__ = [
+    "map2array",
+    "list2dictionary",
+    "insert_layer",
+    "remove_layer",
+    "scale_layer",
+]
 
 
 def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
@@ -155,3 +163,119 @@ def remove_layer(layers: dict, key: str) -> dict:
     """
     layers.pop(key)
     return layers
+
+
+def scale_layer(layer_in, pixel_scale_in, pixel_scale_out, npix_out):
+    """
+    Rescale an optical layer to a new pixel scale and array size.
+
+    This helper function supports `TransmissiveLayer`, `AberratedLayer`,
+    `BasisLayer`, and `Optic` objects. It rescales any defined 2D (or 3D
+    for `BasisLayer`) arrays—such as transmission maps, OPDs, phases,
+    or bases—using the interpolation routine from
+    `dLux.utils.interpolation.scale()`.
+
+    Parameters
+    ----------
+    layer_in : TransmissiveLayer, AberratedLayer, BasisLayer, or Optic
+        The optical layer instance to be rescaled.
+    pixel_scale_in : float
+        The current pixel scale of the input layer.
+    pixel_scale_out : float
+        The target pixel scale for the rescaled layer.
+    npix_out : int
+        The desired output array size.
+
+    Returns
+    -------
+    layer_out : same type as `layer_in`
+        A new instance of the same layer type with rescaled internal
+        arrays and updated resolution.
+
+    Raises
+    ------
+    ValueError
+        If an array on the layer has an unexpected number of dimensions.
+    TypeError
+        If the provided layer type is not one of the supported classes.
+
+    Notes
+    -----
+    - Scaling is applied only to defined fields (e.g., `opd`, `phase`,
+      `transmission`, or `basis`).
+    - Unsupported layer types will raise a `TypeError`.
+    - This function imports layer classes locally to avoid circular
+      dependencies within the `dLux` module.
+    """
+    from dLux.layers import (
+        TransmissiveLayer,
+        AberratedLayer,
+        BasisLayer,
+        Optic,
+    )
+
+    scale_factor = pixel_scale_out / pixel_scale_in
+    new_layer = layer_in
+
+    # --- Transmissive Component ---
+    if isinstance(layer_in, TransmissiveLayer):
+        transmission = layer_in.transmission
+        if transmission is not None:
+            if transmission.ndim != 2:
+                raise ValueError(
+                    f"TransmissiveLayer transmission must be 2D "
+                    f"(got shape {transmission.shape})"
+                )
+            scaled = scale(transmission, npix_out, scale_factor)
+            new_layer = new_layer.set("transmission", scaled)
+
+    # --- Aberrated Component ---
+    if isinstance(layer_in, AberratedLayer):
+        if layer_in.opd is not None:
+            if layer_in.opd.ndim != 2:
+                raise ValueError(
+                    f"AberratedLayer opd must be 2D, got shape {layer_in.opd.shape}"
+                )
+            scaled_opd = scale(layer_in.opd, npix_out, scale_factor)
+            new_layer = new_layer.set("opd", scaled_opd)
+
+        if layer_in.phase is not None:
+            if layer_in.phase.ndim != 2:
+                raise ValueError(
+                    f"AberratedLayer phase must be 2D, got shape {layer_in.phase.shape}"
+                )
+            scaled_phase = scale(layer_in.phase, npix_out, scale_factor)
+            new_layer = new_layer.set("phase", scaled_phase)
+
+    # --- Basis Component ---
+    if isinstance(layer_in, BasisLayer):
+        basis = layer_in.basis
+        if basis is not None:
+            if basis.ndim != 3:
+                raise ValueError(
+                    "BasisLayer basis must be a 3D array [n_modes, H, W]"
+                )
+            scale_fn = vmap(scale, (0, None, None))
+            scaled_basis = scale_fn(basis, npix_out, scale_factor)
+            new_layer = new_layer.set("basis", scaled_basis)
+
+    if isinstance(layer_in, Optic):
+        # Optic is an object with optional opd/phase/transmission.
+        # We can safely recurse scaling through any defined arrays.
+        fields = {}
+        if layer_in.opd is not None:
+            fields["opd"] = scale(layer_in.opd, npix_out, scale_factor)
+        if layer_in.phase is not None:
+            fields["phase"] = scale(layer_in.phase, npix_out, scale_factor)
+        if layer_in.transmission is not None:
+            fields["transmission"] = scale(
+                layer_in.transmission, npix_out, scale_factor
+            )
+        return layer_in.set(list(fields.keys()), list(fields.values()))
+
+    # --- Final Return ---
+    if new_layer is not layer_in:
+        return new_layer
+
+    # If no recognized layers were scaled
+    raise TypeError(f"Unsupported layer type: {type(layer_in)}")

@@ -9,3 +9,6 @@ build/
 dLux.egg-info/
 docs/notebooks/files
 .idea/
+site/
+venv/
+*/venv/

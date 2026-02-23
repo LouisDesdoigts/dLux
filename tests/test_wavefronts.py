@@ -182,3 +182,55 @@ class TestWavefront:
             focal_wf.propagate_fresnel(
                 npix, pscale, focal_length, focal_shift, pixel=pixel
             )
+
+    @pytest.mark.parametrize("pad", [1, 2, 3])
+    def test_fresnel_AS_propagation(self, wavefront, pad):
+        """
+        Fresnel AS: correct plane/units, shape & pixel scale; deterministic and
+        (approximately) energy-preserving.
+        """
+        prop_dist = 0.75  # any nonzero distance
+
+        # Forward propagate
+        out1 = wavefront.propagate_fresnel_AS(prop_dist, pad=pad)
+        out2 = wavefront.propagate_fresnel_AS(prop_dist, pad=pad)
+
+        # Plane/units and structure
+        assert isinstance(out1, Wavefront)
+        assert out1.plane == "Intermediate"
+        assert out1.units == "Cartesian"
+        assert out1.npixels == wavefront.npixels * pad
+        assert np.allclose(out1.pixel_scale, wavefront.pixel_scale)
+
+        # No NaNs
+        assert not np.isnan(out1.amplitude).any()
+        assert not np.isnan(out1.phase).any()
+
+        # Determinism
+        assert np.allclose(out1.amplitude, out2.amplitude, atol=1e-12)
+        assert np.allclose(out1.phase, out2.phase, atol=1e-12)
+
+        # Energy conservation (unitary up to numerical error)
+        Ein = np.sum(wavefront.amplitude**2)
+        Eout = np.sum(out1.amplitude**2)
+        assert np.isclose(Ein, Eout, rtol=1e-10)
+
+    def test_fresnel_AS_identity_and_roundtrip(self, wavefront):
+        """
+        Fresnel AS: z=0 is identity (with pad=1), and forward/backward round-trip
+        returns to the original field (same size) up to numerical error.
+        """
+        # z = 0 ⇒ identity (no padding so shapes match)
+        z0 = wavefront.propagate_fresnel_AS(0.0, pad=1)
+        assert np.allclose(z0.amplitude, wavefront.amplitude, atol=1e-12)
+        assert np.allclose(z0.phase, wavefront.phase, atol=1e-12)
+
+        # Round-trip: +z then -z (pad=1 keeps constant size)
+        z = 0.5
+        fwd = wavefront.propagate_fresnel_AS(z, pad=1)
+        bwd = fwd.propagate_fresnel_AS(-z, pad=1)
+
+        # Compare complex fields to avoid phase-wrapping edge cases
+        wf0 = wavefront.amplitude * np.exp(1j * wavefront.phase)
+        wfB = bwd.amplitude * np.exp(1j * bwd.phase)
+        assert np.allclose(wf0, wfB, atol=1e-10)

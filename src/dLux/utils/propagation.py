@@ -3,7 +3,7 @@ from jax import Array, vmap
 import dLux.utils as dlu
 
 
-__all__ = ["FFT", "MFT", "fresnel_MFT"]
+__all__ = ["FFT", "MFT", "fresnel_MFT", "fresnel_AS"]
 
 
 def FFT(
@@ -405,4 +405,127 @@ def fresnel_MFT(
     )
 
     phasor *= second_factor
+    return phasor
+
+
+def fresnel_AS_transfer_function(
+    N: int, wavelength: float, diameter: float, prop_dist: float, pad: int = 2
+) -> Array:
+    r"""
+    Computes the Fresnel Angular Spectrum (AS) transfer function efficiently.
+
+    This routine computes the transfer function as described in Section 4.2.3
+    of Goodman's Introduction to Fourier Optics and given in EQ 4-20.
+
+    This routine additionally invokes the paraxial approximation to make the
+    kernel separable in X and Y. Under this approximation, the 2D angular
+    spectrum transfer function can be expressed as the outer product of two 1D
+    factors, enabling a much faster and memory-efficient computation.
+
+    Parameters
+    ----------
+    N : int
+        Size of the input phasor array (before padding, assumes square array).
+    wavelength : float
+        Wavelength in meters.
+    diameter : float
+        Diameter of the aperture in meters.
+    prop_dist : float
+        Propagation distance in meters.
+    pad : int
+        Padding factor applied to the input array.
+
+    Returns
+    -------
+    H : np.ndarray
+        The (padded) complex Fresnel transfer function.
+
+    Notes
+    -----
+    - The paraxial form used here assumes small propagation angles,
+      i.e. $(\lambda f_x)^2 + (\lambda f_y)^2 \ll 1$, such that:
+
+      $$
+      \sqrt{1 - (\lambda f_x)^2 - (\lambda f_y)^2}
+      \approx 1 - \frac{1}{2}(\lambda^2 f_x^2 + \lambda^2 f_y^2).
+      $$
+
+    - This allows the kernel to be written as a separable product of
+      1D terms, reducing computational cost from $\mathcal{O}(N^2)$
+      to $\mathcal{O}(2N)$ operations.
+
+    - For wide-angle propagation, use the full non-separable form.
+    """
+    Npad = N * pad
+    radius = (pad * diameter) / 2
+    k = 2 * np.pi / wavelength
+
+    # 1D spatial frequencies (square grid -> same in x and y)
+    f = np.fft.fftfreq(Npad) * Npad
+
+    # Compute the sqrt argument in Goodman EQ 4-20
+    sqrt_arg = 1 - (1 / 4) * (wavelength / radius) ** 2 * f**2
+
+    # Avoid negative sqrt
+    sqrt_arg = np.maximum(0, sqrt_arg)
+
+    # Take the exponential
+    tf = np.exp(1j * k * prop_dist * np.sqrt(sqrt_arg))
+
+    # Outer product to form the 2D transfer function
+    return np.outer(tf, tf)
+
+
+def fresnel_AS(
+    phasor: Array,
+    wavelength: float,
+    diameter: float,
+    prop_dist: float,
+    pad: int = 2,
+    transfer_function: Array = None,
+) -> np.ndarray:
+    """
+    Performs Fresnel propagation using the Angular Spectrum (AS) method.
+
+    Parameters
+    ----------
+    phasor : np.ndarray
+        The input phasor (complex array).
+    wavelength : float
+        Wavelength of the input phasor (meters).
+    diameter : float
+        Diameter of the input phasor array (meters).
+    prop_dist : float
+        Distance to propagate (meters).
+    pad : int, optional
+        Padding factor for the input array before propagation. Default is 2.
+    transfer_function : np.ndarray, optional
+        Precomputed Fresnel transfer function. If None, it is computed internally.
+
+    Returns
+    -------
+    phasor : np.ndarray
+        The propagated (and padded) phasor.
+
+    Notes
+    -----
+    - The output array is padded according to the pad parameter, and
+    generally will not be the same size as the input array
+    """
+
+    # Pad the input array
+    pad = int(pad)
+    N = phasor.shape[0]
+    Npad = (N * (pad - 1)) // 2
+    phasor = np.pad(phasor, Npad)
+
+    # Compute the transfer function if not provided
+    if transfer_function is None:
+        transfer_function = fresnel_AS_transfer_function(
+            N, wavelength, diameter, prop_dist, pad=pad
+        )
+
+    # Perform the propagation
+    phasor = np.fft.ifft2(np.fft.fft2(phasor) * transfer_function)
+
     return phasor

@@ -13,3 +13,6 @@ This module contains the leftover functions that don't fit anywhere else in the 
 
 ???+ info "remove_layer"
     ::: dLux.utils.helpers.remove_layer
+
+???+ info "scale_layer"
+    ::: dLux.utils.helpers.scale_layer

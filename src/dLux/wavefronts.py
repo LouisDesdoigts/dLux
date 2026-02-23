@@ -773,3 +773,81 @@ class Wavefront(Base):
             ["amplitude", "phase", "pixel_scale", "plane", "units"],
             [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
         )
+
+    def _fresnel_AS(
+        self: Wavefront,
+        phasor: Array,
+        wavelength: float,
+        diameter: float,
+        prop_dist: float,
+        pad: int = 2,
+    ) -> Array:
+        """
+        Alias for the fresnel_AS function to allow for vectorisation over phasors,
+        wavelengths, etc.
+
+        Parameters
+        ----------
+        phasor : Array
+            The phasor to propagate.
+        wavelength : float, meters
+            The wavelength of the wavefront.
+        diameter : float, meters
+            The diameter of the phasor
+        prop_dist : float, meters
+            The distance to propagate
+        pad : int = 2
+            Pad factor for the input phasor
+
+        Returns
+        -------
+        phasor : Array
+            The propagated phasor.
+        """
+        return dlu.fresnel_AS(phasor, wavelength, diameter, prop_dist, pad)
+
+    def propagate_fresnel_AS(
+        self: Wavefront,
+        prop_dist: float,
+        pad: int = 2,
+    ) -> Wavefront:
+        """
+        Propagates the wavefront a distance using fresnel Angular Spectrum propagation
+
+        Parameters
+        ----------
+        prop_dist : float, meters
+            The distance to propagate
+        pad : int = 2
+            Pad factor for the input field
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The propagated wavefront.
+        """
+
+        # Require Cartesian units (i.e., Pupil or already-Intermediate usage)
+        if self.units != "Cartesian":
+            raise ValueError(
+                f"propagate_fresnel_AS requires Cartesian units; "
+                f"got plane={self.plane}, units={self.units}."
+            )
+
+        # Update the plane, pixel scale, and units
+        plane = "Intermediate"
+        pixel_scale = self.pixel_scale
+        units = "Cartesian"
+
+        # Propagate
+        # Using a self._fresnel_AS here allows for broadband wavefronts to define
+        # vectorised propagation fn over phasors, wavels, px_scales, etc.
+        phasor = self._fresnel_AS(
+            self.phasor, self.wavelength, self.diameter, prop_dist, pad
+        )
+
+        # Update
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
+        )
