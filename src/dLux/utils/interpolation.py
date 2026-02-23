@@ -1,61 +1,56 @@
 import jax.numpy as np
 from jax import Array
-from jax.scipy.ndimage import map_coordinates
+import interpax as ipx
 import dLux.utils as dlu
 
 __all__ = [
-    "generate_coordinates",
+    "interp",
     "scale",
     "rotate",
 ]
 
 
-def generate_coordinates(
-    npixels_in: int,
-    npixels_out: int,
-    sampling_ratio: Array,
-    x_shift: Array = np.array(0.0),
-    y_shift: Array = np.array(0.0),
-) -> Array:
+def interp(
+    image: Array,
+    knot_coords: Array,
+    sample_coords: Array,
+    method: str = "linear",
+    fill: float = 0.0,
+):
     """
-    Generates a new set of paraxial coordinates which can be used for interpolation.
+    General interpolation function, wrapping interpax.interp2d
 
     Parameters
     ----------
-    npixels_in : int
-        The number of pixels in the original array.
-    npixels_out : int
-        The number of pixel in the output array.
-    sampling_ratio : Array
-        The ratio of pixel sizes in the input and output array,
-        i.e. pixel_scale_out/pixel_scale_in.
-    x_shift : Array, pixels = np.array(0.)
-        How much to shift the x_coordinates in the output array, in the pixel
-        units of the output array.
-    y_shift : Array, pixels = np.array(0.)
-        How much to shift the y_coordinates in the output array, in the pixel
-        units of the output array.
+    image : Array
+        The input 2D image to interpolate
+    knot_coords : Array
+        The coordinates of the points in the image
+    sample_coords : Array
+        The coordinates to interpolate onto
+    method : str = "linear"
+        The interpolation method.
+    fill : float = 0.0
+        Default value outside knot_coords
 
     Returns
     -------
-    coordinates : Array
-        The output coordinates at which to interpolate onto.
+    array: Array
+        The interpolated array.
     """
-    old_centre = (npixels_in - 1) / 2
-    new_centre = (npixels_out - 1) / 2
-    pixels = (
-        sampling_ratio * np.linspace(-new_centre, new_centre, npixels_out)
-        + old_centre
-    )
-    x_pixels, y_pixels = np.meshgrid(pixels + x_shift, pixels + y_shift)
-    return np.array([y_pixels, x_pixels])
+    xs, ys = knot_coords
+    xpts, ypts = sample_coords.reshape(2, -1)
+
+    return ipx.interp2d(
+        ypts, xpts, ys[:, 0], xs[0], image, method=method, extrap=fill
+    ).reshape(sample_coords[0].shape)
 
 
-def scale(array: Array, npixels: int, ratio: float, order: int = 1) -> Array:
+def scale(
+    array: Array, npixels: int, ratio: float, method: str = "linear"
+) -> Array:
     """
-    Paraxially interpolates an array based on the sampling ratio, and npixels_out.
-
-    # TODO: Check if a half-pixel offset is produced
+    Paraxially interpolates a square array based on the sampling ratio, and npixels_out.
 
     Parameters
     ----------
@@ -65,10 +60,9 @@ def scale(array: Array, npixels: int, ratio: float, order: int = 1) -> Array:
     npixels : int
         The number of pixel in the output array.
     ratio : float
-        The relative input to output scales, TODO: does 2 make it bigger or
-        smaller? i.e. input scale/output scale. <- get this right.
-    order : int = 1
-        The interpolation order to use. Can be 0 or 1.
+        The scale of the input relative to the output
+    method : str = "linear"
+        The interpolation method.
 
     Returns
     -------
@@ -77,14 +71,19 @@ def scale(array: Array, npixels: int, ratio: float, order: int = 1) -> Array:
     """
     # Get coords arrays
     npixels_in = array.shape[-1]
-    # TODO: Update with array_coordinates
-    coordinates = generate_coordinates(npixels_in, npixels, ratio)
-    return map_coordinates(array, coordinates, order=order)
+    coords_in = dlu.pixel_coords(npixels_in, 1)
+    coords_out = dlu.compress_coords(
+        dlu.pixel_coords(npixels, 1),
+        np.array([ratio, ratio]) * npixels / npixels_in,
+    )
+
+    # Interpolate
+    return interp(array, coords_in, coords_out, method)
 
 
-def rotate(array: Array, angle: Array, order: int = 1) -> Array:
+def rotate(array: Array, angle: Array, method: str = "linear") -> Array:
     """
-    Rotates an array by the angle, using interpolation.
+    Rotates a square array by the angle, using interpolation.
 
     Parameters
     ----------
@@ -92,27 +91,18 @@ def rotate(array: Array, angle: Array, order: int = 1) -> Array:
         The array to rotate.
     angle : Array, radians
         The angle to rotate the array by.
-    order : int = 1
-        The interpolation order to use. Can be 0 or 1.
+    method : str = "linear"
+        The interpolation method.
 
     Returns
     -------
     array : Array
         The rotated array.
     """
-
-    # TODO: Use rotate_coords
-    def _rotate(coordinates: Array, rotation: Array) -> Array:
-        x, y = coordinates[0], coordinates[1]
-        new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
-        new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
-        return np.array([new_x, new_y])
-
     # Get coordinates
     npixels = array.shape[0]
-    centre = (npixels - 1) / 2
-    coordinates = dlu.nd_coords((npixels, npixels), indexing="ij")
-    coordinates_rotated = _rotate(coordinates, angle) + centre
+    coords_in = dlu.nd_coords((npixels, npixels))
+    coords_out = dlu.rotate_coords(coords_in, angle)
 
     # Interpolate
-    return map_coordinates(array, coordinates_rotated, order=order)
+    return interp(array, coords_in, coords_out, method)
