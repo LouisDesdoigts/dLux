@@ -75,8 +75,8 @@ class Rotate(UnifiedLayer):
     ----------
     angle : float, radians
         The angle by which to rotate the input in the clockwise direction.
-    order : int
-        The order of the interpolation to use. Must be 0 or 1.
+    method : str
+        The interpolation method.
     complex : bool
         Should the rotation be performed on the 'complex' (real, imaginary), as opposed
         to the default 'phasor' (amplitude, phase) arrays. Only applies if the input is
@@ -84,13 +84,13 @@ class Rotate(UnifiedLayer):
     """
 
     angle: float
-    order: int
+    method: str
     complex: bool
 
     def __init__(
         self: UnifiedLayer,
         angle: float,
-        order: int = 1,
+        method: str = "linear",
         complex: bool = False,
     ):
         """
@@ -98,8 +98,8 @@ class Rotate(UnifiedLayer):
         ----------
         angle : float, radians
             The angle by which to rotate the input in the clockwise direction.
-        order : int = 1
-            The order of the interpolation to use. Must be 0 or 1.
+        method : str = "linear"
+            The interpolation method.
         complex : bool = False
             Should the rotation be performed on the 'complex' (real, imaginary), as
             opposed to the default 'phasor' (amplitude, phase) arrays. Only applies if
@@ -107,11 +107,8 @@ class Rotate(UnifiedLayer):
         """
         super().__init__()
         self.angle = float(angle)
-        self.order = int(order)
+        self.method = str(method)
         self.complex = bool(complex)
-
-        if self.order not in (0, 1):
-            raise ValueError("Order must be 0, 1")
 
     def apply(
         self: UnifiedLayer, input: Union[Wavefront, PSF]
@@ -130,9 +127,9 @@ class Rotate(UnifiedLayer):
             The rotated input.
         """
         if isinstance(input, PSF):
-            return input.rotate(self.angle, self.order)
+            return input.rotate(self.angle, self.method)
         else:
-            return input.rotate(self.angle, self.order, self.complex)
+            return input.rotate(self.angle, self.method, self.complex)
 
 
 class Flip(UnifiedLayer):

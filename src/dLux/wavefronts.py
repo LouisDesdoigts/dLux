@@ -484,7 +484,10 @@ class Wavefront(Base):
         )
 
     def rotate(
-        self: Wavefront, angle: Array, order: int = 1, complex: bool = False
+        self: Wavefront,
+        angle: Array,
+        method: str = "linear",
+        complex: bool = False,
     ) -> Wavefront:
         """
         Rotates the wavefront by a given angle via interpolation. Can be done on the
@@ -495,8 +498,8 @@ class Wavefront(Base):
         angle : Array, radians
             The angle by which to rotate the wavefront in a clockwise
             direction.
-        order : int = 1
-            The interpolation order to use.
+        method : str = "linear"
+            The interpolation method.
         complex : bool = False
             Whether to rotate the real and imaginary representation of the wavefront as
             opposed to the amplitude and phase representation.
@@ -511,7 +514,7 @@ class Wavefront(Base):
 
         # Rotate the field
         rotator = vmap(dlu.rotate, (0, None, None))
-        field = rotator(field, angle, order)
+        field = rotator(field, angle, method)
 
         # Cast back to (amplitude, phase) if needed
         if complex:

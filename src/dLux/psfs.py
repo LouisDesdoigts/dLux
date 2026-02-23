@@ -102,7 +102,7 @@ class PSF(Base):
             "data", convolve(self.data, other, mode="same", method=method)
         )
 
-    def rotate(self: PSF, angle: float, order: int = 1) -> PSF:
+    def rotate(self: PSF, angle: float, method: str = "linear") -> PSF:
         """
         Rotates the psf by a given angle via interpolation.
 
@@ -110,15 +110,15 @@ class PSF(Base):
         ----------
         angle : float
             The angle by which to rotate the psf.
-        order : int = 1
-            The order of the interpolation method to use.
+        method : str = "linear"
+            The interpolation method.
 
         Returns
         -------
         psf : PSF
             The rotated psf.
         """
-        return self.set("data", dlu.rotate(self.data, angle, order=order))
+        return self.set("data", dlu.rotate(self.data, angle, method=method))
 
     def resize(self: PSF, npixels: int) -> PSF:
         """
