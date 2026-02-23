@@ -61,7 +61,6 @@ plugins:
           paths: [src]
           options:
             docstring_style: "numpy"
-          rendering:
             members_order: source
 
 markdown_extensions:
