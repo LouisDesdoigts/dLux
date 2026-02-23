@@ -2,6 +2,7 @@ import jax.numpy as np
 import jax.tree as jtu
 from jax import Array
 from typing import Union
+from .math import triangular_number
 
 __all__ = [
     "cart2polar",
@@ -12,6 +13,8 @@ __all__ = [
     "compress_coords",
     "shear_coords",
     "rotate_coords",
+    "gen_powers",
+    "distort_coords",
 ]
 
 
@@ -94,6 +97,61 @@ def rotate_coords(coords: Array, rotation: float) -> Array:
     new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
     new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
     return np.array([new_x, new_y])
+
+
+def gen_powers(degree: int):
+    """
+    Generates the powers required for a 2d polynomial
+
+    Parameters
+    ----------
+    degree : int
+        Maximum power to generate
+
+    Returns
+    -------
+    xpows : Array
+        x axis powers
+    ypows : Array
+        y axis powers
+    """
+    n = triangular_number(degree)
+    vals = np.arange(n)
+
+    # Ypows
+    tris = triangular_number(np.arange(degree))
+    ydiffs = np.repeat(tris, np.arange(1, degree + 1))
+    ypows = vals - ydiffs
+
+    # Xpows
+    tris = triangular_number(np.arange(1, degree + 1))
+    xdiffs = np.repeat(n - np.flip(tris), np.arange(degree, 0, -1))
+    xpows = np.flip(vals - xdiffs)
+
+    return np.array([xpows, ypows])
+
+
+def distort_coords(coords: Array, coeffs: Array, pows: Array):
+    """
+    Apply a 2D polynomial distortion to some coordinates
+
+    Parameters
+    ----------
+    coords : Array
+        Input coordinates to distort
+    coeffs : Array
+        Distortion polynomial coefficients
+    pows : Array
+        Distortion polynomial powers
+
+    Returns
+    -------
+    distorted_coords : Array
+        Coords with the distortion applied
+    """
+    pow_base = np.multiply(*(coords[:, None, ...] ** pows[..., None, None]))
+    distortion = np.sum(coeffs[..., None, None] * pow_base[None, ...], axis=1)
+    return coords + distortion
 
 
 # Coordinate conversions #

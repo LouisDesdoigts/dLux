@@ -11,6 +11,8 @@ from dLux.utils.coordinates import (
     compress_coords,
     shear_coords,
     rotate_coords,
+    gen_powers,
+    distort_coords,
 )
 
 rtol = 1e-5
@@ -54,6 +56,20 @@ def test_rotate_coords():
     rotation = np.pi
     expected = np.array([[0.0, -0.5, -1.0], [0.0, -0.5, -1.0]])
     assert np.allclose(rotate_coords(coords, rotation), expected)
+
+
+def test_gen_powers():
+    expected = np.array(
+        [[0.0, 1.0, 0.0, 2.0, 1.0, 0.0], [0.0, 0.0, 1.0, 0.0, 1.0, 2.0]]
+    )
+    powers = gen_powers(3)
+    assert np.allclose(powers, expected)
+
+
+def test_distort_coords():
+    coords = np.array([[[0.0, 0.5, 1.0]], [[0.0, 0.5, 1.0]]])
+    distortion = distort_coords(coords, np.ones(6), gen_powers(3))
+    assert distortion.shape == coords.shape
 
 
 def test_cart2polar():

@@ -3,38 +3,24 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 from jax import random
-from dLux.utils.interpolation import generate_coordinates, scale, rotate
-
-
-@pytest.fixture
-def npixels_in():
-    return 10
-
-
-@pytest.fixture
-def npixels_out():
-    return 20
-
-
-@pytest.fixture
-def sampling_ratio():
-    return np.array(2.0)
-
-
-@pytest.fixture
-def x_shift():
-    return np.array(1.0)
-
-
-@pytest.fixture
-def y_shift():
-    return np.array(-1.0)
+from dLux.utils.interpolation import interp, scale, rotate
+from dLux.utils import pixel_coords
 
 
 @pytest.fixture
 def array():
     key = random.PRNGKey(0)
     return random.normal(key, (10, 10))
+
+
+@pytest.fixture
+def knot_coords():
+    return pixel_coords(10, 1)
+
+
+@pytest.fixture
+def sample_coords():
+    return pixel_coords(20, 1)
 
 
 @pytest.fixture
@@ -53,24 +39,25 @@ def angle():
 
 
 @pytest.fixture
-def order():
-    return 1
+def method():
+    return "linear"
 
 
-def test_generate_coordinates(
-    npixels_in, npixels_out, sampling_ratio, x_shift, y_shift
-):
-    result = generate_coordinates(
-        npixels_in, npixels_out, sampling_ratio, x_shift, y_shift
-    )
-    assert result.shape == (2, npixels_out, npixels_out)
+@pytest.fixture
+def fill():
+    return 0.0
 
 
-def test_scale(array, npixels, ratio, order):
-    result = scale(array, npixels, ratio, order)
+def test_interp(array, knot_coords, sample_coords, method, fill):
+    result = interp(array, knot_coords, sample_coords, method, fill)
+    assert result.shape == (20, 20)
+
+
+def test_scale(array, npixels, ratio, method):
+    result = scale(array, npixels, ratio, method)
     assert result.shape == (npixels, npixels)
 
 
-def test_rotate(array, angle, order):
-    result = rotate(array, angle, order)
+def test_rotate(array, angle, method):
+    result = rotate(array, angle, method)
     assert result.shape == (10, 10)
