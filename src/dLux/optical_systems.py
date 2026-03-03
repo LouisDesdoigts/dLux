@@ -3,7 +3,8 @@ from collections import OrderedDict
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
-from zodiax import filter_vmap, Base
+import equinox as eqx
+import zodiax as zdx
 from typing import Union, Any
 import dLux.utils as dlu
 
@@ -24,7 +25,7 @@ from .psfs import PSF
 ###################
 # Private Classes #
 ###################
-class BaseOpticalSystem(Base):
+class BaseOpticalSystem(zdx.Base):
     @abstractmethod
     def propagate_mono(
         self: BaseOpticalSystem,
@@ -186,7 +187,7 @@ class OpticalSystem(BaseOpticalSystem):
         prop_fn = lambda wavelength, weight: self.propagate_mono(
             wavelength, offset, return_wf=True
         ).multiply("amplitude", weight**0.5)
-        wf = filter_vmap(prop_fn)(wavelengths, weights)
+        wf = eqx.filter_vmap(prop_fn)(wavelengths, weights)
 
         # Return PSF, Wavefront, or array psf
         if return_wf:
