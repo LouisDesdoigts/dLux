@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -2459,8 +2459,7 @@ universal to all optics classes.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
-<span class="normal">119</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
@@ -2565,7 +2564,8 @@ universal to all optics classes.</p>
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
-<span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OpticalSystem</span><span class="p">(</span><span class="n">BaseOpticalSystem</span><span class="p">):</span>
+<span class="normal">224</span>
+<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OpticalSystem</span><span class="p">(</span><span class="n">BaseOpticalSystem</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base optics class implementing both the `propagate` and `model` methods that are</span>
 <span class="sd">    universal to all optics classes.</span>
@@ -2636,7 +2636,7 @@ universal to all optics classes.</p>
         <span class="n">prop_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_mono</span><span class="p">(</span>
             <span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">return_wf</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
-        <span class="n">wf</span> <span class="o">=</span> <span class="n">filter_vmap</span><span class="p">(</span><span class="n">prop_fn</span><span class="p">)(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">eqx</span><span class="o">.</span><span class="n">filter_vmap</span><span class="p">(</span><span class="n">prop_fn</span><span class="p">)(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
 
         <span class="c1"># Return PSF, Wavefront, or array psf</span>
         <span class="k">if</span> <span class="n">return_wf</span><span class="p">:</span>
@@ -2825,8 +2825,7 @@ if <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">124</span>
-<span class="normal">125</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
@@ -2897,7 +2896,8 @@ if <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate</span><span class="p">(</span>
+<span class="normal">196</span>
+<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
@@ -2962,7 +2962,7 @@ if <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
     <span class="n">prop_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_mono</span><span class="p">(</span>
         <span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">return_wf</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
-    <span class="n">wf</span> <span class="o">=</span> <span class="n">filter_vmap</span><span class="p">(</span><span class="n">prop_fn</span><span class="p">)(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">eqx</span><span class="o">.</span><span class="n">filter_vmap</span><span class="p">(</span><span class="n">prop_fn</span><span class="p">)(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
 
     <span class="c1"># Return PSF, Wavefront, or array psf</span>
     <span class="k">if</span> <span class="n">return_wf</span><span class="p">:</span>
@@ -3081,8 +3081,7 @@ if <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
-<span class="normal">199</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
@@ -3107,7 +3106,8 @@ if <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
-<span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span>
+<span class="normal">224</span>
+<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
     <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -3259,8 +3259,7 @@ parameter while increasing the psf_npixels parameter.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">421</span>
-<span class="normal">422</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">422</span>
 <span class="normal">423</span>
 <span class="normal">424</span>
 <span class="normal">425</span>
@@ -3356,7 +3355,8 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">515</span>
 <span class="normal">516</span>
 <span class="normal">517</span>
-<span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AngularOpticalSystem</span><span class="p">(</span><span class="n">ParametricOpticalSystem</span><span class="p">,</span> <span class="n">LayeredOpticalSystem</span><span class="p">):</span>
+<span class="normal">518</span>
+<span class="normal">519</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AngularOpticalSystem</span><span class="p">(</span><span class="n">ParametricOpticalSystem</span><span class="p">,</span> <span class="n">LayeredOpticalSystem</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An extension to the LayeredOpticalSystem class that propagates a wavefront to an</span>
 <span class="sd">    image plane with `psf_pixel_scale` in units of arcseconds.</span>
@@ -3599,8 +3599,7 @@ parameter while increasing the psf_npixels parameter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">446</span>
-<span class="normal">447</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">447</span>
 <span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
@@ -3634,7 +3633,8 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">478</span>
 <span class="normal">479</span>
 <span class="normal">480</span>
-<span class="normal">481</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">481</span>
+<span class="normal">482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -3779,8 +3779,7 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">483</span>
-<span class="normal">484</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">484</span>
 <span class="normal">485</span>
 <span class="normal">486</span>
 <span class="normal">487</span>
@@ -3814,7 +3813,8 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="normal">515</span>
 <span class="normal">516</span>
 <span class="normal">517</span>
-<span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_mono</span><span class="p">(</span>
+<span class="normal">518</span>
+<span class="normal">519</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_mono</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
@@ -3986,8 +3986,7 @@ parameter while increasing the psf_npixels parameter.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">521</span>
-<span class="normal">522</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">522</span>
 <span class="normal">523</span>
 <span class="normal">524</span>
 <span class="normal">525</span>
@@ -4092,7 +4091,8 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">624</span>
 <span class="normal">625</span>
 <span class="normal">626</span>
-<span class="normal">627</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CartesianOpticalSystem</span><span class="p">(</span><span class="n">ParametricOpticalSystem</span><span class="p">,</span> <span class="n">LayeredOpticalSystem</span><span class="p">):</span>
+<span class="normal">627</span>
+<span class="normal">628</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CartesianOpticalSystem</span><span class="p">(</span><span class="n">ParametricOpticalSystem</span><span class="p">,</span> <span class="n">LayeredOpticalSystem</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An extension to the LayeredOpticalSystem class that propagates a wavefront to an</span>
 <span class="sd">    image plane with `psf_pixel_scale` in units of microns.</span>
@@ -4360,8 +4360,7 @@ parameter while increasing the psf_npixels parameter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
-<span class="normal">551</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">551</span>
 <span class="normal">552</span>
 <span class="normal">553</span>
 <span class="normal">554</span>
@@ -4400,7 +4399,8 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">587</span>
 <span class="normal">588</span>
 <span class="normal">589</span>
-<span class="normal">590</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">590</span>
+<span class="normal">591</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -4550,8 +4550,7 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">592</span>
-<span class="normal">593</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">593</span>
 <span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
@@ -4585,7 +4584,8 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="normal">624</span>
 <span class="normal">625</span>
 <span class="normal">626</span>
-<span class="normal">627</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_mono</span><span class="p">(</span>
+<span class="normal">627</span>
+<span class="normal">628</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_mono</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
@@ -4711,8 +4711,7 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
-<span class="normal">275</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
@@ -4855,7 +4854,8 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="normal">415</span>
 <span class="normal">416</span>
 <span class="normal">417</span>
-<span class="normal">418</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayeredOpticalSystem</span><span class="p">(</span><span class="n">OpticalSystem</span><span class="p">):</span>
+<span class="normal">418</span>
+<span class="normal">419</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayeredOpticalSystem</span><span class="p">(</span><span class="n">OpticalSystem</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A flexible optical system that allows for the arbitrary chaining of OpticalLayers.</span>
 
@@ -5096,8 +5096,7 @@ specify a key for the layer in the layers dictionary.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">295</span>
-<span class="normal">296</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">296</span>
 <span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
@@ -5116,7 +5115,8 @@ specify a key for the layer in the layers dictionary.</p>
 <span class="normal">312</span>
 <span class="normal">313</span>
 <span class="normal">314</span>
-<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">315</span>
+<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -5214,8 +5214,7 @@ their keys.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
-<span class="normal">318</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
 <span class="normal">321</span>
@@ -5236,7 +5235,8 @@ their keys.</p>
 <span class="normal">336</span>
 <span class="normal">337</span>
 <span class="normal">338</span>
-<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Raises both the individual layers and the attributes of the layers via</span>
 <span class="sd">    their keys.</span>
@@ -5368,8 +5368,7 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">341</span>
-<span class="normal">342</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">342</span>
 <span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
@@ -5403,7 +5402,8 @@ if <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="normal">373</span>
 <span class="normal">374</span>
 <span class="normal">375</span>
-<span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_mono</span><span class="p">(</span>
+<span class="normal">376</span>
+<span class="normal">377</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_mono</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span>
     <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
@@ -5535,8 +5535,7 @@ as the class name of the layer.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">378</span>
-<span class="normal">379</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
@@ -5559,7 +5558,8 @@ as the class name of the layer.</p>
 <span class="normal">399</span>
 <span class="normal">400</span>
 <span class="normal">401</span>
-<span class="normal">402</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">insert_layer</span><span class="p">(</span>
+<span class="normal">402</span>
+<span class="normal">403</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">insert_layer</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalSystem</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">OpticalLayer</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalSystem</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -5660,8 +5660,7 @@ as the class name of the layer.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dLux/optical_systems.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">404</span>
-<span class="normal">405</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
 <span class="normal">408</span>
@@ -5674,7 +5673,8 @@ as the class name of the layer.</p>
 <span class="normal">415</span>
 <span class="normal">416</span>
 <span class="normal">417</span>
-<span class="normal">418</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalSystem</span><span class="p">:</span>
+<span class="normal">418</span>
+<span class="normal">419</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalSystem</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Removes a layer from the layers dictionary, specified by its key.</span>
 
