@@ -70,7 +70,7 @@ class Source(BaseSource):
         """
         # Spectrum
         if spectrum is not None:
-            if not isinstance(spectrum, spectra.Spectrum):
+            if not isinstance(spectrum, Spectrum()):
                 raise TypeError("spectrum must be a dLux Spectrum object.")
             self.spectrum = spectrum
         else:
