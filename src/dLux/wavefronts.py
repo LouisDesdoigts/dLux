@@ -485,96 +485,8 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The resized wavefront.
         """
-        amplitude, phase = vmap(dlu.resize, (0, None, None))(self.phasor, npixels, 0j)
-        return self.set(["amplitude", "phase"], [amplitude, phase])
-
-    def _magic_unified_op(self, other: Any, op: str) -> Wavefront:
-        """
-        Internal helper function to unify the logic of the magic methods for addition,
-        subtraction, multiplication and division.
-
-        Parameters
-        ----------
-        other : Any
-            The object to operate with. Can be a complex array, a Wavefront, or None.
-        op : str
-            The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The resulting wavefront after applying the operation.
-
-        Raises
-        ------
-        TypeError
-            If `other` is not a supported type for the operation.
-        """
-        if isinstance(other, (Array, float, int, complex)):
-            if op == "add":
-                return self.add("phasor", other)
-            elif op == "subtract":
-                return self.add("phasor", -other)
-            elif op == "multiply":
-                return self.multiply("phasor", other)
-            elif op == "divide":
-                return self.multiply("phasor", 1 / other)
-        elif isinstance(other, Wavefront):
-            if op == "add":
-                return self.add("phasor", other.phasor)
-            elif op == "subtract":
-                return self.add("phasor", -other.phasor)
-            elif op == "multiply":
-                return self.multiply("phasor", other.phasor)
-            elif op == "divide":
-                return self.multiply("phasor", 1 / other.phasor)
-        elif other is None:
-            return self
-        else:
-            raise TypeError(
-                f"Unsupported type for {op}: {type(other)}. Must be an array, "
-                "Wavefront, or None."
-            )
-
-    def __add__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be added together. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "add")
-
-    def __sub__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be subtracted. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "subtract")
-
-    def __mul__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be multiplied. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "multiply")
-
-    def __truediv__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be divided. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "divide")
-
-    def __iadd__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place addition."""
-        return self.__add__(other)
-
-    def __isub__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place subtraction."""
-        return self.__sub__(other)
-
-    def __imul__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place multiplication."""
-        return self.__mul__(other)
-
-    def __itruediv__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place division."""
-        return self.__truediv__(other)
+        phasor = vmap(dlu.resize, (0, None, None))(self.phasor, npixels, 0j)
+        return self.set(phasor=phasor)
 
     def _prep_prop(self: Wavefront, focal_length) -> tuple:
         """
@@ -796,3 +708,87 @@ class Wavefront(zdx.Base):
             ["phasor", "pixel_scale", "plane", "units"],
             [phasor, pixel_scale, plane, units],
         )
+
+    def _magic_unified_op(self, other: Any, op: str) -> Wavefront:
+        """
+        Internal helper function to unify the logic of the magic methods for addition,
+        subtraction, multiplication and division.
+
+        Parameters
+        ----------
+        other : Any
+            The object to operate with. Can be a complex array, a Wavefront, or None.
+        op : str
+            The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The resulting wavefront after applying the operation.
+        """
+        # Nones always return unchanged
+        if other is None:
+            return self
+
+        # Check for supported types
+        if not isinstance(other, (Wavefront, Array, float, int, complex)):
+            raise TypeError(
+                f"Unsupported type for {op}: {type(other)}. Must be an array, "
+                "Wavefront, or None."
+            )
+
+        # Extract phasor if other is a Wavefront
+        if isinstance(other, Wavefront):
+            other = other.phasor
+
+        # Apply the operation
+        if op == "add":
+            return self.add("phasor", other)
+        elif op == "subtract":
+            return self.add("phasor", -other)
+        elif op == "multiply":
+            return self.multiply("phasor", other)
+        elif op == "divide":
+            return self.multiply("phasor", 1 / other)
+        else:
+            raise ValueError(f"Unsupported operation '{op}'.")
+
+    def __add__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be added together. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "add")
+
+    def __sub__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be subtracted. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "subtract")
+
+    def __mul__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be multiplied. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "multiply")
+
+    def __truediv__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be divided. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "divide")
+
+    def __iadd__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place addition."""
+        return self.__add__(other)
+
+    def __isub__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place subtraction."""
+        return self.__sub__(other)
+
+    def __imul__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place multiplication."""
+        return self.__mul__(other)
+
+    def __itruediv__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place division."""
+        return self.__truediv__(other)
