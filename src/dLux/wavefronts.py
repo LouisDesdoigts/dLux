@@ -2,7 +2,6 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import vmap, Array
 import zodiax as zdx
-from typing import Any
 import dLux.utils as dlu
 import dLux
 
@@ -709,14 +708,14 @@ class Wavefront(zdx.Base):
             [phasor, pixel_scale, plane, units],
         )
 
-    def _magic_unified_op(self, other: Any, op: str) -> Wavefront:
+    def _magic_unified_op(self, other: Wavefront | Array | None, op: str) -> Wavefront:
         """
         Internal helper function to unify the logic of the magic methods for addition,
         subtraction, multiplication and division.
 
         Parameters
         ----------
-        other : Any
+        other : Wavefront | Array | None
             The object to operate with. Can be a complex array, a Wavefront, or None.
         op : str
             The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.
@@ -753,42 +752,42 @@ class Wavefront(zdx.Base):
         else:
             raise ValueError(f"Unsupported operation '{op}'.")
 
-    def __add__(self: Wavefront, other: Any) -> Wavefront:
+    def __add__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
         Allows complex phasors or Wavefronts to be added together. Nones are ignored.
         """
         return self._magic_unified_op(other, "add")
 
-    def __sub__(self: Wavefront, other: Any) -> Wavefront:
+    def __sub__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
         Allows complex phasors or Wavefronts to be subtracted. Nones are ignored.
         """
         return self._magic_unified_op(other, "subtract")
 
-    def __mul__(self: Wavefront, other: Any) -> Wavefront:
+    def __mul__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
         Allows complex phasors or Wavefronts to be multiplied. Nones are ignored.
         """
         return self._magic_unified_op(other, "multiply")
 
-    def __truediv__(self: Wavefront, other: Any) -> Wavefront:
+    def __truediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
         Allows complex phasors or Wavefronts to be divided. Nones are ignored.
         """
         return self._magic_unified_op(other, "divide")
 
-    def __iadd__(self: Wavefront, other: Any) -> Wavefront:
+    def __iadd__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """In-place addition."""
         return self.__add__(other)
 
-    def __isub__(self: Wavefront, other: Any) -> Wavefront:
+    def __isub__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """In-place subtraction."""
         return self.__sub__(other)
 
-    def __imul__(self: Wavefront, other: Any) -> Wavefront:
+    def __imul__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """In-place multiplication."""
         return self.__mul__(other)
 
-    def __itruediv__(self: Wavefront, other: Any) -> Wavefront:
+    def __itruediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """In-place division."""
         return self.__truediv__(other)
