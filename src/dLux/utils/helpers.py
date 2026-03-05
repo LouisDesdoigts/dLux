@@ -38,9 +38,9 @@ def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> 
     objects, in which case the keys are taken as the class name, else a (key, object)
     tuple can be used to specify a key.
 
-    If any duplicate keys are found, the key is appended with an index value. ie if two
-    of the list entries have the same key 'layer', they will be assigned 'layer_0' and
-    layer_1' respectively, depending on their input order in the list.
+    If any duplicate keys are found, the key is appended with an index value. i.e. if
+    two of the list entries have the same key 'layer', they will be assigned 'layer_0'
+    and 'layer_1' respectively, depending on their input order in the list.
 
     Parameters
     ----------
@@ -92,7 +92,7 @@ def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> 
     for i in range(len(names)):
         # Check for spaces in names
         if " " in names[i]:
-            raise ValueError(f"Names can not contain spaces, got {names[i]}")
+            raise ValueError(f"Names cannot contain spaces, got {names[i]}")
 
         # Add to dict
         if isinstance(list_in[i], tuple):

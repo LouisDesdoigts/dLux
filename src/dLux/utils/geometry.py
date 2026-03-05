@@ -213,7 +213,7 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
 # TODO: This eventually
 # def irreg_polygon(
 # npix, diam, vertices, oversample=1, invert=False, shift=np.zeros(2)):
-#     """Calcs an downsampled irregular polygon to gain soft edges"""
+#     """Calculates a downsampled irregular polygon to gain soft edges"""
 #     pass
 
 

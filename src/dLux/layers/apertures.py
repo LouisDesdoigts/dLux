@@ -280,7 +280,7 @@ class CircularAperture(DynamicAperture):
 
 class SquareAperture(DynamicAperture):
     """
-    A dynamically generated square aperture parameterised by it side length.
+    A dynamically generated square aperture parameterised by its side length.
     Both jit and grad compatible.
 
     ??? abstract "UML"
@@ -383,7 +383,7 @@ class SquareAperture(DynamicAperture):
 
 class RectangularAperture(DynamicAperture):
     """
-    A dynamically generated rectangular aperture parameterised by it width and height.
+    A dynamically generated rectangular aperture parameterised by its width and height.
     Both jit and grad compatible.
 
     ??? abstract "UML"
@@ -754,7 +754,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         # Ensure aperture is dynamic
         if not isinstance(aperture, DynamicAperture):
             raise TypeError(
-                "AberratedApertures can not contain Static, "
+                "AberratedApertures cannot contain Static, "
                 "Compound or Multi Apertures. AberratedApertures can be "
                 "placed in Compound or Multi Apertures, which can then be "
                 "promoted to Static."
@@ -764,10 +764,10 @@ class AberratedAperture(BasisLayer, ApertureLayer):
 
         # Ensure transmissive
         if aperture.occulting:
-            raise TypeError("AberratedApertures can not be occulting.")
+            raise TypeError("AberratedApertures cannot be occulting.")
 
         if isinstance(aperture, Spider):
-            raise TypeError("AberratedApertures can not be spiders.")
+            raise TypeError("AberratedApertures cannot be spiders.")
 
         # Set Aperture
         self.aperture = aperture
@@ -782,7 +782,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         Required abstract method. Raises NotImplementedError as it is invalid here.
         """
         raise NotImplementedError(
-            "Aberrated Apertures can not use the .calculate() method because "
+            "Aberrated Apertures cannot use the .calculate() method because "
             "they need coords to be generated on. please use "
             ".eval_basis(coords) method instead."
         )
@@ -1067,7 +1067,7 @@ class CompositeAperture(BaseDynamicAperture):
 
 class CompoundAperture(CompositeAperture):
     """
-    Dynamically generates an Apertures from a series of overlapping sub-apertures. Both
+    Dynamically generates an aperture from a series of overlapping sub-apertures. Both
     jit and grad compatible.
 
     This class combines the aperture via a _multiplication_ of the sub-apertures. An
@@ -1078,7 +1078,7 @@ class CompoundAperture(CompositeAperture):
     If you want to combine apertures via an _addition_ of the sub-apertures such as an
     aperture mask, use the MultiAperture class.
 
-    Note that this class can not contain a MultiAperture, but MultiApertures can
+    Note that this class cannot contain a MultiAperture, but MultiApertures can
     contain CompoundApertures.
 
     ??? abstract "UML"
@@ -1149,11 +1149,11 @@ class CompoundAperture(CompositeAperture):
 
 class MultiAperture(CompositeAperture):
     """
-    Dynamically generates an Apertures from a series of separated sub-apertures. Both
+    Dynamically generates an aperture from a series of separated sub-apertures. Both
     jit and grad compatible.
 
     This class combines the aperture via an _addition_ of the sub-apertures. An example
-    would be a aperture mask with multiple holes.
+    would be an aperture mask with multiple holes.
 
     This class can only contain a _multiple_ AberratedAperture, or CompoundApertures.
 

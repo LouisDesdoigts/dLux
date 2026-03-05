@@ -12,7 +12,7 @@ __all__ = ["PSF"]
 
 class PSF(zdx.Base):
     """
-    A simple class that holds the state of some PSF as it it transformed by detector
+    A simple class that holds the state of some PSF as it is transformed by detector
     layers.
 
     Attributes

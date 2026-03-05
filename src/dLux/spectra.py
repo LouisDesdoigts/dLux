@@ -177,8 +177,8 @@ class PolySpectrum(SimpleSpectrum):
 
     def normalise(self: PolySpectrum) -> PolySpectrum:
         """
-        Calculated weights are automatically normalised, so this method simply returns
-        an unmodified object.
+        The calculated weights are automatically normalised, so this method
+        simply returns an unmodified object.
 
         Returns
         --------

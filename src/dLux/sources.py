@@ -709,7 +709,7 @@ class PointResolvedSource(ResolvedSource):
 
         # Note we always return wf here so we can convolve each wavelength
         # individually if a chromatic wavefront output is required. We also
-        # Can not propagate the weights since they have different values
+        # Cannot propagate the weights since they have different values
         # for the point and resolved source.
         wf = optics.propagate(self.wavelengths, self.position, return_wf=True)
 
@@ -749,7 +749,7 @@ class PointResolvedSource(ResolvedSource):
             # return combined_wf.multiply("amplitude", weights[:, :, None, None])
             return combined_wf.multiply("phasor", weights[:, :, None, None])
 
-        # Create singe array psf object
+        # Create single array psf object
         point_psf = (np.expand_dims(weights[0], (1, 2)) * wf.psf).sum(0)
         resolved_psf = (np.expand_dims(weights[1], (1, 2)) * wf.psf).sum(0)
         conv_psf = jsp.signal.convolve(resolved_psf, self.distribution, mode="same")
