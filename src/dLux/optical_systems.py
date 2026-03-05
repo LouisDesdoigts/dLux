@@ -44,13 +44,13 @@ class BaseOpticalSystem(zdx.Base):
         offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront
-            if `return_wf` is False, returns the psf Array.
-            if `return_wf` is True, returns the Wavefront object.
+            If `return_wf` is False, returns the PSF array.
+            If `return_wf` is True, returns the Wavefront object.
         """
 
     @abstractmethod
@@ -74,17 +74,17 @@ class BaseOpticalSystem(zdx.Base):
         weights : Array = None
             The weight of each wavelength. If None, all weights are equal.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
 
         """
 
@@ -103,17 +103,17 @@ class BaseOpticalSystem(zdx.Base):
         source : Source
             The Source object to model through the optics.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
 
 
@@ -143,21 +143,21 @@ class OpticalSystem(BaseOpticalSystem):
         weights : Array = None
             The weight of each wavelength. If None, all weights are equal.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         if return_wf and return_psf:
             raise ValueError(
-                "return_wf and return_psf cannot both be True. " "Please choose one."
+                "return_wf and return_psf cannot both be True. Please choose one."
             )
 
         wavelengths = np.atleast_1d(wavelengths)
@@ -181,7 +181,7 @@ class OpticalSystem(BaseOpticalSystem):
             offset = np.asarray(offset)
         if offset.shape != (2,):
             raise ValueError(
-                "offset must be a 1d array of shape (2,), got " f"shape {offset.shape}."
+                "offset must be a 1d array of shape (2,), " f"got shape {offset.shape}."
             )
 
         # Calculate - note we multiply by sqrt(weight) to account for the
@@ -194,7 +194,7 @@ class OpticalSystem(BaseOpticalSystem):
         ).multiply("amplitude", weight**0.5)
         wf = eqx.filter_vmap(prop_fn)(wavelengths, weights)
 
-        # Return PSF, Wavefront, or array psf
+        # Return PSF, Wavefront, or PSF array
         if return_wf:
             return wf
         if return_psf:
@@ -215,17 +215,17 @@ class OpticalSystem(BaseOpticalSystem):
         source : Source
             The Source object to model through the optics.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         return source.model(self, return_wf, return_psf)
 
@@ -358,13 +358,13 @@ class LayeredOpticalSystem(OpticalSystem):
         offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront
-            if `return_wf` is False, returns the psf Array.
-            if `return_wf` is True, returns the Wavefront object.
+            If `return_wf` is False, returns the PSF array.
+            If `return_wf` is True, returns the Wavefront object.
         """
         if offset is None:
             offset = np.zeros(2)
@@ -505,13 +505,13 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront
-            if `return_wf` is False, returns the psf Array.
-            if `return_wf` is True, returns the Wavefront object.
+            If `return_wf` is False, returns the PSF array.
+            If `return_wf` is True, returns the Wavefront object.
         """
         wf = super().propagate_mono(wavelength, offset, return_wf=True)
 
@@ -614,13 +614,13 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront
-            if `return_wf` is False, returns the psf Array.
-            if `return_wf` is True, returns the Wavefront object.
+            If `return_wf` is False, returns the PSF array.
+            If `return_wf` is True, returns the Wavefront object.
         """
         wf = super().propagate_mono(wavelength, offset, return_wf=True)
 

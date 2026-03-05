@@ -14,7 +14,7 @@ __all__ = ["Zernike", "ZernikeBasis"]
 class Zernike(zdx.Base):
     """
     A Zernike polynomial that can be generated dynamically in a way that is both jit and
-    grad safe. If you want a _static_ zernike (most use cases), use the zernike
+    grad safe. If you want a _static_ Zernike (most use cases), use the zernike
     functions found in `utils.zernikes` and load the basis into a `BasisOptic` class.
 
     The 'jth' zernike polynomial is defined [here](https://oeis.org/A176988). The basic
@@ -101,8 +101,8 @@ class Zernike(zdx.Base):
 # TODO: Rename basis to basis_fns??
 class ZernikeBasis(zdx.Base):
     """
-    A Basis of Zernike polynomials that can be generated dynamically in a way that is
-    both jit and grad safe. If you want a _static_ zernike (most use cases), use the
+    A basis of Zernike polynomials that can be generated dynamically in a way that is
+    both jit and grad safe. If you want a _static_ Zernike (most use cases), use the
     zernike functions found in `utils.zernikes` and load the basis into a `BasisOptic`
     class.
 

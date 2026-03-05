@@ -28,10 +28,6 @@ class Wavefront(zdx.Base):
         The current plane type of wavefront, can be 'Pupil', 'Focal' or 'Intermediate'.
     units : str
         The current units of the wavefront, can be 'Cartesian' or 'Angular'.
-
-    Properties
-    ----------
-    TODO
     """
 
     wavelength: float
@@ -65,7 +61,7 @@ class Wavefront(zdx.Base):
         phase = np.zeros((npixels, npixels), dtype=float)
         self.phasor = amplitude * np.exp(1j * phase)
 
-        # Always initialised in Pupil plane with Cartesian Coords
+        # Always initialized in Pupil plane with Cartesian coordinates
         self.plane = str(plane)
         self.units = str(units)
 
@@ -215,7 +211,7 @@ class Wavefront(zdx.Base):
         Returns the number of 'dimensions' of the wavefront. This is used to track the
         vectorised version of the wavefront returned from vmapping.
 
-        NOTE: May clash with future polarised wavefront
+        NOTE: May clash with future polarised wavefront.
 
         Returns
         -------
@@ -325,7 +321,7 @@ class Wavefront(zdx.Base):
         # factor such that angle_rad = angle_unit * factor
         scaling = dlu.unit_factor_to_rad(unit)
 
-        # Calculate scales coordinates
+        # Calculate scaled coordinates
         coords = self.coordinates(scale=scaling)
 
         # Tilt the wavefront
@@ -383,13 +379,13 @@ class Wavefront(zdx.Base):
         complex: bool = True,
     ) -> Wavefront:
         """
-        Interpolated the wavefront to a given npixels and pixel_scale. Can be done on
+        Interpolates the wavefront to a given npixels and pixel_scale. Can be done on
         the real and imaginary components by passing in complex=True.
 
         Parameters
         ----------
         npixels : int
-            The number of pixels  to interpolate to.
+            The number of pixels to interpolate to.
         pixel_scale: Array
             The pixel scale to interpolate to.
         complex : bool = True
@@ -434,7 +430,7 @@ class Wavefront(zdx.Base):
             direction.
         method : str = "linear"
             The interpolation method.
-        complex : bool = False
+        complex : bool = True
             If True, rotate the real and imaginary components. If False, rotate the
             amplitude and phase components.
 
@@ -676,8 +672,8 @@ class Wavefront(zdx.Base):
         Notes
         -----
         - Models defocus regions a few wavelengths from best focus.
-        - Assumes forward propagation from pupil; inverse mode retained for
-        experimentation.
+                - Assumes forward propagation from pupil; inverse mode retained for
+                    experimentation.
         """
         if self.plane != "Pupil":
             raise ValueError(
@@ -756,25 +752,29 @@ class Wavefront(zdx.Base):
 
     def __add__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
-        Allows complex phasors or Wavefronts to be added together. Nones are ignored.
+        Allows complex phasors or Wavefront objects to be added together. None values
+        are ignored.
         """
         return self._magic_unified_op(other, "add")
 
     def __sub__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
-        Allows complex phasors or Wavefronts to be subtracted. Nones are ignored.
+        Allows complex phasors or Wavefront objects to be subtracted. None values are
+        ignored.
         """
         return self._magic_unified_op(other, "subtract")
 
     def __mul__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
-        Allows complex phasors or Wavefronts to be multiplied. Nones are ignored.
+        Allows complex phasors or Wavefront objects to be multiplied. None values are
+        ignored.
         """
         return self._magic_unified_op(other, "multiply")
 
     def __truediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
-        Allows complex phasors or Wavefronts to be divided. Nones are ignored.
+        Allows complex phasors or Wavefront objects to be divided. None values are
+        ignored.
         """
         return self._magic_unified_op(other, "divide")
 

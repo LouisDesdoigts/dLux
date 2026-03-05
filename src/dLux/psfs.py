@@ -12,15 +12,15 @@ __all__ = ["PSF"]
 
 class PSF(zdx.Base):
     """
-    A simple class that holds the state of some PSF as it is transformed by detector
+    A simple class that holds the state of a PSF as it is transformed by detector
     layers.
 
     Attributes
     ----------
     data : Array
-        The psf as it is transformed by the detector.
+        The PSF as it is transformed by the detector.
     pixel_scale : Array
-        The pixel scale of the psf.
+        The pixel scale of the PSF.
     """
 
     data: Array
@@ -31,9 +31,9 @@ class PSF(zdx.Base):
         Parameters
         ----------
         data : Array
-            The psf to be transformed by the detector.
+            The PSF to be transformed by the detector.
         pixel_scale : Array
-            The pixel scale of the psf.
+            The pixel scale of the PSF.
         """
         self.data = np.asarray(data, dtype=float)
         self.pixel_scale = np.asarray(pixel_scale, dtype=float)
@@ -41,7 +41,7 @@ class PSF(zdx.Base):
     @property
     def npixels(self: PSF) -> int:
         """
-        Returns the side length of the arrays currently representing the psf.
+        Returns the side length of the arrays currently representing the PSF.
 
         Returns
         -------
@@ -53,30 +53,30 @@ class PSF(zdx.Base):
     @property
     def ndim(self: PSF) -> int:
         """
-        Returns the number of 'dimensions' of the psf. This is used to track the
-        vectorised version of the psf returned from vmapping.
+        Returns the number of dimensions of the PSF. This is used to track the
+        vectorised version of the PSF returned from vmapping.
 
         Returns
         -------
         ndim : int
-            The 'dimensionality' of dimensions of the psf.
+            The dimensionality of the PSF.
         """
         return self.pixel_scale.ndim
 
     def downsample(self: PSF, n: int) -> PSF:
         """
-        Downsamples the psf by a factor of n. This is done by summing the psf pixels in
+        Downsamples the PSF by a factor of n. This is done by summing the PSF pixels in
         n x n blocks.
 
         Parameters
         ----------
         n : int
-            The factor by which to downsample the psf.
+            The factor by which to downsample the PSF.
 
         Returns
         -------
         psf : PSF
-            The downsampled psf.
+            The downsampled PSF.
         """
         data = dlu.downsample(self.data, n, mean=False)
         pixel_scale = self.pixel_scale * n
@@ -84,12 +84,12 @@ class PSF(zdx.Base):
 
     def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
         """
-        Convolves the psf with some input array.
+        Convolves the PSF with an input array.
 
         Parameters
         ----------
         other : Array
-            The psf to convolve with.
+            The array to convolve with the PSF.
         method : str = "auto"
             The method to use for the convolution. Can be "auto", "direct",
             or "fft". Is "auto" by default, which calls "direct".
@@ -97,47 +97,47 @@ class PSF(zdx.Base):
         Returns
         -------
         psf : PSF
-            The convolved psf.
+            The convolved PSF.
         """
         return self.set(data=convolve(self.data, other, mode="same", method=method))
 
     def rotate(self: PSF, angle: float, method: str = "linear") -> PSF:
         """
-        Rotates the psf by a given angle via interpolation.
+        Rotates the PSF by a given angle via interpolation.
 
         Parameters
         ----------
         angle : float
-            The angle by which to rotate the psf.
+            The angle by which to rotate the PSF.
         method : str = "linear"
             The interpolation method.
 
         Returns
         -------
         psf : PSF
-            The rotated psf.
+            The rotated PSF.
         """
         return self.set(data=dlu.rotate(self.data, angle, method=method))
 
     def resize(self: PSF, npixels: int) -> PSF:
         """
-        Resizes the psf via a zero-padding or cropping operation.
+        Resizes the PSF via a zero-padding or cropping operation.
 
         Parameters
         ----------
         npixels : int
-            The size to resize the psf to.
+            The size to resize the PSF to.
 
         Returns
         -------
         psf : PSF
-            The resized psf.
+            The resized PSF.
         """
         return self.set(data=dlu.resize(self.data, npixels))
 
     def flip(self: PSF, axis: tuple) -> PSF:
         """
-        Flips the psf along the specified axes. Note we use 'ij' indexing, so axis 0 is
+        Flips the PSF along the specified axes. Note we use 'ij' indexing, so axis 0 is
         the y-axis and axis 1 is the x-axis.
 
         Parameters
@@ -198,25 +198,25 @@ class PSF(zdx.Base):
 
     def __add__(self: PSF, other: PSF | Array | None) -> PSF:
         """
-        Allows arrays or PSFs to be added together. Nones are ignored.
+        Allows arrays or PSFs to be added together. None values are ignored.
         """
         return self._magic_unified_op(other, "add")
 
     def __sub__(self: PSF, other: PSF | Array | None) -> PSF:
         """
-        Allows arrays or PSFs to be subtracted. Nones are ignored.
+        Allows arrays or PSFs to be subtracted. None values are ignored.
         """
         return self._magic_unified_op(other, "subtract")
 
     def __mul__(self: PSF, other: PSF | Array | None) -> PSF:
         """
-        Allows arrays or PSFs to be multiplied. Nones are ignored.
+        Allows arrays or PSFs to be multiplied. None values are ignored.
         """
         return self._magic_unified_op(other, "multiply")
 
     def __truediv__(self: PSF, other: PSF | Array | None) -> PSF:
         """
-        Allows arrays or PSFs to be divided. Nones are ignored.
+        Allows arrays or PSFs to be divided. None values are ignored.
         """
         return self._magic_unified_op(other, "divide")
 

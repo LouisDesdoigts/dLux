@@ -184,7 +184,7 @@ class ShiftedMFT(MFT):
         The (x, y) shift to apply to the wavefront in the output plane.
     pixel : bool
         If True the shift value is assumed to be in units of pixels, else the physical
-        units of the output plane (ie radians if focal_length is None, else meters).
+        units of the output plane (i.e. radians if focal_length is None, else meters).
     """
 
     shift: Array
@@ -213,7 +213,7 @@ class ShiftedMFT(MFT):
             the output pixel_scale has units radians/pixel, else meters/pixels.
         pixel : bool = False
             If True the shift value is assumed to be in units of pixels, else the
-            physical units of the output plane (ie radians if focal_length is None,
+            physical units of the output plane (i.e. radians if focal_length is None,
             else meters).
         """
         super().__init__(
@@ -255,7 +255,7 @@ class ShiftedMFT(MFT):
 
 class FarFieldFresnel(ShiftedMFT):
     """
-    Propagates a `Wavefront` using the MFT algorithm, modified to allows for more
+    Propagates a `Wavefront` using the MFT algorithm, modified to allow more
     accurate representations of wavefront behaviour in the far-field regime, a few
     wavelengths away from focus in either direction. Allows for the pixel_scale and
     number of pixels to be specified in the output plane, and optionally allows for a
@@ -268,7 +268,7 @@ class FarFieldFresnel(ShiftedMFT):
     ----------
     npixels : int
         The number of pixels in the output plane.
-    pixel_scale : float, meters/
+    pixel_scale : float, meters/pixel
         The pixel scale in the output plane.
     focal_length : float, meters
         The focal_length of the lens/mirror this propagator represents.
@@ -297,7 +297,7 @@ class FarFieldFresnel(ShiftedMFT):
         ----------
         npixels : int
             The number of pixels in the output plane.
-        pixel_scale : float, meters/
+        pixel_scale : float, meters/pixel
             The pixel scale in the output plane.
         focal_length : float, meters
             The focal_length of the lens/mirror this propagator represents.

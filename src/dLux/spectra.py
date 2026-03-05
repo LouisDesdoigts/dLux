@@ -44,7 +44,6 @@ class Spectrum(SimpleSpectrum):
     """
     A simple spectrum class using wavelengths and weights.
 
-
     ??? abstract "UML"
         ![UML](../../assets/uml/Spectrum.png)
 
@@ -182,7 +181,7 @@ class PolySpectrum(SimpleSpectrum):
 
         Returns
         --------
-        spectrum : Spectrum
-            The unmodified spectrum object
+        spectrum : PolySpectrum
+            The unmodified spectrum object.
         """
         return self

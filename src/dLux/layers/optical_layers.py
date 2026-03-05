@@ -30,7 +30,7 @@ class BaseLayer(zdx.Base):
 class OpticalLayer(BaseLayer):
     """
     The base optical layer class. Optical layer classes operate on `Wavefront` objects
-    though their `apply` method, and are stored by the `OpticalSystem` classes.
+    through their `apply` method, and are stored by the `OpticalSystem` classes.
     """
 
     @abstractmethod
@@ -213,7 +213,7 @@ class BasisLayer(OpticalLayer):
         Parameters
         ----------
         basis: Array | list
-            The set of basis vectors. Should in generate be a 3 dimensional array.
+            The set of basis vectors. Should in general be a 3 dimensional array.
         coefficients: Array
             The Array of coefficients to be applied to each basis vector.
         as_phase: bool = False

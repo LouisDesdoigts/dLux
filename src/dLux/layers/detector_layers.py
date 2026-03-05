@@ -21,7 +21,7 @@ __all__ = [
 
 class DetectorLayer(BaseLayer):
     """
-    A base Detector layer class to help with type checking throughout the rest of the
+    A base detector layer class to help with type checking throughout the rest of the
     software.
     """
 
@@ -36,19 +36,19 @@ class DetectorLayer(BaseLayer):
         Parameters
         ----------
         psf : PSF
-            The psf to operate on.
+            The PSF to operate on.
 
         Returns
         -------
         psf : PSF
-            The transformed psf.
+            The transformed PSF.
         """
 
 
 class ApplyPixelResponse(DetectorLayer):
     """
-    Applies a pixel response array to the input psf, via a multiplication. This can be
-    used to model variations in the inter and intra-pixel sensitivity variations common
+    Applies a pixel response array to the input PSF via multiplication. This can be
+    used to model inter- and intra-pixel sensitivity variations common
     to most detectors.
 
     ??? abstract "UML"
@@ -57,7 +57,7 @@ class ApplyPixelResponse(DetectorLayer):
     Attributes
     ----------
     pixel_response : Array
-        The pixel_response to apply to the input psf.
+        The pixel_response to apply to the input PSF.
     """
 
     pixel_response: Array
@@ -67,8 +67,8 @@ class ApplyPixelResponse(DetectorLayer):
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input psf. Must be a 2d array that
-            matches the psf shape at time of application.
+            The pixel_response to apply to the input PSF. Must be a 2d array that
+            matches the PSF shape at time of application.
         """
         super().__init__()
         self.pixel_response = np.asarray(pixel_response, dtype=float)
@@ -82,19 +82,19 @@ class ApplyPixelResponse(DetectorLayer):
         Parameters
         ----------
         psf : PSF
-            The psf to operate on.
+            The PSF to operate on.
 
         Returns
         -------
         psf : PSF
-            The transformed psf.
+            The transformed PSF.
         """
         return psf * self.pixel_response
 
 
 class ApplyJitter(DetectorLayer):
     """
-    Convolves the psf with a radially symmetric Gaussian kernel parameterised by its
+    Convolves the PSF with a radially symmetric Gaussian kernel parameterised by its
     standard deviation (sigma).
 
     ??? abstract "UML"
@@ -150,12 +150,12 @@ class ApplyJitter(DetectorLayer):
         Parameters
         ----------
         psf : PSF
-            The psf to operate on.
+            The PSF to operate on.
 
         Returns
         -------
         psf : PSF
-            The transformed psf.
+            The transformed PSF.
         """
         kernel = self.generate_kernel(psf.pixel_scale)
         return psf.convolve(kernel)
@@ -163,7 +163,7 @@ class ApplyJitter(DetectorLayer):
 
 class ApplySaturation(DetectorLayer):
     """
-    Applies a simple saturation model to the input psf, by clipping any values above
+    Applies a simple saturation model to the input PSF by clipping any values above
     the threshold value.
 
     ??? abstract "UML"
@@ -194,19 +194,19 @@ class ApplySaturation(DetectorLayer):
         Parameters
         ----------
         psf : PSF
-            The psf to operate on.
+            The PSF to operate on.
 
         Returns
         -------
         psf : PSF
-            The transformed psf.
+            The transformed PSF.
         """
         return psf.min("data", self.threshold)
 
 
 class AddConstant(DetectorLayer):
     """
-    Adds a constant to the output psf. This is typically used to model the mean value of
+    Adds a constant to the output PSF. This is typically used to model the mean value of
     the detector noise.
 
     ??? abstract "UML"
@@ -215,7 +215,7 @@ class AddConstant(DetectorLayer):
     Attributes
     ----------
     value : float
-        The value to add to the psf.
+        The value to add to the PSF.
     """
 
     value: float
@@ -225,7 +225,7 @@ class AddConstant(DetectorLayer):
         Parameters
         ----------
         value : float
-            The value to add to the psf.
+            The value to add to the PSF.
         """
         super().__init__()
         self.value = float(value)
@@ -237,21 +237,21 @@ class AddConstant(DetectorLayer):
         Parameters
         ----------
         psf : PSF
-            The psf to operate on.
+            The PSF to operate on.
 
         Returns
         -------
         psf : PSF
-            The transformed psf.
+            The transformed PSF.
         """
         return psf + self.value
 
 
 class Downsample(DetectorLayer):
     """
-    Downsamples an input psf by an integer number of pixels via a sum. Typically used
-    to downsample an oversampled psf to the true pixel size. Note kernel_size must be
-    an integer multiple of the input psf size.
+    Downsamples an input PSF by an integer number of pixels via a sum. Typically used
+    to downsample an oversampled PSF to the true pixel size. Note the input PSF size
+    must be divisible by kernel_size.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/Downsample.png)
@@ -284,11 +284,11 @@ class Downsample(DetectorLayer):
         Parameters
         ----------
         psf : PSF
-            The psf to operate on.
+            The PSF to operate on.
 
         Returns
         -------
         psf : PSF
-            The transformed psf.
+            The transformed PSF.
         """
         return psf.downsample(self.kernel_size)

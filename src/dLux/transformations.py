@@ -26,7 +26,7 @@ class CoordTransform(zdx.Base):
     ----------
     translation: Array
         The (x, y) shift applied to the coords.
-    rotation: Array
+    rotation: float
         The clockwise rotation applied to the coords.
     compression: Array
         The (x, y) compression applied to the coords.
@@ -131,29 +131,29 @@ class CoordTransform(zdx.Base):
 
 class DistortedCoords(zdx.Base):
     """
-    A class to handle coordinates distorted by a 2D polynomial distortion
+    A class to handle coordinates distorted by a 2D polynomial distortion.
 
     Attributes
     ----------
     powers : Array
-        Powers of the polynomial distortion
+        Powers of the polynomial distortion.
     distortion : Array
-        Distortion coefficients
+        Distortion coefficients.
     """
 
     powers: Array
     distortion: Array
 
     def __init__(
-        self: DistortedCoords, order: int = 1, distortion: None | Array = None
+        self: DistortedCoords, order: int = 1, distortion: Array | None = None
     ):
         """
         Parameters
         ----------
         order : int
-            Order of polynomial to use
-        distortion : None | Array
-            Distortion coefficients, defaulting to 0
+            Order of polynomial to use.
+        distortion : Array | None
+            Distortion coefficients, defaulting to 0.
         """
         self.powers = np.array(dlu.gen_powers(order + 1))[:, 1:]
 
@@ -166,35 +166,35 @@ class DistortedCoords(zdx.Base):
 
     def calculate(self: DistortedCoords, npix: int, diameter: float) -> Array:
         """
-        Generates flat coordinates and then distorts them
+        Generates flat coordinates and then distorts them.
 
         Parameters
         ----------
         npix : int
-            Number of pixels in coordinates
+            Number of pixels in coordinates.
         diameter: float
-            Diameter of original coordinate system
+            Diameter of original coordinate system.
 
         Returns
         -------
         distorted_coords : Array
-            Distorted coordinates
+            Distorted coordinates.
         """
         coords = dlu.pixel_coords(npix, diameter)
         return dlu.distort_coords(coords, self.distortion, self.powers)
 
     def apply(self: DistortedCoords, coords: Array) -> Array:
         """
-        Apply distortion to some coordinates
+        Apply distortion to some coordinates.
 
         Parameters
         ----------
         coords : Array
-            Coordinates to distort
+            Coordinates to distort.
 
         Returns
         -------
         distorted_coords : Array
-            Distorted coordinates
+            Distorted coordinates.
         """
         return dlu.distort_coords(coords, self.distortion, self.powers)

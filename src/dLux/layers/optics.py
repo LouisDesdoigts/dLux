@@ -16,7 +16,7 @@ __all__ = [
 class Optic(TransmissiveLayer, AberratedLayer):
     """
     A basic 'Optic' class, which optionally applies a transmission, OPD and phase to
-    the input wavefront, with the option for normalise after.
+    the input wavefront, with optional normalisation afterward.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/Optic.png)
@@ -97,7 +97,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
 
 class BasisOptic(TransmissiveLayer, BasisLayer):
     """
-    A basic 'Optic' class, with aberrations applied through a set of basis-vector
+    A basic 'BasisOptic' class, with aberrations applied through a set of basis-vector
     coefficients. This can be applied either as an opd or phase, using the `as_phase`
     attribute. Also optionally applies a transmission and normalisation.
 
@@ -121,11 +121,11 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
 
     def __init__(
         self: BasisOptic,
-        basis,
-        transmission=None,
-        coefficients=None,
-        as_phase=False,
-        normalise=False,
+        basis: Array,
+        transmission: Array = None,
+        coefficients: Array = None,
+        as_phase: bool = False,
+        normalise: bool = False,
     ):
         """
         Parameters

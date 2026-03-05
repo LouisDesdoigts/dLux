@@ -61,7 +61,7 @@ class Telescope(Instrument):
             A `Source` or `Scene` object to model through the instrument. Can be
             either a single `Source` object, or a list of `Source` objects which is
             then converted to a `Scene` object. The list entries can also be a tuple of
-            (key, source)  in order to specify a key for the source in the scene.
+            (key, source) in order to specify a key for the source in the scene.
         detector : Detector = None
             A `Detector` object that defines the detector transformations of the
             instrument.
@@ -115,12 +115,12 @@ class Telescope(Instrument):
         Parameters
         ----------
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, PSF
-            if `return_psf` is False, the psf Array is returned.
+            If `return_psf` is False, the PSF array is returned.
             If `return_psf` is True, the PSF object is returned.
 
         """
@@ -136,7 +136,7 @@ class Telescope(Instrument):
         if self.detector is not None:
             return self.detector.model(psf_obj, return_psf=return_psf)
 
-        # Return psf
+        # Return PSF
         if return_psf:
             return psf_obj
         return psf_obj.data
@@ -186,7 +186,7 @@ class Dither(Telescope):
             A `Source` or `Scene` object to model through the instrument. Can be
             either a single `Source` object, or a list of `Source` objects which is
             then converted to a `Scene` object. The list entries can also be a tuple of
-            (key, source)  in order to specify a key for the source in the scene.
+            (key, source) in order to specify a key for the source in the scene.
         detector : Detector = None
             A `Detector` object that defines the detector transformations of the
             instrument.
@@ -204,12 +204,12 @@ class Dither(Telescope):
         Parameters
         ----------
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, PSF
-            if `return_psf` is False, the psf Array is returned.
+            If `return_psf` is False, the PSF array is returned.
             If `return_psf` is True, the PSF object is returned.
         """
 

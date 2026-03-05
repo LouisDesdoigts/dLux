@@ -19,7 +19,7 @@ class UnifiedLayer(OpticalLayer, DetectorLayer):
 
 class Resize(UnifiedLayer):
     """
-    Resizes either a wavefront or PSF by either padding or cropping. Note this class
+    Resizes either a wavefront or PSF by padding or cropping. Note this class
     only supports padding and cropping of even sizes to even sizes, and odd sizes to
     odd sizes to ensure all operations are paraxial.
 
@@ -131,7 +131,7 @@ class Rotate(UnifiedLayer):
 class Flip(UnifiedLayer):
     """
     Flips either a wavefront or PSF about the input axes. Can be either an int or a
-    tuple of ints. This class uses the 'ij' indexing convention, ie axis 0 is the
+    tuple of ints. This class uses the 'ij' indexing convention, i.e. axis 0 is the
     y-axis, and axis 1 is the x-axis.
 
     ??? abstract "UML"
@@ -139,20 +139,20 @@ class Flip(UnifiedLayer):
 
     Attributes
     ----------
-    axes : tuple | int
+    axes : tuple[int, ...] | int
         The axes to flip the input about. This class uses the 'ij' indexing convention,
-        ie axis 0 is the y-axis, and axis 1 is the x-axis.
+        i.e. axis 0 is the y-axis, and axis 1 is the x-axis.
     """
 
-    axes: tuple[int] | int
+    axes: tuple[int, ...] | int
 
-    def __init__(self: Flip, axes: tuple[int] | int):
+    def __init__(self: Flip, axes: tuple[int, ...] | int):
         """
         Parameters
         ----------
-        axes : tuple | int
+        axes : tuple[int, ...] | int
             The axes to flip the input about. This class uses the 'ij' indexing
-            convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.
+            convention, i.e. axis 0 is the y-axis, and axis 1 is the x-axis.
         """
         super().__init__()
         self.axes = axes
@@ -166,7 +166,7 @@ class Flip(UnifiedLayer):
 
     def apply(self: Flip, target: Wavefront | PSF) -> Wavefront | PSF:
         """
-        Flips the input about the input axes.
+        Flips the input about the specified axes.
 
         Parameters
         ----------

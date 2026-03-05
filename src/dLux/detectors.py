@@ -23,7 +23,7 @@ class BaseDetector(zdx.Base):
 
 class LayeredDetector(BaseDetector):
     """
-    Applies a series of detector layers to some input psf.
+    Applies a series of detector layers to an input PSF.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/LayeredDetector.png)
@@ -31,7 +31,7 @@ class LayeredDetector(BaseDetector):
     Attributes
     ----------
     layers: OrderedDict
-        A series of `DetectorLayer` transformations to apply to the input psf.
+        A series of `DetectorLayer` transformations to apply to the input PSF.
     """
 
     layers: OrderedDict
@@ -44,7 +44,7 @@ class LayeredDetector(BaseDetector):
         Parameters
         ----------
         layers : list[DetectorLayer | tuple[str, DetectorLayer]]
-            A list of DetectorLayer objects to apply to the input psf. List entries
+            A list of DetectorLayer objects to apply to the input PSF. List entries
             can be tuples of (key, layer) to specify a key, else the key is taken as
             the class name of the layer.
         """
@@ -68,24 +68,27 @@ class LayeredDetector(BaseDetector):
         """
         if key in self.layers.keys():
             return self.layers[key]
-        else:
-            raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
+        raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
 
-    def model(self: LayeredDetector, psf: PSF, return_psf: bool = False) -> Array | PSF:
+    def model(
+        self: LayeredDetector,
+        psf: PSF,
+        return_psf: bool = False,
+    ) -> Array | PSF:
         """
-        Applies the detector layers to the input psf.
+        Applies the detector layers to the input PSF.
 
         Parameters
         ----------
         psf : PSF
-            The input psf to be transformed.
+            The input PSF to be transformed.
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, PSF
-            If `return_psf` is False, returns the psf Array.
+            If `return_psf` is False, returns the PSF array.
             If `return_psf` is True, returns the PSF object.
         """
         for _, layer in self.layers.items():

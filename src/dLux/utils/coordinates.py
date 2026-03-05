@@ -247,10 +247,10 @@ def nd_coords(
     Returns a set of nd pixel center coordinates, with an optional offset. Each
     dimension can have a different number of pixels, pixel scale and offset by passing
     in tuples of values: `nd_coords((10, 10), (1, 2), (0, 1))`. pixel scale and offset
-    can also be passed in as floats to apply those values to all dimensions, ie:
+    can also be passed in as floats to apply those values to all dimensions, i.e.:
     `nd_coords((10, 10), 1, 0)`.
 
-    The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the
+    The indexing argument is the same as in numpy.meshgrid, i.e.: giving the
     string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
     meshgrid with Cartesian indexing. In the 2-D case with inputs of length M
     and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for

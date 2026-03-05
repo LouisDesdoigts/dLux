@@ -66,6 +66,8 @@ Current package-wide audit status: 10/10 checks passing (`src/dLux`, 9 automated
 - Added a core-model pass in `spectra.py` with class-accurate annotations, lightweight wavelength-shape validation, and clearer spectrum shape-error wording.
 - Added a core-model pass in `psfs.py` and `transformations.py` with a PSF arithmetic field-target fix (`data` vs `phasor`) plus concise transformation doc/message/typing consistency cleanups.
 - Added package-wide sweep follow-up fixes for remaining doc typos in `layers/apertures.py` and class-accurate layer-mutation self annotations in `optical_systems.py`.
+- Added a final wording-consistency sweep across core/layer docs and comments (`sources.py`, `spectra.py`, `psfs.py`, `layers/apertures.py`) with typo/grammar normalization and no intended behavior changes.
+- Added a utilities wording cleanup pass (`utils/helpers.py`, `utils/geometry.py`) for docstring example clarity and typo normalization.
 - Removed temporary pre-1.0 compatibility shims for renamed utility keywords.
 
 ### Notes

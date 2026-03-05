@@ -212,17 +212,17 @@ class PointSource(Source):
         optics : Optics
             The optics through which to model the source object.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
@@ -308,17 +308,17 @@ class PointSources(Source):
         optics : Optics
             The optics through which to model the source object.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
@@ -426,17 +426,17 @@ class ResolvedSource(PointSource):
         optics : Optics
             The optics through which to model the source object.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         _validate_return_mode(return_wf, return_psf)
         # Normalise and get parameters
@@ -455,16 +455,16 @@ class ResolvedSource(PointSource):
             # Replace previous amplitude leaf update with phasor rescale
             # return wf.set_amplitude(vmap(conv_fn)(wf.psf) ** 0.5)
             # NOTE: This operation is actually incorrect since we can only add
-            # incoherent light via a convolution so we can only operate on psfs.
+            # incoherent light via a convolution so we can only operate on PSFs.
             amp = vmap(conv_fn)(wf.psf) ** 0.5
             return wf.set("phasor", amp * np.exp(1j * wf.phase))
 
-        # Return psf object
+        # Return PSF object
         conv_psf = jsp.signal.convolve(wf.psf.sum(0), self.distribution, mode="same")
         if return_psf:
             return PSF(conv_psf, wf.pixel_scale.mean())
 
-        # Return array psf
+        # Return PSF array
         return conv_psf
 
 
@@ -563,17 +563,17 @@ class BinarySource(Source):
         optics : Optics
             The optics through which to model the source object.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         _validate_return_mode(return_wf, return_psf)
         # Normalise and get input values
@@ -594,7 +594,7 @@ class BinarySource(Source):
         if return_wf:
             return output
 
-        # Return psf just requires constructing object
+        # Return PSF just requires constructing object
         if return_psf:
             return PSF(output.data.sum(0), output.pixel_scale.mean())
 
@@ -689,17 +689,17 @@ class PointResolvedSource(ResolvedSource):
         optics : Optics
             The optics through which to model the source object.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         _validate_return_mode(return_wf, return_psf)
         # Normalise and get parameters
@@ -713,7 +713,7 @@ class PointResolvedSource(ResolvedSource):
         # for the point and resolved source.
         wf = optics.propagate(self.wavelengths, self.position, return_wf=True)
 
-        # Returning wf is a special case, we need to convolve each psf with
+        # Returning wf is a special case, we need to convolve each PSF with
         # the distribution, and them re-combine them into a vectorised wf
         if return_wf:
             # Perform convolution
@@ -722,7 +722,7 @@ class PointResolvedSource(ResolvedSource):
             )
             # Replace previous amplitude leaf update with phasor rescale
             # TODO: This operation is actually incorrect since we can only add
-            # incoherent light via a convolution so we can only operate on psfs.
+            # incoherent light via a convolution so we can only operate on PSFs.
             # conv_wf = wf.set_amplitude(vmap(conv_fn)(wf.psf) ** 0.5)
             amp = vmap(conv_fn)(wf.psf) ** 0.5
             conv_wf = wf.set("phasor", amp * np.exp(1j * wf.phase))
@@ -749,7 +749,7 @@ class PointResolvedSource(ResolvedSource):
             # return combined_wf.multiply("amplitude", weights[:, :, None, None])
             return combined_wf.multiply("phasor", weights[:, :, None, None])
 
-        # Create single array psf object
+        # Create single PSF-array object
         point_psf = (np.expand_dims(weights[0], (1, 2)) * wf.psf).sum(0)
         resolved_psf = (np.expand_dims(weights[1], (1, 2)) * wf.psf).sum(0)
         conv_psf = jsp.signal.convolve(resolved_psf, self.distribution, mode="same")
@@ -757,7 +757,7 @@ class PointResolvedSource(ResolvedSource):
         if return_psf:
             return PSF(psf, wf.pixel_scale.mean())
 
-        # Return array psf
+        # Return PSF array
         return psf
 
 
@@ -836,17 +836,17 @@ class Scene(BaseSource):
         optics : Optics
             The optics through which to model the source object.
         return_wf : bool = False
-            Should the Wavefront object be returned instead of the psf Array?
+            Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
-            Should the PSF object be returned instead of the psf Array?
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
         object : Array, Wavefront, PSF
-            if `return_wf` is False and `return_psf` is False, returns the psf Array.
-            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
-            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
@@ -863,7 +863,7 @@ class Scene(BaseSource):
         if return_wf:
             return output
 
-        # Return psf case requires mapping across the psf outputs
+        # Return PSF case requires mapping across the PSF outputs
         if return_psf:
             # Define mapping function
             leaf_fn = lambda leaf: isinstance(leaf, PSF)
