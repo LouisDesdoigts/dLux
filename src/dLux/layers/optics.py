@@ -1,3 +1,5 @@
+"""Composite optical layers built from transmission and aberration components."""
+
 from __future__ import annotations
 from jax import Array
 
@@ -9,7 +11,6 @@ from .optical_layers import (
     BasisLayer,
     AberratedLayer,
 )
-
 
 __all__ = [
     "Optic",
@@ -154,7 +155,7 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
             normalise=normalise,
         )
 
-    def apply(self: OpticalLayer, wavefront: Wavefront()) -> Wavefront():
+    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 

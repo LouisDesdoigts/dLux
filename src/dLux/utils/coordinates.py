@@ -1,7 +1,6 @@
 import jax.numpy as np
 import jax.tree as jtu
 from jax import Array
-from typing import Union
 from .math import triangular_number
 
 __all__ = [
@@ -239,9 +238,9 @@ def pixel_coords(
 
 
 def nd_coords(
-    npixels: Union[int, tuple],
-    pixel_scales: Union[tuple, float] = 1.0,
-    offsets: Union[tuple, float] = 0.0,
+    npixels: int | tuple,
+    pixel_scales: tuple | float = 1.0,
+    offsets: tuple | float = 0.0,
     indexing: str = "xy",
 ) -> Array:
     """
@@ -260,13 +259,13 @@ def nd_coords(
 
     Parameters
     ----------
-    npixels : Union[int, tuple]
+    npixels : int | tuple
         The number of pixels in each dimension.
-    pixel_scales : Union[tuple, float] = 1.
+    pixel_scales : tuple | float = 1.
         The pixel_scales of each dimension. If a tuple, the length
         of the tuple must match the number of dimensions. If a float, the same
         scale is applied to all dimensions.
-    offsets : Union[tuple, float] = 0.
+    offsets : tuple | float = 0.
         The offset of the pixel centers in each dimension. If a tuple, the
         length of the tuple must match the number of dimensions. If a float,
         the same offset is applied to all dimensions.

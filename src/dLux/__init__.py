@@ -1,3 +1,5 @@
+"""Public package interface for dLux."""
+
 import importlib.metadata
 
 __version__ = importlib.metadata.version("dLux")
@@ -27,7 +29,7 @@ modules = [
     transformations,
 ]
 
-__all__ = [module.__all__ for module in modules]
+__all__ = [name for module in modules for name in module.__all__]
 
 
 from .detectors import (

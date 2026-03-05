@@ -1,7 +1,8 @@
-from __future__ import annotations
-from typing import Union
+"""Unified layers that operate on either wavefronts or PSFs."""
 
-__all__ = ["Rotate", "Flip", "Resize"]
+from __future__ import annotations
+
+__all__ = ["UnifiedLayer", "Rotate", "Flip", "Resize"]
 
 
 from .optical_layers import OpticalLayer
@@ -43,23 +44,21 @@ class Resize(UnifiedLayer):
         super().__init__()
         self.npixels = int(npixels)
 
-    def apply(
-        self: UnifiedLayer, input: Union[Wavefront, PSF]
-    ) -> Union[Wavefront, PSF]:
+    def apply(self: UnifiedLayer, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Resizes the input.
 
         Parameters
         ----------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The input to resize.
 
         Returns
         -------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The resized input.
         """
-        return input.resize(self.npixels)
+        return target.resize(self.npixels)
 
 
 class Rotate(UnifiedLayer):
@@ -110,26 +109,24 @@ class Rotate(UnifiedLayer):
         self.method = str(method)
         self.complex = bool(complex)
 
-    def apply(
-        self: UnifiedLayer, input: Union[Wavefront, PSF]
-    ) -> Union[Wavefront, PSF]:
+    def apply(self: UnifiedLayer, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Applies the rotation to the input.
 
         Parameters
         ----------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The input to rotate.
 
         Returns
         -------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The rotated input.
         """
-        if isinstance(input, PSF):
-            return input.rotate(self.angle, self.method)
+        if isinstance(target, PSF):
+            return target.rotate(self.angle, self.method)
         else:
-            return input.rotate(self.angle, self.method, self.complex)
+            return target.rotate(self.angle, self.method, self.complex)
 
 
 class Flip(UnifiedLayer):
@@ -143,18 +140,18 @@ class Flip(UnifiedLayer):
 
     Attributes
     ----------
-    axes : Union[tuple, int]
+    axes : tuple | int
         The axes to flip the input about. This class uses the 'ij' indexing convention,
         ie axis 0 is the y-axis, and axis 1 is the x-axis.
     """
 
-    axes: Union[tuple[int], int]
+    axes: tuple[int] | int
 
-    def __init__(self: UnifiedLayer, axes: Union[tuple[int], int]):
+    def __init__(self: UnifiedLayer, axes: tuple[int] | int):
         """
         Parameters
         ----------
-        axes : Union[tuple, int]
+        axes : tuple | int
             The axes to flip the input about. This class uses the 'ij' indexing
             convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.
         """
@@ -168,20 +165,18 @@ class Flip(UnifiedLayer):
         elif not isinstance(self.axes, int):
             raise ValueError("axes must be integers.")
 
-    def apply(
-        self: UnifiedLayer, input: Union[Wavefront, PSF]
-    ) -> Union[Wavefront, PSF]:
+    def apply(self: UnifiedLayer, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Flips the input about the input axes.
 
         Parameters
         ----------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The input to flip.
 
         Returns
         -------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The flipped input.
         """
-        return input.flip(self.axes)
+        return target.flip(self.axes)

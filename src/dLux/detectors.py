@@ -1,7 +1,8 @@
+"""Detector models that apply detector-layer transformations to PSFs."""
+
 from __future__ import annotations
 from collections import OrderedDict
 from abc import abstractmethod
-from typing import Union
 from zodiax import Base
 from jax import Array
 import dLux.utils as dlu
@@ -9,13 +10,14 @@ import dLux.utils as dlu
 from .layers.detector_layers import DetectorLayer
 from .psfs import PSF
 
-
 __all__ = ["BaseDetector", "LayeredDetector"]
 
 
 class BaseDetector(Base):
     @abstractmethod
-    def model(self, psf):  # pragma: no cover
+    def model(
+        self, psf: PSF, return_psf: bool = False
+    ) -> Array | PSF:  # pragma: no cover
         pass
 
 
@@ -34,11 +36,14 @@ class LayeredDetector(BaseDetector):
 
     layers: OrderedDict
 
-    def __init__(self: LayeredDetector, layers: list[DetectorLayer, tuple]):
+    def __init__(
+        self: LayeredDetector,
+        layers: list[DetectorLayer | tuple[str, DetectorLayer]],
+    ):
         """
         Parameters
         ----------
-        layers : list[DetectorLayer, tuple]
+        layers : list[DetectorLayer | tuple[str, DetectorLayer]]
             A list of DetectorLayer objects to apply to the input psf. List entries
             can be tuples of (key, layer) to specify a key, else the key is taken as
             the class name of the layer.
@@ -68,9 +73,7 @@ class LayeredDetector(BaseDetector):
                 "'{}' object has no attribute '{}'".format(type(self), key)
             )
 
-    def model(
-        self: LayeredDetector, psf: PSF, return_psf: bool = False
-    ) -> Array:
+    def model(self: LayeredDetector, psf: PSF, return_psf: bool = False) -> Array:
         """
         Applied the detector layers to the input psf.
 
@@ -91,7 +94,9 @@ class LayeredDetector(BaseDetector):
         return psf.data
 
     def insert_layer(
-        self: LayeredDetector, layer: Union[DetectorLayer, tuple], index: int
+        self: LayeredDetector,
+        layer: DetectorLayer | tuple[str, DetectorLayer],
+        index: int,
     ) -> LayeredDetector:
         """
         Inserts a layer into the layers dictionary at a specified index. This function

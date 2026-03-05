@@ -1,3 +1,5 @@
+"""Public layer interfaces and concrete layer implementations."""
+
 # Import as modules
 from . import (
     optical_layers,
@@ -20,7 +22,7 @@ modules = [
     detector_layers,
 ]
 
-__all__ = [module.__all__ for module in modules]
+__all__ = [name for module in modules for name in module.__all__]
 
 
 from .optical_layers import (

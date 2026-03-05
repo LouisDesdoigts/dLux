@@ -44,3 +44,13 @@ We are always looking to collaborate and further develop this software! We have 
 ## Publications
 
 We have a multitude of publications in the pipeline using dLux, some built from our tutorials. To start we would recommend looking at [this invited talk](https://louisdesdoigts.github.io/diff_optics/#/0/3) on ∂Lux which gives a good overview and has an attached recording of it being presented! We also have [this poster](https://spie.org/astronomical-telescopes-instrumentation/presentation/Optical-design-analysis-and-calibration-using-Lux/12180-160)!
+
+## Design Philosophy
+
+dLux is designed as a differentiable optical modelling framework for astronomy with a strong emphasis on accessibility and flexibility.
+
+In practice, this means the codebase prioritises readability and directness over strict formalism. We generally use lightweight type hints (`Array`, `float`, `int`) and accept standard Python numeric inputs where possible, relying on JAX type-promotion semantics during execution and transformations.
+
+The project also prioritises JIT-transformable model code. Validation is intentionally pragmatic rather than exhaustive: we check inputs where it improves clarity and user feedback, while avoiding defensive complexity that would obscure the core optics and modelling logic.
+
+Overall, the aim is to keep the framework approachable for early-career researchers while still supporting high-performance differentiable workflows.

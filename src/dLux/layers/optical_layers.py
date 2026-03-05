@@ -1,6 +1,7 @@
+"""Core optical-layer abstractions and reusable optical-layer mixins."""
+
 from __future__ import annotations
 from abc import abstractmethod
-from typing import Union
 import jax.numpy as np
 from zodiax import Base
 from jax import Array
@@ -9,9 +10,9 @@ import dLux.utils as dlu
 
 from ..wavefronts import Wavefront
 
-
 __all__ = [
     "BaseLayer",
+    "OpticalLayer",
     "TransmissiveLayer",
     "AberratedLayer",
     "BasisLayer",
@@ -22,7 +23,7 @@ __all__ = [
 
 class BaseLayer(Base):
     @abstractmethod
-    def apply(self, wavefront):  # pragma: no cover
+    def apply(self, target: object) -> object:  # pragma: no cover
         pass
 
 
@@ -33,7 +34,7 @@ class OpticalLayer(BaseLayer):
     """
 
     @abstractmethod
-    def apply(self, wavefront) -> Wavefront:  # pragma: no cover
+    def apply(self, wavefront: Wavefront) -> Wavefront:  # pragma: no cover
         """
         Applies the layer to the wavefront.
 
@@ -187,7 +188,7 @@ class BasisLayer(OpticalLayer):
 
     Attributes
     ----------
-    basis: Union[Array, list]
+    basis: Array | list
         The set of basis vectors. Should in generate be a 3 dimensional array.
     coefficients: Array
         The array of coefficients to be applied to each basis vector.
@@ -196,7 +197,7 @@ class BasisLayer(OpticalLayer):
         a phase, else it is applied as an OPD.
     """
 
-    basis: Union[Array, list]
+    basis: Array | list
     coefficients: Array
     as_phase: bool
 
@@ -211,7 +212,7 @@ class BasisLayer(OpticalLayer):
         """
         Parameters
         ----------
-        basis: Union[Array, list]
+        basis: Array | list
             The set of basis vectors. Should in generate be a 3 dimensional array.
         coefficients: Array
             The Array of coefficients to be applied to each basis vector.

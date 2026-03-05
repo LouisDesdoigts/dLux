@@ -1,22 +1,22 @@
+"""Instrument abstractions that combine sources, optics, and detectors."""
+
 from __future__ import annotations
 from abc import abstractmethod
 from zodiax import Base
 from jax import Array, vmap
 import jax.numpy as np
-from typing import Union
 
 from .optical_systems import BaseOpticalSystem as OpticalSystem
 from .detectors import BaseDetector as Detector
 from .sources import BaseSource as Source, Scene
 from .psfs import PSF
 
-
 __all__ = ["Instrument", "Telescope", "Dither"]
 
 
 class Instrument(Base):
     @abstractmethod
-    def model(self):  # pragma: no cover
+    def model(self, return_psf: bool = False) -> Array | PSF:  # pragma: no cover
         pass
 
 
@@ -48,7 +48,7 @@ class Telescope(Instrument):
     def __init__(
         self: Telescope,
         optics: OpticalSystem,
-        source: Union[list, Source],
+        source: list | Source,
         detector: Detector = None,
     ):
         """
@@ -83,8 +83,7 @@ class Telescope(Instrument):
         # Detector
         if not isinstance(detector, Detector) and detector is not None:
             raise TypeError(
-                "detector must be an Detector object. "
-                f"Got type {type(detector)}"
+                "detector must be an Detector object. " f"Got type {type(detector)}"
             )
         self.detector = detector
 
@@ -106,9 +105,7 @@ class Telescope(Instrument):
         for attribute in self.__dict__.values():
             if hasattr(attribute, key):
                 return getattr(attribute, key)
-        raise AttributeError(
-            f"{self.__class__.__name__} has no attribute " f"{key}."
-        )
+        raise AttributeError(f"{self.__class__.__name__} has no attribute " f"{key}.")
 
     def model(self: Telescope, return_psf: bool = False) -> Array:
         """
@@ -172,7 +169,7 @@ class Dither(Telescope):
         self: Telescope,
         dithers: Array,
         optics: OpticalSystem,
-        source: Union[list, Source],
+        source: list | Source,
         detector: Detector = None,
     ):
         """

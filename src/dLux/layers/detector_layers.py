@@ -1,3 +1,5 @@
+"""Detector-layer abstractions and detector-layer implementations."""
+
 from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np

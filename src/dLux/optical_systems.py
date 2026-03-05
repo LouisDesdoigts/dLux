@@ -1,3 +1,5 @@
+"""Optical-system abstractions and concrete optical-system compositions."""
+
 from __future__ import annotations
 from collections import OrderedDict
 from abc import abstractmethod
@@ -5,9 +7,8 @@ import jax.numpy as np
 from jax import Array
 import equinox as eqx
 import zodiax as zdx
-from typing import Union, Any
+from typing import Any
 import dLux.utils as dlu
-
 
 __all__ = [
     "BaseOpticalSystem",
@@ -54,7 +55,7 @@ class BaseOpticalSystem(zdx.Base):
 
     @abstractmethod
     def propagate(
-        self: OpticalSystem,
+        self: BaseOpticalSystem,
         wavelengths: Array,
         offset: Array = np.zeros(2),
         weights: Array = None,
@@ -89,7 +90,7 @@ class BaseOpticalSystem(zdx.Base):
 
     @abstractmethod
     def model(
-        self: OpticalSystem,
+        self: BaseOpticalSystem,
         source: Source,
         return_wf: bool = False,
         return_psf: bool = False,
@@ -156,8 +157,7 @@ class OpticalSystem(BaseOpticalSystem):
         """
         if return_wf and return_psf:
             raise ValueError(
-                "return_wf and return_psf cannot both be True. "
-                "Please choose one."
+                "return_wf and return_psf cannot both be True. " "Please choose one."
             )
 
         wavelengths = np.atleast_1d(wavelengths)
@@ -178,8 +178,7 @@ class OpticalSystem(BaseOpticalSystem):
         offset = np.array(offset) if not isinstance(offset, Array) else offset
         if offset.shape != (2,):
             raise ValueError(
-                "offset must be a 2-element array, got "
-                f"shape {offset.shape}."
+                "offset must be a 2-element array, got " f"shape {offset.shape}."
             )
 
         # Calculate - note we multiply by sqrt(weight) to account for the
@@ -300,7 +299,7 @@ class LayeredOpticalSystem(OpticalSystem):
         self: OpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list[OpticalLayer, tuple],
+        layers: list[OpticalLayer | tuple[str, OpticalLayer]],
     ):
         """
         Parameters
@@ -309,7 +308,7 @@ class LayeredOpticalSystem(OpticalSystem):
             The size of the initial wavefront to propagate.
         diameter : float
             The diameter of the wavefront to propagate.
-        layers : list[OpticalLayer, tuple]
+        layers : list[OpticalLayer | tuple[str, OpticalLayer]]
             A list of `OpticalLayer` transformations to apply to wavefronts. The list
             entries can be either `OpticalLayer` objects or tuples of (key, layer) to
             specify a key for the layer in the layers dictionary.
@@ -338,9 +337,7 @@ class LayeredOpticalSystem(OpticalSystem):
         for layer in list(self.layers.values()):
             if hasattr(layer, key):
                 return getattr(layer, key)
-        raise AttributeError(
-            f"{self.__class__.__name__} has no attribute " f"{key}."
-        )
+        raise AttributeError(f"{self.__class__.__name__} has no attribute " f"{key}.")
 
     def propagate_mono(
         self: OpticalSystem,
@@ -380,7 +377,9 @@ class LayeredOpticalSystem(OpticalSystem):
         return wavefront.psf
 
     def insert_layer(
-        self: OpticalSystem, layer: Union[OpticalLayer, tuple], index: int
+        self: OpticalSystem,
+        layer: OpticalLayer | tuple[str, OpticalLayer],
+        index: int,
     ) -> OpticalSystem:
         """
         Inserts a layer into the layers dictionary at a specified index. This function
@@ -451,7 +450,7 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         self: OpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list[OpticalLayer, tuple],
+        layers: list[OpticalLayer | tuple[str, OpticalLayer]],
         psf_npixels: int,
         psf_pixel_scale: float,
         oversample: int = 1,
@@ -463,7 +462,7 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
             The number of pixels representing the wavefront.
         diameter : Array, metres
             The diameter of the initial wavefront to propagate.
-        layers : list[OpticalLayer, tuple]
+        layers : list[OpticalLayer | tuple[str, OpticalLayer]]
             A list of `OpticalLayer` transformations to apply to wavefronts. The list
             entries can be either `OpticalLayer` objects or tuples of (key, layer) to
             specify a key for the layer in the layers dictionary.
@@ -555,7 +554,7 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         self: OpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list[OpticalLayer, tuple],
+        layers: list[OpticalLayer | tuple[str, OpticalLayer]],
         focal_length: float,
         psf_npixels: int,
         psf_pixel_scale: float,
@@ -568,7 +567,7 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
             The number of pixels representing the wavefront.
         diameter : Array, metres
             The diameter of the initial wavefront to propagate.
-        layers : list[OpticalLayer, tuple]
+        layers : list[OpticalLayer | tuple[str, OpticalLayer]]
             A list of `OpticalLayer` transformations to apply to wavefronts. The list
             entries can be either `OpticalLayer` objects or tuples of (key, layer) to
             specify a key for the layer in the layers dictionary.

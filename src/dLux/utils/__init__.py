@@ -1,3 +1,5 @@
+"""Public utility functions used across dLux modules."""
+
 # Import as modules
 from . import (
     propagation,
@@ -28,7 +30,7 @@ modules = [
     geometry,
 ]
 
-__all__ = [module.__all__ for module in modules]
+__all__ = [name for module in modules for name in module.__all__]
 
 # Dont import all functions from modules
 from .propagation import FFT as FFT, MFT as MFT, fresnel_MFT as fresnel_MFT

@@ -1,3 +1,5 @@
+"""Optical-layer propagators for FFT, MFT, and far-field Fresnel propagation."""
+
 from __future__ import annotations
 import jax.numpy as np
 from jax import Array
@@ -5,7 +7,6 @@ from jax import Array
 
 from .optical_layers import OpticalLayer
 from ..wavefronts import Wavefront
-
 
 __all__ = ["MFT", "FFT", "ShiftedMFT", "FarFieldFresnel"]
 
@@ -225,9 +226,7 @@ class ShiftedMFT(MFT):
         self.pixel = bool(pixel)
 
         if self.shift.shape != (2,):
-            raise ValueError(
-                f"Shift must be a 2D array, got {self.shift.shape}."
-            )
+            raise ValueError(f"Shift must be a 2D array, got {self.shift.shape}.")
 
     def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """

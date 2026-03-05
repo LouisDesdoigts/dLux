@@ -42,6 +42,7 @@ line-length = 88
 # E = pycodestyle, F = Pyflakes, I = Isort (replaces your separate isort config)
 select = ["E", "F", "I"]
 ignore = [
+    "E402", # Allow imports not at the top of the file
     "E731", # Allow lambda assignments
     "E741", # Allow ambiguous variable names (l, O, I)
     "F722", # Allow syntax errors in forward type annotations
