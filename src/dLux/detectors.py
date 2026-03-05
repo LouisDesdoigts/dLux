@@ -3,7 +3,7 @@
 from __future__ import annotations
 from collections import OrderedDict
 from abc import abstractmethod
-from zodiax import Base
+import zodiax as zdx
 from jax import Array
 import dLux.utils as dlu
 
@@ -13,7 +13,7 @@ from .psfs import PSF
 __all__ = ["BaseDetector", "LayeredDetector"]
 
 
-class BaseDetector(Base):
+class BaseDetector(zdx.Base):
     @abstractmethod
     def model(
         self, psf: PSF, return_psf: bool = False
@@ -69,25 +69,26 @@ class LayeredDetector(BaseDetector):
         if key in self.layers.keys():
             return self.layers[key]
         else:
-            raise AttributeError(
-                "'{}' object has no attribute '{}'".format(type(self), key)
-            )
+            raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
 
-    def model(self: LayeredDetector, psf: PSF, return_psf: bool = False) -> Array:
+    def model(self: LayeredDetector, psf: PSF, return_psf: bool = False) -> Array | PSF:
         """
-        Applied the detector layers to the input psf.
+        Applies the detector layers to the input psf.
 
         Parameters
         ----------
         psf : PSF
             The input psf to be transformed.
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psf : PSF
-            The output psf after being transformed by the detector layers.
+        object : Array, PSF
+            If `return_psf` is False, returns the psf Array.
+            If `return_psf` is True, returns the PSF object.
         """
-        for key, layer in self.layers.items():
+        for _, layer in self.layers.items():
             psf = layer.apply(psf)
         if return_psf:
             return psf

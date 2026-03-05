@@ -1,5 +1,7 @@
+"""Dynamic Zernike aberration primitives and basis containers."""
+
 from __future__ import annotations
-from zodiax import Base
+import zodiax as zdx
 import jax.numpy as np
 from jax import Array
 import jax.tree as jtu
@@ -9,7 +11,7 @@ __all__ = ["Zernike", "ZernikeBasis"]
 
 
 # TODO: Should all the leaves of this class be static?
-class Zernike(Base):
+class Zernike(zdx.Base):
     """
     A Zernike polynomial that can be generated dynamically in a way that is both jit and
     grad safe. If you want a _static_ zernike (most use cases), use the zernike
@@ -56,16 +58,17 @@ class Zernike(Base):
 
     def __init__(self: Zernike, j: int):
         """
-        Construct for the Zernike class.
+        Constructor for the Zernike class.
 
         Parameters
         ----------
         j : int
             The Zernike (noll) index.
         """
-        if int(j) < 1:
+        j = int(j)
+        if j < 1:
             raise ValueError("The Zernike index must be greater than 0.")
-        self.j = int(j)
+        self.j = j
         self.name = dlu.zernike_name(j)
         self.n, self.m = dlu.noll_indices(j)
         self._c, self._k = dlu.zernike_factors(j)
@@ -91,17 +94,12 @@ class Zernike(Base):
             The Zernike polynomial.
         """
         if nsides == 0:
-            return dlu.zernike_fast(
-                self.n, self.m, self._c, self._k, coordinates
-            )
-        else:
-            return dlu.polike_fast(
-                nsides, self.n, self.m, self._c, self._k, coordinates
-            )
+            return dlu.zernike_fast(self.n, self.m, self._c, self._k, coordinates)
+        return dlu.polike_fast(nsides, self.n, self.m, self._c, self._k, coordinates)
 
 
 # TODO: Rename basis to basis_fns??
-class ZernikeBasis(Base):
+class ZernikeBasis(zdx.Base):
     """
     A Basis of Zernike polynomials that can be generated dynamically in a way that is
     both jit and grad safe. If you want a _static_ zernike (most use cases), use the
@@ -132,7 +130,7 @@ class ZernikeBasis(Base):
 
     def __init__(self: ZernikeBasis, js: list[int]):
         """
-        Constructor for the DynamicZernike class.
+        Constructor for the ZernikeBasis class.
 
         Parameters
         ----------

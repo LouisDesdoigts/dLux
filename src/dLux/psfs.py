@@ -1,14 +1,16 @@
+"""PSF container and PSF-space operations used by detector models."""
+
 from __future__ import annotations
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import Array
-from zodiax import Base
+import zodiax as zdx
 import dLux.utils as dlu
 
 __all__ = ["PSF"]
 
 
-class PSF(Base):
+class PSF(zdx.Base):
     """
     A simple class that holds the state of some PSF as it it transformed by detector
     layers.
@@ -184,13 +186,13 @@ class PSF(Base):
 
         # Apply the operation
         if op == "add":
-            return self.add("phasor", other)
+            return self.add("data", other)
         elif op == "subtract":
-            return self.add("phasor", -other)
+            return self.add("data", -other)
         elif op == "multiply":
-            return self.multiply("phasor", other)
+            return self.multiply("data", other)
         elif op == "divide":
-            return self.multiply("phasor", 1 / other)
+            return self.multiply("data", 1 / other)
         else:
             raise ValueError(f"Unsupported operation '{op}'.")
 

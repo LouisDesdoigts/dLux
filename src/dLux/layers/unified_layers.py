@@ -34,17 +34,17 @@ class Resize(UnifiedLayer):
 
     npixels: int
 
-    def __init__(self: UnifiedLayer, npixels: int):
+    def __init__(self: Resize, npixels: int):
         """
         Parameters
         ----------
-        npixels : tuple
+        npixels : int
             The desired output size.
         """
         super().__init__()
         self.npixels = int(npixels)
 
-    def apply(self: UnifiedLayer, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply(self: Resize, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Resizes the input.
 
@@ -87,7 +87,7 @@ class Rotate(UnifiedLayer):
     complex: bool
 
     def __init__(
-        self: UnifiedLayer,
+        self: Rotate,
         angle: float,
         method: str = "linear",
         complex: bool = False,
@@ -109,7 +109,7 @@ class Rotate(UnifiedLayer):
         self.method = str(method)
         self.complex = bool(complex)
 
-    def apply(self: UnifiedLayer, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply(self: Rotate, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Applies the rotation to the input.
 
@@ -125,8 +125,7 @@ class Rotate(UnifiedLayer):
         """
         if isinstance(target, PSF):
             return target.rotate(self.angle, self.method)
-        else:
-            return target.rotate(self.angle, self.method, self.complex)
+        return target.rotate(self.angle, self.method, self.complex)
 
 
 class Flip(UnifiedLayer):
@@ -147,7 +146,7 @@ class Flip(UnifiedLayer):
 
     axes: tuple[int] | int
 
-    def __init__(self: UnifiedLayer, axes: tuple[int] | int):
+    def __init__(self: Flip, axes: tuple[int] | int):
         """
         Parameters
         ----------
@@ -159,13 +158,13 @@ class Flip(UnifiedLayer):
         self.axes = axes
 
         if isinstance(self.axes, tuple):
-            for axes in self.axes:
-                if not isinstance(axes, int):
+            for axis in self.axes:
+                if not isinstance(axis, int):
                     raise ValueError("All axes must be integers.")
         elif not isinstance(self.axes, int):
-            raise ValueError("axes must be integers.")
+            raise ValueError("axes must be an int or tuple of ints.")
 
-    def apply(self: UnifiedLayer, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply(self: Flip, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Flips the input about the input axes.
 

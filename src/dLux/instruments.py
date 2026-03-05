@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from abc import abstractmethod
-from zodiax import Base
+import zodiax as zdx
 from jax import Array, vmap
 import jax.numpy as np
 
@@ -14,7 +14,7 @@ from .psfs import PSF
 __all__ = ["Instrument", "Telescope", "Dither"]
 
 
-class Instrument(Base):
+class Instrument(zdx.Base):
     @abstractmethod
     def model(self, return_psf: bool = False) -> Array | PSF:  # pragma: no cover
         pass
@@ -35,7 +35,7 @@ class Telescope(Instrument):
         An `OpticalSystem` object that defines the optical transformations of the
         instrument.
     source : Source
-        A `Source` or `Scene` to objects to model through the instrument.
+        A `Source` or `Scene` object to model through the instrument.
     detector : Detector
         A `Detector` object that defines the detector transformations of the
         instrument.
@@ -48,7 +48,7 @@ class Telescope(Instrument):
     def __init__(
         self: Telescope,
         optics: OpticalSystem,
-        source: list | Source,
+        source: list | tuple[str, Source] | Source,
         detector: Detector = None,
     ):
         """
@@ -58,7 +58,7 @@ class Telescope(Instrument):
             An `OpticalSystem` object that defines the optical transformations of the
             instrument.
         source : Source
-            A `Source` or `Scene` to objects to model through the instrument. Can be
+            A `Source` or `Scene` object to model through the instrument. Can be
             either a single `Source` object, or a list of `Source` objects which is
             then converted to a `Scene` object. The list entries can also be a tuple of
             (key, source)  in order to specify a key for the source in the scene.
@@ -68,14 +68,15 @@ class Telescope(Instrument):
         """
         # Optics
         if not isinstance(optics, OpticalSystem):
-            raise TypeError("optics must be an Optics object.")
+            raise TypeError("optics must be an OpticalSystem object.")
         self.optics = optics
 
         # Sources
         if isinstance(source, Source):
             self.source = source
         elif isinstance(source, tuple):
-            # If its a (key, source) tuple, we ignore the key
+            if len(source) != 2 or not isinstance(source[1], Source):
+                raise TypeError("source tuple must be of the form (key, Source).")
             self.source = source[1]
         else:
             self.source = Scene(source)
@@ -83,7 +84,7 @@ class Telescope(Instrument):
         # Detector
         if not isinstance(detector, Detector) and detector is not None:
             raise TypeError(
-                "detector must be an Detector object. " f"Got type {type(detector)}"
+                "detector must be a Detector object. " f"Got type {type(detector)}"
             )
         self.detector = detector
 
@@ -105,9 +106,9 @@ class Telescope(Instrument):
         for attribute in self.__dict__.values():
             if hasattr(attribute, key):
                 return getattr(attribute, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute " f"{key}.")
+        raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
 
-    def model(self: Telescope, return_psf: bool = False) -> Array:
+    def model(self: Telescope, return_psf: bool = False) -> Array | PSF:
         """
         Models the source objects through the optical system and detector.
 
@@ -154,7 +155,7 @@ class Dither(Telescope):
         An `OpticalSystem` object that defines the optical transformations of the
         instrument.
     source : Source
-        A `Source` or `Scene` to objects to model through the instrument.
+        A `Source` or `Scene` object to model through the instrument.
     detector : Detector
         A `Detector` object that defines the detector transformations of the
         instrument.
@@ -166,10 +167,10 @@ class Dither(Telescope):
     dithers: Array
 
     def __init__(
-        self: Telescope,
+        self: Dither,
         dithers: Array,
         optics: OpticalSystem,
-        source: list | Source,
+        source: list | tuple[str, Source] | Source,
         detector: Detector = None,
     ):
         """
@@ -182,7 +183,7 @@ class Dither(Telescope):
             An `OpticalSystem` object that defines the optical transformations of the
             instrument.
         source : Source
-            A `Source` or `Scene` to objects to model through the instrument. Can be
+            A `Source` or `Scene` object to model through the instrument. Can be
             either a single `Source` object, or a list of `Source` objects which is
             then converted to a `Scene` object. The list entries can also be a tuple of
             (key, source)  in order to specify a key for the source in the scene.
@@ -195,7 +196,7 @@ class Dither(Telescope):
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
         super().__init__(optics=optics, source=source, detector=detector)
 
-    def model(self: Telescope, return_psf: bool = False) -> Array:
+    def model(self: Dither, return_psf: bool = False) -> Array | PSF:
         """
         Models the source objects through the optical system and detector, while also
         applying the dithers to the source positions.

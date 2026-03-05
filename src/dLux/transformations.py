@@ -1,22 +1,23 @@
+"""Coordinate transformation utilities for dynamic apertures and distortions."""
+
 from __future__ import annotations
-from zodiax import Base
+import zodiax as zdx
 from jax import Array
 import jax.numpy as np
 import dLux.utils as dlu
-
 
 __all__ = ["CoordTransform", "DistortedCoords"]
 
 
 # Class to be held by dynamic apertures
-class CoordTransform(Base):
+class CoordTransform(zdx.Base):
     """
-    A simple class to handle the coordinate transformations applied dynamic
-    aperture classes. Transformations are applied in the order:
+    A simple class to handle coordinate transformations applied to dynamic aperture
+    classes. Transformations are applied in the order:
         1. Translation
-        2. Rotation
+        2. Shear
         3. Compression
-        4. Shear
+        4. Rotation
 
     ??? abstract "UML"
         ![UML](../../assets/uml/CoordTransform.png)
@@ -60,14 +61,14 @@ class CoordTransform(Base):
         if translation is not None:
             self.translation = np.asarray(translation, dtype=float)
             if self.translation.shape != (2,):
-                raise ValueError("center must be have shape (2,).")
+                raise ValueError("translation must have shape (2,).")
         else:
             self.translation = None
 
         if rotation is not None:
             self.rotation = np.asarray(rotation, dtype=float)
             if self.rotation.shape != ():
-                raise ValueError("rotation must have shaoe ().")
+                raise ValueError("rotation must have shape ().")
         else:
             self.rotation = None
 
@@ -81,7 +82,7 @@ class CoordTransform(Base):
         if shear is not None:
             self.shear = np.asarray(shear, dtype=float)
             if self.shear.shape != (2,):
-                raise ValueError("shear must be have shape (2,).")
+                raise ValueError("shear must have shape (2,).")
         else:
             self.shear = None
 
@@ -128,7 +129,7 @@ class CoordTransform(Base):
         return coords
 
 
-class DistortedCoords(Base):
+class DistortedCoords(zdx.Base):
     """
     A class to handle coordinates distorted by a 2D polynomial distortion
 
@@ -143,7 +144,9 @@ class DistortedCoords(Base):
     powers: Array
     distortion: Array
 
-    def __init__(self, order: int = 1, distortion: None | Array = None):
+    def __init__(
+        self: DistortedCoords, order: int = 1, distortion: None | Array = None
+    ):
         """
         Parameters
         ----------
@@ -156,11 +159,12 @@ class DistortedCoords(Base):
 
         if distortion is None:
             distortion = np.zeros_like(self.powers)
-        if distortion is not None and distortion.shape != self.powers.shape:
-            raise ValueError("Distortion shape must match powers shape")
+        distortion = np.asarray(distortion, dtype=float)
+        if distortion.shape != self.powers.shape:
+            raise ValueError("distortion shape must match powers shape.")
         self.distortion = distortion
 
-    def calculate(self, npix: int, diameter: float):
+    def calculate(self: DistortedCoords, npix: int, diameter: float) -> Array:
         """
         Generates flat coordinates and then distorts them
 
@@ -179,7 +183,7 @@ class DistortedCoords(Base):
         coords = dlu.pixel_coords(npix, diameter)
         return dlu.distort_coords(coords, self.distortion, self.powers)
 
-    def apply(self, coords: Array):
+    def apply(self: DistortedCoords, coords: Array) -> Array:
         """
         Apply distortion to some coordinates
 

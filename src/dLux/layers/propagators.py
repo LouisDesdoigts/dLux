@@ -23,9 +23,9 @@ class Propagator(OpticalLayer):
         meters/pixel.
     """
 
-    focal_length: float
+    focal_length: float | None
 
-    def __init__(self: Propagator, focal_length: float = None):
+    def __init__(self: Propagator, focal_length: float | None = None):
         """
         Parameters
         ----------
@@ -63,7 +63,7 @@ class FFT(Propagator):
 
     pad: int
 
-    def __init__(self: Propagator, focal_length: float = None, pad: int = 2):
+    def __init__(self: FFT, focal_length: float = None, pad: int = 2):
         """
         Parameters
         ----------
@@ -77,7 +77,7 @@ class FFT(Propagator):
         super().__init__(focal_length=focal_length)
         self.pad = int(pad)
 
-    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: FFT, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -118,7 +118,7 @@ class MFT(Propagator):
     pixel_scale: float
 
     def __init__(
-        self: Propagator,
+        self: MFT,
         npixels: int,
         pixel_scale: float,
         focal_length: float = None,
@@ -140,7 +140,7 @@ class MFT(Propagator):
         self.pixel_scale = float(pixel_scale)
         self.npixels = int(npixels)
 
-    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: MFT, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -191,7 +191,7 @@ class ShiftedMFT(MFT):
     pixel: bool
 
     def __init__(
-        self: Propagator,
+        self: ShiftedMFT,
         npixels: int,
         pixel_scale: float,
         shift: Array,
@@ -226,9 +226,11 @@ class ShiftedMFT(MFT):
         self.pixel = bool(pixel)
 
         if self.shift.shape != (2,):
-            raise ValueError(f"Shift must be a 2D array, got {self.shift.shape}.")
+            raise ValueError(
+                f"shift must be a 1d array of shape (2,), got {self.shift.shape}."
+            )
 
-    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: ShiftedMFT, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -282,12 +284,12 @@ class FarFieldFresnel(ShiftedMFT):
     focal_shift: float
 
     def __init__(
-        self: Propagator,
+        self: FarFieldFresnel,
         npixels: int,
         pixel_scale: float,
         focal_length: float,
         focal_shift: float,
-        shift: Array = np.zeros(2),
+        shift: Array | None = None,
         pixel: bool = False,
     ):
         """
@@ -301,13 +303,15 @@ class FarFieldFresnel(ShiftedMFT):
             The focal_length of the lens/mirror this propagator represents.
         focal_shift : float, meters
             The shift in the propagation distance of the wavefront from focus.
-        shift : Array = np.zeros(2)
+        shift : Array | None = None
             The (x, y) shift to apply to the wavefront in the output plane.
         pixel : bool = False
             If True the shift value is assumed to be in units of pixels, else the
             physical units of the output plane.
         """
         self.focal_shift = float(focal_shift)
+        if shift is None:
+            shift = np.zeros(2)
         super().__init__(
             shift=shift,
             pixel=pixel,
@@ -316,7 +320,7 @@ class FarFieldFresnel(ShiftedMFT):
             npixels=npixels,
         )
 
-    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: FarFieldFresnel, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 

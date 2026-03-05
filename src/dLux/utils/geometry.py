@@ -17,7 +17,11 @@ __all__ = [
 ]
 
 
-def combine(arrays: Array, oversample: int = 1, sum: bool = False) -> Array:
+def combine(
+    arrays: Array,
+    oversample: int = 1,
+    use_sum: bool = False,
+) -> Array:
     """
     Combines multiple arrays by multiplying them together, and downsampling the output.
 
@@ -27,10 +31,10 @@ def combine(arrays: Array, oversample: int = 1, sum: bool = False) -> Array:
         The arrays to be combined. Should have shape (n_arrays, npix, npix).
     oversample : int = 1
         The amount to downsample the output by.
-    sum : bool = False
+    use_sum : bool = False
         Whether to sum the arrays instead of multiplying them.
     """
-    method = np.sum if sum else np.prod
+    method = np.sum if use_sum else np.prod
     array = np.array(arrays)
     if oversample == 1:
         return method(array, 0)
@@ -51,9 +55,7 @@ def shift_and_scale(array: Array) -> Array:
     array : Array
         The shifted and scaled array.
     """
-    return dlu.math.nandiv(
-        array - array.min(), array.max() - array.min(), fill=0
-    )
+    return dlu.math.nandiv(array - array.min(), array.max() - array.min(), fill=0)
 
 
 def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
@@ -156,9 +158,7 @@ def rectangle(
     return (rectangle_distance(coords, width, height) < 0).astype(float)
 
 
-def reg_polygon(
-    coords: Array, rmax: float, nsides: int, invert: bool = False
-) -> Array:
+def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -> Array:
     """
     Calculates a soft-edged regular polygon via downsampling. This function is not
     differentiable.
@@ -205,9 +205,9 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
     """
     angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
     calc_fn = vmap(lambda angle: spider_distance(coords, width, angle) < 0)
-    return (
-        ~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))
-    ).astype(float)
+    return (~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))).astype(
+        float
+    )
 
 
 # TODO: This eventually

@@ -1,22 +1,10 @@
+"""Wavefront state and propagation utilities used by optical systems."""
+
 from __future__ import annotations
 import jax.numpy as np
 from jax import vmap, Array
 import zodiax as zdx
 import dLux.utils as dlu
-import dLux
-
-# Optical layers require Wavefront to init, so we alias it here to avoid MRO issues
-OpticalLayer = lambda: dLux.layers.optical_layers.OpticalLayer
-
-
-"""
-High level notes:
-
- - Should we allow Nones to the magic methods?
- - Should we allow .apply, rahter than enforcing call?
-    - The question here is whether we need other inputs to the call (ie normalise 
-    or other meta-parameters)
-"""
 
 __all__ = ["Wavefront"]
 
@@ -330,8 +318,9 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The tilted wavefront.
         """
-        if getattr(angles, "shape", None) != (2,):
-            raise ValueError("angles must be an array of shape (2,).")
+        angles = np.asarray(angles, dtype=float)
+        if angles.shape != (2,):
+            raise ValueError("angles must be a 1d array of shape (2,).")
 
         # factor such that angle_rad = angle_unit * factor
         scaling = dlu.unit_factor_to_rad(unit)
@@ -364,9 +353,9 @@ class Wavefront(zdx.Base):
             New wavefront with phasor scaled to achieve the normalisation.
         """
         if mode == "power":
-            scale = np.sqrt(value / self.power.sum())
+            scale = np.sqrt(value / self.power)
         elif mode == "peak":
-            scale = np.sqrt(value / self.power.max())
+            scale = np.sqrt(value / self.psf.max())
         else:
             raise ValueError("mode must be 'power' or 'peak'")
         return self.multiply("phasor", scale)
@@ -597,7 +586,7 @@ class Wavefront(zdx.Base):
         npixels: int,
         pixel_scale: float,
         focal_length: float = None,
-        shift: Array = np.zeros(2),
+        shift: Array | None = None,
         pixel: bool = True,
     ) -> Wavefront:
         """
@@ -612,9 +601,10 @@ class Wavefront(zdx.Base):
             units).
         focal_length : float | None
             Focal length for Cartesian focal sampling; None for angular focal sampling.
-        shift : Array, shape (2,)
+        shift : Array | None, shape (2,) = None
             Offset of the output plane center (x, y). Units = pixels if pixel=True,
-            else physical units matching input pixel_scale.
+            else physical units matching input pixel_scale. If None, no shift is
+            applied.
         pixel : bool
             Interpret shift in pixel units if True; else in pixel_scale units.
 
@@ -630,6 +620,12 @@ class Wavefront(zdx.Base):
         """
         inverse, plane, units = self._prep_prop(focal_length)
         pixel_scale = np.asarray(pixel_scale, float)
+        if shift is None:
+            shift = np.zeros(2, dtype=float)
+        else:
+            shift = np.asarray(shift, dtype=float)
+            if shift.shape != (2,):
+                raise ValueError("shift must be a 1d array of shape (2,).")
         args = (npixels, pixel_scale, focal_length, shift, pixel, inverse)
         phasor = self._MFT(self.phasor, self.wavelength, self.pixel_scale, *args)
         return self.set(
@@ -643,7 +639,7 @@ class Wavefront(zdx.Base):
         pixel_scale: float,
         focal_length: float,
         focal_shift: float = 0.0,
-        shift: Array = np.zeros(2),
+        shift: Array | None = None,
         pixel: bool = True,
         inverse: bool = False,
     ) -> Wavefront:
@@ -660,8 +656,8 @@ class Wavefront(zdx.Base):
             System focal length.
         focal_shift : float
             Axial distance from best focus (meters).
-        shift : Array, shape (2,)
-            Lateral shift of output plane center.
+        shift : Array | None, shape (2,) = None
+            Lateral shift of output plane center. If None, no shift is applied.
         pixel : bool
             Interpret shift as pixels if True; else physical units.
         inverse : bool
@@ -689,6 +685,12 @@ class Wavefront(zdx.Base):
                 f"{self.plane})."
             )
         pixel_scale = np.asarray(pixel_scale, float)
+        if shift is None:
+            shift = np.zeros(2, dtype=float)
+        else:
+            shift = np.asarray(shift, dtype=float)
+            if shift.shape != (2,):
+                raise ValueError("shift must be a 1d array of shape (2,).")
         plane = "Intermediate"
         units = "Cartesian"
         phasor = dlu.fresnel_MFT(

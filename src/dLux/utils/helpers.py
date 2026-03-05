@@ -32,9 +32,7 @@ def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
         return np.array(jtu.flatten(jtu.map(fn, tree))[0])
 
 
-def list2dictionary(
-    list_in: list, ordered: bool, allowed_types: tuple = ()
-) -> dict:
+def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> dict:
     """
     Converts some input list to a dictionary. The input list entries can either be
     objects, in which case the keys are taken as the class name, else a (key, object)
@@ -70,9 +68,7 @@ def list2dictionary(
 
         # Check input types
         if allowed_types != () and not isinstance(item, allowed_types):
-            raise TypeError(
-                f"Item {name} is not an allowed type, got " f"{type(item)}"
-            )
+            raise TypeError(f"Item {name} is not an allowed type, got " f"{type(item)}")
 
         # Check for Repeats
         if name in names:
@@ -108,7 +104,12 @@ def list2dictionary(
     return dict_out
 
 
-def insert_layer(layers: dict, layer: Any, index: int, type: Any) -> dict:
+def insert_layer(
+    layers: dict,
+    layer: Any,
+    index: int,
+    allowed_type: Any,
+) -> dict:
     """
     Inserts a layer into a dictionary of layers at a specified index. This function
     calls the list2dictionary function to ensure all keys remain unique. Note that this
@@ -124,7 +125,7 @@ def insert_layer(layers: dict, layer: Any, index: int, type: Any) -> dict:
         The layer to be inserted.
     index : int
         The index at which to insert the layer.
-    type : Any
+    allowed_type : Any
         The type of layer to be inserted. Used for type-checking.
 
     Returns
@@ -134,7 +135,7 @@ def insert_layer(layers: dict, layer: Any, index: int, type: Any) -> dict:
     """
     layers_list = list(zip(layers.keys(), layers.values()))
     layers_list.insert(index, layer)
-    return list2dictionary(layers_list, True, type)
+    return list2dictionary(layers_list, True, allowed_type)
 
 
 def remove_layer(layers: dict, key: str) -> dict:

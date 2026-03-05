@@ -62,20 +62,20 @@ class ApplyPixelResponse(DetectorLayer):
 
     pixel_response: Array
 
-    def __init__(self: DetectorLayer, pixel_response: Array):
+    def __init__(self: ApplyPixelResponse, pixel_response: Array):
         """
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input psf. Must be a 2-dimensional array
-            equal to size of the psf at time of application.
+            The pixel_response to apply to the input psf. Must be a 2d array that
+            matches the psf shape at time of application.
         """
         super().__init__()
         self.pixel_response = np.asarray(pixel_response, dtype=float)
         if self.pixel_response.ndim != 2:
-            raise ValueError("pixel_response must be a 2 dimensional array.")
+            raise ValueError("pixel_response must be a 2d array.")
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
+    def apply(self: ApplyPixelResponse, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -111,7 +111,7 @@ class ApplyJitter(DetectorLayer):
     kernel_size: int
     sigma: float
 
-    def __init__(self: DetectorLayer, sigma: float, kernel_size: int = 10):
+    def __init__(self: ApplyJitter, sigma: float, kernel_size: int = 10):
         """
         Parameters
         ----------
@@ -124,7 +124,10 @@ class ApplyJitter(DetectorLayer):
         self.kernel_size = int(kernel_size)
         self.sigma = float(sigma)
 
-    def generate_kernel(self: DetectorLayer, pixel_scale: float) -> Array:
+        if self.kernel_size <= 0:
+            raise ValueError("kernel_size must be greater than 0.")
+
+    def generate_kernel(self: ApplyJitter, pixel_scale: float) -> Array:
         """
         Generates the normalised Gaussian kernel.
 
@@ -140,7 +143,7 @@ class ApplyJitter(DetectorLayer):
         kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
         return kernel / np.sum(kernel)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
+    def apply(self: ApplyJitter, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -174,7 +177,7 @@ class ApplySaturation(DetectorLayer):
 
     threshold: float
 
-    def __init__(self: DetectorLayer, threshold: float):
+    def __init__(self: ApplySaturation, threshold: float):
         """
         Parameters
         ----------
@@ -184,7 +187,7 @@ class ApplySaturation(DetectorLayer):
         super().__init__()
         self.threshold = float(threshold)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
+    def apply(self: ApplySaturation, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -217,7 +220,7 @@ class AddConstant(DetectorLayer):
 
     value: float
 
-    def __init__(self: DetectorLayer, value: float):
+    def __init__(self: AddConstant, value: float):
         """
         Parameters
         ----------
@@ -227,7 +230,7 @@ class AddConstant(DetectorLayer):
         super().__init__()
         self.value = float(value)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
+    def apply(self: AddConstant, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -261,17 +264,20 @@ class Downsample(DetectorLayer):
 
     kernel_size: int
 
-    def __init__(self: DetectorLayer, kernel_size: int):
+    def __init__(self: Downsample, kernel_size: int):
         """
         Parameters
         ----------
         kernel_size : int
-            The size of the downsampling kernel.
+            The size of the downsampling kernel. Must be greater than 0.
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
+        if self.kernel_size <= 0:
+            raise ValueError("kernel_size must be greater than 0.")
+
+    def apply(self: Downsample, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 

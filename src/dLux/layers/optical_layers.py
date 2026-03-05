@@ -3,7 +3,7 @@
 from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
-from zodiax import Base
+import zodiax as zdx
 from jax import Array
 import dLux.utils as dlu
 
@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 
-class BaseLayer(Base):
+class BaseLayer(zdx.Base):
     @abstractmethod
     def apply(self, target: object) -> object:  # pragma: no cover
         pass
@@ -70,7 +70,7 @@ class TransmissiveLayer(OpticalLayer):
     normalise: bool
 
     def __init__(
-        self: OpticalLayer,
+        self: TransmissiveLayer,
         transmission: Array = None,
         normalise: bool = False,
         **kwargs,
@@ -89,7 +89,7 @@ class TransmissiveLayer(OpticalLayer):
         self.normalise = bool(normalise)
         super().__init__(**kwargs)
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: TransmissiveLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -129,7 +129,7 @@ class AberratedLayer(OpticalLayer):
     phase: Array
 
     def __init__(
-        self: OpticalLayer,
+        self: AberratedLayer,
         opd: Array = None,
         phase: Array = None,
         **kwargs,
@@ -158,7 +158,7 @@ class AberratedLayer(OpticalLayer):
                 )
         super().__init__(**kwargs)
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: AberratedLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -189,7 +189,7 @@ class BasisLayer(OpticalLayer):
     Attributes
     ----------
     basis: Array | list
-        The set of basis vectors. Should in generate be a 3 dimensional array.
+        The set of basis vectors. Should in general be a 3 dimensional array.
     coefficients: Array
         The array of coefficients to be applied to each basis vector.
     as_phase: bool = False
@@ -203,7 +203,7 @@ class BasisLayer(OpticalLayer):
 
     # NOTE: We need the None basis input for aberrated apertures
     def __init__(
-        self: OpticalLayer,
+        self: BasisLayer,
         basis: Array = None,
         coefficients: Array = None,
         as_phase: bool = False,
@@ -238,7 +238,7 @@ class BasisLayer(OpticalLayer):
         self.coefficients = coefficients
         self.as_phase = bool(as_phase)
 
-    def eval_basis(self: OpticalLayer) -> Array:
+    def eval_basis(self: BasisLayer) -> Array:
         """
         Calculates the dot product of the basis vectors and coefficients.
 
@@ -249,7 +249,7 @@ class BasisLayer(OpticalLayer):
         """
         return dlu.eval_basis(self.basis, self.coefficients)
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: BasisLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -286,7 +286,7 @@ class Tilt(OpticalLayer):
 
     angles: Array
 
-    def __init__(self: OpticalLayer, angles: Array):
+    def __init__(self: Tilt, angles: Array):
         """
         Parameters
         ----------
@@ -297,9 +297,9 @@ class Tilt(OpticalLayer):
         self.angles = np.asarray(angles, dtype=float)
 
         if self.angles.shape != (2,):
-            raise ValueError("angles must have have (2,)")
+            raise ValueError("angles must be a 1d array of shape (2,).")
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: Tilt, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -324,7 +324,7 @@ class Normalise(OpticalLayer):
         ![UML](../../assets/uml/Normalise.png)
     """
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: Normalise, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 

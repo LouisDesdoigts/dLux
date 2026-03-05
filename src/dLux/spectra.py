@@ -1,15 +1,17 @@
+"""Spectrum primitives and polynomial spectrum parametrisations."""
+
 from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
-from zodiax import Base
+import zodiax as zdx
 from jax import vmap, Array
 
 __all__ = ["BaseSpectrum", "Spectrum", "PolySpectrum"]
 
 
-class BaseSpectrum(Base):
+class BaseSpectrum(zdx.Base):
     @abstractmethod
-    def normalise(self):  # pragma: no cover
+    def normalise(self) -> BaseSpectrum:  # pragma: no cover
         pass
 
 
@@ -25,7 +27,7 @@ class SimpleSpectrum(BaseSpectrum):
 
     wavelengths: Array
 
-    def __init__(self: Spectrum, wavelengths: Array):
+    def __init__(self: SimpleSpectrum, wavelengths: Array):
         """
         Parameters
         ----------
@@ -33,6 +35,8 @@ class SimpleSpectrum(BaseSpectrum):
             The array of wavelengths at which the spectrum is defined.
         """
         self.wavelengths = np.asarray(wavelengths, dtype=float)
+        if self.wavelengths.ndim != 1:
+            raise ValueError("wavelengths must be a 1d array.")
         super().__init__()
 
 
@@ -77,13 +81,11 @@ class Spectrum(SimpleSpectrum):
 
         if self.weights.ndim == 1:
             if self.wavelengths.shape != self.weights.shape:
-                raise ValueError(
-                    "wavelengths and weights must have the same " "shape."
-                )
+                raise ValueError("wavelengths and weights must have the same shape.")
         else:
             if self.wavelengths.shape != self.weights.shape[-1:]:
                 raise ValueError(
-                    "wavelengths and weights must have the same " "shape."
+                    "wavelengths and weights must have the same trailing shape."
                 )
 
     def normalise(self: Spectrum) -> Spectrum:
@@ -122,7 +124,7 @@ class PolySpectrum(SimpleSpectrum):
 
     coefficients: Array
 
-    def __init__(self: Spectrum, wavelengths: Array, coefficients: Array):
+    def __init__(self: PolySpectrum, wavelengths: Array, coefficients: Array):
         """
         Parameters
         ----------
@@ -137,7 +139,7 @@ class PolySpectrum(SimpleSpectrum):
         if self.coefficients.ndim != 1:
             raise ValueError("Coefficients must be a 1d array.")
 
-    def _eval_weight(self: Spectrum, wavelength: Array) -> Array:
+    def _eval_weight(self: PolySpectrum, wavelength: Array) -> Array:
         """
         Evaluates the polynomial function at the supplied wavelength.
 
@@ -159,7 +161,7 @@ class PolySpectrum(SimpleSpectrum):
         ).sum()
 
     @property
-    def weights(self: Spectrum) -> Array:
+    def weights(self: PolySpectrum) -> Array:
         """
         Gets the relative spectral weights by evaluating the polynomial function at the
         internal wavelengths. Output weights are automatically normalised to a sum of
@@ -173,7 +175,7 @@ class PolySpectrum(SimpleSpectrum):
         weights = vmap(self._eval_weight)(self.wavelengths)
         return weights / weights.sum()
 
-    def normalise(self: Spectrum) -> Spectrum:
+    def normalise(self: PolySpectrum) -> PolySpectrum:
         """
         Calculated weights are automatically normalised, so this method simply returns
         an unmodified object.

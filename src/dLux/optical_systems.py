@@ -31,7 +31,7 @@ class BaseOpticalSystem(zdx.Base):
     def propagate_mono(
         self: BaseOpticalSystem,
         wavelength: float,
-        offset: Array = np.zeros(2),
+        offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array:  # pragma: no cover
         """
@@ -41,7 +41,7 @@ class BaseOpticalSystem(zdx.Base):
         ----------
         wavelength : float, metres
             The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array, radians = np.zeros(2)
+        offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
             Should the Wavefront object be returned instead of the psf Array?
@@ -57,7 +57,7 @@ class BaseOpticalSystem(zdx.Base):
     def propagate(
         self: BaseOpticalSystem,
         wavelengths: Array,
-        offset: Array = np.zeros(2),
+        offset: Array | None = None,
         weights: Array = None,
         return_wf: bool = False,
         return_psf: bool = False,
@@ -69,7 +69,7 @@ class BaseOpticalSystem(zdx.Base):
         ----------
         wavelengths : Array, metres
             The wavelengths of the wavefronts to propagate through the optics.
-        offset : Array, radians = np.zeros(2)
+        offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         weights : Array = None
             The weight of each wavelength. If None, all weights are equal.
@@ -126,7 +126,7 @@ class OpticalSystem(BaseOpticalSystem):
     def propagate(
         self: OpticalSystem,
         wavelengths: Array,
-        offset: Array = np.zeros(2),
+        offset: Array | None = None,
         weights: Array = None,
         return_wf: bool = False,
         return_psf: bool = False,
@@ -138,7 +138,7 @@ class OpticalSystem(BaseOpticalSystem):
         ----------
         wavelengths : Array, metres
             The wavelengths of the wavefronts to propagate through the optics.
-        offset : Array, radians = np.zeros(2)
+        offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         weights : Array = None
             The weight of each wavelength. If None, all weights are equal.
@@ -175,10 +175,13 @@ class OpticalSystem(BaseOpticalSystem):
             )
 
         # Check offset
-        offset = np.array(offset) if not isinstance(offset, Array) else offset
+        if offset is None:
+            offset = np.zeros(2)
+        else:
+            offset = np.asarray(offset)
         if offset.shape != (2,):
             raise ValueError(
-                "offset must be a 2-element array, got " f"shape {offset.shape}."
+                "offset must be a 1d array of shape (2,), got " f"shape {offset.shape}."
             )
 
         # Calculate - note we multiply by sqrt(weight) to account for the
@@ -248,7 +251,7 @@ class ParametricOpticalSystem(OpticalSystem):
     psf_pixel_scale: float
 
     def __init__(
-        self: OpticalSystem,
+        self: ParametricOpticalSystem,
         psf_npixels: int,
         psf_pixel_scale: float,
         oversample: int = 1,
@@ -296,7 +299,7 @@ class LayeredOpticalSystem(OpticalSystem):
     layers: OrderedDict
 
     def __init__(
-        self: OpticalSystem,
+        self: LayeredOpticalSystem,
         wf_npixels: int,
         diameter: float,
         layers: list[OpticalLayer | tuple[str, OpticalLayer]],
@@ -317,7 +320,7 @@ class LayeredOpticalSystem(OpticalSystem):
         self.diameter = float(diameter)
         self.layers = dlu.list2dictionary(layers, True, OpticalLayer)
 
-    def __getattr__(self: OpticalSystem, key: str) -> Any:
+    def __getattr__(self: LayeredOpticalSystem, key: str) -> Any:
         """
         Raises both the individual layers and the attributes of the layers via
         their keys.
@@ -337,12 +340,12 @@ class LayeredOpticalSystem(OpticalSystem):
         for layer in list(self.layers.values()):
             if hasattr(layer, key):
                 return getattr(layer, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute " f"{key}.")
+        raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
 
     def propagate_mono(
-        self: OpticalSystem,
+        self: LayeredOpticalSystem,
         wavelength: Array,
-        offset: Array = np.zeros(2),
+        offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array:
         """
@@ -352,7 +355,7 @@ class LayeredOpticalSystem(OpticalSystem):
         ----------
         wavelength : float, metres
             The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array, radians = np.zeros(2)
+        offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
             Should the Wavefront object be returned instead of the psf Array?
@@ -363,6 +366,9 @@ class LayeredOpticalSystem(OpticalSystem):
             if `return_wf` is False, returns the psf Array.
             if `return_wf` is True, returns the Wavefront object.
         """
+        if offset is None:
+            offset = np.zeros(2)
+
         # Initialise wavefront
         wavefront = Wavefront(self.wf_npixels, self.diameter, wavelength)
         wavefront = wavefront.tilt(offset)
@@ -377,7 +383,7 @@ class LayeredOpticalSystem(OpticalSystem):
         return wavefront.psf
 
     def insert_layer(
-        self: OpticalSystem,
+        self: LayeredOpticalSystem,
         layer: OpticalLayer | tuple[str, OpticalLayer],
         index: int,
     ) -> OpticalSystem:
@@ -404,7 +410,7 @@ class LayeredOpticalSystem(OpticalSystem):
             "layers", dlu.insert_layer(self.layers, layer, index, OpticalLayer)
         )
 
-    def remove_layer(self: OpticalLayer, key: str) -> OpticalSystem:
+    def remove_layer(self: LayeredOpticalSystem, key: str) -> OpticalSystem:
         """
         Removes a layer from the layers dictionary, specified by its key.
 
@@ -447,7 +453,7 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
     """
 
     def __init__(
-        self: OpticalSystem,
+        self: AngularOpticalSystem,
         wf_npixels: int,
         diameter: float,
         layers: list[OpticalLayer | tuple[str, OpticalLayer]],
@@ -484,9 +490,9 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         )
 
     def propagate_mono(
-        self: OpticalSystem,
+        self: AngularOpticalSystem,
         wavelength: Array,
-        offset: Array = np.zeros(2),
+        offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array:
         """
@@ -496,7 +502,7 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         ----------
         wavelength : float, metres
             The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array, radians = np.zeros(2)
+        offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
             Should the Wavefront object be returned instead of the psf Array?
@@ -548,10 +554,10 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         parameter while increasing the psf_npixels parameter.
     """
 
-    focal_length: None
+    focal_length: float
 
     def __init__(
-        self: OpticalSystem,
+        self: CartesianOpticalSystem,
         wf_npixels: int,
         diameter: float,
         layers: list[OpticalLayer | tuple[str, OpticalLayer]],
@@ -593,9 +599,9 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         )
 
     def propagate_mono(
-        self: OpticalSystem,
+        self: CartesianOpticalSystem,
         wavelength: Array,
-        offset: Array = np.zeros(2),
+        offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array:
         """
@@ -605,7 +611,7 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         ----------
         wavelength : float, metres
             The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array, radians = np.zeros(2)
+        offset : Array | None, radians = None
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
             Should the Wavefront object be returned instead of the psf Array?

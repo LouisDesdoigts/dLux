@@ -1,22 +1,17 @@
 from __future__ import annotations
 from typing import Any
 from abc import abstractmethod
+from jax import Array, vmap
 import jax.numpy as np
+import jax.scipy as jsp
 import jax.tree as jtu
-from jax.scipy.signal import convolve
-from jax import vmap, Array
-from zodiax import Base
+import zodiax as zdx
 import equinox as eqx
 import dLux.utils as dlu
 from dLux import spectra
-import dLux
 
 
 from .psfs import PSF
-
-Optics = lambda: dLux.optical_systems.BaseOpticalSystem
-Spectrum = lambda: dLux.spectra.BaseSpectrum
-
 
 __all__ = [
     "BaseSource",
@@ -29,13 +24,61 @@ __all__ = [
 ]
 
 
-class BaseSource(Base):
+def _validate_return_mode(return_wf: bool, return_psf: bool) -> None:
+    if return_wf and return_psf:
+        raise ValueError(
+            "return_wf and return_psf cannot both be True. Please choose one."
+        )
+
+
+def _as_wavelengths_1d(wavelengths: Array | None) -> Array | None:
+    if wavelengths is None:
+        return None
+    wavelengths = np.asarray(wavelengths, dtype=float)
+    if wavelengths.ndim != 1:
+        raise ValueError("wavelengths must be a 1d array.")
+    return wavelengths
+
+
+def _infer_n_wavelengths(
+    wavelengths: Array | None,
+    spectrum: spectra.BaseSpectrum | None,
+) -> int:
+    wavelengths = _as_wavelengths_1d(wavelengths)
+    if wavelengths is not None:
+        return len(wavelengths)
+
+    if spectrum is None:
+        raise ValueError(
+            "wavelengths must be provided when weights is None and no spectrum "
+            "is supplied."
+        )
+
+    if not isinstance(spectrum, spectra.BaseSpectrum):
+        raise TypeError("spectrum must be a dLux Spectrum object.")
+
+    return len(np.asarray(spectrum.wavelengths, dtype=float))
+
+
+def _as_position_2d(position: Array) -> Array:
+    position = np.asarray(position, dtype=float)
+    if position.shape != (2,):
+        raise ValueError("position must be a 1d array of shape (2,).")
+    return position
+
+
+class BaseSource(zdx.Base):
     @abstractmethod
-    def normalise(self):  # pragma: no cover
+    def normalise(self) -> BaseSource:  # pragma: no cover
         pass
 
     @abstractmethod
-    def model(self, optics):  # pragma: no cover
+    def model(
+        self,
+        optics: object,
+        return_wf: bool = False,
+        return_psf: bool = False,
+    ) -> object:  # pragma: no cover
         pass
 
 
@@ -49,13 +92,13 @@ class Source(BaseSource):
         The spectrum of this object, represented by a Spectrum object.
     """
 
-    spectrum: Spectrum()
+    spectrum: spectra.BaseSpectrum
 
     def __init__(
         self: Source,
         wavelengths: Array = None,
         weights: Array = None,
-        spectrum: Spectrum() = None,
+        spectrum: spectra.BaseSpectrum = None,
     ):
         """
         Parameters
@@ -70,7 +113,7 @@ class Source(BaseSource):
         """
         # Spectrum
         if spectrum is not None:
-            if not isinstance(spectrum, Spectrum()):
+            if not isinstance(spectrum, spectra.BaseSpectrum):
                 raise TypeError("spectrum must be a dLux Spectrum object.")
             self.spectrum = spectrum
         else:
@@ -93,9 +136,7 @@ class Source(BaseSource):
         if hasattr(self.spectrum, key):
             return getattr(self.spectrum, key)
         else:
-            raise AttributeError(
-                f"{self.__class__.__name__} has no " f"attribute {key}."
-            )
+            raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
 
     def normalise(self: Source) -> Source:
         """
@@ -131,12 +172,12 @@ class PointSource(Source):
     flux: float
 
     def __init__(
-        self: Source,
+        self: PointSource,
         wavelengths: Array = None,
         position: Array = np.zeros(2),
         flux: float = 1.0,
         weights: Array = None,
-        spectrum: Spectrum() = None,
+        spectrum: spectra.BaseSpectrum = None,
     ):
         """
         Parameters
@@ -152,19 +193,14 @@ class PointSource(Source):
             The spectrum of this object, represented by a Spectrum object.
         """
         # Position and Flux
-        self.position = np.asarray(position, dtype=float)
+        self.position = _as_position_2d(position)
         self.flux = float(flux)
 
-        if self.position.shape != (2,):
-            raise ValueError("position must be a 1d array of shape (2,).")
-
-        super().__init__(
-            wavelengths=wavelengths, weights=weights, spectrum=spectrum
-        )
+        super().__init__(wavelengths=wavelengths, weights=weights, spectrum=spectrum)
 
     def model(
-        self: Source,
-        optics: Optics,
+        self: PointSource,
+        optics: object,
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
@@ -188,6 +224,7 @@ class PointSource(Source):
                 object.
             if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
+        _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
         weights = self.weights * self.flux
         return optics.propagate(
@@ -216,12 +253,12 @@ class PointSources(Source):
     flux: Array
 
     def __init__(
-        self: Source,
+        self: PointSources,
         wavelengths: Array = None,
         position: Array = np.zeros((1, 2)),
         flux: Array = None,
         weights: Array = None,
-        spectrum: Spectrum() = None,
+        spectrum: spectra.BaseSpectrum = None,
     ):
         """
         Parameters
@@ -237,9 +274,7 @@ class PointSources(Source):
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
         """
-        super().__init__(
-            spectrum=spectrum, wavelengths=wavelengths, weights=weights
-        )
+        super().__init__(spectrum=spectrum, wavelengths=wavelengths, weights=weights)
 
         # More complex parameter checks here because of extra dims
         self.position = np.asarray(position, dtype=float)
@@ -260,8 +295,8 @@ class PointSources(Source):
                 )
 
     def model(
-        self: Source,
-        optics: Optics,
+        self: PointSources,
+        optics: object,
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
@@ -285,11 +320,7 @@ class PointSources(Source):
                 object.
             if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
-        if return_wf and return_psf:
-            raise ValueError(
-                "return_wf and return_psf cannot both be True. "
-                "Please choose one."
-            )
+        _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
         prop_fn = lambda position, weight: optics.propagate(
@@ -328,13 +359,13 @@ class ResolvedSource(PointSource):
     distribution: Array
 
     def __init__(
-        self: Source,
+        self: ResolvedSource,
         wavelengths: Array = None,
         position: Array = np.zeros(2),
         flux: float = 1.0,
         distribution: Array = np.ones((3, 3)),
         weights: Array = None,
-        spectrum: Spectrum() = None,
+        spectrum: spectra.BaseSpectrum = None,
     ):
         """
         Parameters
@@ -366,7 +397,7 @@ class ResolvedSource(PointSource):
             weights=weights,
         )
 
-    def normalise(self: Source) -> Source:
+    def normalise(self: ResolvedSource) -> ResolvedSource:
         """
         Method for returning a new source object with a normalised total
         spectrum and source distribution.
@@ -382,8 +413,8 @@ class ResolvedSource(PointSource):
         return self.set(["spectrum", "distribution"], [spectrum, distribution])
 
     def model(
-        self: Source,
-        optics: Optics = None,
+        self: ResolvedSource,
+        optics: object = None,
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
@@ -407,24 +438,20 @@ class ResolvedSource(PointSource):
                 object.
             if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
-        if return_wf and return_psf:
-            raise ValueError(
-                "return_wf and return_psf cannot both be True. "
-                "Please choose one."
-            )
+        _validate_return_mode(return_wf, return_psf)
         # Normalise and get parameters
         self = self.normalise()
         weights = self.weights * self.flux
 
         # Note we always return wf here so we can convolve each wavelength
         # individually if a chromatic wavefront output is required.
-        wf = optics.propagate(
-            self.wavelengths, self.position, weights, return_wf=True
-        )
+        wf = optics.propagate(self.wavelengths, self.position, weights, return_wf=True)
 
         # Returning wf is a special case
         if return_wf:
-            conv_fn = lambda psf: convolve(psf, self.distribution, mode="same")
+            conv_fn = lambda psf: jsp.signal.convolve(
+                psf, self.distribution, mode="same"
+            )
             # Replace previous amplitude leaf update with phasor rescale
             # return wf.set_amplitude(vmap(conv_fn)(wf.psf) ** 0.5)
             # NOTE: This operation is actually incorrect since we can only add
@@ -433,7 +460,7 @@ class ResolvedSource(PointSource):
             return wf.set("phasor", amp * np.exp(1j * wf.phase))
 
         # Return psf object
-        conv_psf = convolve(wf.psf.sum(0), self.distribution, mode="same")
+        conv_psf = jsp.signal.convolve(wf.psf.sum(0), self.distribution, mode="same")
         if return_psf:
             return PSF(conv_psf, wf.pixel_scale.mean())
 
@@ -473,14 +500,14 @@ class BinarySource(Source):
     contrast: float
 
     def __init__(
-        self: Source,
+        self: BinarySource,
         wavelengths: Array = None,
         position: Array = np.zeros(2),
         mean_flux: float = 1.0,
         separation: float = 0.0,
         position_angle: float = np.pi / 2,
         contrast: float = 1.0,
-        spectrum: Spectrum() = None,
+        spectrum: spectra.BaseSpectrum = None,
         weights: Array = None,
     ):
         """
@@ -502,16 +529,14 @@ class BinarySource(Source):
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
         """
-        wavelengths = np.asarray(wavelengths, dtype=float)
+        wavelengths = _as_wavelengths_1d(wavelengths)
         if weights is None:
-            weights = np.ones((2, len(wavelengths)))
+            n_wavelengths = _infer_n_wavelengths(wavelengths, spectrum)
+            weights = np.ones((2, n_wavelengths))
 
         # Position and Flux
-        self.position = np.asarray(position, dtype=float)
+        self.position = _as_position_2d(position)
         self.mean_flux = float(mean_flux)
-
-        if self.position.shape != (2,):
-            raise ValueError("position must be a 1d array of shape (2,).")
 
         # Binary values
         self.separation = float(separation)
@@ -525,8 +550,8 @@ class BinarySource(Source):
         )
 
     def model(
-        self: Source,
-        optics: Optics,
+        self: BinarySource,
+        optics: object,
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
@@ -550,6 +575,7 @@ class BinarySource(Source):
                 object.
             if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
+        _validate_return_mode(return_wf, return_psf)
         # Normalise and get input values
         self = self.normalise()
         positions = dlu.positions_from_sep(
@@ -606,15 +632,15 @@ class PointResolvedSource(ResolvedSource):
     contrast: float
 
     def __init__(
-        self: Source,
+        self: PointResolvedSource,
         wavelengths: Array = None,
         position: Array = np.zeros(2),
         flux: float = 1.0,
         distribution: Array = np.ones((3, 3)),
         contrast: float = 1.0,
         weights: Array = None,
-        spectrum: Spectrum() = None,
-    ) -> Source:
+        spectrum: spectra.BaseSpectrum = None,
+    ) -> PointResolvedSource:
         """
         Parameters
         ----------
@@ -633,9 +659,10 @@ class PointResolvedSource(ResolvedSource):
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
         """
-        wavelengths = np.asarray(wavelengths, dtype=float)
+        wavelengths = _as_wavelengths_1d(wavelengths)
         if weights is None:
-            weights = np.ones((2, len(wavelengths)))
+            n_wavelengths = _infer_n_wavelengths(wavelengths, spectrum)
+            weights = np.ones((2, n_wavelengths))
 
         self.contrast = float(contrast)
 
@@ -646,12 +673,11 @@ class PointResolvedSource(ResolvedSource):
             distribution=distribution,
             spectrum=spectrum,
             weights=weights,
-            # contrast=contrast,
         )
 
     def model(
-        self: Source,
-        optics: Optics,
+        self: PointResolvedSource,
+        optics: object,
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
@@ -675,11 +701,7 @@ class PointResolvedSource(ResolvedSource):
                 object.
             if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
-        if return_wf and return_psf:
-            raise ValueError(
-                "return_wf and return_psf cannot both be True. "
-                "Please choose one."
-            )
+        _validate_return_mode(return_wf, return_psf)
         # Normalise and get parameters
         self = self.normalise()
         flux = dlu.fluxes_from_contrast(self.flux, self.contrast)
@@ -695,7 +717,9 @@ class PointResolvedSource(ResolvedSource):
         # the distribution, and them re-combine them into a vectorised wf
         if return_wf:
             # Perform convolution
-            conv_fn = lambda psf: convolve(psf, self.distribution, mode="same")
+            conv_fn = lambda psf: jsp.signal.convolve(
+                psf, self.distribution, mode="same"
+            )
             # Replace previous amplitude leaf update with phasor rescale
             # TODO: This operation is actually incorrect since we can only add
             # incoherent light via a convolution so we can only operate on psfs.
@@ -728,7 +752,7 @@ class PointResolvedSource(ResolvedSource):
         # Create singe array psf object
         point_psf = (np.expand_dims(weights[0], (1, 2)) * wf.psf).sum(0)
         resolved_psf = (np.expand_dims(weights[1], (1, 2)) * wf.psf).sum(0)
-        conv_psf = convolve(resolved_psf, self.distribution, mode="same")
+        conv_psf = jsp.signal.convolve(resolved_psf, self.distribution, mode="same")
         psf = point_psf + conv_psf
         if return_psf:
             return PSF(psf, wf.pixel_scale.mean())
@@ -760,8 +784,10 @@ class Scene(BaseSource):
             A list of source objects to model simultaneously.
         """
         super().__init__()
-        if isinstance(sources, (BaseSource, tuple)):
+        if isinstance(sources, BaseSource):
             sources = [sources]
+        elif isinstance(sources, tuple):
+            sources = list(sources)
         self.sources = dlu.list2dictionary(sources, False, BaseSource)
 
     def normalise(self: Scene) -> Scene:
@@ -778,7 +804,7 @@ class Scene(BaseSource):
         sources = jtu.map(norm_fn, self.sources, is_leaf=is_source)
         return self.set("sources", sources)
 
-    def __getattr__(self: Source, key: str) -> Any:
+    def __getattr__(self: Scene, key: str) -> Any:
         """
         Raises the individual sources via their keys.
 
@@ -794,13 +820,11 @@ class Scene(BaseSource):
         """
         if key in self.sources.keys():
             return self.sources[key]
-        raise AttributeError(
-            f"{self.__class__.__name__} has no attribute " f"{key}."
-        )
+        raise AttributeError(f"{self.__class__.__name__} has no attribute " f"{key}.")
 
     def model(
         self: Scene,
-        optics: Optics(),
+        optics: object,
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
@@ -824,6 +848,7 @@ class Scene(BaseSource):
                 object.
             if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
+        _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
 
         # Define leaf_fn and map across sources
