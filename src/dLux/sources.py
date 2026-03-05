@@ -5,7 +5,8 @@ import jax.numpy as np
 import jax.tree as jtu
 from jax.scipy.signal import convolve
 from jax import vmap, Array
-from zodiax import filter_vmap, Base
+from zodiax import Base
+import equinox as eqx
 import dLux.utils as dlu
 from dLux import spectra
 import dLux
@@ -69,7 +70,7 @@ class Source(BaseSource):
         """
         # Spectrum
         if spectrum is not None:
-            if not isinstance(spectrum, spectra.Spectrum):
+            if not isinstance(spectrum, Spectrum()):
                 raise TypeError("spectrum must be a dLux Spectrum object.")
             self.spectrum = spectrum
         else:
@@ -294,7 +295,7 @@ class PointSources(Source):
         prop_fn = lambda position, weight: optics.propagate(
             self.wavelengths, position, weight, return_wf=True
         )
-        wfs = filter_vmap(prop_fn)(self.position, weights)
+        wfs = eqx.filter_vmap(prop_fn)(self.position, weights)
 
         if return_wf:
             return wfs
@@ -561,7 +562,7 @@ class BinarySource(Source):
         prop_fn = lambda position, weight: optics.propagate(
             self.wavelengths, position, weight, return_wf, return_psf
         )
-        output = filter_vmap(prop_fn)(positions, weights)
+        output = eqx.filter_vmap(prop_fn)(positions, weights)
 
         # Return wf is simple case
         if return_wf:

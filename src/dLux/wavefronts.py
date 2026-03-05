@@ -3,6 +3,7 @@ import jax.numpy as np
 from typing import Any
 from jax import Array
 from zodiax import Base
+from jx import vmap
 import dLux.utils as dlu
 import dLux
 
@@ -422,6 +423,94 @@ class Wavefront(Base):
         """
         return self.set("phasor", np.flip(self.phasor, axis))
 
+    def scale_to(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+    ) -> Wavefront:
+        """
+        Interpolated the wavefront to a given npixels and pixel_scale. Can be done on
+        the real and imaginary components by passing in complex=True.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels  to interpolate to.
+        pixel_scale: Array
+            The pixel scale to interpolate to.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new interpolated wavefront.
+        """
+        # Get field in either (amplitude, phase) or (real, imaginary)
+        field = self._to_field(complex=complex)
+
+        # Scale the field
+        scale_fn = vmap(dlu.scale, (0, None, None))
+        field = scale_fn(field, npixels, pixel_scale / self.pixel_scale)
+
+        # Return new wavefront
+        return self.set(
+            ["phasor", "pixel_scale"],
+            [field, pixel_scale],
+        )
+
+    def rotate(
+        self: Wavefront,
+        angle: Array,
+        method: str = "linear",
+        complex: bool = False,
+    ) -> Wavefront:
+        """
+        Rotates the wavefront by a given angle via interpolation. Can be done on the
+        real and imaginary components by passing in complex=True.
+
+        Parameters
+        ----------
+        angle : Array, radians
+            The angle by which to rotate the wavefront in a clockwise
+            direction.
+        method : str = "linear"
+            The interpolation method.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront rotated by angle in the clockwise direction.
+        """
+        # Get field in either (amplitude, phase) or (real, imaginary)
+        field = self._to_field(complex=complex)
+
+        # Rotate the field
+        rotator = vmap(dlu.rotate, (0, None, None))
+        field = rotator(field, angle, method)
+
+        # Return new wavefront
+        return self.set(["phasor"], [field])
+
+    def resize(self: Wavefront, npixels: int) -> Wavefront:
+        """
+        Resizes the wavefront via a zero-padding or cropping operation.
+
+        Parameters
+        ----------
+        npixels : int
+            The size to resize the wavefront to.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The resized wavefront.
+        """
+        field = self._to_field()
+        amplitude, phase = vmap(dlu.resize, (0, None))(field, npixels)
+        return self.set(["amplitude", "phase"], [amplitude, phase])
+
+    #########################
+    # Propagation Functions #
+    #########################
     def _prep_prop(self: Wavefront, focal_length) -> tuple:
         """
         Determine propagation direction and output metadata.

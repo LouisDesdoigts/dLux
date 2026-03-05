@@ -5,7 +5,7 @@ import jax.numpy as np
 import dLux.utils as dlu
 
 
-__all__ = ["CoordTransform"]
+__all__ = ["CoordTransform", "DistortedCoords"]
 
 
 # Class to be held by dynamic apertures
@@ -126,3 +126,71 @@ class CoordTransform(Base):
         if self.rotation is not None:
             coords = dlu.rotate_coords(coords, self.rotation)
         return coords
+
+
+class DistortedCoords(Base):
+    """
+    A class to handle coordinates distorted by a 2D polynomial distortion
+
+    Attributes
+    ----------
+    powers : Array
+        Powers of the polynomial distortion
+    distortion : Array
+        Distortion coefficients
+    """
+
+    powers: Array
+    distortion: Array
+
+    def __init__(self, order: int = 1, distortion: None | Array = None):
+        """
+        Parameters
+        ----------
+        order : int
+            Order of polynomial to use
+        distortion : None | Array
+            Distortion coefficients, defaulting to 0
+        """
+        self.powers = np.array(dlu.gen_powers(order + 1))[:, 1:]
+
+        if distortion is None:
+            distortion = np.zeros_like(self.powers)
+        if distortion is not None and distortion.shape != self.powers.shape:
+            raise ValueError("Distortion shape must match powers shape")
+        self.distortion = distortion
+
+    def calculate(self, npix: int, diameter: float):
+        """
+        Generates flat coordinates and then distorts them
+
+        Parameters
+        ----------
+        npix : int
+            Number of pixels in coordinates
+        diameter: float
+            Diameter of original coordinate system
+
+        Returns
+        -------
+        distorted_coords : Array
+            Distorted coordinates
+        """
+        coords = dlu.pixel_coords(npix, diameter)
+        return dlu.distort_coords(coords, self.distortion, self.powers)
+
+    def apply(self, coords: Array):
+        """
+        Apply distortion to some coordinates
+
+        Parameters
+        ----------
+        coords : Array
+            Coordinates to distort
+
+        Returns
+        -------
+        distorted_coords : Array
+            Distorted coordinates
+        """
+        return dlu.distort_coords(coords, self.distortion, self.powers)
