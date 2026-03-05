@@ -185,7 +185,7 @@ def MFT(
     Propagates a phasor using a Matrix Fourier Transform (MFT), allowing for output
     pixel scale and a shift to be specified.
 
-    This Soumer et al. 2007 paper describes the MFT: https://arxiv.org/pdf/0711.0368
+    This Soummer et al. 2007 paper describes the MFT: https://arxiv.org/pdf/0711.0368
 
     Parameters
     ----------
