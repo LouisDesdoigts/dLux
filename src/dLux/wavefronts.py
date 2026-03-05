@@ -82,9 +82,6 @@ class Wavefront(zdx.Base):
         self.plane = str(plane)
         self.units = str(units)
 
-    ####################
-    # Getter Functions #
-    ####################
     @property
     def diameter(self: Wavefront) -> Array:
         """
@@ -160,6 +157,31 @@ class Wavefront(zdx.Base):
         return np.angle(self.phasor)
 
     @property
+    def complex(self: Wavefront) -> Array:
+        """
+        Returns the complex phasor of the `Wavefront`.
+
+        Returns
+        -------
+        wavefront : Array
+            The complex phasor of the `Wavefront`.
+        """
+        return np.stack([self.phasor.real, self.phasor.imag], axis=0)
+
+    @property
+    def polar(self: Wavefront) -> Array:
+        """
+        Returns the polar representation (amplitude, phase) of the `Wavefront`.
+
+        Returns
+        -------
+        wavefront : Array
+            The polar representation of the `Wavefront` as a stack of amplitude and
+            phase.
+        """
+        return np.stack([self.amplitude, self.phase], axis=0)
+
+    @property
     def psf(self: Wavefront) -> Array:
         """
         Calculates the Point Spread Function (PSF), i.e. the squared modulus
@@ -189,13 +211,15 @@ class Wavefront(zdx.Base):
         """
         Returns the size of the fringes in angular units.
 
-        TODO: Units check from focal plane
-
         Returns
         -------
         fringe_size : Array, radians
             The size of the linear diffraction fringe of the wavefront.
         """
+        if self.plane != "Pupil":
+            raise ValueError(
+                "Fringe size is only defined for wavefronts in the Pupil plane."
+            )
         return self.wavelength / self.diameter
 
     @property
@@ -286,8 +310,7 @@ class Wavefront(zdx.Base):
         Returns
         -------
         coordinates : Array
-            The coordinates of the centers of each pixel representing the
-            wavefront.
+            The coordinates of the centers of each pixel representing the wavefront.
         """
         return dlu.pixel_coords(self.npixels, self.diameter * scale, polar, fft_style)
 
@@ -301,7 +324,7 @@ class Wavefront(zdx.Base):
             The (x, y) angles by which to tilt the wavefront, in `unit`.
         unit : str
             The units of the angles, e.g. "rad", "deg", "arcmin", "arcsec", and
-            prefixed forms like "mrad", "mas", etc (as supported by units.py).
+            prefixed forms like "mrad", "mas", etc (as supported by utils/units.py).
 
         Returns
         -------
@@ -335,6 +358,11 @@ class Wavefront(zdx.Base):
             - "peak" : scales so max(|E|^2) == value.
         value : float = 1.0
             Target value for the selected mode.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            New wavefront with phasor scaled to achieve the normalisation.
         """
         if mode == "power":
             scale = np.sqrt(value / self.power.sum())
@@ -342,7 +370,7 @@ class Wavefront(zdx.Base):
             scale = np.sqrt(value / self.power.max())
         else:
             raise ValueError("mode must be 'power' or 'peak'")
-        return self.set("phasor", self.phasor * scale)
+        return self.multiply("phasor", scale)
 
     def flip(self: Wavefront, axis: tuple[int] | int) -> Wavefront:
         """
@@ -358,12 +386,13 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             New wavefront with phasor flipped.
         """
-        return self.set("phasor", np.flip(self.phasor, axis))
+        return self.set(phasor=np.flip(self.phasor, axis))
 
     def scale_to(
         self: Wavefront,
         npixels: int,
         pixel_scale: Array,
+        complex: bool = True,
     ) -> Wavefront:
         """
         Interpolated the wavefront to a given npixels and pixel_scale. Can be done on
@@ -375,6 +404,9 @@ class Wavefront(zdx.Base):
             The number of pixels  to interpolate to.
         pixel_scale: Array
             The pixel scale to interpolate to.
+        complex : bool = True
+            If True, interpolate the real and imaginary components. If False,
+            interpolate the amplitude and phase components.
 
         Returns
         -------
@@ -382,23 +414,26 @@ class Wavefront(zdx.Base):
             The new interpolated wavefront.
         """
         # Get field in either (amplitude, phase) or (real, imaginary)
-        field = self._to_field(complex=complex)
+        fields = self.complex if complex else self.polar
 
         # Scale the field
         scale_fn = vmap(dlu.scale, (0, None, None))
-        field = scale_fn(field, npixels, pixel_scale / self.pixel_scale)
+        fields = scale_fn(fields, npixels, pixel_scale / self.pixel_scale)
+
+        # Convert back to complex form
+        if complex:
+            phasor = fields[0] + 1j * fields[1]
+        else:
+            phasor = fields[0] * np.exp(1j * fields[1])
 
         # Return new wavefront
-        return self.set(
-            ["phasor", "pixel_scale"],
-            [field, pixel_scale],
-        )
+        return self.set(phasor=phasor, pixel_scale=pixel_scale)
 
     def rotate(
         self: Wavefront,
         angle: Array,
         method: str = "linear",
-        complex: bool = False,
+        complex: bool = True,
     ) -> Wavefront:
         """
         Rotates the wavefront by a given angle via interpolation. Can be done on the
@@ -411,6 +446,9 @@ class Wavefront(zdx.Base):
             direction.
         method : str = "linear"
             The interpolation method.
+        complex : bool = False
+            If True, rotate the real and imaginary components. If False, rotate the
+            amplitude and phase components.
 
         Returns
         -------
@@ -418,14 +456,20 @@ class Wavefront(zdx.Base):
             The new wavefront rotated by angle in the clockwise direction.
         """
         # Get field in either (amplitude, phase) or (real, imaginary)
-        field = self._to_field(complex=complex)
+        fields = self.complex if complex else self.polar
 
         # Rotate the field
         rotator = vmap(dlu.rotate, (0, None, None))
-        field = rotator(field, angle, method)
+        fields = rotator(fields, angle, method)
+
+        # Convert back to complex form
+        if complex:
+            phasor = fields[0] + 1j * fields[1]
+        else:
+            phasor = fields[0] * np.exp(1j * fields[1])
 
         # Return new wavefront
-        return self.set(["phasor"], [field])
+        return self.set(phasor=phasor)
 
     def resize(self: Wavefront, npixels: int) -> Wavefront:
         """
@@ -441,13 +485,97 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The resized wavefront.
         """
-        field = self._to_field()
-        amplitude, phase = vmap(dlu.resize, (0, None))(field, npixels)
+        amplitude, phase = vmap(dlu.resize, (0, None, None))(self.phasor, npixels, 0j)
         return self.set(["amplitude", "phase"], [amplitude, phase])
 
-    #########################
-    # Propagation Functions #
-    #########################
+    def _magic_unified_op(self, other: Any, op: str) -> Wavefront:
+        """
+        Internal helper function to unify the logic of the magic methods for addition,
+        subtraction, multiplication and division.
+
+        Parameters
+        ----------
+        other : Any
+            The object to operate with. Can be a complex array, a Wavefront, or None.
+        op : str
+            The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The resulting wavefront after applying the operation.
+
+        Raises
+        ------
+        TypeError
+            If `other` is not a supported type for the operation.
+        """
+        if isinstance(other, (Array, float, int, complex)):
+            if op == "add":
+                return self.add("phasor", other)
+            elif op == "subtract":
+                return self.add("phasor", -other)
+            elif op == "multiply":
+                return self.multiply("phasor", other)
+            elif op == "divide":
+                return self.multiply("phasor", 1 / other)
+        elif isinstance(other, Wavefront):
+            if op == "add":
+                return self.add("phasor", other.phasor)
+            elif op == "subtract":
+                return self.add("phasor", -other.phasor)
+            elif op == "multiply":
+                return self.multiply("phasor", other.phasor)
+            elif op == "divide":
+                return self.multiply("phasor", 1 / other.phasor)
+        elif other is None:
+            return self
+        else:
+            raise TypeError(
+                f"Unsupported type for {op}: {type(other)}. Must be an array, "
+                "Wavefront, or None."
+            )
+
+    def __add__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be added together. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "add")
+
+    def __sub__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be subtracted. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "subtract")
+
+    def __mul__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be multiplied. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "multiply")
+
+    def __truediv__(self: Wavefront, other: Any) -> Wavefront:
+        """
+        Allows complex phasors or Wavefronts to be divided. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "divide")
+
+    def __iadd__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place addition."""
+        return self.__add__(other)
+
+    def __isub__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place subtraction."""
+        return self.__sub__(other)
+
+    def __imul__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place multiplication."""
+        return self.__mul__(other)
+
+    def __itruediv__(self: Wavefront, other: Any) -> Wavefront:
+        """In-place division."""
+        return self.__truediv__(other)
+
     def _prep_prop(self: Wavefront, focal_length) -> tuple:
         """
         Determine propagation direction and output metadata.
@@ -668,91 +796,3 @@ class Wavefront(zdx.Base):
             ["phasor", "pixel_scale", "plane", "units"],
             [phasor, pixel_scale, plane, units],
         )
-
-    def _magic_unified_op(self, other: Any, op: str) -> Wavefront:
-        """
-        Internal helper function to unify the logic of the magic methods for addition,
-        subtraction, multiplication and division.
-
-        Parameters
-        ----------
-        other : Any
-            The object to operate with. Can be a complex array, a Wavefront, or None.
-        op : str
-            The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The resulting wavefront after applying the operation.
-
-        Raises
-        ------
-        TypeError
-            If `other` is not a supported type for the operation.
-        """
-        if isinstance(other, (Array, float, int, complex)):
-            if op == "add":
-                return self.add("phasor", other)
-            elif op == "subtract":
-                return self.add("phasor", -other)
-            elif op == "multiply":
-                return self.multiply("phasor", other)
-            elif op == "divide":
-                return self.multiply("phasor", 1 / other)
-        elif isinstance(other, Wavefront):
-            if op == "add":
-                return self.add("phasor", other.phasor)
-            elif op == "subtract":
-                return self.add("phasor", -other.phasor)
-            elif op == "multiply":
-                return self.multiply("phasor", other.phasor)
-            elif op == "divide":
-                return self.multiply("phasor", 1 / other.phasor)
-        elif other is None:
-            return self
-        else:
-            raise TypeError(
-                f"Unsupported type for {op}: {type(other)}. Must be an array, "
-                "Wavefront, or None."
-            )
-
-    def __add__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be added together. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "add")
-
-    def __sub__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be subtracted. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "subtract")
-
-    def __mul__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be multiplied. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "multiply")
-
-    def __truediv__(self: Wavefront, other: Any) -> Wavefront:
-        """
-        Allows complex phasors or Wavefronts to be divided. Nones are ignored.
-        """
-        return self._magic_unified_op(other, "divide")
-
-    def __iadd__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place addition."""
-        return self.__add__(other)
-
-    def __isub__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place subtraction."""
-        return self.__sub__(other)
-
-    def __imul__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place multiplication."""
-        return self.__mul__(other)
-
-    def __itruediv__(self: Wavefront, other: Any) -> Wavefront:
-        """In-place division."""
-        return self.__truediv__(other)

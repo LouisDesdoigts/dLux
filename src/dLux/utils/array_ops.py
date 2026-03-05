@@ -11,7 +11,7 @@ __all__ = [
 # TODO: Add convolve?
 
 
-def pad_to(array: Array, npixels: int) -> Array:
+def pad_to(array: Array, npixels: int, fill: float = 0.0) -> Array:
     """
     Paraxially zero-pads the input array to the shape (npixels, npixels). Due to the
     paraxial requirement, the input array must be square and even arrays can only
@@ -23,6 +23,8 @@ def pad_to(array: Array, npixels: int) -> Array:
         The input array to pad.
     npixels : int
         The size to pad to the array to.
+    fill : float = 0.
+        The value to fill the array with.
 
     Returns
     -------
@@ -42,7 +44,7 @@ def pad_to(array: Array, npixels: int) -> Array:
             f"npixels_in = {npixels_in} < npixels = {npixels}"
         )
 
-    return np.pad(array, (npixels - npixels_in) // 2)
+    return np.pad(array, (npixels - npixels_in) // 2, constant_values=fill)
 
 
 def crop_to(array: Array, npixels: int) -> Array:
@@ -80,7 +82,7 @@ def crop_to(array: Array, npixels: int) -> Array:
     return array[start:stop, start:stop]
 
 
-def resize(array: Array, npixels: int) -> Array:
+def resize(array: Array, npixels: int, fill: float = 0.0) -> Array:
     """
     Resizes the input array to the shape (npixels, npixels), using either a pad or crop
     depending on the input array size. Due to the paraxial requirement, the input array
@@ -93,6 +95,8 @@ def resize(array: Array, npixels: int) -> Array:
         The input array to resize.
     npixels : int
         The size to output the array.
+    fill : float = 0.
+        The value to fill the array with if padding is required.
 
     Returns
     -------
@@ -106,7 +110,7 @@ def resize(array: Array, npixels: int) -> Array:
     elif npixels < npixels_in:
         return crop_to(array, npixels)
     else:
-        return pad_to(array, npixels)
+        return pad_to(array, npixels, fill)
 
 
 def downsample(array: Array, n: int, mean: bool = True) -> Array:
@@ -129,9 +133,7 @@ def downsample(array: Array, n: int, mean: bool = True) -> Array:
         The downsampled array.
     """
     if array.shape[0] != array.shape[1]:
-        raise ValueError(
-            f"Input array has shape {array.shape}, which is not square"
-        )
+        raise ValueError(f"Input array has shape {array.shape}, which is not square")
     if array.shape[0] % n != 0:
         raise ValueError(
             f"Input array has {array.shape[0]} pixels, which is not divisible "
