@@ -197,8 +197,9 @@ def polar2cart(coordinates: Array) -> Array:
     return np.array([r * np.cos(phi), r * np.sin(phi)])
 
 
-# Positions Calculations #
-def pixel_coords(npixels: int, diameter: float, polar: bool = False) -> Array:
+def pixel_coords(
+    npixels: int, diameter: float, polar: bool = False, fft_style: bool = False
+) -> Array:
     """
     Returns a paraxial set of 2d coordinates for each pixel center.
 
@@ -210,13 +211,28 @@ def pixel_coords(npixels: int, diameter: float, polar: bool = False) -> Array:
         The diameter of the coordinates array to generate.
     polar : bool = False
         Output the coordinates in polar (r, phi) coordinates.
+    fft_style : bool = False
+        If True, use FFT-style centering. For even npixels this produces integer
+        centered coordinates. For odd npixels this is identical to the default.
 
     Returns
     -------
     coordinates : Array
         The array of pixel center coordinates.
     """
-    coords = nd_coords((npixels,) * 2, (diameter / npixels,) * 2)
+    pixscale = diameter / npixels
+
+    # Default: symmetric pixel-center coordinates (half-integer for even N)
+    offsets = (0.0, 0.0)
+
+    # FFT-style: shift by +0.5 pixel for even N so coordinates become integer-centered
+    if fft_style and (npixels % 2 == 0):
+        offsets = (pixscale / 2.0, pixscale / 2.0)
+
+    # Generate the coordinates
+    coords = nd_coords((npixels,) * 2, (pixscale,) * 2, offsets=offsets, indexing="xy")
+
+    # Convert to polar if requested
     if polar:
         return cart2polar(coords)
     return coords

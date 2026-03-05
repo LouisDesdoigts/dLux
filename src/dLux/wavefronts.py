@@ -263,18 +263,25 @@ class Wavefront(zdx.Base):
             return self
         return self.add_phase(self.wavenumber * np.asarray(opd))
 
-    def coordinates(self: Wavefront, scale=1.0) -> Array:
+    def coordinates(
+        self: Wavefront,
+        scale=1.0,
+        polar: bool = False,
+        fft_style: bool = False,
+    ) -> Array:
         """
         Returns the physical positions of the wavefront pixels in meters, with an
         optional scaling factor for numerical stability.
-
-        TODO: Account for FFT-centering offset if post-FFT. Needs an extra tracked
-        quantity.
 
         Parameters
         ----------
         scale : float = 1.0
             Optional scaling factor applied to the diameter for numerical stability.
+        polar : bool = False
+            Output the coordinates in polar (r, phi) coordinates.
+        fft_style : bool = False
+            If True, use FFT-style centering. For even npixels this produces integer
+            centered coordinates. For odd npixels this is identical to the default.
 
         Returns
         -------
@@ -282,7 +289,7 @@ class Wavefront(zdx.Base):
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
-        return dlu.pixel_coords(self.npixels, self.diameter * scale)
+        return dlu.pixel_coords(self.npixels, self.diameter * scale, polar, fft_style)
 
     def tilt(self: "Wavefront", angles: Array, unit: str = "rad") -> "Wavefront":
         """
