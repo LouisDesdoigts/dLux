@@ -5,7 +5,6 @@ from jax import Array
 from zodiax import Base
 import dLux.utils as dlu
 
-
 __all__ = ["PSF"]
 
 
@@ -79,7 +78,7 @@ class PSF(Base):
         """
         data = dlu.downsample(self.data, n, mean=False)
         pixel_scale = self.pixel_scale * n
-        return self.set(["data", "pixel_scale"], [data, pixel_scale])
+        return self.set(data=data, pixel_scale=pixel_scale)
 
     def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
         """
@@ -98,9 +97,7 @@ class PSF(Base):
         psf : PSF
             The convolved psf.
         """
-        return self.set(
-            "data", convolve(self.data, other, mode="same", method=method)
-        )
+        return self.set(data=convolve(self.data, other, mode="same", method=method))
 
     def rotate(self: PSF, angle: float, method: str = "linear") -> PSF:
         """
@@ -118,7 +115,7 @@ class PSF(Base):
         psf : PSF
             The rotated psf.
         """
-        return self.set("data", dlu.rotate(self.data, angle, method=method))
+        return self.set(data=dlu.rotate(self.data, angle, method=method))
 
     def resize(self: PSF, npixels: int) -> PSF:
         """
@@ -134,7 +131,7 @@ class PSF(Base):
         psf : PSF
             The resized psf.
         """
-        return self.set("data", dlu.resize(self.data, npixels))
+        return self.set(data=dlu.resize(self.data, npixels))
 
     def flip(self: PSF, axis: tuple) -> PSF:
         """
@@ -151,140 +148,88 @@ class PSF(Base):
         psf : PSF
             The new flipped PSF.
         """
-        return self.set("data", np.flip(self.data, axis))
+        return self.set(data=np.flip(self.data, axis))
 
-    def __mul__(self: PSF, other: Array) -> PSF:
+    def _magic_unified_op(self, other: Array | PSF | None, op: str) -> PSF:
         """
-        Magic method for the multiplication operator. This allows for the
-        multiplication of the psf by a scalar or another psf.
+        Internal helper function to unify the logic of the magic methods for addition,
+        subtraction, multiplication and division.
 
         Parameters
         ----------
-        other : Array
-            The scalar or psf to multiply the psf by.
+        other : Array | PSF | None
+            The object to operate with. Can be an array, a PSF, or None.
+        op : str
+            The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.
 
         Returns
         -------
         psf : PSF
-            The multiplied psf.
+            The resulting PSF after applying the operation.
         """
-        return self.multiply("data", other)
+        # Nones always return unchanged
+        if other is None:
+            return self
 
-    def __imul__(self: PSF, other: Array) -> PSF:
+        # Check for supported types
+        if not isinstance(other, (PSF, Array, float, int, complex)):
+            raise TypeError(
+                f"Unsupported type for {op}: {type(other)}. Must be an array, "
+                "PSF, or None."
+            )
+
+        # Extract data if other is a PSF
+        if isinstance(other, PSF):
+            other = other.data
+
+        # Apply the operation
+        if op == "add":
+            return self.add("phasor", other)
+        elif op == "subtract":
+            return self.add("phasor", -other)
+        elif op == "multiply":
+            return self.multiply("phasor", other)
+        elif op == "divide":
+            return self.multiply("phasor", 1 / other)
+        else:
+            raise ValueError(f"Unsupported operation '{op}'.")
+
+    def __add__(self: PSF, other: PSF | Array | None) -> PSF:
         """
-        Magic method for the inplace multiplication operator. This allows for the
-        inplace multiplication of the psf by a scalar or another psf.
-
-        Parameters
-        ----------
-        other : Array
-            The scalar or psf to multiply the psf by.
-
-        Returns
-        -------
-        psf : PSF
-            The multiplied psf.
+        Allows arrays or PSFs to be added together. Nones are ignored.
         """
-        return self.__mul__(other)
+        return self._magic_unified_op(other, "add")
 
-    def __add__(self: PSF, other: Array) -> PSF:
+    def __sub__(self: PSF, other: PSF | Array | None) -> PSF:
         """
-        Magic method for the addition operator. This allows for the addition of the psf
-        by a scalar or another psf.
-
-        Parameters
-        ----------
-        other : Array
-            The scalar or psf to add to the psf.
-
-        Returns
-        -------
-        psf : PSF
-            The added psf.
+        Allows arrays or PSFs to be subtracted. Nones are ignored.
         """
-        return self.add("data", other)
+        return self._magic_unified_op(other, "subtract")
 
-    def __iadd__(self: PSF, other: Array) -> PSF:
+    def __mul__(self: PSF, other: PSF | Array | None) -> PSF:
         """
-        Magic method for the inplace addition operator. This allows for the inplace
-        addition of the psf by a scalar or another psf.
-
-        Parameters
-        ----------
-        other : Array
-            The scalar or psf to add to the psf.
-
-        Returns
-        -------
-        psf : PSF
-            The added psf.
+        Allows arrays or PSFs to be multiplied. Nones are ignored.
         """
+        return self._magic_unified_op(other, "multiply")
+
+    def __truediv__(self: PSF, other: PSF | Array | None) -> PSF:
+        """
+        Allows arrays or PSFs to be divided. Nones are ignored.
+        """
+        return self._magic_unified_op(other, "divide")
+
+    def __iadd__(self: PSF, other: PSF | Array | None) -> PSF:
+        """In-place addition."""
         return self.__add__(other)
 
-    def __sub__(self: PSF, other: Array) -> PSF:
-        """
-        Magic method for the subtraction operator. This allows for the subtraction of
-        the psf by a scalar or another psf.
-
-        Parameters
-        ----------
-        other : Array
-            The scalar or psf to subtract from the psf.
-
-        Returns
-        -------
-        psf : PSF
-            The subtracted psf.
-        """
-        return self.add("data", -other)
-
-    def __isub__(self: PSF, other: Array) -> PSF:
-        """
-        Magic method for the inplace subtraction operator. This allows for the inplace
-        subtraction of the psf by a scalar or another psf.
-
-        Parameters
-        ----------
-        other : Array
-            The scalar or psf to subtract from the psf.
-
-        Returns
-        -------
-        psf : PSF
-            The subtracted psf.
-        """
+    def __isub__(self: PSF, other: PSF | Array | None) -> PSF:
+        """In-place subtraction."""
         return self.__sub__(other)
 
-    def __truediv__(self: PSF, other: Array) -> PSF:
-        """
-        Magic method for the division operator. This allows for the division of the psf
-        by a scalar or another psf.
+    def __imul__(self: PSF, other: PSF | Array | None) -> PSF:
+        """In-place multiplication."""
+        return self.__mul__(other)
 
-        Parameters
-        ----------
-        other : Array
-            The scalar or psf to divide the psf by.
-
-        Returns
-        -------
-        psf : PSF
-            The divided psf.
-        """
-        return self.divide("data", other)
-
-    def __itruediv__(self: PSF, other: Array) -> PSF:
-        """
-        Magic method for the inplace division operator. This allows for the inplace
-        division of the psf by a scalar or another psf.
-
-        Parameters
-        ----------
-        other : Array
-            The scalar or psf to divide the psf by.
-
-        Returns
-        -------
-        psf : PSF
-            The divided psf.
-        """
+    def __itruediv__(self: PSF, other: PSF | Array | None) -> PSF:
+        """In-place division."""
         return self.__truediv__(other)
