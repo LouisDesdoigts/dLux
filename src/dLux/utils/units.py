@@ -3,6 +3,8 @@ from jax import Array
 from functools import lru_cache
 
 __all__ = [
+    "unit_factor_to_rad",
+    "convert",
     "rad2arcsec",
     "rad2deg",
     "rad2arcmin",
