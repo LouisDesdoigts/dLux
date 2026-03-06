@@ -260,7 +260,7 @@ data = jr.poisson(jr.PRNGKey(1), flux * optics.propagate(wavels))
 @zdx.filter_value_and_grad("aberrations.coefficients")
 def loss_fn(model, data):
     psf = flux * model.propagate(wavels)
-    return -jsp.stats.poisson.logpmf(data, psf).mean()
+    return -jsp.stats.poisson.logpmf(data, psf).sum()
 
 
 # Now we evaluate the loss function and get the gradients
