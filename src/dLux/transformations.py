@@ -23,7 +23,7 @@ class BaseCoordTransform(zdx.Base):
         Automatically inherit __call__ docstrings and annotations from parent class.
         """
         super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls)
+        dlu.helpers.inherit_docstrings(cls, ["__call__"])
 
     def calculate(self: BaseCoordTransform, npix: int, diameter: float) -> Array:
         """

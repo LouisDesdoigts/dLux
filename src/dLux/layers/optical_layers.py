@@ -38,7 +38,7 @@ class BaseLayer(zdx.Base):
     def __init_subclass__(cls, **kwargs):
         """Automatically inherit __call__ docstring from parent if child has none."""
         super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls)
+        dlu.helpers.inherit_docstrings(cls, ["__call__"])
 
 
 class OpticalLayer(BaseLayer):

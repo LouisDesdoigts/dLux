@@ -72,6 +72,11 @@ def _as_position_2d(position: Array) -> Array:
 
 
 class BaseSource(zdx.Base):
+    def __init_subclass__(cls, **kwargs):
+        """Inherit docstrings from parent classes for model method."""
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["model"])
+
     @abstractmethod
     def normalise(self: BaseSource) -> BaseSource:  # pragma: no cover
         pass
@@ -83,7 +88,26 @@ class BaseSource(zdx.Base):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:  # pragma: no cover
-        pass
+        """
+        Models the source object through the provided optics.
+
+        Parameters
+        ----------
+        optics : OpticalSystem
+            The optics through which to model the source object.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the PSF array?
+        return_psf : bool = False
+            Should the PSF object be returned instead of the PSF array?
+
+        Returns
+        -------
+        result : Array | Wavefront | PSF
+            If `return_wf` is False and `return_psf` is False, returns the PSF array.
+            If `return_wf` is True and `return_psf` is False, returns the Wavefront
+                object.
+            If `return_wf` is False and `return_psf` is True, returns the PSF object.
+        """
 
 
 class Source(BaseSource):
@@ -208,26 +232,6 @@ class PointSource(Source):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
         _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
         weights = self.weights * self.flux
@@ -304,26 +308,6 @@ class PointSources(Source):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
         _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
@@ -422,26 +406,6 @@ class ResolvedSource(PointSource):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
         _validate_return_mode(return_wf, return_psf)
         # Normalise and get parameters
         self = self.normalise()
@@ -557,26 +521,6 @@ class BinarySource(Source):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
         _validate_return_mode(return_wf, return_psf)
         # Normalise and get input values
         self = self.normalise()
@@ -683,26 +627,6 @@ class PointResolvedSource(ResolvedSource):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
         _validate_return_mode(return_wf, return_psf)
         # Normalise and get parameters
         self = self.normalise()
@@ -804,26 +728,6 @@ class Scene(BaseSource):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
         _validate_return_mode(return_wf, return_psf)
         self = self.normalise()
 

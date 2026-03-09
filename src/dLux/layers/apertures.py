@@ -107,7 +107,7 @@ class BaseDynamicAperture(ApertureLayer):
     def __init_subclass__(cls, **kwargs):
         """Inherit docstrings from parent classes for transmission method."""
         super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls, ["transmission"])
+        dlu.helpers.inherit_docstrings(cls, ["transmission", "extent", "nsides"])
 
     def __getattr__(self: BaseDynamicAperture, key: str) -> Any:
         """Raises transformation attributes to the ApertureLayer level."""
@@ -186,9 +186,29 @@ class DynamicAperture(BaseDynamicAperture):
         if self.softness <= 0:
             raise ValueError("softening must be greater than 0.")
 
+    @property
     @abstractmethod  # pragma: no cover
     def extent(self: DynamicAperture) -> float:
-        pass
+        """
+        Returns the maximum extent of the aperture.
+
+        Returns
+        -------
+        extent : float
+            The maximum extent of the aperture.
+        """
+
+    @property
+    @abstractmethod  # pragma: no cover
+    def nsides(self: DynamicAperture) -> int:
+        """
+        Returns the number of sides of the aperture.
+
+        Returns
+        -------
+        nsides : int
+            The number of sides of the aperture.
+        """
 
 
 #############################
@@ -256,26 +276,10 @@ class CircularAperture(DynamicAperture):
 
     @property
     def extent(self: ApertureLayer) -> float:
-        """
-        Returns the maximum extent of the aperture.
-
-        Returns
-        -------
-        extent : float
-            The maximum extent of the aperture.
-        """
         return self.radius
 
     @property
     def nsides(self: ApertureLayer) -> int:
-        """
-        Returns the number of sides of the aperture.
-
-        Returns
-        -------
-        nsides : int
-            The number of sides of the aperture.
-        """
         return 0
 
 
@@ -344,26 +348,10 @@ class SquareAperture(DynamicAperture):
 
     @property
     def extent(self: ApertureLayer) -> float:
-        """
-        Returns the maximum extent of the aperture.
-
-        Returns
-        -------
-        extent : float
-            The maximum extent of the aperture.
-        """
         return np.sqrt(2) * self.width
 
     @property
     def nsides(self: ApertureLayer) -> int:
-        """
-        Returns the number of sides of the aperture.
-
-        Returns
-        -------
-        nsides : int
-            The number of sides of the aperture.
-        """
         return 4
 
 
@@ -441,26 +429,10 @@ class RectangularAperture(DynamicAperture):
 
     @property
     def extent(self: ApertureLayer) -> float:
-        """
-        Returns the maximum extent of the aperture.
-
-        Returns
-        -------
-        extent : float
-            The maximum extent of the aperture.
-        """
         return np.hypot(self.height / 2.0, self.width / 2.0)
 
     @property
     def nsides(self: ApertureLayer) -> int:
-        """
-        Returns the number of sides of the aperture.
-
-        Returns
-        -------
-        nsides : int
-            The number of sides of the aperture.
-        """
         return 4
 
 
@@ -529,21 +501,6 @@ class RegPolyAperture(DynamicAperture):
         )
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         if self.transformation is not None:
             coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -553,14 +510,6 @@ class RegPolyAperture(DynamicAperture):
 
     @property
     def extent(self: ApertureLayer) -> float:
-        """
-        Returns the maximum extent of the aperture.
-
-        Returns
-        -------
-        extent : float
-            The maximum extent of the aperture.
-        """
         return self.rmax
 
 
@@ -638,26 +587,10 @@ class Spider(DynamicAperture):
 
     @property
     def extent(self: ApertureLayer) -> float:
-        """
-        Returns the maximum extent of the aperture.
-
-        Returns
-        -------
-        extent : float
-            The maximum extent of the aperture.
-        """
         raise TypeError("Spiders do not have an extent.")
 
     @property
     def nsides(self: ApertureLayer) -> int:
-        """
-        Returns the number of sides of the aperture.
-
-        Returns
-        -------
-        nsides : int
-            The number of sides of the aperture.
-        """
         raise TypeError("Spiders do not have a number of sides.")
 
 
@@ -743,21 +676,6 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         )
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         return self.aperture.transmission(coords, pixel_scale)
 
     def calc_basis(self: ApertureLayer, coords: Array) -> Array:
@@ -797,19 +715,6 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         return dlu.eval_basis(basis, self.coefficients)
 
     def __call__(self: AberratedAperture, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
         # Transmission
         wavefront *= self.transmission(wavefront.coordinates(), wavefront.pixel_scale)
         if self.normalise:
@@ -987,19 +892,6 @@ class CompositeAperture(BaseDynamicAperture):
         return np.squeeze(np.array(jtu.flatten(transmissions)[0]))
 
     def __call__(self: CompositeAperture, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
         # Transmission
         wavefront *= self.transmission(wavefront.coordinates(), wavefront.pixel_scale)
         if self.normalise:
