@@ -300,11 +300,10 @@ def nd_coords(
         return np.linspace(start, end, n)
 
     # Generate the linear edges of each axes
-    # TODO: tree.flatten()[0] to avoid squeeze?
     lin_pixels = jtu.map(pixel_fn, npixels, offsets, pixel_scales)
 
-    # output (x, y) for 2d, else in order
+    # Output (x, y) for 2d, else in order.
     positions = np.array(np.meshgrid(*lin_pixels, indexing=indexing))
 
-    # Squeeze for empty axis removal in 1d case
+    # Squeeze the output in case of 1d input
     return np.squeeze(positions)

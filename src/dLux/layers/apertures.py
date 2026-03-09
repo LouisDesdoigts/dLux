@@ -52,8 +52,19 @@ class ApertureLayer(OpticalLayer):
         pixel_scale: float,
     ) -> Array:  # pragma: no cover
         """
-        Evaluates the aperture transmission on the given coords, applying the aperture
-        transformations to the coords.
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
         """
 
 
@@ -92,6 +103,11 @@ class BaseDynamicAperture(ApertureLayer):
                     "Use the CoordTransform class to create one."
                 )
         self.transformation = transformation
+
+    def __init_subclass__(cls, **kwargs):
+        """Inherit docstrings from parent classes for transmission method."""
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["transmission"])
 
     def __getattr__(self: BaseDynamicAperture, key: str) -> Any:
         """Raises transformation attributes to the ApertureLayer level."""
@@ -233,21 +249,6 @@ class CircularAperture(DynamicAperture):
         self.radius = float(radius)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         if self.transformation is not None:
             coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -336,21 +337,6 @@ class SquareAperture(DynamicAperture):
         self.width = float(width)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         if self.transformation is not None:
             coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -446,21 +432,6 @@ class RectangularAperture(DynamicAperture):
         )
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         if self.transformation is not None:
             coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -658,21 +629,6 @@ class Spider(DynamicAperture):
         self.angles = np.asarray(angles, dtype=float)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         if self.transformation is not None:
             coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -705,7 +661,6 @@ class Spider(DynamicAperture):
         raise TypeError("Spiders do not have a number of sides.")
 
 
-# TODO: Should this not have transmission as it is held by its sub-aperture?
 class AberratedAperture(BasisLayer, ApertureLayer):
     """
     Creates a dynamically generated Aperture with aberrations. Both jit and grad
@@ -943,7 +898,7 @@ class CompositeAperture(BaseDynamicAperture):
             The list of aberrated apertures.
         """
 
-        # Define leaf fn
+        # Define leaf function
         def is_aberrated(leaf):
             if isinstance(leaf, AberratedAperture):
                 return True
@@ -952,11 +907,12 @@ class CompositeAperture(BaseDynamicAperture):
                     return True
             return False
 
-        # Get aberrated apertures
-        # TODO: use partition
-        filter_map = jtu.map(is_aberrated, self.apertures, is_leaf=is_aberrated)
-        aberrated = eqx.filter(self.apertures, filter_map)
-        return jtu.flatten(aberrated, is_leaf=is_aberrated)[0]
+        # Create boolean filter spec with same pytree structure as self.apertures
+        filter_spec = jtu.tree_map(is_aberrated, self.apertures, is_leaf=is_aberrated)
+
+        # Get aberrated apertures using eqx.partition with proper filter spec
+        aberrated, _ = eqx.partition(self.apertures, filter_spec)
+        return jtu.leaves(aberrated)
 
     @property
     def coefficients(self: ApertureLayer) -> list[Array]:
@@ -1127,21 +1083,6 @@ class CompoundAperture(CompositeAperture):
                 )
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         if self.transformation is not None:
             coords = self.transformation(coords)
         return self.transmissions(coords, pixel_scale).prod(0)
@@ -1190,21 +1131,6 @@ class MultiAperture(CompositeAperture):
         return super().eval_basis(coords).sum(0)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
-        """
-        Calculates the transmission of the aperture at the given coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The coordinates to calculate the transmission on.
-        pixel_scale : float
-            The pixel scale of the coordinates.
-
-        Returns
-        -------
-        transmission : Array
-            The transmission of the aperture at the given coordinates.
-        """
         if self.transformation is not None:
             coords = self.transformation(coords)
         return self.transmissions(coords, pixel_scale).sum(0)

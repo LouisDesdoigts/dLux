@@ -6,7 +6,6 @@ import zodiax as zdx
 from jax import Array
 import jax.numpy as np
 import dLux.utils as dlu
-from dLux.utils.helpers import inherit_docstrings
 
 __all__ = ["BaseCoordTransform", "CoordTransform", "DistortedCoords"]
 
@@ -24,7 +23,7 @@ class BaseCoordTransform(zdx.Base):
         Automatically inherit __call__ docstrings and annotations from parent class.
         """
         super().__init_subclass__(**kwargs)
-        inherit_docstrings(cls)
+        dlu.helpers.inherit_docstrings(cls)
 
     def calculate(self: BaseCoordTransform, npix: int, diameter: float) -> Array:
         """

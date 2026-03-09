@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 from abc import abstractmethod
-from jax import Array, vmap
+from jax import Array
 import jax.numpy as np
 import jax.scipy as jsp
 import jax.tree as jtu
@@ -454,15 +454,12 @@ class ResolvedSource(PointSource):
 
         # Returning wf is a special case
         if return_wf:
-            conv_fn = lambda psf: jsp.signal.convolve(
-                psf, self.distribution, mode="same"
+            raise NotImplementedError(
+                "Wavefront information cannot be preserved through convolution. "
+                "Convolution can only operate on PSFs (incoherent light). "
+                "Please use return_wf=False to get the PSF array or return_psf=True "
+                "to get a PSF object."
             )
-            # Replace previous amplitude leaf update with phasor rescale
-            # return wf.set_amplitude(vmap(conv_fn)(wf.psf) ** 0.5)
-            # NOTE: This operation is actually incorrect since we can only add
-            # incoherent light via a convolution so we can only operate on PSFs.
-            amp = vmap(conv_fn)(wf.psf) ** 0.5
-            return wf.set("phasor", amp * np.exp(1j * wf.phase))
 
         # Return PSF object
         conv_psf = jsp.signal.convolve(wf.psf.sum(0), self.distribution, mode="same")
@@ -719,41 +716,14 @@ class PointResolvedSource(ResolvedSource):
         # for the point and resolved source.
         wf = optics.propagate(self.wavelengths, self.position, return_wf=True)
 
-        # Returning wf is a special case: we need to convolve each PSF with
-        # the distribution, and then recombine them into a vectorised wf
+        # Returning wf is a special case
         if return_wf:
-            # Perform convolution
-            conv_fn = lambda psf: jsp.signal.convolve(
-                psf, self.distribution, mode="same"
+            raise NotImplementedError(
+                "Wavefront information cannot be preserved through convolution. "
+                "Convolution can only operate on PSFs (incoherent light). "
+                "Please use return_wf=False to get the PSF array or return_psf=True "
+                "to get a PSF object."
             )
-            # Replace previous amplitude leaf update with phasor rescale
-            # TODO: This operation is actually incorrect since we can only add
-            # incoherent light via a convolution so we can only operate on PSFs.
-            # conv_wf = wf.set_amplitude(vmap(conv_fn)(wf.psf) ** 0.5)
-            amp = vmap(conv_fn)(wf.psf) ** 0.5
-            conv_wf = wf.set("phasor", amp * np.exp(1j * wf.phase))
-
-            # Stack leaves manually, this is a bit of a hack to get around
-            # string leaf errors from jtu.map, and to avoid
-            # flattening/unflattening with partition and combine
-            stack_leaves = lambda x, y: np.stack([x, y], axis=0)
-            amplitudes = stack_leaves(wf.amplitude, conv_wf.amplitude)
-            phases = stack_leaves(wf.phase, conv_wf.phase)
-            pixel_scales = stack_leaves(wf.pixel_scale, conv_wf.pixel_scale)
-            wavelengths = stack_leaves(wf.wavelength, conv_wf.wavelength)
-
-            # # Combine into single wf and finally apply weights
-            # combined_wf = wf.set(
-            #     ["wavelength", "amplitude", "phase", "pixel_scale"],
-            #     [wavelengths, amplitudes, phases, pixel_scales],
-            # )
-            phasors = amplitudes * np.exp(1j * phases)
-            combined_wf = wf.set(
-                ["wavelength", "phasor", "pixel_scale"],
-                [wavelengths, phasors, pixel_scales],
-            )
-            # return combined_wf.multiply("amplitude", weights[:, :, None, None])
-            return combined_wf.multiply("phasor", weights[:, :, None, None])
 
         # Create single PSF-array object
         point_psf = (np.expand_dims(weights[0], (1, 2)) * wf.psf).sum(0)

@@ -9,7 +9,6 @@ import equinox as eqx
 import zodiax as zdx
 from typing import Any
 import dLux.utils as dlu
-from dLux.utils.helpers import inherit_docstrings
 
 __all__ = [
     "BaseOpticalSystem",
@@ -33,7 +32,7 @@ class BaseOpticalSystem(zdx.Base):
         Automatically inherit method docstrings from parent class.
         """
         super().__init_subclass__(**kwargs)
-        inherit_docstrings(cls, ["propagate_mono", "propagate", "model"])
+        dlu.helpers.inherit_docstrings(cls, ["propagate_mono", "propagate", "model"])
 
     @abstractmethod
     def propagate_mono(

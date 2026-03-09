@@ -4,8 +4,7 @@ from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
-from jax.scipy.stats import norm
-
+import dLux.utils as dlu
 
 from ..psfs import PSF
 from .optical_layers import BaseLayer
@@ -131,12 +130,11 @@ class ApplyJitter(DetectorLayer):
         kernel : Array
             The Gaussian kernel.
         """
-        # TODO: Move to utils?
-        # Generate distribution
-        sigma = self.sigma * pixel_scale
-        x = np.linspace(-10, 10, self.kernel_size) * pixel_scale
-        kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
-        return kernel / np.sum(kernel)
+        return dlu.gaussian(
+            mean=np.array([0.0, 0.0]),
+            std=np.array([self.sigma, self.sigma]),
+            npix=self.kernel_size,
+        )
 
     def __call__(self: ApplyJitter, psf: PSF) -> PSF:
         kernel = self.generate_kernel(psf.pixel_scale)

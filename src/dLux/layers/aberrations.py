@@ -1,6 +1,7 @@
 """Dynamic Zernike aberration primitives and basis containers."""
 
 from __future__ import annotations
+import equinox as eqx
 import zodiax as zdx
 import jax.numpy as np
 from jax import Array
@@ -10,7 +11,6 @@ import dLux.utils as dlu
 __all__ = ["Zernike", "ZernikeBasis"]
 
 
-# TODO: Should all the leaves of this class be static?
 class Zernike(zdx.Base):
     """
     A Zernike polynomial that can be generated dynamically in a way that is both jit and
@@ -49,10 +49,10 @@ class Zernike(zdx.Base):
         parameter and should not be changed.
     """
 
-    j: int
-    n: int
-    m: int
-    name: str
+    j: int = eqx.field(static=True)
+    n: int = eqx.field(static=True)
+    m: int = eqx.field(static=True)
+    name: str = eqx.field(static=True)
     _c: Array
     _k: Array
 
@@ -98,7 +98,6 @@ class Zernike(zdx.Base):
         return dlu.polike_fast(nsides, self.n, self.m, self._c, self._k, coordinates)
 
 
-# TODO: Rename basis to basis_fns??
 class ZernikeBasis(zdx.Base):
     """
     A basis of Zernike polynomials that can be generated dynamically in a way that is

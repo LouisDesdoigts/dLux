@@ -7,7 +7,6 @@ import jax.numpy as np
 import zodiax as zdx
 from jax import Array
 import dLux.utils as dlu
-from dLux.utils.helpers import inherit_docstrings
 
 
 from ..wavefronts import Wavefront
@@ -39,7 +38,7 @@ class BaseLayer(zdx.Base):
     def __init_subclass__(cls, **kwargs):
         """Automatically inherit __call__ docstring from parent if child has none."""
         super().__init_subclass__(**kwargs)
-        inherit_docstrings(cls)
+        dlu.helpers.inherit_docstrings(cls)
 
 
 class OpticalLayer(BaseLayer):
