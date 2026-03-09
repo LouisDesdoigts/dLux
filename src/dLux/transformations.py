@@ -1,16 +1,70 @@
 """Coordinate transformation utilities for dynamic apertures and distortions."""
 
 from __future__ import annotations
+from abc import abstractmethod
 import zodiax as zdx
 from jax import Array
 import jax.numpy as np
 import dLux.utils as dlu
 
-__all__ = ["CoordTransform", "DistortedCoords"]
+__all__ = ["BaseCoordTransform", "CoordTransform", "DistortedCoords"]
+
+
+class BaseCoordTransform(zdx.Base):
+    """
+    Abstract base class for coordinate transformations.
+
+    Provides a common interface for applying transformations to coordinates,
+    including a backwards-compatible `apply` method.
+    """
+
+    def calculate(self: BaseCoordTransform, npix: int, diameter: float) -> Array:
+        """
+        Generate and apply transformations to coordinates.
+
+        Parameters
+        ----------
+        npix : int
+            The number of pixels in the output array.
+        diameter : float
+            The diameter of the output array in metres.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
+        """
+        coords = dlu.pixel_coords(npix, diameter)
+        return self(coords)
+
+    @abstractmethod
+    def __call__(self: BaseCoordTransform, coords: Array) -> Array:
+        """
+        Apply the transformation to input coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The input coordinates to be transformed.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
+        """
+        raise NotImplementedError("Subclasses must implement __call__")
+
+    def apply(self: BaseCoordTransform, coords: Array) -> Array:
+        """
+        Backwards compatibility method that invokes __call__.
+
+        Delegates to the __call__ method.
+        """
+        return self(coords)
 
 
 # Class to be held by dynamic apertures
-class CoordTransform(zdx.Base):
+class CoordTransform(BaseCoordTransform):
     """
     A simple class to handle coordinate transformations applied to dynamic aperture
     classes. Transformations are applied in the order:
@@ -86,25 +140,7 @@ class CoordTransform(zdx.Base):
         else:
             self.shear = None
 
-    def calculate(self: CoordTransform, npix: int, diam: float) -> Array:
-        """
-        Generate the transformed coords from diameter and npix.
-
-        Parameters
-        ----------
-        npix : int
-            The number of pixels in the output array.
-        diam : float
-            The diameter of the output array in metres.
-
-        Returns
-        -------
-        coords : Array
-            The transformed coordinates.
-        """
-        return self.apply(dlu.pixel_coords(npix, diam))
-
-    def apply(self: CoordTransform, coords: Array) -> Array:
+    def __call__(self: CoordTransform, coords: Array) -> Array:
         """
         Apply the transformations to the input coordinates.
 
@@ -129,7 +165,7 @@ class CoordTransform(zdx.Base):
         return coords
 
 
-class DistortedCoords(zdx.Base):
+class DistortedCoords(BaseCoordTransform):
     """
     A class to handle coordinates distorted by a 2D polynomial distortion.
 
@@ -164,26 +200,7 @@ class DistortedCoords(zdx.Base):
             raise ValueError("distortion shape must match powers shape.")
         self.distortion = distortion
 
-    def calculate(self: DistortedCoords, npix: int, diameter: float) -> Array:
-        """
-        Generates flat coordinates and then distorts them.
-
-        Parameters
-        ----------
-        npix : int
-            Number of pixels in coordinates.
-        diameter: float
-            Diameter of original coordinate system.
-
-        Returns
-        -------
-        distorted_coords : Array
-            Distorted coordinates.
-        """
-        coords = dlu.pixel_coords(npix, diameter)
-        return dlu.distort_coords(coords, self.distortion, self.powers)
-
-    def apply(self: DistortedCoords, coords: Array) -> Array:
+    def __call__(self: DistortedCoords, coords: Array) -> Array:
         """
         Apply distortion to some coordinates.
 

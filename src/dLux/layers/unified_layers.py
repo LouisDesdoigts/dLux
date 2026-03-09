@@ -44,7 +44,7 @@ class Resize(UnifiedLayer):
         super().__init__()
         self.npixels = int(npixels)
 
-    def apply(self: Resize, target: Wavefront | PSF) -> Wavefront | PSF:
+    def __call__(self: Resize, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Resizes the input.
 
@@ -109,7 +109,7 @@ class Rotate(UnifiedLayer):
         self.method = str(method)
         self.complex = bool(complex)
 
-    def apply(self: Rotate, target: Wavefront | PSF) -> Wavefront | PSF:
+    def __call__(self: Rotate, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Applies the rotation to the input.
 
@@ -164,7 +164,7 @@ class Flip(UnifiedLayer):
         elif not isinstance(self.axes, int):
             raise ValueError("axes must be an int or tuple of ints.")
 
-    def apply(self: Flip, target: Wavefront | PSF) -> Wavefront | PSF:
+    def __call__(self: Flip, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Flips the input about the specified axes.
 

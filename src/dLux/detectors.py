@@ -93,7 +93,7 @@ class LayeredDetector(BaseDetector):
             If `return_psf` is True, returns the PSF object.
         """
         for _, layer in self.layers.items():
-            psf = layer.apply(psf)
+            psf = layer(psf)
         if return_psf:
             return psf
         return psf.data

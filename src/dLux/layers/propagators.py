@@ -77,7 +77,7 @@ class FFT(Propagator):
         super().__init__(focal_length=focal_length)
         self.pad = int(pad)
 
-    def apply(self: FFT, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: FFT, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -140,7 +140,7 @@ class MFT(Propagator):
         self.pixel_scale = float(pixel_scale)
         self.npixels = int(npixels)
 
-    def apply(self: MFT, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: MFT, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -230,7 +230,7 @@ class ShiftedMFT(MFT):
                 f"shift must be a 1d array of shape (2,), got {self.shift.shape}."
             )
 
-    def apply(self: ShiftedMFT, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: ShiftedMFT, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -320,7 +320,7 @@ class FarFieldFresnel(ShiftedMFT):
             npixels=npixels,
         )
 
-    def apply(self: FarFieldFresnel, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: FarFieldFresnel, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 

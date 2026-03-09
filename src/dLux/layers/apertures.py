@@ -99,7 +99,7 @@ class BaseDynamicAperture(ApertureLayer):
             return getattr(self.transformation, key)
         raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
 
-    def apply(self: BaseDynamicAperture, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: BaseDynamicAperture, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -249,7 +249,7 @@ class CircularAperture(DynamicAperture):
             The transmission of the aperture at the given coordinates.
         """
         if self.transformation is not None:
-            coords = self.transformation.apply(coords)
+            coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
         return dlu.soft_circle(coords, self.radius, clip_val, self.occulting)
 
@@ -352,7 +352,7 @@ class SquareAperture(DynamicAperture):
             The transmission of the aperture at the given coordinates.
         """
         if self.transformation is not None:
-            coords = self.transformation.apply(coords)
+            coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
         return dlu.soft_square(coords, self.width, clip_val, self.occulting)
 
@@ -462,7 +462,7 @@ class RectangularAperture(DynamicAperture):
             The transmission of the aperture at the given coordinates.
         """
         if self.transformation is not None:
-            coords = self.transformation.apply(coords)
+            coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
         return dlu.soft_rectangle(
             coords, self.width, self.height, clip_val, self.occulting
@@ -574,7 +574,7 @@ class RegPolyAperture(DynamicAperture):
             The transmission of the aperture at the given coordinates.
         """
         if self.transformation is not None:
-            coords = self.transformation.apply(coords)
+            coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
         return dlu.soft_reg_polygon(
             coords, self.rmax, self.nsides, clip_val, self.occulting
@@ -674,7 +674,7 @@ class Spider(DynamicAperture):
             The transmission of the aperture at the given coordinates.
         """
         if self.transformation is not None:
-            coords = self.transformation.apply(coords)
+            coords = self.transformation(coords)
         clip_val = pixel_scale * self.softness / 2
         return dlu.soft_spider(
             coords, self.width, self.angles, clip_val, self.occulting
@@ -820,7 +820,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
             The basis vectors at the given coordinates.
         """
         if self.aperture.transformation is not None:
-            coords = self.aperture.transformation.apply(coords)
+            coords = self.aperture.transformation(coords)
         coords /= self.aperture.extent
         return self.basis.calculate_basis(coords, self.aperture.nsides)
 
@@ -841,7 +841,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         basis = self.calc_basis(coords)
         return dlu.eval_basis(basis, self.coefficients)
 
-    def apply(self: AberratedAperture, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: AberratedAperture, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -862,7 +862,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
 
         # Transform coordinate
         if self.aperture.transformation is not None:
-            coords = self.aperture.transformation.apply(wavefront.coordinates())
+            coords = self.aperture.transformation(wavefront.coordinates())
         else:
             coords = wavefront.coordinates()
 
@@ -1030,7 +1030,7 @@ class CompositeAperture(BaseDynamicAperture):
         transmissions = jtu.map(eval_fn, self.apertures, is_leaf=leaf_fn)
         return np.squeeze(np.array(jtu.flatten(transmissions)[0]))
 
-    def apply(self: CompositeAperture, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: CompositeAperture, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -1051,7 +1051,7 @@ class CompositeAperture(BaseDynamicAperture):
 
         # Transform coordinate
         if self.transformation is not None:
-            coords = self.transformation.apply(wavefront.coordinates())
+            coords = self.transformation(wavefront.coordinates())
         else:
             coords = wavefront.coordinates()
 
@@ -1143,7 +1143,7 @@ class CompoundAperture(CompositeAperture):
             The transmission of the aperture at the given coordinates.
         """
         if self.transformation is not None:
-            coords = self.transformation.apply(coords)
+            coords = self.transformation(coords)
         return self.transmissions(coords, pixel_scale).prod(0)
 
 
@@ -1206,5 +1206,5 @@ class MultiAperture(CompositeAperture):
             The transmission of the aperture at the given coordinates.
         """
         if self.transformation is not None:
-            coords = self.transformation.apply(coords)
+            coords = self.transformation(coords)
         return self.transmissions(coords, pixel_scale).sum(0)

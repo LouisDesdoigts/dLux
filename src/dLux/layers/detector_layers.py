@@ -29,7 +29,7 @@ class DetectorLayer(BaseLayer):
         super().__init__()
 
     @abstractmethod
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:  # pragma: no cover
+    def __call__(self: DetectorLayer, psf: PSF) -> PSF:  # pragma: no cover
         """
         Applies the layer to the PSF.
 
@@ -43,6 +43,14 @@ class DetectorLayer(BaseLayer):
         psf : PSF
             The transformed PSF.
         """
+
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:
+        """
+        Backwards compatibility method that invokes __call__.
+
+        Delegates to the __call__ method.
+        """
+        return self(psf)
 
 
 class ApplyPixelResponse(DetectorLayer):
@@ -75,20 +83,7 @@ class ApplyPixelResponse(DetectorLayer):
         if self.pixel_response.ndim != 2:
             raise ValueError("pixel_response must be a 2d array.")
 
-    def apply(self: ApplyPixelResponse, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
+    def __call__(self: ApplyPixelResponse, psf: PSF) -> PSF:
         return psf * self.pixel_response
 
 
@@ -143,20 +138,7 @@ class ApplyJitter(DetectorLayer):
         kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
         return kernel / np.sum(kernel)
 
-    def apply(self: ApplyJitter, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
+    def __call__(self: ApplyJitter, psf: PSF) -> PSF:
         kernel = self.generate_kernel(psf.pixel_scale)
         return psf.convolve(kernel)
 
@@ -187,20 +169,7 @@ class ApplySaturation(DetectorLayer):
         super().__init__()
         self.threshold = float(threshold)
 
-    def apply(self: ApplySaturation, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
+    def __call__(self: ApplySaturation, psf: PSF) -> PSF:
         return psf.min("data", self.threshold)
 
 
@@ -230,20 +199,7 @@ class AddConstant(DetectorLayer):
         super().__init__()
         self.value = float(value)
 
-    def apply(self: AddConstant, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
+    def __call__(self: AddConstant, psf: PSF) -> PSF:
         return psf + self.value
 
 
@@ -277,18 +233,5 @@ class Downsample(DetectorLayer):
         if self.kernel_size <= 0:
             raise ValueError("kernel_size must be greater than 0.")
 
-    def apply(self: Downsample, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
+    def __call__(self: Downsample, psf: PSF) -> PSF:
         return psf.downsample(self.kernel_size)

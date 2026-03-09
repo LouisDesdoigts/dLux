@@ -24,8 +24,26 @@ __all__ = [
 
 class BaseLayer(zdx.Base):
     @abstractmethod
-    def apply(self: BaseLayer, target: Any) -> Any:  # pragma: no cover
+    def __call__(self: BaseLayer, target: Any) -> Any:  # pragma: no cover
         pass
+
+    def apply(self: BaseLayer, target: Any) -> Any:
+        """
+        Backwards compatibility method that invokes __call__.
+
+        Delegates to the __call__ method.
+        """
+        return self(target)
+
+    def __init_subclass__(cls, **kwargs):
+        """Automatically inherit __call__ docstring from parent if child has none."""
+        super().__init_subclass__(**kwargs)
+        if cls.__call__.__doc__ is None:
+            # Walk MRO to find first parent with a __call__ docstring
+            for base in cls.__mro__[1:]:
+                if hasattr(base, "__call__") and base.__call__.__doc__ is not None:
+                    cls.__call__.__doc__ = base.__call__.__doc__
+                    break
 
 
 class OpticalLayer(BaseLayer):
@@ -35,7 +53,7 @@ class OpticalLayer(BaseLayer):
     """
 
     @abstractmethod
-    def apply(
+    def __call__(
         self: OpticalLayer, wavefront: Wavefront
     ) -> Wavefront:  # pragma: no cover
         """
@@ -92,20 +110,7 @@ class TransmissiveLayer(OpticalLayer):
         self.normalise = bool(normalise)
         super().__init__(**kwargs)
 
-    def apply(self: TransmissiveLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: TransmissiveLayer, wavefront: Wavefront) -> Wavefront:
         wavefront *= self.transmission
         if self.normalise:
             wavefront = wavefront.normalise()
@@ -161,20 +166,7 @@ class AberratedLayer(OpticalLayer):
                 )
         super().__init__(**kwargs)
 
-    def apply(self: AberratedLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: AberratedLayer, wavefront: Wavefront) -> Wavefront:
         wavefront += self.opd
         wavefront = wavefront.add_phase(self.phase)
         return wavefront
@@ -252,20 +244,7 @@ class BasisLayer(OpticalLayer):
         """
         return dlu.eval_basis(self.basis, self.coefficients)
 
-    def apply(self: BasisLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: BasisLayer, wavefront: Wavefront) -> Wavefront:
         output = self.eval_basis()
         if self.as_phase:
             wavefront = wavefront.add_phase(output)
@@ -302,20 +281,7 @@ class Tilt(OpticalLayer):
         if self.angles.shape != (2,):
             raise ValueError("angles must be a 1d array of shape (2,).")
 
-    def apply(self: Tilt, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: Tilt, wavefront: Wavefront) -> Wavefront:
         return wavefront.tilt(self.angles)
 
 
@@ -327,18 +293,5 @@ class Normalise(OpticalLayer):
         ![UML](../../assets/uml/Normalise.png)
     """
 
-    def apply(self: Normalise, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: Normalise, wavefront: Wavefront) -> Wavefront:
         return wavefront.normalise()

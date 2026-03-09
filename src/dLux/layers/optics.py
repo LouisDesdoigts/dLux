@@ -73,7 +73,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
                         f"shapes {self.transmission.shape} and {self.phase.shape}."
                     )
 
-    def apply(self: Optic, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: Optic, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -150,7 +150,7 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
             normalise=normalise,
         )
 
-    def apply(self: BasisOptic, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: BasisOptic, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
