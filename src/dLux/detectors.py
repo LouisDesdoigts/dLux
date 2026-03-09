@@ -3,6 +3,7 @@
 from __future__ import annotations
 from collections import OrderedDict
 from abc import abstractmethod
+from typing import Any
 import zodiax as zdx
 from jax import Array
 import dLux.utils as dlu
@@ -16,7 +17,7 @@ __all__ = ["BaseDetector", "LayeredDetector"]
 class BaseDetector(zdx.Base):
     @abstractmethod
     def model(
-        self, psf: PSF, return_psf: bool = False
+        self: BaseDetector, psf: PSF, return_psf: bool = False
     ) -> Array | PSF:  # pragma: no cover
         pass
 
@@ -51,7 +52,7 @@ class LayeredDetector(BaseDetector):
         self.layers = dlu.list2dictionary(layers, True, DetectorLayer)
         super().__init__()
 
-    def __getattr__(self: LayeredDetector, key: str) -> object:
+    def __getattr__(self: LayeredDetector, key: str) -> Any:
         """
         Raises the individual layers via their keys.
 
@@ -62,7 +63,7 @@ class LayeredDetector(BaseDetector):
 
         Returns
         -------
-        item : object
+        item : Any
             The item corresponding to the supplied key in the layers
             dictionary.
         """
@@ -87,7 +88,7 @@ class LayeredDetector(BaseDetector):
 
         Returns
         -------
-        object : Array, PSF
+        result : Array | PSF
             If `return_psf` is False, returns the PSF array.
             If `return_psf` is True, returns the PSF object.
         """
@@ -111,7 +112,7 @@ class LayeredDetector(BaseDetector):
 
         Parameters
         ----------
-        layer : Any
+        layer : DetectorLayer | tuple[str, DetectorLayer]
             The layer to be inserted.
         index : int
             The index at which to insert the layer.

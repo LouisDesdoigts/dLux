@@ -47,7 +47,7 @@ class ApertureLayer(OpticalLayer):
 
     @abstractmethod
     def transmission(
-        self,
+        self: ApertureLayer,
         coords: Array,
         pixel_scale: float,
     ) -> Array:  # pragma: no cover
@@ -171,7 +171,7 @@ class DynamicAperture(BaseDynamicAperture):
             raise ValueError("softening must be greater than 0.")
 
     @abstractmethod  # pragma: no cover
-    def extent(self) -> float:
+    def extent(self: DynamicAperture) -> float:
         pass
 
 

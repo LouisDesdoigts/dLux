@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from abc import abstractmethod
+from typing import Any
 import jax.numpy as np
 import zodiax as zdx
 from jax import Array
@@ -23,7 +24,7 @@ __all__ = [
 
 class BaseLayer(zdx.Base):
     @abstractmethod
-    def apply(self, target: object) -> object:  # pragma: no cover
+    def apply(self: BaseLayer, target: Any) -> Any:  # pragma: no cover
         pass
 
 
@@ -34,7 +35,9 @@ class OpticalLayer(BaseLayer):
     """
 
     @abstractmethod
-    def apply(self, wavefront: Wavefront) -> Wavefront:  # pragma: no cover
+    def apply(
+        self: OpticalLayer, wavefront: Wavefront
+    ) -> Wavefront:  # pragma: no cover
         """
         Applies the layer to the wavefront.
 

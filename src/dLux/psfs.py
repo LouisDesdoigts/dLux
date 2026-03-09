@@ -152,7 +152,7 @@ class PSF(zdx.Base):
         """
         return self.set(data=np.flip(self.data, axis))
 
-    def _magic_unified_op(self, other: Array | PSF | None, op: str) -> PSF:
+    def _magic_unified_op(self: PSF, other: Array | PSF | None, op: str) -> PSF:
         """
         Internal helper function to unify the logic of the magic methods for addition,
         subtraction, multiplication and division.

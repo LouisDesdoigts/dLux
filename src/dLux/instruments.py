@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from abc import abstractmethod
+from typing import Any
 import zodiax as zdx
 from jax import Array, vmap
 import jax.numpy as np
@@ -16,7 +17,9 @@ __all__ = ["Instrument", "Telescope", "Dither"]
 
 class Instrument(zdx.Base):
     @abstractmethod
-    def model(self, return_psf: bool = False) -> Array | PSF:  # pragma: no cover
+    def model(
+        self: Instrument, return_psf: bool = False
+    ) -> Array | PSF:  # pragma: no cover
         pass
 
 
@@ -88,7 +91,7 @@ class Telescope(Instrument):
             )
         self.detector = detector
 
-    def __getattr__(self: Telescope, key: str) -> object:
+    def __getattr__(self: Telescope, key: str) -> Any:
         """
         Raises the attributes from the optics, source and detector to the top level of
         the class.
@@ -100,7 +103,7 @@ class Telescope(Instrument):
 
         Returns
         -------
-        item : object
+        item : Any
             The item corresponding to the supplied key in the sub-dictionaries.
         """
         for attribute in self.__dict__.values():
@@ -119,7 +122,7 @@ class Telescope(Instrument):
 
         Returns
         -------
-        object : Array, PSF
+        result : Array | PSF
             If `return_psf` is False, the PSF array is returned.
             If `return_psf` is True, the PSF object is returned.
 
@@ -208,7 +211,7 @@ class Dither(Telescope):
 
         Returns
         -------
-        object : Array, PSF
+        result : Array | PSF
             If `return_psf` is False, the PSF array is returned.
             If `return_psf` is True, the PSF object is returned.
         """

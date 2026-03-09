@@ -706,7 +706,9 @@ class Wavefront(zdx.Base):
             [phasor, pixel_scale, plane, units],
         )
 
-    def _magic_unified_op(self, other: Wavefront | Array | None, op: str) -> Wavefront:
+    def _magic_unified_op(
+        self: Wavefront, other: Wavefront | Array | None, op: str
+    ) -> Wavefront:
         """
         Internal helper function to unify the logic of the magic methods for addition,
         subtraction, multiplication and division.

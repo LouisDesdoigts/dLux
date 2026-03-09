@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from abc import abstractmethod
 from jax import Array, vmap
 import jax.numpy as np
@@ -12,6 +12,10 @@ from dLux import spectra
 
 
 from .psfs import PSF
+
+if TYPE_CHECKING:
+    from .optical_systems import BaseOpticalSystem
+    from .wavefronts import Wavefront
 
 __all__ = [
     "BaseSource",
@@ -69,16 +73,16 @@ def _as_position_2d(position: Array) -> Array:
 
 class BaseSource(zdx.Base):
     @abstractmethod
-    def normalise(self) -> BaseSource:  # pragma: no cover
+    def normalise(self: BaseSource) -> BaseSource:  # pragma: no cover
         pass
 
     @abstractmethod
     def model(
-        self,
-        optics: object,
+        self: BaseSource,
+        optics: BaseOpticalSystem,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> object:  # pragma: no cover
+    ) -> Array | Wavefront | PSF:  # pragma: no cover
         pass
 
 
@@ -200,16 +204,16 @@ class PointSource(Source):
 
     def model(
         self: PointSource,
-        optics: object,
+        optics: BaseOpticalSystem,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Models the source object through the provided optics.
 
         Parameters
         ----------
-        optics : Optics
+        optics : OpticalSystem
             The optics through which to model the source object.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
@@ -218,7 +222,7 @@ class PointSource(Source):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -296,16 +300,16 @@ class PointSources(Source):
 
     def model(
         self: PointSources,
-        optics: object,
+        optics: BaseOpticalSystem,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Models the source object through the provided optics.
 
         Parameters
         ----------
-        optics : Optics
+        optics : OpticalSystem
             The optics through which to model the source object.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
@@ -314,7 +318,7 @@ class PointSources(Source):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -414,16 +418,16 @@ class ResolvedSource(PointSource):
 
     def model(
         self: ResolvedSource,
-        optics: object = None,
+        optics: BaseOpticalSystem,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Models the source object through the provided optics.
 
         Parameters
         ----------
-        optics : Optics
+        optics : OpticalSystem
             The optics through which to model the source object.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
@@ -432,7 +436,7 @@ class ResolvedSource(PointSource):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -443,7 +447,8 @@ class ResolvedSource(PointSource):
         self = self.normalise()
         weights = self.weights * self.flux
 
-        # Note we always return wf here so we can convolve each wavelength
+        # Note that we always return a wavefront here so we can convolve each
+        # wavelength
         # individually if a chromatic wavefront output is required.
         wf = optics.propagate(self.wavelengths, self.position, weights, return_wf=True)
 
@@ -551,16 +556,16 @@ class BinarySource(Source):
 
     def model(
         self: BinarySource,
-        optics: object,
+        optics: BaseOpticalSystem,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Models the source object through the provided optics.
 
         Parameters
         ----------
-        optics : Optics
+        optics : OpticalSystem
             The optics through which to model the source object.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
@@ -569,7 +574,7 @@ class BinarySource(Source):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -594,7 +599,7 @@ class BinarySource(Source):
         if return_wf:
             return output
 
-        # Return PSF just requires constructing object
+        # Return PSF case just requires constructing the object
         if return_psf:
             return PSF(output.data.sum(0), output.pixel_scale.mean())
 
@@ -677,16 +682,16 @@ class PointResolvedSource(ResolvedSource):
 
     def model(
         self: PointResolvedSource,
-        optics: object,
+        optics: BaseOpticalSystem,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Models the source object through the provided optics.
 
         Parameters
         ----------
-        optics : Optics
+        optics : OpticalSystem
             The optics through which to model the source object.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
@@ -695,7 +700,7 @@ class PointResolvedSource(ResolvedSource):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -707,14 +712,15 @@ class PointResolvedSource(ResolvedSource):
         flux = dlu.fluxes_from_contrast(self.flux, self.contrast)
         weights = self.weights * flux[:, None]
 
-        # Note we always return wf here so we can convolve each wavelength
+        # Note that we always return a wavefront here so we can convolve each
+        # wavelength
         # individually if a chromatic wavefront output is required. We also
-        # Cannot propagate the weights since they have different values
+        # cannot propagate the weights since they have different values
         # for the point and resolved source.
         wf = optics.propagate(self.wavelengths, self.position, return_wf=True)
 
-        # Returning wf is a special case, we need to convolve each PSF with
-        # the distribution, and them re-combine them into a vectorised wf
+        # Returning wf is a special case: we need to convolve each PSF with
+        # the distribution, and then recombine them into a vectorised wf
         if return_wf:
             # Perform convolution
             conv_fn = lambda psf: jsp.signal.convolve(
@@ -815,7 +821,7 @@ class Scene(BaseSource):
 
         Returns
         -------
-        item : object
+        item : Any
             The item corresponding to the supplied key in the sub-dictionaries.
         """
         if key in self.sources.keys():
@@ -824,16 +830,16 @@ class Scene(BaseSource):
 
     def model(
         self: Scene,
-        optics: object,
+        optics: BaseOpticalSystem,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Models the source object through the provided optics.
 
         Parameters
         ----------
-        optics : Optics
+        optics : OpticalSystem
             The optics through which to model the source object.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
@@ -842,7 +848,7 @@ class Scene(BaseSource):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.

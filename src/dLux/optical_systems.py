@@ -33,7 +33,7 @@ class BaseOpticalSystem(zdx.Base):
         wavelength: float,
         offset: Array | None = None,
         return_wf: bool = False,
-    ) -> Array:  # pragma: no cover
+    ) -> Array | Wavefront:  # pragma: no cover
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -48,7 +48,7 @@ class BaseOpticalSystem(zdx.Base):
 
         Returns
         -------
-        object : Array, Wavefront
+        result : Array | Wavefront
             If `return_wf` is False, returns the PSF array.
             If `return_wf` is True, returns the Wavefront object.
         """
@@ -61,7 +61,7 @@ class BaseOpticalSystem(zdx.Base):
         weights: Array = None,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:  # pragma: no cover
+    ) -> Array | Wavefront | PSF:  # pragma: no cover
         """
         Propagates a Polychromatic point source through the optics.
 
@@ -80,7 +80,7 @@ class BaseOpticalSystem(zdx.Base):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -94,7 +94,7 @@ class BaseOpticalSystem(zdx.Base):
         source: Source,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:  # pragma: no cover
+    ) -> Array | Wavefront | PSF:  # pragma: no cover
         """
         Models the input Source object through the optics.
 
@@ -109,7 +109,7 @@ class BaseOpticalSystem(zdx.Base):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -130,7 +130,7 @@ class OpticalSystem(BaseOpticalSystem):
         weights: Array = None,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Propagates a Polychromatic point source through the optics.
 
@@ -149,7 +149,7 @@ class OpticalSystem(BaseOpticalSystem):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -206,7 +206,7 @@ class OpticalSystem(BaseOpticalSystem):
         source: Source,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront | PSF:
         """
         Models the input Source object through the optics.
 
@@ -221,7 +221,7 @@ class OpticalSystem(BaseOpticalSystem):
 
         Returns
         -------
-        object : Array, Wavefront, PSF
+        result : Array | Wavefront | PSF
             If `return_wf` is False and `return_psf` is False, returns the PSF array.
             If `return_wf` is True and `return_psf` is False, returns the Wavefront
                 object.
@@ -332,7 +332,7 @@ class LayeredOpticalSystem(OpticalSystem):
 
         Returns
         -------
-        item : object
+        item : Any
             The item corresponding to the supplied key in the layers dictionary.
         """
         if key in self.layers.keys():
@@ -347,7 +347,7 @@ class LayeredOpticalSystem(OpticalSystem):
         wavelength: Array,
         offset: Array | None = None,
         return_wf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront:
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -362,7 +362,7 @@ class LayeredOpticalSystem(OpticalSystem):
 
         Returns
         -------
-        object : Array, Wavefront
+        result : Array | Wavefront
             If `return_wf` is False, returns the PSF array.
             If `return_wf` is True, returns the Wavefront object.
         """
@@ -396,7 +396,7 @@ class LayeredOpticalSystem(OpticalSystem):
 
         Parameters
         ----------
-        layer : Any
+        layer : OpticalLayer | tuple[str, OpticalLayer]
             The layer to be inserted.
         index : int
             The index at which to insert the layer.
@@ -494,7 +494,7 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         wavelength: Array,
         offset: Array | None = None,
         return_wf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront:
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -509,7 +509,7 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
 
         Returns
         -------
-        object : Array, Wavefront
+        result : Array | Wavefront
             If `return_wf` is False, returns the PSF array.
             If `return_wf` is True, returns the Wavefront object.
         """
@@ -603,7 +603,7 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         wavelength: Array,
         offset: Array | None = None,
         return_wf: bool = False,
-    ) -> Array:
+    ) -> Array | Wavefront:
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -618,7 +618,7 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
 
         Returns
         -------
-        object : Array, Wavefront
+        result : Array | Wavefront
             If `return_wf` is False, returns the PSF array.
             If `return_wf` is True, returns the Wavefront object.
         """

@@ -21,4 +21,14 @@ _modules = (
     apertures,
     aberrations,
 )
-__all__ = reexport(_modules, globals())
+
+_module_names = [
+    "optical_layers",
+    "optics",
+    "detector_layers",
+    "unified_layers",
+    "propagators",
+    "apertures",
+    "aberrations",
+]
+__all__ = _module_names + reexport(_modules, globals())

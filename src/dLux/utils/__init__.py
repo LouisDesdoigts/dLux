@@ -30,4 +30,18 @@ _modules = (
     source,
     geometry,
 )
-__all__ = reexport(_modules, globals())
+
+_module_names = [
+    "propagation",
+    "coordinates",
+    "helpers",
+    "interpolation",
+    "math",
+    "optics",
+    "units",
+    "array_ops",
+    "zernikes",
+    "source",
+    "geometry",
+]
+__all__ = _module_names + reexport(_modules, globals())

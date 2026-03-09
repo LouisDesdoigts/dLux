@@ -11,7 +11,7 @@ __all__ = ["BaseSpectrum", "Spectrum", "PolySpectrum"]
 
 class BaseSpectrum(zdx.Base):
     @abstractmethod
-    def normalise(self) -> BaseSpectrum:  # pragma: no cover
+    def normalise(self: BaseSpectrum) -> BaseSpectrum:  # pragma: no cover
         pass
 
 

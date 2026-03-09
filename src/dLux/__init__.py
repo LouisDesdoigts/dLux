@@ -28,4 +28,17 @@ _modules = (
     psfs,
     transformations,
 )
-__all__ = reexport(_modules, globals())
+
+_module_names = [
+    "layers",
+    "utils",
+    "optical_systems",
+    "detectors",
+    "instruments",
+    "sources",
+    "spectra",
+    "wavefronts",
+    "psfs",
+    "transformations",
+]
+__all__ = _module_names + reexport(_modules, globals())
