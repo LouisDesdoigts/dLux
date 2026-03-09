@@ -36,12 +36,12 @@ class Wavefront(zdx.Base):
     plane: str
     units: str
 
-    # TODO: Allow a phasor input, or add a `from_phasor` class method like prysm
     def __init__(
         self: Wavefront,
         npixels: int,
-        diameter: float,
         wavelength: float,
+        diameter: float = None,
+        pixel_scale: float = None,
         plane: str = "Pupil",
         units: str = "Cartesian",
     ):
@@ -50,13 +50,33 @@ class Wavefront(zdx.Base):
         ----------
         npixels : int
             The number of pixels that represent the `Wavefront`.
-        diameter : float, meters
-            The total diameter of the `Wavefront`.
         wavelength : float, meters
             The wavelength of the `Wavefront`.
+        diameter : float = None, meters
+            The total diameter of the `Wavefront`. Either diameter or pixel_scale
+            must be provided.
+        pixel_scale : float = None, meters/pixel or radians/pixel
+            The pixel scale of the `Wavefront`. Either diameter or pixel_scale
+            must be provided.
+        plane : str = "Pupil"
+            The plane type of the `Wavefront`.
+        units : str = "Cartesian"
+            The units of the `Wavefront`.
         """
+        # Handle diameter vs pixel_scale
+        if diameter is None and pixel_scale is None:
+            raise ValueError("Either diameter or pixel_scale must be provided.")
+        if diameter is not None and pixel_scale is not None:
+            raise ValueError(
+                "Cannot specify both diameter and pixel_scale. Choose one."
+            )
+
         self.wavelength = np.asarray(wavelength, float)
-        self.pixel_scale = np.asarray(diameter / npixels, float)
+        if diameter is not None:
+            self.pixel_scale = np.asarray(diameter / npixels, float)
+        else:
+            self.pixel_scale = np.asarray(pixel_scale, float)
+
         amplitude = np.ones((npixels, npixels), dtype=float) / npixels**2
         phase = np.zeros((npixels, npixels), dtype=float)
         self.phasor = amplitude * np.exp(1j * phase)
@@ -64,6 +84,73 @@ class Wavefront(zdx.Base):
         # Always initialized in Pupil plane with Cartesian coordinates
         self.plane = str(plane)
         self.units = str(units)
+
+    @classmethod
+    def from_phasor(
+        cls,
+        phasor: Array[complex],
+        wavelength: float,
+        pixel_scale: float = None,
+        diameter: float = None,
+        plane: str = "Pupil",
+        units: str = "Cartesian",
+    ) -> Wavefront:
+        """
+        Create a Wavefront from an existing phasor array.
+
+        Parameters
+        ----------
+        phasor : Array[complex]
+            The complex electric field array.
+        wavelength : float, meters
+            The wavelength of the wavefront.
+        pixel_scale : float = None, meters/pixel or radians/pixel
+            The pixel scale of the phasor array. Either pixel_scale or
+            diameter must be provided.
+        diameter : float = None, meters or radians
+            The diameter of the phasor array. Either pixel_scale or
+            diameter must be provided.
+        plane : str = "Pupil"
+            The current plane type of wavefront.
+        units : str = "Cartesian"
+            The current units of the wavefront.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            A new Wavefront object with the specified phasor.
+        """
+        # Infer npixels from phasor shape
+        phasor_arr = np.asarray(phasor, complex)
+        npixels = phasor_arr.shape[-1]
+
+        # Create instance with appropriate parameters
+        if diameter is not None:
+            wf = cls(
+                npixels=npixels,
+                wavelength=wavelength,
+                diameter=diameter,
+                plane=plane,
+                units=units,
+            )
+        else:
+            wf = cls(
+                npixels=npixels,
+                wavelength=wavelength,
+                pixel_scale=pixel_scale,
+                plane=plane,
+                units=units,
+            )
+
+        # Update with correct phasor and pixel_scale
+        return wf.set(
+            phasor=phasor_arr,
+            wavelength=np.asarray(wavelength, float),
+            pixel_scale=np.asarray(
+                pixel_scale if pixel_scale is not None else diameter / npixels,
+                float,
+            ),
+        )
 
     @property
     def diameter(self: Wavefront) -> Array:
