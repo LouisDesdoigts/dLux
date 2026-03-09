@@ -6,6 +6,7 @@ import zodiax as zdx
 from jax import Array
 import jax.numpy as np
 import dLux.utils as dlu
+from dLux.utils.helpers import inherit_docstrings
 
 __all__ = ["BaseCoordTransform", "CoordTransform", "DistortedCoords"]
 
@@ -17,6 +18,13 @@ class BaseCoordTransform(zdx.Base):
     Provides a common interface for applying transformations to coordinates,
     including a backwards-compatible `apply` method.
     """
+
+    def __init_subclass__(cls, **kwargs):
+        """
+        Automatically inherit __call__ docstrings and annotations from parent class.
+        """
+        super().__init_subclass__(**kwargs)
+        inherit_docstrings(cls)
 
     def calculate(self: BaseCoordTransform, npix: int, diameter: float) -> Array:
         """
@@ -140,20 +148,7 @@ class CoordTransform(BaseCoordTransform):
         else:
             self.shear = None
 
-    def __call__(self: CoordTransform, coords: Array) -> Array:
-        """
-        Apply the transformations to the input coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The input coordinates to be transformed.
-
-        Returns
-        -------
-        coords : Array
-            The transformed coordinates.
-        """
+    def __call__(self, coords):
         if self.translation is not None:
             coords = dlu.translate_coords(coords, self.translation)
         if self.shear is not None:
@@ -200,18 +195,5 @@ class DistortedCoords(BaseCoordTransform):
             raise ValueError("distortion shape must match powers shape.")
         self.distortion = distortion
 
-    def __call__(self: DistortedCoords, coords: Array) -> Array:
-        """
-        Apply distortion to some coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            Coordinates to distort.
-
-        Returns
-        -------
-        distorted_coords : Array
-            Distorted coordinates.
-        """
+    def __call__(self, coords):
         return dlu.distort_coords(coords, self.distortion, self.powers)

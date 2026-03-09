@@ -4,7 +4,63 @@ import jax.numpy as np
 import jax.tree as jtu
 from jax import Array
 
-__all__ = ["map2array", "list2dictionary", "insert_layer", "remove_layer"]
+__all__ = [
+    "map2array",
+    "list2dictionary",
+    "insert_layer",
+    "remove_layer",
+    "inherit_docstrings",
+]
+
+
+def inherit_docstrings(cls, method_names=None):
+    """
+    Inherit docstrings and annotations from parent classes for specified methods.
+
+    This function walks the MRO to find the first parent class with a docstring
+    or annotations for each method, and copies them to the child class if missing.
+
+    Parameters
+    ----------
+    cls : type
+        The class being created via __init_subclass__.
+    method_names : list[str] | None
+        List of method names to inherit docstrings/annotations for.
+        If None, only '__call__' is checked.
+
+    Returns
+    -------
+    None
+        Modifies cls in place.
+    """
+    if method_names is None:
+        method_names = ["__call__"]
+
+    for method_name in method_names:
+        # Only process if method is defined in this class
+        if method_name in cls.__dict__:
+            method = cls.__dict__[method_name]
+
+            # Inherit docstring if missing
+            if method.__doc__ is None:
+                for base in cls.__mro__[1:]:
+                    if (
+                        hasattr(base, method_name)
+                        and getattr(base, method_name).__doc__ is not None
+                    ):
+                        method.__doc__ = getattr(base, method_name).__doc__
+                        break
+
+            # Inherit annotations if missing
+            if not hasattr(method, "__annotations__") or not method.__annotations__:
+                for base in cls.__mro__[1:]:
+                    if method_name in base.__dict__ and hasattr(
+                        base.__dict__[method_name], "__annotations__"
+                    ):
+                        method.__annotations__ = base.__dict__[
+                            method_name
+                        ].__annotations__
+                        break
 
 
 def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:

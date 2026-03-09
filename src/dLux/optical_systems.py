@@ -9,6 +9,7 @@ import equinox as eqx
 import zodiax as zdx
 from typing import Any
 import dLux.utils as dlu
+from dLux.utils.helpers import inherit_docstrings
 
 __all__ = [
     "BaseOpticalSystem",
@@ -27,6 +28,13 @@ from .psfs import PSF
 # Private Classes #
 ###################
 class BaseOpticalSystem(zdx.Base):
+    def __init_subclass__(cls, **kwargs):
+        """
+        Automatically inherit method docstrings from parent class.
+        """
+        super().__init_subclass__(**kwargs)
+        inherit_docstrings(cls, ["propagate_mono", "propagate", "model"])
+
     @abstractmethod
     def propagate_mono(
         self: BaseOpticalSystem,
@@ -207,26 +215,6 @@ class OpticalSystem(BaseOpticalSystem):
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array | Wavefront | PSF:
-        """
-        Models the input Source object through the optics.
-
-        Parameters
-        ----------
-        source : Source
-            The Source object to model through the optics.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
         return source.model(self, return_wf, return_psf)
 
 
@@ -348,24 +336,6 @@ class LayeredOpticalSystem(OpticalSystem):
         offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array | Wavefront:
-        """
-        Propagates a monochromatic point source through the optical layers.
-
-        Parameters
-        ----------
-        wavelength : float, metres
-            The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array | None, radians = None
-            The (x, y) offset from the optical axis of the source.
-        return_wf: bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront
-            If `return_wf` is False, returns the PSF array.
-            If `return_wf` is True, returns the Wavefront object.
-        """
         if offset is None:
             offset = np.zeros(2)
 
@@ -495,24 +465,6 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array | Wavefront:
-        """
-        Propagates a monochromatic point source through the optical layers.
-
-        Parameters
-        ----------
-        wavelength : float, metres
-            The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array | None, radians = None
-            The (x, y) offset from the optical axis of the source.
-        return_wf: bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront
-            If `return_wf` is False, returns the PSF array.
-            If `return_wf` is True, returns the Wavefront object.
-        """
         wf = super().propagate_mono(wavelength, offset, return_wf=True)
 
         # Propagate
@@ -604,24 +556,6 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array | Wavefront:
-        """
-        Propagates a monochromatic point source through the optical layers.
-
-        Parameters
-        ----------
-        wavelength : float, metres
-            The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array | None, radians = None
-            The (x, y) offset from the optical axis of the source.
-        return_wf: bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront
-            If `return_wf` is False, returns the PSF array.
-            If `return_wf` is True, returns the Wavefront object.
-        """
         wf = super().propagate_mono(wavelength, offset, return_wf=True)
 
         # Propagate
