@@ -368,7 +368,7 @@ class LayeredOpticalSystem(OpticalSystem):
 
         # Apply layers
         for layer in list(self.layers.values()):
-            wavefront *= layer
+            wavefront = layer(wavefront)
 
         # Return PSF or Wavefront
         if return_wf:
