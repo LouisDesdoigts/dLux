@@ -28,6 +28,32 @@ class Wavefront(zdx.Base):
         The current plane type of wavefront, can be 'Pupil', 'Focal' or 'Intermediate'.
     units : str
         The current units of the wavefront, can be 'Cartesian' or 'Angular'.
+    diameter : Array, property
+        Derived property from `pixel_scale` and `npixels`; wavefront diameter.
+    npixels : int, property
+        Derived property from `phasor`; side length of wavefront arrays.
+    real : Array, property
+        Derived property from `phasor`; real component of the electric field.
+    imaginary : Array, property
+        Derived property from `phasor`; imaginary component of the electric field.
+    amplitude : Array, property
+        Derived property from `phasor`; field amplitude `abs(phasor)`.
+    phase : Array, property
+        Derived property from `phasor`; field phase angle.
+    complex : tuple[Array, Array], property
+        Derived property from `phasor`; `(real, imaginary)` representation.
+    polar : tuple[Array, Array], property
+        Derived property from `phasor`; `(amplitude, phase)` representation.
+    psf : Array, property
+        Derived property from `phasor`; intensity image `abs(phasor) ** 2`.
+    wavenumber : Array, property
+        Derived property from `wavelength`; scalar `2 * pi / wavelength`.
+    fringe_size : Array, property
+        Derived property from `wavelength`; angular fringe scale.
+    ndim : int, property
+        Derived property from `pixel_scale`; vectorisation rank of wavefront state.
+    power : Array, property
+        Derived property from `amplitude`; total wavefront power.
     """
 
     wavelength: float

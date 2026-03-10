@@ -162,6 +162,10 @@ class DynamicAperture(BaseDynamicAperture):
         The object that applies the coordinate transformations to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
+    extent : float, property
+        Derived property from aperture geometry parameters; maximum aperture extent.
+    nsides : int, property
+        Derived property from aperture geometry parameters; effective side count.
     """
 
     occulting: bool
@@ -244,6 +248,10 @@ class CircularAperture(DynamicAperture):
         The approximate pixel width of the soft boundary applied to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
+    extent : float, property
+        Derived property from `radius`; maximum aperture extent.
+    nsides : int, property
+        Derived property from aperture type; `0` for circular symmetry.
     """
 
     radius: float
@@ -314,6 +322,10 @@ class SquareAperture(DynamicAperture):
         The approximate pixel width of the soft boundary applied to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
+    extent : float, property
+        Derived property from `width`; circumscribed half-diagonal scale.
+    nsides : int, property
+        Derived property from aperture type; `4` sides.
     """
 
     width: float
@@ -388,6 +400,10 @@ class RectangularAperture(DynamicAperture):
         The approximate pixel width of the soft boundary applied to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
+    extent : float, property
+        Derived property from `height` and `width`; half-diagonal extent.
+    nsides : int, property
+        Derived property from aperture type; `4` sides.
     """
 
     height: float
@@ -469,6 +485,8 @@ class RegPolyAperture(DynamicAperture):
         The approximate pixel width of the soft boundary applied to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
+    extent : float, property
+        Derived property from `rmax`; maximum aperture extent.
     """
 
     nsides: int
@@ -546,6 +564,10 @@ class Spider(DynamicAperture):
         The approximate pixel width of the soft boundary applied to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
+    extent : float, property
+        Derived property from aperture type; undefined for spiders and raises.
+    nsides : int, property
+        Derived property from aperture type; undefined for spiders and raises.
     """
 
     width: float
@@ -758,6 +780,9 @@ class CompositeAperture(BaseDynamicAperture):
         The object that applies the coordinate transformations to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
+    coefficients : list[Array], property
+        Derived property from contained aberrated apertures; concatenated
+        coefficient sets.
     """
 
     apertures: dict

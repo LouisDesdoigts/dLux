@@ -15,6 +15,13 @@ __all__ = ["BaseDetector", "LayeredDetector"]
 
 
 class BaseDetector(zdx.Base):
+    """
+    Abstract base class for detector models.
+
+    Concrete detectors implement `model(...)` to transform input PSFs into
+    detector-space outputs.
+    """
+
     @abstractmethod
     def model(
         self: BaseDetector, psf: PSF, return_psf: bool = False

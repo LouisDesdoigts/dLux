@@ -78,6 +78,13 @@ def _as_position_2d(position: Array) -> Array:
 
 
 class BaseSource(zdx.Base):
+    """
+    Abstract base class for source models.
+
+    Concrete source classes define normalisation behavior and the optical
+    modelling interface via `normalise(...)` and `model(...)`.
+    """
+
     def __init_subclass__(cls, **kwargs):
         """Inherit docstrings from parent classes for model method."""
         super().__init_subclass__(**kwargs)

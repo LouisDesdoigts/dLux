@@ -21,6 +21,10 @@ class PSF(zdx.Base):
         The PSF as it is transformed by the detector.
     pixel_scale : Array
         The pixel scale of the PSF.
+    npixels : int, property
+        Derived property from `data`; returns the PSF side length in pixels.
+    ndim : int, property
+        Derived property from `pixel_scale`; returns PSF vectorisation rank.
     """
 
     data: Array

@@ -27,6 +27,13 @@ from .psfs import PSF
 # Private Classes #
 ###################
 class BaseOpticalSystem(zdx.Base):
+    """
+    Abstract base class for optical-system models.
+
+    Defines the required propagation and source-modelling interfaces used by
+    concrete optical-system implementations.
+    """
+
     def __init_subclass__(cls, **kwargs):
         """
         Automatically inherit method docstrings from parent class.

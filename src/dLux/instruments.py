@@ -17,6 +17,13 @@ __all__ = ["Instrument", "Telescope", "Dither"]
 
 
 class Instrument(zdx.Base):
+    """
+    Abstract base class for instrument models.
+
+    Concrete instrument classes must implement `model(...)` to produce an image
+    array or PSF object from their configured components.
+    """
+
     @abstractmethod
     def model(
         self: Instrument, return_psf: bool = False

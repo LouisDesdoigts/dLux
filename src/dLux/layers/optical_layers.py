@@ -23,6 +23,13 @@ __all__ = [
 
 
 class BaseLayer(zdx.Base):
+    """
+    Abstract base class for all dLux layers.
+
+    Layer objects define a callable transform interface that maps one target
+    object to another (for example Wavefront -> Wavefront or PSF -> PSF).
+    """
+
     @abstractmethod
     def __call__(self: BaseLayer, target: Any) -> Any:  # pragma: no cover
         pass

@@ -10,6 +10,13 @@ __all__ = ["BaseSpectrum", "Spectrum", "PolySpectrum"]
 
 
 class BaseSpectrum(zdx.Base):
+    """
+    Abstract base class for spectral parameterisations.
+
+    Concrete spectrum classes must provide `normalise(...)` and expose spectral
+    weighting over configured wavelengths.
+    """
+
     @abstractmethod
     def normalise(self: BaseSpectrum) -> BaseSpectrum:  # pragma: no cover
         pass
@@ -119,6 +126,9 @@ class PolySpectrum(SimpleSpectrum):
         The array of wavelengths at which the spectrum is defined.
     coefficients : Array
         The array of polynomial coefficient values.
+    weights : Array, property
+        Derived property from `wavelengths` and `coefficients`; normalised
+        polynomial weights evaluated at each wavelength.
     """
 
     coefficients: Array
