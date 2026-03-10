@@ -3,6 +3,9 @@
 ???+ info "BaseLayer"
     ::: dLux.layers.optical_layers.BaseLayer
 
+???+ info "OpticalLayer"
+    ::: dLux.layers.optical_layers.OpticalLayer
+
 ???+ info "TransmissiveLayer"
     ::: dLux.layers.optical_layers.TransmissiveLayer
 

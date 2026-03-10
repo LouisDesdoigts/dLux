@@ -3,6 +3,9 @@
 ???+ info "BaseOpticalSystem"
     ::: dLux.optical_systems.BaseOpticalSystem
 
+???+ info "ParametricOpticalSystem"
+    ::: dLux.optical_systems.ParametricOpticalSystem
+
 ???+ info "AngularOpticalSystem"
     ::: dLux.optical_systems.AngularOpticalSystem
 

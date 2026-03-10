@@ -3,11 +3,17 @@ from __future__ import annotations
 import importlib
 import inspect
 import re
+import sys
 from pathlib import Path
 from typing import Iterable
 
 ROOT = Path(__file__).resolve().parent
+REPO_ROOT = ROOT.parent
+SRC_ROOT = REPO_ROOT / "src"
 API_ROOT = ROOT / "API"
+
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 INFO_RE = re.compile(r'^\?\?\?\+ info "([^"]+)"\s*$')
 DIRECTIVE_RE = re.compile(r"^\s*:::\s*([A-Za-z_][A-Za-z0-9_\.]+)\s*$")

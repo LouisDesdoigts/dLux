@@ -2,6 +2,9 @@
 
 This module contains functions for converting between different units.
 
+???+ info "convert"
+    ::: dLux.utils.units.convert
+
 ???+ info "rad2arcsec"
     ::: dLux.utils.units.rad2arcsec
 

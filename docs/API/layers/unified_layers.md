@@ -1,5 +1,8 @@
 # Unified Layers
 
+???+ info "UnifiedLayer"
+    ::: dLux.layers.unified_layers.UnifiedLayer
+
 ???+ info "Rotate"
     ::: dLux.layers.unified_layers.Rotate
 

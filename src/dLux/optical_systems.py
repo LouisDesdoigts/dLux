@@ -12,6 +12,7 @@ import dLux.utils as dlu
 
 __all__ = [
     "BaseOpticalSystem",
+    "ParametricOpticalSystem",
     "AngularOpticalSystem",
     "CartesianOpticalSystem",
     "LayeredOpticalSystem",
