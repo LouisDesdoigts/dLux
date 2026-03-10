@@ -4,34 +4,32 @@
 
 
 theme:
-  name: material
+  name: zensical
+  icon:
+    repo: fontawesome/brands/github  # Sets the logo to the GitHub 'cat'
   features:
-    - navigation.sections
-    - navigation.path
-    - navigation.indexes 
-    - navigation.top
-    - content.code.copy
+    - navigation.top      # "Back to top" button
+    - navigation.indexes   # Allows a section title to be its own page
+    - content.code.copy   # Copy button on code blocks
+    - toc.integrate       # Put Table of Contents on the left sidebar
+    - content.action.edit   # Adds an "Edit this page" button
+    - content.action.view   # Adds a "View source" button
 
   palette:
-    # Light mode / dark mode
-    # We deliberately don't automatically use `media` to check a user's preferences. We default to light mode as
-    # (a) it looks more professional, and (b) is more obvious about the fact that it offers a (dark mode) toggle.
+    # Light mode
     - scheme: default
-      primary: white
-      accent: amber
+      primary: amber
+      accent: orange
       toggle:
-        icon: material/weather-night
+        icon: lucide/sun
         name: Switch to dark mode
+    # Dark mode
     - scheme: slate
-      primary: black
-      accent: amber
+      primary: amber
+      accent: orange
       toggle:
-        icon: material/weather-sunny
+        icon: lucide/moon
         name: Switch to light mode
-  icon:
-    repo: fontawesome/brands/github  # GitHub logo in top right
-    logo: material/telescope
-    favicon: material/telescope
 
 site_name: dLux
 docs_dir: docs/
@@ -40,106 +38,107 @@ site_author: Louis Desdoigts
 site_url: https://louisdesdoigts.github.io/dlux/
 repo_url: https://github.com/LouisDesdoigts/dlux
 repo_name: louisdesdoigts/dlux
-edit_uri: "" 
+edit_uri: edit/main/docs/   # Directs where the "Edit" link points 
 
 strict: true # Prevent builds with warnings
 
 plugins:
-  - mkdocs-jupyter
-  - search
-  - same-dir
-  - autorefs
-  - simple:
-      ignore:
-        - tests
-        - src
-        - build
-  - mkdocstrings:
-      default_handler: python
+  - zensical/search      # High-performance built-in search
+  - mkdocstrings:        # Auto-generate API docs from code
       handlers:
         python:
-          paths: [src]
           options:
             docstring_style: "numpy"
-            members_order: source
+            show_root_heading: true      # Highly recommended for module-level docs
 
 markdown_extensions:
-  - admonition
-  - pymdownx.details
-  - pymdownx.extra
+  - admonition           # Support for !!! note "Title" blocks
+  - pymdownx.details     # Support for collapsible ??? note blocks
+  - pymdownx.superfences # Allows nesting code inside other blocks
+  - pymdownx.snippets:   # Allows including code snippets from files
+      base_path: [".", "docs"] # Look in the root AND the docs folder
+  - pymdownx.arithmatex: # Required for LaTeX math
+      generic: true
   - toc:
+      permalink: "¤"     # Clickable link next to headers
       toc_depth: 2
+  - attr_list            # Required to resize/style images {: width=300}
+  - md_in_html           # Allows using HTML tags inside Markdown
+
+
+# MathJax setup for LaTeX rendering
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+extra:
+  version:
+    provider: mike  # Tells the UI: "Look for mike's version list"
 
 # ===== Navigation =====
 nav:
-    - Home: README.md
+  - Home: index.md
+  - Tutorials:
+    - Introductory:
+      - A Basic Overview:         tutorials/introductory/overview.md
+      - Optical Systems:          tutorials/introductory/optical_systems.md
+      - Sources & Spectra:        tutorials/introductory/sources.md
+      # - Detectors:
+      # - Building Telescope:
+      # - Building a coronagraph:
+      # - The Wavefront and PSF classes:
+      # - functional psf modelling with the Utils module:
 
-    - Tutorials:
-        - Introductory:
-            - A Basic Overview:         tutorials/introductory/overview.md
-            - Optical Systems:          tutorials/introductory/optical_systems.md
-            - Sources & Spectra:        tutorials/introductory/sources.md
-            # - Detectors:
-            # - Building Telescope:
-            # - Building a coronagraph:
-            # - The Wavefront and PSF classes:
-            # - functional psf modelling with the Utils module:
+    - How-To's:
+      - Working with dLux objects: tutorials/howtos/dLux_objects.md
+      - Building Apertures:        tutorials/howtos/custom_apertures.md
+      # - Optimisation with dLux (Optimising many parameters, arbitrary loss functions):
+      # - Estimating Uncertainties (Fisher Information):
+      # - Sampling Posteriors (HMC):
+      # - Building your own classes (optical system, source):
 
-              
-        - How-To's:
-            - Working with dLux objects: tutorials/howtos/dLux_objects.md
-            - Building Apertures:        tutorials/howtos/custom_apertures.md
-            # - Optimisation with dLux (Optimising many parameters, arbitrary loss functions):
-            # - Estimating Uncertainties (Fisher Information):
-            # - Sampling Posteriors (HMC):
-            # - Building your own classes (optical system, source): 
+    - Examples:
+      - Phase Retrieval:          tutorials/examples/phase_retrieval_demo.md
+      - Phase Mask Design:        tutorials/examples/designing_a_mask.md
+      - Pixel Level Calibration:  tutorials/examples/flatfield_calibration.md
+      - Fisher Information:       tutorials/examples/fisher_information.md
+      - Parameter Inference:      tutorials/examples/HMC.md
 
-            
-        - Examples:
-            - Phase Retrieval:          tutorials/examples/phase_retrieval_demo.md
-            - Phase Mask Design:        tutorials/examples/designing_a_mask.md
-            - Pixel Level Calibration:  tutorials/examples/flatfield_calibration.md
-            - Fisher Information:       tutorials/examples/fisher_information.md
-            - Parameter Inference:      tutorials/examples/HMC.md
+  - API:
+    - Core API:
+      # - Overview:         API/core/core.md
+      - Wavefronts:       API/core/wavefronts.md
+      - Optical Systems:  API/core/optical_systems.md
+      - Spectra:          API/core/spectra.md
+      - Sources:          API/core/sources.md
+      - PSFs:             API/core/psfs.md
+      - Detectors:        API/core/detectors.md
+      - Instruments:      API/core/instruments.md
+      - Transformations:  API/core/transformations.md
 
-    - API:
-    
-        - Core API:
-            # - Overview:         API/core/core.md
-            - Wavefronts:       API/core/wavefronts.md
-            - Optical Systems:  API/core/optical_systems.md
-            - Spectra:          API/core/spectra.md
-            - Sources:          API/core/sources.md
-            - PSFs:             API/core/psfs.md
-            - Detectors:        API/core/detectors.md
-            - Instruments:      API/core/instruments.md
-            - Transformations:  API/core/transformations.md
+    - Layers API:
+      # - Overview:        API/layers/layers.md
+      - Optical Layers:   API/layers/optical_layers.md
+      - Optics:           API/layers/optics.md
+      - Propagators:      API/layers/propagators.md
+      - Apertures:        API/layers/apertures.md
+      - Aberrations:      API/layers/aberrations.md
+      - Detector Layers:  API/layers/detector_layers.md
+      - Unified Layers:   API/layers/unified_layers.md
 
-        - Layers API:
-            # - Overview:        API/layers/layers.md
-            - Optical Layers:   API/layers/optical_layers.md
-            - Optics:           API/layers/optics.md
-            - Propagators:      API/layers/propagators.md
-            - Apertures:        API/layers/apertures.md
-            - Aberrations:      API/layers/aberrations.md
-            - Detector Layers:  API/layers/detector_layers.md
-            - Unified Layers:   API/layers/unified_layers.md
+    - Utils API:
+      # - Overview:      API/utils/utils.md
+      - Array Operations: API/utils/array_ops.md
+      - Coordinates:      API/utils/coordinates.md
+      - Geometry:         API/utils/geometry.md
+      - Helpers:          API/utils/helpers.md
+      - Interpolation:    API/utils/interpolation.md
+      - Math:             API/utils/math.md
+      - Optics:           API/utils/optics.md
+      - Propagation:      API/utils/propagation.md
+      - Source:           API/utils/source.md
+      - Units:            API/utils/units.md
+      - Zernikes:         API/utils/zernikes.md
 
-        - Utils API:
-            # - Overview:      API/utils/utils.md
-            - Array Operations: API/utils/array_ops.md
-            - Coordinates:      API/utils/coordinates.md
-            - Geometry:         API/utils/geometry.md
-            - Helpers:          API/utils/helpers.md
-            - Interpolation:    API/utils/interpolation.md
-            - Math:             API/utils/math.md
-            - Optics:           API/utils/optics.md
-            - Propagation:      API/utils/propagation.md
-            - Source:           API/utils/source.md
-            - Units:            API/utils/units.md
-            - Zernikes:         API/utils/zernikes.md
-            
-
-    - FAQ & Troubleshooting: faq.md
-    - Change Log: CHANGELOG.md
-    - Contributing: CONTRIBUTING.md
+  - FAQ & Troubleshooting: faq.md
+  - Change Log: CHANGELOG.md
+  - Contributing: CONTRIBUTING.md
