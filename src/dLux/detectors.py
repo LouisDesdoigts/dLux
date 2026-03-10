@@ -20,6 +20,9 @@ class BaseDetector(zdx.Base):
 
     Concrete detectors implement `model(...)` to transform input PSFs into
     detector-space outputs.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseDetector.png)
     """
 
     @abstractmethod

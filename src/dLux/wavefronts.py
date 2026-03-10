@@ -15,6 +15,9 @@ class Wavefront(zdx.Base):
     A simple class to hold the state of some wavefront as it is transformed and
     propagated throughout an optical system. All wavefronts assume square arrays.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Wavefront.png)
+
     Attributes
     ----------
     wavelength : float, meters

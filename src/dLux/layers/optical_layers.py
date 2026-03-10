@@ -28,6 +28,9 @@ class BaseLayer(zdx.Base):
 
     Layer objects define a callable transform interface that maps one target
     object to another (for example Wavefront -> Wavefront or PSF -> PSF).
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseLayer.png)
     """
 
     @abstractmethod
@@ -52,6 +55,9 @@ class OpticalLayer(BaseLayer):
     """
     The base optical layer class. Optical layer classes operate on `Wavefront` objects
     through their `apply` method, and are stored by the `OpticalSystem` classes.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/OpticalLayer.png)
     """
 
     @abstractmethod

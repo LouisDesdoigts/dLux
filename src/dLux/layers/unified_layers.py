@@ -14,6 +14,9 @@ from ..psfs import PSF
 class UnifiedLayer(OpticalLayer, DetectorLayer):
     """
     Base class for unified layers that can be applied to either wavefronts or PSFs.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/UnifiedLayer.png)
     """
 
 

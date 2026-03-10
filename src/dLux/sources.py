@@ -83,6 +83,9 @@ class BaseSource(zdx.Base):
 
     Concrete source classes define normalisation behavior and the optical
     modelling interface via `normalise(...)` and `model(...)`.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseSource.png)
     """
 
     def __init_subclass__(cls, **kwargs):

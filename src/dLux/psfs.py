@@ -15,6 +15,9 @@ class PSF(zdx.Base):
     A simple class that holds the state of a PSF as it is transformed by detector
     layers.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/PSF.png)
+
     Attributes
     ----------
     data : Array

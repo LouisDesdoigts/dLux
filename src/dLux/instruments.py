@@ -22,6 +22,9 @@ class Instrument(zdx.Base):
 
     Concrete instrument classes must implement `model(...)` to produce an image
     array or PSF object from their configured components.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Instrument.png)
     """
 
     @abstractmethod
@@ -39,6 +42,9 @@ class Telescope(Instrument):
 
     To generate more complex instruments or a set of observations, the `Telescope`
     class can be inherited and modified to suit the needs of the user.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Telescope.png)
 
     Attributes
     ----------
@@ -171,6 +177,9 @@ class Dither(Telescope):
     source positions before modelling the instrument. Serves both as a demonstration
     of how to extend the `Telescope` class and as a useful tool for modelling
     dithered observations.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Dither.png)
 
     Attributes
     ----------

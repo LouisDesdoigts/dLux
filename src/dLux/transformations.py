@@ -16,6 +16,9 @@ class BaseCoordTransform(zdx.Base):
 
     Provides a common interface for applying transformations to coordinates,
     including a backwards-compatible `apply` method.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseCoordTransform.png)
     """
 
     def __init_subclass__(cls, **kwargs):
@@ -162,6 +165,9 @@ class CoordTransform(BaseCoordTransform):
 class DistortedCoords(BaseCoordTransform):
     """
     A class to handle coordinates distorted by a 2D polynomial distortion.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/DistortedCoords.png)
 
     Attributes
     ----------

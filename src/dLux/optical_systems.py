@@ -32,6 +32,9 @@ class BaseOpticalSystem(zdx.Base):
 
     Defines the required propagation and source-modelling interfaces used by
     concrete optical-system implementations.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseOpticalSystem.png)
     """
 
     def __init_subclass__(cls, **kwargs):

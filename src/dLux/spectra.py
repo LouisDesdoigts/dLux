@@ -15,6 +15,9 @@ class BaseSpectrum(zdx.Base):
 
     Concrete spectrum classes must provide `normalise(...)` and expose spectral
     weighting over configured wavelengths.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseSpectrum.png)
     """
 
     @abstractmethod
