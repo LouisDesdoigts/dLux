@@ -5,6 +5,7 @@ import jax.numpy as np
 from jax import vmap, Array
 import zodiax as zdx
 import dLux.utils as dlu
+from .psfs import PSF
 
 __all__ = ["Wavefront"]
 
@@ -292,6 +293,18 @@ class Wavefront(zdx.Base):
             The PSF of the wavefront.
         """
         return np.abs(self.phasor) ** 2
+
+    def to_PSF(self: Wavefront) -> PSF:
+        """
+        Converts the wavefront to a dLux PSF object.
+
+        Returns
+        -------
+        psf : PSF
+            A PSF object containing the current wavefront intensity and
+            pixel scale.
+        """
+        return PSF(self.psf, self.pixel_scale)
 
     @property
     def wavenumber(self: Wavefront) -> Array:
