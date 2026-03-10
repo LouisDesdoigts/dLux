@@ -30,6 +30,8 @@ dev = [
     "pytest-cov",
     "black",
     "ruff",
+    "selenium",           # Used to generate UML diagrams in documentation
+    "pylint",             # Provides pyreverse for UML generation
     "pre-commit",
     "zensical",           # The new documentation engine
     "mkdocstrings-python" # Required for API generation
