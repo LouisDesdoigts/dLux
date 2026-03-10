@@ -360,7 +360,7 @@ class LayeredOpticalSystem(OpticalSystem):
             offset = np.zeros(2)
 
         # Initialise wavefront
-        wavefront = Wavefront(self.wf_npixels, self.diameter, wavelength)
+        wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
         wavefront = wavefront.tilt(offset)
 
         # Apply layers

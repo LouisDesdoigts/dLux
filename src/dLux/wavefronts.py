@@ -68,8 +68,8 @@ class Wavefront(zdx.Base):
 
     def __init__(
         self: Wavefront,
-        npixels: int,
         wavelength: float,
+        npixels: int,
         diameter: float = None,
         pixel_scale: float = None,
         plane: str = "Pupil",
@@ -78,10 +78,10 @@ class Wavefront(zdx.Base):
         """
         Parameters
         ----------
-        npixels : int
-            The number of pixels that represent the `Wavefront`.
         wavelength : float, meters
             The wavelength of the `Wavefront`.
+        npixels : int
+            The number of pixels that represent the `Wavefront`.
         diameter : float = None, meters
             The total diameter of the `Wavefront`. Either diameter or pixel_scale
             must be provided.
