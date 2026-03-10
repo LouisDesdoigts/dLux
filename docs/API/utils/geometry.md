@@ -8,6 +8,9 @@ TODO: Little tutorial on generating apertures.
 
 ---
 
+???+ info "combine"
+    ::: dLux.utils.geometry.combine
+
 ???+ info "circle"
     ::: dLux.utils.geometry.circle
 
@@ -22,9 +25,6 @@ TODO: Little tutorial on generating apertures.
 
 ???+ info "spider"
     ::: dLux.utils.geometry.spider
-
-???+ info "combine"
-    ::: dLux.utils.geometry.combine
 
 ???+ info "soft_circle"
     ::: dLux.utils.geometry.soft_circle
