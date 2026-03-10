@@ -27,6 +27,9 @@ class ApertureLayer(OpticalLayer):
     """
     Base ApertureLayer class, instantiates the normalise attribute.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ApertureLayer.png)
+
     Attributes
     ----------
     normalise : bool
@@ -71,6 +74,9 @@ class ApertureLayer(OpticalLayer):
 class BaseDynamicAperture(ApertureLayer):
     """
     An abstract base class that implements the coordinate transformation attribute.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseDynamicAperture.png)
 
     Attributes
     ----------
@@ -150,6 +156,9 @@ class DynamicAperture(BaseDynamicAperture):
     """
     An abstract base class that implements the methods required to provide dynamic soft
     edges to the apertures, and the ability to occult the aperture.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/DynamicAperture.png)
 
     Attributes
     ----------
@@ -771,6 +780,9 @@ class CompositeAperture(BaseDynamicAperture):
     """
     Base class for dynamically generated Apertures that are a combination of various
     different aperture shapes. Both jit and grad compatible.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/CompositeAperture.png)
 
     Attributes
     ----------

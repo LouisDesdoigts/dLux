@@ -29,6 +29,9 @@ class SimpleSpectrum(BaseSpectrum):
     """
     Base class for arbitrary spectral parametrisations.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/SimpleSpectrum.png)
+
     Attributes
     ----------
     wavelengths : Array, metres

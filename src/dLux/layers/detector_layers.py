@@ -22,6 +22,9 @@ class DetectorLayer(BaseLayer):
     """
     A base detector layer class to help with type checking throughout the rest of the
     software.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/DetectorLayer.png)
     """
 
     def __init__(self: DetectorLayer):

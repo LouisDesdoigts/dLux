@@ -15,6 +15,9 @@ class Propagator(OpticalLayer):
     """
     Base propagator class, instantiating the focal_length attribute.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Propagator.png)
+
     Attributes
     ----------
     focal_length : float

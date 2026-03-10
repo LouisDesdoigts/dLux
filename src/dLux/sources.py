@@ -130,6 +130,9 @@ class Source(BaseSource):
     """
     Base source class that implements the spectra attribute.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Source.png)
+
     Attributes
     ----------
     spectrum : Spectrum

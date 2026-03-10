@@ -138,6 +138,9 @@ class OpticalSystem(BaseOpticalSystem):
     """
     Base optics class implementing both the `propagate` and `model` methods that are
     universal to all optics classes.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/OpticalSystem.png)
     """
 
     def propagate(
@@ -234,6 +237,9 @@ class ParametricOpticalSystem(OpticalSystem):
     """
     Implements the attributes required for an optical system with a specific output
     pixel scale and number of pixels.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ParametricOpticalSystem.png)
 
     Attributes
     ----------
