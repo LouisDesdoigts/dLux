@@ -175,7 +175,7 @@ class AberratedLayer(OpticalLayer):
         super().__init__(**kwargs)
 
     def __call__(self: AberratedLayer, wavefront: Wavefront) -> Wavefront:
-        wavefront += self.opd
+        wavefront = wavefront.add_opd(self.opd)
         wavefront = wavefront.add_phase(self.phase)
         return wavefront
 
@@ -257,7 +257,7 @@ class BasisLayer(OpticalLayer):
         if self.as_phase:
             wavefront = wavefront.add_phase(output)
         else:
-            wavefront += output
+            wavefront = wavefront.add_opd(output)
         return wavefront
 
 

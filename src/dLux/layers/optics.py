@@ -88,7 +88,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
             The transformed wavefront.
         """
         wavefront *= self.transmission
-        wavefront += self.opd
+        wavefront = wavefront.add_opd(self.opd)
         wavefront = wavefront.add_phase(self.phase)
         if self.normalise:
             wavefront = wavefront.normalise()
@@ -169,7 +169,7 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
         if self.as_phase:
             wavefront = wavefront.add_phase(self.eval_basis())
         else:
-            wavefront += self.eval_basis()
+            wavefront = wavefront.add_opd(self.eval_basis())
 
         if self.normalise:
             wavefront = wavefront.normalise()
