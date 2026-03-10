@@ -215,7 +215,7 @@ class OpticalSystem(BaseOpticalSystem):
         # ).multiply("amplitude", weight**0.5)
         prop_fn = lambda wavelength, weight: self.propagate_mono(
             wavelength, offset, return_wf=True
-        ).multiply("amplitude", weight**0.5)
+        ).multiply("phasor", weight**0.5)
         wf = eqx.filter_vmap(prop_fn)(wavelengths, weights)
 
         # Return PSF, Wavefront, or PSF array
