@@ -31,15 +31,20 @@ def pad_to(array: Array, npixels: int, fill: float = 0.0) -> Array:
     """
     npixels_in = array.shape[-1]
     if npixels_in % 2 != npixels % 2:
+        parity_in = "even" if npixels_in % 2 == 0 else "odd"
+        parity_out = "even" if npixels % 2 == 0 else "odd"
+        suggested_npixels = npixels + 1
         raise ValueError(
-            "Only supports even -> even or odd -> odd padding."
-            f"Input array has {npixels_in} pixels, and requested padding to "
-            f"{npixels} pixels"
+            f"Center-preserving padding requires parity consistency, "
+            f"i.e. even -> even or odd -> odd: "
+            f"input array ({npixels_in} pixels, {parity_in}) cannot be padded "
+            f"to {npixels} pixels ({parity_out} parity). "
+            f"Try npixels={suggested_npixels} instead."
         )
     if npixels < npixels_in:
         raise ValueError(
-            "npixels must be larger than the current array, "
-            f"npixels_in = {npixels_in} < npixels = {npixels}"
+            f"Cannot pad to smaller size: input has {npixels_in} pixels, "
+            f"target is {npixels} pixels. Padding requires npixels >= {npixels_in}."
         )
 
     return np.pad(array, (npixels - npixels_in) // 2, constant_values=fill)
@@ -65,15 +70,20 @@ def crop_to(array: Array, npixels: int) -> Array:
     """
     npixels_in = array.shape[-1]
     if npixels_in % 2 != npixels % 2:
+        parity_in = "even" if npixels_in % 2 == 0 else "odd"
+        parity_out = "even" if npixels % 2 == 0 else "odd"
+        suggested_npixels = npixels - 1
         raise ValueError(
-            "Only supports even -> even or odd -> odd cropping."
-            f"Input array has {npixels_in} pixels, and requested cropping to "
-            f"{npixels} pixels"
+            f"Center-preserving cropping requires parity consistency, "
+            f"i.e. even -> even or odd -> odd: "
+            f"input array ({npixels_in} pixels, {parity_in}) cannot be cropped "
+            f"to {npixels} pixels ({parity_out} parity). "
+            f"Try npixels={suggested_npixels} instead."
         )
     if npixels > npixels_in:
         raise ValueError(
-            "npixels must be smaller than the current array, "
-            f"npixels_in = {npixels_in} > npixels = {npixels}"
+            f"Cannot crop to larger size: input has {npixels_in} pixels, "
+            f"target is {npixels} pixels. Cropping requires npixels <= {npixels_in}."
         )
 
     start, stop = (npixels_in - npixels) // 2, (npixels_in + npixels) // 2

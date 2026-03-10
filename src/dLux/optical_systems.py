@@ -164,7 +164,8 @@ class OpticalSystem(BaseOpticalSystem):
         """
         if return_wf and return_psf:
             raise ValueError(
-                "return_wf and return_psf cannot both be True. Please choose one."
+                "Cannot return both Wavefront and PSF objects. Choose one: "
+                "return_wf=True for Wavefront, or return_psf=True for PSF."
             )
 
         wavelengths = np.atleast_1d(wavelengths)
@@ -176,9 +177,9 @@ class OpticalSystem(BaseOpticalSystem):
         # Check wavelengths and weights
         if weights.shape != wavelengths.shape:
             raise ValueError(
-                "wavelengths and weights must have the "
-                f"same shape, got {wavelengths.shape} and {weights.shape} "
-                "respectively."
+                f"Wavelength and weight shape mismatch: "
+                f"wavelengths {wavelengths.shape} vs weights {weights.shape}. "
+                f"Must have same length and dimensions."
             )
 
         # Check offset
@@ -188,7 +189,9 @@ class OpticalSystem(BaseOpticalSystem):
             offset = np.asarray(offset)
         if offset.shape != (2,):
             raise ValueError(
-                "offset must be a 1d array of shape (2,), " f"got shape {offset.shape}."
+                f"offset must be [x, y] array of shape (2,), "
+                f"got shape {offset.shape}. "
+                "Pass offset as [on_axis_x, on_axis_y] angles in radians."
             )
 
         # Calculate - note we multiply by sqrt(weight) to account for the
@@ -327,7 +330,11 @@ class LayeredOpticalSystem(OpticalSystem):
         for layer in list(self.layers.values()):
             if hasattr(layer, key):
                 return getattr(layer, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
+        raise dlu.helpers.missing_attribute_error(
+            self,
+            key,
+            list(self.layers.keys()),
+        )
 
     def propagate_mono(
         self: LayeredOpticalSystem,

@@ -31,7 +31,8 @@ __all__ = [
 def _validate_return_mode(return_wf: bool, return_psf: bool) -> None:
     if return_wf and return_psf:
         raise ValueError(
-            "return_wf and return_psf cannot both be True. Please choose one."
+            "Cannot return both Wavefront and PSF objects. Choose one: "
+            "set return_wf=True for Wavefront, or return_psf=True for PSF object."
         )
 
 
@@ -59,7 +60,9 @@ def _infer_n_wavelengths(
         )
 
     if not isinstance(spectrum, spectra.BaseSpectrum):
-        raise TypeError("spectrum must be a dLux Spectrum object.")
+        raise TypeError(
+            "spectrum must be a dLux BaseSpectrum instance from dLux.spectra."
+        )
 
     return len(np.asarray(spectrum.wavelengths, dtype=float))
 
@@ -67,7 +70,10 @@ def _infer_n_wavelengths(
 def _as_position_2d(position: Array) -> Array:
     position = np.asarray(position, dtype=float)
     if position.shape != (2,):
-        raise ValueError("position must be a 1d array of shape (2,).")
+        raise ValueError(
+            f"position must be a 1d array of shape (2,), got shape {position.shape}. "
+            "Pass position=[x, y] where x, y are on-sky angles in radians."
+        )
     return position
 
 
@@ -142,7 +148,12 @@ class Source(BaseSource):
         # Spectrum
         if spectrum is not None:
             if not isinstance(spectrum, spectra.BaseSpectrum):
-                raise TypeError("spectrum must be a dLux Spectrum object.")
+                raise TypeError(
+                    f"spectrum must be a dLux BaseSpectrum instance from "
+                    f"dLux.spectra, "
+                    f"got {type(spectrum).__name__}. "
+                    "Use a dLux spectrum type from dLux.spectra."
+                )
             self.spectrum = spectrum
         else:
             self.spectrum = spectra.Spectrum(wavelengths, weights)
@@ -163,8 +174,19 @@ class Source(BaseSource):
         """
         if hasattr(self.spectrum, key):
             return getattr(self.spectrum, key)
-        else:
-            raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
+        spectrum_state = [
+            a for a in self.spectrum.__dict__.keys() if not a.startswith("_")
+        ]
+        core_spectrum_fields = [
+            name for name in ("wavelengths", "weights") if hasattr(self.spectrum, name)
+        ]
+        spectrum_attrs = sorted(set(spectrum_state + core_spectrum_fields))
+        raise dlu.helpers.missing_attribute_error(
+            self,
+            key,
+            spectrum_attrs,
+            hint="This object forwards spectrum attributes via '.spectrum'.",
+        )
 
     def normalise(self: Source) -> Source:
         """
@@ -720,7 +742,11 @@ class Scene(BaseSource):
         """
         if key in self.sources.keys():
             return self.sources[key]
-        raise AttributeError(f"{self.__class__.__name__} has no attribute " f"{key}.")
+        raise dlu.helpers.missing_attribute_error(
+            self,
+            key,
+            list(self.sources.keys()),
+        )
 
     def model(
         self: Scene,

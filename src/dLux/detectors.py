@@ -69,7 +69,11 @@ class LayeredDetector(BaseDetector):
         """
         if key in self.layers.keys():
             return self.layers[key]
-        raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
+        raise dlu.helpers.missing_attribute_error(
+            self,
+            key,
+            list(self.layers.keys()),
+        )
 
     def model(
         self: LayeredDetector,

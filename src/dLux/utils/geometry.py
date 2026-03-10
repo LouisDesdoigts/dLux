@@ -501,7 +501,6 @@ def line_distance(coords: Array, m: float, xy: Array) -> Array:
     x, y = coords
 
     # First determine the case: horizontal, vertical or regular
-    # NOTE: We may be able to improve here my using np.where
     case = (m == 0) * 0 + (m == np.inf) * 1 + (m != 0) * (m != np.inf) * 2
 
     # Now we determine the sign on the y-intersection so we know when to flip

@@ -10,6 +10,7 @@ __all__ = [
     "insert_layer",
     "remove_layer",
     "inherit_docstrings",
+    "missing_attribute_error",
 ]
 
 
@@ -212,3 +213,39 @@ def remove_layer(layers: dict, key: str) -> dict:
     """
     layers.pop(key)
     return layers
+
+
+def missing_attribute_error(
+    owner: Any,
+    key: str,
+    valid_attrs: list[str] = None,
+    hint: str = None,
+) -> AttributeError:
+    """
+    Builds a consistent AttributeError message for missing attributes.
+
+    Parameters
+    ----------
+    owner : Any
+        The object raising the error.
+    key : str
+        The missing attribute name.
+    valid_attrs : list[str] = None
+        Optional list of valid attribute names to surface.
+    hint : str = None
+        Optional additional guidance appended to the message.
+
+    Returns
+    -------
+    error : AttributeError
+        The formatted AttributeError instance.
+    """
+    message = f"{owner.__class__.__name__} has no attribute '{key}'."
+    if valid_attrs:
+        attrs = sorted(valid_attrs)
+        attrs_str = ", ".join(attrs[:6])
+        ellipsis = "..." if len(attrs) > 6 else ""
+        message += f" Valid attributes: {attrs_str}{ellipsis}"
+    if hint:
+        message += f" {hint}"
+    return AttributeError(message)

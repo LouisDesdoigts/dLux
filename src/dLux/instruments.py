@@ -6,6 +6,7 @@ from typing import Any
 import zodiax as zdx
 from jax import Array, vmap
 import jax.numpy as np
+import dLux.utils as dlu
 
 from .optical_systems import BaseOpticalSystem as OpticalSystem
 from .detectors import BaseDetector as Detector
@@ -71,7 +72,11 @@ class Telescope(Instrument):
         """
         # Optics
         if not isinstance(optics, OpticalSystem):
-            raise TypeError("optics must be an OpticalSystem object.")
+            raise TypeError(
+                f"optics must be an OpticalSystem instance, "
+                f"got {type(optics).__name__}. "
+                "Use a dLux optics type from dLux.optical_systems."
+            )
         self.optics = optics
 
         # Sources
@@ -79,7 +84,10 @@ class Telescope(Instrument):
             self.source = source
         elif isinstance(source, tuple):
             if len(source) != 2 or not isinstance(source[1], Source):
-                raise TypeError("source tuple must be of the form (key, Source).")
+                raise TypeError(
+                    f"source tuple must be of the form (key: str, Source: Source), "
+                    f"got {type(source).__name__} with length {len(source)}."
+                )
             self.source = source[1]
         else:
             self.source = Scene(source)
@@ -87,7 +95,8 @@ class Telescope(Instrument):
         # Detector
         if not isinstance(detector, Detector) and detector is not None:
             raise TypeError(
-                "detector must be a Detector object. " f"Got type {type(detector)}"
+                f"detector must be a Detector instance, got {type(detector).__name__}. "
+                "Use a dLux detector type from dLux.detectors."
             )
         self.detector = detector
 
@@ -109,7 +118,11 @@ class Telescope(Instrument):
         for attribute in self.__dict__.values():
             if hasattr(attribute, key):
                 return getattr(attribute, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
+        raise dlu.helpers.missing_attribute_error(
+            self,
+            key,
+            list(self.__dict__.keys()),
+        )
 
     def model(self: Telescope, return_psf: bool = False) -> Array | PSF:
         """

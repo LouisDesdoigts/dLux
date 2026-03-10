@@ -65,10 +65,13 @@ class Wavefront(zdx.Base):
         """
         # Handle diameter vs pixel_scale
         if diameter is None and pixel_scale is None:
-            raise ValueError("Either diameter or pixel_scale must be provided.")
+            raise ValueError("Provide one: diameter or pixel_scale.")
         if diameter is not None and pixel_scale is not None:
             raise ValueError(
-                "Cannot specify both diameter and pixel_scale. Choose one."
+                "Cannot specify both 'diameter' and 'pixel_scale' - they are "
+                "interdependent (diameter = pixel_scale × npixels). Choose one: "
+                "use 'diameter' for wavefront diameter, or 'pixel_scale' for "
+                "wavefront sampling."
             )
 
         self.wavelength = np.asarray(wavelength, float)

@@ -98,9 +98,12 @@ class BaseDynamicAperture(ApertureLayer):
         super().__init__(normalise=normalise)
         if transformation is not None:
             if not isinstance(transformation, CoordTransform):
+                actual_type = type(transformation).__name__
                 raise TypeError(
-                    "transformation must be a CoordTransform object. "
-                    "Use the CoordTransform class to create one."
+                    f"transformation must be a CoordTransform instance, "
+                    f"got {actual_type}. Import with: "
+                    "from dLux.transformations import CoordTransform. "
+                    "Use a CoordTransform-compatible type from this module."
                 )
         self.transformation = transformation
 
@@ -113,7 +116,14 @@ class BaseDynamicAperture(ApertureLayer):
         """Raises transformation attributes to the ApertureLayer level."""
         if hasattr(self.transformation, key):
             return getattr(self.transformation, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
+        own_attrs = [a for a in self.__dict__.keys() if not a.startswith("_")]
+        transform_attrs = []
+        if self.transformation is not None:
+            transform_attrs = [
+                a for a in self.transformation.__dict__.keys() if not a.startswith("_")
+            ]
+        valid_attrs = sorted(set(own_attrs + transform_attrs))
+        raise dlu.helpers.missing_attribute_error(self, key, valid_attrs)
 
     def __call__(self: BaseDynamicAperture, wavefront: Wavefront) -> Wavefront:
         """
@@ -790,8 +800,11 @@ class CompositeAperture(BaseDynamicAperture):
         """
         if key in list(self.apertures.keys()):
             return self.apertures[key]
-        else:
-            raise AttributeError(f"{self.__class__.__name__} has no attribute {key}.")
+        raise dlu.helpers.missing_attribute_error(
+            self,
+            key,
+            list(self.apertures.keys()),
+        )
 
     def _aberrated_apertures(self: ApertureLayer) -> list[ApertureLayer]:
         """

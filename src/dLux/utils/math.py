@@ -49,17 +49,26 @@ def gaussian(
     if mean.size == 1:
         mean = np.repeat(mean, ndim)
     elif mean.size != ndim:
-        raise ValueError("mean must be scalar or have one value per dimension.")
+        raise ValueError(
+            f"mean shape mismatch: got {mean.size} elements but expected "
+            f"either 1 (scalar) or {ndim} (one per dimension)."
+        )
 
     if std.size == 1:
         std = np.repeat(std, ndim)
     elif std.size != ndim:
-        raise ValueError("std must be scalar or have one value per dimension.")
+        raise ValueError(
+            f"std shape mismatch: got {std.size} elements but expected "
+            f"either 1 (scalar) or {ndim} (one per dimension)."
+        )
 
     if npix_arr.size == 1:
         npix_arr = np.repeat(npix_arr, ndim)
     elif npix_arr.size != ndim:
-        raise ValueError("npix must be scalar or have one value per dimension.")
+        raise ValueError(
+            f"npix shape mismatch: got {npix_arr.size} elements but expected "
+            f"either 1 (scalar) or {ndim} (one per dimension)."
+        )
 
     # Generate per-axis coordinates and corresponding 1D Gaussians
     linspaces = jtu.map(
