@@ -294,7 +294,7 @@ class Wavefront(zdx.Base):
         """
         return np.abs(self.phasor) ** 2
 
-    def to_PSF(self: Wavefront) -> PSF:
+    def to_psf(self: Wavefront) -> PSF:
         """
         Converts the wavefront to a dLux PSF object.
 
