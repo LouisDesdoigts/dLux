@@ -1,3 +1,4 @@
+import inspect
 import subprocess
 import dLux as dl
 from jax.tree_util import tree_flatten
@@ -42,9 +43,11 @@ def save_to_png(html_file, image_file):
     driver.quit()
 
 
-classes = tree_flatten(dl.__all__)[0]
 dl_dict = dl.__dict__
-paths = [str(dl_dict[c]).split("'")[1] for c in classes]
+classes = [
+    name for name in tree_flatten(dl.__all__)[0] if inspect.isclass(dl_dict.get(name))
+]
+paths = [f"{dl_dict[c].__module__}.{dl_dict[c].__qualname__}" for c in classes]
 depths = [get_parent_depth(dl_dict[c]) for c in classes]
 cwd = os.getcwd()
 
@@ -73,12 +76,14 @@ for path, depth in zip(paths, depths):
 
     # Save to png
     file_name = path.split(".")[-1]
-    save_to_png(
-        f"{cwd}/assets/uml/{path}.html", f"{cwd}/assets/uml/{file_name}.png"
-    )
+    html_path = f"{cwd}/assets/uml/{path}.html"
+    if not os.path.exists(html_path):
+        print(f"Warning: pyreverse did not generate output for {path}, skipping.")
+        continue
+    save_to_png(html_path, f"{cwd}/assets/uml/{file_name}.png")
 
     # Remove html file
-    os.remove(f"{cwd}/assets/uml/{path}.html")
+    os.remove(html_path)
 
 # # Generate for whole package
 # subprocess.run(
