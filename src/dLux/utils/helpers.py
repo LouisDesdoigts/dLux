@@ -9,6 +9,7 @@ __all__ = [
     "list2dictionary",
     "insert_layer",
     "remove_layer",
+    "imshow_extent",
     "inherit_docstrings",
     "missing_attribute_error",
 ]
@@ -213,6 +214,24 @@ def remove_layer(layers: dict, key: str) -> dict:
     """
     layers.pop(key)
     return layers
+
+
+def imshow_extent(size: float) -> Array:
+    """
+    Returns a square imshow extent in [xmin, xmax, ymin, ymax] order.
+
+    Parameters
+    ----------
+    size : float
+        The total width of the image in the relevant physical units.
+
+    Returns
+    -------
+    extent : Array
+        The extent array to pass directly to matplotlib imshow.
+    """
+    half_size = np.asarray(size, dtype=float) / 2
+    return np.array([-half_size, half_size, -half_size, half_size])
 
 
 def missing_attribute_error(
