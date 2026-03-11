@@ -601,8 +601,7 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The resized wavefront.
         """
-        phasor = vmap(dlu.resize, (0, None, None))(self.phasor, npixels, 0j)
-        return self.set(phasor=phasor)
+        return self.set(phasor=dlu.resize(self.phasor, npixels, 0j))
 
     def _prep_prop(self: Wavefront, focal_length) -> tuple:
         """
