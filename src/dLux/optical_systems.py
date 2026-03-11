@@ -277,6 +277,19 @@ class ParametricOpticalSystem(OpticalSystem):
         self.psf_pixel_scale = float(psf_pixel_scale)
         super().__init__(**kwargs)
 
+    @property
+    def fov(self: ParametricOpticalSystem) -> float:
+        """
+        Returns the field of view of the optical system in the units of the pixel scale.
+
+        Returns
+        -------
+        fov : float
+            The field of view of the optical system in the units of the pixel scale.
+
+        """
+        return self.psf_npixels * self.psf_pixel_scale
+
 
 ##################
 # Public Classes #
