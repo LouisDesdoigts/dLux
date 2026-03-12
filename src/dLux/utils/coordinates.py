@@ -2,6 +2,7 @@ import jax.numpy as np
 import jax.tree as jtu
 from jax import Array
 from .math import triangular_number
+from .helpers import _cast_tuple, _cast_scalar
 
 __all__ = [
     "cart2polar",
@@ -281,6 +282,16 @@ def nd_coords(
     """
     if indexing not in ["xy", "ij"]:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
+
+    # Validate npixels and ensure tuple
+    npixels = _cast_tuple(npixels, "npixels")
+
+    # Get the number of dimensions
+    ndim = len(npixels)
+
+    # Validate and ensure tuples
+    pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
+    offsets = _cast_scalar(offsets, ndim, "offsets")
 
     # Promote npixels to tuple to handle 1d case
     if not isinstance(npixels, tuple):

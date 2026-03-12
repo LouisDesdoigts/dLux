@@ -268,3 +268,47 @@ def missing_attribute_error(
     if hint:
         message += f" {hint}"
     return AttributeError(message)
+
+
+def _cast_tuple(x, name):
+
+    # Validate npixels and ensure tuple
+    if isinstance(x, int):
+        x = (x,)
+    elif isinstance(x, tuple):
+        for n in x:
+            if not isinstance(n, int):
+                raise ValueError(f"All {name} must be integers.")
+    else:
+        raise ValueError(f"{name} must be an int or a tuple of ints.")
+
+    return x
+
+
+def _cast_scalar(x, ndim, name):
+
+    _is_numeric = lambda x: isinstance(x, (int, float))
+    _is_scalar_array = lambda x: isinstance(x, Array) and x.ndim == 0
+    _is_scalar = lambda x: _is_numeric(x) or _is_scalar_array(x)
+
+    if _is_scalar(x):
+        x = (x,) * ndim
+    elif isinstance(x, Array):
+        if x.ndim != 1 or x.shape[0] != ndim:
+            raise ValueError(f"Length of {name} array must match number of dimensions.")
+        x = tuple(x)
+    elif isinstance(x, tuple):
+        if len(x) != ndim:
+            raise ValueError(f"Length of {name} must match number of dimensions.")
+        for z in x:
+            if not _is_scalar(z):
+                raise ValueError(
+                    f"All {name} must be scalars (int, float, or scalar Array)."
+                )
+    else:
+        raise ValueError(
+            f"{name} must be a scalar (int, float, or scalar Array) or "
+            f"a tuple of scalars."
+        )
+
+    return x
