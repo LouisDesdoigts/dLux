@@ -2,7 +2,8 @@ import jax.numpy as np
 import jax.tree as jtu
 from jax import Array
 from .math import triangular_number
-from .helpers import _cast_tuple, _cast_scalar
+
+from .helpers import _cast_tuple, _cast_scalar, _input_len
 
 __all__ = [
     "cart2polar",
@@ -239,9 +240,9 @@ def pixel_coords(
 
 
 def nd_coords(
-    npixels: int | tuple,
-    pixel_scales: tuple | float = 1.0,
-    offsets: tuple | float = 0.0,
+    npixels: int | tuple[int, ...],
+    pixel_scales: float | tuple[float, ...] = 1.0,
+    offsets: float | tuple[float, ...] = 0.0,
     indexing: str = "xy",
 ) -> Array:
     """
@@ -260,13 +261,13 @@ def nd_coords(
 
     Parameters
     ----------
-    npixels : int | tuple
+    npixels : int | tuple[int, ...]
         The number of pixels in each dimension.
-    pixel_scales : tuple | float = 1.
+    pixel_scales : float | tuple[float, ...] = 1.0
         The pixel_scales of each dimension. If a tuple, the length
         of the tuple must match the number of dimensions. If a float, the same
         scale is applied to all dimensions.
-    offsets : tuple | float = 0.
+    offsets : float | tuple[float, ...] = 0.0
         The offset of the pixel centers in each dimension. If a tuple, the
         length of the tuple must match the number of dimensions. If a float,
         the same offset is applied to all dimensions.
@@ -287,23 +288,13 @@ def nd_coords(
     npixels = _cast_tuple(npixels, "npixels")
 
     # Get the number of dimensions
-    ndim = len(npixels)
+    ndim = max(
+        len(npixels), _input_len(pixel_scales, "mean"), _input_len(offsets, "std")
+    )
 
     # Validate and ensure tuples
     pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
     offsets = _cast_scalar(offsets, ndim, "offsets")
-
-    # Promote npixels to tuple to handle 1d case
-    if not isinstance(npixels, tuple):
-        npixels = (npixels,)
-
-    # Assume equal pixel scales if not given
-    if not isinstance(pixel_scales, tuple):
-        pixel_scales = (pixel_scales,) * len(npixels)
-
-    # Assume no offset if not given
-    if not isinstance(offsets, tuple):
-        offsets = (offsets,) * len(npixels)
 
     def pixel_fn(n, offset, scale):
         start = -(n - 1) / 2 * scale - offset

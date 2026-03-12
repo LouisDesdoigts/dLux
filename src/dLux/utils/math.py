@@ -4,6 +4,8 @@ import jax.scipy as jsp
 import jax.tree as jtu
 from typing import Any
 
+from .helpers import _cast_scalar, _cast_tuple, _input_len
+
 __all__ = [
     "gaussian",
     "mv_gaussian",
@@ -17,7 +19,7 @@ __all__ = [
 def gaussian(
     mean: float | Array = 0.0,
     std: float | Array = 1.0,
-    npix: int | Array = 64,
+    npix: int | tuple[int, ...] = 64,
     extent: float = 5.0,
 ) -> Array:
     """
@@ -29,8 +31,8 @@ def gaussian(
         The center position(s) of the Gaussian. Scalar for 1D, array for nD.
     std : float | Array = 1.0
         The standard deviation(s) of the Gaussian. Scalar for 1D, array for nD.
-    npix : int | Array = 64
-        The number of pixels along each axis. Scalar for 1D, array for nD.
+    npix : int | tuple[int, ...] = 64
+        The number of pixels along each axis. Scalar for 1D, tuple for nD.
     extent : float = 5.0
         The extent of the grid in units of standard deviation on each side.
 
@@ -39,47 +41,22 @@ def gaussian(
     kernel : Array
         The normalized n-dimensional Gaussian kernel.
     """
-    # Ensure arrays
-    mean = np.atleast_1d(np.asarray(mean, dtype=float))
-    std = np.atleast_1d(np.asarray(std, dtype=float))
-    npix_arr = np.atleast_1d(np.asarray(npix, dtype=int))
-    ndim = max(mean.size, std.size, npix_arr.size)
-
-    # Broadcast scalar inputs to nD
-    if mean.size == 1:
-        mean = np.repeat(mean, ndim)
-    elif mean.size != ndim:
-        raise ValueError(
-            f"mean shape mismatch: got {mean.size} elements but expected "
-            f"either 1 (scalar) or {ndim} (one per dimension)."
-        )
-
-    if std.size == 1:
-        std = np.repeat(std, ndim)
-    elif std.size != ndim:
-        raise ValueError(
-            f"std shape mismatch: got {std.size} elements but expected "
-            f"either 1 (scalar) or {ndim} (one per dimension)."
-        )
-
-    if npix_arr.size == 1:
-        npix_arr = np.repeat(npix_arr, ndim)
-    elif npix_arr.size != ndim:
-        raise ValueError(
-            f"npix shape mismatch: got {npix_arr.size} elements but expected "
-            f"either 1 (scalar) or {ndim} (one per dimension)."
-        )
+    # Check inputs and cast to tuples
+    npix = _cast_tuple(npix, "npix")
+    ndim = max(len(npix), _input_len(mean, "mean"), _input_len(std, "std"))
+    mean = _cast_scalar(mean, ndim, "mean")
+    std = _cast_scalar(std, ndim, "std")
 
     # Generate per-axis coordinates and corresponding 1D Gaussians
     linspaces = jtu.map(
         lambda n: np.linspace(-extent, extent, n),
-        tuple(npix_arr),
+        npix,
     )
     one_d_gauss = jtu.map(
         lambda axis, m, s: jsp.stats.norm.pdf(axis, loc=m, scale=s),
         linspaces,
-        tuple(mean),
-        tuple(std),
+        mean,
+        std,
     )
 
     # Construct nD separable Gaussian kernel from 1D marginals
@@ -112,6 +89,8 @@ def mv_gaussian(
     kernel : Array
         The normalized multivariate Gaussian kernel.
     """
+
+    raise NotImplementedError("Self reminder to check input bullshit")
     mean = np.asarray(mean, dtype=float)
     cov = np.asarray(cov, dtype=float)
     npix_arr = np.atleast_1d(np.asarray(npix, dtype=int))

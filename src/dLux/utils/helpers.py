@@ -312,3 +312,17 @@ def _cast_scalar(x, ndim, name):
         )
 
     return x
+
+
+def _input_len(x, name):
+    if isinstance(x, tuple):
+        return len(x)
+    if isinstance(x, Array):
+        if x.ndim == 0:
+            return 1
+        if x.ndim == 1:
+            return x.shape[0]
+        raise ValueError(
+            f"{name} must be a scalar, tuple, or 1D array; got ndim={x.ndim}."
+        )
+    return 1
