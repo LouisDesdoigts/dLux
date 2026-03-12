@@ -498,7 +498,7 @@ class RegPolyAperture(DynamicAperture):
         Derived property from `rmax`; maximum aperture extent.
     """
 
-    nsides: int
+    _nsides: int  # Enables nsides to be a class property to stick to design pattern
     rmax: float
 
     def __init__(
@@ -527,7 +527,7 @@ class RegPolyAperture(DynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the aperture.
         """
-        self.nsides = int(nsides)
+        self._nsides = int(nsides)
         self.rmax = float(rmax)
 
         super().__init__(
@@ -548,6 +548,10 @@ class RegPolyAperture(DynamicAperture):
     @property
     def extent(self: ApertureLayer) -> float:
         return self.rmax
+
+    @property
+    def nsides(self: ApertureLayer) -> int:
+        return self._nsides
 
 
 class Spider(DynamicAperture):
