@@ -363,18 +363,42 @@ class LayeredOpticalSystem(OpticalSystem):
             list(self.layers.keys()),
         )
 
-    def propagate_mono(
-        self: LayeredOpticalSystem,
-        wavelength: Array,
-        offset: Array | None = None,
-        return_wf: bool = False,
-    ) -> Array | Wavefront:
+    def initialise_wavefront(
+        self: LayeredOpticalSystem, wavelength: Array, offset: Array = None
+    ) -> Wavefront:
+        """
+        Initialises the wavefront for the propagate_mono method. and applies the offset
+        as a tilt to the wavefront.
+
+        Parameters
+        ----------
+        wavelength : Array
+            The wavelength of the wavefront to propagate through the optical layers.
+        offset : Array, radians = None
+            The (x, y) offset from the optical axis of the source. Passed as angles in
+            radians.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The initialised wavefront with the offset applied as a tilt.
+        """
         if offset is None:
             offset = np.zeros(2)
 
         # Initialise wavefront
         wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
         wavefront = wavefront.tilt(offset)
+        return wavefront
+
+    def propagate_mono(
+        self: LayeredOpticalSystem,
+        wavelength: Array,
+        offset: Array | None = None,
+        return_wf: bool = False,
+    ) -> Array | Wavefront:
+        # Initialise wavefront
+        wavefront = self.initialise_wavefront(wavelength, offset)
 
         # Apply layers
         for layer in list(self.layers.values()):
