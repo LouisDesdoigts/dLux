@@ -75,8 +75,9 @@ def _calc_area_fraction(coefficients: Array, epsilon: float = 1e-15) -> float:
 
 def soft_binarise(array: Array, oversample: int = 3) -> Array:
     """
-    Applies the CLIMB algorithm originally introduced in Wong et al 2021 (TODO: add
-    link). Assumes a square input array.
+    Applies the CLIMB algorithm originally introduced in
+    [Wong et al., 2021](https://ui.adsabs.harvard.edu/abs/2021JOSAB..38.2465W/abstract).
+    Assumes a square input array.
 
     Parameters
     ----------
