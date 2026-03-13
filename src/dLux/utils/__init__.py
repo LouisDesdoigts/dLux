@@ -15,6 +15,7 @@ from . import (
     zernikes,
     source,
     geometry,
+    misc,
 )
 
 _modules = (
@@ -29,6 +30,7 @@ _modules = (
     zernikes,
     source,
     geometry,
+    misc,
 )
 
 _module_names = [
@@ -43,5 +45,6 @@ _module_names = [
     "zernikes",
     "source",
     "geometry",
+    "misc",
 ]
 __all__ = _module_names + reexport(_modules, globals())
