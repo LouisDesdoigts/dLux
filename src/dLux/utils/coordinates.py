@@ -296,6 +296,9 @@ def nd_coords(
     pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
     offsets = _cast_scalar(offsets, ndim, "offsets")
 
+    if len(npixels) != ndim:
+        npixels *= ndim
+
     def pixel_fn(n, offset, scale):
         start = -(n - 1) / 2 * scale - offset
         end = (n - 1) / 2 * scale - offset

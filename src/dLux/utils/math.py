@@ -19,7 +19,7 @@ __all__ = [
 def gaussian(
     mean: float | Array = 0.0,
     std: float | Array = 1.0,
-    npix: int | tuple[int, ...] = 64,
+    npixels: int | tuple[int, ...] = 64,
     extent: float = 5.0,
 ) -> Array:
     """
@@ -31,7 +31,7 @@ def gaussian(
         The center position(s) of the Gaussian. Scalar for 1D, array for nD.
     std : float | Array = 1.0
         The standard deviation(s) of the Gaussian. Scalar for 1D, array for nD.
-    npix : int | tuple[int, ...] = 64
+    npixels : int | tuple[int, ...] = 64
         The number of pixels along each axis. Scalar for 1D, tuple for nD.
     extent : float = 5.0
         The extent of the grid in units of standard deviation on each side.
@@ -42,15 +42,19 @@ def gaussian(
         The normalized n-dimensional Gaussian kernel.
     """
     # Check inputs and cast to tuples
-    npix = _cast_tuple(npix, "npix")
-    ndim = max(len(npix), _input_len(mean, "mean"), _input_len(std, "std"))
+    npixels = _cast_tuple(npixels, "npixels")
+    ndim = max(len(npixels), _input_len(mean, "mean"), _input_len(std, "std"))
     mean = _cast_scalar(mean, ndim, "mean")
     std = _cast_scalar(std, ndim, "std")
+
+    # Make sure npix is the right dimensionality
+    if len(npixels) != ndim:
+        npixels *= ndim
 
     # Generate per-axis coordinates and corresponding 1D Gaussians
     linspaces = jtu.map(
         lambda n: np.linspace(-extent, extent, n),
-        npix,
+        npixels,
     )
     one_d_gauss = jtu.map(
         lambda axis, m, s: jsp.stats.norm.pdf(axis, loc=m, scale=s),
@@ -89,8 +93,8 @@ def mv_gaussian(
     kernel : Array
         The normalized multivariate Gaussian kernel.
     """
-
     raise NotImplementedError("Self reminder to check input bullshit")
+
     mean = np.asarray(mean, dtype=float)
     cov = np.asarray(cov, dtype=float)
     npix_arr = np.atleast_1d(np.asarray(npix, dtype=int))

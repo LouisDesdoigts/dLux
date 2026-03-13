@@ -136,7 +136,7 @@ class ApplyJitter(DetectorLayer):
         return dlu.gaussian(
             mean=np.array([0.0, 0.0]),
             std=np.array([self.sigma, self.sigma]),
-            npix=self.kernel_size,
+            npixels=self.kernel_size,
         )
 
     def __call__(self: ApplyJitter, psf: PSF) -> PSF:
