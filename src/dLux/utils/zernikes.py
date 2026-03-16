@@ -2,6 +2,7 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import lax, vmap, Array
 import dLux.utils as dlu
+from functools import lru_cache
 
 __all__ = [
     "zernike_name",
@@ -65,6 +66,7 @@ zernike_names = {
 }
 
 
+@lru_cache(maxsize=None)
 def zernike_name(j: int) -> str:
     """
     Gets the name of the jth Zernike polynomial.
@@ -82,6 +84,7 @@ def zernike_name(j: int) -> str:
     return zernike_names[int(j)] if j >= 1 and j <= 36 else f"Zernike {int(j)}"
 
 
+@lru_cache(maxsize=None)
 def noll_indices(j: int) -> tuple[int]:
     """
     Calculate the radial and azimuthal orders of the Zernike polynomial.
@@ -105,6 +108,7 @@ def noll_indices(j: int) -> tuple[int]:
     return int(n), int(m)
 
 
+@lru_cache(maxsize=None)
 def zernike_factors(j: int) -> tuple[Array]:
     """
     Calculates the normalisation coefficients and powers of the Zernike polynomial.
