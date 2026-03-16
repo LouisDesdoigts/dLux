@@ -196,7 +196,7 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
     width : float
         The width of the spider.
     angles : Array
-        The angles of the spider.
+        The angles of the spider in degrees.
 
     Returns
     -------
@@ -372,7 +372,7 @@ def soft_spider(
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
     invert : bool = False
-        Whether to invert the spider.
+        Whether to invert the spider in degrees.
 
     Returns
     -------
@@ -465,7 +465,7 @@ def spider_distance(coords: Array, width: float, angle: float) -> Array:
     width : float
         The width of the spider.
     angle : float
-        The angle of the spider.
+        The angle of the spider in degrees.
 
     Returns
     -------

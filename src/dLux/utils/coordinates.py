@@ -155,7 +155,6 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     return coords + distortion
 
 
-# Coordinate conversions #
 def cart2polar(coordinates: Array) -> Array:
     """
     Converts the input (x, y) Cartesian coordinates into (r, phi) polar
