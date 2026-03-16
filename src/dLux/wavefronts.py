@@ -427,7 +427,12 @@ class Wavefront(zdx.Base):
         coordinates : Array
             The coordinates of the centers of each pixel representing the wavefront.
         """
-        return dlu.pixel_coords(self.npixels, self.diameter * scale, polar, fft_style)
+        return dlu.pixel_coords(
+            self.npixels,
+            pixel_scale=self.pixel_scale * scale,
+            polar=polar,
+            fft_style=fft_style,
+        )
 
     def tilt(self: "Wavefront", angles: Array, unit: str = "rad") -> "Wavefront":
         """

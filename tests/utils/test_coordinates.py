@@ -130,7 +130,7 @@ def test_pixel_coords():
     diameter = 1.0
     polar = False
     expected_shape = (2, 10, 10)
-    actual = pixel_coords(npixels, diameter, polar)
+    actual = pixel_coords(npixels, diameter=diameter, polar=polar)
     assert actual.shape == expected_shape
 
     # Test case 2
@@ -138,7 +138,7 @@ def test_pixel_coords():
     diameter = 1.0
     polar = True
     expected_shape = (2, 10, 10)
-    actual = pixel_coords(npixels, diameter, polar)
+    actual = pixel_coords(npixels, diameter=diameter, polar=polar)
     assert actual.shape == expected_shape
 
     # Test case 3
@@ -146,7 +146,7 @@ def test_pixel_coords():
     diameter = 2.0
     polar = False
     expected_shape = (2, 20, 20)
-    actual = pixel_coords(npixels, diameter, polar)
+    actual = pixel_coords(npixels, diameter=diameter, polar=polar)
     assert actual.shape == expected_shape
 
     # Test case 4
@@ -154,7 +154,7 @@ def test_pixel_coords():
     diameter = 2.0
     polar = True
     expected_shape = (2, 20, 20)
-    actual = pixel_coords(npixels, diameter, polar)
+    actual = pixel_coords(npixels, diameter=diameter, polar=polar)
     assert actual.shape == expected_shape
 
 
