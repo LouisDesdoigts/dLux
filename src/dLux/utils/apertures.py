@@ -155,7 +155,7 @@ def circular_aperture(
     diameter: float,
     oversample: int = 5,
     secondary_diameter: float | None = None,
-    spider_width: float = 0.0,
+    spider_width: float | None = None,
     spider_angles: list | tuple | Array | None = None,
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
@@ -173,7 +173,7 @@ def circular_aperture(
         The oversampling factor used to build soft pixel edges.
     secondary_diameter : float | None = None
         Optional central obscuration diameter.
-    spider_width : float = 0.0
+    spider_width : float | None = None
         Optional spider vane width.
     spider_angles : list | tuple | Array | None = None
         Angles of spider vanes in degrees.
@@ -190,8 +190,10 @@ def circular_aperture(
         If Zernikes are requested, basis has shape
         ``(nterms, npixels, npixels)``.
     """
-    if spider_width > 0 and spider_angles is None:
-        raise ValueError("`spider_angles` must be provided when `spider_width > 0`.")
+    if (spider_width is None) != (spider_angles is None):
+        raise ValueError(
+            "`spider_width` and `spider_angles` must both be provided or both be None."
+        )
 
     # Get the oversampled primary aperture
     coords = dlu.pixel_coords(npixels * oversample, diameter=diameter)
@@ -202,7 +204,7 @@ def circular_aperture(
         layers.append(dlu.circle(coords, secondary_diameter / 2, invert=True))
 
     # Add the spiders if requested
-    if spider_width > 0 and spider_angles is not None:
+    if spider_width is not None:
         layers += [dlu.spider(coords, spider_width, spider_angles)]
 
     # Get the combined transmission of the layers
@@ -229,11 +231,12 @@ def segmented_aperture(
     npixels: int,
     diameter: float,
     nrings: int,
-    flat_to_flat: float,
+    segment_diameter: float,
     gap: float = 0.0,
     oversample: int = 5,
-    has_secondary: bool = True,
-    spider_width: float = 0.0,
+    nrings_excluded: int = 1,
+    secondary_diameter: float | None = None,
+    spider_width: float | None = None,
     spider_angles: list | tuple | Array | None = None,
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
@@ -249,15 +252,19 @@ def segmented_aperture(
         The full aperture diameter.
     nrings : int
         The number of hexagonal rings including the center segment.
-    flat_to_flat : float
+    segment_diameter : float
         Flat-to-flat diameter of each segment.
     gap : float = 0.0
         Physical gap between neighbouring segments.
     oversample : int = 5
         The oversampling factor used to build soft pixel edges.
-    has_secondary : bool = True
-        If True, removes the central segment as a secondary obscuration.
-    spider_width : float = 0.0
+    nrings_excluded : int = 1
+        Number of inner rings to remove from the aperture. Set to ``0`` to
+        keep all segments; ``1`` removes only the central segment; ``2``
+        removes the center plus the first surrounding ring, etc.
+    secondary_diameter : float | None = None
+        Optional circular secondary obscuration diameter.
+    spider_width : float | None = None
         Optional spider vane width.
     spider_angles : list | tuple | Array | None = None
         Angles of spider vanes in degrees.
@@ -279,36 +286,43 @@ def segmented_aperture(
     The per-segment Zernikes are circular Zernikes in each local segment frame,
     clipped only by the binary segment mask.
     """
-    if spider_width > 0 and spider_angles is None:
-        raise ValueError("`spider_angles` must be provided when `spider_width > 0`.")
+    if (spider_width is None) != (spider_angles is None):
+        raise ValueError(
+            "`spider_width` and `spider_angles` must both be provided or both be None."
+        )
+
+    # Get the segment centres
+    rmax = segment_diameter / 2  # segment_diameter is the circumscribed circle diameter
+    cens = segmented_hex_cens(nrings, rmax, gap)
+
+    # Remove inner rings before computing any apertures.
+    # Ring k (0-indexed) has 6k segments (ring 0 = 1 center). Cumulative:
+    #   1 + 6*(1+2+...+(k-1)) = 1 + 3*k*(k-1)  (centered hexagonal numbers)
+    if nrings_excluded > 0:
+        n_excluded = 1 + 3 * nrings_excluded * (nrings_excluded - 1)
+        cens = cens[n_excluded:]
 
     # Get the oversampled coordinates
     coords = dlu.pixel_coords(npixels * oversample, diameter=diameter)
     shift_fn = jit(lambda c: dlu.translate_coords(coords, c))
 
-    # Get the segment centres
-    rmax = flat_to_flat / np.sqrt(3.0)
-    cens = segmented_hex_cens(nrings, rmax, gap)
-
-    # Get the individual hexagonal segments
+    # Get the individual hexagonal segments (only for kept centres)
     hex_fn = jit(lambda c: dlu.reg_polygon(shift_fn(c), rmax, 6))
-
-    # Avoid vmap to stop ram blowing up
     hexes = np.array([hex_fn(c) for c in cens])
 
-    # Central segment becomes the secondary obstruction
-    if has_secondary:
-        hexes = hexes[1:]
-        cens = cens[1:]
+    # Build the list of transmission layers
+    layers = [hexes.sum(0)]
+
+    # Add the secondary if requested
+    if secondary_diameter is not None and secondary_diameter > 0:
+        layers.append(dlu.circle(coords, secondary_diameter / 2, invert=True))
 
     # Add the spiders if requested
-    if spider_width > 0 and spider_angles is not None:
-        spiders = dlu.spider(coords, spider_width, spider_angles)
-    else:
-        spiders = 1.0
+    if spider_width is not None:
+        layers.append(dlu.spider(coords, spider_width, spider_angles))
 
     # Get the combined transmission of the layers
-    transmission = dlu.combine([hexes.sum(0), spiders], oversample)
+    transmission = dlu.combine(layers, oversample)
 
     # Return the transmission if no Zernike basis is requested
     if zernike_nolls is None:
@@ -319,11 +333,10 @@ def segmented_aperture(
     shift_fn = jit(lambda c: dlu.translate_coords(coords, c))
 
     # Get the zernike generation function
-    z_diam = np.sqrt(3) * flat_to_flat * (1.0 + zernike_oversize)
+    z_diam = segment_diameter * (1.0 + zernike_oversize)
     z_fn = lambda c: dlu.zernike_basis(zernike_nolls, shift_fn(c), z_diam)
 
     # Get the downsampled segment masks and supports
-    # seg_support = [dlu.downsample(hex, oversample) > 0 for hex in hexes]
     hexes = np.array([dlu.downsample(hex, oversample) for hex in hexes])
     seg_support = non_redundant_support(hexes)
 
@@ -424,7 +437,7 @@ def hst_like(
     diameter: float = 2.4,
     oversample: int = 5,
     secondary_diameter: float = 0.305,
-    spider_width: float = 0.038,
+    spider_width: float | None = 0.038,
     spider_angles: list | tuple = (0, 90, 180, 270),
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
@@ -442,7 +455,7 @@ def hst_like(
         The oversampling factor used to build soft pixel edges.
     secondary_diameter : float = 0.305
         The secondary obscuration diameter.
-    spider_width : float = 0.038
+    spider_width : float | None = 0.038
         Width of the spider vanes.
     spider_angles : list | tuple = (0, 90, 180, 270)
         Spider vane angles in degrees.
@@ -474,11 +487,12 @@ def jwst_like(
     npixels: int,
     diameter: float = 6.6,
     nrings: int = 3,
-    flat_to_flat: float = 1.32,
+    segment_diameter: float = 1.524,  # 2 * 1.32 / sqrt(3), from flat-to-flat 1.32m
     gap: float = 0.007,
     oversample: int = 5,
-    has_secondary: bool = True,
-    spider_width: float = 0.1,
+    nrings_excluded: int = 1,
+    secondary_diameter: float | None = None,
+    spider_width: float | None = 0.1,
     spider_angles: list | tuple = (30, 180, 330),
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
@@ -494,15 +508,18 @@ def jwst_like(
         The full primary diameter.
     nrings : int = 3
         The number of hexagonal rings including the central segment.
-    flat_to_flat : float = 1.32
-        Flat-to-flat segment diameter.
+    segment_diameter : float = 1.524
+        Circumscribed circle diameter of each segment.
     gap : float = 0.007
         Segment spacing.
     oversample : int = 5
         The oversampling factor used to build soft pixel edges.
-    has_secondary : bool = True
-        If True, removes the central segment.
-    spider_width : float = 0.1
+    nrings_excluded : int = 1
+        Number of inner rings to remove. Defaults to ``1`` (removes the
+        central segment).
+    secondary_diameter : float | None = None
+        Optional circular secondary obscuration diameter.
+    spider_width : float | None = 0.1
         Width of the spider vanes.
     spider_angles : list | tuple = (30, 180, 330)
         Spider vane angles in degrees.
@@ -522,10 +539,11 @@ def jwst_like(
         npixels=npixels,
         diameter=diameter,
         nrings=nrings,
-        flat_to_flat=flat_to_flat,
+        segment_diameter=segment_diameter,
         gap=gap,
         oversample=oversample,
-        has_secondary=has_secondary,
+        nrings_excluded=nrings_excluded,
+        secondary_diameter=secondary_diameter,
         spider_width=spider_width,
         spider_angles=spider_angles,
         zernike_nolls=zernike_nolls,
