@@ -17,6 +17,7 @@ from . import (
     geometry,
     misc,
     norms,
+    apertures,
 )
 
 _modules = (
@@ -33,6 +34,7 @@ _modules = (
     geometry,
     misc,
     norms,
+    apertures,
 )
 
 _module_names = [
@@ -49,5 +51,6 @@ _module_names = [
     "geometry",
     "misc",
     "norms",
+    "apertures",
 ]
 __all__ = _module_names + reexport(_modules, globals())

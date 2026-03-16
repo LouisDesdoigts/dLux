@@ -205,9 +205,8 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
     """
     angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
     calc_fn = vmap(lambda angle: spider_distance(coords, width, angle) < 0)
-    return (~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))).astype(
-        float
-    )
+    spiders = ~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))
+    return spiders.astype(float)
 
 
 # TODO: This eventually
