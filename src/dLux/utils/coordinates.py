@@ -198,7 +198,12 @@ def polar2cart(coordinates: Array) -> Array:
 
 
 def pixel_coords(
-    npixels: int, diameter: float, polar: bool = False, fft_style: bool = False
+    npixels: int,
+    diameter: float = None,
+    radius: float = None,
+    pixel_scale: float = None,
+    polar: bool = False,
+    fft_style: bool = False,
 ) -> Array:
     """
     Returns a paraxial set of 2d coordinates for each pixel center.
@@ -207,8 +212,12 @@ def pixel_coords(
     ----------
     npixels : int
         The output size of the coordinates array to generate.
-    diameter : float
+    diameter : float = None
         The diameter of the coordinates array to generate.
+    radius : float = None
+        The radius of the coordinates array to generate.
+    pixel_scale : float = None
+        The pixel scale of the coordinates array to generate.
     polar : bool = False
         Output the coordinates in polar (r, phi) coordinates.
     fft_style : bool = False
@@ -220,7 +229,18 @@ def pixel_coords(
     coordinates : Array
         The array of pixel center coordinates.
     """
-    pixscale = diameter / npixels
+    supplied = sum(value is not None for value in (diameter, radius, pixel_scale))
+    if supplied != 1:
+        raise ValueError(
+            "Exactly one of diameter, radius, or pixel_scale must be provided."
+        )
+
+    if diameter is not None:
+        pixscale = diameter / npixels
+    elif radius is not None:
+        pixscale = 2 * radius / npixels
+    else:
+        pixscale = pixel_scale
 
     # Default: symmetric pixel-center coordinates (half-integer for even N)
     offsets = (0.0, 0.0)
