@@ -13,10 +13,6 @@ __all__ = [
     "triangular_number",
     "eval_basis",
     "nandiv",
-    "l1_norm",
-    "l2_norm",
-    "max_norm",
-    "rms_norm",
 ]
 
 
@@ -211,89 +207,3 @@ def nandiv(a: Array, b: Array, fill: Any = np.inf) -> Array:
         The result of the division.
     """
     return np.where(b == 0, fill, a / b)
-
-
-def _resolve_mask(array, mask):
-    """Resolved the mask for a given array"""
-    if mask is None:
-        return np.ones_like(array)
-    return mask
-
-
-def l1_norm(array: Array, mask: Array | None = None) -> float:
-    """
-    Calculates the L1 norm of an array, optionally applying a mask.
-
-    Parameters
-    ----------
-    array : Array
-        The input array to calculate the L1 norm of.
-    mask : Array | None = None
-        An optional boolean mask to apply to the array before calculating the norm.
-
-    Returns
-    -------
-    norm : float
-        The L1 norm of the array, optionally masked.
-    """
-    return np.sum(_resolve_mask(array, mask) * np.abs(array))
-
-
-def l2_norm(array: Array, mask: Array | None = None) -> float:
-    """
-    Calculates the L2 norm of an array, optionally applying a mask.
-
-    Parameters
-    ----------
-    array : Array
-        The input array to calculate the L2 norm of.
-    mask : Array | None = None
-        An optional boolean mask to apply to the array before calculating the norm.
-
-    Returns
-    -------
-    norm : float
-        The L2 norm of the array, optionally masked.
-    """
-    return np.sqrt(np.sum(_resolve_mask(array, mask) * array**2))
-
-
-def max_norm(array: Array, mask: Array | None = None) -> float:
-    """
-    Calculates the maximum norm of an array, optionally applying a mask.
-
-    Parameters
-    ----------
-    array : Array
-        The input array to calculate the maximum norm of.
-    mask : Array | None = None
-        An optional boolean mask to apply to the array before calculating the norm.
-
-    Returns
-    -------
-    norm : float
-        The maximum norm of the array, optionally masked.
-    """
-    return np.max(np.where(_resolve_mask(array, mask), np.abs(array), -np.inf))
-
-
-def rms_norm(array: Array, mask: Array | None = None) -> float:
-    """
-    Calculates the root mean square (RMS) norm of an array, optionally applying a mask.
-
-    Parameters
-    ----------
-    array : Array
-        The input array to calculate the RMS norm of.
-    mask : Array | None = None
-        An optional boolean mask to apply to the array before calculating the norm.
-
-    Returns
-    -------
-    norm : float
-        The RMS norm of the array, optionally masked.
-
-    """
-    mask = _resolve_mask(array, mask)
-    n = np.sum(mask)
-    return np.sqrt(np.sum(mask * array**2) / n)
