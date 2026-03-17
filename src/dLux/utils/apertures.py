@@ -159,7 +159,8 @@ def circular_aperture(
     spider_angles: list | tuple | Array | None = None,
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
-) -> Array | tuple[Array, Array]:
+    return_support: bool = False,
+) -> Array | tuple[Array, ...]:
     """
     Builds a static circular aperture.
 
@@ -181,6 +182,9 @@ def circular_aperture(
         Optional Noll indices for Zernike basis generation.
     zernike_oversize : float = 0.01
         Fractional oversize of the Zernike basis diameter.
+    return_support : bool = False
+        Whether to return the aperture support mask along with the transmission and
+        basis. Only relevant if Zernike basis is requested.
 
     Returns
     -------
@@ -189,6 +193,9 @@ def circular_aperture(
     transmission, basis
         If Zernikes are requested, basis has shape
         ``(nterms, npixels, npixels)``.
+    transmission, basis, support
+        If Zernikes are requested and ``return_support=True``, support has shape
+        ``(npixels, npixels)``.
     """
     if (spider_width is None) != (spider_angles is None):
         raise ValueError(
@@ -223,6 +230,10 @@ def circular_aperture(
     support = dlu.downsample(layers[0], oversample) > 0
     basis = basis * support[None, ...]
 
+    # Return the transmission, basis, and support if requested
+    if return_support:
+        return transmission, basis, support
+
     # Return the transmission and basis
     return transmission, basis
 
@@ -240,7 +251,8 @@ def segmented_aperture(
     spider_angles: list | tuple | Array | None = None,
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
-) -> Array | tuple[Array, Array]:
+    return_support: bool = False,
+) -> Array | tuple[Array, ...]:
     """
     Builds a static segmented hexagonal aperture.
 
@@ -272,6 +284,9 @@ def segmented_aperture(
         Optional Noll indices for Zernike basis generation.
     zernike_oversize : float = 0.01
         Fractional oversize of the segment Zernike basis diameter.
+    return_support : bool = False
+        Whether to return the aperture support mask along with the transmission and
+        basis. Only relevant if Zernike basis is requested.
 
     Returns
     -------
@@ -280,6 +295,9 @@ def segmented_aperture(
     transmission, basis
         If Zernikes are requested, basis has shape
         ``(n_segments, nterms, npixels, npixels)``.
+    transmission, basis, support
+        If Zernikes are requested and ``return_support=True``, support has shape
+        ``(n_segments, npixels, npixels)``.
 
     Notes
     -----
@@ -343,6 +361,10 @@ def segmented_aperture(
     # Calculate the basis for each segment and mask by the segment shape
     basis = [z_fn(cen) * supp[None, ...] for cen, supp in zip(cens, seg_support)]
 
+    # Return the transmission, basis, and support if requested
+    if return_support:
+        return transmission, np.array(basis), seg_support
+
     # Return the transmission and basis
     return transmission, np.array(basis)
 
@@ -356,7 +378,8 @@ def sparse_aperture(
     oversample: int = 5,
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
-) -> Array | tuple[Array, Array]:
+    return_support: bool = False,
+) -> Array | tuple[Array, ...]:
     """
     Builds a static sparse aperture from explicit sub-aperture centres.
 
@@ -378,6 +401,9 @@ def sparse_aperture(
         Optional Noll indices for Zernike basis generation.
     zernike_oversize : float = 0.01
         Fractional oversize of the sub-aperture Zernike basis diameter.
+    return_support : bool = False
+        Whether to return the aperture support mask along with the transmission and
+        basis. Only relevant if Zernike basis is requested.
 
     Returns
     -------
@@ -386,6 +412,9 @@ def sparse_aperture(
     transmission, basis
         If Zernikes are requested, basis has shape
         ``(n_ap, nterms, npixels, npixels)``.
+    transmission, basis, support
+        If Zernikes are requested and ``return_support=True``, support has shape
+        ``(n_ap, npixels, npixels)``.
     """
     if shape not in {"circle", "hex"}:
         raise ValueError("`shape` must be either 'circle' or 'hex'.")
@@ -423,10 +452,14 @@ def sparse_aperture(
     z_fn = lambda c: dlu.zernike_basis(zernike_nolls, shift_fn(c), z_diam)
 
     # Get the downsampled sub aperture support
-    segs = [dlu.downsample(aper, oversample) for aper in apers]
+    supp = np.array([dlu.downsample(aper, oversample) for aper in apers]) > 0
 
     # Calculate the basis for each sub-aperture and mask by the sub-aperture shape
-    basis = [z_fn(cen) * (seg > 0)[None, ...] for cen, seg in zip(centers, segs)]
+    basis = [z_fn(cen) * sup[None, ...] for cen, sup in zip(centers, supp)]
+
+    # Return the transmission, basis, and support if requested
+    if return_support:
+        return transmission, np.array(basis), supp
 
     # Return the transmission and basis
     return transmission, np.array(basis)
@@ -441,7 +474,8 @@ def hst_like(
     spider_angles: list | tuple = (0, 90, 180, 270),
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
-) -> Array | tuple[Array, Array]:
+    return_support: bool = False,
+) -> Array | tuple[Array, ...]:
     """
     Builds an HST-like circular aperture model.
 
@@ -463,6 +497,9 @@ def hst_like(
         Optional Noll indices for Zernike basis generation.
     zernike_oversize : float = 0.01
         Fractional oversize of the Zernike basis diameter.
+    return_support : bool = False
+        Whether to return the aperture support mask along with the transmission and
+        basis. Only relevant if Zernike basis is requested.
 
     Returns
     -------
@@ -470,6 +507,8 @@ def hst_like(
         The HST-like aperture transmission.
     transmission, basis : tuple[Array, Array]
         Returned when ``zernike_nolls`` is provided.
+    transmission, basis, support : tuple[Array, Array, Array]
+        Returned when ``zernike_nolls`` is provided and ``return_support=True``.
     """
     return circular_aperture(
         npixels=npixels,
@@ -480,6 +519,7 @@ def hst_like(
         spider_angles=spider_angles,
         zernike_nolls=zernike_nolls,
         zernike_oversize=zernike_oversize,
+        return_support=return_support,
     )
 
 
@@ -496,7 +536,8 @@ def jwst_like(
     spider_angles: list | tuple = (30, 180, 330),
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
-) -> Array | tuple[Array, Array]:
+    return_support: bool = False,
+) -> Array | tuple[Array, ...]:
     """
     Builds a JWST-like segmented aperture model.
 
@@ -527,6 +568,9 @@ def jwst_like(
         Optional Noll indices for Zernike basis generation.
     zernike_oversize : float = 0.01
         Fractional oversize of the Zernike basis diameter.
+    return_support : bool = False
+        Whether to return the aperture support mask along with the transmission and
+        basis. Only relevant if Zernike basis is requested.
 
     Returns
     -------
@@ -534,6 +578,8 @@ def jwst_like(
         The JWST-like aperture transmission.
     transmission, basis : tuple[Array, Array]
         Returned when ``zernike_nolls`` is provided.
+    transmission, basis, support : tuple[Array, Array, Array]
+        Returned when ``zernike_nolls`` is provided and ``return_support=True``.
     """
     return segmented_aperture(
         npixels=npixels,
@@ -548,6 +594,7 @@ def jwst_like(
         spider_angles=spider_angles,
         zernike_nolls=zernike_nolls,
         zernike_oversize=zernike_oversize,
+        return_support=return_support,
     )
 
 
@@ -560,7 +607,8 @@ def euclid_like(
     spider_angles: list | tuple = (0, 120, 240),
     zernike_nolls: list | tuple | Array | None = None,
     zernike_oversize: float = 0.01,
-) -> Array | tuple[Array, Array]:
+    return_support: bool = False,
+) -> Array | tuple[Array, ...]:
     """
     Builds a Euclid-like circular aperture model.
 
@@ -582,6 +630,9 @@ def euclid_like(
         Optional Noll indices for Zernike basis generation.
     zernike_oversize : float = 0.01
         Fractional oversize of the Zernike basis diameter.
+    return_support : bool = False
+        Whether to return the aperture support mask along with the transmission and
+        basis. Only relevant if Zernike basis is requested.
 
     Returns
     -------
@@ -589,6 +640,8 @@ def euclid_like(
         The Euclid-like aperture transmission.
     aperture, basis : tuple[Array, Array]
         Returned when ``zernike_nolls`` is provided.
+    aperture, basis, support : tuple[Array, Array, Array]
+        Returned when ``zernike_nolls`` is provided and ``return_support=True``.
 
     Notes
     -----
@@ -620,13 +673,19 @@ def euclid_like(
         return aperture
 
     # Get the basis
-    _, basis = circular_aperture(
+    _, basis, support = circular_aperture(
         npixels=npixels,
         diameter=diameter,
         oversample=oversample,
         secondary_diameter=secondary_diameter,
         zernike_nolls=zernike_nolls,
         zernike_oversize=zernike_oversize,
+        return_support=True,
     )
 
+    # Mask the basis by the aperture support
+    if return_support:
+        return aperture, basis, support
+
+    # Return the aperture and basis
     return aperture, basis
