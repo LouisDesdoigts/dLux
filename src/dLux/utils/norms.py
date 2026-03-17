@@ -23,7 +23,8 @@ def l1_norm(
     keepdims: bool = False,
 ) -> float:
     """
-    Calculates the L1 norm of an array, optionally applying a mask.
+    Calculates the L1 norm of an array, optionally applying a mask. The L1 norm is
+    defined as the sum of the absolute values of the elements in the array.
 
     Parameters
     ----------
@@ -55,7 +56,8 @@ def l2_norm(
     keepdims: bool = False,
 ) -> float:
     """
-    Calculates the L2 norm of an array, optionally applying a mask.
+    Calculates the L2 norm of an array, optionally applying a mask. The L2 norm is
+    defined as the square root of the sum of the squares of the elements in the array.
 
     Parameters
     ----------
@@ -85,7 +87,8 @@ def max_norm(
     keepdims: bool = False,
 ) -> float:
     """
-    Calculates the maximum norm of an array, optionally applying a mask.
+    Calculates the maximum norm of an array, optionally applying a mask. The maximum
+    norm is defined as the maximum absolute value of the elements in the array.
 
     Parameters
     ----------
@@ -119,6 +122,8 @@ def rms_norm(
 ) -> float:
     """
     Calculates the root mean square (RMS) norm of an array, optionally applying a mask.
+    The RMS norm is defined as the square root of the mean of the squares of the
+    elements in the array.
 
     Parameters
     ----------
@@ -140,3 +145,44 @@ def rms_norm(
     mask = _resolve_mask(array, mask)
     n = np.sum(mask, axis=axis, keepdims=keepdims)
     return np.sqrt(np.sum(mask * array**2, axis=axis, keepdims=keepdims) / n)
+
+
+def p2v_norm(
+    array: Array,
+    mask: Array | None = None,
+    axis: int | tuple[int, ...] | None = None,
+    keepdims: bool = False,
+) -> float:
+    """
+    Calculates the point-to-valley (P2V) norm of an array, optionally applying a mask.
+    The P2V norm is defined as the difference between the maximum and minimum values
+    of the elements in the array.
+
+    Parameters
+    ----------
+    array : Array
+        The input array to calculate the P2V norm of.
+    mask : Array | None = None
+        An optional boolean mask to apply to the array before calculating the norm.
+    axis : int | tuple[int, ...] | None = None
+        Axis or axes along which the norm is computed. By default, all axes are used.
+    keepdims : bool = False
+        If True, the reduced axes are left in the result as dimensions with size one.
+
+    Returns
+    -------
+    norm : float
+        The P2V norm of the array, optionally masked.
+    """
+    resolved_mask = _resolve_mask(array, mask)
+    max_val = np.max(
+        np.where(resolved_mask.astype(bool), array, -np.inf),
+        axis=axis,
+        keepdims=keepdims,
+    )
+    min_val = np.min(
+        np.where(resolved_mask.astype(bool), array, np.inf),
+        axis=axis,
+        keepdims=keepdims,
+    )
+    return max_val - min_val
