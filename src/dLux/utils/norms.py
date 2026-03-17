@@ -11,9 +11,23 @@ __all__ = [
 
 def _resolve_mask(array, mask):
     """Resolved the mask for a given array"""
+
+    # If None, return an array of ones with the same shape as the input array
     if mask is None:
         return np.ones_like(array)
-    return mask
+
+    # If the mask has less dimensions than the array, broadcast it
+    if mask.ndim < array.ndim:
+        mask = np.expand_dims(mask, np.arange(array.ndim - mask.ndim))
+
+    # If the mask has more dimensions than the array, raise an error
+    if mask.ndim > array.ndim:
+        raise ValueError(
+            f"Mask has more dimensions ({mask.ndim}) than input array ({array.ndim})."
+        )
+
+    # Finally, return the mask
+    return mask.astype(float)
 
 
 def l1_norm(
