@@ -26,10 +26,22 @@ class BaseDetector(zdx.Base):
     """
 
     @abstractmethod
-    def model(
+    def __call__(
         self: BaseDetector, psf: PSF, return_psf: bool = False
     ) -> Array | PSF:  # pragma: no cover
         pass
+
+    def model(
+        self: LayeredDetector,
+        psf: PSF,
+        return_psf: bool = False,
+    ) -> Array | PSF:
+        """
+        Backwards compatibility method that invokes __call__.
+
+        Delegates to the __call__ method.
+        """
+        return self(psf, return_psf)
 
 
 class LayeredDetector(BaseDetector):
@@ -88,7 +100,7 @@ class LayeredDetector(BaseDetector):
             list(self.layers.keys()),
         )
 
-    def model(
+    def __call__(
         self: LayeredDetector,
         psf: PSF,
         return_psf: bool = False,
