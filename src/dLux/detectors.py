@@ -79,6 +79,9 @@ class LayeredDetector(BaseDetector):
         """
         if key in self.layers.keys():
             return self.layers[key]
+        for layer in list(self.layers.values()):
+            if hasattr(layer, key):
+                return getattr(layer, key)
         raise dlu.helpers.missing_attribute_error(
             self,
             key,
