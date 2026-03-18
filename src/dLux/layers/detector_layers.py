@@ -103,23 +103,33 @@ class ApplyJitter(DetectorLayer):
         The standard deviation of the Gaussian kernel, in units of pixels.
     kernel_size : int
         The size of the convolution kernel to use.
+    oversample : int
+        The oversampling factor to use when generating the kernel. This is used to
+        mitigate aliasing when the kernel is small compared to the pixel size.
     """
 
-    kernel_size: int
     sigma: float
+    kernel_size: int
+    oversample: int
 
-    def __init__(self: ApplyJitter, sigma: float, kernel_size: int = 10):
+    def __init__(
+        self: ApplyJitter, sigma: float, kernel_size: int = 9, oversample: int = 3
+    ):
         """
         Parameters
         ----------
         sigma : float, pixels
             The standard deviation of the Gaussian kernel, in units of pixels.
-        kernel_size : int = 10
+        kernel_size : int = 9
             The size of the convolution kernel to use.
+        oversample : int = 3
+            The oversampling factor to use when generating the kernel. This is used to
+            mitigate aliasing when the kernel is small compared to the pixel size.
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
         self.sigma = float(sigma)
+        self.oversample = int(oversample)
 
         if self.kernel_size <= 0:
             raise ValueError("kernel_size must be greater than 0.")
@@ -134,11 +144,12 @@ class ApplyJitter(DetectorLayer):
         kernel : Array
             The Gaussian kernel.
         """
-        return dlu.gaussian(
+        kernel = dlu.gaussian(
             mean=np.array([0.0, 0.0]),
             std=np.array([self.sigma, self.sigma]),
-            npixels=self.kernel_size,
+            npixels=self.kernel_size * self.oversample,
         )
+        return dlu.downsample(kernel, self.oversample, mean=False)
 
     def __call__(self: ApplyJitter, psf: PSF) -> PSF:
         return psf.convolve(self.kernel)
