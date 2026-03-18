@@ -124,7 +124,8 @@ class ApplyJitter(DetectorLayer):
         if self.kernel_size <= 0:
             raise ValueError("kernel_size must be greater than 0.")
 
-    def generate_kernel(self: ApplyJitter, pixel_scale: float) -> Array:
+    @property
+    def kernel(self: ApplyJitter) -> Array:
         """
         Generates the normalised Gaussian kernel.
 
@@ -140,8 +141,7 @@ class ApplyJitter(DetectorLayer):
         )
 
     def __call__(self: ApplyJitter, psf: PSF) -> PSF:
-        kernel = self.generate_kernel(psf.pixel_scale)
-        return psf.convolve(kernel)
+        return psf.convolve(self.kernel)
 
 
 class ApplySaturation(DetectorLayer):
