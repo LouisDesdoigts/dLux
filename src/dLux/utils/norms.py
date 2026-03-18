@@ -6,6 +6,7 @@ __all__ = [
     "l2_norm",
     "max_norm",
     "rms_norm",
+    "p2v_norm",
 ]
 
 
@@ -56,7 +57,7 @@ def l1_norm(
     norm : float
         The L1 norm of the array, optionally masked.
     """
-    return np.sum(
+    return np.nansum(
         _resolve_mask(array, mask) * np.abs(array),
         axis=axis,
         keepdims=keepdims,
@@ -90,7 +91,7 @@ def l2_norm(
         The L2 norm of the array, optionally masked.
     """
     return np.sqrt(
-        np.sum(_resolve_mask(array, mask) * array**2, axis=axis, keepdims=keepdims)
+        np.nansum(_resolve_mask(array, mask) * array**2, axis=axis, keepdims=keepdims)
     )
 
 
@@ -121,7 +122,7 @@ def max_norm(
         The maximum norm of the array, optionally masked.
     """
     resolved_mask = _resolve_mask(array, mask)
-    return np.max(
+    return np.nanmax(
         np.where(resolved_mask.astype(bool), np.abs(array), -np.inf),
         axis=axis,
         keepdims=keepdims,
@@ -158,7 +159,7 @@ def rms_norm(
     """
     mask = _resolve_mask(array, mask)
     n = np.sum(mask, axis=axis, keepdims=keepdims)
-    return np.sqrt(np.sum(mask * array**2, axis=axis, keepdims=keepdims) / n)
+    return np.sqrt(np.nansum(mask * array**2, axis=axis, keepdims=keepdims) / n)
 
 
 def p2v_norm(
@@ -189,12 +190,12 @@ def p2v_norm(
         The P2V norm of the array, optionally masked.
     """
     resolved_mask = _resolve_mask(array, mask)
-    max_val = np.max(
+    max_val = np.nanmax(
         np.where(resolved_mask.astype(bool), array, -np.inf),
         axis=axis,
         keepdims=keepdims,
     )
-    min_val = np.min(
+    min_val = np.nanmin(
         np.where(resolved_mask.astype(bool), array, np.inf),
         axis=axis,
         keepdims=keepdims,
