@@ -409,6 +409,26 @@ class LayeredOpticalSystem(OpticalSystem):
             return wavefront
         return wavefront.psf
 
+    def debug_propagate_mono(
+        self: LayeredOpticalSystem,
+        wavelength: Array,
+        offset: Array | None = None,
+    ) -> Array | Wavefront:
+        # Outputs dictionary
+        outputs = {}
+
+        # Initialise wavefront
+        wavefront = self.initialise_wavefront(wavelength, offset)
+        outputs["initial_wavefront"] = wavefront
+
+        # Apply layers, storing the outputs
+        for name, layer in self.layers.items():
+            wavefront = layer(wavefront)
+            outputs[name] = wavefront
+
+        # Return the wavefront and the outputs dictionary for debugging
+        return wavefront, outputs
+
     def insert_layer(
         self: LayeredOpticalSystem,
         layer: OpticalLayer | tuple[str, OpticalLayer],
@@ -454,7 +474,70 @@ class LayeredOpticalSystem(OpticalSystem):
         return self.set("layers", dlu.remove_layer(self.layers, key))
 
 
-class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
+class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
+    """
+    An extension to the LayeredOpticalSystem class that also includes the attributes of
+    the ParametricOpticalSystem class. Mainly used to enable the debug_propagate_mono
+    method to be be common modelled across both the AngularOpticalSystem and
+    CartesianOpticalSystem classes.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ParametricLayeredOpticalSystem.png)
+    """
+
+    @abstractmethod
+    def to_focus(
+        self: AngularOpticalSystem,
+        wavefront: Wavefront,
+    ) -> Array | Wavefront:
+        """
+        Propagate the wavefront to the focal plane using an FFT-based propagator with
+        the specified pixel scale and number of pixels.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate to the focal plane.
+        Returns
+        -------
+        result : Array | Wavefront
+            The propagated wavefront at the focal plane
+        """
+
+    def debug_propagate_mono(
+        self: AngularOpticalSystem,
+        wavelength: Array,
+        offset: Array | None = None,
+    ) -> Array | Wavefront:
+        # Propagate the upstream layers and store the outputs
+        wf, outputs = super().debug_propagate_mono(wavelength, offset)
+
+        # Propagate to the focal plane and store the output
+        wf = self.to_focus(wf)
+        outputs["final_wavefront"] = wf
+
+        # Return the wavefront and the outputs dictionary for debugging
+        return wf, outputs
+
+    def propagate_mono(
+        self: AngularOpticalSystem,
+        wavelength: Array,
+        offset: Array | None = None,
+        return_wf: bool = False,
+    ) -> Array | Wavefront:
+        # Upstream layers propagation
+        wf = super().propagate_mono(wavelength, offset, return_wf=True)
+
+        # Propagate
+        wf = self.to_focus(wf)
+
+        # Return PSF or Wavefront
+        if return_wf:
+            return wf
+        return wf.psf
+
+
+class AngularOpticalSystem(ParametricLayeredOpticalSystem):
     """
     An extension to the LayeredOpticalSystem class that propagates a wavefront to an
     image plane with `psf_pixel_scale` in units of arcseconds.
@@ -516,24 +599,28 @@ class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
             oversample=oversample,
         )
 
-    def propagate_mono(
+    def to_focus(
         self: AngularOpticalSystem,
-        wavelength: Array,
-        offset: Array | None = None,
-        return_wf: bool = False,
+        wavefront: Wavefront,
     ) -> Array | Wavefront:
-        wf = super().propagate_mono(wavelength, offset, return_wf=True)
+        """
+        Propagate the wavefront to the focal plane using an FFT-based propagator with
+        the specified pixel scale and number of pixels.
 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate to the focal plane.
+        Returns
+        -------
+        result : Array | Wavefront
+            The propagated wavefront at the focal plane
+        """
         # Propagate
         true_pixel_scale = self.psf_pixel_scale / self.oversample
         pixel_scale = dlu.arcsec2rad(true_pixel_scale)
         psf_npixels = self.psf_npixels * self.oversample
-        wf = wf.propagate(psf_npixels, pixel_scale)
-
-        # Return PSF or Wavefront
-        if return_wf:
-            return wf
-        return wf.psf
+        return wavefront.propagate(psf_npixels, pixel_scale)
 
 
 class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
@@ -607,21 +694,25 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
             oversample=oversample,
         )
 
-    def propagate_mono(
-        self: CartesianOpticalSystem,
-        wavelength: Array,
-        offset: Array | None = None,
-        return_wf: bool = False,
+    def to_focus(
+        self: AngularOpticalSystem,
+        wavefront: Wavefront,
     ) -> Array | Wavefront:
-        wf = super().propagate_mono(wavelength, offset, return_wf=True)
+        """
+        Propagate the wavefront to the focal plane using an FFT-based propagator with
+        the specified pixel scale and number of pixels.
 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate to the focal plane.
+        Returns
+        -------
+        result : Array | Wavefront
+            The propagated wavefront at the focal plane
+        """
         # Propagate
         true_pixel_scale = self.psf_pixel_scale / self.oversample
         pixel_scale = 1e-6 * true_pixel_scale
         psf_npixels = self.psf_npixels * self.oversample
-        wf = wf.propagate(psf_npixels, pixel_scale, self.focal_length)
-
-        # Return PSF or Wavefront
-        if return_wf:
-            return wf
-        return wf.psf
+        return wavefront.propagate(psf_npixels, pixel_scale)
