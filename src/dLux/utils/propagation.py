@@ -2,7 +2,6 @@ import jax.numpy as np
 from jax import Array, vmap
 import dLux.utils as dlu
 
-
 __all__ = ["FFT", "MFT", "fresnel_MFT"]
 
 
@@ -53,9 +52,11 @@ def FFT(
 
     # Perform the FFT
     if inverse:
-        phasor = np.fft.fft2(np.fft.ifftshift(phasor)) / phasor.shape[-1]
+        phasor = np.fft.ifftshift(np.fft.fft2(np.fft.ifftshift(phasor)))
+        phasor /= phasor.shape[-1]
     else:
-        phasor = np.fft.fftshift(np.fft.ifft2(phasor)) * phasor.shape[-1]
+        phasor = np.fft.fftshift(np.fft.ifft2(np.fft.fftshift(phasor)))
+        phasor *= phasor.shape[-1]
 
     return phasor, new_pixel_scale
 
@@ -244,9 +245,7 @@ def MFT(
         pixel_scale_out,
         focal_length,
     )
-    phasor *= np.exp(
-        np.log(nfringes) - (np.log(npixels_in) + np.log(npixels_out))
-    )
+    phasor *= np.exp(np.log(nfringes) - (np.log(npixels_in) + np.log(npixels_out)))
 
     return phasor
 
@@ -274,9 +273,7 @@ def quadratic_phase(
     phase : Array
         The phases for a quadratic lens.
     """
-    return np.exp(
-        1j * np.pi * np.hypot(*coordinates) ** 2 / (distance * wavelength)
-    )
+    return np.exp(1j * np.pi * np.hypot(*coordinates) ** 2 / (distance * wavelength))
 
 
 def fresnel_phase_factors(
