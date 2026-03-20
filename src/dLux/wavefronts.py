@@ -648,6 +648,7 @@ class Wavefront(zdx.Base):
         self: Wavefront,
         focal_length: float = None,
         pad: int = 2,
+        inverse: None | bool = None,
     ) -> Wavefront:
         """
         Fraunhofer (FFT) propagation between conjugate pupil and focal planes.
@@ -659,6 +660,9 @@ class Wavefront(zdx.Base):
             If float, output sampling is Cartesian at that focal length.
         pad : int
             Zero-padding factor applied before the FFT to control sampling / aliasing.
+        inverse : None | bool
+            If None, automatically determine propagation direction based on current
+            plane.
 
         Returns
         -------
@@ -670,7 +674,9 @@ class Wavefront(zdx.Base):
         - Phasor is transformed directly; amplitude/phase are derived.
         - Energy conservation depends on padding conventions in dlu.FFT.
         """
-        inverse, plane, units = self._prep_prop(focal_length)
+        _inverse, plane, units = self._prep_prop(focal_length)
+        if inverse is None:
+            inverse = _inverse
         phasor, pixel_scale = dlu.FFT(
             self.phasor,
             self.wavelength,
@@ -720,6 +726,7 @@ class Wavefront(zdx.Base):
         focal_length: float = None,
         shift: Array | None = None,
         pixel: bool = True,
+        inverse: None | bool = None,
     ) -> Wavefront:
         """
         Flexible MFT propagation allowing explicit output sampling.
@@ -739,6 +746,9 @@ class Wavefront(zdx.Base):
             applied.
         pixel : bool
             Interpret shift in pixel units if True; else in pixel_scale units.
+        inverse : None | bool
+            If None, automatically determine propagation direction based on current
+            plane.
 
         Returns
         -------
@@ -750,7 +760,9 @@ class Wavefront(zdx.Base):
         - Ideal for generating PSFs at arbitrary sampling.
         - For broadband propagation, vmap this function over wavelength and pixel_scale.
         """
-        inverse, plane, units = self._prep_prop(focal_length)
+        _inverse, plane, units = self._prep_prop(focal_length)
+        if inverse is None:
+            inverse = _inverse
         pixel_scale = np.asarray(pixel_scale, float)
         if shift is None:
             shift = np.zeros(2, dtype=float)
