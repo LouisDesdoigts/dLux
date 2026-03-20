@@ -4,11 +4,15 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import Array
 
-
 from .optical_layers import OpticalLayer
 from ..wavefronts import Wavefront
 
-__all__ = ["MFT", "FFT", "ShiftedMFT", "FarFieldFresnel"]
+__all__ = [
+    "MFT",
+    "FFT",
+    "ShiftedMFT",
+    "FarFieldFresnel",
+]
 
 
 class Propagator(OpticalLayer):
@@ -62,23 +66,33 @@ class FFT(Propagator):
     pad : int
         The zero-padding factor to apply to the `Wavefront` before propagation. In
         general, this should be greater than 2 to avoid aliasing.
+    crop : int
+        The cropping factor to apply to the `Wavefront` after propagation. In general,
+        this should only be applied after a corresponding padding factor has been
+        applied to avoid aliasing.
     """
 
     pad: int
+    crop: int
 
-    def __init__(self: FFT, focal_length: float = None, pad: int = 2):
+    def __init__(self: FFT, focal_length: float = None, pad: int = 1, crop: int = 1):
         """
         Parameters
         ----------
         focal_length : float = None
             The focal_length of the lens/mirror this propagator represents. If None, the
             output pixel_scale has units radians/pixel, else meters/pixels.
-        pad : int = 2
+        pad : int = 1
             The zero-padding factor to apply to the `Wavefront` before propagation. In
             general, this should be greater than 2 to avoid aliasing.
+        crop : int = 1
+            The cropping factor to apply to the `Wavefront` after propagation. In
+            general, this should only be applied after a corresponding padding factor
+            has been applied to avoid aliasing.
         """
         super().__init__(focal_length=focal_length)
         self.pad = int(pad)
+        self.crop = int(crop)
 
     def __call__(self: FFT, wavefront: Wavefront) -> Wavefront:
         """
@@ -94,7 +108,8 @@ class FFT(Propagator):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        return wavefront.propagate_FFT(self.focal_length, self.pad)
+        size_out = wavefront.npixels * self.pad // self.crop
+        return wavefront.propagate_FFT(self.focal_length, self.pad).resize(size_out)
 
 
 class MFT(Propagator):
