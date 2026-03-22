@@ -623,7 +623,7 @@ class AngularOpticalSystem(ParametricLayeredOpticalSystem):
         return wavefront.propagate(psf_npixels, pixel_scale)
 
 
-class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
+class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
     """
     An extension to the LayeredOpticalSystem class that propagates a wavefront to an
     image plane with `psf_pixel_scale` in units of microns.
