@@ -37,6 +37,8 @@ def FFT(
     -------
     phasor : Array[complex]
         The propagated phasor.
+    new_pixel_scale : float
+        The pixel scale of the output phasor.
     """
     npixels = phasor.shape[-1]
 
@@ -52,12 +54,12 @@ def FFT(
 
     # Perform the FFT
     if inverse:
-        phasor = np.fft.ifftshift(np.fft.fft2(np.fft.ifftshift(phasor)))
-        phasor /= phasor.shape[-1]
-    else:
-        phasor = np.fft.fftshift(np.fft.ifft2(np.fft.fftshift(phasor)))
+        phasor = np.fft.fftshift(np.fft.ifft2(np.fft.ifftshift(phasor)))
         phasor *= phasor.shape[-1]
 
+    else:
+        phasor = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(phasor)))
+        phasor /= phasor.shape[-1]
     return phasor, new_pixel_scale
 
 
@@ -117,7 +119,7 @@ def transfer_matrix(
     out_vec = dlu.nd_coords(npixels_out, scale_out, shift * scale_out)
 
     # Generate transfer matrix
-    matrix = 2j * np.pi * np.outer(in_vec, out_vec)
+    matrix = -2j * np.pi * np.outer(in_vec, out_vec)
     if inverse:
         matrix *= -1
     return np.exp(matrix)
