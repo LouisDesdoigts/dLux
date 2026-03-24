@@ -1,6 +1,8 @@
 import zodiax as zdx
 import jax.numpy as np
 
+__all__ = ["Spec", "PadSpec", "CoordSpec"]
+
 
 class Spec(zdx.Base):
     pass
