@@ -18,6 +18,7 @@ from . import (
     misc,
     norms,
     apertures,
+    fourier,
 )
 
 _modules = (
@@ -35,6 +36,7 @@ _modules = (
     misc,
     norms,
     apertures,
+    fourier,
 )
 
 _module_names = [
@@ -52,5 +54,6 @@ _module_names = [
     "misc",
     "norms",
     "apertures",
+    "fourier",
 ]
 __all__ = _module_names + reexport(_modules, globals())

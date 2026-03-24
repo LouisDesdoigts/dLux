@@ -5,15 +5,25 @@ import jax.numpy as np
 from jax import vmap, Array
 import zodiax as zdx
 import dLux.utils as dlu
+
 from .psfs import PSF
+from .coordinates import CoordSpec
 
 __all__ = ["Wavefront"]
+
+# TODO: Check all docstrings
+# TODO: Make coord specs 2d compatible
 
 
 class Wavefront(zdx.Base):
     """
     A simple class to hold the state of some wavefront as it is transformed and
     propagated throughout an optical system. All wavefronts assume square arrays.
+
+    # TODO: Remove all 'radians/pixel', everything is now cartesian meters/pixel,
+    the only 'angular' propagation is equivalent to propagating with a focal length
+    of 1, where meters and radians become equivalent. Also remove all "plane", "units",
+    "Angular", "Cartesian", "Intermediate" in the docstrings, etc.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/Wavefront.png)
@@ -28,10 +38,9 @@ class Wavefront(zdx.Base):
         The pixel scale of the phase and amplitude arrays. If `units='Cartesian'` then
         the pixel scale is in meters/pixel, else if `units='Angular'` then the pixel
         scale is in radians/pixel.
-    plane : str
-        The current plane type of wavefront, can be 'Pupil', 'Focal' or 'Intermediate'.
-    units : str
-        The current units of the wavefront, can be 'Cartesian' or 'Angular'.
+    fft_center : bool
+        Whether the wavefront has FFT-style centering. For even npixels this produces
+        integer centered coordinates. For odd npixels this is identical to the default.
     diameter : Array, property
         Derived property from `pixel_scale` and `npixels`; wavefront diameter.
     npixels : int, property
@@ -52,19 +61,16 @@ class Wavefront(zdx.Base):
         Derived property from `phasor`; intensity image `abs(phasor) ** 2`.
     wavenumber : Array, property
         Derived property from `wavelength`; scalar `2 * pi / wavelength`.
-    fringe_size : Array, property
-        Derived property from `wavelength`; angular fringe scale.
     ndim : int, property
         Derived property from `pixel_scale`; vectorisation rank of wavefront state.
     power : Array, property
         Derived property from `amplitude`; total wavefront power.
     """
 
+    phasor: Array[complex]
     wavelength: float
     pixel_scale: float
-    phasor: Array[complex]
-    plane: str
-    units: str
+    center: float
 
     def __init__(
         self: Wavefront,
@@ -72,8 +78,7 @@ class Wavefront(zdx.Base):
         npixels: int,
         diameter: float = None,
         pixel_scale: float = None,
-        plane: str = "Pupil",
-        units: str = "Cartesian",
+        center: Array = None,
     ):
         """
         Parameters
@@ -88,10 +93,10 @@ class Wavefront(zdx.Base):
         pixel_scale : float = None, meters/pixel or radians/pixel
             The pixel scale of the `Wavefront`. Either diameter or pixel_scale
             must be provided.
-        plane : str = "Pupil"
-            The plane type of the `Wavefront`.
-        units : str = "Cartesian"
-            The units of the `Wavefront`.
+        fft_center : bool = False
+            If True, the wavefront is initialized with FFT-style centering. For even
+            npixels this produces integer centered coordinates. For odd npixels this is
+            identical to the default.
         """
         # Handle diameter vs pixel_scale
         if diameter is None and pixel_scale is None:
@@ -114,9 +119,14 @@ class Wavefront(zdx.Base):
         phase = np.zeros((npixels, npixels), dtype=float)
         self.phasor = amplitude * np.exp(1j * phase)
 
-        # Always initialized in Pupil plane with Cartesian coordinates
-        self.plane = str(plane)
-        self.units = str(units)
+        if center is not None:
+            self.center = np.asarray(center, float)
+
+            # NOTE: only 1d offsets are presently supported
+            if self.center.shape != (1,):
+                raise ValueError("center must have shape (1,).")
+        else:
+            self.center = np.zeros(1, float)
 
     @classmethod
     def from_phasor(
@@ -125,8 +135,7 @@ class Wavefront(zdx.Base):
         wavelength: float,
         pixel_scale: float = None,
         diameter: float = None,
-        plane: str = "Pupil",
-        units: str = "Cartesian",
+        center: Array = None,
     ) -> Wavefront:
         """
         Create a Wavefront from an existing phasor array.
@@ -143,10 +152,10 @@ class Wavefront(zdx.Base):
         diameter : float = None, meters or radians
             The diameter of the phasor array. Either pixel_scale or
             diameter must be provided.
-        plane : str = "Pupil"
-            The current plane type of wavefront.
-        units : str = "Cartesian"
-            The current units of the wavefront.
+        fft_center : bool = False
+            If True, the wavefront is initialized with FFT-style centering. For even
+            npixels this produces integer centered coordinates. For odd npixels this is
+            identical to the default.
 
         Returns
         -------
@@ -157,33 +166,14 @@ class Wavefront(zdx.Base):
         phasor_arr = np.asarray(phasor, complex)
         npixels = phasor_arr.shape[-1]
 
-        # Create instance with appropriate parameters
-        if diameter is not None:
-            wf = cls(
-                npixels=npixels,
-                wavelength=wavelength,
-                diameter=diameter,
-                plane=plane,
-                units=units,
-            )
-        else:
-            wf = cls(
-                npixels=npixels,
-                wavelength=wavelength,
-                pixel_scale=pixel_scale,
-                plane=plane,
-                units=units,
-            )
-
-        # Update with correct phasor and pixel_scale
-        return wf.set(
-            phasor=phasor_arr,
-            wavelength=np.asarray(wavelength, float),
-            pixel_scale=np.asarray(
-                pixel_scale if pixel_scale is not None else diameter / npixels,
-                float,
-            ),
-        )
+        # Create instance with appropriate parameters and set the phasor
+        return cls(
+            npixels=npixels,
+            wavelength=wavelength,
+            diameter=diameter,
+            pixel_scale=pixel_scale,
+            center=center,
+        ).set(phasor=phasor_arr)
 
     @property
     def diameter(self: Wavefront) -> Array:
@@ -322,22 +312,6 @@ class Wavefront(zdx.Base):
         return 2 * np.pi / self.wavelength
 
     @property
-    def fringe_size(self: Wavefront) -> Array:
-        """
-        Returns the size of the fringes in angular units.
-
-        Returns
-        -------
-        fringe_size : Array, radians
-            The size of the linear diffraction fringe of the wavefront.
-        """
-        if self.plane != "Pupil":
-            raise ValueError(
-                "Fringe size is only defined for wavefronts in the Pupil plane."
-            )
-        return self.wavelength / self.diameter
-
-    @property
     def ndim(self: Wavefront) -> int:
         """
         Returns the number of 'dimensions' of the wavefront. This is used to track the
@@ -402,39 +376,7 @@ class Wavefront(zdx.Base):
             return self
         return self.add_phase(self.wavenumber * np.asarray(opd))
 
-    def coordinates(
-        self: Wavefront,
-        scale=1.0,
-        polar: bool = False,
-        fft_style: bool = False,
-    ) -> Array:
-        """
-        Returns the physical positions of the wavefront pixels in meters, with an
-        optional scaling factor for numerical stability.
-
-        Parameters
-        ----------
-        scale : float = 1.0
-            Optional scaling factor applied to the diameter for numerical stability.
-        polar : bool = False
-            Output the coordinates in polar (r, phi) coordinates.
-        fft_style : bool = False
-            If True, use FFT-style centering. For even npixels this produces integer
-            centered coordinates. For odd npixels this is identical to the default.
-
-        Returns
-        -------
-        coordinates : Array
-            The coordinates of the centers of each pixel representing the wavefront.
-        """
-        return dlu.pixel_coords(
-            self.npixels,
-            pixel_scale=self.pixel_scale * scale,
-            polar=polar,
-            fft_style=fft_style,
-        )
-
-    def tilt(self: "Wavefront", angles: Array, unit: str = "rad") -> "Wavefront":
+    def tilt(self: Wavefront, angles: Array, unit: str = "rad") -> Wavefront:
         """
         Tilts the wavefront by the (x, y) angles.
 
@@ -455,14 +397,11 @@ class Wavefront(zdx.Base):
         if angles.shape != (2,):
             raise ValueError("angles must be a 1d array of shape (2,).")
 
-        # factor such that angle_rad = angle_unit * factor
-        scaling = dlu.unit_factor_to_rad(unit)
-
         # Calculate scaled coordinates
-        coords = self.coordinates(scale=scaling)
+        coords = self.coordinates(scale=dlu.unit_factor_to_rad(unit))
 
         # Tilt the wavefront
-        return self.add_opd(-(angles[:, None, None] * coords).sum(0))
+        return self.add_opd(np.sum(angles[:, None, None] * coords, axis=0))
 
     def normalise(
         self: Wavefront,
@@ -608,128 +547,106 @@ class Wavefront(zdx.Base):
         """
         return self.set(phasor=dlu.resize(self.phasor, npixels, 0j))
 
-    def _prep_prop(self: Wavefront, focal_length) -> tuple:
-        """
-        Determine propagation direction and output metadata.
-
-        Parameters
-        ----------
-        focal_length : float | None
-            Focal length for a pupil→focal propagation. If None, focal plane sampling
-            is angular (radians/pixel). If provided, focal plane sampling is Cartesian
-            (meters/pixel). For focal→pupil inverse propagation, must be None when
-            current units are Angular.
-
-        Returns
-        -------
-        inverse : bool
-            False for forward pupil→focal; True for focal→pupil inverse.
-        plane : str
-            'Focal' if starting in a Pupil plane, else 'Pupil'.
-        units : str
-            'Angular' if forward propagation with focal_length=None, else 'Cartesian'.
-        """
-        if self.plane == "Pupil":
-            inverse = False
-            plane = "Focal"
-            units = "Angular" if focal_length is None else "Cartesian"
-        else:
-            if focal_length is not None and self.units == "Angular":
-                raise ValueError(
-                    "Cannot specify focal_length when propagating from an angular "
-                    "Focal plane."
-                )
-            inverse = True
-            plane = "Pupil"
-            units = "Cartesian"
-        return inverse, plane, units
-
-    def propagate_FFT(
+    def coordinates(
         self: Wavefront,
-        focal_length: float = None,
-        pad: int = 2,
-        inverse: None | bool = None,
-    ) -> Wavefront:
-        """
-        Fraunhofer (FFT) propagation between conjugate pupil and focal planes.
-
-        Parameters
-        ----------
-        focal_length : float | None
-            If None, output sampling is angular (radians/pixel).
-            If float, output sampling is Cartesian at that focal length.
-        pad : int
-            Zero-padding factor applied before the FFT to control sampling / aliasing.
-        inverse : None | bool
-            If None, automatically determine propagation direction based on current
-            plane.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            New wavefront with propagated phasor, updated pixel_scale, plane and units.
-
-        Notes
-        -----
-        - Phasor is transformed directly; amplitude/phase are derived.
-        - Energy conservation depends on padding conventions in dlu.FFT.
-        """
-        _inverse, plane, units = self._prep_prop(focal_length)
-        if inverse is None:
-            inverse = _inverse
-        phasor, pixel_scale = dlu.FFT(
-            self.phasor,
-            self.wavelength,
-            self.pixel_scale,
-            focal_length,
-            pad,
-            inverse,
-        )
-        return self.set(
-            ["phasor", "pixel_scale", "plane", "units"],
-            [phasor, pixel_scale, plane, units],
-        )
-
-    def _MFT(
-        self: Wavefront,
-        phasor: Array,
-        wavelength: float,
-        pixel_scale: float,
-        *args: tuple,
+        scale=1.0,
+        polar: bool = False,
     ) -> Array:
         """
-        Internal alias wrapper for dlu.MFT to support vmapped / broadband propagation.
+        Returns the physical positions of the wavefront pixels in meters, with an
+        optional scaling factor for numerical stability.
 
         Parameters
         ----------
-        phasor : Array[complex]
-            Input complex field.
-        wavelength : float
-            Wavelength associated with the field.
-        pixel_scale : float
-            Input sampling (meters/pixel or radians/pixel).
-        args : tuple
-            Additional arguments passed through to dlu.MFT (npixels_out,
-            pixel_scale_out, focal_length, shift, pixel_units, inverse_flag).
+        scale : float = 1.0
+            Optional scaling factor applied to the diameter for numerical stability.
+        polar : bool = False
+            Output the coordinates in polar (r, phi) coordinates.
 
         Returns
         -------
-        phasor : Array[complex]
-            Propagated complex field.
+        coordinates : Array
+            The coordinates of the centers of each pixel representing the wavefront.
         """
-        return dlu.MFT(phasor, wavelength, pixel_scale, *args)
+        xs = self.xs * scale
+        coords = np.array(np.meshgrid(xs, xs))
+        if polar:
+            return dlu.cartesian_to_polar(coords)
+        return coords
+
+    @property
+    def spec(self):
+        return CoordSpec(self.npixels, self.pixel_scale, self.center)
+
+    @property
+    def xs(self):
+        return self.spec.xs
+
+    def set_spec(self, spec: CoordSpec):
+        return self.set(pixel_scale=spec.d, center=spec.c)
+
+    def propagate_FFT(
+        self,
+        pad=2,
+        focal_length=None,
+        spec_out: CoordSpec = None,
+        inverse=False,
+    ):
+        # Input spec
+        spec_in = self.spec
+        wl = self.wavelength
+
+        # Default FFT output center
+        n_out = spec_in.n * pad
+        d_fft, c_fft = dlu.fft_spec(n_out, spec_in.d, wl, focal_length)
+
+        # Get the phase ramp and the output center
+        if spec_out is not None:
+            if spec_out.d is not None:
+                raise ValueError("Output spec cannot specify d; FFT output d is fixed.")
+            if spec_out.n is not None:
+                raise ValueError(
+                    "Output spec cannot specify n; FFT output n is determined by the ",
+                    "pad parameter.",
+                )
+
+            # Calculate the input phase ramp for the FFT propagation
+            shift = c_fft - spec_out.c
+            in_ramp = dlu.fft_phase_ramp(spec_in.xs, wl, shift, focal_length, inverse)
+
+            # Calculate the output phase ramp correction
+            spec_out = spec_out.set(n=n_out, d=d_fft)
+            shift = dlu.fft_spec(spec_out.n, spec_out.d, wl, focal_length)[1]
+            out_ramp = dlu.fft_phase_ramp(spec_out.xs, wl, shift, focal_length, inverse)
+
+        else:
+            in_ramp, out_ramp = 1.0, 1.0
+            spec_out = CoordSpec(n=n_out, d=d_fft, c=c_fft)
+
+        # Apply ramp and FFT
+        phasor, pixel_scale = dlu.FFT(
+            phasor=self.phasor * in_ramp,
+            wavelength=self.wavelength,
+            pixel_scale=self.pixel_scale,
+            focal_length=focal_length,
+            inverse=inverse,
+            pad=pad,
+        )
+
+        # Update the values
+        return self.set(
+            phasor=phasor * out_ramp, pixel_scale=pixel_scale, center=spec_out.c
+        )
 
     def propagate(
         self: Wavefront,
         npixels: int,
         pixel_scale: float,
         focal_length: float = None,
-        shift: Array | None = None,
-        pixel: bool = True,
-        inverse: None | bool = None,
+        inverse: bool = False,
     ) -> Wavefront:
         """
-        Flexible MFT propagation allowing explicit output sampling.
+        Legacy MFT propagation function without CoordSpec.
 
         Parameters
         ----------
@@ -740,15 +657,8 @@ class Wavefront(zdx.Base):
             units).
         focal_length : float | None
             Focal length for Cartesian focal sampling; None for angular focal sampling.
-        shift : Array | None, shape (2,) = None
-            Offset of the output plane center (x, y). Units = pixels if pixel=True,
-            else physical units matching input pixel_scale. If None, no shift is
-            applied.
-        pixel : bool
-            Interpret shift in pixel units if True; else in pixel_scale units.
-        inverse : None | bool
-            If None, automatically determine propagation direction based on current
-            plane.
+        inverse : bool
+            Is the propagation forwards in the inverse direction.
 
         Returns
         -------
@@ -760,99 +670,58 @@ class Wavefront(zdx.Base):
         - Ideal for generating PSFs at arbitrary sampling.
         - For broadband propagation, vmap this function over wavelength and pixel_scale.
         """
-        _inverse, plane, units = self._prep_prop(focal_length)
-        if inverse is None:
-            inverse = _inverse
-        pixel_scale = np.asarray(pixel_scale, float)
-        if shift is None:
-            shift = np.zeros(2, dtype=float)
-        else:
-            shift = np.asarray(shift, dtype=float)
-            if shift.shape != (2,):
-                raise ValueError("shift must be a 1d array of shape (2,).")
-        args = (npixels, pixel_scale, focal_length, shift, pixel, inverse)
-        phasor = self._MFT(self.phasor, self.wavelength, self.pixel_scale, *args)
-        return self.set(
-            ["phasor", "pixel_scale", "plane", "units"],
-            [phasor, pixel_scale, plane, units],
+        # Propagate
+        phasor = dlu.MFT(
+            phasor=self.phasor,
+            wavelength=self.wavelength,
+            pixel_scale_in=self.pixel_scale,
+            npixels_out=npixels,
+            pixel_scale_out=pixel_scale,
+            focal_length=focal_length,
+            inverse=inverse,
         )
+        return self.set(phasor=phasor, pixel_scale=np.array(pixel_scale, float))
 
-    def propagate_fresnel(
-        self: Wavefront,
-        npixels: int,
-        pixel_scale: float,
-        focal_length: float,
-        focal_shift: float = 0.0,
-        shift: Array | None = None,
-        pixel: bool = True,
-        inverse: bool = False,
-    ) -> Wavefront:
+    def propagate_MFT(self, spec_out, focal_length=None, inverse=None):
+        """MFT propagator compatible with the new CoordSpec formulation"""
+        # Propagate
+        phasor = dlu.MFT(
+            phasor=self.phasor,
+            wavelength=self.wavelength,
+            pixel_scale_in=self.pixel_scale,
+            npixels_out=spec_out.n,
+            pixel_scale_out=spec_out.d,
+            focal_length=focal_length,
+            inverse=inverse,
+        )
+        return self.set(phasor=phasor, pixel_scale=np.array(spec_out.d, float))
+
+    #######################
+    ### New Propagators ###
+    #######################
+    def propagate_ASM(self):
+        """Angular spectrum free-space propagation"""
+        raise NotImplementedError()
+
+    def propagate_fresnel(self):
+        """LCT-based MFT Fresnel propagation"""
+        raise NotImplementedError()
+
+    def propagate_fresnel_fft(self):
+        """LCT-based FFT Fresnel propagation"""
+        raise NotImplementedError()
+
+    def propagate_fraunhofer(self):
         """
-        Far-field Fresnel propagation near focus for intermediate planes.
-
-        Parameters
-        ----------
-        npixels : int
-            Output array size.
-        pixel_scale : float
-            Output sampling (meters/pixel).
-        focal_length : float
-            System focal length.
-        focal_shift : float
-            Axial distance from best focus (meters).
-        shift : Array | None, shape (2,) = None
-            Lateral shift of output plane center. If None, no shift is applied.
-        pixel : bool
-            Interpret shift as pixels if True; else physical units.
-        inverse : bool
-            If True, perform inverse Fresnel (rare; leave False for forward).
-
-        Returns
-        -------
-        wavefront : Wavefront
-            New wavefront in an 'Intermediate' Cartesian plane.
-
-        Raises
-        ------
-        ValueError
-            If current plane is not 'Pupil'.
-
-        Notes
-        -----
-        - Models defocus regions a few wavelengths from best focus.
-                - Assumes forward propagation from pupil; inverse mode retained for
-                    experimentation.
+        Fraunhofer propagation via MFT (same as propagate MFT, but with abcdLux backend)
         """
-        if self.plane != "Pupil":
-            raise ValueError(
-                "Fresnel propagation requires starting in Pupil plane (got "
-                f"{self.plane})."
-            )
-        pixel_scale = np.asarray(pixel_scale, float)
-        if shift is None:
-            shift = np.zeros(2, dtype=float)
-        else:
-            shift = np.asarray(shift, dtype=float)
-            if shift.shape != (2,):
-                raise ValueError("shift must be a 1d array of shape (2,).")
-        plane = "Intermediate"
-        units = "Cartesian"
-        phasor = dlu.fresnel_MFT(
-            self.phasor,
-            self.wavelength,
-            self.pixel_scale,
-            npixels,
-            pixel_scale,
-            focal_length,
-            focal_shift,
-            shift,
-            pixel,
-            inverse,
-        )
-        return self.set(
-            ["phasor", "pixel_scale", "plane", "units"],
-            [phasor, pixel_scale, plane, units],
-        )
+        raise NotImplementedError()
+
+    def propagate_fraunhofer_fft(self):
+        """
+        Fraunhofer propagation via FFT (same as propagate FFT, but with abcdLux backend)
+        """
+        raise NotImplementedError()
 
     def _magic_unified_op(
         self: Wavefront, other: Wavefront | Array | None, op: str

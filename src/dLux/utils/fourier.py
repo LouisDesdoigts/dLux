@@ -2,7 +2,31 @@ from jax import Array
 import jax.numpy as np
 from abcdLux.mft import mft_kernels
 
-__all__ = ["fourier_kernels", "eval_fourier_basis"]
+__all__ = ["fourier_kernels", "eval_fourier_basis", "fft_spec", "fft_phase_ramp"]
+
+
+def fft_spec(npixels_in, pixel_scale_in, wavelength, focal_length=None):
+    """ """
+    # Output pixel scale - fl * lambda / D
+    d_out = wavelength / (npixels_in * pixel_scale_in)
+    if focal_length is not None:
+        d_out = d_out * focal_length
+
+    # Return the centered case
+    if npixels_in % 2 != 0:
+        return d_out, 0.0
+    return d_out, -0.5 * d_out
+
+
+def fft_phase_ramp(xs, wavelength, shift, focal_length=None, inverse=False):
+    """ """
+    # Sign convention: positive for forward transform, negative for inverse transform
+    sign = -1 if inverse else 1
+
+    # Calculate the phase ramp to shift the FFT from native_out to spec_out
+    alpha = wavelength if focal_length is None else wavelength * focal_length
+    ramp = np.exp(sign * 2j * np.pi * xs * shift / alpha)
+    return ramp[None, :] * ramp[:, None]
 
 
 def _realpack_to_exp_transform(N: int) -> Array:

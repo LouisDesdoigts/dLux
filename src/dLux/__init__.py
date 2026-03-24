@@ -15,6 +15,7 @@ from . import (
     wavefronts,
     psfs,
     transformations,
+    coordinates,
 )
 
 _modules = (
@@ -27,6 +28,7 @@ _modules = (
     wavefronts,
     psfs,
     transformations,
+    coordinates,
 )
 
 _module_names = [
@@ -40,5 +42,6 @@ _module_names = [
     "wavefronts",
     "psfs",
     "transformations",
+    "coordinates",
 ]
 __all__ = _module_names + reexport(_modules, globals())
