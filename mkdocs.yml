@@ -140,5 +140,7 @@ nav:
       - Zernikes:         API/utils/zernikes.md
 
   - FAQ & Troubleshooting: faq.md
+  - Previous Versions:
+      - v0.14.0: https://louisdesdoigts.github.io/dlux/0.14.0/
   - Change Log: CHANGELOG.md
   - Contributing: CONTRIBUTING.md
