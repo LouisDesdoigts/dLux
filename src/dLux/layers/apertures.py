@@ -857,21 +857,24 @@ class CompositeAperture(BaseDynamicAperture):
             The list of aberrated apertures.
         """
 
-        # Define leaf function
-        def is_aberrated(leaf):
-            if isinstance(leaf, AberratedAperture):
+        def is_aperture(node):
+            return isinstance(node, ApertureLayer)
+
+        def is_aberrated(node):
+            if isinstance(node, AberratedAperture):
                 return True
-            elif isinstance(leaf, CompoundAperture):
-                if len(leaf._aberrated_apertures()) > 0:
-                    return True
+            elif isinstance(node, CompositeAperture):
+                return len(node._aberrated_apertures()) > 0
             return False
 
-        # Create boolean filter spec with same pytree structure as self.apertures
-        filter_spec = jtu.tree_map(is_aberrated, self.apertures, is_leaf=is_aberrated)
+        # Build a {key: bool} filter spec, keeping every aperture object atomic
+        filter_spec = jtu.map(is_aberrated, self.apertures, is_leaf=is_aperture)
 
-        # Get aberrated apertures using eqx.partition with proper filter spec
-        aberrated, _ = eqx.partition(self.apertures, filter_spec)
-        return jtu.leaves(aberrated)
+        # Partition: selected apertures are kept whole; rest become None
+        aberrated, _ = eqx.partition(self.apertures, filter_spec, is_leaf=is_aperture)
+
+        # Flatten, keeping apertures atomic; None slots are dropped automatically
+        return jtu.leaves(aberrated, is_leaf=is_aperture)
 
     @property
     def coefficients(self: ApertureLayer) -> list[Array]:

@@ -206,4 +206,7 @@ def nandiv(a: Array, b: Array, fill: Any = np.inf) -> Array:
     a / b : Array
         The result of the division.
     """
-    return np.where(b == 0, fill, a / b)
+    # Avoid evaluating a/0 under jax_debug_nans by dividing through a safe denominator
+    safe_b = np.where(b == 0, 1, b)
+    out = a / safe_b
+    return np.where(b == 0, fill, out)

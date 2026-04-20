@@ -266,8 +266,8 @@ class ASMPropagator(OpticalLayer):
         field = asm.asm_prop(
             u_in=wavefront.phasor,
             spec_in=wavefront.spec,
-            wavelength=wavefront.wavelength,
-            distance=self.distance,
+            lam=wavefront.wavelength,
+            z=self.distance,
             npad=wavefront.npixels * self.pad,
             crop=False,
         )

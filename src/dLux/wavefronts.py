@@ -571,7 +571,7 @@ class Wavefront(zdx.Base):
         xs = self.xs * scale
         coords = np.array(np.meshgrid(xs, xs))
         if polar:
-            return dlu.cartesian_to_polar(coords)
+            return dlu.cart2polar(coords)
         return coords
 
     @property
