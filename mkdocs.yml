@@ -141,5 +141,7 @@ nav:
             
 
     - FAQ & Troubleshooting: faq.md
+    - Previous Versions:
+      - v0.14.2: https://louisdesdoigts.github.io/dLux/0.14.2/
     - Change Log: CHANGELOG.md
     - Contributing: CONTRIBUTING.md
