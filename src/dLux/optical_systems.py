@@ -357,11 +357,7 @@ class LayeredOpticalSystem(OpticalSystem):
         for layer in list(self.layers.values()):
             if hasattr(layer, key):
                 return getattr(layer, key)
-        raise dlu.helpers.missing_attribute_error(
-            self,
-            key,
-            list(self.layers.keys()),
-        )
+        raise dlu.missing_attribute_error(self, key, list(self.layers.keys()))
 
     def initialise_wavefront(
         self: LayeredOpticalSystem, wavelength: Array, offset: Array = None

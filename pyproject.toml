@@ -17,7 +17,7 @@ keywords = [
     "telescope", 
     "dLux"
 ]
-dependencies = ["zodiax>=0.5", "interpax"]
+dependencies = ["zodiax>=0.5", "abcdLux", "interpax"]
 
 [project.optional-dependencies]
 tests = [

@@ -2,7 +2,13 @@ from jax import Array
 import jax.numpy as np
 from abcdLux.mft import mft_kernels
 
-__all__ = ["fourier_kernels", "eval_fourier_basis", "fft_spec", "fft_phase_ramp"]
+__all__ = [
+    "fft_spec",
+    "fft_phase_ramp",
+    "fourier_kernel_1d",
+    "fourier_kernels",
+    "eval_fourier_basis",
+]
 
 
 def fft_spec(npixels_in, pixel_scale_in, wavelength, focal_length=None):
@@ -29,96 +35,213 @@ def fft_phase_ramp(xs, wavelength, shift, focal_length=None, inverse=False):
     return ramp[None, :] * ramp[:, None]
 
 
-def _realpack_to_exp_transform(N: int) -> Array:
+def _to_xy(value: int | tuple[int], name: str) -> tuple[int]:
     """
-    Build T (N,N) such that:
-      c_exp = T @ a_real
-    with real-packed a_real = [DC, cos1, sin1, cos2, sin2, ...]
-    and exp-packed c_exp = [0, +1, -1, +2, -2, ...].
-    """
-    T = np.zeros((N, N), dtype=complex)
+    Casts an integer or tuple input to an `(x, y)` tuple.
 
-    # DC maps directly
+    Parameters
+    ----------
+    value : int | tuple[int]
+        The input value.
+    name : str
+        The name of the input, used for error messages.
+
+    Returns
+    -------
+    value : tuple[int]
+        The cast input value.
+    """
+    if isinstance(value, int):
+        value = (value, value)
+    elif not isinstance(value, (tuple, list)) or len(value) != 2:
+        raise TypeError(f"{name} must be an int or length-2 tuple, got {type(value)}.")
+
+    value = (int(value[0]), int(value[1]))
+    if value[0] <= 0 or value[1] <= 0:
+        raise ValueError(f"{name} must contain positive integers, got {value}.")
+
+    return value
+
+
+def _fourier_mode_order(n_modes: int) -> Array:
+    """
+    Calculates the Fourier mode ordering for the complex exponential basis.
+
+    Parameters
+    ----------
+    n_modes : int
+        The number of Fourier modes.
+
+    Returns
+    -------
+    modes : Array
+        The ordered Fourier mode indices.
+    """
+    if n_modes % 2 == 1:
+        kmax = (n_modes - 1) // 2
+        modes = [0]
+        for m in range(1, kmax + 1):
+            modes.extend([m, -m])
+    else:
+        kmax = n_modes // 2
+        modes = [0]
+        for m in range(1, kmax):
+            modes.extend([m, -m])
+        modes.append(kmax)
+
+    return np.asarray(modes)
+
+
+def _map_to_real(kernel: Array) -> Array:
+    """
+    Maps a complex exponential Fourier kernel to the real Fourier basis.
+
+    The input kernel is assumed to use the mode ordering
+    `[0, +1, -1, +2, -2, ...]`. The returned kernel uses
+    `[DC, cos1, sin1, cos2, sin2, ...]`.
+
+    Parameters
+    ----------
+    kernel : Array
+        The complex exponential Fourier kernel.
+
+    Returns
+    -------
+    kernel : Array
+        The real Fourier kernel.
+    """
+    n_modes = kernel.shape[-1]
+
+    # Initialise the basis transform matrix and set the DC term
+    T = np.zeros((n_modes, n_modes), dtype=complex)
     T = T.at[0, 0].set(1.0)
 
-    # Number of cos/sin harmonic pairs present (excluding Nyquist if even)
-    if N % 2 == 0:
-        n_harm = (N // 2) - 1
+    # Determine number of harmonic pairs and Nyquist handling.
+    if n_modes % 2 == 0:
+        n_harm = n_modes // 2 - 1
         has_nyq = True
     else:
-        n_harm = (N - 1) // 2
+        n_harm = (n_modes - 1) // 2
         has_nyq = False
 
     if n_harm > 0:
         k = np.arange(1, n_harm + 1)
+        half = np.array(0.5, dtype=complex)
+        half_j = np.array(0.5j, dtype=complex)
 
-        # exp indices for +k and -k in [0, +1, -1, +2, -2, ...]
+        # Get the indicies
         ip = 2 * k - 1
         im = 2 * k
 
-        # real indices for cosk and sink in [DC, cos1, sin1, cos2, sin2, ...]
-        ic = 2 * k - 1
-        is_ = 2 * k
+        # Set the transform for each harmonic pair
+        T = T.at[ip, ip].set(half)
+        T = T.at[ip, im].set(-half_j)
+        T = T.at[im, ip].set(half)
+        T = T.at[im, im].set(half_j)
 
-        half = np.array(0.5, dtype=complex)
-        jhalf = np.array(0.5j, dtype=complex)
-
-        # c(+k) = 0.5*cosk  - 0.5j*sink
-        T = T.at[ip, ic].set(half)
-        T = T.at[ip, is_].set(-jhalf)
-
-        # c(-k) = 0.5*cosk  + 0.5j*sink
-        T = T.at[im, ic].set(half)
-        T = T.at[im, is_].set(+jhalf)
-
-    # Nyquist (even N): only cosine exists; sin term is identically zero on-grid
+    # Nyquist mode (even n): purely cosine, maps directly.
     if has_nyq:
-        T = T.at[N - 1, N - 1].set(1.0)
+        T = T.at[n_modes - 1, n_modes - 1].set(1.0)
 
-    return T
+    return (kernel @ T).real
 
 
-def fourier_kernels(N: int, M: int):
+def fourier_kernel_1d(n_modes: int, npix: int, scale: float = 1.0) -> Array:
     """
-    Returns Kx_real, Ky_real such that:
-      out ≈ (Ky_real @ C_real @ Kx_real.T).real
-    with C_real real-packed coefficients (N,N) and output shape (M,M).
+    Calculates a cached 1D Fourier basis evaluation kernel.
+
+    A unit-amplitude mode with `scale=1` evaluates to values between `-1` and `+1`.
+
+    Parameters
+    ----------
+    n_modes : int
+        The number of Fourier modes.
+    npix : int
+        The number of output pixels.
+    scale : float = 1.0
+        The output amplitude scaling.
+
+    Returns
+    -------
+    kernel : Array
+        The cached Fourier kernel.
     """
+    # Calculate the Fourier mode indices.
+    modes = _fourier_mode_order(n_modes)
 
-    # exp basis frequency indices: [0, +1, -1, +2, -2, ...]
-    # (same along x and y)
-    def k_order_monotone(N):
-        if N % 2 == 1:
-            kmax = (N - 1) // 2
-            ks = [0]
-            for m in range(1, kmax + 1):
-                ks.extend([m, -m])
-        else:
-            kmax = N // 2
-            ks = [0]
-            for m in range(1, kmax):
-                ks.extend([m, -m])
-            ks.append(kmax)  # Nyquist
-        return np.asarray(ks)
+    # Calculate the output coordinates.
+    coords = (np.arange(npix) - npix // 2) / npix
 
-    # Input and output coordinates
-    kx = k_order_monotone(N)
-    x = (np.arange(M) - (M // 2)) / M
+    # Calculate the complex exponential kernel.
+    kernel, _ = mft_kernels(spec_in=modes, spec_out=coords, alpha=2 * np.pi, weight=1.0)
 
-    # spec_in is kx/ky, spec_out is x/y.
-    Kx, Ky = mft_kernels(spec_in=kx, spec_out=x, alpha=2 * np.pi, weight=1.0)
-
-    # Fold transforms into kernels: Ky_real = Ky @ Ty, Kx_real = Kx @ Tx
-    Tx = _realpack_to_exp_transform(N)
-    return Kx @ Tx, Ky @ Tx
+    # Map the kernel to the real Fourier basis.
+    return scale * _map_to_real(kernel)
 
 
-def eval_fourier_basis(C: Array, Kx: Array, Ky: Array) -> Array:
+def fourier_kernels(
+    n_modes: int | tuple[int],
+    npix: int | tuple[int],
+    scale: float = 1.0,
+) -> tuple[Array, Array]:
     """
-    Evaluate with cached real-output kernels.
-    C: (N,N) real-packed coeffs (float)
-    Kx: (M,N) complex
-    Ky: (M,N) complex
-    Returns: (M,M) real (float)
+    Calculates the cached 2D Fourier basis evaluation kernels.
+
+    The input `n_modes` and `npix` are interpreted in `(x, y)` order. If an
+    integer is provided it is cast to `(value, value)`. The returned kernels satisfy
+
+    `output = Kx @ coefficients @ Ky.T`
+
+    where `coefficients` has shape `(n_modes_x, n_modes_y)` and `output` has shape
+    `(npix_x, npix_y)`.
+
+    Parameters
+    ----------
+    n_modes : int | tuple[int]
+        The number of Fourier modes in `(x, y)`.
+    npix : int | tuple[int]
+        The output number of pixels in `(x, y)`.
+    scale : float = 1.0
+        The per-axis output amplitude scaling.
+
+    Returns
+    -------
+    Kx : Array
+        The x-axis Fourier kernel.
+    Ky : Array
+        The y-axis Fourier kernel.
     """
-    return (Ky @ (C @ Kx.T)).real
+    # Unpack the number of modes and pixels for each dimension.
+    n_modes_x, n_modes_y = _to_xy(n_modes, "n_modes")
+    npix_x, npix_y = _to_xy(npix, "npix")
+
+    # Calculate the Fourier kernels for each dimension.
+    Kx = fourier_kernel_1d(n_modes_x, npix_x, scale)
+    Ky = fourier_kernel_1d(n_modes_y, npix_y, scale)
+
+    return Kx, Ky
+
+
+def eval_fourier_basis(coefficients: Array, Kx: Array, Ky: Array) -> Array:
+    """
+    Evaluates a 2D real Fourier basis using cached kernels.
+
+    The coefficient array is assumed to be ordered as `(x, y)`, with shape
+    `(n_modes_x, n_modes_y)`. The returned output is also ordered as `(x, y)`,
+    with shape `(npix_x, npix_y)`.
+
+    Parameters
+    ----------
+    coefficients : Array
+        The Fourier coefficients.
+    Kx : Array
+        The x-axis Fourier kernel.
+    Ky : Array
+        The y-axis Fourier kernel.
+
+    Returns
+    -------
+    output : Array
+        The evaluated Fourier basis.
+    """
+    return Kx @ coefficients @ Ky.T

@@ -34,3 +34,15 @@ class CoordSpec(Spec):
         if self.d is None:
             raise ValueError("d must be specified to calculate coordinates.")
         return self.c + (np.arange(self.n) - (self.n - 1) / 2) * self.d
+
+    @property
+    def fov(self):
+        if self.d is None:
+            raise ValueError("d must be specified to calculate FOV.")
+        return self.n * self.d
+
+    @property
+    def extent(self):
+        if self.d is None:
+            raise ValueError("d must be specified to calculate extent.")
+        return self.c - (self.n / 2) * self.d, self.c + (self.n / 2) * self.d
