@@ -1,6 +1,6 @@
 [project]
 name = "dLux"
-version = "0.14.2"
+version = "0.14.3"
 description = "Differentiable Optical Models as Parameterised Neural Networks in Jax using Zodiax."
 readme = "README.md"
 requires-python =">=3.8"
