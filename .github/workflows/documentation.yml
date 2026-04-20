@@ -1,44 +1,71 @@
-# Author: Jordan Dennis 
-# Date: 07/07/2022
-# Title: documentation.yml
-# Description: Automatically generates the docs on a merge.
-
 name: Documentation
 on:
   push:
     branches:
       - main
+      - docs-patch
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   documentation:
     runs-on: ubuntu-latest
-    steps: 
-      - name: checkout all
-        uses: actions/checkout@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-
-      - name: python install
-        uses: actions/setup-python@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.x
-          architecture: x64
+          python-version: '3.11'
 
-      - name: install environment
+      - name: Install environment
         run: |
-          pip install mkdocs
-          pip install mkdocs-jupyter
-          pip install mkdocs-same-dir
-          pip install pymdown-extensions
-          pip install mkdocs-pymdownx-material-extras
-          pip install mkdocs-autorefs  
-          pip install mkdocs-simple-plugin
-          pip install mkdocstrings
-          pip install mkdocstrings[python]
-          pip install mkdocs-material
-          pip install --upgrade notebook==6.4.12
+          python -m pip install --upgrade pip
+          python -m pip install ".[dev]"
+          python -m pip install zensical mkdocstrings-python
 
-      - name: generate and deploy documentation
-        run: mkdocs gh-deploy -d https://louisdesdoigts.github.io/dLux
+      - name: Verify docs environment
+        run: |
+          python -m pip show zensical mkdocs
+          python -c "import zensical, mkdocs; print('Docs deps OK')"
+
+      - name: Build Documentation
+        run: zensical build --strict
+
+      - name: Prepare publish directory
+        run: |
+          rm -rf .publish
+          mkdir -p .publish
+          cp -R site/. .publish/
+
+          # If this is a normal push to main, update the 'dev' and 'latest' aliases
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            mkdir -p .publish/dev .publish/latest
+            cp -R site/. .publish/dev/
+            cp -R site/. .publish/latest/
+          fi
+
+          # If this is a tag (e.g. v0.5.0), create permanent versioned folders
+          # with and without the 'v' prefix for robust backwards compatibility.
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION_TAG=${GITHUB_REF#refs/tags/}
+            VERSION=${VERSION_TAG#v}
+            mkdir -p ".publish/$VERSION_TAG" ".publish/$VERSION" .publish/latest
+            cp -R site/. ".publish/$VERSION_TAG/"
+            cp -R site/. ".publish/$VERSION/"
+            cp -R site/. .publish/latest/
+          fi
+
+      - name: Deploy Documentation
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .publish
+          keep_files: true
 
