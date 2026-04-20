@@ -208,14 +208,11 @@ class FFTPropagator(ABCDPropagator):
         fl = abcd.abcd_effective_focal_length(self.abcd)
 
         # Calculate the phase ramp for the FFT propagation offset
-        # NOTE: !! This FFT pixel offset correction may not be valid here !!
         d_fft, c_fft = dlu.fft_spec(n_padded, spec_in.d, lam, fl)
         in_ramp = dlu.fft_phase_ramp(spec_in.xs, lam, c_fft - self.spec.c, fl)
 
-        # # Calculate the output phase ramp correction
+        # Calculate the output phase ramp correction
         spec_out = CoordSpec(n=n_padded, c=self.spec.c, d=d_fft)
-        # shift = dlu.fft_spec(spec_out.n, spec_out.d, lam, fl)[1]
-        # out_ramp = dlu.fft_phase_ramp(spec_out.xs, lam, shift, fl)
 
         # FFT-based LCT propagation
         field, spec_out_xys = lct.lct_prop_fft(
@@ -223,10 +220,8 @@ class FFTPropagator(ABCDPropagator):
             spec_in=wavefront.spec.xs,
             lam=wavefront.wavelength,
             ABCD=self.abcd,
-            # npad=spec_out.n - spec_in.n,
-            npad=spec_out.n,  # - spec_in.n,
+            npad=spec_out.n,
         )
-        # field *= out_ramp
 
         # Apply the crop if specified
         if isinstance(self.spec, PadSpec):

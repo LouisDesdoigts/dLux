@@ -1,7 +1,7 @@
 from jax import Array
 import jax.numpy as np
 import dLux.utils as dlu
-from equinox import filter_jit as jit
+from equinox import filter_jit as fjit
 
 __all__ = [
     "segmented_hex_cens",
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-@jit
+@fjit
 def _hex_cens(rmax: float) -> Array:
     """
     Returns the centres of the six neighbouring hexagons.
@@ -39,7 +39,7 @@ def _hex_cens(rmax: float) -> Array:
     return np.array(xys)
 
 
-@jit
+@fjit
 def _evenly_spaced_points(point1: Array, point2: Array, n: int) -> Array:
     """
     Returns evenly spaced interior points between two 2D points.
@@ -63,7 +63,7 @@ def _evenly_spaced_points(point1: Array, point2: Array, n: int) -> Array:
     return np.squeeze(np.column_stack((x, y)))
 
 
-@jit
+@fjit
 def segmented_hex_cens(nrings: int, rmax: float, gap: float = 0.0) -> Array:
     """
     Hex-segment centres including the central segment.
@@ -322,10 +322,10 @@ def segmented_aperture(
 
     # Get the oversampled coordinates
     coords = dlu.pixel_coords(npixels * oversample, diameter=diameter)
-    shift_fn = jit(lambda c: dlu.translate_coords(coords, c))
+    shift_fn = fjit(lambda c: dlu.translate_coords(coords, c))
 
     # Get the individual hexagonal segments (only for kept centres)
-    hex_fn = jit(lambda c: dlu.reg_polygon(shift_fn(c), rmax, 6))
+    hex_fn = fjit(lambda c: dlu.reg_polygon(shift_fn(c), rmax, 6))
     hexes = np.array([hex_fn(c) for c in cens])
 
     # Build the list of transmission layers
@@ -348,7 +348,7 @@ def segmented_aperture(
 
     # Get the non-oversampled Zernike basis for each segment
     coords = dlu.pixel_coords(npixels, diameter=diameter)
-    shift_fn = jit(lambda c: dlu.translate_coords(coords, c))
+    shift_fn = fjit(lambda c: dlu.translate_coords(coords, c))
 
     # Get the zernike generation function
     z_diam = segment_diameter * (1.0 + zernike_oversize)
@@ -421,14 +421,14 @@ def sparse_aperture(
 
     # Get the oversampled coordinates
     coords = dlu.pixel_coords(npixels * oversample, diameter=diameter)
-    shift_fn = jit(lambda c: dlu.translate_coords(coords, c))
+    shift_fn = fjit(lambda c: dlu.translate_coords(coords, c))
 
     # Pick the sub-aperture shape function
     if shape == "circle":
-        aperture_fn = jit(lambda c: dlu.circle(shift_fn(c), hole_diameter / 2))
+        aperture_fn = fjit(lambda c: dlu.circle(shift_fn(c), hole_diameter / 2))
     else:
         rmax = hole_diameter / np.sqrt(3.0)
-        aperture_fn = jit(lambda c: dlu.reg_polygon(shift_fn(c), rmax, 6))
+        aperture_fn = fjit(lambda c: dlu.reg_polygon(shift_fn(c), rmax, 6))
 
     # Get the individual sub-apertures
     centers = np.array(centers, float)
@@ -443,7 +443,7 @@ def sparse_aperture(
 
     # Get the non-oversampled Zernike basis for each sub-aperture
     coords = dlu.pixel_coords(npixels, diameter=diameter)
-    shift_fn = jit(lambda c: dlu.translate_coords(coords, c))
+    shift_fn = fjit(lambda c: dlu.translate_coords(coords, c))
 
     # Get the zernike basis function
     z_diam = hole_diameter * (1.0 + zernike_oversize)
@@ -659,9 +659,9 @@ def euclid_like(
 
     # Get the generation functions
     spider_shift = np.array([secondary_diameter / 2 - spider_width / 2, diameter / 2])
-    rot_fn = jit(lambda angle: dlu.rotate_coords(ap_coords, dlu.deg2rad(angle + 30)))
-    shift_fn = jit(lambda angle: dlu.translate_coords(rot_fn(angle), spider_shift))
-    rect_fn = jit(lambda c: dlu.rectangle(c, spider_width, diameter, invert=True))
+    rot_fn = fjit(lambda angle: dlu.rotate_coords(ap_coords, dlu.deg2rad(angle + 30)))
+    shift_fn = fjit(lambda angle: dlu.translate_coords(rot_fn(angle), spider_shift))
+    rect_fn = fjit(lambda c: dlu.rectangle(c, spider_width, diameter, invert=True))
 
     # Get the spider vanes
     spiders = [rect_fn(shift_fn(angle)) for angle in spider_angles]
