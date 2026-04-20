@@ -2,13 +2,19 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 import pytest
-from dLux import CoordTransform, DistortedCoords
+from dLux import BaseCoordTransform, CoordTransform, DistortedCoords
 from dLux.utils import pixel_coords
+
+
+class NullTransform(BaseCoordTransform):
+    def __call__(self, coords):
+        return super().__call__(coords)
 
 
 def test_coord_transform():
     CoordTransform().calculate(1, 16)
     CoordTransform([0.0, 0.0], np.pi, [1, 1], [1, 1]).calculate(1, 16)
+    CoordTransform().apply(pixel_coords(1, 16))
     with pytest.raises(ValueError):
         CoordTransform(translation=[0.0])
     with pytest.raises(ValueError):
@@ -25,3 +31,8 @@ def test_distorted_coords():
     DistortedCoords().apply(pixel_coords(1, 16))
     with pytest.raises(ValueError):
         DistortedCoords(2, np.zeros(5))
+
+
+def test_base_coord_transform_not_implemented():
+    with pytest.raises(NotImplementedError):
+        NullTransform()(pixel_coords(1, 16))

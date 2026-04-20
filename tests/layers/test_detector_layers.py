@@ -26,6 +26,8 @@ def test_apply_pixel_response():
 
 def test_apply_jitter():
     _test_apply(ApplyJitter(0.1, 5))
+    with pytest.raises(ValueError):
+        ApplyJitter(0.1, 0)
 
 
 def test_apply_saturation():
@@ -38,3 +40,5 @@ def test_add_constant():
 
 def test_downsample():
     _test_apply(Downsample(8))
+    with pytest.raises(ValueError):
+        Downsample(0)

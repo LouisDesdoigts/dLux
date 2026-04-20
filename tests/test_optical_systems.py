@@ -56,11 +56,20 @@ def _test_propagate_mono(optics):
     assert isinstance(optics.propagate_mono(1e-6, return_wf=True), Wavefront)
 
 
+def _test_debug_propagate_mono(optics):
+    wavefront, outputs = optics.debug_propagate_mono(1e-6)
+
+    assert isinstance(wavefront, Wavefront)
+    assert isinstance(outputs, dict)
+    assert isinstance(outputs["initial_wavefront"], Wavefront)
+
+
 def test_layered_optics(wf_npixels, diameter, layers):
     optics = LayeredOpticalSystem(wf_npixels, diameter, layers)
     _test_model(optics)
     _test_propagate(optics)
     _test_propagate_mono(optics)
+    _test_debug_propagate_mono(optics)
 
     # Test getattr
     optics.Optic
@@ -69,8 +78,14 @@ def test_layered_optics(wf_npixels, diameter, layers):
         optics.not_an_attr
 
     # Test insert and remove layer
-    optics.insert_layer(Optic(), 1)
-    optics.remove_layer("Optic")
+    inserted = optics.insert_layer(Optic(), 1)
+    assert isinstance(inserted, LayeredOpticalSystem)
+    assert len(inserted.layers) == 2
+    assert list(inserted.layers.keys()) == ["Optic_0", "Optic_1"]
+
+    removed = inserted.remove_layer("Optic_0")
+    assert isinstance(removed, LayeredOpticalSystem)
+    assert len(removed.layers) == 1
 
 
 @pytest.fixture
@@ -102,6 +117,9 @@ def test_angular_optics(
     _test_model(optics)
     _test_propagate(optics)
     _test_propagate_mono(optics)
+    _test_debug_propagate_mono(optics)
+
+    assert optics.fov == psf_npixels * psf_pixel_scale
 
 
 def test_cartesian_optics(
@@ -125,3 +143,6 @@ def test_cartesian_optics(
     _test_model(optics)
     _test_propagate(optics)
     _test_propagate_mono(optics)
+    _test_debug_propagate_mono(optics)
+
+    assert optics.fov == psf_npixels * psf_pixel_scale
