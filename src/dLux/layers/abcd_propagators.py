@@ -224,7 +224,7 @@ class FFTPropagator(ABCDPropagator):
         )
 
         # Apply the crop if specified
-        if isinstance(self.spec, PadSpec):
+        if isinstance(self.spec, PadSpec) and self.spec.crop > 1:
             n_out = field.shape[0] // self.spec.crop
             field = dlu.crop_to(field, n_out)
 
@@ -246,39 +246,45 @@ class ASMPropagator(OpticalLayer):
     """
 
     distance: float
-    pad: int
-    crop: int
+    spec: CoordSpec
 
-    def __init__(self, distance, pad=1, crop=1):
-        raise NotImplementedError("ASMPropagator is not yet implemented.")
+    def __init__(self, distance, spec):
         self.distance = float(distance)
-        self.pad = int(pad)
-        self.crop = int(crop)
+        if isinstance(spec, CoordSpec):
+            if spec.d is not None or spec.c is not None:
+                raise ValueError("ASMPropagator CoordSpec can not specify d or c.")
+        self.spec = spec
+
+    def __getattr__(self, key):
+        if hasattr(self.spec, key):
+            return getattr(self.spec, key)
+        raise dlu.missing_attribute_error(self, key)
 
     def __call__(self, wavefront):
 
-        # Get spec and padding
-        # spec_in = (wavefront.npixels, wavefront.pixel_scale)
-        # spec_in =
-        # pad_to =
+        # Get padding
+        if isinstance(self.spec, CoordSpec):
+            n_padded = self.spec.n
+        else:
+            n_padded = wavefront.npixels * self.spec.pad
 
         # Propagate the field
         field = asm.asm_prop(
             u_in=wavefront.phasor,
-            spec_in=wavefront.spec,
+            spec_in=wavefront.xs,
             lam=wavefront.wavelength,
             z=self.distance,
-            npad=wavefront.npixels * self.pad,
+            npad=n_padded,
             crop=False,
         )
 
-        # crop if requested
-        if self.crop > 1:
-            crop_to = field.shape[0] // self.crop
-            field = dlu.crop_to(field, crop_to)
+        # Apply the crop if specified
+        if isinstance(self.spec, PadSpec) and self.spec.crop > 1:
+            n_out = field.shape[0] // self.spec.crop
+            field = dlu.crop_to(field, n_out)
 
         # Update wavefront
-        return wavefront.set(phasor=field, plane="Intermediate")
+        return wavefront.set(phasor=field)
 
 
 class Fraunhofer(ABCDPropagator):
@@ -298,12 +304,3 @@ class Fresnel(ABCDPropagator):
 
     def __init__(self):
         raise NotImplementedError("Fresnel propagator is not yet implemented.")
-
-
-# class CoordSpec(zdx.Base):
-#     N: int | tuple[int, ...]  # Num pixels
-#     d: float | tuple[float, ...]  # pixel scale
-#     s: float | tuple[float, ...]  # offset
-
-#     def __init__(self):
-#         raise NotImplementedError("CoordSpec is not yet implemented.")

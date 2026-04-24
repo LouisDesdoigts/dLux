@@ -77,12 +77,60 @@ def test_fft_propagator_call_padspec(wavefront):
     assert out.npixels == 16
 
 
+def test_asm_propagator_constructor_error():
+    with pytest.raises(ValueError, match="can not specify d or c"):
+        abcd_props.ASMPropagator(1.0, CoordSpec(n=8, d=1.0, c=0.0))
+
+
+def test_asm_propagator_call_coordspec(wavefront):
+    prop = abcd_props.ASMPropagator(1.0, CoordSpec(n=20, c=None))
+
+    out = prop(wavefront)
+    assert isinstance(out, Wavefront)
+    assert out.npixels == 20
+
+
+def test_asm_propagator_call_padspec(wavefront):
+    prop = abcd_props.ASMPropagator(1.0, PadSpec(pad=2, crop=2, c=0.0))
+
+    out = prop(wavefront)
+    assert isinstance(out, Wavefront)
+    assert out.npixels == 16
+
+
+def test_asm_propagator_getattr():
+    prop = abcd_props.ASMPropagator(1.0, CoordSpec(n=8, c=None))
+
+    assert prop.n == 8
+    with pytest.raises(AttributeError):
+        prop.not_an_attr
+
+
 def test_not_implemented_constructors():
-    with pytest.raises(NotImplementedError):
-        abcd_props.ASMPropagator(1.0)
+    spec = CoordSpec(n=8, c=None)
+    prop = abcd_props.ASMPropagator(1.0, spec)
+    assert isinstance(prop, abcd_props.ASMPropagator)
 
     with pytest.raises(TypeError):
         abcd_props.Fraunhofer()
 
     with pytest.raises(TypeError):
         abcd_props.Fresnel()
+
+
+def test_fraunhofer_init_not_implemented():
+    concrete_fraunhofer = type(
+        "ConcreteFraunhofer", (abcd_props.Fraunhofer,), {"__call__": lambda self, w: w}
+    )
+
+    with pytest.raises(NotImplementedError):
+        concrete_fraunhofer()
+
+
+def test_fresnel_init_not_implemented():
+    concrete_fresnel = type(
+        "ConcreteFresnel", (abcd_props.Fresnel,), {"__call__": lambda self, w: w}
+    )
+
+    with pytest.raises(NotImplementedError):
+        concrete_fresnel()
