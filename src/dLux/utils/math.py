@@ -93,7 +93,7 @@ def mv_gaussian(
     kernel : Array
         The normalized multivariate Gaussian kernel.
     """
-    raise NotImplementedError("Self reminder to check input bullshit")
+    raise NotImplementedError("Multivariate Gaussian generation is under development.")
 
     mean = np.asarray(mean, dtype=float)
     cov = np.asarray(cov, dtype=float)
