@@ -12,7 +12,28 @@ __all__ = [
 
 
 def fft_spec(npixels_in, pixel_scale_in, wavelength, focal_length=None):
-    """ """
+    """
+    Compute the native FFT output sampling and center offset.
+
+    Parameters
+    ----------
+    npixels_in : int
+        Number of input pixels along one axis.
+    pixel_scale_in : float
+        Input pixel scale.
+    wavelength : float
+        Wavelength used for propagation.
+    focal_length : float = None
+        Effective focal length. If provided, the output sampling is converted from
+        angular to linear units.
+
+    Returns
+    -------
+    d_out : float
+        Output pixel scale.
+    c_out : float
+        Output coordinate center offset.
+    """
     # Output pixel scale - fl * lambda / D
     d_out = wavelength / (npixels_in * pixel_scale_in)
     if focal_length is not None:
@@ -25,7 +46,29 @@ def fft_spec(npixels_in, pixel_scale_in, wavelength, focal_length=None):
 
 
 def fft_phase_ramp(xs, wavelength, shift, focal_length=None, inverse=False):
-    """ """
+    """
+    Compute the 2D complex phase ramp for FFT coordinate shifting.
+
+    Parameters
+    ----------
+    xs : Array
+        One-dimensional coordinate vector.
+    wavelength : float
+        Wavelength used for propagation.
+    shift : float
+        Output coordinate shift to apply.
+    focal_length : float = None
+        Effective focal length. If provided, coordinates are interpreted in linear
+        units; otherwise angular units are assumed.
+    inverse : bool = False
+        If False, use the forward-transform phase sign convention. If True, use the
+        backward-transform phase sign convention.
+
+    Returns
+    -------
+    ramp : Array
+        Two-dimensional complex phase ramp.
+    """
     # Sign convention: positive for forward transform, negative for inverse transform
     sign = -1 if inverse else 1
 

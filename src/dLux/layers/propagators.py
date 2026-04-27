@@ -8,8 +8,6 @@ from ..coordinates import CoordSpec
 
 __all__ = ["MFT", "FFT"]
 
-# TODO: Check all docstrings
-
 
 class Propagator(OpticalLayer):
     """
@@ -25,8 +23,8 @@ class Propagator(OpticalLayer):
         `focal_length` is None, pixel_scales are assumed to be in radians/pixel, else
         meters/pixel.
     inverse: bool
-        If False the propagation is from a pupil to a focal plane, else from a focal
-        plane to a pupil.
+        If False, propagate forward through the system. If True, propagate backward
+        through the system.
     """
 
     focal_length: float | None
@@ -42,6 +40,9 @@ class Propagator(OpticalLayer):
             The effective focal length of the focusing optic this class represents. Note
             if `focal_length` is None, pixel_scales are assumed to be in radians/pixel,
             else meters/pixel.
+        inverse : bool = False
+            If False, propagate forward through the system. If True, propagate
+            backward through the system.
         """
         super().__init__()
 
@@ -58,16 +59,14 @@ class FFT(Propagator):
     ??? abstract "UML"
         ![UML](../../assets/uml/FFT.png)
 
-    # TODO: Update padding to take in units of npixels, rather than factor.
-
     Attributes
     ----------
     focal_length : float
         The focal_length of the lens/mirror this propagator represents. If None, the
         output pixel_scale has units radians/pixel, else meters/pixels.
     inverse: bool
-        If False the propagation is from a pupil to a focal plane, else from a focal
-        plane to a pupil.
+        If False, propagate forward through the system. If True, propagate backward
+        through the system.
     pad : int
         The zero-padding factor to apply to the `Wavefront` before propagation. In
         general, this should be greater than 2 to avoid aliasing.
@@ -96,8 +95,8 @@ class FFT(Propagator):
             The focal_length of the lens/mirror this propagator represents. If None, the
             output pixel_scale has units radians/pixel, else meters/pixels.
         inverse: bool = False
-            If False the propagation is from a pupil to a focal plane, else from a focal
-            plane to a pupil.
+            If False, propagate forward through the system. If True, propagate
+            backward through the system.
         pad : int = 1
             The zero-padding factor to apply to the `Wavefront` before propagation. In
             general, this should be greater than 2 to avoid aliasing.
@@ -105,6 +104,9 @@ class FFT(Propagator):
             The cropping factor to apply to the `Wavefront` after propagation. In
             general, this should only be applied after a corresponding padding factor
             has been applied to avoid aliasing.
+        center : bool = True
+            If True, the output coordinates are centered at 0. If False, output
+            coordinates use the default transform convention.
         """
         super().__init__(focal_length=focal_length, inverse=inverse)
         self.pad = int(pad)
@@ -157,8 +159,8 @@ class MFT(Propagator):
         The focal_length of the lens/mirror this propagator represents. If None, the
         output pixel_scale has units radians/pixel, else meters/pixels.
     inverse: bool
-        If False the propagation is from a pupil to a focal plane, else from a focal
-        plane to a pupil.
+        If False, propagate forward through the system. If True, propagate backward
+        through the system.
     """
 
     npixels: int
@@ -183,8 +185,8 @@ class MFT(Propagator):
             The focal_length of the lens/mirror this propagator represents. If None,
             the output pixel_scale has units radians/pixel, else meters/pixels.
         inverse: bool = False
-            If False the propagation is from a pupil to a focal plane, else from a focal
-            plane to a pupil.
+            If False, propagate forward through the system. If True, propagate
+            backward through the system.
         """
         super().__init__(focal_length=focal_length, inverse=inverse)
 

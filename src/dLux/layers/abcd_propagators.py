@@ -37,11 +37,22 @@ class ABCDFreeSpace(ABCDElement):
     distance: float
 
     def __init__(self, distance):
+        """
+        Parameters
+        ----------
+        distance : float
+            The free-space propagation distance.
+        """
         self.distance = np.array(distance, float)
 
     @property
     def abcd(self):
-        """Analytic ABCD matrix for free space propagation"""
+        """
+        Returns
+        -------
+        matrix : Array
+            The analytic ABCD matrix for free-space propagation.
+        """
         return abcd.abcd_free_space(self.distance)
 
 
@@ -57,11 +68,22 @@ class ABCDLens(ABCDElement):
     focal_length: float
 
     def __init__(self, focal_length):
+        """
+        Parameters
+        ----------
+        focal_length : float
+            The lens focal length.
+        """
         self.focal_length = np.array(focal_length, float)
 
     @property
     def abcd(self):
-        """Analytic ABCD matrix for a lens"""
+        """
+        Returns
+        -------
+        matrix : Array
+            The analytic ABCD matrix for a lens.
+        """
         return abcd.abcd_lens(self.focal_length)
 
 
@@ -73,27 +95,50 @@ class ABCDMirror(ABCDElement):
     radius: float
 
     def __init__(self, radius):
+        """
+        Parameters
+        ----------
+        radius : float
+            The mirror radius of curvature.
+        """
         self.radius = np.array(radius, float)
 
     @property
     def abcd(self):
-        """Analytic ABCD matrix for a mirror"""
+        """
+        Returns
+        -------
+        matrix : Array
+            The analytic ABCD matrix for a mirror.
+        """
         return abcd.abcd_mirror(self.radius)
 
 
 class ABCDConjugatePlane(ABCDElement):
     """
-    A conjugate plane element represented by an ABCD matrix.
+    A conjugate plane element represented by an ABCD matrix. This produces the classic
+    'pupil-focal Fourier relationship' seen in fourier/physical optics.
     """
 
     focal_length: float
 
     def __init__(self, focal_length):
+        """
+        Parameters
+        ----------
+        focal_length : float
+            The effective focal length that defines the conjugate-plane transform.
+        """
         self.focal_length = np.array(focal_length, float)
 
     @property
     def abcd(self):
-        """Analytic ABCD matrix for a conjugate plane"""
+        """
+        Returns
+        -------
+        matrix : Array
+            The analytic ABCD matrix for a conjugate-plane propagation.
+        """
         return abcd.abcd_fraunhofer(self.focal_length)
 
 
@@ -102,17 +147,33 @@ class ABCDConjugatePlane(ABCDElement):
 ###################
 class ABCDPropagator(OpticalLayer):
     """
-    Arbitrarily chained ABCD matrices
+    Propagator defined by a composition of ABCD elements.
+
+    Attributes
+    ----------
+    ABCDs : dict
+        Dictionary of ABCD elements in propagation order.
+    spec : CoordSpec | PadSpec
+        Output coordinate specification.
     """
 
     ABCDs: dict
     spec: CoordSpec
 
     def __init__(self, ABCDs, spec):
+        """
+        Parameters
+        ----------
+        ABCDs : list[ABCDElement] | dict[str, ABCDElement]
+            ABCD elements to compose into a single propagation transform.
+        spec : CoordSpec | PadSpec
+            Output coordinate specification.
+        """
         self.ABCDs = dlu.list2dictionary(ABCDs, True, allowed_types=(ABCDElement,))
         self.spec = spec
 
     def __getattr__(self, key):
+        """Resolve missing attributes via `spec` or child ABCD elements."""
         if hasattr(self.spec, key):
             return getattr(self.spec, key)
         if key in self.ABCDs.keys():
@@ -124,7 +185,12 @@ class ABCDPropagator(OpticalLayer):
 
     @property
     def abcd(self):
-        """Analytic defocused ABCD matrix"""
+        """
+        Returns
+        -------
+        matrix : Array
+            The composed ABCD matrix for this propagator.
+        """
         return abcd.compose_abcd([m.abcd for m in self.ABCDs.values()])
 
 
@@ -147,7 +213,17 @@ class MFTPropagator(ABCDPropagator):
 
     def __call__(self, wavefront):
         """
-        Propagates the updates the wavefront
+        Propagate a wavefront using an LCT-based matrix Fourier transform.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Input wavefront to propagate.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            Propagated wavefront with updated field and output specification.
         """
         # Define input-output coordinates
         spec_in = wavefront.spec
@@ -168,30 +244,47 @@ class MFTPropagator(ABCDPropagator):
 
 class FFTPropagator(ABCDPropagator):
     """
-    FFT-based propagator with optional zero-padding and cropping.
+    FFT-based ABCD propagator with optional padding and cropping.
 
     Note: Always returns a wavefront in an 'Intermediate' plane, even if the
     propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane
     tracking, but the present Wavefront class is not compatible with this formulation.
 
-    pad: int
-        The zero-padding factor to apply to the `Wavefront` before propagation. In
-        general, this should be greater than 2 to avoid aliasing if the wavefront has
-        not already been padded
-    crop: int
-        The factor by which to crop the output field after propagation. Generally used
-        to return the wavefront to the original size after a padded FFT-based
-        propagation, and should generally be the same as the original pad factor.
+    Parameters
+    ----------
+    ABCDs : list[ABCDElement] | dict[str, ABCDElement]
+        ABCD elements to compose into a single propagation transform.
+    spec : CoordSpec | PadSpec
+        Output coordinate specification. If `CoordSpec` is provided, `d` must be None.
     """
 
     def __init__(self, ABCDs, spec):
+        """
+        Parameters
+        ----------
+        ABCDs : list[ABCDElement] | dict[str, ABCDElement]
+            ABCD elements to compose into a single propagation transform.
+        spec : CoordSpec | PadSpec
+            Output coordinate specification. If `CoordSpec` is provided, `d` must be
+            None.
+        """
         if isinstance(spec, CoordSpec) and (spec.d is not None):
             raise ValueError("FFTPropagator CoordSpec can not specify d.")
         super().__init__(ABCDs=ABCDs, spec=spec)
 
     def __call__(self, wavefront):
         """
-        Propagates the updates the wavefront
+        Propagate a wavefront using an FFT-based LCT approximation.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Input wavefront to propagate.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            Propagated wavefront with updated field and sampling metadata.
         """
 
         # Get the input spec
@@ -238,7 +331,7 @@ class FFTPropagator(ABCDPropagator):
 
 class ASMPropagator(OpticalLayer):
     """
-    Angular Spectrum Method (ASM) propagator
+    Angular Spectrum Method (ASM) propagator.
 
     Note: Always returns a wavefront in an 'Intermediate' plane, even if the
     propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane
@@ -249,6 +342,14 @@ class ASMPropagator(OpticalLayer):
     spec: CoordSpec
 
     def __init__(self, distance, spec):
+        """
+        Parameters
+        ----------
+        distance : float
+            Propagation distance.
+        spec : CoordSpec | PadSpec
+            Output specification. If `CoordSpec` is provided, `d` and `c` must be None.
+        """
         self.distance = float(distance)
         if isinstance(spec, CoordSpec):
             if spec.d is not None or spec.c is not None:
@@ -256,11 +357,25 @@ class ASMPropagator(OpticalLayer):
         self.spec = spec
 
     def __getattr__(self, key):
+        """Resolve missing attributes via `spec`."""
         if hasattr(self.spec, key):
             return getattr(self.spec, key)
         raise dlu.missing_attribute_error(self, key)
 
     def __call__(self, wavefront):
+        """
+        Propagate a wavefront using the angular spectrum method.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Input wavefront to propagate.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            Propagated wavefront with updated field.
+        """
 
         # Get padding
         if isinstance(self.spec, CoordSpec):
@@ -288,6 +403,7 @@ class ASMPropagator(OpticalLayer):
 
 
 class Fraunhofer(ABCDPropagator):
+    """Placeholder for a dedicated Fraunhofer propagator."""
 
     spec_out: tuple[int, float]
     focal_length: float
@@ -297,6 +413,7 @@ class Fraunhofer(ABCDPropagator):
 
 
 class Fresnel(ABCDPropagator):
+    """Placeholder for a dedicated Fresnel propagator."""
 
     spec_out: tuple[int, float]
     focal_length: float

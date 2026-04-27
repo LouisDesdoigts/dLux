@@ -62,18 +62,25 @@ class BaseCoordTransform(zdx.Base):
         coords : Array
             The transformed coordinates.
         """
-        raise NotImplementedError("Subclasses must implement __call__")
+        pass
 
     def apply(self: BaseCoordTransform, coords: Array) -> Array:
         """
-        Backwards compatibility method that invokes __call__.
+        Backwards compatibility alias for `__call__`.
 
-        Delegates to the __call__ method.
+        Parameters
+        ----------
+        coords : Array
+            The input coordinates to be transformed.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
         """
         return self(coords)
 
 
-# Class to be held by dynamic apertures
 class CoordTransform(BaseCoordTransform):
     """
     A simple class to handle coordinate transformations applied to dynamic aperture

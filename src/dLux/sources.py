@@ -29,6 +29,16 @@ __all__ = [
 
 
 def _validate_return_mode(return_wf: bool, return_psf: bool) -> None:
+    """
+    Raises a ValueError if both return_wf and return_psf are True.
+
+    Parameters
+    ----------
+    return_wf : bool
+        Whether to return a Wavefront object.
+    return_psf : bool
+        Whether to return a PSF object.
+    """
     if return_wf and return_psf:
         raise ValueError(
             "Cannot return both Wavefront and PSF objects. Choose one: "
@@ -37,6 +47,19 @@ def _validate_return_mode(return_wf: bool, return_psf: bool) -> None:
 
 
 def _as_wavelengths_1d(wavelengths: Array | None) -> Array | None:
+    """
+    Validates and returns wavelengths as a 1D float array, or None.
+
+    Parameters
+    ----------
+    wavelengths : Array | None
+        The wavelengths to validate.
+
+    Returns
+    -------
+    wavelengths : Array | None
+        The validated 1D wavelengths array, or None.
+    """
     if wavelengths is None:
         return None
     wavelengths = np.asarray(wavelengths, dtype=float)
@@ -49,6 +72,22 @@ def _infer_n_wavelengths(
     wavelengths: Array | None,
     spectrum: spectra.BaseSpectrum | None,
 ) -> int:
+    """
+    Infers the number of wavelengths from the wavelengths array or spectrum.
+
+    Parameters
+    ----------
+    wavelengths : Array | None
+        The wavelengths array. If provided, its length is returned.
+    spectrum : BaseSpectrum | None
+        The spectrum object. Used to infer the number of wavelengths if
+        `wavelengths` is None.
+
+    Returns
+    -------
+    n_wavelengths : int
+        The number of wavelengths.
+    """
     wavelengths = _as_wavelengths_1d(wavelengths)
     if wavelengths is not None:
         return len(wavelengths)
@@ -68,6 +107,19 @@ def _infer_n_wavelengths(
 
 
 def _as_position_2d(position: Array) -> Array:
+    """
+    Validates and returns a position as a shape-(2,) float array.
+
+    Parameters
+    ----------
+    position : Array
+        The (x, y) on-sky position in radians.
+
+    Returns
+    -------
+    position : Array
+        The validated shape-(2,) position array.
+    """
     position = np.asarray(position, dtype=float)
     if position.shape != (2,):
         raise ValueError(

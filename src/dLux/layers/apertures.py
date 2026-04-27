@@ -276,13 +276,14 @@ class CircularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        radius: Array, meters
+        radius: float, meters
             The radius of the aperture.
-
+        transformation: CoordTransform = None
+            The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
             transmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
+        softening: float, pixels = 1.0
             The approximate pixel width of the soft boundary applied to the aperture.
         normalise : bool = False
             Whether to normalise the wavefront after passing through the aperture.
@@ -760,6 +761,19 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         return dlu.eval_basis(basis, self.coefficients)
 
     def __call__(self: AberratedAperture, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the aperture transmission and aberrations to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         # Transmission
         wavefront *= self.transmission(wavefront.coordinates(), wavefront.pixel_scale)
         if self.normalise:
@@ -949,6 +963,19 @@ class CompositeAperture(BaseDynamicAperture):
         return np.squeeze(np.array(jtu.flatten(transmissions)[0]))
 
     def __call__(self: CompositeAperture, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the composite aperture transmission and aberrations to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         # Transmission
         wavefront *= self.transmission(wavefront.coordinates(), wavefront.pixel_scale)
         if self.normalise:

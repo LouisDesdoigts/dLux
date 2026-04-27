@@ -11,19 +11,13 @@ from .coordinates import CoordSpec
 
 __all__ = ["Wavefront"]
 
-# TODO: Check all docstrings
 # TODO: Make coord specs 2d compatible
 
 
 class Wavefront(zdx.Base):
     """
-    A simple class to hold the state of some wavefront as it is transformed and
-    propagated throughout an optical system. All wavefronts assume square arrays.
-
-    # TODO: Remove all 'radians/pixel', everything is now cartesian meters/pixel,
-    the only 'angular' propagation is equivalent to propagating with a focal length
-    of 1, where meters and radians become equivalent. Also remove all "plane", "units",
-    "Angular", "Cartesian", "Intermediate" in the docstrings, etc.
+    Holds the state of a wavefront as it is transformed and propagated
+    through an optical system. All wavefronts assume square arrays.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/Wavefront.png)
@@ -34,13 +28,10 @@ class Wavefront(zdx.Base):
         The wavelength of the `Wavefront`.
     phasor : Array[complex]
         The electric field of the `Wavefront`.
-    pixel_scale : float, meters/pixel or radians/pixel
-        The pixel scale of the phase and amplitude arrays. If `units='Cartesian'` then
-        the pixel scale is in meters/pixel, else if `units='Angular'` then the pixel
-        scale is in radians/pixel.
-    fft_center : bool
-        Whether the wavefront has FFT-style centering. For even npixels this produces
-        integer centered coordinates. For odd npixels this is identical to the default.
+    pixel_scale : float, meters/pixel
+        The pixel scale of the phase and amplitude arrays.
+    center : Array
+        The centre coordinate of the wavefront grid.
     diameter : Array, property
         Derived property from `pixel_scale` and `npixels`; wavefront diameter.
     npixels : int, property
@@ -88,15 +79,13 @@ class Wavefront(zdx.Base):
         npixels : int
             The number of pixels that represent the `Wavefront`.
         diameter : float = None, meters
-            The total diameter of the `Wavefront`. Either diameter or pixel_scale
+            The total diameter of the `Wavefront`. Either `diameter` or `pixel_scale`
             must be provided.
-        pixel_scale : float = None, meters/pixel or radians/pixel
-            The pixel scale of the `Wavefront`. Either diameter or pixel_scale
+        pixel_scale : float = None, meters/pixel
+            The pixel scale of the `Wavefront`. Either `diameter` or `pixel_scale`
             must be provided.
-        fft_center : bool = False
-            If True, the wavefront is initialized with FFT-style centering. For even
-            npixels this produces integer centered coordinates. For odd npixels this is
-            identical to the default.
+        center : Array = None
+            The centre coordinate of the wavefront grid, in metres. Defaults to zero.
         """
         # Handle diameter vs pixel_scale
         if diameter is None and pixel_scale is None:
@@ -146,16 +135,14 @@ class Wavefront(zdx.Base):
             The complex electric field array.
         wavelength : float, meters
             The wavelength of the wavefront.
-        pixel_scale : float = None, meters/pixel or radians/pixel
-            The pixel scale of the phasor array. Either pixel_scale or
-            diameter must be provided.
-        diameter : float = None, meters or radians
-            The diameter of the phasor array. Either pixel_scale or
-            diameter must be provided.
-        fft_center : bool = False
-            If True, the wavefront is initialized with FFT-style centering. For even
-            npixels this produces integer centered coordinates. For odd npixels this is
-            identical to the default.
+        pixel_scale : float = None, meters/pixel
+            The pixel scale of the phasor array. Either `pixel_scale` or
+            `diameter` must be provided.
+        diameter : float = None, meters
+            The diameter of the phasor array. Either `pixel_scale` or
+            `diameter` must be provided.
+        center : Array = None
+            The centre coordinate of the wavefront grid, in metres. Defaults to zero.
 
         Returns
         -------
@@ -576,13 +563,43 @@ class Wavefront(zdx.Base):
 
     @property
     def spec(self):
+        """
+        Returns the current wavefront sampling as a `CoordSpec`.
+
+        Returns
+        -------
+        spec : CoordSpec
+            Coordinate specification with `n`, `d`, and `c` set from the
+            current wavefront state.
+        """
         return CoordSpec(self.npixels, self.pixel_scale, self.center)
 
     @property
     def xs(self):
+        """
+        1D array of pixel centre coordinates along one axis.
+
+        Returns
+        -------
+        xs : Array
+            Coordinates of pixel centres, in metres.
+        """
         return self.spec.xs
 
     def set_spec(self, spec: CoordSpec):
+        """
+        Updates the wavefront pixel scale and centre from a `CoordSpec`.
+
+        Parameters
+        ----------
+        spec : CoordSpec
+            The coordinate specification to apply.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            New wavefront with updated `pixel_scale` and `center`.
+        """
         return self.set(pixel_scale=spec.d, center=spec.c)
 
     def propagate_FFT(
@@ -592,6 +609,28 @@ class Wavefront(zdx.Base):
         spec_out: CoordSpec = None,
         inverse=False,
     ):
+        """
+        Propagates the wavefront using an FFT-based method.
+
+        Parameters
+        ----------
+        pad : int = 2
+            Zero-padding factor applied before the FFT.
+        focal_length : float | None = None
+            Focal length for Cartesian focal sampling. Pass `None` for
+            angular (far-field) sampling.
+        spec_out : CoordSpec | None = None
+            Output coordinate specification. If provided, only `c` (centre)
+            may be set; `n` and `d` are determined by the propagation.
+        inverse : bool = False
+            If False, propagate forward through the system. If True, propagate
+            backward through the system.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            Propagated wavefront with updated phasor and sampling metadata.
+        """
         # Input spec
         spec_in = self.spec
         wl = self.wavelength
@@ -657,8 +696,9 @@ class Wavefront(zdx.Base):
             units).
         focal_length : float | None
             Focal length for Cartesian focal sampling; None for angular focal sampling.
-        inverse : bool
-            Is the propagation forwards in the inverse direction.
+        inverse : bool = False
+            If False, propagate forward through the system. If True, propagate
+            backward through the system.
 
         Returns
         -------
@@ -683,7 +723,26 @@ class Wavefront(zdx.Base):
         return self.set(phasor=phasor, pixel_scale=np.array(pixel_scale, float))
 
     def propagate_MFT(self, spec_out, focal_length=None, inverse=None):
-        """MFT propagator compatible with the new CoordSpec formulation"""
+        """
+        Propagates the wavefront using an MFT-based method with a `CoordSpec`.
+
+        Parameters
+        ----------
+        spec_out : CoordSpec
+            Output coordinate specification defining the number of pixels
+            and pixel scale of the propagated field.
+        focal_length : float | None = None
+            Focal length for Cartesian focal sampling. Pass `None` for
+            angular (far-field) sampling.
+        inverse : bool | None = None
+            If False or None, propagate forward through the system. If True,
+            propagate backward through the system.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            Propagated wavefront with updated phasor and pixel scale.
+        """
         # Propagate
         phasor = dlu.MFT(
             phasor=self.phasor,

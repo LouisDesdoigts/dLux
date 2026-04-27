@@ -48,9 +48,17 @@ class DetectorLayer(BaseLayer):
 
     def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """
-        Backwards compatibility method that invokes __call__.
+        Backwards compatibility alias for `__call__`.
 
-        Delegates to the __call__ method.
+        Parameters
+        ----------
+        psf : PSF
+            The PSF to operate on.
+
+        Returns
+        -------
+        psf : PSF
+            The transformed PSF.
         """
         return self(psf)
 

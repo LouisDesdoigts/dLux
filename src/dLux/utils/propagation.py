@@ -31,7 +31,8 @@ def FFT(
         The amount to pad the input array by before propagation. Note this function
         does not automatically crop the output.
     inverse : bool = False
-        Is this a forward or inverse FFT.
+        If False, apply the forward propagation transform. If True, apply the
+        backward propagation transform.
 
     Returns
     -------
@@ -90,14 +91,15 @@ def transfer_matrix(
     pixel_scale_out : float, meters/pixel or radians/pixel
         The pixel scale of the output plane.
     shift : float = 0.0
-        The shift in the center of the output plane.
+        The shift in output-plane coordinates.
     focal_length : float = None
         The focal length of the propagation. If None, the propagation is angular and
         pixel_scale_out is taken in as radians/pixel, else meters/pixel.
     focal_shift: float, meters
         The shift from focus to propagate to. Used for fresnel propagation.
     inverse: bool = False
-        Is this a forward or inverse propagation.
+        If False, apply the forward propagation transform. If True, apply the
+        backward propagation transform.
 
     Returns
     -------
@@ -188,7 +190,7 @@ def MFT(
     Propagates a phasor using a Matrix Fourier Transform (MFT), allowing for output
     pixel scale and a shift to be specified.
 
-    This Soummer et al. 2007 paper describes the MFT: https://arxiv.org/pdf/0711.0368
+    Soummer et al. (2007) describes the MFT formulation: https://arxiv.org/pdf/0711.0368
 
     Parameters
     ----------
@@ -209,7 +211,9 @@ def MFT(
         The shift in the center of the output plane.
     pixel : bool = True
         Should the shift be taken in units of pixels, or pixel scale.
-
+    inverse : bool = False
+        If False, apply the forward propagation transform. If True, apply the
+        backward propagation transform.
 
     Returns
     -------

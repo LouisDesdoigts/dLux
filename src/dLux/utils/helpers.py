@@ -271,6 +271,21 @@ def missing_attribute_error(
 
 
 def _cast_tuple(x, name):
+    """
+    Validate and cast an integer or tuple input to a tuple of integers.
+
+    Parameters
+    ----------
+    x : int | tuple[int, ...]
+        Input value to validate and cast.
+    name : str
+        Parameter name used in error messages.
+
+    Returns
+    -------
+    x : tuple[int, ...]
+        Validated tuple of integers.
+    """
 
     # Validate npixels and ensure tuple
     if isinstance(x, int):
@@ -286,6 +301,23 @@ def _cast_tuple(x, name):
 
 
 def _cast_scalar(x, ndim, name):
+    """
+    Validate and cast scalar-like input to an `ndim`-length tuple.
+
+    Parameters
+    ----------
+    x : int | float | Array | tuple
+        Input scalar-like value(s).
+    ndim : int
+        Target dimensionality.
+    name : str
+        Parameter name used in error messages.
+
+    Returns
+    -------
+    x : tuple
+        Tuple of scalar-like values with length `ndim`.
+    """
 
     _is_numeric = lambda x: isinstance(x, (int, float))
     _is_scalar_array = lambda x: isinstance(x, Array) and x.ndim == 0
@@ -315,6 +347,21 @@ def _cast_scalar(x, ndim, name):
 
 
 def _input_len(x, name):
+    """
+    Infer the logical length of scalar/tuple/1D-array input.
+
+    Parameters
+    ----------
+    x : Any
+        Input value to inspect.
+    name : str
+        Parameter name used in error messages.
+
+    Returns
+    -------
+    length : int
+        Inferred length of the input.
+    """
     if isinstance(x, tuple):
         return len(x)
     if isinstance(x, Array):

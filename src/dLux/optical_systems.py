@@ -280,13 +280,12 @@ class ParametricOpticalSystem(OpticalSystem):
     @property
     def fov(self: ParametricOpticalSystem) -> float:
         """
-        Returns the field of view of the optical system in the units of the pixel scale.
+        Field of view of the optical system in the units of the pixel scale.
 
         Returns
         -------
         fov : float
-            The field of view of the optical system in the units of the pixel scale.
-
+            Field of view, equal to ``psf_npixels * psf_pixel_scale``.
         """
         return self.psf_npixels * self.psf_pixel_scale
 
@@ -393,6 +392,24 @@ class LayeredOpticalSystem(OpticalSystem):
         offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array | Wavefront:
+        """
+        Propagates a monochromatic point source through the optical layers.
+
+        Parameters
+        ----------
+        wavelength : float, metres
+            The wavelength of the wavefront to propagate through the optical layers.
+        offset : Array | None, radians = None
+            The (x, y) offset from the optical axis of the source.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the PSF array?
+
+        Returns
+        -------
+        result : Array | Wavefront
+            If `return_wf` is False, returns the PSF array.
+            If `return_wf` is True, returns the Wavefront object.
+        """
         # Initialise wavefront
         wavefront = self.initialise_wavefront(wavelength, offset)
 
@@ -410,6 +427,24 @@ class LayeredOpticalSystem(OpticalSystem):
         wavelength: Array,
         offset: Array | None = None,
     ) -> Array | Wavefront:
+        """
+        Propagates a monochromatic wavefront through the layers, returning
+        intermediate wavefront states for debugging.
+
+        Parameters
+        ----------
+        wavelength : float, metres
+            The wavelength of the wavefront to propagate.
+        offset : Array | None, radians = None
+            The (x, y) offset from the optical axis of the source.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The final propagated wavefront.
+        outputs : dict
+            Dictionary mapping layer names to their output wavefronts.
+        """
         # Outputs dictionary
         outputs = {}
 
@@ -483,28 +518,33 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
 
     @abstractmethod
     def to_focus(
-        self: AngularOpticalSystem,
+        self: ParametricLayeredOpticalSystem,
         wavefront: Wavefront,
-    ) -> Array | Wavefront:
-        """
-        Propagate the wavefront to the focal plane using an FFT-based propagator with
-        the specified pixel scale and number of pixels.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate to the focal plane.
-        Returns
-        -------
-        result : Array | Wavefront
-            The propagated wavefront at the focal plane
-        """
+    ) -> Array | Wavefront: ...
 
     def debug_propagate_mono(
-        self: AngularOpticalSystem,
+        self: ParametricLayeredOpticalSystem,
         wavelength: Array,
         offset: Array | None = None,
     ) -> Array | Wavefront:
+        """
+        Propagates a monochromatic wavefront through all layers and to the
+        focal plane, returning intermediate wavefront states for debugging.
+
+        Parameters
+        ----------
+        wavelength : float, metres
+            The wavelength of the wavefront to propagate.
+        offset : Array | None, radians = None
+            The (x, y) offset from the optical axis of the source.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The final propagated wavefront at the focal plane.
+        outputs : dict
+            Dictionary mapping layer names to their output wavefronts.
+        """
         # Propagate the upstream layers and store the outputs
         wf, outputs = super().debug_propagate_mono(wavelength, offset)
 
@@ -516,11 +556,30 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
         return wf, outputs
 
     def propagate_mono(
-        self: AngularOpticalSystem,
+        self: ParametricLayeredOpticalSystem,
         wavelength: Array,
         offset: Array | None = None,
         return_wf: bool = False,
     ) -> Array | Wavefront:
+        """
+        Propagates a monochromatic point source through the optical layers
+        and to the focal plane.
+
+        Parameters
+        ----------
+        wavelength : float, metres
+            The wavelength of the wavefront to propagate through the optical layers.
+        offset : Array | None, radians = None
+            The (x, y) offset from the optical axis of the source.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the PSF array?
+
+        Returns
+        -------
+        result : Array | Wavefront
+            If `return_wf` is False, returns the PSF array.
+            If `return_wf` is True, returns the Wavefront object.
+        """
         # Upstream layers propagation
         wf = super().propagate_mono(wavelength, offset, return_wf=True)
 
@@ -600,17 +659,17 @@ class AngularOpticalSystem(ParametricLayeredOpticalSystem):
         wavefront: Wavefront,
     ) -> Array | Wavefront:
         """
-        Propagate the wavefront to the focal plane using an FFT-based propagator with
-        the specified pixel scale and number of pixels.
+        Propagate the wavefront to the focal plane.
 
         Parameters
         ----------
         wavefront : Wavefront
             The wavefront to propagate to the focal plane.
+
         Returns
         -------
-        result : Array | Wavefront
-            The propagated wavefront at the focal plane
+        result : Wavefront
+            The propagated wavefront at the focal plane.
         """
         # Propagate
         true_pixel_scale = self.psf_pixel_scale / self.oversample
@@ -691,21 +750,21 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
         )
 
     def to_focus(
-        self: AngularOpticalSystem,
+        self: CartesianOpticalSystem,
         wavefront: Wavefront,
     ) -> Array | Wavefront:
         """
-        Propagate the wavefront to the focal plane using an FFT-based propagator with
-        the specified pixel scale and number of pixels.
+        Propagate the wavefront to the focal plane.
 
         Parameters
         ----------
         wavefront : Wavefront
             The wavefront to propagate to the focal plane.
+
         Returns
         -------
-        result : Array | Wavefront
-            The propagated wavefront at the focal plane
+        result : Wavefront
+            The propagated wavefront at the focal plane.
         """
         # Propagate
         true_pixel_scale = self.psf_pixel_scale / self.oversample

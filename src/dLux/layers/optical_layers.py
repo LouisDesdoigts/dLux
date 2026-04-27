@@ -39,9 +39,17 @@ class BaseLayer(zdx.Base):
 
     def apply(self: BaseLayer, target: Any) -> Any:
         """
-        Backwards compatibility method that invokes __call__.
+        Backwards compatibility alias for `__call__`.
 
-        Delegates to the __call__ method.
+        Parameters
+        ----------
+        target : Any
+            The object to operate on.
+
+        Returns
+        -------
+        result : Any
+            The transformed object.
         """
         return self(target)
 
@@ -215,10 +223,11 @@ class BasisLayer(OpticalLayer):
         """
         Parameters
         ----------
-        basis: Array | list
+        basis: Array | list = None
             The set of basis vectors. Should in general be a 3 dimensional array.
-        coefficients: Array
-            The Array of coefficients to be applied to each basis vector.
+        coefficients: Array = None
+            The Array of coefficients to be applied to each basis vector. Defaults
+            to zeros if `basis` is provided and `coefficients` is None.
         as_phase: bool = False
             Whether to apply the basis as a phase or OPD. If True the output is applied
             as a phase, else it is applied as an OPD.

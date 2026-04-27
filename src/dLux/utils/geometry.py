@@ -33,6 +33,11 @@ def combine(
         The amount to downsample the output by.
     use_sum : bool = False
         Whether to sum the arrays instead of multiplying them.
+
+    Returns
+    -------
+    array : Array
+        The combined array, optionally downsampled by `oversample`.
     """
     method = np.sum if use_sum else np.prod
     array = np.array(arrays)
@@ -147,6 +152,8 @@ def rectangle(
         The width of the rectangle.
     height : float
         The height of the rectangle.
+    invert : bool = False
+        Whether to invert the rectangle.
 
     Returns
     -------
@@ -236,7 +243,6 @@ def soft_circle(
         The radius of the circle.
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
-        circle.
     invert : bool = False
         Whether to invert the circle.
 
@@ -266,7 +272,6 @@ def soft_square(
         The width of the square.
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
-        square.
     invert : bool = False
         Whether to invert the square.
 
@@ -302,6 +307,8 @@ def soft_rectangle(
         The height of the rectangle.
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
+    invert : bool = False
+        Whether to invert the rectangle.
 
     Returns
     -------
@@ -371,7 +378,7 @@ def soft_spider(
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
     invert : bool = False
-        Whether to invert the spider in degrees.
+        Whether to invert the spider.
 
     Returns
     -------
