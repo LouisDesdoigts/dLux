@@ -1,4 +1,4 @@
-![alt text](ocs/assets/logo.jpg)
+![alt text](docs/assets/logo.jpg)
 
 # ∂Lux
 
