@@ -9,6 +9,7 @@ from dLux.utils import pixel_coords
 def test_coord_transform():
     CoordTransform().calculate(1, 16)
     CoordTransform([0.0, 0.0], np.pi, [1, 1], [1, 1]).calculate(1, 16)
+    CoordTransform().apply(pixel_coords(1, 16))
     with pytest.raises(ValueError):
         CoordTransform(translation=[0.0])
     with pytest.raises(ValueError):

@@ -1,5 +1,6 @@
 import sys
 import os
+import pytest
 
 platform: str = sys.platform
 not_lin_err: str = """
@@ -12,6 +13,9 @@ if platform not in ["linux", "linux2"]:
 
 
 def test_install_dLux():
+    if platform not in ["linux", "linux2"]:
+        pytest.skip("Installation smoke-test only runs on Linux CI.")
+
     install_ok = os.system("pip install --quiet .")
 
     assert install_ok == 0

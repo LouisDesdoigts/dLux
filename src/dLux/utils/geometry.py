@@ -17,7 +17,11 @@ __all__ = [
 ]
 
 
-def combine(arrays: Array, oversample: int = 1, sum: bool = False) -> Array:
+def combine(
+    arrays: Array,
+    oversample: int = 1,
+    use_sum: bool = False,
+) -> Array:
     """
     Combines multiple arrays by multiplying them together, and downsampling the output.
 
@@ -27,10 +31,15 @@ def combine(arrays: Array, oversample: int = 1, sum: bool = False) -> Array:
         The arrays to be combined. Should have shape (n_arrays, npix, npix).
     oversample : int = 1
         The amount to downsample the output by.
-    sum : bool = False
+    use_sum : bool = False
         Whether to sum the arrays instead of multiplying them.
+
+    Returns
+    -------
+    array : Array
+        The combined array, optionally downsampled by `oversample`.
     """
-    method = np.sum if sum else np.prod
+    method = np.sum if use_sum else np.prod
     array = np.array(arrays)
     if oversample == 1:
         return method(array, 0)
@@ -51,9 +60,7 @@ def shift_and_scale(array: Array) -> Array:
     array : Array
         The shifted and scaled array.
     """
-    return dlu.math.nandiv(
-        array - array.min(), array.max() - array.min(), fill=0
-    )
+    return dlu.math.nandiv(array - array.min(), array.max() - array.min(), fill=0)
 
 
 def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
@@ -145,6 +152,8 @@ def rectangle(
         The width of the rectangle.
     height : float
         The height of the rectangle.
+    invert : bool = False
+        Whether to invert the rectangle.
 
     Returns
     -------
@@ -156,9 +165,7 @@ def rectangle(
     return (rectangle_distance(coords, width, height) < 0).astype(float)
 
 
-def reg_polygon(
-    coords: Array, rmax: float, nsides: int, invert: bool = False
-) -> Array:
+def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -> Array:
     """
     Calculates a soft-edged regular polygon via downsampling. This function is not
     differentiable.
@@ -196,7 +203,7 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
     width : float
         The width of the spider.
     angles : Array
-        The angles of the spider.
+        The angles of the spider in degrees.
 
     Returns
     -------
@@ -205,15 +212,14 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
     """
     angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
     calc_fn = vmap(lambda angle: spider_distance(coords, width, angle) < 0)
-    return (
-        ~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))
-    ).astype(float)
+    spiders = ~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))
+    return spiders.astype(float)
 
 
 # TODO: This eventually
 # def irreg_polygon(
 # npix, diam, vertices, oversample=1, invert=False, shift=np.zeros(2)):
-#     """Calcs an downsampled irregular polygon to gain soft edges"""
+#     """Calculates a downsampled irregular polygon to gain soft edges"""
 #     pass
 
 
@@ -237,7 +243,6 @@ def soft_circle(
         The radius of the circle.
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
-        circle.
     invert : bool = False
         Whether to invert the circle.
 
@@ -267,7 +272,6 @@ def soft_square(
         The width of the square.
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
-        square.
     invert : bool = False
         Whether to invert the square.
 
@@ -303,6 +307,8 @@ def soft_rectangle(
         The height of the rectangle.
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
+    invert : bool = False
+        Whether to invert the rectangle.
 
     Returns
     -------
@@ -465,7 +471,7 @@ def spider_distance(coords: Array, width: float, angle: float) -> Array:
     width : float
         The width of the spider.
     angle : float
-        The angle of the spider.
+        The angle of the spider in degrees.
 
     Returns
     -------
@@ -501,7 +507,6 @@ def line_distance(coords: Array, m: float, xy: Array) -> Array:
     x, y = coords
 
     # First determine the case: horizontal, vertical or regular
-    # NOTE: We may be able to improve here my using np.where
     case = (m == 0) * 0 + (m == np.inf) * 1 + (m != 0) * (m != np.inf) * 2
 
     # Now we determine the sign on the y-intersection so we know when to flip
