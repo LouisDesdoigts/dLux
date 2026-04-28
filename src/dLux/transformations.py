@@ -48,7 +48,7 @@ class BaseCoordTransform(zdx.Base):
         return self(coords)
 
     @abstractmethod
-    def __call__(self: BaseCoordTransform, coords: Array) -> Array:
+    def __call__(self: BaseCoordTransform, coords: Array) -> Array:  # pragma: no cover
         """
         Apply the transformation to input coordinates.
 
@@ -62,7 +62,6 @@ class BaseCoordTransform(zdx.Base):
         coords : Array
             The transformed coordinates.
         """
-        pass
 
     def apply(self: BaseCoordTransform, coords: Array) -> Array:
         """
