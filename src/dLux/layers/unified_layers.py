@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["UnifiedLayer", "Rotate", "Flip", "Resize"]
+__all__ = ["UnifiedLayer", "Rotate", "Flip", "Resize", "Lambda"]
 
 
 from .optical_layers import OpticalLayer
@@ -182,3 +182,29 @@ class Flip(UnifiedLayer):
             The flipped input.
         """
         return target.flip(self.axes)
+
+
+class Lambda(UnifiedLayer):
+    """
+    A no-op layer that returns the input unchanged. This can be useful for debugging or
+    as a placeholder in a pipeline.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Lambda.png)
+    """
+
+    def __call__(self: Lambda, target: Wavefront | PSF) -> Wavefront | PSF:
+        """
+        Returns the input unchanged.
+
+        Parameters
+        ----------
+        target : Wavefront | PSF
+            The input to return.
+
+        Returns
+        -------
+        target : Wavefront | PSF
+            The input, unchanged.
+        """
+        return target
