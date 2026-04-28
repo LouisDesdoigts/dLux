@@ -2,7 +2,7 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 import pytest
-from dLux.layers import Flip, Rotate, Resize
+from dLux.layers import Flip, Lambda, Resize, Rotate
 from dLux import Wavefront, PSF
 
 wf = Wavefront(npixels=16, diameter=1, wavelength=1e-6)
@@ -33,3 +33,10 @@ def test_flip(axes):
         Flip((0.0, 1))
     with pytest.raises(ValueError):
         Flip(0.0)
+
+
+def test_lambda():
+    layer = Lambda()
+
+    assert layer.apply(wf) is wf
+    assert layer.apply(psf) is psf
