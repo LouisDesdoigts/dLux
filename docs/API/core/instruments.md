@@ -1,5 +1,8 @@
 # Instruments
 
+???+ info "Instrument"
+    ::: dLux.instruments.Instrument
+
 ???+ info "Telescope"
     ::: dLux.instruments.Telescope
 

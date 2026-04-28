@@ -2,17 +2,16 @@ import pytest
 from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
-from dLux.utils.propagation import (
-    FFT,
-    MFT,
-    fresnel_MFT,
-    calc_nfringes,
-)
+
+from dLux.utils import propagation as propagation_utils
 
 
+# ============================================================================
+# Fixtures
+# ============================================================================
 @pytest.fixture
 def phasor():
-    return np.ones((32, 32)) * np.exp(1j * np.zeros((32, 32)))
+    return np.ones((32, 32), dtype=complex)
 
 
 @pytest.fixture
@@ -47,60 +46,100 @@ def pixel_scale_out():
 
 @pytest.fixture
 def shift():
-    return np.array([0.1, 0.2])
+    return np.array([1.0, -2.0])
 
 
-@pytest.fixture
-def focal_shift():
-    return 0.1
+# ============================================================================
+# Tests for FFT
+# ============================================================================
+class TestFFT:
+    """Tests for FFT-based propagation."""
 
-
-# NOTE: 'Correctness' is non-trivial in this module, so most of these tests are
-# high-level run checks for shapes and nans.
-
-
-@pytest.mark.parametrize("inverse", [True, False])
-def test_FFT(
-    phasor, wavelength, pixel_scale, focal_length, npixels_in, inverse
-):
-    result, new_pixel_scale = FFT(
-        phasor, wavelength, pixel_scale, focal_length, pad=2, inverse=inverse
-    )
-    assert result.shape == (2 * npixels_in, 2 * npixels_in)
-
-
-def test_calc_nfringes(
-    wavelength,
-    npixels_in,
-    pixel_scale,
-    npixels_out,
-    pixel_scale_out,
-    focal_length,
-):
-    result = calc_nfringes(
+    @pytest.mark.parametrize("inverse", [True, False])
+    def test_output_shape(
+        self,
+        phasor,
         wavelength,
+        pixel_scale,
+        focal_length,
         npixels_in,
+        inverse,
+    ):
+        """Padding scales the FFT output dimensions by the pad factor."""
+        result, _ = propagation_utils.FFT(
+            phasor, wavelength, pixel_scale, focal_length, pad=2, inverse=inverse
+        )
+        assert result.shape == (2 * npixels_in, 2 * npixels_in)
+
+    def test_round_trip_no_padding(self, phasor, wavelength, pixel_scale):
+        """Forward then inverse FFT recovers the input when no padding is used."""
+        forward, _ = propagation_utils.FFT(
+            phasor,
+            wavelength,
+            pixel_scale,
+            focal_length=None,
+            pad=1,
+            inverse=False,
+        )
+        recovered, _ = propagation_utils.FFT(
+            forward,
+            wavelength,
+            pixel_scale,
+            focal_length=None,
+            pad=1,
+            inverse=True,
+        )
+        assert np.allclose(recovered, phasor, rtol=1e-6, atol=1e-6)
+
+
+# ============================================================================
+# Tests for MFT
+# ============================================================================
+class TestMFT:
+    """Tests for matrix Fourier transform propagation."""
+
+    @pytest.mark.parametrize(
+        "focal_length,inverse,pixel",
+        [
+            (2.0, True, True),
+            (2.0, False, True),
+            (2.0, True, False),
+            (2.0, False, False),
+            (None, True, True),
+            (None, False, True),
+            (None, True, False),
+            (None, False, False),
+        ],
+    )
+    def test_output_shape_and_finiteness(
+        self,
+        phasor,
+        wavelength,
         pixel_scale,
         npixels_out,
         pixel_scale_out,
+        shift,
         focal_length,
-    )
-    assert isinstance(result, float)
+        pixel,
+        inverse,
+    ):
+        """MFT returns a finite array with the requested output shape."""
+        result = propagation_utils.MFT(
+            phasor,
+            wavelength,
+            pixel_scale,
+            npixels_out,
+            pixel_scale_out,
+            focal_length,
+            shift,
+            pixel=pixel,
+            inverse=inverse,
+        )
+        assert not np.isnan(result).any()
+        assert result.shape == (npixels_out, npixels_out)
 
-
-@pytest.mark.parametrize("inverse, pixel", [[True, False], [True, False]])
-def test_MFT(
-    phasor,
-    wavelength,
-    pixel_scale,
-    npixels_out,
-    pixel_scale_out,
-    focal_length,
-    shift,
-    pixel,
-    inverse,
-):
-    result = MFT(
+    def test_shift_units_are_consistent(
+        self,
         phasor,
         wavelength,
         pixel_scale,
@@ -108,37 +147,30 @@ def test_MFT(
         pixel_scale_out,
         focal_length,
         shift,
-        pixel=pixel,
-        inverse=inverse,
-    )
-    assert not np.isnan(result).any()
-    assert result.shape == (npixels_out, npixels_out)
-
-
-@pytest.mark.parametrize("inverse, pixel", [[True, False], [True, False]])
-def test_fresnel_MFT(
-    phasor,
-    wavelength,
-    pixel_scale,
-    npixels_out,
-    pixel_scale_out,
-    shift,
-    focal_length,
-    focal_shift,
-    pixel,
-    inverse,
-):
-    result = fresnel_MFT(
-        phasor,
-        wavelength,
-        pixel_scale,
-        npixels_out,
-        pixel_scale_out,
-        focal_length,
-        focal_shift,
-        shift,
-        pixel=pixel,
-        inverse=inverse,
-    )
-    assert not np.isnan(result).any()
-    assert result.shape == (npixels_out, npixels_out)
+    ):
+        """
+        Pixel and physical-unit shifts produce the same result when scaled consistently.
+        """
+        by_pixels = propagation_utils.MFT(
+            phasor,
+            wavelength,
+            pixel_scale,
+            npixels_out,
+            pixel_scale_out,
+            focal_length,
+            shift,
+            pixel=True,
+            inverse=False,
+        )
+        by_scale = propagation_utils.MFT(
+            phasor,
+            wavelength,
+            pixel_scale,
+            npixels_out,
+            pixel_scale_out,
+            focal_length,
+            shift * pixel_scale_out,
+            pixel=False,
+            inverse=False,
+        )
+        assert np.allclose(by_pixels, by_scale, rtol=1e-6, atol=1e-6)

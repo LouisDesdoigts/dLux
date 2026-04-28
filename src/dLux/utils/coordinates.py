@@ -1,8 +1,9 @@
 import jax.numpy as np
 import jax.tree as jtu
 from jax import Array
-from typing import Union
 from .math import triangular_number
+
+from .helpers import _cast_tuple, _cast_scalar, _input_len
 
 __all__ = [
     "cart2polar",
@@ -154,7 +155,6 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     return coords + distortion
 
 
-# Coordinate conversions #
 def cart2polar(coordinates: Array) -> Array:
     """
     Converts the input (x, y) Cartesian coordinates into (r, phi) polar
@@ -197,8 +197,14 @@ def polar2cart(coordinates: Array) -> Array:
     return np.array([r * np.cos(phi), r * np.sin(phi)])
 
 
-# Positions Calculations #
-def pixel_coords(npixels: int, diameter: float, polar: bool = False) -> Array:
+def pixel_coords(
+    npixels: int,
+    diameter: float = None,
+    radius: float = None,
+    pixel_scale: float = None,
+    polar: bool = False,
+    fft_style: bool = False,
+) -> Array:
     """
     Returns a paraxial set of 2d coordinates for each pixel center.
 
@@ -206,36 +212,66 @@ def pixel_coords(npixels: int, diameter: float, polar: bool = False) -> Array:
     ----------
     npixels : int
         The output size of the coordinates array to generate.
-    diameter : float
+    diameter : float = None
         The diameter of the coordinates array to generate.
+    radius : float = None
+        The radius of the coordinates array to generate.
+    pixel_scale : float = None
+        The pixel scale of the coordinates array to generate.
     polar : bool = False
         Output the coordinates in polar (r, phi) coordinates.
+    fft_style : bool = False
+        If True, use FFT-style centering. For even npixels this produces integer
+        centered coordinates. For odd npixels this is identical to the default.
 
     Returns
     -------
     coordinates : Array
         The array of pixel center coordinates.
     """
-    coords = nd_coords((npixels,) * 2, (diameter / npixels,) * 2)
+    supplied = sum(value is not None for value in (diameter, radius, pixel_scale))
+    if supplied != 1:
+        raise ValueError(
+            "Exactly one of diameter, radius, or pixel_scale must be provided."
+        )
+
+    if diameter is not None:
+        pixscale = diameter / npixels
+    elif radius is not None:
+        pixscale = 2 * radius / npixels
+    else:
+        pixscale = pixel_scale
+
+    # Default: symmetric pixel-center coordinates (half-integer for even N)
+    offsets = (0.0, 0.0)
+
+    # FFT-style: shift by +0.5 pixel for even N so coordinates become integer-centered
+    if fft_style and (npixels % 2 == 0):
+        offsets = (pixscale / 2.0, pixscale / 2.0)
+
+    # Generate the coordinates
+    coords = nd_coords((npixels,) * 2, (pixscale,) * 2, offsets=offsets, indexing="xy")
+
+    # Convert to polar if requested
     if polar:
         return cart2polar(coords)
     return coords
 
 
 def nd_coords(
-    npixels: Union[int, tuple],
-    pixel_scales: Union[tuple, float] = 1.0,
-    offsets: Union[tuple, float] = 0.0,
+    npixels: int | tuple[int, ...],
+    pixel_scales: float | tuple[float, ...] = 1.0,
+    offsets: float | tuple[float, ...] = 0.0,
     indexing: str = "xy",
 ) -> Array:
     """
     Returns a set of nd pixel center coordinates, with an optional offset. Each
     dimension can have a different number of pixels, pixel scale and offset by passing
     in tuples of values: `nd_coords((10, 10), (1, 2), (0, 1))`. pixel scale and offset
-    can also be passed in as floats to apply those values to all dimensions, ie:
+    can also be passed in as floats to apply those values to all dimensions, i.e.:
     `nd_coords((10, 10), 1, 0)`.
 
-    The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the
+    The indexing argument is the same as in numpy.meshgrid, i.e.: giving the
     string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
     meshgrid with Cartesian indexing. In the 2-D case with inputs of length M
     and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for
@@ -244,13 +280,13 @@ def nd_coords(
 
     Parameters
     ----------
-    npixels : Union[int, tuple]
+    npixels : int | tuple[int, ...]
         The number of pixels in each dimension.
-    pixel_scales : Union[tuple, float] = 1.
+    pixel_scales : float | tuple[float, ...] = 1.0
         The pixel_scales of each dimension. If a tuple, the length
         of the tuple must match the number of dimensions. If a float, the same
         scale is applied to all dimensions.
-    offsets : Union[tuple, float] = 0.
+    offsets : float | tuple[float, ...] = 0.0
         The offset of the pixel centers in each dimension. If a tuple, the
         length of the tuple must match the number of dimensions. If a float,
         the same offset is applied to all dimensions.
@@ -267,17 +303,20 @@ def nd_coords(
     if indexing not in ["xy", "ij"]:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
 
-    # Promote npixels to tuple to handle 1d case
-    if not isinstance(npixels, tuple):
-        npixels = (npixels,)
+    # Validate npixels and ensure tuple
+    npixels = _cast_tuple(npixels, "npixels")
 
-    # Assume equal pixel scales if not given
-    if not isinstance(pixel_scales, tuple):
-        pixel_scales = (pixel_scales,) * len(npixels)
+    # Get the number of dimensions
+    ndim = max(
+        len(npixels), _input_len(pixel_scales, "mean"), _input_len(offsets, "std")
+    )
 
-    # Assume no offset if not given
-    if not isinstance(offsets, tuple):
-        offsets = (offsets,) * len(npixels)
+    # Validate and ensure tuples
+    pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
+    offsets = _cast_scalar(offsets, ndim, "offsets")
+
+    if len(npixels) != ndim:
+        npixels *= ndim
 
     def pixel_fn(n, offset, scale):
         start = -(n - 1) / 2 * scale - offset
@@ -285,11 +324,10 @@ def nd_coords(
         return np.linspace(start, end, n)
 
     # Generate the linear edges of each axes
-    # TODO: tree.flatten()[0] to avoid squeeze?
     lin_pixels = jtu.map(pixel_fn, npixels, offsets, pixel_scales)
 
-    # output (x, y) for 2d, else in order
+    # Output (x, y) for 2d, else in order.
     positions = np.array(np.meshgrid(*lin_pixels, indexing=indexing))
 
-    # Squeeze for empty axis removal in 1d case
+    # Squeeze the output in case of 1d input
     return np.squeeze(positions)

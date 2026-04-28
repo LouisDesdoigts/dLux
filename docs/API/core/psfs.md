@@ -1,4 +1,4 @@
-# PSFs
+# Psfs
 
 ???+ info "PSF"
     ::: dLux.psfs.PSF

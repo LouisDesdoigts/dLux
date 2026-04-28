@@ -14,8 +14,7 @@ from dLux.layers import (
 )
 from dLux import Wavefront, CoordTransform
 
-
-wf = Wavefront(16, 1, 1e-6)
+wf = Wavefront(npixels=16, diameter=1, wavelength=1e-6)
 
 
 @pytest.fixture
@@ -54,12 +53,8 @@ def _test_nsides(aperture):
 @pytest.mark.parametrize("occulting", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
-def test_circular_aperture(
-    rmax, occulting, softening, normalise, transformation
-):
-    ap = CircularAperture(
-        rmax, transformation, occulting, softening, normalise
-    )
+def test_circular_aperture(rmax, occulting, softening, normalise, transformation):
+    ap = CircularAperture(rmax, transformation, occulting, softening, normalise)
     _test_apply(ap)
     _test_extent(ap)
     _test_nsides(ap)
@@ -72,9 +67,7 @@ def test_circular_aperture(
 @pytest.mark.parametrize("occulting", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
-def test_square_aperture(
-    rmax, occulting, softening, normalise, transformation
-):
+def test_square_aperture(rmax, occulting, softening, normalise, transformation):
     ap = SquareAperture(rmax, transformation, occulting, softening, normalise)
     _test_apply(ap)
     _test_extent(ap)
@@ -84,9 +77,7 @@ def test_square_aperture(
 @pytest.mark.parametrize("occulting", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
-def test_rectangular_aperture(
-    rmax, occulting, softening, normalise, transformation
-):
+def test_rectangular_aperture(rmax, occulting, softening, normalise, transformation):
     ap = RectangularAperture(
         rmax, rmax, transformation, occulting, softening, normalise
     )
@@ -101,9 +92,7 @@ def test_rectangular_aperture(
 def test_reg_poly_aperture(
     rmax, n_sides, occulting, softening, normalise, transformation
 ):
-    ap = RegPolyAperture(
-        n_sides, rmax, transformation, occulting, softening, normalise
-    )
+    ap = RegPolyAperture(n_sides, rmax, transformation, occulting, softening, normalise)
     _test_apply(ap)
     _test_extent(ap)
     _test_nsides(ap)
@@ -180,9 +169,7 @@ def aperture_list(noll_indices, rmax):
 
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 @pytest.mark.parametrize("normalise", [True, False])
-def test_compound_aperture(
-    aperture_list, transformation, normalise, noll_indices
-):
+def test_compound_aperture(aperture_list, transformation, normalise, noll_indices):
     ap = CompoundAperture(aperture_list, transformation, normalise)
     _test_apply(ap)
 
@@ -199,9 +186,7 @@ def test_compound_aperture(
 
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 @pytest.mark.parametrize("normalise", [True, False])
-def test_multi_aperture(
-    aperture_list, transformation, normalise, noll_indices
-):
+def test_multi_aperture(aperture_list, transformation, normalise, noll_indices):
     ap = MultiAperture(aperture_list, transformation, normalise)
     _test_apply(ap)
 

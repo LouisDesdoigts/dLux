@@ -1,6 +1,4 @@
-# Array Operations
-
-Contains a series of functions for performing paraxial operations on arrays.
+# Array Ops
 
 ???+ info "pad_to"
     ::: dLux.utils.array_ops.pad_to

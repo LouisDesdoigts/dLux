@@ -1,8 +1,4 @@
-# Optics Utility Functions
-
-This module contains a number of common equations used in optics, such as converting between Optical Path Difference (OPD) and phase, and a few functions used to calculate sampling rates in focal planes.
-
----
+# Optics
 
 ???+ info "wavenumber"
     ::: dLux.utils.optics.wavenumber
