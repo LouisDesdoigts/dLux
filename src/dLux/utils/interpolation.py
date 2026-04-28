@@ -18,20 +18,20 @@ def interp(
     fill: float = 0.0,
 ):
     """
-    General interpolation function, wrapping interpax.interp2d
+    General 2D interpolation wrapper around `interpax.interp2d`.
 
     Parameters
     ----------
     image : Array
-        The input 2D image to interpolate
+        The input 2D image to interpolate.
     knot_coords : Array
-        The coordinates of the points in the image
+        The coordinates of the sampled points in `image`.
     sample_coords : Array
-        The coordinates to interpolate onto
+        The coordinates to interpolate onto.
     method : str = "linear"
         The interpolation method.
     fill : float = 0.0
-        Default value outside knot_coords
+        Fill value used outside `knot_coords`.
 
     Returns
     -------
@@ -46,11 +46,9 @@ def interp(
     ).reshape(sample_coords[0].shape)
 
 
-def scale(
-    array: Array, npixels: int, ratio: float, method: str = "linear"
-) -> Array:
+def scale(array: Array, npixels: int, ratio: float, method: str = "linear") -> Array:
     """
-    Paraxially interpolates a square array based on the sampling ratio, and npixels_out.
+    Paraxially interpolate a square array using a sampling ratio.
 
     Parameters
     ----------
@@ -58,9 +56,9 @@ def scale(
         The input field to interpolate, either in amplitude and phase, or real
         and imaginary.
     npixels : int
-        The number of pixel in the output array.
+        The number of pixels in the output array.
     ratio : float
-        The scale of the input relative to the output
+        The sampling scale of the input relative to the output.
     method : str = "linear"
         The interpolation method.
 
@@ -89,7 +87,7 @@ def rotate(array: Array, angle: Array, method: str = "linear") -> Array:
     ----------
     array : Array
         The array to rotate.
-    angle : Array, radians
+    angle : float | Array, radians
         The angle to rotate the array by.
     method : str = "linear"
         The interpolation method.

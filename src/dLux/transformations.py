@@ -1,22 +1,94 @@
+"""Coordinate transformation utilities for dynamic apertures and distortions."""
+
 from __future__ import annotations
-from zodiax import Base
+from abc import abstractmethod
+import zodiax as zdx
 from jax import Array
 import jax.numpy as np
 import dLux.utils as dlu
 
+__all__ = ["BaseCoordTransform", "CoordTransform", "DistortedCoords"]
 
-__all__ = ["CoordTransform", "DistortedCoords"]
 
-
-# Class to be held by dynamic apertures
-class CoordTransform(Base):
+class BaseCoordTransform(zdx.Base):
     """
-    A simple class to handle the coordinate transformations applied dynamic
-    aperture classes. Transformations are applied in the order:
+    Abstract base class for coordinate transformations.
+
+    Provides a common interface for applying transformations to coordinates,
+    including a backwards-compatible `apply` method.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseCoordTransform.png)
+    """
+
+    def __init_subclass__(cls, **kwargs):
+        """
+        Automatically inherit __call__ docstrings and annotations from parent class.
+        """
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["__call__"])
+
+    def calculate(self: BaseCoordTransform, npix: int, diameter: float) -> Array:
+        """
+        Generate and apply transformations to coordinates.
+
+        Parameters
+        ----------
+        npix : int
+            The number of pixels in the output array.
+        diameter : float
+            The diameter of the output array in metres.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
+        """
+        coords = dlu.pixel_coords(npix, diameter)
+        return self(coords)
+
+    @abstractmethod
+    def __call__(self: BaseCoordTransform, coords: Array) -> Array:
+        """
+        Apply the transformation to input coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The input coordinates to be transformed.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
+        """
+        pass
+
+    def apply(self: BaseCoordTransform, coords: Array) -> Array:
+        """
+        Backwards compatibility alias for `__call__`.
+
+        Parameters
+        ----------
+        coords : Array
+            The input coordinates to be transformed.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
+        """
+        return self(coords)
+
+
+class CoordTransform(BaseCoordTransform):
+    """
+    A simple class to handle coordinate transformations applied to dynamic aperture
+    classes. Transformations are applied in the order:
         1. Translation
-        2. Rotation
+        2. Shear
         3. Compression
-        4. Shear
+        4. Rotation
 
     ??? abstract "UML"
         ![UML](../../assets/uml/CoordTransform.png)
@@ -25,7 +97,7 @@ class CoordTransform(Base):
     ----------
     translation: Array
         The (x, y) shift applied to the coords.
-    rotation: Array
+    rotation: float
         The clockwise rotation applied to the coords.
     compression: Array
         The (x, y) compression applied to the coords.
@@ -60,14 +132,14 @@ class CoordTransform(Base):
         if translation is not None:
             self.translation = np.asarray(translation, dtype=float)
             if self.translation.shape != (2,):
-                raise ValueError("center must be have shape (2,).")
+                raise ValueError("translation must have shape (2,).")
         else:
             self.translation = None
 
         if rotation is not None:
             self.rotation = np.asarray(rotation, dtype=float)
             if self.rotation.shape != ():
-                raise ValueError("rotation must have shaoe ().")
+                raise ValueError("rotation must have shape ().")
         else:
             self.rotation = None
 
@@ -81,42 +153,11 @@ class CoordTransform(Base):
         if shear is not None:
             self.shear = np.asarray(shear, dtype=float)
             if self.shear.shape != (2,):
-                raise ValueError("shear must be have shape (2,).")
+                raise ValueError("shear must have shape (2,).")
         else:
             self.shear = None
 
-    def calculate(self: CoordTransform, npix: int, diam: float) -> Array:
-        """
-        Generate the transformed coords from diameter and npix.
-
-        Parameters
-        ----------
-        npix : int
-            The number of pixels in the output array.
-        diam : float
-            The diameter of the output array in metres.
-
-        Returns
-        -------
-        coords : Array
-            The transformed coordinates.
-        """
-        return self.apply(dlu.pixel_coords(npix, diam))
-
-    def apply(self: CoordTransform, coords: Array) -> Array:
-        """
-        Apply the transformations to the input coordinates.
-
-        Parameters
-        ----------
-        coords : Array
-            The input coordinates to be transformed.
-
-        Returns
-        -------
-        coords : Array
-            The transformed coordinates.
-        """
+    def __call__(self, coords):
         if self.translation is not None:
             coords = dlu.translate_coords(coords, self.translation)
         if self.shear is not None:
@@ -128,69 +169,43 @@ class CoordTransform(Base):
         return coords
 
 
-class DistortedCoords(Base):
+class DistortedCoords(BaseCoordTransform):
     """
-    A class to handle coordinates distorted by a 2D polynomial distortion
+    A class to handle coordinates distorted by a 2D polynomial distortion.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/DistortedCoords.png)
 
     Attributes
     ----------
     powers : Array
-        Powers of the polynomial distortion
+        Powers of the polynomial distortion.
     distortion : Array
-        Distortion coefficients
+        Distortion coefficients.
     """
 
     powers: Array
     distortion: Array
 
-    def __init__(self, order: int = 1, distortion: None | Array = None):
+    def __init__(
+        self: DistortedCoords, order: int = 1, distortion: Array | None = None
+    ):
         """
         Parameters
         ----------
         order : int
-            Order of polynomial to use
-        distortion : None | Array
-            Distortion coefficients, defaulting to 0
+            Order of polynomial to use.
+        distortion : Array | None
+            Distortion coefficients, defaulting to 0.
         """
         self.powers = np.array(dlu.gen_powers(order + 1))[:, 1:]
 
         if distortion is None:
             distortion = np.zeros_like(self.powers)
-        if distortion is not None and distortion.shape != self.powers.shape:
-            raise ValueError("Distortion shape must match powers shape")
+        distortion = np.asarray(distortion, dtype=float)
+        if distortion.shape != self.powers.shape:
+            raise ValueError("distortion shape must match powers shape.")
         self.distortion = distortion
 
-    def calculate(self, npix: int, diameter: float):
-        """
-        Generates flat coordinates and then distorts them
-
-        Parameters
-        ----------
-        npix : int
-            Number of pixels in coordinates
-        diameter: float
-            Diameter of original coordinate system
-
-        Returns
-        -------
-        distorted_coords : Array
-            Distorted coordinates
-        """
-        coords = dlu.pixel_coords(npix, diameter)
-        return dlu.distort_coords(coords, self.distortion, self.powers)
-
-    def apply(self, coords: Array):
-        """
-        Apply distortion to some coordinates
-
-        Parameters
-        ----------
-        coords : Array
-            Coordinates to distort
-
-        Returns
-        -------
-        distorted_coords : Array
-            Distorted coordinates
-        """
+    def __call__(self, coords):
         return dlu.distort_coords(coords, self.distortion, self.powers)

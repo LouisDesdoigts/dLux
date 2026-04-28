@@ -2,14 +2,10 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 import pytest
-from dLux.layers import (
-    Rotate,
-    Flip,
-    Resize,
-)
+from dLux.layers import Flip, Lambda, Resize, Rotate
 from dLux import Wavefront, PSF
 
-wf = Wavefront(16, 1, 1e-6)
+wf = Wavefront(npixels=16, diameter=1, wavelength=1e-6)
 psf = PSF(np.ones((16, 16)), 1 / 16)
 
 
@@ -39,39 +35,8 @@ def test_flip(axes):
         Flip(0.0)
 
 
-# @pytest.mark.parametrize("transmission", [None, np.ones((16, 16))])
-# @pytest.mark.parametrize("normalise", [True, False])
-# def test_transmissive_layer(transmission, normalise):
-#     layer = TransmissiveLayer(transmission, normalise)
-#     assert isinstance(layer.apply(wf), Wavefront)
+def test_lambda():
+    layer = Lambda()
 
-
-# @pytest.mark.parametrize("opd", [None, np.ones((16, 16))])
-# @pytest.mark.parametrize("phase", [None, np.ones((16, 16))])
-# def test_aberrated_layer(opd, phase):
-#     layer = AberratedLayer(opd, phase)
-#     assert isinstance(layer.apply(wf), Wavefront)
-#     with pytest.raises(ValueError):
-#         layer = AberratedLayer(np.ones((4, 4)), np.ones((5, 5)))
-
-
-# @pytest.mark.parametrize("basis", [np.ones((5, 16, 16))])
-# @pytest.mark.parametrize("coefficients", [None, np.ones(5)])
-# @pytest.mark.parametrize("as_phase", [False, True])
-# def test_basis_layer(basis, coefficients, as_phase):
-#     layer = BasisLayer(basis, coefficients, as_phase)
-#     assert isinstance(layer.apply(wf), Wavefront)
-#     with pytest.raises(ValueError):
-#         layer = BasisLayer(np.ones((5, 16, 16)), np.ones(6))
-
-
-# def test_tilt():
-#     layer = Tilt(np.array([0.1, 0.2]))
-#     assert isinstance(layer.apply(wf), Wavefront)
-#     with pytest.raises(ValueError):
-#         layer = Tilt(np.array([0.1, 0.2, 0.3]))
-
-
-# def test_normalise():
-#     layer = Normalise()
-#     assert isinstance(layer.apply(wf), Wavefront)
+    assert layer.apply(wf) is wf
+    assert layer.apply(psf) is psf

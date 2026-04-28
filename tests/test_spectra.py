@@ -19,6 +19,8 @@ def test_spectrum():
     with pytest.raises(ValueError):
         Spectrum(np.ones((2, 3)), np.ones(3))
     with pytest.raises(ValueError):
+        Spectrum(np.ones(3), np.ones(4))
+    with pytest.raises(ValueError):
         Spectrum(np.ones(3), np.ones((2, 4)))
 
 

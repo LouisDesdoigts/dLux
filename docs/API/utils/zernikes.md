@@ -1,6 +1,4 @@
-# Zernike Polynomials
-
-This module contains the code required to generate Zernike polynomials.
+# Zernikes
 
 ???+ info "zernike_name"
     ::: dLux.utils.zernikes.zernike_name
