@@ -1,0 +1,2649 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for dLux.">
+      
+      
+        <meta name="author" content="Louis Desdoigts">
+      
+      
+        <link rel="canonical" href="https://louisdesdoigts.github.io/dlux/apertures/">
+      
+      
+        <link rel="prev" href="../phase_retrieval/">
+      
+      
+        <link rel="next" href="../calibration/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.37">
+    
+    
+      
+        <title>Apertures in dLux - dLux</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.1e981d71.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,a=__md_scope)=>JSON.parse(t.getItem(a.pathname+"."+e)),__md_set=(e,t,a=localStorage,_=__md_scope)=>{try{a.setItem(_.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="amber" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#apertures-in-dlux" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="dLux" class="md-header__button md-logo" aria-label="dLux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dLux
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Apertures in dLux
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="amber" data-md-color-accent="orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="amber" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/LouisDesdoigts/dlux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    louisdesdoigts/dlux
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="dLux" class="md-nav__button md-logo" aria-label="dLux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    dLux
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LouisDesdoigts/dlux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    louisdesdoigts/dlux
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase_retrieval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A Basic Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Apertures
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Apertures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-pre-built-apertures" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1. Pre-Built Apertures
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#euclid-like-aperture" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Euclid-like Aperture
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-custom-apertures" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        2. Custom Apertures
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-dynamic-apertures" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        3. Dynamic Apertures
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrumental Calibration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mask_design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase Mask Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coronagraphs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coronagraphs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../abcd_fresnel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABCD Fresnel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../asm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASM Fresnel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sparse_propagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparse Propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optical_systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Optical Systems Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sources Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/coordinates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/detectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detectors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/instruments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instruments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/optical_systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Optical Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/psfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Psfs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/spectra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spectra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/transformations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/wavefronts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wavefronts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/abcd_propagators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Abcd Propagators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/aberrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aberrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/apertures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Apertures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/detector_layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detector Layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/optical_layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Optical Layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/optics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Optics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/propagators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propagators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/unified_layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unified Layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utils API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Utils API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/apertures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Apertures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/array_ops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Array Ops
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/coordinates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/fourier/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fourier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/helpers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helpers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/interpolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpolation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/math/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Math
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/misc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Misc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/norms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/optics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Optics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/propagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Source
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/units/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Units
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/zernikes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zernikes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ & Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Previous Versions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Previous Versions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://louisdesdoigts.github.io/dLux/0.14.3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.14.3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CHANGELOG.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Change Log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRIBUTING.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+    <a href="https://github.com/LouisDesdoigts/dlux/edit/main/docs/apertures.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-file-pen" viewBox="0 0 24 24"><path d="M12.659 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v9.34"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10.378 12.622a1 1 0 0 1 3 3.003L8.36 20.637a2 2 0 0 1-.854.506l-2.867.837a.5.5 0 0 1-.62-.62l.836-2.869a2 2 0 0 1 .506-.853z"/></svg>
+    </a>
+  
+  
+    
+      
+    
+    <a href="https://github.com/LouisDesdoigts/dlux/raw/main/docs/apertures.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-file-code-2" viewBox="0 0 24 24"><path d="M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5M5 16l-3 3 3 3M9 22l3-3-3-3"/></svg>
+    </a>
+  
+
+
+<h1 id="apertures-in-dlux">Apertures in dLux<a class="headerlink" href="#apertures-in-dlux" title="Permanent link">¤</a></h1>
+<p>dLux provides a number of built in apertures, as well as a number of powerful tools to create custom and differentiable apertures. This tutorial will go over how to create a number of different common aperture types, the basic API, and how to create both custom and dynamic (i.e. differentiable) apertures. It is broken up into the following sections:</p>
+<ol>
+<li>Pre-Built Apertures</li>
+<li>Custom Apertures</li>
+<li>Dynamic Apertures</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Basic imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.random</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">equinox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">eqx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">vmap</span>
+
+<span class="c1"># dLux imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dLux.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dlu</span>
+
+<span class="c1"># Visualisation imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;image.cmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;inferno&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;serif&quot;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;image.origin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lower&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.dpi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">90</span>
+</code></pre></div>
+<hr />
+<h2 id="1-pre-built-apertures">1. Pre-Built Apertures<a class="headerlink" href="#1-pre-built-apertures" title="Permanent link">¤</a></h2>
+<p><strong>Standard Aperture</strong></p>
+<p>dLux provides a handful of pre-built aperture types that can be used to easily generate common aperture types. The three core pre-built aperture types are:
+- <code>circular_aperture</code>: A simple circular aperture with a primary-secondary configuration and azimuthally symmetric spiders. This is a very common aperture type, and it used for example in the Hubble space telescope, the Subaru telescope, and the VLT telescopes.
+- <code>segmented_aperture</code>: A segmented hexagonal aperture with a primary-secondary configuration and azimuthally symmetric spiders. This is also a very common aperture type, and it is used for example in the James Webb space telescope and the Keck telescopes.
+- <code>sparse_aperture</code>: A sparse aperture with a user defined number of circular or hexagonal sub-apertures, each with their own position and radius. These apertures are commonly found in interferometers, and they are used for example in the CHARA array and the VLTI, or in Specialised observing modes such as AMI on JWST.</p>
+<p><strong>Notable Aperture</strong></p>
+<p>dLux also provides some functions to generate specific telescope apertures, which are <em>mostly</em> just wrappers around these core aperture generating functions but sometimes with custom spiders. We current have thr following telescope apertures implemented:
+- <code>hst_aperture</code>: This is just a thin wapper around <code>circular_aperture</code> with the correct parameters to generate the Hubble space telescope aperture.
+- <code>jwst_aperture</code>: This is just a thin wrapper around <code>segmented_aperture</code> with the correct parameters to generate the James Webb space telescope aperture.
+- <code>euclid_aperture</code>: This is a wrapper around <code>circular_aperture</code> with a custom implementation of the spiders, given that they are offset from the center of the aperture.</p>
+<p>We are always open to adding more pre-built apertures, so if there is a specific aperture you would like to see added please feel free to open an issue or submit a PR!</p>
+<p><strong>Aperture Aberrations</strong></p>
+<p>These functions all also provide the option to generate a set of Zernike polynomials over each aperture, enabling the simple modelling of more realistic PSFs. These all share a unified API, as we will see.</p>
+<h3 id="circular-aperturehst-like-aperture">Circular Aperture/HST-like Aperture<a class="headerlink" href="#circular-aperturehst-like-aperture" title="Permanent link">¤</a></h3>
+<p>Lets start with the hst_like aperture, since it is a simple wrapper around the <code>circular_aperture</code> function. We wil show how we can tweak the the parameters to generate a slightly different HST-like aperture, as well as some Zernike polynomials. Note that most of the parameters we are specifying here are just the default parameters for the <code>hst_aperture</code> function, so if you want to generate a standard HST-like aperture you can just call that function with just the npixels parameter.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Angles of the spiders in degrees</span>
+<span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Zernike noll indices to include in the basis</span>
+<span class="n">js</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">z_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">dlu</span><span class="o">.</span><span class="n">zernike_name</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">js</span><span class="p">]</span>
+
+<span class="c1"># Generate the aperture and the Zernike basis functions</span>
+<span class="n">aperture</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">hst_like</span><span class="p">(</span>
+    <span class="n">npixels</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="c1"># Number of pixels across the aperture</span>
+    <span class="n">diameter</span><span class="o">=</span><span class="mf">2.4</span><span class="p">,</span> <span class="c1"># Diameter of the primary mirror in meters</span>
+    <span class="n">oversample</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># Oversampling factor for the aperture (i.e. how many pixels across the aperture diameter)</span>
+    <span class="n">secondary_diameter</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Diameter of the secondary mirror in meters</span>
+    <span class="n">spider_width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="c1"># Width of the spiders in meters</span>
+    <span class="n">spider_angles</span><span class="o">=</span><span class="n">angles</span><span class="p">,</span> <span class="c1"># Angles of the spiders in degrees</span>
+    <span class="n">zernike_nolls</span><span class="o">=</span><span class="n">js</span><span class="p">,</span> <span class="c1"># Zernike noll indices to include in the basis</span>
+<span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot the aperture and the Zernike basis functions</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;HST-like aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">z_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/apertures_files/output_4_0.png" /></p>
+<h3 id="segmented-aperturejwst-like-aperture">Segmented Aperture/JWST-like Aperture<a class="headerlink" href="#segmented-aperturejwst-like-aperture" title="Permanent link">¤</a></h3>
+<p>Now lets have a look at the segmented aperture, which is a bit more complex, and has a few more parameters to play with. We will show how we can tweak the parameters to generate a slightly different JWST-like aperture, as well as some Zernike polynomials. This function is also mostly using the default parameters for the <code>jwst_aperture</code> function so you can see what the inputs are.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Custom spider angles for the JWST-like aperture</span>
+<span class="n">angles</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Generate the JWST-like aperture and the Zernike basis functions</span>
+<span class="n">aperture</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">jwst_like</span><span class="p">(</span>
+    <span class="n">npixels</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="c1"># Number of pixels across the aperture</span>
+    <span class="n">diameter</span><span class="o">=</span><span class="mf">6.6</span><span class="p">,</span> <span class="c1"># Diameter of the primary mirror in meters</span>
+    <span class="n">nrings</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="c1"># Number of rings of segments in the primary mirror</span>
+    <span class="n">oversample</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># Oversampling factor for the aperture (i.e. how many pixels across the aperture diameter)</span>
+    <span class="n">gap</span><span class="o">=</span><span class="mf">0.007</span><span class="p">,</span> <span class="c1"># Gap between the segments in meters</span>
+    <span class="n">segment_diameter</span><span class="o">=</span><span class="mf">1.524</span><span class="p">,</span> <span class="c1"># Diameter of the segments in meters</span>
+    <span class="n">nrings_excluded</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Number of rings of segments to exclude from the aperture (i.e. to make holes in the aperture)</span>
+    <span class="n">spider_width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># Width of the spiders in meters</span>
+    <span class="n">spider_angles</span><span class="o">=</span><span class="n">angles</span><span class="p">,</span> <span class="c1"># Angles of the spiders in degrees</span>
+    <span class="n">zernike_nolls</span><span class="o">=</span><span class="n">js</span><span class="p">,</span> <span class="c1"># Zernike noll indices to include in the basis</span>
+<span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot the aperture and the Zernike basis functions</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;JWST-like aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">z_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/apertures_files/output_7_0.png" /></p>
+<h3 id="segmented-aperture">Segmented Aperture<a class="headerlink" href="#segmented-aperture" title="Permanent link">¤</a></h3>
+<p>Now lets have a look at the sparse aperture function, which enables us to create things like aperture masks or interferometric apertures. The main different here is that we need to specify the positions of each sub-aperture as well as their shape (either hexagonal: 'hex' or circular: 'circle'). All the rest of the API is functionally the same as the other aperture generating functions. Lets generate a an JWST AMI-like aperture, a simple 7-hole mask. </p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate some hole centers</span>
+<span class="n">inds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">18</span><span class="p">]</span>
+<span class="n">cens</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">segmented_hex_cens</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">1.524</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)[</span><span class="n">inds</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+<span class="c1"># Generate the aperture and basis</span>
+<span class="n">aperture</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">sparse_aperture</span><span class="p">(</span>
+    <span class="n">npixels</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="c1"># Number of pixels across the aperture</span>
+    <span class="n">diameter</span><span class="o">=</span><span class="mf">6.6</span><span class="p">,</span> <span class="c1"># Diameter of the primary mirror in meters</span>
+    <span class="n">centers</span><span class="o">=</span><span class="n">cens</span><span class="p">,</span> <span class="c1"># Centers of the holes in meters</span>
+    <span class="n">hole_diameter</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="c1"># Diameter of the holes in meters</span>
+    <span class="n">oversample</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># Oversampling factor for the aperture (i.e. how many pixels across the aperture diameter)</span>
+    <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;hex&quot;</span><span class="p">,</span> <span class="c1"># Shape of the holes (either &#39;hex&#39; or &#39;circle&#39;)</span>
+    <span class="n">zernike_nolls</span><span class="o">=</span><span class="n">js</span><span class="p">,</span> <span class="c1"># Zernike noll indices to include in the basis</span>
+<span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot the aperture and the Zernike basis functions</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;AMI-like aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">z_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/apertures_files/output_10_0.png" /></p>
+<h2 id="euclid-like-aperture">Euclid-like Aperture<a class="headerlink" href="#euclid-like-aperture" title="Permanent link">¤</a></h2>
+<p>Lets also take a quick-look at the Euclid-like aperture, which gives an idea of how we can create most telescope apertures with these classes plus some custom spiders. The Euclid aperture is also has some very nice asymmetric properties, which makes it a good aperture to use to test out phase-retrieval algorithms (like we do in some of the other tutorials). </p>
+<div class="highlight"><pre><span></span><code><span class="n">aperture</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">euclid_like</span><span class="p">(</span>
+    <span class="n">npixels</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="c1"># Number of pixels across the aperture</span>
+    <span class="n">diameter</span><span class="o">=</span><span class="mf">1.21</span><span class="p">,</span> <span class="c1"># Diameter of the primary mirror in meters</span>
+    <span class="n">oversample</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># Oversampling factor for the aperture (i.e. how many pixels across the aperture diameter)</span>
+    <span class="n">secondary_diameter</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="c1"># Diameter of the secondary mirror in meters</span>
+    <span class="n">spider_width</span><span class="o">=</span><span class="mf">0.075</span><span class="p">,</span> <span class="c1"># Width of the spiders in meters</span>
+    <span class="n">zernike_nolls</span><span class="o">=</span><span class="n">js</span><span class="p">,</span> <span class="c1"># Zernike noll indices to include in the basis</span>
+<span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot the aperture and the Zernike basis functions</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Euclid-like aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">z_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/apertures_files/output_13_0.png" /></p>
+<p>Okay awesome, as we can see its pretty easy to generate a lot of different aperture types with these functions, and to generate Zernike polynomials over each aperture to model aberrations. In the next section we will look at how to create custom apertures, which can be used to create more complex and unique aperture designs.</p>
+<hr />
+<h2 id="2-custom-apertures">2. Custom Apertures<a class="headerlink" href="#2-custom-apertures" title="Permanent link">¤</a></h2>
+<p>In many cases the pre-built apertures may not be sufficient to generate the specific aperture you want to model. dLux provides a wide range of low-level tools to create custom apertures (everything from above is done internally within dLux!). In order to get an idea of what these tools are and how to use them, we will go through the process of creating a custom aperture from scratch. We will first create a HST-like aperture and then create an AMI-like aperture. We will also show how these tools can be used to also generate the zernike basis functions over these custom apertures.</p>
+<p>Most of the tools to create custom apertures are contained within the <code>dLux.utils.geometry</code> module, which provides a number of functions to create basic geometric shapes (circles, hexagons, rectangles, etc.) as well as functions to combine these shapes together to create more complex apertures. These functions are designed to work on the coordinates provides by the <code>dLux.utils.coordinates</code> module, which provides a number of functions to create coordinate grids and transform them in various ways. Finally, the code used to generate the Zernike polynomials is contained within the <code>dLux.utils.zernike</code> module, which provides a number of functions to generate Zernike polynomials over arbitrary apertures.</p>
+<p>It is worth noting that the pre-built aperture functions can be used as a reference for how to use these low-level tools to create custom apertures, so don't be afraid to dive into the source code for these functions to see how they work and how they use the low-level tools to create the apertures.</p>
+<p><strong>A custom HST-like Aperture</strong></p>
+<p>Lets look at our HST-like aperture, except this time we are going to make the primary mirror an octagon and our secondary mirror a square.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Start by generating a set of oversampled coordinates for the aperture</span>
+<span class="n">npixels</span> <span class="o">=</span> <span class="mi">512</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mf">2.4</span>
+<span class="n">oversample</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span> <span class="o">*</span> <span class="n">oversample</span><span class="p">,</span> <span class="n">diameter</span><span class="p">)</span>
+
+<span class="c1"># Generate our primary mirror aperture with an octagonal shape</span>
+<span class="n">primary</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">reg_polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nsides</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="c1"># Generate our secondary mirror aperture with an inverted square</span>
+<span class="n">secondary_diameter</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># Diameter of the secondary mirror in meters</span>
+<span class="n">secondary</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">secondary_diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Generate our spiders with the spiders function</span>
+<span class="n">spider_width</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">spider_angles</span> <span class="o">=</span> <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">+</span> <span class="mi">45</span>
+<span class="n">spiders</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">spider</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">spider_width</span><span class="p">,</span> <span class="n">angles</span><span class="p">)</span>
+
+<span class="c1"># Combine the primary, secondary, and spiders to get the full aperture</span>
+<span class="n">aperture</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">combine</span><span class="p">([</span><span class="n">primary</span><span class="p">,</span> <span class="n">secondary</span><span class="p">,</span> <span class="n">spiders</span><span class="p">],</span> <span class="n">oversample</span><span class="p">)</span>
+</code></pre></div>
+<p>Okay that was pretty simple, so what about the Zernike basis? The Zernike generation code has a very similar API to the aperture functions, so lets see how to make a Zernike basis for this aperture.</p>
+<p>The main difference we want to consider here is that we aren't generating them on the oversampled basis, since there is not really a physical meaning to 'downsample' a Zernike, as the values at the edges of the aperture would no longer be correct. Instead we generate them on the same grid as the aperture itself, and use a slight oversize to ensure the basis functions span the full aperture!</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate the *non* oversampled coordinates</span>
+<span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="p">)</span>
+
+<span class="c1"># Generate the slightly oversized Zernike basis functions</span>
+<span class="n">basis</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">zernike_basis</span><span class="p">(</span><span class="n">js</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span> <span class="o">*</span> <span class="mf">1.01</span><span class="p">)</span>
+
+<span class="c1"># Cut down the Zernikes to the primary mirror support</span>
+<span class="n">support</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">primary</span><span class="p">,</span> <span class="n">oversample</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span> <span class="o">*</span> <span class="n">support</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</code></pre></div>
+<p>Now we can plot and compare our custom aperture and Zernike basis functions, and see how they look!</p>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot the aperture and the Zernike basis functions</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Custom aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">z_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">basis</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/apertures_files/output_19_0.png" /></p>
+<p><strong>Double Slit Aperture</strong></p>
+<p>Cool, so now what is we want to build a more abstract aperture, like the double slit experiment? This is also pretty simple to do with the low-level tools, we just need to create two rectangles and combine them together. Here is where we can see how to shift apertures around using the coordinates transformation functions. We will also see how we can combine <em>sparse</em> apertures with the <code>combine</code> function <code>use_sum</code> option. We could also generate some Zernike polynomials over this aperture as well, but since this isn't usually part of the double-slit experiment, and our apertures will be very non-circular and therefore non-orthogonal, we wont generate them here, but the process would be the same as before.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Start by generating a set of oversampled coordinates for the aperture</span>
+<span class="n">npixels</span> <span class="o">=</span> <span class="mi">512</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">oversample</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span> <span class="o">*</span> <span class="n">oversample</span><span class="p">,</span> <span class="n">diameter</span><span class="p">)</span>
+
+<span class="c1"># Generate our two slits with the rectangle function</span>
+<span class="n">separation</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">shift_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x_pos</span><span class="p">:</span> <span class="n">dlu</span><span class="o">.</span><span class="n">translate_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+<span class="n">slit1</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">shift_fn</span><span class="p">(</span><span class="n">separation</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">slit2</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">shift_fn</span><span class="p">(</span><span class="o">-</span><span class="n">separation</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">double_slit</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">combine</span><span class="p">([</span><span class="n">slit1</span><span class="p">,</span> <span class="n">slit2</span><span class="p">],</span> <span class="n">oversample</span><span class="p">,</span> <span class="n">use_sum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot the double slit aperture</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Double slit aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">double_slit</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/apertures_files/output_22_0.png" /></p>
+<hr />
+<h2 id="3-dynamic-apertures">3. Dynamic Apertures<a class="headerlink" href="#3-dynamic-apertures" title="Permanent link">¤</a></h2>
+<p>Okay great, now that we have seen how we can create custom aperture, lets have a look at how we can make these apertures dynamic, or in other words, differentiable. This is a powerful feature of dLux that basically doesn't exist in any other optical simulation package. It opens a whole new set of optical calibration and design potential. It has already been used to recover both <a href="https://arxiv.org/abs/2510.09806">physical and wavefront distortions to the aperture mask on JWST</a>, as well as recovering the misalignment and drift of the HST NICMOS cold-mask pupil (paper in prep). It also opens the option to do things like end-to-end optimization of coronagraphs and other high-contrast imaging systems, which is something we are very excited about.</p>
+<p>To aide in the recovery of <em>complex</em> dynamic aperture shapes, dLux also provides the ability to provide polynomial distortions to coordinates systems - which is what we use to generate the apertures in the first place! This provides us with a high level of flexibility with a simple API. Lets use the same AMI mast as before, showing how we can create a differentiable version of the aperture!</p>
+<p>These functions are also designed to be <em>fully compatible</em> with jax, meaning we can jit, grad, vmap, etc. them to our hearts content! This means we can easily use these dynamic apertures in optimization and inference problems, which is super exciting!</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate some hole centers</span>
+<span class="n">inds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">18</span><span class="p">]</span>
+<span class="n">cens</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">segmented_hex_cens</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">1.524</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)[</span><span class="n">inds</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+<span class="c1"># Generating a set of non-oversampled coordinates for the aperture</span>
+<span class="n">npixels</span> <span class="o">=</span> <span class="mi">512</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mf">6.6</span>
+<span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="p">)</span>
+
+<span class="c1"># Define the hexagon function</span>
+<span class="n">rmax</span> <span class="o">=</span> <span class="mf">0.8</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">softness</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">diameter</span> <span class="o">/</span> <span class="n">npixels</span>
+<span class="n">hex_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">coords</span><span class="p">:</span> <span class="n">dlu</span><span class="o">.</span><span class="n">soft_reg_polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">rmax</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">clip_dist</span><span class="o">=</span><span class="n">softness</span><span class="p">)</span>
+
+<span class="c1"># Coordinate distortion set up</span>
+<span class="n">powers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">gen_powers</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># Third order polynomial distortion</span>
+<span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">powers</span><span class="p">)</span> <span class="c1"># Coefficients for the polynomial distortion</span>
+
+<span class="c1"># Hole generation functions</span>
+<span class="n">distort_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">coeffs</span><span class="p">:</span> <span class="n">dlu</span><span class="o">.</span><span class="n">distort_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
+<span class="n">coord_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">cen</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">:</span> <span class="n">dlu</span><span class="o">.</span><span class="n">translate_coords</span><span class="p">(</span><span class="n">distort_fn</span><span class="p">(</span><span class="n">coeffs</span><span class="p">),</span> <span class="n">cen</span><span class="p">)</span>
+<span class="n">hole_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">cen</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">:</span> <span class="n">hex_fn</span><span class="p">(</span><span class="n">coord_fn</span><span class="p">(</span><span class="n">cen</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">))</span>
+
+<span class="c1"># Now we can create the fast aperture generation function</span>
+<span class="n">aper_fn</span> <span class="o">=</span> <span class="n">jit</span><span class="p">(</span><span class="k">lambda</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">cen</span><span class="p">:</span> <span class="n">vmap</span><span class="p">(</span><span class="n">hole_fn</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))(</span><span class="n">cen</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</code></pre></div>
+<p>Awesome, now we have a fast, differentiable aperture generation function that we can use in a variety of applications! Lets try applying some random distortions and shifts to our aperture and see how it looks!</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plain aperture</span>
+<span class="n">aperture</span> <span class="o">=</span> <span class="n">aper_fn</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">cens</span><span class="p">)</span>
+
+<span class="c1"># Distorted aperture</span>
+<span class="n">distortions</span> <span class="o">=</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">jr</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="n">coeffs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">distorted_aperture</span> <span class="o">=</span> <span class="n">aper_fn</span><span class="p">(</span><span class="n">coeffs</span> <span class="o">+</span> <span class="n">distortions</span><span class="p">,</span> <span class="n">cens</span><span class="p">)</span>
+
+<span class="c1"># Shifted aperture</span>
+<span class="n">shifts</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">jr</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="n">cens</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">shifted_aperture</span> <span class="o">=</span> <span class="n">aper_fn</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">cens</span> <span class="o">+</span> <span class="n">shifts</span><span class="p">)</span>
+
+<span class="c1"># Shifted and distorted aperture</span>
+<span class="n">shifted_distorted_aperture</span> <span class="o">=</span> <span class="n">aper_fn</span><span class="p">(</span><span class="n">coeffs</span> <span class="o">+</span> <span class="n">distortions</span><span class="p">,</span> <span class="n">cens</span> <span class="o">+</span> <span class="n">shifts</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Now lets have a look at them!</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Plain aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Distorted aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">distorted_aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Shifted aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">shifted_aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Shifted and distorted aperture&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">shifted_distorted_aperture</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/apertures_files/output_27_0.png" /></p>
+<p>Pretty cool! Now lets check that our gradients are working correctly</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define a simple loss function to check the gradients</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+    <span class="n">aperture</span> <span class="o">=</span> <span class="n">aper_fn</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;coeffs&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;cens&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">aperture</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Initialize the parameters at their distorted values</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;coeffs&quot;</span><span class="p">:</span> <span class="n">coeffs</span> <span class="o">+</span> <span class="n">distortions</span><span class="p">,</span>
+    <span class="s2">&quot;cens&quot;</span><span class="p">:</span> <span class="n">cens</span> <span class="o">+</span> <span class="n">shifts</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># Compute the loss and gradients and examine them</span>
+<span class="n">loss</span><span class="p">,</span> <span class="n">grads</span> <span class="o">=</span> <span class="n">eqx</span><span class="o">.</span><span class="n">filter_value_and_grad</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">aperture</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loss:&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gradients for cens:&quot;</span><span class="p">,</span> <span class="n">grads</span><span class="p">[</span><span class="s2">&quot;cens&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gradients for coeffs:&quot;</span><span class="p">,</span> <span class="n">grads</span><span class="p">[</span><span class="s2">&quot;coeffs&quot;</span><span class="p">])</span>
+</code></pre></div>
+<pre><code>Loss: 0.10399954
+Gradients for cens: [[-0.03483739  0.01555587]
+ [ 0.00139634  0.04428311]
+ [ 0.01616716  0.00632419]
+ [-0.00105111 -0.00074032]
+ [-0.01101966  0.03689023]
+ [-0.03352235  0.02372693]
+ [ 0.01387123  0.02138328]]
+Gradients for coeffs: [[ 4.8995782e-02 -3.6315620e-04  1.5526479e-01  8.1152119e-02
+  -2.7263498e-02  2.5632763e-01]
+ [-1.4742331e-01  1.3391176e-02 -2.6525241e-01 -5.1730144e-01
+   4.3967422e-02 -4.8298120e-01]]
+</code></pre>
+<p>Awesome, now we have a dynamic version of our aperture! We can easily use this in optimization and inference problems, which is super exciting!</p>
+<p>In practice, these dynamic aperture can be generated using the <code>dLux.layers.apertures</code> module, which provides a number of pre-built dynamic apertures, as well as the tools to create custom dynamic apertures. In some cases it is more practical to create a custom dynamic aperture using the low-level tools like shown here, and then to build a custom layer for this to reduce object clutter, but everything can be done with the existing infrastructure.</p>
+<p>It's also worth noting that we can also dynamically and differentiably generate Zernike polynomials over these dynamic apertures with the same API as before, which opens up even more possibilities for calibration and design problems! The syntax is more-or-less the same, so we wont show that here as it would be a lot of just copy-pasting from the previous section, but feel free to try it out yourself!</p>
+<div class="highlight"><pre><span></span><code>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.dbc0afdc.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
