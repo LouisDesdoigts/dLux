@@ -78,30 +78,16 @@ extra:
 nav:
   - Home: index.md
   - Tutorials:
-    - Introductory:
-      - A Basic Overview:         tutorials/introductory/overview.md
-      - Optical Systems:          tutorials/introductory/optical_systems.md
-      - Sources & Spectra:        tutorials/introductory/sources.md
-      # - Detectors:
-      # - Building Telescope:
-      # - Building a coronagraph:
-      # - The Wavefront and PSF classes:
-      # - functional psf modelling with the Utils module:
-
-    - How-To's:
-      - Working with dLux objects: tutorials/howtos/dLux_objects.md
-      - Building Apertures:        tutorials/howtos/custom_apertures.md
-      # - Optimisation with dLux (Optimising many parameters, arbitrary loss functions):
-      # - Estimating Uncertainties (Fisher Information):
-      # - Sampling Posteriors (HMC):
-      # - Building your own classes (optical system, source):
-
-    - Examples:
-      - Phase Retrieval:          tutorials/examples/phase_retrieval_demo.md
-      - Phase Mask Design:        tutorials/examples/designing_a_mask.md
-      - Pixel Level Calibration:  tutorials/examples/flatfield_calibration.md
-      - Fisher Information:       tutorials/examples/fisher_information.md
-      - Parameter Inference:      tutorials/examples/HMC.md
+    - A Basic Overview:         phase_retrieval.md
+    - Building Apertures:       apertures.md
+    - Instrumental Calibration: calibration.md
+    - Phase Mask Design:        mask_design.md
+    - Coronagraphs:             coronagraphs.md
+    - ABCD Fresnel:             abcd_fresnel.md
+    - ASM Fresnel:              asm.md
+    - Sparse Propagation:       sparse_propagation.md
+    - Optical Systems Overview: optical_systems.md
+    - Sources Overview:         sources.md
 
   - API:
     - Core API:
