@@ -1,5 +1,8 @@
 name: automated tests
-on: [push]
+on:
+  push:
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
