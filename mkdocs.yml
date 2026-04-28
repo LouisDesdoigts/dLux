@@ -133,5 +133,5 @@ nav:
   - FAQ & Troubleshooting: faq.md
   - Previous Versions:
       - v0.14.3: https://louisdesdoigts.github.io/dLux/0.14.3/
-  - Change Log: CHANGELOG.md
-  - Contributing: CONTRIBUTING.md
+  - Change Log: changelog.md
+  - Contributing: contributing.md
