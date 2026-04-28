@@ -7,6 +7,9 @@ __all__ = ["Spec", "PadSpec", "CoordSpec"]
 class Spec(zdx.Base):
     """
     Abstract base class for coordinate/sampling specifications.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Spec.png)
     """
 
     pass
@@ -16,6 +19,9 @@ class PadSpec(Spec):
     """
     Coordinate specification defined via integer padding and cropping factors
     relative to an input grid size.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/PadSpec.png)
 
     Attributes
     ----------
@@ -53,6 +59,9 @@ class CoordSpec(Spec):
     """
     Coordinate specification defined explicitly by number of pixels, pixel
     scale, and centre offset.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/CoordSpec.png)
 
     Attributes
     ----------

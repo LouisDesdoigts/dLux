@@ -319,6 +319,9 @@ class FourierBasis(OpticalLayer):
     """
     Optical layer for representing an OPD using a 2D real Fourier basis.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/FourierBasis.png)
+
     Attributes
     ----------
     coefficients : Array

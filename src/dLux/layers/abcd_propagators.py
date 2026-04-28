@@ -24,6 +24,9 @@ class ABCDElement(zdx.Base):
     """
     An ABCD element is a layer that can be represented by an ABCD matrix. This is a
     base class for such elements, and should not be used directly.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ABCDElement.png)
     """
 
     pass
@@ -32,6 +35,9 @@ class ABCDElement(zdx.Base):
 class ABCDFreeSpace(ABCDElement):
     """
     A free space propagation element represented by an ABCD matrix.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ABCDFreeSpace.png)
     """
 
     distance: float
@@ -63,6 +69,9 @@ class ABCDLens(ABCDElement):
     and back focal planes. To represent a true pupil-focal plane propagation, apply a
     free space propagation of the focal length both before _and_ after the lens, or use
     the ABCDConjugatePlane element.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ABCDLens.png)
     """
 
     focal_length: float
@@ -90,6 +99,9 @@ class ABCDLens(ABCDElement):
 class ABCDMirror(ABCDElement):
     """
     A mirror element represented by an ABCD matrix.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ABCDMirror.png)
     """
 
     radius: float
@@ -118,6 +130,9 @@ class ABCDConjugatePlane(ABCDElement):
     """
     A conjugate plane element represented by an ABCD matrix. This produces the classic
     'pupil-focal Fourier relationship' seen in fourier/physical optics.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ABCDConjugatePlane.png)
     """
 
     focal_length: float
@@ -148,6 +163,9 @@ class ABCDConjugatePlane(ABCDElement):
 class ABCDPropagator(OpticalLayer):
     """
     Propagator defined by a composition of ABCD elements.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ABCDPropagator.png)
 
     Attributes
     ----------
@@ -202,6 +220,9 @@ class MFTPropagator(ABCDPropagator):
     propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane
     tracking, but the present Wavefront class is not compatible with this formulation.
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/MFTPropagator.png)
+
     Parameters
     ----------
     ABCDs: list[ABCDElement]
@@ -249,6 +270,9 @@ class FFTPropagator(ABCDPropagator):
     Note: Always returns a wavefront in an 'Intermediate' plane, even if the
     propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane
     tracking, but the present Wavefront class is not compatible with this formulation.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/FFTPropagator.png)
 
     Parameters
     ----------
@@ -336,6 +360,9 @@ class ASMPropagator(OpticalLayer):
     Note: Always returns a wavefront in an 'Intermediate' plane, even if the
     propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane
     tracking, but the present Wavefront class is not compatible with this formulation.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ASMPropagator.png)
     """
 
     distance: float
@@ -403,7 +430,12 @@ class ASMPropagator(OpticalLayer):
 
 
 class Fraunhofer(ABCDPropagator):
-    """Placeholder for a dedicated Fraunhofer propagator."""
+    """
+    Placeholder for a dedicated Fraunhofer propagator.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Fraunhofer.png)
+    """
 
     spec_out: tuple[int, float]
     focal_length: float
@@ -413,7 +445,12 @@ class Fraunhofer(ABCDPropagator):
 
 
 class Fresnel(ABCDPropagator):
-    """Placeholder for a dedicated Fresnel propagator."""
+    """
+    Placeholder for a dedicated Fresnel propagator.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Fresnel.png)
+    """
 
     spec_out: tuple[int, float]
     focal_length: float
