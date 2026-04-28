@@ -1,7 +1,5 @@
 # Helpers
 
-This module contains the leftover functions that don't fit anywhere else in the `utils` module!
-
 ???+ info "map2array"
     ::: dLux.utils.helpers.map2array
 
@@ -13,6 +11,9 @@ This module contains the leftover functions that don't fit anywhere else in the 
 
 ???+ info "remove_layer"
     ::: dLux.utils.helpers.remove_layer
+
+???+ info "imshow_extent"
+    ::: dLux.utils.helpers.imshow_extent
 
 ???+ info "inherit_docstrings"
     ::: dLux.utils.helpers.inherit_docstrings

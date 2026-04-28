@@ -20,3 +20,6 @@
 
 ???+ info "Normalise"
     ::: dLux.layers.optical_layers.Normalise
+
+???+ info "FourierBasis"
+    ::: dLux.layers.optical_layers.FourierBasis

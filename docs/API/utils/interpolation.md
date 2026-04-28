@@ -1,6 +1,4 @@
-# Interpolation Utility Functions
-
-This module contains basic paraxial interpolation functions.
+# Interpolation
 
 ???+ info "interp"
     ::: dLux.utils.interpolation.interp

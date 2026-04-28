@@ -11,3 +11,6 @@
 
 ???+ info "Resize"
     ::: dLux.layers.unified_layers.Resize
+
+???+ info "Lambda"
+    ::: dLux.layers.unified_layers.Lambda

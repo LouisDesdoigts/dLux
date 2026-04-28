@@ -1,4 +1,4 @@
-# Aperture Layers
+# Apertures
 
 ???+ info "CircularAperture"
     ::: dLux.layers.apertures.CircularAperture

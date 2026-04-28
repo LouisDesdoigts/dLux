@@ -1,7 +1,5 @@
 # Coordinates
 
-This module contains a series of functions which are used to calculate coordinate arrays, apply transformations to coordinate arrays, and convert between Cartesian and polar coordinates.
-
 ???+ info "cart2polar"
     ::: dLux.utils.coordinates.cart2polar
 
