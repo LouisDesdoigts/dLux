@@ -1,15 +1,11 @@
+"""Composite optical layers built from transmission and aberration components."""
+
 from __future__ import annotations
 from jax import Array
 
 
 from ..wavefronts import Wavefront
-from .optical_layers import (
-    OpticalLayer,
-    TransmissiveLayer,
-    BasisLayer,
-    AberratedLayer,
-)
-
+from .optical_layers import TransmissiveLayer, BasisLayer, AberratedLayer
 
 __all__ = [
     "Optic",
@@ -20,7 +16,7 @@ __all__ = [
 class Optic(TransmissiveLayer, AberratedLayer):
     """
     A basic 'Optic' class, which optionally applies a transmission, OPD and phase to
-    the input wavefront, with the option for normalise after.
+    the input wavefront, with optional normalisation afterward.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/Optic.png)
@@ -38,7 +34,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
     """
 
     def __init__(
-        self: OpticalLayer,
+        self: Optic,
         transmission: Array = None,
         opd: Array = None,
         phase: Array = None,
@@ -77,7 +73,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
                         f"shapes {self.transmission.shape} and {self.phase.shape}."
                     )
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: Optic, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -92,7 +88,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
             The transformed wavefront.
         """
         wavefront *= self.transmission
-        wavefront += self.opd
+        wavefront = wavefront.add_opd(self.opd)
         wavefront = wavefront.add_phase(self.phase)
         if self.normalise:
             wavefront = wavefront.normalise()
@@ -101,7 +97,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
 
 class BasisOptic(TransmissiveLayer, BasisLayer):
     """
-    A basic 'Optic' class, with a aberrations applied through a set of basis vectors
+    A basic 'BasisOptic' class, with aberrations applied through a set of basis-vector
     coefficients. This can be applied either as an opd or phase, using the `as_phase`
     attribute. Also optionally applies a transmission and normalisation.
 
@@ -117,19 +113,19 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
     as_phase : bool
-        Whether to apply the basis as a phase phase or OPD. If True the basis is
+        Whether to apply the basis as a phase or OPD. If True the basis is
         applied as a phase, else it is applied as an OPD.
     normalise : bool
         Whether to normalise the wavefront after passing through the optic.
     """
 
     def __init__(
-        self: OpticalLayer,
-        basis,
-        transmission=None,
-        coefficients=None,
-        as_phase=False,
-        normalise=False,
+        self: BasisOptic,
+        basis: Array,
+        transmission: Array = None,
+        coefficients: Array = None,
+        as_phase: bool = False,
+        normalise: bool = False,
     ):
         """
         Parameters
@@ -141,7 +137,7 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
         transmission: Array = None
             The Array of transmission values to be applied to the input wavefront.
         as_phase : bool = False
-            Whether to apply the basis as a phase phase or OPD. If True the basis is
+            Whether to apply the basis as a phase or OPD. If True the basis is
             applied as a phase, else it is applied as an OPD.
         normalise : bool = False
             Whether to normalise the wavefront after passing through the optic.
@@ -154,7 +150,7 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
             normalise=normalise,
         )
 
-    def apply(self: OpticalLayer, wavefront: Wavefront()) -> Wavefront():
+    def __call__(self: BasisOptic, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -173,7 +169,7 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
         if self.as_phase:
             wavefront = wavefront.add_phase(self.eval_basis())
         else:
-            wavefront += self.eval_basis()
+            wavefront = wavefront.add_opd(self.eval_basis())
 
         if self.normalise:
             wavefront = wavefront.normalise()

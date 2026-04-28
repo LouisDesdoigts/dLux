@@ -39,3 +39,26 @@ class TestPSF:
 
         psf /= np.ones(1)
         assert isinstance(psf, PSF)
+
+    def test_magic_with_psf_operand(self, psf):
+        other = PSF(np.full((16, 16), 2.0), 1 / 16)
+
+        added = psf + other
+        assert isinstance(added, PSF)
+        assert np.allclose(added.data, 3.0)
+
+        subtracted = psf - other
+        assert isinstance(subtracted, PSF)
+        assert np.allclose(subtracted.data, -1.0)
+
+    def test_magic_with_none(self, psf):
+        unchanged = psf._magic_unified_op(None, "add")
+        assert unchanged is psf
+
+    def test_magic_invalid_type(self, psf):
+        with pytest.raises(TypeError, match="Unsupported type"):
+            psf + "invalid"
+
+    def test_magic_invalid_operation(self, psf):
+        with pytest.raises(ValueError, match="Unsupported operation"):
+            psf._magic_unified_op(np.ones(1), "invalid")

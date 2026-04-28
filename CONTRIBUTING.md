@@ -55,10 +55,14 @@ Any changes you make should also be appropriately documented! For small API chan
 To build the documentation locally and make sure everything is working correctly, you can run the following command:
 
 ```bash
-mkdocs serve
+zensical serve
 ```
 
 This will build the documentation and serve it on a local server. You can then navigate to `localhost:8000` in your browser to view the documentation.
+
+**Generating UML Diagrams**
+
+Needs to be run from the docs/ directory... TODO: expand on this
 
 ---
 

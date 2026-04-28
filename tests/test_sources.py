@@ -15,12 +15,17 @@ from dLux import (
     Optic,
     PSF,
 )
+import dLux.sources as sources_module
 
 
 def _test_model(source):
     optics = LayeredOpticalSystem(16, 1.0, [Optic()])
     assert isinstance(source.model(optics), np.ndarray)
-    assert isinstance(source.model(optics, return_wf=True), Wavefront)
+    if isinstance(source, (ResolvedSource, PointResolvedSource)):
+        with pytest.raises(NotImplementedError):
+            source.model(optics, return_wf=True)
+    else:
+        assert isinstance(source.model(optics, return_wf=True), Wavefront)
     assert isinstance(source.model(optics, return_psf=True), PSF)
     with pytest.raises(ValueError):
         source.model(optics, return_wf=True, return_psf=True)
@@ -78,7 +83,15 @@ def test_point_resolved_source(wavelengths, spectrum):
 
 
 def test_scene():
-    scene = Scene(("source", PointSource([1e-6])))
+    keyed_scene = Scene([("source", PointSource([1e-6]))])
+    assert isinstance(keyed_scene.source, PointSource)
+
+    single_scene = Scene(PointSource([1e-6]))
+    assert isinstance(single_scene.PointSource, PointSource)
+
+    tuple_scene = Scene((PointSource([1e-6]), PointSource([1e-6])))
+    assert isinstance(tuple_scene.PointSource_0, PointSource)
+
     scene = Scene([PointSource([1e-6]), PointSource([1e-6])])
     optics = LayeredOpticalSystem(16, 1.0, [Optic()])
 
@@ -95,3 +108,19 @@ def test_scene():
     scene.PointSource_0
     with pytest.raises(AttributeError):
         scene.not_an_attr
+
+
+def test_source_helper_functions(spectrum):
+    assert sources_module._as_wavelengths_1d(None) is None
+
+    with pytest.raises(ValueError):
+        sources_module._as_wavelengths_1d(np.ones((2, 2)))
+
+    assert sources_module._infer_n_wavelengths(np.ones(3), None) == 3
+    assert sources_module._infer_n_wavelengths(None, spectrum) == 1
+
+    with pytest.raises(ValueError):
+        sources_module._infer_n_wavelengths(None, None)
+
+    with pytest.raises(TypeError):
+        sources_module._infer_n_wavelengths(None, 1)

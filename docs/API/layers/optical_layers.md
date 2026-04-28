@@ -1,5 +1,11 @@
 # Optical Layers
 
+???+ info "BaseLayer"
+    ::: dLux.layers.optical_layers.BaseLayer
+
+???+ info "OpticalLayer"
+    ::: dLux.layers.optical_layers.OpticalLayer
+
 ???+ info "TransmissiveLayer"
     ::: dLux.layers.optical_layers.TransmissiveLayer
 
@@ -14,3 +20,6 @@
 
 ???+ info "Normalise"
     ::: dLux.layers.optical_layers.Normalise
+
+???+ info "FourierBasis"
+    ::: dLux.layers.optical_layers.FourierBasis

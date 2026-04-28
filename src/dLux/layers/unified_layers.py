@@ -1,7 +1,8 @@
-from __future__ import annotations
-from typing import Union
+"""Unified layers that operate on either wavefronts or PSFs."""
 
-__all__ = ["Rotate", "Flip", "Resize"]
+from __future__ import annotations
+
+__all__ = ["UnifiedLayer", "Rotate", "Flip", "Resize", "Lambda"]
 
 
 from .optical_layers import OpticalLayer
@@ -13,12 +14,15 @@ from ..psfs import PSF
 class UnifiedLayer(OpticalLayer, DetectorLayer):
     """
     Base class for unified layers that can be applied to either wavefronts or PSFs.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/UnifiedLayer.png)
     """
 
 
 class Resize(UnifiedLayer):
     """
-    Resizes either a wavefront or PSF by either padding or cropping. Note this class
+    Resizes either a wavefront or PSF by padding or cropping. Note this class
     only supports padding and cropping of even sizes to even sizes, and odd sizes to
     odd sizes to ensure all operations are paraxial.
 
@@ -33,33 +37,31 @@ class Resize(UnifiedLayer):
 
     npixels: int
 
-    def __init__(self: UnifiedLayer, npixels: int):
+    def __init__(self: Resize, npixels: int):
         """
         Parameters
         ----------
-        npixels : tuple
+        npixels : int
             The desired output size.
         """
         super().__init__()
         self.npixels = int(npixels)
 
-    def apply(
-        self: UnifiedLayer, input: Union[Wavefront, PSF]
-    ) -> Union[Wavefront, PSF]:
+    def __call__(self: Resize, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Resizes the input.
 
         Parameters
         ----------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The input to resize.
 
         Returns
         -------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The resized input.
         """
-        return input.resize(self.npixels)
+        return target.resize(self.npixels)
 
 
 class Rotate(UnifiedLayer):
@@ -88,7 +90,7 @@ class Rotate(UnifiedLayer):
     complex: bool
 
     def __init__(
-        self: UnifiedLayer,
+        self: Rotate,
         angle: float,
         method: str = "linear",
         complex: bool = False,
@@ -110,32 +112,29 @@ class Rotate(UnifiedLayer):
         self.method = str(method)
         self.complex = bool(complex)
 
-    def apply(
-        self: UnifiedLayer, input: Union[Wavefront, PSF]
-    ) -> Union[Wavefront, PSF]:
+    def __call__(self: Rotate, target: Wavefront | PSF) -> Wavefront | PSF:
         """
         Applies the rotation to the input.
 
         Parameters
         ----------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The input to rotate.
 
         Returns
         -------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The rotated input.
         """
-        if isinstance(input, PSF):
-            return input.rotate(self.angle, self.method)
-        else:
-            return input.rotate(self.angle, self.method, self.complex)
+        if isinstance(target, PSF):
+            return target.rotate(self.angle, self.method)
+        return target.rotate(self.angle, self.method, self.complex)
 
 
 class Flip(UnifiedLayer):
     """
     Flips either a wavefront or PSF about the input axes. Can be either an int or a
-    tuple of ints. This class uses the 'ij' indexing convention, ie axis 0 is the
+    tuple of ints. This class uses the 'ij' indexing convention, i.e. axis 0 is the
     y-axis, and axis 1 is the x-axis.
 
     ??? abstract "UML"
@@ -143,45 +142,69 @@ class Flip(UnifiedLayer):
 
     Attributes
     ----------
-    axes : Union[tuple, int]
+    axes : tuple[int, ...] | int
         The axes to flip the input about. This class uses the 'ij' indexing convention,
-        ie axis 0 is the y-axis, and axis 1 is the x-axis.
+        i.e. axis 0 is the y-axis, and axis 1 is the x-axis.
     """
 
-    axes: Union[tuple[int], int]
+    axes: tuple[int, ...] | int
 
-    def __init__(self: UnifiedLayer, axes: Union[tuple[int], int]):
+    def __init__(self: Flip, axes: tuple[int, ...] | int):
         """
         Parameters
         ----------
-        axes : Union[tuple, int]
+        axes : tuple[int, ...] | int
             The axes to flip the input about. This class uses the 'ij' indexing
-            convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.
+            convention, i.e. axis 0 is the y-axis, and axis 1 is the x-axis.
         """
         super().__init__()
         self.axes = axes
 
         if isinstance(self.axes, tuple):
-            for axes in self.axes:
-                if not isinstance(axes, int):
+            for axis in self.axes:
+                if not isinstance(axis, int):
                     raise ValueError("All axes must be integers.")
         elif not isinstance(self.axes, int):
-            raise ValueError("axes must be integers.")
+            raise ValueError("axes must be an int or tuple of ints.")
 
-    def apply(
-        self: UnifiedLayer, input: Union[Wavefront, PSF]
-    ) -> Union[Wavefront, PSF]:
+    def __call__(self: Flip, target: Wavefront | PSF) -> Wavefront | PSF:
         """
-        Flips the input about the input axes.
+        Flips the input about the specified axes.
 
         Parameters
         ----------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The input to flip.
 
         Returns
         -------
-        input : Union[Wavefront, PSF]
+        target : Wavefront | PSF
             The flipped input.
         """
-        return input.flip(self.axes)
+        return target.flip(self.axes)
+
+
+class Lambda(UnifiedLayer):
+    """
+    A no-op layer that returns the input unchanged. This can be useful for debugging or
+    as a placeholder in a pipeline.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Lambda.png)
+    """
+
+    def __call__(self: Lambda, target: Wavefront | PSF) -> Wavefront | PSF:
+        """
+        Returns the input unchanged.
+
+        Parameters
+        ----------
+        target : Wavefront | PSF
+            The input to return.
+
+        Returns
+        -------
+        target : Wavefront | PSF
+            The input, unchanged.
+        """
+        return target

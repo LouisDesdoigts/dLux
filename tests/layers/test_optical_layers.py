@@ -2,15 +2,16 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 import pytest
+import dLux.utils as dlu
 from dLux.layers import (
     TransmissiveLayer,
     AberratedLayer,
     BasisLayer,
+    FourierBasis,
     Tilt,
     Normalise,
 )
 from dLux import Wavefront
-
 
 wf = Wavefront(16, 1, 1e-6)
 
@@ -50,3 +51,26 @@ def test_tilt():
 
 def test_normalise():
     _test_apply(Normalise())
+
+
+@pytest.mark.parametrize("coefficients", [None, np.ones((5, 5))])
+def test_fourier_basis(coefficients):
+    layer = FourierBasis(npix=16, n_modes=5, coefficients=coefficients)
+    expected = dlu.eval_fourier_basis(layer.coefficients, *layer.kernels)
+    updated = layer.update_kernels(8)
+    applied = layer(wf)
+
+    _test_apply(layer)
+    assert layer.eval_basis().shape == (16, 16)
+    assert np.allclose(layer.eval_basis(), expected)
+    assert updated.kernels[0].shape == (8, 5)
+    assert updated.kernels[1].shape == (8, 5)
+    assert np.allclose(applied.phase, wf.add_opd(expected).phase)
+
+    if coefficients is None:
+        assert np.allclose(layer.eval_basis(), 0.0)
+
+
+def test_fourier_basis_invalid_coefficients():
+    with pytest.raises(ValueError):
+        FourierBasis(npix=16, n_modes=5, coefficients=np.ones((4, 4)))

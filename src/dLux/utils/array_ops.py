@@ -8,10 +8,8 @@ __all__ = [
     "downsample",
 ]
 
-# TODO: Add convolve?
 
-
-def pad_to(array: Array, npixels: int) -> Array:
+def pad_to(array: Array, npixels: int, fill: float = 0.0) -> Array:
     """
     Paraxially zero-pads the input array to the shape (npixels, npixels). Due to the
     paraxial requirement, the input array must be square and even arrays can only
@@ -23,6 +21,8 @@ def pad_to(array: Array, npixels: int) -> Array:
         The input array to pad.
     npixels : int
         The size to pad to the array to.
+    fill : float = 0.
+        The value to fill the array with.
 
     Returns
     -------
@@ -31,18 +31,23 @@ def pad_to(array: Array, npixels: int) -> Array:
     """
     npixels_in = array.shape[-1]
     if npixels_in % 2 != npixels % 2:
+        parity_in = "even" if npixels_in % 2 == 0 else "odd"
+        parity_out = "even" if npixels % 2 == 0 else "odd"
+        suggested_npixels = npixels + 1
         raise ValueError(
-            "Only supports even -> even or odd -> odd padding."
-            f"Input array has {npixels_in} pixels, and requested padding to "
-            f"{npixels} pixels"
+            f"Center-preserving padding requires parity consistency, "
+            f"i.e. even -> even or odd -> odd: "
+            f"input array ({npixels_in} pixels, {parity_in}) cannot be padded "
+            f"to {npixels} pixels ({parity_out} parity). "
+            f"Try npixels={suggested_npixels} instead."
         )
     if npixels < npixels_in:
         raise ValueError(
-            "npixels must be larger than the current array, "
-            f"npixels_in = {npixels_in} < npixels = {npixels}"
+            f"Cannot pad to smaller size: input has {npixels_in} pixels, "
+            f"target is {npixels} pixels. Padding requires npixels >= {npixels_in}."
         )
 
-    return np.pad(array, (npixels - npixels_in) // 2)
+    return np.pad(array, (npixels - npixels_in) // 2, constant_values=fill)
 
 
 def crop_to(array: Array, npixels: int) -> Array:
@@ -65,22 +70,27 @@ def crop_to(array: Array, npixels: int) -> Array:
     """
     npixels_in = array.shape[-1]
     if npixels_in % 2 != npixels % 2:
+        parity_in = "even" if npixels_in % 2 == 0 else "odd"
+        parity_out = "even" if npixels % 2 == 0 else "odd"
+        suggested_npixels = npixels - 1
         raise ValueError(
-            "Only supports even -> even or odd -> odd cropping."
-            f"Input array has {npixels_in} pixels, and requested cropping to "
-            f"{npixels} pixels"
+            f"Center-preserving cropping requires parity consistency, "
+            f"i.e. even -> even or odd -> odd: "
+            f"input array ({npixels_in} pixels, {parity_in}) cannot be cropped "
+            f"to {npixels} pixels ({parity_out} parity). "
+            f"Try npixels={suggested_npixels} instead."
         )
     if npixels > npixels_in:
         raise ValueError(
-            "npixels must be smaller than the current array, "
-            f"npixels_in = {npixels_in} > npixels = {npixels}"
+            f"Cannot crop to larger size: input has {npixels_in} pixels, "
+            f"target is {npixels} pixels. Cropping requires npixels <= {npixels_in}."
         )
 
     start, stop = (npixels_in - npixels) // 2, (npixels_in + npixels) // 2
     return array[start:stop, start:stop]
 
 
-def resize(array: Array, npixels: int) -> Array:
+def resize(array: Array, npixels: int, fill: float = 0.0) -> Array:
     """
     Resizes the input array to the shape (npixels, npixels), using either a pad or crop
     depending on the input array size. Due to the paraxial requirement, the input array
@@ -93,6 +103,8 @@ def resize(array: Array, npixels: int) -> Array:
         The input array to resize.
     npixels : int
         The size to output the array.
+    fill : float = 0.
+        The value to fill the array with if padding is required.
 
     Returns
     -------
@@ -106,7 +118,7 @@ def resize(array: Array, npixels: int) -> Array:
     elif npixels < npixels_in:
         return crop_to(array, npixels)
     else:
-        return pad_to(array, npixels)
+        return pad_to(array, npixels, fill)
 
 
 def downsample(array: Array, n: int, mean: bool = True) -> Array:
@@ -129,9 +141,7 @@ def downsample(array: Array, n: int, mean: bool = True) -> Array:
         The downsampled array.
     """
     if array.shape[0] != array.shape[1]:
-        raise ValueError(
-            f"Input array has shape {array.shape}, which is not square"
-        )
+        raise ValueError(f"Input array has shape {array.shape}, which is not square")
     if array.shape[0] % n != 0:
         raise ValueError(
             f"Input array has {array.shape[0]} pixels, which is not divisible "

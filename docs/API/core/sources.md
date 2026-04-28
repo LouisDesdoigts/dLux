@@ -1,5 +1,8 @@
 # Sources
 
+???+ info "BaseSource"
+    ::: dLux.sources.BaseSource
+
 ???+ info "PointSource"
     ::: dLux.sources.PointSource
 

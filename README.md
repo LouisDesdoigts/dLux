@@ -5,42 +5,53 @@
 [![PyPI version](https://badge.fury.io/py/dLux.svg)](https://badge.fury.io/py/dLux)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![integration](https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml/badge.svg)](https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/LouisDesdoigts/dLux/graph/badge.svg)](https://codecov.io/gh/LouisDesdoigts/dLux)
 [![Documentation](https://github.com/LouisDesdoigts/dLux/actions/workflows/documentation.yml/badge.svg)](https://louisdesdoigts.github.io/dLux/)
 
-Differentiable Optical Models as _Parameterised Neural Networks_ in Jax using Zodiax
+dLux is an open-source differentiable optical modelling framework built within the [Jax](https://github.com/jax-ml/jax)+[Equinox](https://github.com/patrick-kidger/equinox)+[Zodiax](https://github.com/LouisDesdoigts/zodiax) ecosystem. All models are differentiable, GPU accelerated, and interface with the optimisation and statistical tools provided by these libraries. It is designed to be incredibly fast, flexible, and extensible, serving as a framework to solve real-world optical problems within, rather than just another optical simulator. It was built for the modelling of astronomical telescopes, but the tools it provides and its flexible construction make it applicable to optical problems well beyond this domain.
+
+Under the hood, dLux takes inspiration from the isomorphic nature between optical system and neural networks, enabling the description of arbitrary optical systems as a series of layers that operate sequentially on a wavefront. This 'layers based' design provides near-complete flexibility to end users (since you can easily define your own layer!), while also enabling most optical systems to be composed from layers that are already implemented within dLux. Unlike other optical simulators, dLux aims to put tools in users hands and teach them how to use them, not provide a pre-built system that works in unknown ways. This formulation puts more power in the hands of users and also helps them learn optical modelling along the way!
 
 Contributors: [Louis Desdoigts](https://github.com/LouisDesdoigts), [Jordan Dennis](https://github.com/Jordan-Dennis), [Adam Taras](https://github.com/ataras2), [Max Charles](https://github.com/maxecharles), [Connor Langford](https://github.com/CLangford2098), [Benjamin Pope](https://github.com/benjaminpope), [Peter Tuthill](https://github.com/ptuthill)
 
-∂Lux is an open-source differentiable optical modelling framework harnessing the structural isomorphism between optical systems and neural networks, giving forwards models of optical systems as _parametric neural networks_.
+## Documentation & Tutorials
 
-∂Lux is built in [Zodiax](https://github.com/LouisDesdoigts/zodiax), which is an open-source object-oriented [Jax](https://github.com/google/jax) framework built as an extension of [Equinox](https://github.com/patrick-kidger/equinox) for scientific programming. This framework allows for the creation of complex optical systems involving many planes, phase and amplitude screens in each, and propagates between them in the Fraunhofer or Fresnel regimes. This enables [fast phase retrieval](https://louisdesdoigts.github.io/dLux/notebooks/phase_retrieval_demo/), image deconvolution, and [hardware design in high dimensions](https://louisdesdoigts.github.io/dLux/notebooks/designing_a_mask/). Because ∂Lux models are fully differentiable, you can [optimize them by gradient descent over millions of parameters](https://louisdesdoigts.github.io/dLux/notebooks/flatfield_calibration/); or use [Hamiltonian Monte Carlo to accelerate MCMC sampling](https://louisdesdoigts.github.io/dLux/notebooks/HMC/). Our code is fully open-source under a 3-clause BSD license, and we encourage you to use it and build on it to solve problems in astronomy and beyond.
-
-The ∂Lux framework is built in [Zodiax](https://github.com/LouisDesdoigts/zodiax), which gives it a deep range of capabilities from both [Jax](https://github.com/google/jax) and [Equinox](https://github.com/patrick-kidger/equinox):
-
-> - [Accelerated Numpy](https://jax.readthedocs.io/en/latest/jax-101/01-jax-basics.html): a Numpy-like API that can run on GPU and TPU
->
-> - [Automatic Differentiation](https://jax.readthedocs.io/en/latest/jax-101/04-advanced-autodiff.html): Allows for optimisation and inference in extremely high-dimensional spaces
->
-> - [Just-In-Time Compilation](https://jax.readthedocs.io/en/latest/jax-101/02-jitting.html): Compiles code into XLA at runtime and optimising execution across hardware
->
-> - [Automatic Vectorisation](https://jax.readthedocs.io/en/latest/jax-101/03-vectorization.html): Allows for simple parallelism across hardware and asynchronous execution
->
-<!-- > - [Path-Based Pytree Interface](usage.md): Path based indexing allows for easy interfacing with large and highly nested physical models -->
-
-For an overview of these capabilities and different optimisation methods in [Zodiax](https://github.com/LouisDesdoigts/zodiax), please go through this [Zodiax Tutorial](https://louisdesdoigts.github.io/zodiax/docs/usage/).
+dLux has extensive docummentation and a growing set of tutorials to help users get up and running. The documentation includes a detailed API reference, as well as guides on how to use the various features of dLux. The tutorials cover a range of topics, from basic usage to more advanced techniques, and are designed to help users learn how to use dLux effectively.
 
 Documentation: [https://louisdesdoigts.github.io/dLux/](https://louisdesdoigts.github.io/dLux/)
 
-Requires: Python 3.10+, Jax 0.4.13+, Zodiax 0.4+
+The tutorials can be found in the documentation, but are also hosted on the [dLux tutorials](https://github.com/LouisDesdoigts/dLux_tutorials) repository, where the notebooks can be downloaded and run directly. This also enables users to easily contribute their own tutorials to the repository, which we encourage!
 
-Installation: ```pip install dLux```
 
-If you want to run the tutorials locally, you can install the 'extra' dependencies like so: ```pip install 'dLux[extras]'```
+## Installation
+
+dLux is hosted on PyPI and can be installed via pip:
+
+```pip install dLux```
+
+Requires: Python 3.10+, Zodiax 0.5+
 
 ## Collaboration & Development
 
-We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, have general questions, thoughts or ideas, don't hesitate to [email me](mailto:louis.desdoigts@sydney.edu.au) or contact me on [twitter](https://twitter.com/gradientrider)! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
+dLux is open source so we are always open to feedback, suggestions, and pull-requests! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
+
+## Other Projects
+
+dLux has a number of downstream and linked projects:
+
+ - [Zodiax](https://github.com/LouisDesdoigts/zodiax): A differentiable physical modelling framework for general scientific programming, providing the core tools and utilities that dLux is built on.
+ - [abcdLux](https://github.com/LouisDesdoigts/abcdLux): abcdLux provides differentiable Fresnel propagation for optical systems, and is presently being integrated into dLux as the core propagation engine.
+ - [Amigo](https://github.com/LouisDesdoigts/Amigo): Amigo is the best-performing data calibration and analysis pipeline for the JWST interferometer, and is the recommended tool for the analysis of JWST AMI data.
+ - [Dorito](https://github.com/maxecharles/dorito): Dorito is a high-performance image reconstruction algorithm for the JWST AMI, built on top of Amigo. 
+ - [dLuxToliman](https://github.com/maxecharles/dLuxToliman): dLuxToliman is a high-fidelity simulator for the Toliman space telescope, built on top of dLux and designed to be used for the design and analysis of the Toliman mission.
+
+If you have any other projects that use dLux and would like to be added to this list, please let us know!
 
 ## Publications
 
-We have a multitude of publications in the pipeline using dLux, some built from our tutorials. To start we would recommend looking at [this invited talk](https://louisdesdoigts.github.io/diff_optics/#/0/3) on ∂Lux which gives a good overview and has an attached recording of it being presented! We also have [this poster](https://spie.org/astronomical-telescopes-instrumentation/presentation/Optical-design-analysis-and-calibration-using-Lux/12180-160)!
+ - [Deep Calibration of Flat Field and Phase Retrieval with Automatic Differentiation](https://arxiv.org/abs/2406.08703)
+ - [Optical Design Maximising Fisher Information](https://arxiv.org/abs/2406.08704)
+ - [Amigo: a Data-Driven Calibration of the JWST Interferometer](https://arxiv.org/abs/2510.09806)
+ - [Image reconstruction with the JWST Interferometer](https://arxiv.org/abs/2510.10924)
+
+If you have any other papers that use dLux and would like to be added to this list, please let us know!

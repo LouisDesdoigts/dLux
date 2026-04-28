@@ -1,7 +1,8 @@
 from __future__ import annotations
 import jax.numpy as np
-from jax import lax, Array
+from jax import lax, vmap, Array
 import dLux.utils as dlu
+import equinox as eqx
 
 __all__ = [
     "zernike_name",
@@ -128,14 +129,15 @@ def zernike_factors(j: int) -> tuple[Array]:
 
     # Calculate c
     sign = lax.pow(-1.0, k)
-    _fact_1 = dlu.factorial(np.abs(n - k))
-    _fact_2 = dlu.factorial(k)
-    _fact_3 = dlu.factorial(((n + m) // 2) - k)
-    _fact_4 = dlu.factorial(((n - m) // 2) - k)
+    _fact_1 = vmap(dlu.factorial)(np.abs(n - k))
+    _fact_2 = vmap(dlu.factorial)(k)
+    _fact_3 = vmap(dlu.factorial)(((n + m) // 2) - k)
+    _fact_4 = vmap(dlu.factorial)(((n - m) // 2) - k)
     c = sign * _fact_1 / _fact_2 / _fact_3 / _fact_4
     return c, k
 
 
+@eqx.filter_jit
 def eval_radial(rho: Array, n: int, c: Array, k: Array) -> Array:
     """
     Calculates the radial component of the Zernike polynomial.
@@ -160,6 +162,7 @@ def eval_radial(rho: Array, n: int, c: Array, k: Array) -> Array:
     return (c * rads).sum(axis=2)
 
 
+@eqx.filter_jit
 def eval_azimuthal(theta: Array, n: int, m: int) -> Array:
     """
     Calculates the azimuthal component of the Zernike polynomial.
@@ -238,9 +241,7 @@ def zernike(j: int, coordinates: Array, diameter: float = 2) -> Array:
     return aperture * eval_radial(rho, n, c, k) * eval_azimuthal(theta, n, m)
 
 
-def zernike_fast(
-    n: int, m: int, c: Array, k: Array, coordinates: Array
-) -> Array:
+def zernike_fast(n: int, m: int, c: Array, k: Array, coordinates: Array) -> Array:
     """
     Calculates the Zernike polynomial using the pre-calculated c and k parameters, such
     that this function is jittable.
@@ -270,9 +271,7 @@ def zernike_fast(
     return aperture * eval_radial(rho, n, c, k) * eval_azimuthal(theta, n, m)
 
 
-def zernike_basis(
-    js: list[int], coordinates: Array, diameter: float = 2
-) -> Array:
+def zernike_basis(js: list[int], coordinates: Array, diameter: float = 2) -> Array:
     """
     Calculates the Zernike polynomial basis. Note that this function is not-jittable.
 
@@ -293,9 +292,7 @@ def zernike_basis(
     return np.array([zernike(j, coordinates, diameter) for j in js])
 
 
-def polike(
-    nsides: int, j: int, coordinates: Array, diameter: float = 2
-) -> Array:
+def polike(nsides: int, j: int, coordinates: Array, diameter: float = 2) -> Array:
     """
     Calculates the Zernike polynomial on an n-sided aperture. Note that this function
     is not-jittable as is has dynamic array shapes. To use this function in a jittable
@@ -366,9 +363,7 @@ def polike_fast(
     return 1 / r_alpha * zernike_fast(n, m, c, k, coordinates / r_alpha)
 
 
-def polike_basis(
-    nsides: int, js: list[int], coordinates: Array, diameter: float = 2
-):
+def polike_basis(nsides: int, js: list[int], coordinates: Array, diameter: float = 2):
     """
     Calculates the Zernike polynomial basis on an n-sided aperture. Note that this
     function is not-jittable.
