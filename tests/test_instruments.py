@@ -51,6 +51,10 @@ def test_instrument(optics, detector, source):
     with pytest.raises(TypeError):
         Telescope(1, source, detector)
     with pytest.raises(TypeError):
+        Telescope(optics, ("source", 1), detector)
+    with pytest.raises(TypeError):
+        Telescope(optics, ("source", source, source), detector)
+    with pytest.raises(TypeError):
         Telescope(optics, source, 1)
 
     # Test getattr

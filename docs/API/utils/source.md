@@ -1,6 +1,4 @@
-# Source Parametrisations
-
-This is a small module for converting from parametric source values (separation, position angle, mean flux, contrast, etc) to individual source properties (position, flux, etc).
+# Source
 
 ???+ info "fluxes_from_contrast"
     ::: dLux.utils.source.fluxes_from_contrast

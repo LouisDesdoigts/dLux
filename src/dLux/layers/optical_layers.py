@@ -1,39 +1,78 @@
+"""Core optical-layer abstractions and reusable optical-layer mixins."""
+
 from __future__ import annotations
 from abc import abstractmethod
-from typing import Union
+from typing import Any
 import jax.numpy as np
-from zodiax import Base
+import zodiax as zdx
 from jax import Array
 import dLux.utils as dlu
 
 
 from ..wavefronts import Wavefront
 
-
 __all__ = [
     "BaseLayer",
+    "OpticalLayer",
     "TransmissiveLayer",
     "AberratedLayer",
     "BasisLayer",
     "Tilt",
     "Normalise",
+    "FourierBasis",
 ]
 
 
-class BaseLayer(Base):
+class BaseLayer(zdx.Base):
+    """
+    Abstract base class for all dLux layers.
+
+    Layer objects define a callable transform interface that maps one target
+    object to another (for example Wavefront -> Wavefront or PSF -> PSF).
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseLayer.png)
+    """
+
     @abstractmethod
-    def apply(self, wavefront):  # pragma: no cover
+    def __call__(self: BaseLayer, target: Any) -> Any:  # pragma: no cover
         pass
+
+    def apply(self: BaseLayer, target: Any) -> Any:
+        """
+        Backwards compatibility alias for `__call__`.
+
+        Parameters
+        ----------
+        target : Any
+            The object to operate on.
+
+        Returns
+        -------
+        result : Any
+            The transformed object.
+        """
+        return self(target)
+
+    def __init_subclass__(cls, **kwargs):
+        """Automatically inherit __call__ docstring from parent if child has none."""
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["__call__"])
 
 
 class OpticalLayer(BaseLayer):
     """
     The base optical layer class. Optical layer classes operate on `Wavefront` objects
-    though their `apply` method, and are stored by the `OpticalSystem` classes.
+    through their `apply` method, and are stored by the `OpticalSystem` classes.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/OpticalLayer.png)
     """
 
     @abstractmethod
-    def apply(self, wavefront) -> Wavefront:  # pragma: no cover
+    def __call__(
+        self: OpticalLayer, wavefront: Wavefront
+    ) -> Wavefront:  # pragma: no cover
         """
         Applies the layer to the wavefront.
 
@@ -69,7 +108,7 @@ class TransmissiveLayer(OpticalLayer):
     normalise: bool
 
     def __init__(
-        self: OpticalLayer,
+        self: TransmissiveLayer,
         transmission: Array = None,
         normalise: bool = False,
         **kwargs,
@@ -88,20 +127,7 @@ class TransmissiveLayer(OpticalLayer):
         self.normalise = bool(normalise)
         super().__init__(**kwargs)
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: TransmissiveLayer, wavefront: Wavefront) -> Wavefront:
         wavefront *= self.transmission
         if self.normalise:
             wavefront = wavefront.normalise()
@@ -128,7 +154,7 @@ class AberratedLayer(OpticalLayer):
     phase: Array
 
     def __init__(
-        self: OpticalLayer,
+        self: AberratedLayer,
         opd: Array = None,
         phase: Array = None,
         **kwargs,
@@ -157,21 +183,8 @@ class AberratedLayer(OpticalLayer):
                 )
         super().__init__(**kwargs)
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
-        wavefront += self.opd
+    def __call__(self: AberratedLayer, wavefront: Wavefront) -> Wavefront:
+        wavefront = wavefront.add_opd(self.opd)
         wavefront = wavefront.add_phase(self.phase)
         return wavefront
 
@@ -187,8 +200,8 @@ class BasisLayer(OpticalLayer):
 
     Attributes
     ----------
-    basis: Union[Array, list]
-        The set of basis vectors. Should in generate be a 3 dimensional array.
+    basis: Array | list
+        The set of basis vectors. Should in general be a 3 dimensional array.
     coefficients: Array
         The array of coefficients to be applied to each basis vector.
     as_phase: bool = False
@@ -196,13 +209,13 @@ class BasisLayer(OpticalLayer):
         a phase, else it is applied as an OPD.
     """
 
-    basis: Union[Array, list]
+    basis: Array | list
     coefficients: Array
     as_phase: bool
 
     # NOTE: We need the None basis input for aberrated apertures
     def __init__(
-        self: OpticalLayer,
+        self: BasisLayer,
         basis: Array = None,
         coefficients: Array = None,
         as_phase: bool = False,
@@ -211,10 +224,11 @@ class BasisLayer(OpticalLayer):
         """
         Parameters
         ----------
-        basis: Union[Array, list]
-            The set of basis vectors. Should in generate be a 3 dimensional array.
-        coefficients: Array
-            The Array of coefficients to be applied to each basis vector.
+        basis: Array | list = None
+            The set of basis vectors. Should in general be a 3 dimensional array.
+        coefficients: Array = None
+            The Array of coefficients to be applied to each basis vector. Defaults
+            to zeros if `basis` is provided and `coefficients` is None.
         as_phase: bool = False
             Whether to apply the basis as a phase or OPD. If True the output is applied
             as a phase, else it is applied as an OPD.
@@ -237,7 +251,7 @@ class BasisLayer(OpticalLayer):
         self.coefficients = coefficients
         self.as_phase = bool(as_phase)
 
-    def eval_basis(self: OpticalLayer) -> Array:
+    def eval_basis(self: BasisLayer) -> Array:
         """
         Calculates the dot product of the basis vectors and coefficients.
 
@@ -248,25 +262,12 @@ class BasisLayer(OpticalLayer):
         """
         return dlu.eval_basis(self.basis, self.coefficients)
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: BasisLayer, wavefront: Wavefront) -> Wavefront:
         output = self.eval_basis()
         if self.as_phase:
             wavefront = wavefront.add_phase(output)
         else:
-            wavefront += output
+            wavefront = wavefront.add_opd(output)
         return wavefront
 
 
@@ -285,7 +286,7 @@ class Tilt(OpticalLayer):
 
     angles: Array
 
-    def __init__(self: OpticalLayer, angles: Array):
+    def __init__(self: Tilt, angles: Array):
         """
         Parameters
         ----------
@@ -296,22 +297,9 @@ class Tilt(OpticalLayer):
         self.angles = np.asarray(angles, dtype=float)
 
         if self.angles.shape != (2,):
-            raise ValueError("angles must have have (2,)")
+            raise ValueError("angles must be a 1d array of shape (2,).")
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
+    def __call__(self: Tilt, wavefront: Wavefront) -> Wavefront:
         return wavefront.tilt(self.angles)
 
 
@@ -323,18 +311,101 @@ class Normalise(OpticalLayer):
         ![UML](../../assets/uml/Normalise.png)
     """
 
-    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: Normalise, wavefront: Wavefront) -> Wavefront:
+        return wavefront.normalise()
+
+
+class FourierBasis(OpticalLayer):
+    """
+    Optical layer for representing an OPD using a 2D real Fourier basis.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/FourierBasis.png)
+
+    Attributes
+    ----------
+    coefficients : Array
+        The Fourier coefficients, ordered in `(x, y)` mode order.
+    kernels : tuple[Array, Array]
+        The cached Fourier evaluation kernels for the x and y axes.
+    """
+
+    coefficients: Array
+    kernels: tuple[Array, Array]
+
+    def __init__(
+        self: FourierBasis,
+        npix: int | tuple[int, int],
+        n_modes: int | tuple[int, int],
+        coefficients: Array = None,
+        **kwargs,
+    ):
         """
-        Applies the layer to the wavefront.
+        Parameters
+        ----------
+        npix : int | tuple[int, int]
+            The output number of pixels in `(x, y)` order.
+        n_modes : int | tuple[int, int]
+            The number of Fourier modes in `(x, y)` order.
+        coefficients : Array = None
+            The Fourier coefficients. Defaults to zeros if not provided.
+        """
+        self.kernels = dlu.fourier_kernels(n_modes, npix)
+        coefficient_shape = tuple(kernel.shape[1] for kernel in self.kernels)
+
+        if coefficients is None:
+            coefficients = np.zeros(coefficient_shape)
+        else:
+            coefficients = np.asarray(coefficients, dtype=float)
+            if coefficients.shape != coefficient_shape:
+                raise ValueError(
+                    "The Fourier coefficient array must match the number of "
+                    "modes in each dimension."
+                )
+
+        self.coefficients = coefficients
+        super().__init__(**kwargs)
+
+    def update_kernels(self: FourierBasis, npix: int | tuple[int, int]) -> FourierBasis:
+        """
+        Returns a copy of the layer with kernels updated for a new output size.
+
+        Parameters
+        ----------
+        npix : int | tuple[int, int]
+            The updated output number of pixels in `(x, y)` order.
+
+        Returns
+        -------
+        layer : FourierBasis
+            A copy of the layer with updated Fourier kernels.
+        """
+        kernels = dlu.fourier_kernels(self.coefficients.shape, npix)
+        return self.set(kernels=kernels)
+
+    def eval_basis(self: FourierBasis) -> Array:
+        """
+        Evaluates the Fourier basis represented by the current coefficients.
+
+        Returns
+        -------
+        output : Array
+            The evaluated Fourier basis.
+        """
+        return dlu.eval_fourier_basis(self.coefficients, *self.kernels)
+
+    def __call__(self: FourierBasis, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the evaluated Fourier basis to the input wavefront as an OPD.
 
         Parameters
         ----------
         wavefront : Wavefront
-            The wavefront to operate on.
+            The input wavefront.
 
         Returns
         -------
         wavefront : Wavefront
-            The transformed wavefront.
+            The wavefront with the Fourier basis applied as an OPD.
         """
-        return wavefront.normalise()
+        return wavefront.add_opd(self.eval_basis())

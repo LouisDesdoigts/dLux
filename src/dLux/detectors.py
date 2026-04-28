@@ -1,27 +1,52 @@
+"""Detector models that apply detector-layer transformations to PSFs."""
+
 from __future__ import annotations
 from collections import OrderedDict
 from abc import abstractmethod
-from typing import Union
-from zodiax import Base
+from typing import Any
+import zodiax as zdx
 from jax import Array
 import dLux.utils as dlu
 
 from .layers.detector_layers import DetectorLayer
 from .psfs import PSF
 
-
 __all__ = ["BaseDetector", "LayeredDetector"]
 
 
-class BaseDetector(Base):
+class BaseDetector(zdx.Base):
+    """
+    Abstract base class for detector models.
+
+    Concrete detectors implement `model(...)` to transform input PSFs into
+    detector-space outputs.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BaseDetector.png)
+    """
+
     @abstractmethod
-    def model(self, psf):  # pragma: no cover
+    def __call__(
+        self: BaseDetector, psf: PSF, return_psf: bool = False
+    ) -> Array | PSF:  # pragma: no cover
         pass
+
+    def model(
+        self: LayeredDetector,
+        psf: PSF,
+        return_psf: bool = False,
+    ) -> Array | PSF:
+        """
+        Backwards compatibility method that invokes __call__.
+
+        Delegates to the __call__ method.
+        """
+        return self(psf, return_psf)
 
 
 class LayeredDetector(BaseDetector):
     """
-    Applies a series of detector layers to some input psf.
+    Applies a series of detector layers to an input PSF.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/LayeredDetector.png)
@@ -29,24 +54,27 @@ class LayeredDetector(BaseDetector):
     Attributes
     ----------
     layers: OrderedDict
-        A series of `DetectorLayer` transformations to apply to the input psf.
+        A series of `DetectorLayer` transformations to apply to the input PSF.
     """
 
     layers: OrderedDict
 
-    def __init__(self: LayeredDetector, layers: list[DetectorLayer, tuple]):
+    def __init__(
+        self: LayeredDetector,
+        layers: list[DetectorLayer | tuple[str, DetectorLayer]],
+    ):
         """
         Parameters
         ----------
-        layers : list[DetectorLayer, tuple]
-            A list of DetectorLayer objects to apply to the input psf. List entries
+        layers : list[DetectorLayer | tuple[str, DetectorLayer]]
+            A list of DetectorLayer objects to apply to the input PSF. List entries
             can be tuples of (key, layer) to specify a key, else the key is taken as
             the class name of the layer.
         """
         self.layers = dlu.list2dictionary(layers, True, DetectorLayer)
         super().__init__()
 
-    def __getattr__(self: LayeredDetector, key: str) -> object:
+    def __getattr__(self: LayeredDetector, key: str) -> Any:
         """
         Raises the individual layers via their keys.
 
@@ -57,41 +85,52 @@ class LayeredDetector(BaseDetector):
 
         Returns
         -------
-        item : object
+        item : Any
             The item corresponding to the supplied key in the layers
             dictionary.
         """
         if key in self.layers.keys():
             return self.layers[key]
-        else:
-            raise AttributeError(
-                "'{}' object has no attribute '{}'".format(type(self), key)
-            )
+        for layer in list(self.layers.values()):
+            if hasattr(layer, key):
+                return getattr(layer, key)
+        raise dlu.helpers.missing_attribute_error(
+            self,
+            key,
+            list(self.layers.keys()),
+        )
 
-    def model(
-        self: LayeredDetector, psf: PSF, return_psf: bool = False
-    ) -> Array:
+    def __call__(
+        self: LayeredDetector,
+        psf: PSF,
+        return_psf: bool = False,
+    ) -> Array | PSF:
         """
-        Applied the detector layers to the input psf.
+        Applies the detector layers to the input PSF.
 
         Parameters
         ----------
         psf : PSF
-            The input psf to be transformed.
+            The input PSF to be transformed.
+        return_psf : bool = False
+            Should the PSF object be returned instead of the PSF array?
 
         Returns
         -------
-        psf : PSF
-            The output psf after being transformed by the detector layers.
+        result : Array | PSF
+            If `return_psf` is False, returns the PSF array.
+            If `return_psf` is True, returns the PSF object.
         """
-        for key, layer in self.layers.items():
-            psf = layer.apply(psf)
+        for _, layer in self.layers.items():
+            psf = layer(psf)
         if return_psf:
             return psf
         return psf.data
 
     def insert_layer(
-        self: LayeredDetector, layer: Union[DetectorLayer, tuple], index: int
+        self: LayeredDetector,
+        layer: DetectorLayer | tuple[str, DetectorLayer],
+        index: int,
     ) -> LayeredDetector:
         """
         Inserts a layer into the layers dictionary at a specified index. This function
@@ -102,7 +141,7 @@ class LayeredDetector(BaseDetector):
 
         Parameters
         ----------
-        layer : Any
+        layer : DetectorLayer | tuple[str, DetectorLayer]
             The layer to be inserted.
         index : int
             The index at which to insert the layer.

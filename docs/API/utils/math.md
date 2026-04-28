@@ -1,6 +1,10 @@
-# Math Utility Functions
+# Math
 
-This module contains some basic maths functions used under the hood.
+???+ info "gaussian"
+    ::: dLux.utils.math.gaussian
+
+???+ info "mv_gaussian"
+    ::: dLux.utils.math.mv_gaussian
 
 ???+ info "factorial"
     ::: dLux.utils.math.factorial

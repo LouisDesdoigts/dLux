@@ -1,9 +1,10 @@
+"""Detector-layer abstractions and detector-layer implementations."""
+
 from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
-from jax.scipy.stats import norm
-
+import dLux.utils as dlu
 
 from ..psfs import PSF
 from .optical_layers import BaseLayer
@@ -19,34 +20,53 @@ __all__ = [
 
 class DetectorLayer(BaseLayer):
     """
-    A base Detector layer class to help with type checking throughout the rest of the
+    A base detector layer class to help with type checking throughout the rest of the
     software.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/DetectorLayer.png)
     """
 
     def __init__(self: DetectorLayer):
         super().__init__()
 
     @abstractmethod
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:  # pragma: no cover
+    def __call__(self: DetectorLayer, psf: PSF) -> PSF:  # pragma: no cover
         """
         Applies the layer to the PSF.
 
         Parameters
         ----------
         psf : PSF
-            The psf to operate on.
+            The PSF to operate on.
 
         Returns
         -------
         psf : PSF
-            The transformed psf.
+            The transformed PSF.
         """
+
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:
+        """
+        Backwards compatibility alias for `__call__`.
+
+        Parameters
+        ----------
+        psf : PSF
+            The PSF to operate on.
+
+        Returns
+        -------
+        psf : PSF
+            The transformed PSF.
+        """
+        return self(psf)
 
 
 class ApplyPixelResponse(DetectorLayer):
     """
-    Applies a pixel response array to the input psf, via a multiplication. This can be
-    used to model variations in the inter and intra-pixel sensitivity variations common
+    Applies a pixel response array to the input PSF via multiplication. This can be
+    used to model inter- and intra-pixel sensitivity variations common
     to most detectors.
 
     ??? abstract "UML"
@@ -55,44 +75,31 @@ class ApplyPixelResponse(DetectorLayer):
     Attributes
     ----------
     pixel_response : Array
-        The pixel_response to apply to the input psf.
+        The pixel_response to apply to the input PSF.
     """
 
     pixel_response: Array
 
-    def __init__(self: DetectorLayer, pixel_response: Array):
+    def __init__(self: ApplyPixelResponse, pixel_response: Array):
         """
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input psf. Must be a 2-dimensional array
-            equal to size of the psf at time of application.
+            The pixel_response to apply to the input PSF. Must be a 2d array that
+            matches the PSF shape at time of application.
         """
         super().__init__()
         self.pixel_response = np.asarray(pixel_response, dtype=float)
         if self.pixel_response.ndim != 2:
-            raise ValueError("pixel_response must be a 2 dimensional array.")
+            raise ValueError("pixel_response must be a 2d array.")
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The psf to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed psf.
-        """
+    def __call__(self: ApplyPixelResponse, psf: PSF) -> PSF:
         return psf * self.pixel_response
 
 
 class ApplyJitter(DetectorLayer):
     """
-    Convolves the psf with a radially symmetric Gaussian kernel parameterised by its
+    Convolves the PSF with a radially symmetric Gaussian kernel parameterised by its
     standard deviation (sigma).
 
     ??? abstract "UML"
@@ -104,25 +111,39 @@ class ApplyJitter(DetectorLayer):
         The standard deviation of the Gaussian kernel, in units of pixels.
     kernel_size : int
         The size of the convolution kernel to use.
+    oversample : int
+        The oversampling factor to use when generating the kernel. This is used to
+        mitigate aliasing when the kernel is small compared to the pixel size.
     """
 
-    kernel_size: int
     sigma: float
+    kernel_size: int
+    oversample: int
 
-    def __init__(self: DetectorLayer, sigma: float, kernel_size: int = 10):
+    def __init__(
+        self: ApplyJitter, sigma: float, kernel_size: int = 9, oversample: int = 3
+    ):
         """
         Parameters
         ----------
         sigma : float, pixels
             The standard deviation of the Gaussian kernel, in units of pixels.
-        kernel_size : int = 10
+        kernel_size : int = 9
             The size of the convolution kernel to use.
+        oversample : int = 3
+            The oversampling factor to use when generating the kernel. This is used to
+            mitigate aliasing when the kernel is small compared to the pixel size.
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
         self.sigma = float(sigma)
+        self.oversample = int(oversample)
 
-    def generate_kernel(self: DetectorLayer, pixel_scale: float) -> Array:
+        if self.kernel_size <= 0:
+            raise ValueError("kernel_size must be greater than 0.")
+
+    @property
+    def kernel(self: ApplyJitter) -> Array:
         """
         Generates the normalised Gaussian kernel.
 
@@ -131,34 +152,20 @@ class ApplyJitter(DetectorLayer):
         kernel : Array
             The Gaussian kernel.
         """
-        # TODO: Move to utils?
-        # Generate distribution
-        sigma = self.sigma * pixel_scale
-        x = np.linspace(-10, 10, self.kernel_size) * pixel_scale
-        kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
-        return kernel / np.sum(kernel)
+        kernel = dlu.gaussian(
+            mean=np.array([0.0, 0.0]),
+            std=np.array([self.sigma, self.sigma]),
+            npixels=self.kernel_size * self.oversample,
+        )
+        return dlu.downsample(kernel, self.oversample, mean=False)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The psf to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed psf.
-        """
-        kernel = self.generate_kernel(psf.pixel_scale)
-        return psf.convolve(kernel)
+    def __call__(self: ApplyJitter, psf: PSF) -> PSF:
+        return psf.convolve(self.kernel)
 
 
 class ApplySaturation(DetectorLayer):
     """
-    Applies a simple saturation model to the input psf, by clipping any values above
+    Applies a simple saturation model to the input PSF by clipping any values above
     the threshold value.
 
     ??? abstract "UML"
@@ -172,7 +179,7 @@ class ApplySaturation(DetectorLayer):
 
     threshold: float
 
-    def __init__(self: DetectorLayer, threshold: float):
+    def __init__(self: ApplySaturation, threshold: float):
         """
         Parameters
         ----------
@@ -182,26 +189,13 @@ class ApplySaturation(DetectorLayer):
         super().__init__()
         self.threshold = float(threshold)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The psf to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed psf.
-        """
+    def __call__(self: ApplySaturation, psf: PSF) -> PSF:
         return psf.min("data", self.threshold)
 
 
 class AddConstant(DetectorLayer):
     """
-    Adds a constant to the output psf. This is typically used to model the mean value of
+    Adds a constant to the output PSF. This is typically used to model the mean value of
     the detector noise.
 
     ??? abstract "UML"
@@ -210,43 +204,30 @@ class AddConstant(DetectorLayer):
     Attributes
     ----------
     value : float
-        The value to add to the psf.
+        The value to add to the PSF.
     """
 
     value: float
 
-    def __init__(self: DetectorLayer, value: float):
+    def __init__(self: AddConstant, value: float):
         """
         Parameters
         ----------
         value : float
-            The value to add to the psf.
+            The value to add to the PSF.
         """
         super().__init__()
         self.value = float(value)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The psf to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed psf.
-        """
+    def __call__(self: AddConstant, psf: PSF) -> PSF:
         return psf + self.value
 
 
 class Downsample(DetectorLayer):
     """
-    Downsamples an input psf by an integer number of pixels via a sum. Typically used
-    to downsample an oversampled psf to the true pixel size. Note kernel_size must be
-    an integer multiple of the input psf size.
+    Downsamples an input PSF by an integer number of pixels via a sum. Typically used
+    to downsample an oversampled PSF to the true pixel size. Note the input PSF size
+    must be divisible by kernel_size.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/Downsample.png)
@@ -259,28 +240,18 @@ class Downsample(DetectorLayer):
 
     kernel_size: int
 
-    def __init__(self: DetectorLayer, kernel_size: int):
+    def __init__(self: Downsample, kernel_size: int):
         """
         Parameters
         ----------
         kernel_size : int
-            The size of the downsampling kernel.
+            The size of the downsampling kernel. Must be greater than 0.
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
 
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
-        """
-        Applies the layer to the PSF.
+        if self.kernel_size <= 0:
+            raise ValueError("kernel_size must be greater than 0.")
 
-        Parameters
-        ----------
-        psf : PSF
-            The psf to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed psf.
-        """
+    def __call__(self: Downsample, psf: PSF) -> PSF:
         return psf.downsample(self.kernel_size)
