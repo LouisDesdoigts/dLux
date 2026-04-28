@@ -19,6 +19,7 @@ __all__ = [
     "BasisLayer",
     "Tilt",
     "Normalise",
+    "FourierBasis",
 ]
 
 
@@ -312,3 +313,96 @@ class Normalise(OpticalLayer):
 
     def __call__(self: Normalise, wavefront: Wavefront) -> Wavefront:
         return wavefront.normalise()
+
+
+class FourierBasis(OpticalLayer):
+    """
+    Optical layer for representing an OPD using a 2D real Fourier basis.
+
+    Attributes
+    ----------
+    coefficients : Array
+        The Fourier coefficients, ordered in `(x, y)` mode order.
+    kernels : tuple[Array, Array]
+        The cached Fourier evaluation kernels for the x and y axes.
+    """
+
+    coefficients: Array
+    kernels: tuple[Array, Array]
+
+    def __init__(
+        self: FourierBasis,
+        npix: int | tuple[int, int],
+        n_modes: int | tuple[int, int],
+        coefficients: Array = None,
+        **kwargs,
+    ):
+        """
+        Parameters
+        ----------
+        npix : int | tuple[int, int]
+            The output number of pixels in `(x, y)` order.
+        n_modes : int | tuple[int, int]
+            The number of Fourier modes in `(x, y)` order.
+        coefficients : Array = None
+            The Fourier coefficients. Defaults to zeros if not provided.
+        """
+        self.kernels = dlu.fourier_kernels(n_modes, npix)
+        coefficient_shape = tuple(kernel.shape[1] for kernel in self.kernels)
+
+        if coefficients is None:
+            coefficients = np.zeros(coefficient_shape)
+        else:
+            coefficients = np.asarray(coefficients, dtype=float)
+            if coefficients.shape != coefficient_shape:
+                raise ValueError(
+                    "The Fourier coefficient array must match the number of "
+                    "modes in each dimension."
+                )
+
+        self.coefficients = coefficients
+        super().__init__(**kwargs)
+
+    def update_kernels(self: FourierBasis, npix: int | tuple[int, int]) -> FourierBasis:
+        """
+        Returns a copy of the layer with kernels updated for a new output size.
+
+        Parameters
+        ----------
+        npix : int | tuple[int, int]
+            The updated output number of pixels in `(x, y)` order.
+
+        Returns
+        -------
+        layer : FourierBasis
+            A copy of the layer with updated Fourier kernels.
+        """
+        kernels = dlu.fourier_kernels(self.coefficients.shape, npix)
+        return self.set(kernels=kernels)
+
+    def eval_basis(self: FourierBasis) -> Array:
+        """
+        Evaluates the Fourier basis represented by the current coefficients.
+
+        Returns
+        -------
+        output : Array
+            The evaluated Fourier basis.
+        """
+        return dlu.eval_fourier_basis(self.coefficients, *self.kernels)
+
+    def __call__(self: FourierBasis, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the evaluated Fourier basis to the input wavefront as an OPD.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The input wavefront.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront with the Fourier basis applied as an OPD.
+        """
+        return wavefront.add_opd(self.eval_basis())
