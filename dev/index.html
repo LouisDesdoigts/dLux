@@ -327,17 +327,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#collaboration-development" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Collaboration &amp; Development
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#other-projects" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -353,6 +342,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Publications
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collaboration-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Collaboration &amp; Development
       </span>
     </span>
   </a>
@@ -2215,17 +2215,14 @@
 <a href="https://louisdesdoigts.github.io/dLux/"><img alt="Documentation" src="https://github.com/LouisDesdoigts/dLux/actions/workflows/documentation.yml/badge.svg" /></a></p>
 <p>dLux is an open-source differentiable optical modelling framework built within the <a href="https://github.com/jax-ml/jax">Jax</a>+<a href="https://github.com/patrick-kidger/equinox">Equinox</a>+<a href="https://github.com/LouisDesdoigts/zodiax">Zodiax</a> ecosystem. All models are differentiable, GPU accelerated, and interface with the optimisation and statistical tools provided by these libraries. It is designed to be incredibly fast, flexible, and extensible, serving as a framework to solve real-world optical problems within, rather than just another optical simulator. It was built for the modelling of astronomical telescopes, but the tools it provides and its flexible construction make it applicable to optical problems well beyond this domain.</p>
 <p>Under the hood, dLux takes inspiration from the isomorphic nature between optical system and neural networks, enabling the description of arbitrary optical systems as a series of layers that operate sequentially on a wavefront. This 'layers based' design provides near-complete flexibility to end users (since you can easily define your own layer!), while also enabling most optical systems to be composed from layers that are already implemented within dLux. Unlike other optical simulators, dLux aims to put tools in users hands and teach them how to use them, not provide a pre-built system that works in unknown ways. This formulation puts more power in the hands of users and also helps them learn optical modelling along the way!</p>
-<p>Contributors: <a href="https://github.com/LouisDesdoigts">Louis Desdoigts</a>, <a href="https://github.com/Jordan-Dennis">Jordan Dennis</a>, <a href="https://github.com/ataras2">Adam Taras</a>, <a href="https://github.com/maxecharles">Max Charles</a>, <a href="https://github.com/CLangford2098">Connor Langford</a>, <a href="https://github.com/benjaminpope">Benjamin Pope</a>, <a href="https://github.com/ptuthill">Peter Tuthill</a></p>
 <h2 id="documentation-tutorials">Documentation &amp; Tutorials<a class="headerlink" href="#documentation-tutorials" title="Permanent link">¤</a></h2>
 <p>dLux has extensive docummentation and a growing set of tutorials to help users get up and running. The documentation includes a detailed API reference, as well as guides on how to use the various features of dLux. The tutorials cover a range of topics, from basic usage to more advanced techniques, and are designed to help users learn how to use dLux effectively.</p>
 <p>Documentation: <a href="https://louisdesdoigts.github.io/dLux/">https://louisdesdoigts.github.io/dLux/</a></p>
 <p>The tutorials can be found in the documentation, but are also hosted on the <a href="https://github.com/LouisDesdoigts/dLux_tutorials">dLux tutorials</a> repository, where the notebooks can be downloaded and run directly. This also enables users to easily contribute their own tutorials to the repository, which we encourage!</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">¤</a></h2>
-<p>dLux is hosted on PyPI and can be installed via pip:</p>
-<p><code>pip install dLux</code></p>
+<p>dLux is hosted on PyPI and can be installed via pip: <code>pip install dLux</code></p>
+<p>To run dLux on a GPU, simply install a compatible Jax GPU version.</p>
 <p>Requires: Python 3.10+, Zodiax 0.5+</p>
-<h2 id="collaboration-development">Collaboration &amp; Development<a class="headerlink" href="#collaboration-development" title="Permanent link">¤</a></h2>
-<p>dLux is open source so we are always open to feedback, suggestions, and pull-requests! More details about contributing can be found in our <a href="CONTRIBUTING/">contributing guide</a>.</p>
 <h2 id="other-projects">Other Projects<a class="headerlink" href="#other-projects" title="Permanent link">¤</a></h2>
 <p>dLux has a number of downstream and linked projects:</p>
 <ul>
@@ -2244,6 +2241,8 @@
 <li><a href="https://arxiv.org/abs/2510.10924">Image reconstruction with the JWST Interferometer</a></li>
 </ul>
 <p>If you have any other papers that use dLux and would like to be added to this list, please let us know!</p>
+<h2 id="collaboration-development">Collaboration &amp; Development<a class="headerlink" href="#collaboration-development" title="Permanent link">¤</a></h2>
+<p>dLux is open source so we are always open to feedback, suggestions, and pull-requests! More details about contributing can be found in our <a href="CONTRIBUTING/">contributing guide</a>.</p>
 
 
 
