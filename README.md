@@ -12,8 +12,6 @@ dLux is an open-source differentiable optical modelling framework built within t
 
 Under the hood, dLux takes inspiration from the isomorphic nature between optical system and neural networks, enabling the description of arbitrary optical systems as a series of layers that operate sequentially on a wavefront. This 'layers based' design provides near-complete flexibility to end users (since you can easily define your own layer!), while also enabling most optical systems to be composed from layers that are already implemented within dLux. Unlike other optical simulators, dLux aims to put tools in users hands and teach them how to use them, not provide a pre-built system that works in unknown ways. This formulation puts more power in the hands of users and also helps them learn optical modelling along the way!
 
-Contributors: [Louis Desdoigts](https://github.com/LouisDesdoigts), [Jordan Dennis](https://github.com/Jordan-Dennis), [Adam Taras](https://github.com/ataras2), [Max Charles](https://github.com/maxecharles), [Connor Langford](https://github.com/CLangford2098), [Benjamin Pope](https://github.com/benjaminpope), [Peter Tuthill](https://github.com/ptuthill)
-
 ## Documentation & Tutorials
 
 dLux has extensive docummentation and a growing set of tutorials to help users get up and running. The documentation includes a detailed API reference, as well as guides on how to use the various features of dLux. The tutorials cover a range of topics, from basic usage to more advanced techniques, and are designed to help users learn how to use dLux effectively.
@@ -25,15 +23,11 @@ The tutorials can be found in the documentation, but are also hosted on the [dLu
 
 ## Installation
 
-dLux is hosted on PyPI and can be installed via pip:
+dLux is hosted on PyPI and can be installed via pip: ```pip install dLux```
 
-```pip install dLux```
+To run dLux on a GPU, simply install a compatible Jax GPU version.
 
 Requires: Python 3.10+, Zodiax 0.5+
-
-## Collaboration & Development
-
-dLux is open source so we are always open to feedback, suggestions, and pull-requests! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
 
 ## Other Projects
 
@@ -55,3 +49,8 @@ If you have any other projects that use dLux and would like to be added to this 
  - [Image reconstruction with the JWST Interferometer](https://arxiv.org/abs/2510.10924)
 
 If you have any other papers that use dLux and would like to be added to this list, please let us know!
+
+
+## Collaboration & Development
+
+dLux is open source so we are always open to feedback, suggestions, and pull-requests! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
