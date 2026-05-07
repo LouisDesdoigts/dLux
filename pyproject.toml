@@ -1,7 +1,7 @@
 [project]
 name = "dLux"
 version = "0.15.0"
-description = "Differentiable Optical Models as Parameterised Neural Networks in Jax using Zodiax."
+description = "Differentiable Physical Optics Propagation in Jax"
 readme = "README.md"
 requires-python =">=3.10"
 license = {file = "LICENSE.md"}
