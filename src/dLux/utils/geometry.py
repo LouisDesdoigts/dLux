@@ -91,8 +91,7 @@ def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
 #####################
 def circle(coords: Array, radius: float, invert: bool = False) -> Array:
     """
-    Calculates a soft-edged circle via downsampling. This function is not
-    differentiable.
+    Calculates a hard-edged circle. This function is not differentiable.
 
     Parameters
     ----------
@@ -108,6 +107,7 @@ def circle(coords: Array, radius: float, invert: bool = False) -> Array:
     circle : Array
         The circle.
     """
+
     if invert:
         return (circ_distance(coords, radius) > 0).astype(float)
     return (circ_distance(coords, radius) < 0).astype(float)
@@ -115,8 +115,7 @@ def circle(coords: Array, radius: float, invert: bool = False) -> Array:
 
 def square(coords: Array, width: float, invert: bool = False) -> Array:
     """
-    Calculates a soft-edged square via downsampling. This function is not
-    differentiable.
+    Calculates a hard-edged square. This function is not differentiable.
 
     Parameters
     ----------
@@ -141,8 +140,7 @@ def rectangle(
     coords: Array, width: float, height: float, invert: bool = False
 ) -> Array:
     """
-    Calculates a soft-edged rectangle via downsampling. This function is not
-    differentiable.
+    Calculates a hard-edged rectangle. This function is not differentiable.
 
     Parameters
     ----------
@@ -167,8 +165,7 @@ def rectangle(
 
 def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -> Array:
     """
-    Calculates a soft-edged regular polygon via downsampling. This function is not
-    differentiable.
+    Calculates a hard-edged regular polygon. This function is not differentiable.
 
     Parameters
     ----------
@@ -186,6 +183,7 @@ def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -
     polygon : Array
         The polygon.
     """
+
     if invert:
         return (reg_polygon_distance(coords, nsides, rmax) > 0).astype(float)
     return (reg_polygon_distance(coords, nsides, rmax) < 0).astype(float)
@@ -193,8 +191,7 @@ def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -
 
 def spider(coords: Array, width: float, angles: Array) -> Array:
     """
-    Calculates a soft-edged spider via downsampling. This function is not
-    differentiable.
+    Calculates a hard-edged spider. This function is not differentiable.
 
     Parameters
     ----------
