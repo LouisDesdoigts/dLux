@@ -40,6 +40,12 @@ repo_url: https://github.com/LouisDesdoigts/dlux
 repo_name: louisdesdoigts/dlux
 edit_uri: edit/main/docs/   # Directs where the "Edit" link points 
 
+# Disable unresolved_references check: notebook outputs contain patterns like
+# f64[2], Latent[0], [00:00<?, ?it/s] that look like link references but aren't.
+# invalid_links and invalid_link_anchors remain active to catch real broken links.
+validation:
+  unresolved_references: false
+
 strict: true # Prevent builds with warnings
 
 plugins:
