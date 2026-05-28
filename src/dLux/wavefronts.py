@@ -871,3 +871,66 @@ class Wavefront(zdx.Base):
     def __itruediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """In-place division."""
         return self.__truediv__(other)
+
+
+class PolarisedWavefront(Wavefront):
+    """
+    A polarisation wavefront, supporting partial polarisation.
+    The internal represation uses Jones calculus in the general case,
+    i.e. tracking a 2x2 complex coherence matrix for the state.
+
+
+
+    If, for whatever reason, you need a strictly polarised wavefront, add a PR.
+    """
+
+    def __init__(
+        self: Wavefront,
+        wavelength: float,
+        npixels: int,
+        diameter: float = None,
+        pixel_scale: float = None,
+        center: Array = None,
+    ):
+        super().__init__(wavelength, npixels, diameter, pixel_scale, center)
+
+        # stack to (4, npixels, npixels) for (Exx, Exy, Eyy, Eyx), all complex
+        self.phasor = np.stack([self.phasor] * 4, axis=0)
+
+    @property
+    def psf(self: Wavefront) -> Array:
+        """
+        Calculates the Point Spread Function (PSF), i.e. the squared modulus
+        of the complex wavefront.
+
+        Returns
+        -------
+        psf : Array
+            The PSF of the wavefront.
+        """
+        return np.sum(np.abs(self.phasor) ** 2, axis=0)
+
+    @property
+    def I(self: Wavefront) -> Array:
+        """Stokes I parameter."""
+        pass
+
+    @property
+    def Q(self: Wavefront) -> Array:
+        """Stokes Q parameter."""
+        pass
+
+    @property
+    def U(self: Wavefront) -> Array:
+        """Stokes U parameter."""
+        pass
+
+    @property
+    def V(self: Wavefront) -> Array:
+        """Stokes V parameter."""
+        pass
+
+    @property
+    def stokes(self: Wavefront) -> Array:
+        """Returns the Stokes parameters as an array."""
+        return np.stack([self.I, self.Q, self.U, self.V], axis=0)
