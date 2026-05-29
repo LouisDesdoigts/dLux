@@ -158,6 +158,21 @@ class TestCircularAperture:
         assert trans.shape == (npixels, npixels)
         assert (trans >= 0).all() and (trans <= 1).all()
 
+    def test_array_diameter(self, npixels, diameter, oversample):
+        """Increasing array diameter with npixels constant reduces transmission area."""
+        trans_nopad = apertures_utils.circular_aperture(
+            npixels=npixels, diameter=diameter, oversample=oversample
+        )
+        trans_pad = apertures_utils.circular_aperture(
+            npixels=npixels,
+            diameter=diameter,
+            oversample=oversample,
+            array_diameter=diameter * 2,
+        )
+        assert trans_pad.shape == (npixels, npixels)
+        # Transmission should decrease with larger array diameter due to padding
+        assert trans_pad.sum() < trans_nopad.sum()
+
     def test_with_secondary(self, npixels, diameter, oversample):
         """Secondary obscuration reduces transmission area."""
         trans_no_sec = apertures_utils.circular_aperture(
