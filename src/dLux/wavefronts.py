@@ -9,7 +9,7 @@ import dLux.utils as dlu
 from .psfs import PSF
 from .coordinates import CoordSpec
 
-__all__ = ["Wavefront"]
+__all__ = ["Wavefront", "PolarisedWavefront"]
 
 # TODO: Make coord specs 2d compatible
 
@@ -879,10 +879,10 @@ class PolarisedWavefront(Wavefront):
     The internal represation uses Jones calculus in the general case,
     i.e. tracking a 2x2 complex coherence matrix for the state.
 
-
-
     If, for whatever reason, you need a strictly polarised wavefront, add a PR.
     """
+
+    initial_stokes: Array
 
     def __init__(
         self: Wavefront,
@@ -891,11 +891,50 @@ class PolarisedWavefront(Wavefront):
         diameter: float = None,
         pixel_scale: float = None,
         center: Array = None,
+        initial_stokes: Array = np.array([1.0, 0.0, 0.0, 0.0]),
     ):
         super().__init__(wavelength, npixels, diameter, pixel_scale, center)
 
-        # stack to (4, npixels, npixels) for (Exx, Exy, Eyy, Eyx), all complex
-        self.phasor = np.stack([self.phasor] * 4, axis=0)
+        # stack to (2,2, npixels, npixels)
+        self.phasor = np.stack(
+            [
+                np.stack([self.phasor, np.zeros_like(self.phasor)], axis=0),
+                np.stack([np.zeros_like(self.phasor), self.phasor], axis=0),
+            ],
+            axis=0,
+        )
+
+        self.initial_stokes = initial_stokes
+
+    @staticmethod
+    def from_wavefront(
+        wavefront: Wavefront, initial_stokes: Array = None
+    ) -> PolarisedWavefront:
+        """
+        Promotes a regular Wavefront to a PolarisedWavefront by multiplying the scalar phasor
+        by eye(2)
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The input wavefront to promote.
+        initial_stokes : Array = None
+            The initial Stokes parameters to set for the polarised wavefront. If None, defaults to [1, 0, 0, 0] (fully unpolarised).
+
+        Returns
+        -------
+        polarised_wavefront : PolarisedWavefront
+            A new PolarisedWavefront with the same wavelength, pixel scale, and center as the input wavefront, and the phasor promoted
+
+        """
+        if initial_stokes is None:
+            initial_stokes = np.array([1.0, 0.0, 0.0, 0.0])
+        return PolarisedWavefront(
+            wavelength=wavefront.wavelength,
+            npixels=wavefront.npixels,
+            diameter=wavefront.diameter,
+            center=wavefront.center,
+            initial_stokes=initial_stokes,
+        )
 
     @property
     def psf(self: Wavefront) -> Array:
