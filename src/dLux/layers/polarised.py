@@ -41,7 +41,6 @@ def jones_matrix_rotated(init_jones: Array, angle: Array) -> Array:
 class PolarisingOptic(OpticalLayer):
     """
     A basic 'PolarisingOptic' class, which applies a polarisation transformation to the input wavefront.
-
     """
 
     jones_matrix: Array
