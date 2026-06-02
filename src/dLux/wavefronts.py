@@ -947,29 +947,35 @@ class PolarisedWavefront(Wavefront):
         psf : Array
             The PSF of the wavefront.
         """
-        return np.sum(np.abs(self.phasor) ** 2, axis=0)
-
-    @property
-    def I(self: Wavefront) -> Array:
-        """Stokes I parameter."""
-        pass
-
-    @property
-    def Q(self: Wavefront) -> Array:
-        """Stokes Q parameter."""
-        pass
-
-    @property
-    def U(self: Wavefront) -> Array:
-        """Stokes U parameter."""
-        pass
-
-    @property
-    def V(self: Wavefront) -> Array:
-        """Stokes V parameter."""
-        pass
+        return self.stokes[0]
 
     @property
     def stokes(self: Wavefront) -> Array:
         """Returns the Stokes parameters as an array."""
-        return np.stack([self.I, self.Q, self.U, self.V], axis=0)
+
+        A = np.array(
+            [
+                [1, 0, 0, 1],
+                [1, 0, 0, -1],
+                [0, 1, 1, 0],
+                [0, 1j, -1j, 0],
+            ]
+        )
+        A_inv = np.linalg.inv(A)
+
+        J = self.phasor
+        J_conjugate = np.conj(J)
+
+        # Kronecker product mapping: row = 2*i + j, col = 2*k + l
+        # We order the indices as i, j, k, l followed by the batch dimensions (...)
+        J_kron = np.einsum("ik...,jl...->ijkl...", J, J_conjugate)
+
+        # Reshape the (2, 2, 2, 2, ...) array into (4, 4, ...)
+        J_kron = J_kron.reshape((4, 4) + (self.npixels, self.npixels))
+
+        # Perform matrix multiplication: M = A @ J_kron @ A_inv for each batch element
+        M = np.einsum("xy,yz...,zw->xw...", A, J_kron, A_inv)
+
+        M = np.real(M)
+
+        return np.einsum("ab...,b->a...", M, self.initial_stokes)
