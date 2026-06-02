@@ -91,3 +91,31 @@ class TestPolarisingOptic:
         # The output wavefront should have only the vertical component
         assert np.allclose(output_wavefront.phasor[0, 0], 0.0)
         assert np.allclose(output_wavefront.phasor[1, 1], pol_wavefront.phasor[1, 1])
+
+    def test_rotate_horizontal_to_vertical(
+        self, horizontal_polariser_jones, pol_wavefront
+    ):
+        optic = PolarisingOptic(
+            jones_matrix=horizontal_polariser_jones, angle=np.pi / 2
+        )
+        output_wavefront = optic(pol_wavefront)
+        # The output wavefront should have only the vertical component
+        assert np.allclose(output_wavefront.phasor[0, 0], 0.0)
+        assert np.allclose(output_wavefront.phasor[1, 1], pol_wavefront.phasor[0, 0])
+
+    def test_power_conservation(self, horizontal_polariser_jones, pol_wavefront):
+        optic = PolarisingOptic(jones_matrix=horizontal_polariser_jones)
+        output_wavefront = optic(pol_wavefront)
+        # The total power should be conserved (since it's an ideal polariser)
+        input_power = np.sum(pol_wavefront.psf)
+        output_power = np.sum(output_wavefront.psf)
+        print(f"Input power: {input_power}, Output power: {output_power}")
+        assert np.isclose(input_power, output_power, atol=1e-6)
+
+        # Test that the power is halved for a 45 degree polariser
+        optic_45 = PolarisingOptic(
+            jones_matrix=horizontal_polariser_jones, angle=np.pi / 4
+        )
+        output_wavefront_45 = optic_45(pol_wavefront)
+        output_power_45 = np.sum(output_wavefront_45.psf)
+        assert np.isclose(output_power_45, input_power / 2, atol=1e-6)
