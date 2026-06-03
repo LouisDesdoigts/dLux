@@ -958,7 +958,7 @@ class PolarisedWavefront(Wavefront):
                 [1, 0, 0, 1],
                 [1, 0, 0, -1],
                 [0, 1, 1, 0],
-                [0, 1j, -1j, 0],
+                [0, -1j, 1j, 0],  # Swapped 1j and -1j to match IAU
             ]
         )
         A_inv = np.linalg.inv(A)
