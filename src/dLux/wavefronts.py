@@ -928,13 +928,23 @@ class PolarisedWavefront(Wavefront):
         """
         if initial_stokes is None:
             initial_stokes = np.array([1.0, 0.0, 0.0, 0.0])
-        return PolarisedWavefront(
+        pwf = PolarisedWavefront(
             wavelength=wavefront.wavelength,
             npixels=wavefront.npixels,
             diameter=wavefront.diameter,
             center=wavefront.center,
             initial_stokes=initial_stokes,
         )
+        cur_phasor = wavefront.phasor
+
+        new_phasor = np.stack(
+            [
+                np.stack([cur_phasor, np.zeros_like(cur_phasor)], axis=0),
+                np.stack([np.zeros_like(cur_phasor), cur_phasor], axis=0),
+            ],
+        )
+        pwf = pwf.set("phasor", new_phasor)
+        return pwf
 
     @property
     def psf(self: Wavefront) -> Array:

@@ -4,7 +4,7 @@ config.update("jax_debug_nans", True)
 
 import jax
 import pytest
-from dLux.wavefronts import PolarisedWavefront
+from dLux.wavefronts import PolarisedWavefront, Wavefront
 from dLux.layers.polarised import PolarisingOptic
 from dLux.layers.polarised import jones_matrix_rotated
 
@@ -13,6 +13,15 @@ n_pix = 16
 # ==========================================
 # FIXTURES
 # ==========================================
+
+
+@pytest.fixture
+def basic_wavefront():
+    return Wavefront(
+        npixels=n_pix,
+        diameter=1.0,
+        wavelength=1e-6,
+    )
 
 
 @pytest.fixture
@@ -197,6 +206,24 @@ class TestPolarisingOptic:
 
         assert np.allclose(normalized_Q, expected_Q, atol=1e-6)
         assert np.allclose(normalized_U, expected_U, atol=1e-6)
+
+    def test_wf_promotion(self, horizontal_polariser_jones, basic_wavefront):
+        """Tests that a non-polarised wavefront is correctly promoted to polarised when passed through the optic."""
+        basic_wavefront /= np.sqrt(basic_wavefront.psf)  # unity everywhere
+        optic = PolarisingOptic(jones_matrix=horizontal_polariser_jones)
+        output_wavefront = optic(basic_wavefront)
+
+        print(basic_wavefront.phasor)
+
+        assert isinstance(output_wavefront, PolarisedWavefront)
+        assert np.allclose(
+            output_wavefront.stokes[0], 0.5, atol=1e-6
+        )  # Total intensity should be preserved
+        assert np.allclose(
+            output_wavefront.stokes[1], 0.5, atol=1e-6
+        )  # Should become horizontally polarized
+        assert np.allclose(output_wavefront.stokes[2], 0.0, atol=1e-6)  # No U component
+        assert np.allclose(output_wavefront.stokes[3], 0.0, atol=1e-6)  # No V component
 
 
 def test_jones_rotation_batching():
