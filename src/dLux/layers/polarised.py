@@ -80,10 +80,7 @@ class PolarisingOptic(OpticalLayer):
         pol_wavefront = self._promote_if_needed(wavefront)
 
         # Rotate the Jones matrix if needed (now returns shape (2, 2, ...))
-        if self.angle != 0.0:
-            jones_matrix = jones_matrix_rotated(self.jones_matrix, self.angle)
-        else:
-            jones_matrix = self.jones_matrix
+        jones_matrix = jones_matrix_rotated(self.jones_matrix, self.angle)
 
         # Apply the Jones matrix to the wavefront's phasor
         # jones_matrix: (2, 2, ...) -> 'ij...'
