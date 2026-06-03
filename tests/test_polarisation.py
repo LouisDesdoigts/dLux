@@ -8,6 +8,9 @@ from dLux.wavefronts import PolarisedWavefront, Wavefront
 from dLux.layers.polarised import PolarisingOptic
 from dLux.layers.polarised import jones_matrix_rotated
 
+# Import the abstract base tests to inherit standard functionality
+from .test_wavefronts import BaseWavefrontTests
+
 n_pix = 16
 
 # ==========================================
@@ -84,7 +87,34 @@ def spatially_varying_liquid_crystal_optic():
 
 
 # ==========================================
-# TEST CLASSES
+# RUN INHERITED WAVEFRONT TESTS ON POLARISED
+# ==========================================
+
+
+class TestPolarisedWavefrontShared(BaseWavefrontTests):
+    """Executes every single basic wavefront operation test against PolarisedWavefront."""
+
+    @pytest.fixture
+    def wavefront_cls(self):
+        return PolarisedWavefront
+
+    @pytest.fixture
+    def wavefront_factory(self, wavefront_cls):
+        def factory(**kwargs):
+            # Inject unpolarized fallback state if not explicitly specified by standard tests
+            if "initial_stokes" not in kwargs:
+                kwargs["initial_stokes"] = np.array([1.0, 0.0, 0.0, 0.0])
+            return wavefront_cls(**kwargs)
+
+        return factory
+
+    @pytest.fixture
+    def wavefront(self, wavefront_factory):
+        return wavefront_factory(npixels=16, diameter=1.0, wavelength=1e-6)
+
+
+# ==========================================
+# TEST CLASSES (POLARISATION SPECIFIC)
 # ==========================================
 
 
