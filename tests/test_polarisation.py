@@ -5,7 +5,7 @@ config.update("jax_debug_nans", True)
 import jax
 import pytest
 from dLux.wavefronts import PolarisedWavefront, Wavefront
-from dLux.layers.polarised import PolarisingOptic
+from dLux.layers.polarised import PolarisingOptic, UniformPolarisingOptic
 from dLux.layers.polarised import jones_matrix_rotated
 
 # Import the abstract base tests to inherit standard functionality
@@ -167,7 +167,7 @@ class TestPolarisingOptic:
     def test_rotate_horizontal_to_vertical(
         self, horizontal_polariser_jones, pol_wavefront
     ):
-        optic = PolarisingOptic(
+        optic = UniformPolarisingOptic(
             jones_matrix=horizontal_polariser_jones, angle=np.pi / 2
         )
         output_wavefront = optic(pol_wavefront)
@@ -178,7 +178,7 @@ class TestPolarisingOptic:
         self, horizontal_polariser_jones, pol_wavefront
     ):
         """Tests polariser behavior against Malus' Law (State-dependent attenuation)."""
-        optic = PolarisingOptic(jones_matrix=horizontal_polariser_jones)
+        optic = UniformPolarisingOptic(jones_matrix=horizontal_polariser_jones)
         output_wavefront = optic(pol_wavefront)
 
         input_power = np.sum(pol_wavefront.psf)
@@ -186,7 +186,7 @@ class TestPolarisingOptic:
         assert np.isclose(input_power, output_power, atol=1e-6)
 
         # Test Malus' Law: Power should drop by half for a 45-degree rotation
-        optic_45 = PolarisingOptic(
+        optic_45 = UniformPolarisingOptic(
             jones_matrix=horizontal_polariser_jones, angle=np.pi / 4
         )
         output_wavefront_45 = optic_45(pol_wavefront)
@@ -197,7 +197,7 @@ class TestPolarisingOptic:
         self, circular_polariser_jones, unpol_wavefront
     ):
         """Verifies circular polarisation matches the IAU standard convention."""
-        optic = PolarisingOptic(jones_matrix=circular_polariser_jones)
+        optic = UniformPolarisingOptic(jones_matrix=circular_polariser_jones)
         output_wavefront = optic(unpol_wavefront)
 
         # Ensure no linear polarization remains residual
@@ -277,7 +277,9 @@ def test_jax_jit_and_grad_compatibility(horizontal_polariser_jones, pol_wavefron
     @jax.jit
     def jitted_execution(angle):
         # We pass a dynamic angle to evaluate conditional-branch robustness
-        optic = PolarisingOptic(jones_matrix=horizontal_polariser_jones, angle=angle)
+        optic = UniformPolarisingOptic(
+            jones_matrix=horizontal_polariser_jones, angle=angle
+        )
         out_wf = optic(pol_wavefront)
         return np.sum(out_wf.psf)
 
