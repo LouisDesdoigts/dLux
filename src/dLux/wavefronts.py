@@ -946,6 +946,101 @@ class PolarisedWavefront(Wavefront):
         pwf = pwf.set("phasor", new_phasor)
         return pwf
 
+    def scale_to(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        complex: bool = True,
+    ) -> Wavefront:
+        """
+        Interpolates the wavefront to a given npixels and pixel_scale. Can be done on
+        the real and imaginary components by passing in complex=True.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels to interpolate to.
+        pixel_scale: Array
+            The pixel scale to interpolate to.
+        complex : bool = True
+            If True, interpolate the real and imaginary components. If False,
+            interpolate the amplitude and phase components.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new interpolated wavefront.
+        """
+        # Get field in either (amplitude, phase) or (real, imaginary)
+        # shape is (2,2,2,npixels,npixels), where first 2 is real/imag or amp/phase
+        fields = self.complex if complex else self.polar
+
+        fields = fields.reshape((-1, self.npixels, self.npixels))
+
+        print("Fields shape before scaling:", fields.shape)
+
+        # Scale the field
+        scale_fn = vmap(dlu.scale, (0, None, None))
+        fields = scale_fn(fields, npixels, pixel_scale / self.pixel_scale)
+
+        # back to (2,2,2,npixels,npixels)
+        fields = fields.reshape((2, 2, 2, npixels, npixels))
+
+        # Convert back to complex form
+        if complex:
+            phasor = fields[0] + 1j * fields[1]
+        else:
+            phasor = fields[0] * np.exp(1j * fields[1])
+
+        # Return new wavefront
+        return self.set(phasor=phasor, pixel_scale=pixel_scale)
+
+    def rotate(
+        self: Wavefront,
+        angle: Array,
+        method: str = "linear",
+        complex: bool = True,
+    ) -> Wavefront:
+        """
+        Rotates the wavefront by a given angle via interpolation. Can be done on the
+        real and imaginary components by passing in complex=True.
+
+        Parameters
+        ----------
+        angle : Array, radians
+            The angle by which to rotate the wavefront in a clockwise
+            direction.
+        method : str = "linear"
+            The interpolation method.
+        complex : bool = True
+            If True, rotate the real and imaginary components. If False, rotate the
+            amplitude and phase components.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront rotated by angle in the clockwise direction.
+        """
+        # Get field in either (amplitude, phase) or (real, imaginary)
+        fields = self.complex if complex else self.polar
+
+        fields = fields.reshape((-1, self.npixels, self.npixels))
+
+        # Rotate the field
+        rotator = vmap(dlu.rotate, (0, None, None))
+        fields = rotator(fields, angle, method)
+
+        fields = fields.reshape((2, 2, 2, self.npixels, self.npixels))
+
+        # Convert back to complex form
+        if complex:
+            phasor = fields[0] + 1j * fields[1]
+        else:
+            phasor = fields[0] * np.exp(1j * fields[1])
+
+        # Return new wavefront
+        return self.set(phasor=phasor)
+
     @property
     def psf(self: Wavefront) -> Array:
         """
