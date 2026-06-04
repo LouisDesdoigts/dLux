@@ -5,7 +5,14 @@ config.update("jax_debug_nans", True)
 import jax
 import pytest
 from dLux.wavefronts import PolarisedWavefront, Wavefront
-from dLux.layers.polarised import PolarisingOptic, UniformPolarisingOptic
+from dLux.layers.polarised import (
+    PolarisingOptic,
+    UniformPolarisingOptic,
+    LinearPolariser,
+    CircularPolariser,
+    HalfWavePlate,
+    QuarterWavePlate,
+)
 from dLux.layers.polarised import jones_matrix_rotated
 
 # Import the abstract base tests to inherit standard functionality
@@ -254,6 +261,30 @@ class TestPolarisingOptic:
         )  # Should become horizontally polarized
         assert np.allclose(output_wavefront.stokes[2], 0.0, atol=1e-6)  # No U component
         assert np.allclose(output_wavefront.stokes[3], 0.0, atol=1e-6)  # No V component
+
+    def test_different_polarising_optics(self, unpol_wavefront):
+        """Tests that different polarising optics (linear, circular, half-wave, quarter-wave)
+        produce expected transformations on the wavefront, and checking the total power.
+        """
+
+        optics = [
+            LinearPolariser(angle=np.pi / 4),
+            CircularPolariser(),
+            HalfWavePlate(angle=np.pi / 4),
+            QuarterWavePlate(angle=np.pi / 4),
+        ]
+
+        for optic in optics:
+            output_wavefront = optic(unpol_wavefront)
+
+            # Check total power is preserved (or reduced in the case of linear polariser)
+            input_power = np.sum(unpol_wavefront.psf)
+            output_power = np.sum(output_wavefront.psf)
+
+            if isinstance(optic, (LinearPolariser, CircularPolariser)):
+                assert np.isclose(output_power, input_power / 2, atol=1e-6)
+            else:
+                assert np.isclose(output_power, input_power, atol=1e-6)
 
 
 def test_jones_rotation_batching():
