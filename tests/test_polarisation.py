@@ -2,6 +2,10 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 
+# TODO:
+# - normal propagators should still work (and be polarisation independent)
+# - normal optics should still work and vmap operations over the phasor
+
 import jax
 import pytest
 from dLux.wavefronts import PolarisedWavefront, Wavefront
@@ -13,6 +17,7 @@ from dLux.layers.polarised import (
     HalfWavePlate,
     QuarterWavePlate,
 )
+from dLux.layers import CircularAperture
 from dLux.layers.polarised import jones_matrix_rotated
 
 # Import the abstract base tests to inherit standard functionality
@@ -140,6 +145,24 @@ class TestPolarisedWavefront:
         pol_wf = PolarisedWavefront.from_wavefront(wf)
         assert isinstance(pol_wf, PolarisedWavefront)
         assert np.allclose(pol_wf.initial_stokes, np.array([1.0, 0.0, 0.0, 0.0]))
+
+    def test_conventional_layers(self, unpol_wavefront):
+        """Tests that applying a conventional (non-polarisation-aware) layer to a polarised wavefront produces expected results."""
+
+        aperture = CircularAperture(radius=0.25)
+        output_wavefront = aperture(unpol_wavefront)
+
+        # The phasor and stokes should be 0 where the is 0, and unchanged where the aperture is 1
+        mask = aperture.transmission
+        assert np.allclose(output_wavefront.phasor[:, :, mask == 0], 0.0)
+        assert np.allclose(output_wavefront.stokes[:, mask == 0], 0.0)
+        assert np.allclose(
+            output_wavefront.phasor[:, :, mask == 1],
+            unpol_wavefront.phasor[:, :, mask == 1],
+        )
+        assert np.allclose(
+            output_wavefront.stokes[:, mask == 1], unpol_wavefront.stokes[:, mask == 1]
+        )
 
 
 class TestPolarisingOptic:
