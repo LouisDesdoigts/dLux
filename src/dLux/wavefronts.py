@@ -9,7 +9,7 @@ import dLux.utils as dlu
 from .psfs import PSF
 from .coordinates import CoordSpec
 
-__all__ = ["Wavefront"]
+__all__ = ["Wavefront", "PolarisedWavefront"]
 
 # TODO: Make coord specs 2d compatible
 
@@ -871,3 +871,216 @@ class Wavefront(zdx.Base):
     def __itruediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """In-place division."""
         return self.__truediv__(other)
+
+
+class PolarisedWavefront(Wavefront):
+    """
+    A polarisation wavefront, supporting partial polarisation.
+    The internal represation uses Jones calculus in the general case,
+    i.e. tracking a 2x2 complex coherence matrix for the state.
+
+    If, for whatever reason, you need a strictly polarised wavefront, add a PR.
+    """
+
+    initial_stokes: Array
+
+    def __init__(
+        self: Wavefront,
+        wavelength: float,
+        npixels: int,
+        diameter: float = None,
+        pixel_scale: float = None,
+        center: Array = None,
+        initial_stokes: Array = np.array([1.0, 0.0, 0.0, 0.0]),
+    ):
+        super().__init__(wavelength, npixels, diameter, pixel_scale, center)
+
+        # stack to (2,2, npixels, npixels)
+        self.phasor = np.stack(
+            [
+                np.stack([self.phasor, np.zeros_like(self.phasor)], axis=0),
+                np.stack([np.zeros_like(self.phasor), self.phasor], axis=0),
+            ],
+            axis=0,
+        )
+
+        self.initial_stokes = initial_stokes
+
+    @staticmethod
+    def from_wavefront(
+        wavefront: Wavefront, initial_stokes: Array = None
+    ) -> PolarisedWavefront:
+        """
+        Promotes a regular Wavefront to a PolarisedWavefront by multiplying the scalar phasor
+        by eye(2)
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The input wavefront to promote.
+        initial_stokes : Array = None
+            The initial Stokes parameters to set for the polarised wavefront. If None, defaults to [1, 0, 0, 0] (fully unpolarised).
+
+        Returns
+        -------
+        polarised_wavefront : PolarisedWavefront
+            A new PolarisedWavefront with the same wavelength, pixel scale, and center as the input wavefront, and the phasor promoted
+
+        """
+        if initial_stokes is None:
+            initial_stokes = np.array([1.0, 0.0, 0.0, 0.0])
+        pwf = PolarisedWavefront(
+            wavelength=wavefront.wavelength,
+            npixels=wavefront.npixels,
+            diameter=wavefront.diameter,
+            center=wavefront.center,
+            initial_stokes=initial_stokes,
+        )
+        cur_phasor = wavefront.phasor
+
+        new_phasor = np.stack(
+            [
+                np.stack([cur_phasor, np.zeros_like(cur_phasor)], axis=0),
+                np.stack([np.zeros_like(cur_phasor), cur_phasor], axis=0),
+            ],
+        )
+        pwf = pwf.set("phasor", new_phasor)
+        return pwf
+
+    def scale_to(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        complex: bool = True,
+    ) -> Wavefront:
+        """
+        Interpolates the wavefront to a given npixels and pixel_scale. Can be done on
+        the real and imaginary components by passing in complex=True.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels to interpolate to.
+        pixel_scale: Array
+            The pixel scale to interpolate to.
+        complex : bool = True
+            If True, interpolate the real and imaginary components. If False,
+            interpolate the amplitude and phase components.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new interpolated wavefront.
+        """
+        # Get field in either (amplitude, phase) or (real, imaginary)
+        # shape is (2,2,2,npixels,npixels), where first 2 is real/imag or amp/phase
+        fields = self.complex if complex else self.polar
+
+        fields = fields.reshape((-1, self.npixels, self.npixels))
+
+        print("Fields shape before scaling:", fields.shape)
+
+        # Scale the field
+        scale_fn = vmap(dlu.scale, (0, None, None))
+        fields = scale_fn(fields, npixels, pixel_scale / self.pixel_scale)
+
+        # back to (2,2,2,npixels,npixels)
+        fields = fields.reshape((2, 2, 2, npixels, npixels))
+
+        # Convert back to complex form
+        if complex:
+            phasor = fields[0] + 1j * fields[1]
+        else:
+            phasor = fields[0] * np.exp(1j * fields[1])
+
+        # Return new wavefront
+        return self.set(phasor=phasor, pixel_scale=pixel_scale)
+
+    def rotate(
+        self: Wavefront,
+        angle: Array,
+        method: str = "linear",
+        complex: bool = True,
+    ) -> Wavefront:
+        """
+        Rotates the wavefront by a given angle via interpolation. Can be done on the
+        real and imaginary components by passing in complex=True.
+
+        Parameters
+        ----------
+        angle : Array, radians
+            The angle by which to rotate the wavefront in a clockwise
+            direction.
+        method : str = "linear"
+            The interpolation method.
+        complex : bool = True
+            If True, rotate the real and imaginary components. If False, rotate the
+            amplitude and phase components.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront rotated by angle in the clockwise direction.
+        """
+        # Get field in either (amplitude, phase) or (real, imaginary)
+        fields = self.complex if complex else self.polar
+
+        fields = fields.reshape((-1, self.npixels, self.npixels))
+
+        # Rotate the field
+        rotator = vmap(dlu.rotate, (0, None, None))
+        fields = rotator(fields, angle, method)
+
+        fields = fields.reshape((2, 2, 2, self.npixels, self.npixels))
+
+        # Convert back to complex form
+        if complex:
+            phasor = fields[0] + 1j * fields[1]
+        else:
+            phasor = fields[0] * np.exp(1j * fields[1])
+
+        # Return new wavefront
+        return self.set(phasor=phasor)
+
+    @property
+    def psf(self: Wavefront) -> Array:
+        """
+        Calculates the Point Spread Function (PSF), i.e. the squared modulus
+        of the complex wavefront.
+
+        Returns
+        -------
+        psf : Array
+            The PSF of the wavefront.
+        """
+        return self.stokes[0]
+
+    @property
+    def stokes(self: Wavefront) -> Array:
+        """Returns the Stokes parameters as an array."""
+
+        A = np.array(
+            [
+                [1, 0, 0, 1],
+                [1, 0, 0, -1],
+                [0, 1, 1, 0],
+                [0, -1j, 1j, 0],  # Swapped 1j and -1j to match IAU
+            ]
+        )
+        A_inv = np.linalg.inv(A)
+
+        J = self.phasor
+        J_conjugate = np.conj(J)
+
+        # Kronecker product mapping: row = 2*i + j, col = 2*k + l
+        # We order the indices as i, j, k, l followed by the batch dimensions (...)
+        J_kron = np.einsum("ik...,jl...->ijkl...", J, J_conjugate)
+
+        # Reshape the (2, 2, 2, 2, ...) array into (4, 4, ...)
+        J_kron = J_kron.reshape((4, 4) + (self.npixels, self.npixels))
+
+        # Perform matrix multiplication: M = A @ J_kron @ A_inv for each batch element
+        M = np.einsum("xy,yz...,zw->xw...", A, J_kron, A_inv)
+
+        M = np.real(M)
+
+        return np.einsum("ab...,b->a...", M, self.initial_stokes)
