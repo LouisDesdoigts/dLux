@@ -6,6 +6,7 @@ __all__ = [
     "apply_jones",
     "rotate_jones",
     "linear_polariser",
+    "retarder",
     "horizontal_polariser",
     "vertical_polariser",
     "rhc_polariser",
@@ -24,6 +25,12 @@ def linear_polariser(angle: Array) -> Array:
     return np.array([[c**2, c * s], [c * s, s**2]])
 
 
+def retarder(retardance: Array, angle: Array) -> Array:
+    jones = np.array([[1, 0], [0, np.exp(1j * retardance)]])
+    return rotate_jones(jones, angle)
+
+
+#
 def horizontal_polariser() -> Array:
     return np.array([[1, 0], [0, 0]])  # Horizontal polariser
 
