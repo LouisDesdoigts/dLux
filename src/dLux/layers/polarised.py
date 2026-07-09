@@ -10,9 +10,7 @@ __all__ = [
     "PolarisingOptic",
     "UniformPolarisingOptic",
     "LinearPolariser",
-    "CircularPolariser",
-    "QuarterWavePlate",
-    "HalfWavePlate",
+    "Retarder",
 ]
 
 
@@ -24,10 +22,7 @@ class PolarisingOptic(OpticalLayer):
 
     jones: Array
 
-    def __init__(
-        self: PolarisingOptic,
-        jones: Array,
-    ):
+    def __init__(self: PolarisingOptic, jones: Array):
         self.jones = jones
 
     def __call__(self: PolarisingOptic, wavefront: Wavefront) -> Wavefront:
@@ -48,23 +43,12 @@ class UniformPolarisingOptic(PolarisingOptic):
         self: UniformPolarisingOptic,
         jones: Array,
         angle: Array | None = None,
-        initial_angle: Array | None = None,
     ):
-        if initial_angle is not None and angle is not None:
-            raise ValueError(
-                "Cannot specify both 'angle' and 'initial_angle' parameters as this "
-                "leads to confusion."
-            )
+        self.angle = angle
 
         if jones.shape != (2, 2):
             raise ValueError("UniformPolarisingOptic requires a (2, 2) Jones matrix.")
-
-        if initial_angle is not None:
-            jones = dlu.rotate_jones(jones, initial_angle)
-
         super().__init__(jones)
-
-        self.angle = angle
 
     def __call__(self: UniformPolarisingOptic, wavefront: Wavefront) -> Wavefront:
         return wavefront.apply_jones(dlu.rotate_jones(self.jones, self.angle))
@@ -82,70 +66,26 @@ class LinearPolariser(UniformPolarisingOptic):
     horizontal.
     """
 
-    def __init__(
-        self: LinearPolariser,
-        angle: Array | None = None,
-        initial_angle: Array | None = None,
-    ):
-        jones = dlu.linear_polariser(0.0)
-        super().__init__(jones, angle, initial_angle)
+    def __init__(self: LinearPolariser, angle: Array | None = None):
+        super().__init__(dlu.linear_polariser(0.0), angle)
 
 
-class CircularPolariser(UniformPolarisingOptic):
+class Retarder(UniformPolarisingOptic):
     """
-    A circular polariser, which can be oriented at any angle. The Jones matrix for a
-    circular polariser is given by:
-
-    [[0.5, -0.5j],
-     [0.5j, 0.5]]
-
-    for a right-handed circular polariser, and the complex conjugate of this for a
-    left-handed circular polariser.
-    """
-
-    def __init__(
-        self: CircularPolariser,
-        angle: Array | None = None,
-        initial_angle: Array | None = None,
-    ):
-        super().__init__(dlu.rhc_polariser(), angle, initial_angle)
-
-
-class QuarterWavePlate(UniformPolarisingOptic):
-    """
-    A quarter wave plate, which can be oriented at any angle. The Jones matrix for a
-    quarter wave plate is given by:
+    A retarder, which can be oriented at any angle. The Jones matrix for a retarder is
+    given by:
 
     [[1, 0],
-     [0, 1j]]
+     [0, exp(i * delta)]]
 
-    when the fast axis is horizontal, and rotated versions of this for other
-    orientations.
+    where delta is the retardance of the retarder. The fast axis of the retarder is
+    assumed to be horizontal, and the Jones matrix can be rotated to any angle using
+    the 'angle' parameter.
     """
 
     def __init__(
-        self: QuarterWavePlate,
+        self: Retarder,
+        retardance: Array,
         angle: Array | None = None,
-        initial_angle: Array | None = None,
     ):
-        super().__init__(dlu.quarter_wave_plate(0.0), angle, initial_angle)
-
-
-class HalfWavePlate(UniformPolarisingOptic):
-    """
-    A half wave plate, which can be oriented at any angle. The Jones matrix for a half
-    wave plate is given by:
-
-    [[1, 0],
-     [0, -1]]
-
-    when the fast axis is horizontal, and rotated versions of this for other
-    orientations.
-    """
-
-    def __init__(
-        self: HalfWavePlate,
-        angle: Array | None = None,
-        initial_angle: Array | None = None,
-    ):
-        super().__init__(dlu.half_wave_plate(0.0), angle, initial_angle)
+        super().__init__(dlu.retarder(retardance, 0.0), angle)
