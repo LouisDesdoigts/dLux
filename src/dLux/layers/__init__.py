@@ -11,6 +11,7 @@ from . import (
     apertures,
     aberrations,
     abcd_propagators,
+    polarised,
 )
 
 _modules = (
@@ -22,6 +23,7 @@ _modules = (
     apertures,
     aberrations,
     abcd_propagators,
+    polarised,
 )
 
 _module_names = [
@@ -33,5 +35,6 @@ _module_names = [
     "apertures",
     "aberrations",
     "abcd_propagators",
+    "polarised",
 ]
 __all__ = _module_names + reexport(_modules, globals())

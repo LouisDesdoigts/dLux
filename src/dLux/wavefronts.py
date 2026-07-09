@@ -602,6 +602,9 @@ class Wavefront(zdx.Base):
         """
         return self.set(pixel_scale=spec.d, center=spec.c)
 
+    def apply_jones(self, jones):
+        return PolarisedWavefront.from_wavefront(self).apply_jones(jones)
+
     def propagate_FFT(
         self,
         pad=2,
@@ -911,19 +914,21 @@ class PolarisedWavefront(Wavefront):
         wavefront: Wavefront, initial_stokes: Array = None
     ) -> PolarisedWavefront:
         """
-        Promotes a regular Wavefront to a PolarisedWavefront by multiplying the scalar phasor
-        by eye(2)
+        Promotes a regular Wavefront to a PolarisedWavefront by multiplying the scalar
+        phasor by eye(2)
         Parameters
         ----------
         wavefront : Wavefront
             The input wavefront to promote.
         initial_stokes : Array = None
-            The initial Stokes parameters to set for the polarised wavefront. If None, defaults to [1, 0, 0, 0] (fully unpolarised).
+            The initial Stokes parameters to set for the polarised wavefront. If None,
+            defaults to [1, 0, 0, 0] (fully unpolarised).
 
         Returns
         -------
         polarised_wavefront : PolarisedWavefront
-            A new PolarisedWavefront with the same wavelength, pixel scale, and center as the input wavefront, and the phasor promoted
+            A new PolarisedWavefront with the same wavelength, pixel scale, and center
+            as the input wavefront, and the phasor promoted
 
         """
         if initial_stokes is None:
@@ -1057,30 +1062,8 @@ class PolarisedWavefront(Wavefront):
     @property
     def stokes(self: Wavefront) -> Array:
         """Returns the Stokes parameters as an array."""
+        return dlu.jones_to_stokes(self.phasor, self.initial_stokes)
 
-        A = np.array(
-            [
-                [1, 0, 0, 1],
-                [1, 0, 0, -1],
-                [0, 1, 1, 0],
-                [0, -1j, 1j, 0],  # Swapped 1j and -1j to match IAU
-            ]
-        )
-        A_inv = np.linalg.inv(A)
-
-        J = self.phasor
-        J_conjugate = np.conj(J)
-
-        # Kronecker product mapping: row = 2*i + j, col = 2*k + l
-        # We order the indices as i, j, k, l followed by the batch dimensions (...)
-        J_kron = np.einsum("ik...,jl...->ijkl...", J, J_conjugate)
-
-        # Reshape the (2, 2, 2, 2, ...) array into (4, 4, ...)
-        J_kron = J_kron.reshape((4, 4) + (self.npixels, self.npixels))
-
-        # Perform matrix multiplication: M = A @ J_kron @ A_inv for each batch element
-        M = np.einsum("xy,yz...,zw->xw...", A, J_kron, A_inv)
-
-        M = np.real(M)
-
-        return np.einsum("ab...,b->a...", M, self.initial_stokes)
+    def apply_jones(self, jones):
+        """Applies a Jones matrix to the polarised wavefront."""
+        return self.set(phasor=dlu.apply_jones(self.phasor, jones))
