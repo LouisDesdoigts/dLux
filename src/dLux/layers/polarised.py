@@ -1,6 +1,7 @@
 from __future__ import annotations
-from jax import Array
+import equinox as eqx
 import dLux.utils as dlu
+from jax import Array, vmap
 
 
 from .optical_layers import OpticalLayer
@@ -14,78 +15,113 @@ __all__ = [
 ]
 
 
-class PolarisingOptic(OpticalLayer):
-    """
-    A basic 'PolarisingOptic' class, which applies a polarisation transformation to the
-    input wavefront.
-    """
-
-    jones: Array
-
-    def __init__(self: PolarisingOptic, jones: Array):
-        self.jones = jones
+class BasePolarisingOptic(OpticalLayer):
+    jones: eqx.AbstractVar
 
     def __call__(self: PolarisingOptic, wavefront: Wavefront) -> Wavefront:
         return wavefront.apply_jones(self.jones)
 
 
+class PolarisingOptic(BasePolarisingOptic):
+    """
+    A basic 'PolarisingOptic' class, which applies a polarisation transformation to the
+    input wavefront.
+    """
+
+    jones: Array  # Concrete this as an array
+
+    def __init__(self: PolarisingOptic, jones: Array):
+        self.jones = jones
+
+
+# Merge this with PolarisingOptic?
+# NO - The top one is generic spatially varying
 class UniformPolarisingOptic(PolarisingOptic):
     """
     A spatially uniform Jones matrix optic, which applies the same polarisation
     transformation across the entire wavefront. As such optics can be easily rotated,
-    they also support an optional 'angle' parameter, which rotates the Jones matrix by
-    the specified angle before applying it to the wavefront.
+    they also support an optional 'orientation' parameter, which rotates the Jones
+    matrix by the specified orientation before applying it to the wavefront.
     """
 
-    angle: Array | None
+    orientation: Array | None
 
     def __init__(
         self: UniformPolarisingOptic,
         jones: Array,
-        angle: Array | None = None,
+        orientation: Array | None = None,
     ):
-        self.angle = angle
+        self.orientation = orientation
 
         if jones.shape != (2, 2):
             raise ValueError("UniformPolarisingOptic requires a (2, 2) Jones matrix.")
         super().__init__(jones)
 
     def __call__(self: UniformPolarisingOptic, wavefront: Wavefront) -> Wavefront:
-        return wavefront.apply_jones(dlu.rotate_jones(self.jones, self.angle))
+        return wavefront.apply_jones(dlu.rotate_jones(self.jones, self.orientation))
 
 
 class LinearPolariser(UniformPolarisingOptic):
     """
-    A linear polariser, which can be oriented at any angle. The Jones matrix for a
+    A linear polariser, which can be oriented at any orientation. The Jones matrix for a
     linear polariser is given by:
 
     [[cos^2(theta), cos(theta)sin(theta)],
      [cos(theta)sin(theta), sin^2(theta)]]
 
-    where theta is the angle of the polariser's transmission axis relative to the
+    where theta is the orientation of the polariser's transmission axis relative to the
     horizontal.
     """
 
-    def __init__(self: LinearPolariser, angle: Array | None = None):
-        super().__init__(dlu.linear_polariser(0.0), angle)
+    def __init__(self: LinearPolariser, orientation: Array | None = None):
+        super().__init__(dlu.linear_polariser(0.0), orientation)
 
 
 class Retarder(UniformPolarisingOptic):
     """
-    A retarder, which can be oriented at any angle. The Jones matrix for a retarder is
-    given by:
+    A retarder, which can be oriented at any orientation. The Jones matrix for a
+    retarder is given by:
 
     [[1, 0],
      [0, exp(i * delta)]]
 
     where delta is the retardance of the retarder. The fast axis of the retarder is
-    assumed to be horizontal, and the Jones matrix can be rotated to any angle using
-    the 'angle' parameter.
+    assumed to be horizontal, and the Jones matrix can be rotated to any orientation
+    using the 'orientation' parameter.
     """
 
     def __init__(
         self: Retarder,
         retardance: Array,
-        angle: Array | None = None,
+        orientation: Array | None = None,
     ):
-        super().__init__(dlu.retarder(retardance, 0.0), angle)
+        super().__init__(dlu.retarder(retardance, 0.0), orientation)
+
+
+###
+class SVLinearPolariser(BasePolarisingOptic):
+    angle: Array
+
+    def __init__(self: SVLinearPolariser, angle: Array):
+        self.angle = angle
+
+    @property
+    def jones(self: SVLinearPolariser) -> Array:
+        return vmap(dlu.linear_polariser, (0, 1), (2, 3))(self.angle)
+
+
+class SVRetarder(BasePolarisingOptic):
+    # TODO: What if the retardance is fixed but the angle is varying
+    retardance: Array
+    angle: Array
+
+    def __init__(self: SVRetarder, retardance: Array, angle: Array):
+        self.retardance = retardance
+        self.angle = angle
+
+    @property
+    def jones(self: SVRetarder) -> Array:
+        return vmap(dlu.retarder, (0, 1), (2, 3))(self.retardance, self.angle)
+
+
+# TODO: Basis classes
