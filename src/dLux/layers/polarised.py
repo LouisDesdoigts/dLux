@@ -1,7 +1,7 @@
 from __future__ import annotations
 import equinox as eqx
 import dLux.utils as dlu
-from jax import Array, vmap
+from jax import Array
 
 
 from .optical_layers import OpticalLayer
@@ -98,7 +98,7 @@ class Retarder(UniformPolarisingOptic):
         super().__init__(dlu.retarder(retardance, 0.0), orientation)
 
 
-###
+### Spatially varying polarising optics ###
 class SVLinearPolariser(BasePolarisingOptic):
     angle: Array
 
@@ -107,7 +107,7 @@ class SVLinearPolariser(BasePolarisingOptic):
 
     @property
     def jones(self: SVLinearPolariser) -> Array:
-        return vmap(dlu.linear_polariser, (0, 1), (2, 3))(self.angle)
+        return dlu.linear_polariser(self.angle)
 
 
 class SVRetarder(BasePolarisingOptic):
@@ -121,7 +121,7 @@ class SVRetarder(BasePolarisingOptic):
 
     @property
     def jones(self: SVRetarder) -> Array:
-        return vmap(dlu.retarder, (0, 1), (2, 3))(self.retardance, self.angle)
+        return dlu.retarder(self.retardance, self.angle)
 
 
 # TODO: Basis classes
