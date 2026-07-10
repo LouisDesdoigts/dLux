@@ -48,8 +48,6 @@ class Wavefront(zdx.Base):
         Derived property from `phasor`; `(real, imaginary)` representation.
     polar : tuple[Array, Array], property
         Derived property from `phasor`; `(amplitude, phase)` representation.
-    psf : Array, property
-        Derived property from `phasor`; intensity image `abs(phasor) ** 2`.
     wavenumber : Array, property
         Derived property from `wavelength`; scalar `2 * pi / wavelength`.
     ndim : int, property
@@ -261,7 +259,6 @@ class Wavefront(zdx.Base):
         """
         return np.stack([self.amplitude, self.phase], axis=0)
 
-    @property
     def psf(self: Wavefront) -> Array:
         """
         Calculates the Point Spread Function (PSF), i.e. the squared modulus
@@ -879,13 +876,11 @@ class Wavefront(zdx.Base):
 class PolarisedWavefront(Wavefront):
     """
     A polarisation wavefront, supporting partial polarisation.
-    The internal represation uses Jones calculus in the general case,
+    The internal representation uses Jones calculus in the general case,
     i.e. tracking a 2x2 complex coherence matrix for the state.
 
     If, for whatever reason, you need a strictly polarised wavefront, add a PR.
     """
-
-    initial_stokes: Array
 
     def __init__(
         self: Wavefront,
@@ -894,7 +889,6 @@ class PolarisedWavefront(Wavefront):
         diameter: float = None,
         pixel_scale: float = None,
         center: Array = None,
-        initial_stokes: Array = np.array([1.0, 0.0, 0.0, 0.0]),
     ):
         super().__init__(wavelength, npixels, diameter, pixel_scale, center)
 
@@ -907,7 +901,15 @@ class PolarisedWavefront(Wavefront):
             axis=0,
         )
 
-        self.initial_stokes = initial_stokes
+    def from_phasor(self):
+        """
+        Needed to handle input phasors that are already in Jones form or from a
+        regular wavefront phasor
+        """
+
+        raise NotImplementedError(
+            "PolarisedWavefront.from_phasor is not implemented yet."
+        )
 
     @staticmethod
     def from_wavefront(
@@ -951,6 +953,8 @@ class PolarisedWavefront(Wavefront):
         pwf = pwf.set("phasor", new_phasor)
         return pwf
 
+    # TODO: Nuke this and use np.vectorize in the parent class to handle any extra
+    # dimensionality from polarisation
     def scale_to(
         self: Wavefront,
         npixels: int,
@@ -1000,6 +1004,8 @@ class PolarisedWavefront(Wavefront):
         # Return new wavefront
         return self.set(phasor=phasor, pixel_scale=pixel_scale)
 
+    # TODO: Nuke this and use np.vectorize in the parent class to handle any extra
+    # dimensionality from polarisation
     def rotate(
         self: Wavefront,
         angle: Array,
@@ -1046,23 +1052,15 @@ class PolarisedWavefront(Wavefront):
         # Return new wavefront
         return self.set(phasor=phasor)
 
-    @property
-    def psf(self: Wavefront) -> Array:
-        """
-        Calculates the Point Spread Function (PSF), i.e. the squared modulus
-        of the complex wavefront.
+    def psf(self: Wavefront, input_stokes: Array | None = None) -> Array:
+        """We take the -3 dimension since the wavefront can be polarised"""
+        return self.stokes(input_stokes)[-3]
 
-        Returns
-        -------
-        psf : Array
-            The PSF of the wavefront.
-        """
-        return self.stokes[0]
-
-    @property
-    def stokes(self: Wavefront) -> Array:
+    def stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """Returns the Stokes parameters as an array."""
-        return dlu.polarisation.jones_to_stokes(self.phasor, self.initial_stokes)
+        if input_stokes is None:
+            input_stokes = np.array([1.0, 0.0, 0.0, 0.0])
+        return dlu.jones_to_stokes(self.phasor, input_stokes)
 
     def apply_jones(self, jones):
         """Applies a Jones matrix to the polarised wavefront."""

@@ -227,12 +227,21 @@ class OpticalSystem(BaseOpticalSystem):
         ).multiply("phasor", weight**0.5)
         wf = eqx.filter_vmap(prop_fn)(wavelengths, weights)
 
-        # Return PSF, Wavefront, or PSF array
+        # Return PSF or Wavefront
         if return_wf:
             return wf
+
+        # non-polarised case, just return the PSF
+        if not isinstance(wf, PolarisedWavefront):
+            if return_psf:
+                return PSF(wf.psf.sum(0), wf.pixel_scale.mean())
+            return wf.psf.sum(0)
+
+        # Polarised WF case, feed in the stokes
+        psf = wf.psf(stokes=stokes).sum(0)
         if return_psf:
-            return PSF(wf.psf.sum(0), wf.pixel_scale.mean())
-        return wf.psf.sum(0)
+            return PSF(psf, wf.pixel_scale.mean())
+        return psf
 
     def model(
         self: OpticalSystem,
@@ -374,7 +383,6 @@ class LayeredOpticalSystem(OpticalSystem):
         self: LayeredOpticalSystem,
         wavelength: Array,
         offset: Array = None,
-        stokes: Array = None,
     ) -> Wavefront:
         """
         Initialises the wavefront for the propagate_mono method. and applies the offset
@@ -387,12 +395,6 @@ class LayeredOpticalSystem(OpticalSystem):
         offset : Array, radians = None
             The (x, y) offset from the optical axis of the source. Passed as angles in
             radians.
-        stokes : Array = None
-            The input Stokes vector [I, Q, U, V] of the source. If provided, the
-            wavefront is initialised as a `PolarisedWavefront` carrying these Stokes
-            parameters. If None, a scalar `Wavefront` is used (which is promoted to a
-            `PolarisedWavefront` with a default unpolarised [1, 0, 0, 0] state only if
-            a polarising layer is encountered).
 
         Returns
         -------
@@ -403,17 +405,8 @@ class LayeredOpticalSystem(OpticalSystem):
             offset = np.zeros(2)
 
         # Initialise wavefront
-        if stokes is None:
-            wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
-        else:
-            wavefront = PolarisedWavefront(
-                wavelength,
-                self.wf_npixels,
-                self.diameter,
-                initial_stokes=np.asarray(stokes, dtype=float),
-            )
-        wavefront = wavefront.tilt(offset)
-        return wavefront
+        wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
+        return wavefront.tilt(offset)
 
     def propagate_mono(
         self: LayeredOpticalSystem,
@@ -445,7 +438,7 @@ class LayeredOpticalSystem(OpticalSystem):
             If `return_wf` is True, returns the Wavefront object.
         """
         # Initialise wavefront
-        wavefront = self.initialise_wavefront(wavelength, offset, stokes)
+        wavefront = self.initialise_wavefront(wavelength, offset)
 
         # Apply layers
         for layer in list(self.layers.values()):
@@ -454,7 +447,13 @@ class LayeredOpticalSystem(OpticalSystem):
         # Return PSF or Wavefront
         if return_wf:
             return wavefront
-        return wavefront.psf
+
+        # If polarised we feed in stokes to PSF call
+        if isinstance(wavefront, PolarisedWavefront):
+            return wavefront.psf(stokes=stokes)
+
+        # Non-polarised case, just return the PSF
+        return wavefront.psf()
 
     def debug_propagate_mono(
         self: LayeredOpticalSystem,
@@ -628,7 +627,13 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
         # Return PSF or Wavefront
         if return_wf:
             return wf
-        return wf.psf
+
+        # If polarised we feed in stokes to PSF call
+        if isinstance(wf, PolarisedWavefront):
+            return wf.psf(stokes=stokes)
+
+        # Non-polarised case, just return the PSF
+        return wf.psf()
 
 
 class AngularOpticalSystem(ParametricLayeredOpticalSystem):
