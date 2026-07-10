@@ -1062,7 +1062,7 @@ class PolarisedWavefront(Wavefront):
     @property
     def stokes(self: Wavefront) -> Array:
         """Returns the Stokes parameters as an array."""
-        return dlu.jones_to_stokes(self.phasor, self.initial_stokes)
+        return dlu.polarisation.jones_to_stokes(self.phasor, self.initial_stokes)
 
     def apply_jones(self, jones):
         """Applies a Jones matrix to the polarised wavefront."""

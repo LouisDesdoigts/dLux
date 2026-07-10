@@ -14,6 +14,7 @@ __all__ = [
     "lhc_polariser",
     "quarter_wave_plate",
     "half_wave_plate",
+    "jones_to_stokes",
 ]
 
 
@@ -113,6 +114,10 @@ def jones_to_stokes(jones_phasor, stokes):
     """ """
     J = jones_phasor
 
+    # pack wavelength into a batch dimension
+    J = np.moveaxis(J, 0, -1)
+    stokes = np.moveaxis(stokes, 0, -1)
+
     A = np.array(
         [
             [1, 0, 0, 1],
@@ -125,11 +130,12 @@ def jones_to_stokes(jones_phasor, stokes):
     # Kronecker product mapping: row = 2*i + j, col = 2*k + l
     # We order the indices as i, j, k, l followed by the batch dimensions (...)
     J_kron = np.einsum("ik...,jl...->ijkl...", J, np.conj(J))
-
     # Reshape the (2, 2, 2, 2, ...) array into (4, 4, ...)
-    J_kron = J_kron.reshape((4, 4) + J.shape[-2:])
+    J_kron = J_kron.reshape((4, 4) + J.shape[-3:])
+    
 
     # Perform matrix multiplication: M = A @ J_kron @ A_inv for each batch element
     M = np.einsum("xy,yz...,zw->xw...", A, J_kron, np.linalg.inv(A))
-
-    return np.einsum("ab...,b->a...", M.real, stokes)
+    
+    # Return wvl to first index and perform matrix-vector multiplication
+    return np.einsum("abcdw,aw->wacd", M.real, stokes)
