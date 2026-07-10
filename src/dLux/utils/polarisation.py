@@ -22,13 +22,23 @@ def apply_jones(jones: Array, phasor: Array) -> Array:
 
 
 def linear_polariser(angle: Array) -> Array:
+    """
+    This already handles dimensionality inherently. An input shape of (N, M) will
+    produce an output shape of (2, 2, N, M).
+    """
     c, s = np.cos(angle), np.sin(angle)
     return np.array([[c**2, c * s], [c * s, s**2]])
 
 
 def retarder(retardance: Array, angle: Array) -> Array:
-    jones = np.array([[1, 0], [0, np.exp(1j * retardance)]])
-    return rotate_jones(jones, angle)
+    """
+    Constructs a retarder Jones matrix given retardance and angle. Dimensional inputs
+    are handled explicitly by vectorising the construction and rotation operation. An
+    inputs shape of (N, M) will produce an output shape of (2, 2, N, M).
+    """
+    fn = lambda r, a: rotate_jones(np.array([[1, 0], [0, np.exp(1j * r)]]), a)
+    J = np.vectorize(fn, signature="(),()->(i,j)")(retardance, angle)
+    return np.moveaxis(J, (-2, -1), (0, 1))
 
 
 ###
