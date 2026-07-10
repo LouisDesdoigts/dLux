@@ -4,7 +4,7 @@ import dLux.utils as dlu
 from jax import Array
 
 
-from .optical_layers import OpticalLayer
+from .optical_layers import BaseLayer, OpticalLayer
 from ..wavefronts import Wavefront
 
 __all__ = [
@@ -12,6 +12,8 @@ __all__ = [
     "UniformPolarisingOptic",
     "LinearPolariser",
     "Retarder",
+    "SVLinearPolariser",
+    "SVRetarder",
 ]
 
 
@@ -111,7 +113,6 @@ class SVLinearPolariser(BasePolarisingOptic):
 
 
 class SVRetarder(BasePolarisingOptic):
-    # TODO: What if the retardance is fixed but the angle is varying
     retardance: Array
     angle: Array
 
@@ -124,4 +125,72 @@ class SVRetarder(BasePolarisingOptic):
         return dlu.retarder(self.retardance, self.angle)
 
 
-# TODO: Basis classes
+class MultiBasis(BaseLayer):
+    basis: dict[Array]
+    coefficients: dict[Array]
+
+    # A dictionary of basis vectors and coefficients that correspond to each parameter
+    # of the model. Produces an output dictionary of the evaluated basis and
+    # coefficients
+
+    def __init__(self: MultiBasis, basis: dict[Array], coefficients: dict[Array]):
+        self.basis = basis
+        self.coefficients = coefficients
+
+    def __getitem__(self: MultiBasis, key: str) -> Array:
+        """
+        Provides access to a specific evaluated basis by its key via:
+
+        ```python
+        full_basis = MultiBasis(basis_dict, coeff_dict)
+        output_a = full_basis['a']  # Accesses the evaluated basis for key 'a'
+        ```
+
+        """
+        return dlu.eval_basis(self.basis[key], self.coefficients[key])
+
+    def __getattr__(self: MultiBasis, key: str) -> Array:
+        """
+        Provides access to a specific evaluated basis by its key via:
+
+        ```python
+        full_basis = MultiBasis(basis_dict, coeff_dict)
+        output_a = full_basis.a  # Accesses the evaluated basis for key 'a'
+        ```
+
+        """
+        return self.basis[key]
+
+    def __call__(self: MultiBasis) -> dict[Array]:
+        pass
+
+
+# TODO: Think more about implicit (fourier) basis vs explicit basis (holding an array)
+
+
+class Basis(BaseLayer):
+
+    def eval_basis(self):
+        raise NotImplementedError("eval_basis must be implemented in subclasses.")
+
+
+class ExplicitBasis(Basis):
+    basis: Array
+    coefficients: Array
+
+    def eval_basis(self):
+        return dlu.eval_basis(self.basis, self.coefficients)
+
+
+class ImplicitBasis(Basis):
+    coefficients: Array
+
+    def eval_basis(self):
+        pass
+
+
+class FourierBasis(ImplicitBasis):
+
+    def eval_basis(self):
+        # Implement the evaluation of the Fourier basis functions here
+        pass

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import partial
 from jax import Array
 import jax.numpy as np
 
@@ -36,6 +37,10 @@ def retarder(retardance: Array, angle: Array) -> Array:
     Constructs a retarder Jones matrix given retardance and angle. Dimensional inputs
     are handled explicitly by vectorising the construction and rotation operation. An
     inputs shape of (N, M) will produce an output shape of (2, 2, N, M).
+
+    Note that we dont apply the vectorise operation via partial because we want to
+    shift the output axes to the back of the array which isn't possible with the
+    vectorize function.
     """
     fn = lambda r, a: rotate_jones(np.array([[1, 0], [0, np.exp(1j * r)]]), a)
     J = np.vectorize(fn, signature="(),()->(i,j)")(retardance, angle)
@@ -110,32 +115,33 @@ def rotate_jones(jones: Array, angle: Array | None) -> Array:
     )
 
 
+# Pre calculate the A and its inverse
+A = np.array(
+    [
+        [1, 0, 0, 1],
+        [1, 0, 0, -1],
+        [0, 1, 1, 0],
+        [0, -1j, 1j, 0],  # Swapped 1j and -1j to match IAU
+    ]
+)
+
+A_inv = np.linalg.inv(A)
+
+
+@partial(np.vectorize, excluded={1}, signature="(i,j)->(s)")
 def jones_to_stokes(jones_phasor, stokes):
     """ """
     J = jones_phasor
 
-    # pack wavelength into a batch dimension
-    J = np.moveaxis(J, 0, -1)
-    stokes = np.moveaxis(stokes, 0, -1)
-
-    A = np.array(
-        [
-            [1, 0, 0, 1],
-            [1, 0, 0, -1],
-            [0, 1, 1, 0],
-            [0, -1j, 1j, 0],  # Swapped 1j and -1j to match IAU
-        ]
-    )
-
     # Kronecker product mapping: row = 2*i + j, col = 2*k + l
     # We order the indices as i, j, k, l followed by the batch dimensions (...)
     J_kron = np.einsum("ik...,jl...->ijkl...", J, np.conj(J))
+
     # Reshape the (2, 2, 2, 2, ...) array into (4, 4, ...)
-    J_kron = J_kron.reshape((4, 4) + J.shape[-3:])
-    
+    J_kron = J_kron.reshape((4, 4) + J.shape[-2:])
 
     # Perform matrix multiplication: M = A @ J_kron @ A_inv for each batch element
-    M = np.einsum("xy,yz...,zw->xw...", A, J_kron, np.linalg.inv(A))
-    
-    # Return wvl to first index and perform matrix-vector multiplication
-    return np.einsum("abcdw,aw->wacd", M.real, stokes)
+    M = np.einsum("xy,yz...,zw->xw...", A, J_kron, A_inv)
+
+    # Perform the transformation from Jones to Stokes space and return the result
+    return np.einsum("ab...,b->a...", M.real, stokes)
