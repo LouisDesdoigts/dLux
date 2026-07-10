@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 from .layers.optical_layers import OpticalLayer
-from .wavefronts import Wavefront
+from .wavefronts import Wavefront, PolarisedWavefront
 from .sources import BaseSource as Source
 from .psfs import PSF
 
@@ -51,6 +51,7 @@ class BaseOpticalSystem(zdx.Base):
         wavelength: float,
         offset: Array | None = None,
         return_wf: bool = False,
+        stokes: Array | None = None,
     ) -> Array | Wavefront:  # pragma: no cover
         """
         Propagates a monochromatic point source through the optical layers.
@@ -63,6 +64,8 @@ class BaseOpticalSystem(zdx.Base):
             The (x, y) offset from the optical axis of the source.
         return_wf: bool = False
             Should the Wavefront object be returned instead of the PSF array?
+        stokes : Array | None = None
+            The input Stokes vector [I, Q, U, V] of the source.
 
         Returns
         -------
@@ -79,6 +82,7 @@ class BaseOpticalSystem(zdx.Base):
         weights: Array = None,
         return_wf: bool = False,
         return_psf: bool = False,
+        stokes: Array | None = None,
     ) -> Array | Wavefront | PSF:  # pragma: no cover
         """
         Propagates a Polychromatic point source through the optics.
@@ -95,6 +99,8 @@ class BaseOpticalSystem(zdx.Base):
             Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
             Should the PSF object be returned instead of the PSF array?
+        stokes : Array | None = None
+            The input Stokes vector [I, Q, U, V] of the source.
 
         Returns
         -------
@@ -151,6 +157,7 @@ class OpticalSystem(BaseOpticalSystem):
         weights: Array = None,
         return_wf: bool = False,
         return_psf: bool = False,
+        stokes: Array | None = None,
     ) -> Array | Wavefront | PSF:
         """
         Propagates a Polychromatic point source through the optics.
@@ -167,6 +174,11 @@ class OpticalSystem(BaseOpticalSystem):
             Should the Wavefront object be returned instead of the PSF array?
         return_psf : bool = False
             Should the PSF object be returned instead of the PSF array?
+        stokes : Array | None = None
+            The input Stokes vector [I, Q, U, V] of the source. If provided, the
+            wavefront is initialised as a `PolarisedWavefront` carrying these Stokes
+            parameters. If None, defaults to an unpolarised [1, 0, 0, 0] state when a
+            polarising layer is present.
 
         Returns
         -------
@@ -211,7 +223,7 @@ class OpticalSystem(BaseOpticalSystem):
         # Calculate - note we multiply by sqrt(weight) to account for the
         # fact that the PSF is the square of the amplitude
         prop_fn = lambda wavelength, weight: self.propagate_mono(
-            wavelength, offset, return_wf=True
+            wavelength, offset, return_wf=True, stokes=stokes
         ).multiply("phasor", weight**0.5)
         wf = eqx.filter_vmap(prop_fn)(wavelengths, weights)
 
@@ -359,7 +371,10 @@ class LayeredOpticalSystem(OpticalSystem):
         raise dlu.missing_attribute_error(self, key, list(self.layers.keys()))
 
     def initialise_wavefront(
-        self: LayeredOpticalSystem, wavelength: Array, offset: Array = None
+        self: LayeredOpticalSystem,
+        wavelength: Array,
+        offset: Array = None,
+        stokes: Array = None,
     ) -> Wavefront:
         """
         Initialises the wavefront for the propagate_mono method. and applies the offset
@@ -372,6 +387,12 @@ class LayeredOpticalSystem(OpticalSystem):
         offset : Array, radians = None
             The (x, y) offset from the optical axis of the source. Passed as angles in
             radians.
+        stokes : Array = None
+            The input Stokes vector [I, Q, U, V] of the source. If provided, the
+            wavefront is initialised as a `PolarisedWavefront` carrying these Stokes
+            parameters. If None, a scalar `Wavefront` is used (which is promoted to a
+            `PolarisedWavefront` with a default unpolarised [1, 0, 0, 0] state only if
+            a polarising layer is encountered).
 
         Returns
         -------
@@ -382,7 +403,15 @@ class LayeredOpticalSystem(OpticalSystem):
             offset = np.zeros(2)
 
         # Initialise wavefront
-        wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
+        if stokes is None:
+            wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
+        else:
+            wavefront = PolarisedWavefront(
+                wavelength,
+                self.wf_npixels,
+                self.diameter,
+                initial_stokes=np.asarray(stokes, dtype=float),
+            )
         wavefront = wavefront.tilt(offset)
         return wavefront
 
@@ -391,6 +420,7 @@ class LayeredOpticalSystem(OpticalSystem):
         wavelength: Array,
         offset: Array | None = None,
         return_wf: bool = False,
+        stokes: Array | None = None,
     ) -> Array | Wavefront:
         """
         Propagates a monochromatic point source through the optical layers.
@@ -403,6 +433,10 @@ class LayeredOpticalSystem(OpticalSystem):
             The (x, y) offset from the optical axis of the source.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
+        stokes : Array | None = None
+            The input Stokes vector [I, Q, U, V] of the source. If provided, the
+            wavefront is initialised as a `PolarisedWavefront` carrying these Stokes
+            parameters.
 
         Returns
         -------
@@ -411,7 +445,7 @@ class LayeredOpticalSystem(OpticalSystem):
             If `return_wf` is True, returns the Wavefront object.
         """
         # Initialise wavefront
-        wavefront = self.initialise_wavefront(wavelength, offset)
+        wavefront = self.initialise_wavefront(wavelength, offset, stokes)
 
         # Apply layers
         for layer in list(self.layers.values()):
@@ -560,6 +594,7 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
         wavelength: Array,
         offset: Array | None = None,
         return_wf: bool = False,
+        stokes: Array | None = None,
     ) -> Array | Wavefront:
         """
         Propagates a monochromatic point source through the optical layers
@@ -573,6 +608,10 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
             The (x, y) offset from the optical axis of the source.
         return_wf : bool = False
             Should the Wavefront object be returned instead of the PSF array?
+        stokes : Array | None = None
+            The input Stokes vector [I, Q, U, V] of the source. If provided, the
+            wavefront is initialised as a `PolarisedWavefront` carrying these Stokes
+            parameters.
 
         Returns
         -------
@@ -581,7 +620,7 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
             If `return_wf` is True, returns the Wavefront object.
         """
         # Upstream layers propagation
-        wf = super().propagate_mono(wavelength, offset, return_wf=True)
+        wf = super().propagate_mono(wavelength, offset, return_wf=True, stokes=stokes)
 
         # Propagate
         wf = self.to_focus(wf)
