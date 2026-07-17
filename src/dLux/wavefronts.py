@@ -432,6 +432,27 @@ class Wavefront(zdx.Base):
         """
         return self.set(phasor=np.flip(self.phasor, axis))
 
+    @staticmethod
+    def _scale_to(
+        phasor: Array,
+        npixels: int,
+        scale: Array,
+        complex: bool = True,
+    ) -> Array:
+        """
+        Scale a single spatial phasor of shape (n, n).
+        """
+        if complex:
+            fields = np.stack([phasor.real, phasor.imag])
+        else:
+            fields = np.stack([np.abs(phasor), np.angle(phasor)])
+
+        fields = vmap(dlu.scale, in_axes=(0, None, None))(fields, npixels, scale)
+
+        if complex:
+            return fields[0] + 1j * fields[1]
+        return fields[0] * np.exp(1j * fields[1])
+
     def scale_to(
         self: Wavefront,
         npixels: int,
@@ -457,21 +478,41 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The new interpolated wavefront.
         """
-        # Get field in either (amplitude, phase) or (real, imaginary)
-        fields = self.complex if complex else self.polar
+        scale_to = np.vectorize(
+            self._scale_to,
+            excluded={1, 2, 3},
+            signature="(n,n)->(m,m)",
+        )
 
-        # Scale the field
-        scale_fn = vmap(dlu.scale, (0, None, None))
-        fields = scale_fn(fields, npixels, pixel_scale / self.pixel_scale)
+        phasor = scale_to(
+            self.phasor,
+            npixels,
+            pixel_scale / self.pixel_scale,
+            complex,
+        )
 
-        # Convert back to complex form
+        return self.set(phasor=phasor, pixel_scale=np.asarray(pixel_scale, float))
+
+    @staticmethod
+    def _rotate(
+        phasor: Array,
+        angle: Array,
+        method: str = "linear",
+        complex: bool = True,
+    ) -> Array:
+        """
+        Rotate a single spatial phasor of shape (n, n).
+        """
         if complex:
-            phasor = fields[0] + 1j * fields[1]
+            fields = np.stack([phasor.real, phasor.imag])
         else:
-            phasor = fields[0] * np.exp(1j * fields[1])
+            fields = np.stack([np.abs(phasor), np.angle(phasor)])
 
-        # Return new wavefront
-        return self.set(phasor=phasor, pixel_scale=pixel_scale)
+        fields = vmap(dlu.rotate, in_axes=(0, None, None))(fields, angle, method)
+
+        if complex:
+            return fields[0] + 1j * fields[1]
+        return fields[0] * np.exp(1j * fields[1])
 
     def rotate(
         self: Wavefront,
@@ -499,21 +540,21 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The new wavefront rotated by angle in the clockwise direction.
         """
-        # Get field in either (amplitude, phase) or (real, imaginary)
-        fields = self.complex if complex else self.polar
+        rotate = np.vectorize(
+            self._rotate,
+            excluded={1, 2, 3},
+            signature="(n,n)->(n,n)",
+        )
 
-        # Rotate the field
-        rotator = vmap(dlu.rotate, (0, None, None))
-        fields = rotator(fields, angle, method)
-
-        # Convert back to complex form
-        if complex:
-            phasor = fields[0] + 1j * fields[1]
-        else:
-            phasor = fields[0] * np.exp(1j * fields[1])
-
-        # Return new wavefront
+        phasor = rotate(self.phasor, angle, method, complex)
         return self.set(phasor=phasor)
+
+    @staticmethod
+    def _resize(phasor: Array, npixels: int) -> Array:
+        """
+        Resize a single spatial phasor of shape (n, n).
+        """
+        return dlu.resize(phasor, npixels, 0j)
 
     def resize(self: Wavefront, npixels: int) -> Wavefront:
         """
@@ -529,7 +570,12 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The resized wavefront.
         """
-        return self.set(phasor=dlu.resize(self.phasor, npixels, 0j))
+        resize = np.vectorize(
+            self._resize,
+            excluded={1},
+            signature="(n,n)->(m,m)",
+        )
+        return self.set(phasor=resize(self.phasor, npixels))
 
     def coordinates(
         self: Wavefront,
@@ -602,6 +648,64 @@ class Wavefront(zdx.Base):
     def apply_jones(self, jones):
         return PolarisedWavefront.from_wavefront(self).apply_jones(jones)
 
+    @staticmethod
+    def _propagate_FFT(
+        phasor: Array,
+        wavelength: float,
+        pixel_scale: float,
+        center: Array,
+        focal_length: float,
+        pad: int,
+        inverse: bool,
+        spec_out: CoordSpec | None,
+    ) -> Array:
+        """
+        FFT-propagate a single spatial phasor of shape (n, n).
+        """
+        spec_in = CoordSpec(n=phasor.shape[-1], d=pixel_scale, c=center)
+        n_out = spec_in.n * pad
+        d_fft, c_fft = dlu.fft_spec(n_out, spec_in.d, wavelength, focal_length)
+
+        if spec_out is not None:
+            if spec_out.d is not None:
+                raise ValueError("Output spec cannot specify d; FFT output d is fixed.")
+            if spec_out.n is not None:
+                raise ValueError(
+                    "Output spec cannot specify n; FFT output n is determined by the "
+                    "pad parameter."
+                )
+
+            shift = c_fft - spec_out.c
+            in_ramp = dlu.fft_phase_ramp(
+                spec_in.xs,
+                wavelength,
+                shift,
+                focal_length,
+                inverse,
+            )
+
+            spec_out = spec_out.set(n=n_out, d=d_fft)
+            shift = dlu.fft_spec(spec_out.n, spec_out.d, wavelength, focal_length)[1]
+            out_ramp = dlu.fft_phase_ramp(
+                spec_out.xs,
+                wavelength,
+                shift,
+                focal_length,
+                inverse,
+            )
+        else:
+            in_ramp, out_ramp = 1.0, 1.0
+
+        propagated, _ = dlu.FFT(
+            phasor=phasor * in_ramp,
+            wavelength=wavelength,
+            pixel_scale=pixel_scale,
+            focal_length=focal_length,
+            inverse=inverse,
+            pad=pad,
+        )
+        return propagated * out_ramp
+
     def propagate_FFT(
         self,
         pad=2,
@@ -631,50 +735,60 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             Propagated wavefront with updated phasor and sampling metadata.
         """
-        # Input spec
-        spec_in = self.spec
-        wl = self.wavelength
-
-        # Default FFT output center
-        n_out = spec_in.n * pad
-        d_fft, c_fft = dlu.fft_spec(n_out, spec_in.d, wl, focal_length)
-
-        # Get the phase ramp and the output center
-        if spec_out is not None:
-            if spec_out.d is not None:
-                raise ValueError("Output spec cannot specify d; FFT output d is fixed.")
-            if spec_out.n is not None:
-                raise ValueError(
-                    "Output spec cannot specify n; FFT output n is determined by the ",
-                    "pad parameter.",
-                )
-
-            # Calculate the input phase ramp for the FFT propagation
-            shift = c_fft - spec_out.c
-            in_ramp = dlu.fft_phase_ramp(spec_in.xs, wl, shift, focal_length, inverse)
-
-            # Calculate the output phase ramp correction
-            spec_out = spec_out.set(n=n_out, d=d_fft)
-            shift = dlu.fft_spec(spec_out.n, spec_out.d, wl, focal_length)[1]
-            out_ramp = dlu.fft_phase_ramp(spec_out.xs, wl, shift, focal_length, inverse)
-
-        else:
-            in_ramp, out_ramp = 1.0, 1.0
-            spec_out = CoordSpec(n=n_out, d=d_fft, c=c_fft)
-
-        # Apply ramp and FFT
-        phasor, pixel_scale = dlu.FFT(
-            phasor=self.phasor * in_ramp,
-            wavelength=self.wavelength,
-            pixel_scale=self.pixel_scale,
-            focal_length=focal_length,
-            inverse=inverse,
-            pad=pad,
+        propagate_fft = np.vectorize(
+            self._propagate_FFT,
+            excluded={1, 2, 3, 4, 5, 6, 7},
+            signature="(n,n)->(m,m)",
         )
+
+        phasor = propagate_fft(
+            self.phasor,
+            self.wavelength,
+            self.pixel_scale,
+            self.center,
+            focal_length,
+            pad,
+            inverse,
+            spec_out,
+        )
+
+        n_out = self.npixels * pad
+        d_fft, c_fft = dlu.fft_spec(
+            n_out,
+            self.pixel_scale,
+            self.wavelength,
+            focal_length,
+        )
+        center_out = c_fft if spec_out is None else spec_out.c
 
         # Update the values
         return self.set(
-            phasor=phasor * out_ramp, pixel_scale=pixel_scale, center=spec_out.c
+            phasor=phasor,
+            pixel_scale=np.asarray(d_fft, float),
+            center=center_out,
+        )
+
+    @staticmethod
+    def _propagate(
+        phasor: Array,
+        wavelength: float,
+        pixel_scale_in: float,
+        npixels_out: int,
+        pixel_scale_out: float,
+        focal_length: float = None,
+        inverse: bool = False,
+    ) -> Array:
+        """
+        MFT-propagate a single spatial phasor of shape (n, n).
+        """
+        return dlu.MFT(
+            phasor=phasor,
+            wavelength=wavelength,
+            pixel_scale_in=pixel_scale_in,
+            npixels_out=npixels_out,
+            pixel_scale_out=pixel_scale_out,
+            focal_length=focal_length,
+            inverse=inverse,
         )
 
     def propagate(
@@ -710,17 +824,45 @@ class Wavefront(zdx.Base):
         - Ideal for generating PSFs at arbitrary sampling.
         - For broadband propagation, vmap this function over wavelength and pixel_scale.
         """
-        # Propagate
-        phasor = dlu.MFT(
-            phasor=self.phasor,
-            wavelength=self.wavelength,
-            pixel_scale_in=self.pixel_scale,
-            npixels_out=npixels,
-            pixel_scale_out=pixel_scale,
+        propagate = np.vectorize(
+            self._propagate,
+            excluded={1, 2, 3, 4, 5, 6},
+            signature="(n,n)->(m,m)",
+        )
+
+        phasor = propagate(
+            self.phasor,
+            self.wavelength,
+            self.pixel_scale,
+            npixels,
+            pixel_scale,
+            focal_length,
+            inverse,
+        )
+        return self.set(phasor=phasor, pixel_scale=np.array(pixel_scale, float))
+
+    @staticmethod
+    def _propagate_MFT(
+        phasor: Array,
+        wavelength: float,
+        pixel_scale_in: float,
+        npixels_out: int,
+        pixel_scale_out: float,
+        focal_length: float = None,
+        inverse: bool | None = None,
+    ) -> Array:
+        """
+        CoordSpec MFT-propagate a single spatial phasor of shape (n, n).
+        """
+        return dlu.MFT(
+            phasor=phasor,
+            wavelength=wavelength,
+            pixel_scale_in=pixel_scale_in,
+            npixels_out=npixels_out,
+            pixel_scale_out=pixel_scale_out,
             focal_length=focal_length,
             inverse=inverse,
         )
-        return self.set(phasor=phasor, pixel_scale=np.array(pixel_scale, float))
 
     def propagate_MFT(self, spec_out, focal_length=None, inverse=None):
         """
@@ -743,15 +885,20 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             Propagated wavefront with updated phasor and pixel scale.
         """
-        # Propagate
-        phasor = dlu.MFT(
-            phasor=self.phasor,
-            wavelength=self.wavelength,
-            pixel_scale_in=self.pixel_scale,
-            npixels_out=spec_out.n,
-            pixel_scale_out=spec_out.d,
-            focal_length=focal_length,
-            inverse=inverse,
+        propagate_mft = np.vectorize(
+            self._propagate_MFT,
+            excluded={1, 2, 3, 4, 5, 6},
+            signature="(n,n)->(m,m)",
+        )
+
+        phasor = propagate_mft(
+            self.phasor,
+            self.wavelength,
+            self.pixel_scale,
+            spec_out.n,
+            spec_out.d,
+            focal_length,
+            inverse,
         )
         return self.set(phasor=phasor, pixel_scale=np.array(spec_out.d, float))
 
@@ -892,14 +1039,7 @@ class PolarisedWavefront(Wavefront):
     ):
         super().__init__(wavelength, npixels, diameter, pixel_scale, center)
 
-        # stack to (2,2, npixels, npixels)
-        self.phasor = np.stack(
-            [
-                np.stack([self.phasor, np.zeros_like(self.phasor)], axis=0),
-                np.stack([np.zeros_like(self.phasor), self.phasor], axis=0),
-            ],
-            axis=0,
-        )
+        self.phasor = self.phasor[None, None] * np.eye(2)[:, :, None, None]
 
     def from_phasor(self):
         """
@@ -912,9 +1052,7 @@ class PolarisedWavefront(Wavefront):
         )
 
     @staticmethod
-    def from_wavefront(
-        wavefront: Wavefront, initial_stokes: Array = None
-    ) -> PolarisedWavefront:
+    def from_wavefront(wavefront: Wavefront) -> PolarisedWavefront:
         """
         Promotes a regular Wavefront to a PolarisedWavefront by multiplying the scalar
         phasor by eye(2)
@@ -922,9 +1060,6 @@ class PolarisedWavefront(Wavefront):
         ----------
         wavefront : Wavefront
             The input wavefront to promote.
-        initial_stokes : Array = None
-            The initial Stokes parameters to set for the polarised wavefront. If None,
-            defaults to [1, 0, 0, 0] (fully unpolarised).
 
         Returns
         -------
@@ -933,124 +1068,15 @@ class PolarisedWavefront(Wavefront):
             as the input wavefront, and the phasor promoted
 
         """
-        if initial_stokes is None:
-            initial_stokes = np.array([1.0, 0.0, 0.0, 0.0])
         pwf = PolarisedWavefront(
             wavelength=wavefront.wavelength,
             npixels=wavefront.npixels,
             diameter=wavefront.diameter,
             center=wavefront.center,
-            initial_stokes=initial_stokes,
         )
-        cur_phasor = wavefront.phasor
 
-        new_phasor = np.stack(
-            [
-                np.stack([cur_phasor, np.zeros_like(cur_phasor)], axis=0),
-                np.stack([np.zeros_like(cur_phasor), cur_phasor], axis=0),
-            ],
-        )
-        pwf = pwf.set("phasor", new_phasor)
-        return pwf
-
-    # TODO: Nuke this and use np.vectorize in the parent class to handle any extra
-    # dimensionality from polarisation
-    def scale_to(
-        self: Wavefront,
-        npixels: int,
-        pixel_scale: Array,
-        complex: bool = True,
-    ) -> Wavefront:
-        """
-        Interpolates the wavefront to a given npixels and pixel_scale. Can be done on
-        the real and imaginary components by passing in complex=True.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels to interpolate to.
-        pixel_scale: Array
-            The pixel scale to interpolate to.
-        complex : bool = True
-            If True, interpolate the real and imaginary components. If False,
-            interpolate the amplitude and phase components.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new interpolated wavefront.
-        """
-        # Get field in either (amplitude, phase) or (real, imaginary)
-        # shape is (2,2,2,npixels,npixels), where first 2 is real/imag or amp/phase
-        fields = self.complex if complex else self.polar
-
-        fields = fields.reshape((-1, self.npixels, self.npixels))
-
-        print("Fields shape before scaling:", fields.shape)
-
-        # Scale the field
-        scale_fn = vmap(dlu.scale, (0, None, None))
-        fields = scale_fn(fields, npixels, pixel_scale / self.pixel_scale)
-
-        # back to (2,2,2,npixels,npixels)
-        fields = fields.reshape((2, 2, 2, npixels, npixels))
-
-        # Convert back to complex form
-        if complex:
-            phasor = fields[0] + 1j * fields[1]
-        else:
-            phasor = fields[0] * np.exp(1j * fields[1])
-
-        # Return new wavefront
-        return self.set(phasor=phasor, pixel_scale=pixel_scale)
-
-    # TODO: Nuke this and use np.vectorize in the parent class to handle any extra
-    # dimensionality from polarisation
-    def rotate(
-        self: Wavefront,
-        angle: Array,
-        method: str = "linear",
-        complex: bool = True,
-    ) -> Wavefront:
-        """
-        Rotates the wavefront by a given angle via interpolation. Can be done on the
-        real and imaginary components by passing in complex=True.
-
-        Parameters
-        ----------
-        angle : Array, radians
-            The angle by which to rotate the wavefront in a clockwise
-            direction.
-        method : str = "linear"
-            The interpolation method.
-        complex : bool = True
-            If True, rotate the real and imaginary components. If False, rotate the
-            amplitude and phase components.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront rotated by angle in the clockwise direction.
-        """
-        # Get field in either (amplitude, phase) or (real, imaginary)
-        fields = self.complex if complex else self.polar
-
-        fields = fields.reshape((-1, self.npixels, self.npixels))
-
-        # Rotate the field
-        rotator = vmap(dlu.rotate, (0, None, None))
-        fields = rotator(fields, angle, method)
-
-        fields = fields.reshape((2, 2, 2, self.npixels, self.npixels))
-
-        # Convert back to complex form
-        if complex:
-            phasor = fields[0] + 1j * fields[1]
-        else:
-            phasor = fields[0] * np.exp(1j * fields[1])
-
-        # Return new wavefront
-        return self.set(phasor=phasor)
+        jones_phasor = wavefront.phasor[None, None] * np.eye(2)[:, :, None, None]
+        return pwf.set("phasor", jones_phasor)
 
     def psf(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """We take the -3 dimension since the wavefront can be polarised"""
