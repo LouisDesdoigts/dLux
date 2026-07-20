@@ -30,7 +30,7 @@ class Wavefront(zdx.Base):
         The electric field of the `Wavefront`.
     pixel_scale : float, meters/pixel
         The pixel scale of the phase and amplitude arrays.
-    center : Array
+    center : float
         The centre coordinate of the wavefront grid.
     diameter : Array, property
         Derived property from `pixel_scale` and `npixels`; wavefront diameter.
@@ -67,7 +67,7 @@ class Wavefront(zdx.Base):
         npixels: int,
         diameter: float = None,
         pixel_scale: float = None,
-        center: Array = None,
+        center: float = None,
     ):
         """
         Parameters
@@ -82,7 +82,7 @@ class Wavefront(zdx.Base):
         pixel_scale : float = None, meters/pixel
             The pixel scale of the `Wavefront`. Either `diameter` or `pixel_scale`
             must be provided.
-        center : Array = None
+        center : float = None
             The centre coordinate of the wavefront grid, in metres. Defaults to zero.
         """
         # Handle diameter vs pixel_scale
@@ -106,14 +106,13 @@ class Wavefront(zdx.Base):
         phase = np.zeros((npixels, npixels), dtype=float)
         self.phasor = amplitude * np.exp(1j * phase)
 
-        if center is not None:
-            self.center = np.asarray(center, float)
-
-            # NOTE: only 1d offsets are presently supported
-            if self.center.shape != (1,):
-                raise ValueError("center must have shape (1,).")
-        else:
-            self.center = np.zeros(1, float)
+        self.center = np.asarray(0.0 if center is None else center, float)
+        if self.center.ndim != 0:
+            raise ValueError(
+                f"center must be scalar, got shape {self.center.shape}. "
+                "For the current square-array wavefront convention, the same "
+                "centre coordinate is used for both axes."
+            )
 
     @classmethod
     def from_phasor(
@@ -122,7 +121,7 @@ class Wavefront(zdx.Base):
         wavelength: float,
         pixel_scale: float = None,
         diameter: float = None,
-        center: Array = None,
+        center: float = None,
     ) -> Wavefront:
         """
         Create a Wavefront from an existing phasor array.
@@ -139,7 +138,7 @@ class Wavefront(zdx.Base):
         diameter : float = None, meters
             The diameter of the phasor array. Either `pixel_scale` or
             `diameter` must be provided.
-        center : Array = None
+        center : float = None
             The centre coordinate of the wavefront grid, in metres. Defaults to zero.
 
         Returns
@@ -310,6 +309,18 @@ class Wavefront(zdx.Base):
         return self.pixel_scale.ndim
 
     @property
+    def chromatic(self: Wavefront) -> bool:
+        """
+        Returns whether the wavefront carries a leading wavelength dimension.
+
+        Returns
+        -------
+        chromatic : bool
+            True if the wavefront wavelength is vectorised.
+        """
+        return self.wavelength.ndim > 0
+
+    @property
     def power(self: Wavefront) -> Array:
         """
         Returns the total power of the wavefront (sum of |E|^2 over pixels).
@@ -320,6 +331,32 @@ class Wavefront(zdx.Base):
             The total power of the wavefront.
         """
         return np.sum(self.psf)
+
+    def _to_phasor_shape(self: Wavefront, array: Array) -> Array:
+        """
+        Reshape scalar or spatial arrays to broadcast against the phasor.
+
+        Parameters
+        ----------
+        array : Array
+            Input scalar, chromatic scalar, spatial, or chromatic spatial array.
+
+        Returns
+        -------
+        array : Array
+            The input reshaped to broadcast over the phasor axes.
+        """
+        array = np.asarray(array)
+        chromatic_ndim = self.wavelength.ndim
+        extra_ndim = self.phasor.ndim - chromatic_ndim - 2
+
+        if array.ndim == chromatic_ndim:
+            return array.reshape(array.shape + (1,) * (extra_ndim + 2))
+        if array.ndim == chromatic_ndim + 2:
+            return array.reshape(
+                array.shape[:chromatic_ndim] + (1,) * extra_ndim + array.shape[-2:]
+            )
+        return array
 
     def add_phase(self: Wavefront, phase: Array) -> Wavefront:
         """
@@ -338,7 +375,7 @@ class Wavefront(zdx.Base):
         """
         if phase is None:
             return self
-        return self.multiply("phasor", np.exp(1j * phase))
+        return self.multiply("phasor", np.exp(1j * self._to_phasor_shape(phase)))
 
     def add_opd(self: Wavefront, opd: Array) -> Wavefront:
         """
@@ -357,7 +394,7 @@ class Wavefront(zdx.Base):
         """
         if opd is None:
             return self
-        return self.add_phase(self.wavenumber * np.asarray(opd))
+        return self.add_phase(self.wavenumber[..., None, None] * np.asarray(opd))
 
     def tilt(self: Wavefront, angles: Array, unit: str = "rad") -> Wavefront:
         """
@@ -384,7 +421,7 @@ class Wavefront(zdx.Base):
         coords = self.coordinates(scale=dlu.unit_factor_to_rad(unit))
 
         # Tilt the wavefront
-        return self.add_opd(np.sum(angles[:, None, None] * coords, axis=0))
+        return self.add_opd(np.einsum("i,...ijk->...jk", angles, coords))
 
     def normalise(
         self: Wavefront,
@@ -597,9 +634,11 @@ class Wavefront(zdx.Base):
             The coordinates of the centers of each pixel representing the wavefront.
         """
         xs = self.xs * scale
-        coords = np.array(np.meshgrid(xs, xs))
+        coords_fn = lambda xs: np.array(np.meshgrid(xs, xs))
+        coords = np.vectorize(coords_fn, signature="(n)->(c,n,n)")(xs)
+
         if polar:
-            return dlu.cart2polar(coords)
+            return np.vectorize(dlu.cart2polar, signature="(c,n,n)->(c,n,n)")(coords)
         return coords
 
     @property
@@ -683,7 +722,7 @@ class Wavefront(zdx.Base):
 
         output_center = None if spec_out is None else spec_out.c
 
-        def prop_fn(phasor, wavelength, pixel_scale):
+        def prop_fn(phasor, wavelength, pixel_scale, center):
             return dlu.FFT(
                 phasor,
                 wavelength,
@@ -691,13 +730,13 @@ class Wavefront(zdx.Base):
                 focal_length=focal_length,
                 pad=pad,
                 inverse=inverse,
-                center=self.center,
+                center=center,
                 output_center=output_center,
             )
 
-        prop_fn = np.vectorize(prop_fn, signature="(n,n),(),()->(m,m),(),()")
+        prop_fn = np.vectorize(prop_fn, signature="(n,n),(),(),()->(m,m),(),()")
         phasor, pixel_scale, center = prop_fn(
-            self.phasor, self.wavelength, self.pixel_scale
+            self.phasor, self.wavelength, self.pixel_scale, self.center
         )
         return self.set(phasor=phasor, pixel_scale=pixel_scale, center=center)
 
