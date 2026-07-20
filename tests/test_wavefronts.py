@@ -156,10 +156,10 @@ class BaseWavefrontTests:
         self.assert_matches(operation(wavefront), expected(operation))
 
     def test_coordinates(self, wavefront, expected):
-        operation = lambda wavefront: wavefront.set(
-            phasor=wavefront.coordinates(polar=True).astype(complex)
-        )
-        self.assert_matches(operation(wavefront), expected(operation))
+        coords = wavefront.coordinates(polar=True)
+        expected_coords = expected(lambda wavefront: wavefront.coordinates(polar=True))
+        assert coords.shape[-3:] == (2, 16, 16)
+        assert np.allclose(coords, expected_coords)
 
     def test_set_spec(self, wavefront, expected):
         operation = lambda wavefront: wavefront.set_spec(
@@ -264,6 +264,7 @@ class TestWavefront(BaseWavefrontTests):
         assert wavefront.npixels == 16
         assert wavefront.diameter == 1.0
         assert wavefront.wavelength == 1e-6
+        assert wavefront.phasor.shape == (16, 16)
 
         wf_px = Wavefront(wavelength=1e-6, npixels=16, pixel_scale=1 / 16)
         assert wf_px.pixel_scale == 1 / 16
@@ -303,7 +304,7 @@ class TestWavefront(BaseWavefrontTests):
 
 
 class TestChromaticWavefront(BaseWavefrontTests):
-    """Run the standard Wavefront tests on a filter-vmapped chromatic Wavefront."""
+    """Run the standard Wavefront tests on chromatic Wavefront construction paths."""
 
     @pytest.fixture
     def ndim(self):
@@ -314,9 +315,19 @@ class TestChromaticWavefront(BaseWavefrontTests):
         return True
 
     @pytest.fixture
-    def wavefront(self):
-        wavelengths = np.array([1.0e-6, 1.5e-6])
+    def wavelengths(self):
+        return np.array([1.0e-6, 1.5e-6])
+
+    @pytest.fixture(params=["direct", "vmapped"])
+    def construction(self, request):
+        return request.param
+
+    @pytest.fixture
+    def wavefront(self, wavelengths, construction):
         weights = np.array([0.4, 0.6])
+
+        if construction == "direct":
+            return Wavefront(wavelengths, npixels=16, diameter=1.0)
 
         def make_wavefront(wavelength, weight):
             wavefront = Wavefront(wavelength, npixels=16, diameter=1.0)
@@ -325,9 +336,31 @@ class TestChromaticWavefront(BaseWavefrontTests):
         return eqx.filter_vmap(make_wavefront)(wavelengths, weights)
 
     @pytest.fixture
-    def output_pixel_scale(self):
+    def output_pixel_scale(self, construction):
+        if construction == "direct":
+            return 1 / 32
         return np.array([1 / 32, 1 / 40])
 
     @pytest.fixture
-    def expected(self, wavefront):
+    def expected(self, wavefront, wavelengths, construction):
+        if construction == "direct":
+            wavefront = eqx.filter_vmap(
+                lambda wavelength: Wavefront(wavelength, npixels=16, diameter=1.0)
+            )(wavelengths)
         return lambda operation, *args: eqx.filter_vmap(operation)(wavefront, *args)
+
+    def test_constructor(self, wavefront, wavelengths, construction):
+        assert wavefront.phasor.shape == wavelengths.shape + (16, 16)
+        assert wavefront.wavelength.shape == wavelengths.shape
+        if construction == "direct":
+            assert wavefront.pixel_scale.shape == ()
+            assert wavefront.center.shape == ()
+        else:
+            assert wavefront.pixel_scale.shape == wavelengths.shape
+            assert wavefront.center.shape == wavelengths.shape
+
+    def test_from_phasor(self, wavelengths):
+        phasor = np.ones((8, 8), dtype=complex)
+        wf = Wavefront.from_phasor(phasor, wavelengths, pixel_scale=1 / 8)
+        assert wf.phasor.shape == wavelengths.shape + (8, 8)
+        assert np.allclose(wf.phasor, phasor)
