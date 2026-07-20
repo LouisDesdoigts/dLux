@@ -1101,7 +1101,10 @@ class PolarisedWavefront(Wavefront):
 
     def psf_from_stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """Produces the PSF from the input Stokes vector"""
-        return self.stokes(input_stokes)[0]
+        stokes = self.stokes(input_stokes)
+        if self.ndim > 0:
+            return stokes[:, 0]
+        return stokes[0]
 
     def stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """
