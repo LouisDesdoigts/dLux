@@ -173,6 +173,35 @@ class TestImshowExtent:
 
 
 # ============================================================================
+# Tests for from_complex
+# ============================================================================
+class TestFromComplex:
+    """Tests for complex array decomposition."""
+
+    @pytest.mark.parametrize("complex", [True, False])
+    def test_round_trip(self, complex):
+        """Cartesian and polar decompositions reconstruct the input."""
+        array = np.array([[1 + 2j, 3 - 4j], [-5 + 6j, -7 - 8j]])
+        vals, return_fn = helpers_utils.from_complex(array, complex)
+        assert vals.shape == (2, 2, 2)
+        assert np.allclose(return_fn(vals), array)
+
+    def test_cartesian_values(self):
+        """Cartesian decomposition returns real and imaginary components."""
+        array = np.array([[1 + 2j, 3 - 4j]])
+        vals, _ = helpers_utils.from_complex(array, complex=True)
+        assert np.allclose(vals[0], array.real)
+        assert np.allclose(vals[1], array.imag)
+
+    def test_polar_values(self):
+        """Polar decomposition returns amplitude and phase components."""
+        array = np.array([[1 + 2j, 3 - 4j]])
+        vals, _ = helpers_utils.from_complex(array, complex=False)
+        assert np.allclose(vals[0], np.abs(array))
+        assert np.allclose(vals[1], np.angle(array))
+
+
+# ============================================================================
 # Tests for missing_attribute_error
 # ============================================================================
 class TestMissingAttributeError:
