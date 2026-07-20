@@ -16,20 +16,25 @@ __all__ = ["Wavefront", "PolarisedWavefront"]
 
 class Wavefront(zdx.Base):
     """
-    Holds the state of a wavefront as it is transformed and propagated
-    through an optical system. All wavefronts assume square arrays.
+    Holds the state of a wavefront as it is transformed and propagated through an
+    optical system. The final two phasor axes are the square spatial wavefront; any
+    preceding axes are treated as vectorisation axes. Passing a vector of wavelengths
+    creates a chromatic wavefront with matching leading phasor dimensions.
 
     ??? abstract "UML"
         ![UML](../../assets/uml/Wavefront.png)
 
     Attributes
     ----------
-    wavelength : float, meters
-        The wavelength of the `Wavefront`.
+    wavelength : float or Array, meters
+        The wavelength of the `Wavefront`. Vector-valued wavelengths define a chromatic
+        wavefront.
     phasor : Array[complex]
-        The electric field of the `Wavefront`.
-    pixel_scale : float, meters/pixel
-        The pixel scale of the phase and amplitude arrays.
+        The electric field of the `Wavefront`, with shape `(..., npixels, npixels)`.
+        Leading dimensions are vectorisation dimensions.
+    pixel_scale : float or Array, meters/pixel
+        The pixel scale of the phase and amplitude arrays. This may be scalar or
+        vectorised over the leading phasor dimensions.
     center : float
         The centre coordinate of the wavefront grid.
     diameter : Array, property
@@ -48,40 +53,43 @@ class Wavefront(zdx.Base):
         Derived property from `phasor`; `(real, imaginary)` representation.
     polar : tuple[Array, Array], property
         Derived property from `phasor`; `(amplitude, phase)` representation.
-    wavenumber : Array, property
+    wavenumber : float or Array, property
         Derived property from `wavelength`; scalar `2 * pi / wavelength`.
     ndim : int, property
-        Derived property from `pixel_scale`; vectorisation rank of wavefront state.
+        Derived property from `phasor`; vectorisation rank of wavefront state.
+    chromatic : bool, property
+        Derived property from `wavelength`; whether wavelength is vector-valued.
     power : Array, property
         Derived property from `amplitude`; total wavefront power.
     """
 
     phasor: Array[complex]
-    wavelength: float
-    pixel_scale: float
-    center: float
+    wavelength: Array
+    pixel_scale: Array
+    center: Array
 
     def __init__(
         self: Wavefront,
-        wavelength: float,
+        wavelength: float | Array,
         npixels: int,
-        diameter: float = None,
-        pixel_scale: float = None,
-        center: float = None,
+        diameter: float | Array = None,
+        pixel_scale: float | Array = None,
+        center: float | Array = None,
     ):
         """
         Parameters
         ----------
-        wavelength : float, meters
-            The wavelength of the `Wavefront`.
+        wavelength : float or Array, meters
+            The wavelength of the `Wavefront`. Passing an array creates a chromatic
+            wavefront with phasor shape `wavelength.shape + (npixels, npixels)`.
         npixels : int
             The number of pixels that represent the `Wavefront`.
         diameter : float = None, meters
             The total diameter of the `Wavefront`. Either `diameter` or `pixel_scale`
             must be provided.
-        pixel_scale : float = None, meters/pixel
+        pixel_scale : float or Array = None, meters/pixel
             The pixel scale of the `Wavefront`. Either `diameter` or `pixel_scale`
-            must be provided.
+            must be provided. Scalar values are broadcast across chromatic axes.
         center : float = None
             The centre coordinate of the wavefront grid, in metres. Defaults to zero.
         """
@@ -102,8 +110,9 @@ class Wavefront(zdx.Base):
         else:
             self.pixel_scale = np.asarray(pixel_scale, float)
 
-        amplitude = np.ones((npixels, npixels), dtype=float) / npixels**2
-        phase = np.zeros((npixels, npixels), dtype=float)
+        shape = self.wavelength.shape + (npixels, npixels)
+        amplitude = np.ones(shape, dtype=float) / npixels**2
+        phase = np.zeros(shape, dtype=float)
         self.phasor = amplitude * np.exp(1j * phase)
 
         self.center = np.asarray(0.0 if center is None else center, float)
@@ -118,10 +127,10 @@ class Wavefront(zdx.Base):
     def from_phasor(
         cls,
         phasor: Array[complex],
-        wavelength: float,
-        pixel_scale: float = None,
-        diameter: float = None,
-        center: float = None,
+        wavelength: float | Array,
+        pixel_scale: float | Array = None,
+        diameter: float | Array = None,
+        center: float | Array = None,
     ) -> Wavefront:
         """
         Create a Wavefront from an existing phasor array.
@@ -129,12 +138,16 @@ class Wavefront(zdx.Base):
         Parameters
         ----------
         phasor : Array[complex]
-            The complex electric field array.
-        wavelength : float, meters
-            The wavelength of the wavefront.
-        pixel_scale : float = None, meters/pixel
+            The complex electric field array. The final two axes are spatial; leading
+            axes are vectorisation axes. If a 2D phasor is passed with vector
+            wavelengths, it is broadcast over the wavelength axes.
+        wavelength : float or Array, meters
+            The wavelength of the wavefront. Vector-valued wavelengths define a
+            chromatic wavefront.
+        pixel_scale : float or Array = None, meters/pixel
             The pixel scale of the phasor array. Either `pixel_scale` or
-            `diameter` must be provided.
+            `diameter` must be provided. Scalar values are broadcast across
+            chromatic axes.
         diameter : float = None, meters
             The diameter of the phasor array. Either `pixel_scale` or
             `diameter` must be provided.
@@ -146,11 +159,12 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             A new Wavefront object with the specified phasor.
         """
-        # Infer npixels from phasor shape
         phasor_arr = np.asarray(phasor, complex)
+        wavelength = np.asarray(wavelength, float)
+        if phasor_arr.ndim == 2 and wavelength.ndim > 0:
+            phasor_arr = phasor_arr * np.ones(wavelength.shape + (1, 1))
         npixels = phasor_arr.shape[-1]
 
-        # Create instance with appropriate parameters and set the phasor
         return cls(
             npixels=npixels,
             wavelength=wavelength,
@@ -163,7 +177,8 @@ class Wavefront(zdx.Base):
     def diameter(self: Wavefront) -> Array:
         """
         Returns the current wavefront diameter calculated using the pixel scale and
-        number of pixels.
+        number of pixels. If the pixel scale is vectorised, the diameter is also
+        vectorised.
 
         Returns
         -------
@@ -176,7 +191,7 @@ class Wavefront(zdx.Base):
     def npixels(self: Wavefront) -> int:
         """
         Returns the side length of the arrays currently representing the wavefront.
-        Taken from the last axis of the amplitude array.
+        Taken from the final phasor axis.
 
         Returns
         -------
@@ -236,12 +251,12 @@ class Wavefront(zdx.Base):
     @property
     def complex(self: Wavefront) -> Array:
         """
-        Returns the complex phasor of the `Wavefront`.
+        Returns the real and imaginary components of the `Wavefront`.
 
         Returns
         -------
         wavefront : Array
-            The complex phasor of the `Wavefront`.
+            The complex representation with component axis first.
         """
         return np.stack([self.phasor.real, self.phasor.imag], axis=0)
 
@@ -278,15 +293,16 @@ class Wavefront(zdx.Base):
         Returns
         -------
         psf : PSF
-            A PSF object containing the current wavefront intensity and
-            pixel scale.
+            A PSF object containing the current wavefront intensity and pixel scale,
+            including any leading chromatic dimensions.
         """
         return PSF(self.psf, self.pixel_scale)
 
     @property
     def wavenumber(self: Wavefront) -> Array:
         """
-        Returns the wavenumber of the wavefront (2 * pi / wavelength).
+        Returns the wavenumber of the wavefront (2 * pi / wavelength), with the same
+        shape as `wavelength`.
 
         Returns
         -------
@@ -298,15 +314,14 @@ class Wavefront(zdx.Base):
     @property
     def ndim(self: Wavefront) -> int:
         """
-        Returns the number of 'dimensions' of the wavefront. This is used to track the
-        vectorised version of the wavefront returned from vmapping.
+        Returns the number of leading vectorisation dimensions on the phasor.
 
         Returns
         -------
         ndim : int
-            The 'dimensionality' of dimensions of the wavefront.
+            The number of non-spatial dimensions before the final two phasor axes.
         """
-        return self.pixel_scale.ndim
+        return self.phasor.ndim - 2
 
     @property
     def chromatic(self: Wavefront) -> bool:
@@ -323,7 +338,7 @@ class Wavefront(zdx.Base):
     @property
     def power(self: Wavefront) -> Array:
         """
-        Returns the total power of the wavefront (sum of |E|^2 over pixels).
+        Returns the total power of the wavefront, summed over all phasor entries.
 
         Returns
         -------
@@ -334,12 +349,13 @@ class Wavefront(zdx.Base):
 
     def _to_phasor_shape(self: Wavefront, array: Array) -> Array:
         """
-        Reshape scalar or spatial arrays to broadcast against the phasor.
+        Reshape scalar or spatial arrays to broadcast against the phasor, preserving
+        chromatic and other leading vectorisation axes.
 
         Parameters
         ----------
         array : Array
-            Input scalar, chromatic scalar, spatial, or chromatic spatial array.
+            Input scalar, vectorised scalar, spatial, or vectorised spatial array.
 
         Returns
         -------
@@ -358,14 +374,15 @@ class Wavefront(zdx.Base):
             )
         return array
 
-    def add_phase(self: Wavefront, phase: Array) -> Wavefront:
+    def add_phase(self: Wavefront, phase: float | Array) -> Wavefront:
         """
-        Applies a phase (in radians) to the wavefront by multiplying the phasor
-        by exp(1j * phase). Supports broadcasting.
+        Applies a phase (in radians) to the wavefront by multiplying the phasor by
+        exp(1j * phase). Scalar, spatial, chromatic, and vectorised phases are broadcast
+        to the phasor shape.
 
         Parameters
         ----------
-        phase : Array, radians
+        phase : float or Array, radians
             The phase to be added to the wavefront.
 
         Returns
@@ -377,14 +394,15 @@ class Wavefront(zdx.Base):
             return self
         return self.multiply("phasor", np.exp(1j * self._to_phasor_shape(phase)))
 
-    def add_opd(self: Wavefront, opd: Array) -> Wavefront:
+    def add_opd(self: Wavefront, opd: float | Array) -> Wavefront:
         """
-        Applies an optical path difference (in meters) by multiplying the phasor
-        by exp(1j * k * opd), where k = 2*pi / wavelength. Supports broadcasting.
+        Applies an optical path difference (in meters) by multiplying the phasor by
+        exp(1j * k * opd), where k = 2*pi / wavelength. Scalar, spatial, chromatic, and
+        vectorised OPDs are broadcast to the phasor shape.
 
         Parameters
         ----------
-        opd : Array, meters
+        opd : float or Array, meters
             The optical path difference to apply.
 
         Returns
@@ -434,8 +452,8 @@ class Wavefront(zdx.Base):
         Parameters
         ----------
         mode : {"power","peak"} = "power"
-            - "power": scales so sum(|E|^2) == value (discrete sum over pixels).
-            - "peak" : scales so max(|E|^2) == value.
+            - "power": scales so sum(|E|^2) == value across the full phasor.
+            - "peak" : scales so max(|E|^2) == value across the full phasor.
         value : float = 1.0
             Target value for the selected mode.
 
@@ -454,8 +472,8 @@ class Wavefront(zdx.Base):
 
     def flip(self: Wavefront, axis: tuple[int] | int) -> Wavefront:
         """
-        Flip the complex phasor along one or more axes (ij indexing: -2=y, -1=x). Note
-        that if the wavefront is polarised, the polarisation dimensions are leading.
+        Flip the complex phasor along one or more axes. The final two axes are spatial
+        (`-2=y`, `-1=x`); leading axes are vectorisation dimensions.
 
         Parameters
         ----------
@@ -472,20 +490,21 @@ class Wavefront(zdx.Base):
     def scale_to(
         self: Wavefront,
         npixels: int,
-        pixel_scale: Array,
+        pixel_scale: float | Array,
         method: str = "linear",
         complex: bool = True,
     ) -> Wavefront:
         """
-        Interpolates the wavefront to a given npixels and pixel_scale. Can be done on
-        the real and imaginary components by passing in complex=True.
+        Interpolates the wavefront to a given npixels and pixel_scale. Leading phasor
+        dimensions are vectorised over directly.
 
         Parameters
         ----------
         npixels : int
             The number of pixels to interpolate to.
-        pixel_scale: Array
-            The pixel scale to interpolate to.
+        pixel_scale: float or Array
+            The pixel scale to interpolate to. Scalar values are broadcast over leading
+            phasor dimensions.
         method : str = "linear"
             The interpolation method.
         complex : bool = True
@@ -500,6 +519,7 @@ class Wavefront(zdx.Base):
         if isinstance(method, bool):
             complex, method = method, "linear"
 
+        pixel_scale = np.asarray(pixel_scale, float)
         ratio = pixel_scale / self.pixel_scale
         scale = np.vectorize(
             lambda phasor, ratio: dlu.scale(phasor, npixels, ratio, method, complex),
@@ -516,7 +536,8 @@ class Wavefront(zdx.Base):
         complex: bool = True,
     ) -> Wavefront:
         """
-        Interpolates the wavefront onto a set of sample coordinates.
+        Interpolates the wavefront onto a set of sample coordinates. Leading phasor
+        dimensions are vectorised over directly.
 
         Parameters
         ----------
@@ -547,19 +568,19 @@ class Wavefront(zdx.Base):
 
     def rotate(
         self: Wavefront,
-        angle: Array,
+        angle: float | Array,
         method: str = "linear",
         complex: bool = True,
     ) -> Wavefront:
         """
-        Rotates the wavefront by a given angle via interpolation. Can be done on the
-        real and imaginary components by passing in complex=True.
+        Rotates the wavefront by a given angle via interpolation. Leading phasor
+        dimensions are vectorised over directly.
 
         Parameters
         ----------
-        angle : Array, radians
-            The angle by which to rotate the wavefront in a clockwise
-            direction.
+        angle : float or Array, radians
+            The angle by which to rotate the wavefront in a clockwise direction. Scalar
+            values are broadcast over leading phasor dimensions.
         method : str = "linear"
             The interpolation method.
         complex : bool = True
@@ -579,7 +600,8 @@ class Wavefront(zdx.Base):
 
     def resize(self: Wavefront, npixels: int) -> Wavefront:
         """
-        Resizes the wavefront via a zero-padding or cropping operation.
+        Resizes the spatial axes of the wavefront via zero-padding or cropping,
+        preserving leading vectorisation dimensions.
 
         Parameters
         ----------
@@ -595,7 +617,8 @@ class Wavefront(zdx.Base):
 
     def downsample(self: Wavefront, n: int, mean: bool = True) -> Wavefront:
         """
-        Downsamples the wavefront by a factor of n.
+        Downsamples the spatial axes of the wavefront by a factor of n, preserving
+        leading vectorisation dimensions.
 
         Parameters
         ----------
@@ -619,7 +642,8 @@ class Wavefront(zdx.Base):
     ) -> Array:
         """
         Returns the physical positions of the wavefront pixels in meters, with an
-        optional scaling factor for numerical stability.
+        optional scaling factor for numerical stability. If the coordinate spec is
+        vectorised, coordinates include matching leading dimensions.
 
         Parameters
         ----------
@@ -631,7 +655,7 @@ class Wavefront(zdx.Base):
         Returns
         -------
         coordinates : Array
-            The coordinates of the centers of each pixel representing the wavefront.
+            The coordinates of each pixel centre, with shape `(..., 2, n, n)`.
         """
         xs = self.xs * scale
         coords_fn = lambda xs: np.array(np.meshgrid(xs, xs))
@@ -657,7 +681,8 @@ class Wavefront(zdx.Base):
     @property
     def xs(self):
         """
-        1D array of pixel centre coordinates along one axis.
+        1D array of pixel centre coordinates along one axis. If the coordinate spec is
+        vectorised, the returned array has shape `(..., n)`.
 
         Returns
         -------
@@ -668,7 +693,8 @@ class Wavefront(zdx.Base):
 
     def set_spec(self, spec: CoordSpec):
         """
-        Updates the wavefront pixel scale and centre from a `CoordSpec`.
+        Updates the wavefront pixel scale and centre from a `CoordSpec`, preserving
+        the current phasor.
 
         Parameters
         ----------
@@ -690,7 +716,9 @@ class Wavefront(zdx.Base):
         inverse=False,
     ):
         """
-        Propagates the wavefront using an FFT-based method.
+        Propagates the wavefront using an FFT-based method. Leading phasor dimensions
+        are vectorised over directly, so chromatic wavefronts propagate once per
+        wavelength.
 
         Parameters
         ----------
@@ -700,8 +728,9 @@ class Wavefront(zdx.Base):
             Focal length for Cartesian focal sampling. Pass `None` for
             angular (far-field) sampling.
         spec_out : CoordSpec | None = None
-            Output coordinate specification. If provided, only `c` (centre)
-            may be set; `n` and `d` are determined by the propagation.
+            Output coordinate specification. If provided, only `c` (centre) may be set;
+            `n` and `d` are determined by the propagation. Scalar centres are broadcast
+            over leading phasor dimensions.
         inverse : bool = False
             If False, propagate forward through the system. If True, propagate
             backward through the system.
@@ -743,20 +772,21 @@ class Wavefront(zdx.Base):
     def propagate(
         self: Wavefront,
         npixels: int,
-        pixel_scale: float,
+        pixel_scale: float | Array,
         focal_length: float = None,
         inverse: bool = False,
     ) -> Wavefront:
         """
-        Legacy MFT propagation function without CoordSpec.
+        Legacy MFT propagation function without CoordSpec. Leading phasor dimensions
+        are vectorised over directly.
 
         Parameters
         ----------
         npixels : int
             Output array size (square).
-        pixel_scale : float
+        pixel_scale : float or Array
             Desired output pixel scale (meters/pixel or radians/pixel depending on
-            units).
+            units). Scalar values are broadcast over leading phasor dimensions.
         focal_length : float | None
             Focal length for Cartesian focal sampling; None for angular focal sampling.
         inverse : bool = False
@@ -771,8 +801,9 @@ class Wavefront(zdx.Base):
         Notes
         -----
         - Ideal for generating PSFs at arbitrary sampling.
-        - Supports broadband propagation via vectorised wavelength and pixel_scale.
+        - Supports chromatic propagation via leading phasor and wavelength dimensions.
         """
+        pixel_scale = np.asarray(pixel_scale, float)
         fn = np.vectorize(
             lambda phasor, wavelength, pixel_scale_in, pixel_scale_out: dlu.MFT(
                 phasor,
@@ -791,13 +822,15 @@ class Wavefront(zdx.Base):
 
     def propagate_MFT(self, spec_out, focal_length=None, inverse=None):
         """
-        Propagates the wavefront using an MFT-based method with a `CoordSpec`.
+        Propagates the wavefront using an MFT-based method with a `CoordSpec`. Leading
+        phasor dimensions are vectorised over directly.
 
         Parameters
         ----------
         spec_out : CoordSpec
-            Output coordinate specification defining the number of pixels
-            and pixel scale of the propagated field.
+            Output coordinate specification defining the number of pixels and pixel
+            scale of the propagated field. Scalar pixel scales are broadcast over
+            leading phasor dimensions.
         focal_length : float | None = None
             Focal length for Cartesian focal sampling. Pass `None` for
             angular (far-field) sampling.
@@ -823,8 +856,9 @@ class Wavefront(zdx.Base):
             signature="(n,n),(),(),()->(m,m)",
         )
 
-        phasor = fn(self.phasor, self.wavelength, self.pixel_scale, spec_out.d)
-        return self.set(phasor=phasor, pixel_scale=spec_out.d)
+        pixel_scale = np.asarray(spec_out.d, float)
+        phasor = fn(self.phasor, self.wavelength, self.pixel_scale, pixel_scale)
+        return self.set(phasor=phasor, pixel_scale=pixel_scale)
 
     #######################
     ### New Propagators ###
