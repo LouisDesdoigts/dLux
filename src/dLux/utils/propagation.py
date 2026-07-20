@@ -2,7 +2,7 @@ import jax.numpy as np
 from jax import Array, vmap
 import dLux.utils as dlu
 
-__all__ = ["FFT", "MFT"]
+__all__ = ["FFT", "FFT_spec", "FFT_ramp", "MFT"]
 
 
 def FFT_spec(npixels: int, pixel_scale: float, wavelength: float, focal_length=None):
