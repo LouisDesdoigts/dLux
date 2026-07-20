@@ -145,7 +145,7 @@ def jones_to_stokes(J, stokes=None):
     J_kron = np.einsum("ik...,jl...->ijkl...", J, np.conj(J))
 
     # Reshape the (2, 2, 2, 2, ...) array into (4, 4, ...)
-    J_kron = J_kron.reshape((4, 4) + J.shape[-2:])
+    J_kron = J_kron.reshape((4, 4) + J.shape[2:])
 
     # Perform matrix multiplication: M = A @ J_kron @ A_inv for each batch element
     M = np.einsum("xy,yz...,zw->xw...", A, J_kron, A_inv)
