@@ -12,6 +12,7 @@ __all__ = [
     "imshow_extent",
     "inherit_docstrings",
     "missing_attribute_error",
+    "from_complex",
 ]
 
 
@@ -373,3 +374,31 @@ def _input_len(x, name):
             f"{name} must be a scalar, tuple, or 1D array; got ndim={x.ndim}."
         )
     return 1
+
+
+def from_complex(array: Array, complex: bool = True) -> Array:
+    """
+    Maps a complex array to a 2-channel representation (real/imag or amplitude/phase).
+
+    Parameters
+    ----------
+    array : Array
+        The input complex array.
+    complex : bool = True
+        If True, map to real and imaginary components. If False, map to amplitude and
+        phase.
+
+    Returns
+    -------
+    vals : Array
+        The 2-channel representation of the input array.
+    return_fn : Callable
+        Function to reconstruct the original complex array from `vals`.
+    """
+    if complex:
+        vals = np.array([array.real, array.imag])
+        return_fn = lambda x: x[0] + 1j * x[1]
+    else:
+        vals = np.array([np.abs(array), np.angle(array)])
+        return_fn = lambda x: x[0] * np.exp(1j * x[1])
+    return vals, return_fn
