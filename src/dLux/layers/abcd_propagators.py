@@ -325,8 +325,8 @@ class FFTPropagator(ABCDPropagator):
         fl = abcd.abcd_effective_focal_length(self.abcd)
 
         # Calculate the phase ramp for the FFT propagation offset
-        d_fft, c_fft = dlu.fft_spec(n_padded, spec_in.d, lam, fl)
-        in_ramp = dlu.fft_phase_ramp(spec_in.xs, lam, c_fft - self.spec.c, fl)
+        d_fft, c_fft = dlu.FFT_spec(n_padded, spec_in.d, lam, fl)
+        in_ramp = dlu.FFT_ramp(spec_in.xs, lam, c_fft - self.spec.c, fl)
 
         # Calculate the output phase ramp correction
         spec_out = CoordSpec(n=n_padded, c=self.spec.c, d=d_fft)
