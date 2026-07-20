@@ -1,5 +1,4 @@
 from __future__ import annotations
-from functools import partial
 from jax import Array
 import jax.numpy as np
 
@@ -17,34 +16,6 @@ __all__ = [
     "half_wave_plate",
     "jones_to_stokes",
 ]
-
-
-def apply_jones(jones: Array, phasor: Array) -> Array:
-    return np.einsum("ij..., jk... -> ik...", jones, phasor)
-
-
-def linear_polariser(angle: Array) -> Array:
-    """
-    This already handles dimensionality inherently. An input shape of (N, M) will
-    produce an output shape of (2, 2, N, M).
-    """
-    c, s = np.cos(angle), np.sin(angle)
-    return np.array([[c**2, c * s], [c * s, s**2]])
-
-
-def retarder(retardance: Array, angle: Array) -> Array:
-    """
-    Constructs a retarder Jones matrix given retardance and angle. Dimensional inputs
-    are handled explicitly by vectorising the construction and rotation operation. An
-    inputs shape of (N, M) will produce an output shape of (2, 2, N, M).
-
-    Note that we dont apply the vectorise operation via partial because we want to
-    shift the output axes to the back of the array which isn't possible with the
-    vectorize function.
-    """
-    fn = lambda r, a: rotate_jones(np.array([[1, 0], [0, np.exp(1j * r)]]), a)
-    J = np.vectorize(fn, signature="(),()->(i,j)")(retardance, angle)
-    return np.moveaxis(J, (-2, -1), (0, 1))
 
 
 ###
@@ -72,6 +43,38 @@ def quarter_wave_plate(angle: Array) -> Array:
 def half_wave_plate(angle: Array) -> Array:
     jones = np.array([[1, 0], [0, -1]])  # Fast axis horizontal
     return rotate_jones(jones, angle)
+
+
+###
+
+
+def apply_jones(jones: Array, phasor: Array) -> Array:
+    """Applies a Jones matrix to a phasor"""
+    return np.einsum("ij..., jk... -> ik...", jones, phasor)
+
+
+def linear_polariser(angle: Array) -> Array:
+    """
+    This already handles dimensionality inherently. An input shape of (N, M) will
+    produce an output shape of (2, 2, N, M).
+    """
+    c, s = np.cos(angle), np.sin(angle)
+    return np.array([[c**2, c * s], [c * s, s**2]])
+
+
+def retarder(retardance: Array, angle: Array) -> Array:
+    """
+    Constructs a retarder Jones matrix given retardance and angle. Dimensional inputs
+    are handled explicitly by vectorising the construction and rotation operation. An
+    inputs shape of (N, M) will produce an output shape of (2, 2, N, M).
+
+    Note that we dont apply the vectorise operation via partial because we want to
+    shift the output axes to the back of the array which isn't possible with the
+    vectorize function.
+    """
+    fn = lambda r, a: rotate_jones(np.array([[1, 0], [0, np.exp(1j * r)]]), a)
+    J = np.vectorize(fn, signature="(),()->(i,j)")(retardance, angle)
+    return np.moveaxis(J, (-2, -1), (0, 1))
 
 
 def rotate_jones(jones: Array, angle: Array | None) -> Array:
@@ -128,10 +131,14 @@ A = np.array(
 A_inv = np.linalg.inv(A)
 
 
-@partial(np.vectorize, excluded={1}, signature="(i,j)->(s)")
-def jones_to_stokes(jones_phasor, stokes):
-    """ """
-    J = jones_phasor
+def jones_to_stokes(J, stokes=None):
+    """
+    Note the einsum convention used allows us to vectorise over the trailing dimensions
+    freely, but prevents us from vectorising over the leading dimensions because which
+    dimensions are the jones dimensions becomes undefined.
+    """
+    # Build the Stokes vector if not provided. This is equivalent to unpolarised light.
+    stokes = np.array([1.0, 0.0, 0.0, 0.0]) if stokes is None else stokes
 
     # Kronecker product mapping: row = 2*i + j, col = 2*k + l
     # We order the indices as i, j, k, l followed by the batch dimensions (...)
