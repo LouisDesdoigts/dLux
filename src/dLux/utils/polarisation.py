@@ -45,14 +45,6 @@ def half_wave_plate(angle: Array) -> Array:
     return rotate_jones(jones, angle)
 
 
-###
-
-
-def apply_jones(jones: Array, phasor: Array) -> Array:
-    """Applies a Jones matrix to a phasor"""
-    return np.einsum("ij..., jk... -> ik...", jones, phasor)
-
-
 def linear_polariser(angle: Array) -> Array:
     """
     This already handles dimensionality inherently. An input shape of (N, M) will
@@ -75,6 +67,14 @@ def retarder(retardance: Array, angle: Array) -> Array:
     fn = lambda r, a: rotate_jones(np.array([[1, 0], [0, np.exp(1j * r)]]), a)
     J = np.vectorize(fn, signature="(),()->(i,j)")(retardance, angle)
     return np.moveaxis(J, (-2, -1), (0, 1))
+
+
+###
+
+
+def apply_jones(jones: Array, phasor: Array) -> Array:
+    """Applies a Jones matrix to a phasor"""
+    return np.einsum("ij..., jk... -> ik...", jones, phasor)
 
 
 def rotate_jones(jones: Array, angle: Array | None) -> Array:

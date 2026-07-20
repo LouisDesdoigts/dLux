@@ -36,8 +36,6 @@ class PolarisingOptic(BasePolarisingOptic):
         self.jones = jones
 
 
-# Merge this with PolarisingOptic?
-# NO - The top one is generic spatially varying
 class UniformPolarisingOptic(PolarisingOptic):
     """
     A spatially uniform Jones matrix optic, which applies the same polarisation
