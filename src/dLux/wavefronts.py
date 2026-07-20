@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 import jax.numpy as np
-from jax import vmap, Array
+from jax import Array
 import zodiax as zdx
 import dLux.utils as dlu
 
@@ -372,6 +372,31 @@ class Wavefront(zdx.Base):
             return array.reshape(
                 array.shape[:chromatic_ndim] + (1,) * extra_ndim + array.shape[-2:]
             )
+        return array
+
+    def _to_vec(self: Wavefront, array: Array) -> Array:
+        """
+        Reshape metadata before passing it into a vectorised scalar function.
+
+        Metadata lives on the physical vector axes counted by `self.ndim`. If a subclass
+        stores extra axes between those vector axes and the final spatial axes, append
+        singleton dimensions so NumPy's right-aligned broadcasting keeps metadata on the
+        physical axes.
+        """
+        array = np.asarray(array)
+        extra_ndim = self.phasor.ndim - self.ndim - 2
+        if array.ndim == self.ndim:
+            return array.reshape(array.shape + (1,) * extra_ndim)
+        return array
+
+    def _from_vec(self: Wavefront, array: Array) -> Array:
+        """
+        Remove redundant non-physical axes from metadata returned by `np.vectorize`.
+        """
+        array = np.asarray(array)
+        extra_ndim = self.phasor.ndim - self.ndim - 2
+        if extra_ndim and array.ndim == self.ndim + extra_ndim:
+            return array[(...,) + (0,) * extra_ndim]
         return array
 
     def add_phase(self: Wavefront, phase: float | Array) -> Wavefront:
@@ -765,9 +790,16 @@ class Wavefront(zdx.Base):
 
         prop_fn = np.vectorize(prop_fn, signature="(n,n),(),(),()->(m,m),(),()")
         phasor, pixel_scale, center = prop_fn(
-            self.phasor, self.wavelength, self.pixel_scale, self.center
+            self.phasor,
+            self._to_vec(self.wavelength),
+            self._to_vec(self.pixel_scale),
+            self._to_vec(self.center),
         )
-        return self.set(phasor=phasor, pixel_scale=pixel_scale, center=center)
+        return self.set(
+            phasor=phasor,
+            pixel_scale=self._from_vec(pixel_scale),
+            center=self._from_vec(center),
+        )
 
     def propagate(
         self: Wavefront,
@@ -817,7 +849,12 @@ class Wavefront(zdx.Base):
             signature="(n,n),(),(),()->(m,m)",
         )
 
-        phasor = fn(self.phasor, self.wavelength, self.pixel_scale, pixel_scale)
+        phasor = fn(
+            self.phasor,
+            self._to_vec(self.wavelength),
+            self._to_vec(self.pixel_scale),
+            self._to_vec(pixel_scale),
+        )
         return self.set(phasor=phasor, pixel_scale=pixel_scale)
 
     def propagate_MFT(self, spec_out, focal_length=None, inverse=None):
@@ -857,7 +894,12 @@ class Wavefront(zdx.Base):
         )
 
         pixel_scale = np.asarray(spec_out.d, float)
-        phasor = fn(self.phasor, self.wavelength, self.pixel_scale, pixel_scale)
+        phasor = fn(
+            self.phasor,
+            self._to_vec(self.wavelength),
+            self._to_vec(self.pixel_scale),
+            self._to_vec(pixel_scale),
+        )
         return self.set(phasor=phasor, pixel_scale=pixel_scale)
 
     #######################
@@ -1001,38 +1043,120 @@ class PolarisedWavefront(Wavefront):
     """
     A polarisation wavefront, supporting partial polarisation.
     The internal representation uses Jones calculus in the general case,
-    i.e. tracking a 2x2 complex coherence matrix for the state.
+    i.e. tracking a 2x2 complex coherence matrix for the state. Phasors use shape
+    `(..., 2, 2, n, n)`, where leading axes are vectorisation axes, the next two axes
+    are Jones axes, and the final two axes are spatial.
 
     If, for whatever reason, you need a strictly polarised wavefront, add a PR.
     """
 
     def __init__(
         self: Wavefront,
-        wavelength: float,
+        wavelength: float | Array,
         npixels: int,
-        diameter: float = None,
-        pixel_scale: float = None,
+        diameter: float | Array = None,
+        pixel_scale: float | Array = None,
         center: Array = None,
     ):
         super().__init__(wavelength, npixels, diameter, pixel_scale, center)
+        self.phasor = self._promote_phasor(self.phasor)
 
-        self.phasor = self.phasor[None, None] * np.eye(2)[:, :, None, None]
-
-    def from_phasor(self):
+    @staticmethod
+    def _promote_phasor(phasor: Array) -> Array:
         """
-        Needed to handle input phasors that are already in Jones form or from a
-        regular wavefront phasor
-        """
+        Promote a scalar phasor into an unpolarised Jones phasor.
 
-        raise NotImplementedError(
-            "PolarisedWavefront.from_phasor is not implemented yet."
-        )
+        Input phasors have shape `(..., n, n)`. The leading `...` axes are preserved,
+        and identity Jones axes are inserted immediately before the spatial axes:
+        `(..., n, n) -> (..., 2, 2, n, n)`.
+        """
+        vector_shape = phasor.shape[:-2]
+        eye = np.eye(2, dtype=complex)
+
+        # Give the identity matrix singleton vector and spatial axes so it broadcasts
+        # cleanly against `phasor[..., None, None, :, :]`.
+        eye = eye.reshape((1,) * len(vector_shape) + (2, 2, 1, 1))
+        return phasor[..., None, None, :, :] * eye
+
+    @classmethod
+    def from_phasor(
+        cls,
+        phasor: Array[complex],
+        wavelength: float | Array,
+        pixel_scale: float | Array = None,
+        diameter: float | Array = None,
+        center: float = None,
+    ) -> PolarisedWavefront:
+        """
+        Create a PolarisedWavefront from a regular or Jones phasor.
+
+        Parameters
+        ----------
+        phasor : Array[complex]
+            Regular phasor with shape `(..., n, n)` or Jones phasor with shape
+            `(..., 2, 2, n, n)`.
+        wavelength : float or Array, meters
+            The wavelength of the wavefront. If a 2D phasor is passed with vector
+            wavelengths, it is broadcast over the wavelength axes.
+        pixel_scale : float or Array = None, meters/pixel
+            The pixel scale of the phasor array. Either `pixel_scale` or `diameter`
+            must be provided.
+        diameter : float or Array = None, meters
+            The diameter of the phasor array. Either `pixel_scale` or `diameter`
+            must be provided.
+        center : float = None
+            The centre coordinate of the wavefront grid, in metres. Defaults to zero.
+
+        Returns
+        -------
+        wavefront : PolarisedWavefront
+            A new polarised wavefront with phasor shape `(..., 2, 2, n, n)`.
+        """
+        phasor = np.asarray(phasor, complex)
+        wavelength = np.asarray(wavelength, float)
+
+        # Jones phasors already have the Jones axes immediately before the final two
+        # spatial axes: `(..., 2, 2, n, n)`.
+        is_jones = phasor.ndim >= 4 and phasor.shape[-4:-2] == (2, 2)
+
+        # A single spatial phasor with vector wavelengths represents the same spatial
+        # field at each wavelength, so add the wavelength axes before promotion.
+        if phasor.ndim == 2 and wavelength.ndim > 0:
+            phasor = phasor * np.ones(wavelength.shape + (1, 1))
+
+        # A single Jones phasor with vector wavelengths is broadcast in the same way,
+        # preserving the Jones axes before the spatial axes.
+        elif is_jones and phasor.ndim == 4 and wavelength.ndim > 0:
+            phasor = phasor * np.ones(wavelength.shape + (1, 1, 1, 1))
+
+        # Regular phasors are converted to an unpolarised Jones representation.
+        # Jones phasors are assumed to already be in the desired axis order.
+        if not is_jones:
+            phasor = cls._promote_phasor(phasor)
+
+        # Construct the object to initialise wavelength/sampling metadata, then replace
+        # the default identity phasor with the supplied phasor.
+        return cls(
+            wavelength=wavelength,
+            npixels=phasor.shape[-1],
+            diameter=diameter,
+            pixel_scale=pixel_scale,
+            center=center,
+        ).set(phasor=phasor)
+
+    @property
+    def ndim(self: PolarisedWavefront) -> int:
+        """
+        Returns the number of leading vectorisation dimensions, excluding the Jones
+        and spatial axes.
+        """
+        return self.phasor.ndim - 4
 
     @staticmethod
     def from_wavefront(wavefront: Wavefront) -> PolarisedWavefront:
         """
-        Promotes a regular Wavefront to a PolarisedWavefront by multiplying the scalar
-        phasor by eye(2)
+        Promotes a regular Wavefront to a PolarisedWavefront.
+
         Parameters
         ----------
         wavefront : Wavefront
@@ -1048,12 +1172,11 @@ class PolarisedWavefront(Wavefront):
         pwf = PolarisedWavefront(
             wavelength=wavefront.wavelength,
             npixels=wavefront.npixels,
-            diameter=wavefront.diameter,
+            pixel_scale=wavefront.pixel_scale,
             center=wavefront.center,
         )
 
-        jones_phasor = wavefront.phasor[None, None] * np.eye(2)[:, :, None, None]
-        return pwf.set("phasor", jones_phasor)
+        return pwf.set(phasor=PolarisedWavefront._promote_phasor(wavefront.phasor))
 
     @property
     def psf(self: Wavefront) -> Array:
@@ -1062,31 +1185,32 @@ class PolarisedWavefront(Wavefront):
 
     def psf_from_stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """Produces the PSF from the input Stokes vector"""
+        if input_stokes is None:
+            return 0.5 * np.sum(np.abs(self.phasor) ** 2, axis=(-4, -3))
         stokes = self.stokes(input_stokes)
-        if self.ndim > 0:
-            return stokes[:, 0]
-        return stokes[0]
+        return stokes[..., 0, :, :]
 
     def stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """
-        Returns the Stokes parameters as an array. Note that we have to explicitly
-        handle the broadband/vectorised wavefront case here by checking the
-        dimensionality of the wavefront. This is necessary since the jones_to_stokes
-        function vectorises over the trailing dimensions of the phasor, so we can't
-        also vectorise it over arbitrary leading dimensions. We _could_ get around this
-        by swapping the jones dimensions from being leading to being trailing, but we
-        have implicitly adopted the convention that the trailing axes are the spatial
-        ones. The other option would be to manually change the output axes for the
-        phasor when returning the wavefront from filter_vmap, but that requires manual
-        tuning and wont work for non-advanced users. Therefore the simplest solution is
-        to just check the dimensionality of the wavefront and handle the vectorisation
-        manually here.
+        Returns the Stokes parameters as an array.
+
+        The polarised wavefront stores phasors as `(..., 2, 2, n, n)`, while the
+        polarisation utilities operate on `(2, 2, ...)`. We move the Jones axes to the
+        front, call the utility function, then move the Stokes axis back behind any
+        leading wavefront dimensions.
         """
-        # Manually handle potentially chromatic wavefront
-        if self.ndim > 0:
-            return vmap(lambda x: dlu.jones_to_stokes(x, input_stokes))(self.phasor)
-        return dlu.jones_to_stokes(self.phasor, input_stokes)
+        phasor = np.moveaxis(self.phasor, (-4, -3), (0, 1))
+        stokes = dlu.jones_to_stokes(phasor, input_stokes)
+        return np.moveaxis(stokes, 0, -3)
 
     def apply_jones(self, jones):
-        """Applies a Jones matrix to the polarised wavefront."""
-        return self.set(phasor=dlu.apply_jones(jones, self.phasor))
+        """
+        Applies a Jones matrix to the polarised wavefront.
+
+        The Jones matrix follows the utility convention `(2, 2, ...)`. The wavefront
+        Jones axes are moved to the front before applying the utility function, then
+        moved back to preserve `(..., 2, 2, n, n)` ordering.
+        """
+        phasor = np.moveaxis(self.phasor, (-4, -3), (0, 1))
+        phasor = dlu.apply_jones(jones, phasor)
+        return self.set(phasor=np.moveaxis(phasor, (0, 1), (-4, -3)))
