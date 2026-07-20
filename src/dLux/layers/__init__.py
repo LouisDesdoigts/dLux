@@ -6,12 +6,12 @@ from . import (
     optical_layers,
     optics,
     detector_layers,
+    polarised_layers,
     unified_layers,
     propagators,
     apertures,
     aberrations,
     abcd_propagators,
-    polarised,
 )
 
 _modules = (
@@ -23,7 +23,7 @@ _modules = (
     apertures,
     aberrations,
     abcd_propagators,
-    polarised,
+    polarised_layers,
 )
 
 _module_names = [
@@ -35,6 +35,6 @@ _module_names = [
     "apertures",
     "aberrations",
     "abcd_propagators",
-    "polarised",
+    "polarised_layers",
 ]
 __all__ = _module_names + reexport(_modules, globals())
