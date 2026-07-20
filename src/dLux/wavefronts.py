@@ -259,6 +259,7 @@ class Wavefront(zdx.Base):
         """
         return np.stack([self.amplitude, self.phase], axis=0)
 
+    @property
     def psf(self: Wavefront) -> Array:
         """
         Calculates the Point Spread Function (PSF), i.e. the squared modulus
@@ -301,8 +302,6 @@ class Wavefront(zdx.Base):
         Returns the number of 'dimensions' of the wavefront. This is used to track the
         vectorised version of the wavefront returned from vmapping.
 
-        NOTE: May clash with future polarised wavefront.
-
         Returns
         -------
         ndim : int
@@ -320,7 +319,7 @@ class Wavefront(zdx.Base):
         power : Array
             The total power of the wavefront.
         """
-        return np.sum(np.abs(self.phasor) ** 2)
+        return np.sum(self.psf)
 
     def add_phase(self: Wavefront, phase: Array) -> Wavefront:
         """
@@ -418,7 +417,8 @@ class Wavefront(zdx.Base):
 
     def flip(self: Wavefront, axis: tuple[int] | int) -> Wavefront:
         """
-        Flip the complex phasor along one or more axes (ij indexing: 0=y, 1=x).
+        Flip the complex phasor along one or more axes (ij indexing: -2=y, -1=x). Note
+        that if the wavefront is polarised, the polarisation dimensions are leading.
 
         Parameters
         ----------
@@ -644,9 +644,6 @@ class Wavefront(zdx.Base):
             New wavefront with updated `pixel_scale` and `center`.
         """
         return self.set(pixel_scale=spec.d, center=spec.c)
-
-    def apply_jones(self, jones):
-        return PolarisedWavefront.from_wavefront(self).apply_jones(jones)
 
     @staticmethod
     def _propagate_FFT(
@@ -1019,6 +1016,25 @@ class Wavefront(zdx.Base):
         """In-place division."""
         return self.__truediv__(other)
 
+    def apply_jones(self, jones):
+        """
+        Applies a Jones matrix by promoting it to a PolarisedWavefront and applying the
+        Jones matrix.
+        """
+        return PolarisedWavefront.from_wavefront(self).apply_jones(jones)
+
+    def psf_from_stokes(self, stokes: Array | None = None) -> Array:
+        """
+        Calculates the PSF from the input Stokes vector. Since the Wavefront presently
+        has no polarisation state, the PSF is simply the total intensity (first Stokes
+        parameter) multiplied by the PSF of the wavefront.
+        """
+        if stokes is None:
+            return self.psf
+
+        # For a polarisation-insensitive system, only total input intensity matters.
+        return stokes[0] * self.psf
+
 
 class PolarisedWavefront(Wavefront):
     """
@@ -1078,16 +1094,35 @@ class PolarisedWavefront(Wavefront):
         jones_phasor = wavefront.phasor[None, None] * np.eye(2)[:, :, None, None]
         return pwf.set("phasor", jones_phasor)
 
-    def psf(self: Wavefront, input_stokes: Array | None = None) -> Array:
-        """We take the -3 dimension since the wavefront can be polarised"""
-        return self.stokes(input_stokes)[-3]
+    @property
+    def psf(self: Wavefront) -> Array:
+        """Assumes an unpolarised input Stokes vector of [1, 0, 0, 0]"""
+        return self.psf_from_stokes()
+
+    def psf_from_stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
+        """Produces the PSF from the input Stokes vector"""
+        return self.stokes(input_stokes)[0]
 
     def stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
-        """Returns the Stokes parameters as an array."""
-        if input_stokes is None:
-            input_stokes = np.array([1.0, 0.0, 0.0, 0.0])
+        """
+        Returns the Stokes parameters as an array. Note that we have to explicitly
+        handle the broadband/vectorised wavefront case here by checking the
+        dimensionality of the wavefront. This is necessary since the jones_to_stokes
+        function vectorises over the trailing dimensions of the phasor, so we can't
+        also vectorise it over arbitrary leading dimensions. We _could_ get around this
+        by swapping the jones dimensions from being leading to being trailing, but we
+        have implicitly adopted the convention that the trailing axes are the spatial
+        ones. The other option would be to manually change the output axes for the
+        phasor when returning the wavefront from filter_vmap, but that requires manual
+        tuning and wont work for non-advanced users. Therefore the simplest solution is
+        to just check the dimensionality of the wavefront and handle the vectorisation
+        manually here.
+        """
+        # Manually handle potentially chromatic wavefront
+        if self.ndim > 0:
+            return vmap(lambda x: dlu.jones_to_stokes(x, input_stokes))(self.phasor)
         return dlu.jones_to_stokes(self.phasor, input_stokes)
 
     def apply_jones(self, jones):
         """Applies a Jones matrix to the polarised wavefront."""
-        return self.set(phasor=dlu.apply_jones(self.phasor, jones))
+        return self.set(phasor=dlu.apply_jones(jones, self.phasor))

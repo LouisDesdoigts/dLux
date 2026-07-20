@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 from .layers.optical_layers import OpticalLayer
-from .wavefronts import Wavefront, PolarisedWavefront
+from .wavefronts import Wavefront
 from .sources import BaseSource as Source
 from .psfs import PSF
 
@@ -227,18 +227,12 @@ class OpticalSystem(BaseOpticalSystem):
         ).multiply("phasor", weight**0.5)
         wf = eqx.filter_vmap(prop_fn)(wavelengths, weights)
 
-        # Return PSF or Wavefront
+        # Return the Wavefront
         if return_wf:
             return wf
 
-        # non-polarised case, just return the PSF
-        if not isinstance(wf, PolarisedWavefront):
-            if return_psf:
-                return PSF(wf.psf.sum(0), wf.pixel_scale.mean())
-            return wf.psf.sum(0)
-
-        # Polarised WF case, feed in the stokes
-        psf = wf.psf(stokes=stokes).sum(0)
+        # Return psf object or array
+        psf = wf.psf_from_stokes(stokes).sum(0)
         if return_psf:
             return PSF(psf, wf.pixel_scale.mean())
         return psf
@@ -447,13 +441,7 @@ class LayeredOpticalSystem(OpticalSystem):
         # Return PSF or Wavefront
         if return_wf:
             return wavefront
-
-        # If polarised we feed in stokes to PSF call
-        if isinstance(wavefront, PolarisedWavefront):
-            return wavefront.psf(stokes=stokes)
-
-        # Non-polarised case, just return the PSF
-        return wavefront.psf()
+        return wavefront.psf_from_stokes(stokes)
 
     def debug_propagate_mono(
         self: LayeredOpticalSystem,
@@ -627,13 +615,7 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
         # Return PSF or Wavefront
         if return_wf:
             return wf
-
-        # If polarised we feed in stokes to PSF call
-        if isinstance(wf, PolarisedWavefront):
-            return wf.psf(stokes=stokes)
-
-        # Non-polarised case, just return the PSF
-        return wf.psf()
+        return wf.psf_from_stokes(stokes)
 
 
 class AngularOpticalSystem(ParametricLayeredOpticalSystem):
