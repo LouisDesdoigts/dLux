@@ -87,7 +87,9 @@ class BaseWavefrontTests:
         assert np.allclose(wavefront.polar[1], wavefront.phase)
         assert isinstance(wavefront.to_psf(), PSF)
         assert wavefront.ndim == ndim
-        assert wavefront.chromatic is chromatic
+        assert wavefront.is_chromatic is chromatic
+        if not chromatic:
+            assert wavefront._mapped_axis is None
 
     @pytest.mark.parametrize(
         "operation",
@@ -414,6 +416,15 @@ class TestChromaticWavefront(BaseWavefrontTests):
             assert wavefront.pixel_scale.shape == wavelengths.shape
             assert wavefront.center.shape == wavelengths.shape
 
+    def test_mapped_axis(self, wavefront, construction):
+        mapped_axis = wavefront._mapped_axis
+
+        assert mapped_axis.phasor == 0
+        assert mapped_axis.wavelength == 0
+        expected_metadata_axis = None if construction == "direct" else 0
+        assert mapped_axis.pixel_scale == expected_metadata_axis
+        assert mapped_axis.center == expected_metadata_axis
+
     def test_from_phasor(self, wavelengths):
         phasor = np.ones((8, 8), dtype=complex)
         wf = Wavefront.from_phasor(phasor, wavelengths, pixel_scale=1 / 8)
@@ -465,7 +476,7 @@ class TestPolarisedWavefrontConstruction:
         assert wavefront.phasor.shape == (2, 2, 16, 16)
         assert wavefront.ndim == 0
         assert wavefront.npixels == 16
-        assert wavefront.chromatic is False
+        assert wavefront.is_chromatic is False
         assert_polarised_identity(
             wavefront.phasor, np.ones((16, 16), dtype=complex) / 16**2
         )
@@ -476,7 +487,7 @@ class TestPolarisedWavefrontConstruction:
         assert wavefront.phasor.shape == (3, 2, 2, 16, 16)
         assert wavefront.ndim == 1
         assert wavefront.npixels == 16
-        assert wavefront.chromatic is True
+        assert wavefront.is_chromatic is True
         assert_polarised_identity(
             wavefront.phasor, np.ones((3, 16, 16), dtype=complex) / 16**2
         )
