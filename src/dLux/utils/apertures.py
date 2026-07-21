@@ -226,7 +226,7 @@ def circular_aperture(
         return transmission
 
     # Get the non-oversampled Zernike basis for the primary aperture
-    coords = dlu.pixel_coords(npixels, diameter=diameter)
+    coords = dlu.pixel_coords(npixels, diameter=coord_diam)
     z_diam = diameter * (1.0 + zernike_oversize)
     basis = dlu.zernike_basis(zernike_nolls, coords, z_diam)
 
