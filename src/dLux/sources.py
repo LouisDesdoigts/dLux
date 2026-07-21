@@ -137,7 +137,7 @@ class BaseSource(zdx.Base):
     modelling interface via `normalise(...)` and `model(...)`.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseSource.png)
+        ![UML](../assets/uml/BaseSource.png)
     """
 
     def __init_subclass__(cls, **kwargs):
@@ -183,7 +183,7 @@ class Source(BaseSource):
     Base source class that implements the spectra attribute.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Source.png)
+        ![UML](../assets/uml/Source.png)
 
     Attributes
     ----------
@@ -271,7 +271,7 @@ class PointSource(Source):
     A simple point source with a spectrum, position and flux.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/PointSource.png)
+        ![UML](../assets/uml/PointSource.png)
 
     Attributes
     ----------
@@ -332,7 +332,7 @@ class PointSources(Source):
     A set of point sources with the same spectrum, but different positions and fluxes.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/PointSources.png)
+        ![UML](../assets/uml/PointSources.png)
 
     Attributes
     ----------
@@ -417,7 +417,7 @@ class ResolvedSource(PointSource):
     that represents the resolved component.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ResolvedSource.png)
+        ![UML](../assets/uml/ResolvedSource.png)
 
     Attributes
     ----------
@@ -527,7 +527,7 @@ class BinarySource(Source):
     and contrast between the two sources.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BinarySource.png)
+        ![UML](../assets/uml/BinarySource.png)
 
     Attributes
     ----------
@@ -646,7 +646,7 @@ class PointResolvedSource(ResolvedSource):
     the resolved distribution.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/PointResolvedSource.png)
+        ![UML](../assets/uml/PointResolvedSource.png)
 
     Attributes
     ----------
@@ -753,7 +753,7 @@ class Scene(BaseSource):
     A source object that holds a set of sources that are model simultaneously.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Scene.png)
+        ![UML](../assets/uml/Scene.png)
 
     Attributes
     ----------

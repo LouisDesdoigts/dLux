@@ -20,7 +20,7 @@ class Wavefront(zdx.Base):
     through an optical system. All wavefronts assume square arrays.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Wavefront.png)
+        ![UML](../assets/uml/Wavefront.png)
 
     Attributes
     ----------
