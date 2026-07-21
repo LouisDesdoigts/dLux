@@ -215,15 +215,13 @@ class TestSpatiallyVaryingPolarisingLayers:
         assert optic.jones.shape == (2, 2, 8, 8)
 
     def test_missing_explicit_basis_inputs(self):
-        optic = SVLinearPolariser(ExplicitBasis())
-
         with pytest.raises(ValueError, match="Explicit basis"):
+            optic = SVLinearPolariser(ExplicitBasis())
             optic.angle
 
     def test_missing_fourier_basis_inputs(self):
-        optic = SVLinearPolariser(FourierBasis())
-
         with pytest.raises(ValueError, match="Fourier basis"):
+            optic = SVLinearPolariser(FourierBasis())
             optic.angle
 
     def test_sv_retarder_applies_to_chromatic_wavefront(self):
