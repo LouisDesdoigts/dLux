@@ -31,7 +31,7 @@ theme:
         icon: lucide/moon
         name: Switch to light mode
 
-site_name: dLux
+site_name: !ENV [DLUX_DOCS_SITE_NAME, "dLux"]
 docs_dir: docs/
 site_description: Documentation for dLux.
 site_author: Louis Desdoigts
