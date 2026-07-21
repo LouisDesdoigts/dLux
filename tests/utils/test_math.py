@@ -86,6 +86,50 @@ class TestEvalBasis:
 
 
 # ============================================================================
+# Tests for solve_basis
+# ============================================================================
+class TestSolveBasis:
+    """Tests for solving basis coefficients using least squares."""
+
+    def test_recovers_coefficients(self, basis, coefficients):
+        """Projection recovers coefficients used to evaluate a full-rank basis."""
+        array = math_utils.eval_basis(basis, coefficients)
+        result = math_utils.solve_basis(array, basis)
+
+        assert np.allclose(result, coefficients, rtol=1e-5, atol=1e-5)
+
+    def test_multidimensional_coefficients(self):
+        """Projection restores multidimensional coefficient shapes."""
+        key = random.PRNGKey(4)
+        basis = random.normal(key, (2, 3, 4, 4))
+        coefficients = np.arange(6.0).reshape((2, 3))
+        array = math_utils.eval_basis(basis, coefficients)
+
+        result = math_utils.solve_basis(array, basis)
+
+        assert result.shape == coefficients.shape
+        assert np.allclose(result, coefficients, rtol=1e-5, atol=1e-5)
+
+    def test_least_squares_projection(self):
+        """Projection returns the least-squares solution for an inexact instance."""
+        basis = np.array([[1.0, 0.0, 1.0], [0.0, 1.0, 1.0]])
+        array = np.array([1.0, 2.0, 4.0])
+
+        result = math_utils.solve_basis(array, basis)
+        expected = np.linalg.lstsq(basis.T, array, rcond=None)[0]
+
+        assert np.allclose(result, expected)
+
+    def test_invalid_output_shape_raises(self):
+        """Solving rejects basis output dimensions that do not match the array."""
+        basis = np.ones((2, 2, 6))
+        array = np.ones((3, 4))
+
+        with pytest.raises(ValueError, match="trailing dimensions"):
+            math_utils.solve_basis(array, basis)
+
+
+# ============================================================================
 # Tests for nandiv
 # ============================================================================
 class TestNaNDiv:

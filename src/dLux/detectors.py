@@ -22,7 +22,7 @@ class BaseDetector(zdx.Base):
     detector-space outputs.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseDetector.png)
+        ![UML](../assets/uml/BaseDetector.png)
     """
 
     @abstractmethod
@@ -49,7 +49,7 @@ class LayeredDetector(BaseDetector):
     Applies a series of detector layers to an input PSF.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/LayeredDetector.png)
+        ![UML](../assets/uml/LayeredDetector.png)
 
     Attributes
     ----------

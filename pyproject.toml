@@ -1,10 +1,11 @@
 [project]
 name = "dLux"
-version = "0.15.0"
+version = "0.15.1"
 description = "Differentiable Physical Optics Propagation in Jax"
 readme = "README.md"
 requires-python =">=3.10"
-license = {file = "LICENSE.md"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE.md"]
 authors = [{name = "Louis Desdoigts", email = "louis.desdoigts@gmail.com"}]
 keywords = [
     "python", 

@@ -36,7 +36,9 @@ jobs:
           python -c "import zensical, mkdocs; print('Docs deps OK')"
 
       - name: Build Documentation
-        run: zensical build --strict
+        run: |
+          DLUX_VERSION="$(python -c 'from importlib.metadata import version; print(version("dLux"))')"
+          DLUX_DOCS_SITE_NAME="dLux v${DLUX_VERSION}" zensical build --strict
 
       - name: Prepare publish directory
         run: |
@@ -68,4 +70,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .publish
           keep_files: true
-
