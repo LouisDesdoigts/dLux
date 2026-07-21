@@ -136,7 +136,5 @@ nav:
       - Units: API/utils/units.md
       - Zernikes: API/utils/zernikes.md
   - FAQ & Troubleshooting: faq.md
-  - Previous Versions:
-      - v0.14.3: https://louisdesdoigts.github.io/dLux/0.14.3/
   - Change Log: changelog.md
   - Contributing: contributing.md
