@@ -62,7 +62,7 @@ If you use dLux in your research, please cite
 retrieval with automatic differentiation](https://doi.org/10.1117/1.JATIS.9.2.028007):
 
 ```bibtex
-@article{desdoigts2023differentiable,
+@article{dLux,
   author = {Desdoigts, Louis and Pope, Benjamin J. S. and Dennis, Jordan and Tuthill, Peter G.},
   title = {Differentiable optics with {$\partial$Lux}: I--deep calibration of flat field and phase retrieval with automatic differentiation},
   journal = {Journal of Astronomical Telescopes, Instruments, and Systems},
