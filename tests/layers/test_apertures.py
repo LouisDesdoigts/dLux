@@ -203,6 +203,10 @@ def test_compound_aperture(aperture_list, transformation, normalise, noll_indice
 
 def test_compound_aperture_without_aberrations():
     aperture = CompoundAperture([CircularAperture(0.4)])
+    coords = wf.coordinates()
+
+    assert aperture.transmissions(coords, wf.pixel_scale).shape == (1, 16, 16)
+    assert aperture.transmission(coords, wf.pixel_scale).shape == (16, 16)
     _test_apply(aperture)
 
 

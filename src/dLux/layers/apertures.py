@@ -960,7 +960,7 @@ class CompositeAperture(BaseDynamicAperture):
         eval_fn = lambda ap: ap.transmission(coords, pixel_scale)
         leaf_fn = lambda ap: isinstance(ap, ApertureLayer)
         transmissions = jtu.map(eval_fn, self.apertures, is_leaf=leaf_fn)
-        return np.squeeze(np.array(jtu.flatten(transmissions)[0]))
+        return np.array(jtu.flatten(transmissions)[0])
 
     def __call__(self: CompositeAperture, wavefront: Wavefront) -> Wavefront:
         """
