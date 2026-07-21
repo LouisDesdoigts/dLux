@@ -69,3 +69,29 @@ Needs to be run from the docs/ directory... TODO: expand on this
 ## Contributing the Changes
 
 After these steps have been completed, you can commit your changes and push them to your forked repository. These changes should have its formatting and linting checked by the pre-commit hooks. If there are any issues, you will need to fix them before you can commit your changes. Once you have pushed your changes to your forked repository, you can submit a pull request to the main repository. This will allow the maintainers to review your changes and merge them into the main repository!
+
+---
+
+## Package Updates
+
+Package releases are published to PyPI from tagged commits on `main`.
+
+1. Update the version in `pyproject.toml` and add the user-facing changes to `CHANGELOG.md`.
+2. Open a pull request and wait for the remote tests to pass before merging.
+3. Update the local `main` branch:
+
+    ```bash
+    git switch main
+    git pull --ff-only origin main
+    ```
+
+4. Tag and push the release:
+
+    ```bash
+    git tag -a v0.15.1 -m "dLux v0.15.1"
+    git push origin v0.15.1
+    ```
+
+5. Check the release workflow and approve the PyPI deployment.
+
+The tag and `pyproject.toml` version must match. Published versions and release tags should not be reused.
