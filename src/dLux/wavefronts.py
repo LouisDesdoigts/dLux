@@ -57,7 +57,7 @@ class Wavefront(zdx.Base):
         Derived property from `wavelength`; scalar `2 * pi / wavelength`.
     ndim : int, property
         Derived property from `phasor`; vectorisation rank of wavefront state.
-    chromatic : bool, property
+    is_chromatic : bool, property
         Derived property from `wavelength`; whether wavelength is vector-valued.
     power : Array, property
         Derived property from `amplitude`; total wavefront power.
@@ -324,16 +324,43 @@ class Wavefront(zdx.Base):
         return self.phasor.ndim - 2
 
     @property
-    def chromatic(self: Wavefront) -> bool:
+    def is_chromatic(self: Wavefront) -> bool:
         """
         Returns whether the wavefront carries a leading wavelength dimension.
 
         Returns
         -------
-        chromatic : bool
+        is_chromatic : bool
             True if the wavefront wavelength is vectorised.
         """
         return self.wavelength.ndim > 0
+
+    @property
+    def _mapped_axis(self: Wavefront) -> Wavefront | None:
+        """
+        Returns the input-axis specification for mapping over wavelength.
+
+        Dimensional sampling metadata is mapped over its leading axis, while scalar
+        metadata is shared. The phasor is mapped only when the wavefront carries a
+        vectorisation dimension, ensuring intrinsic axes such as the Jones axes of a
+        `PolarisedWavefront` are never mistaken for a wavelength axis.
+
+        Returns
+        -------
+        mapped_axis : Wavefront | None
+            A Wavefront-shaped pytree containing ``0`` for mapped leaves and ``None``
+            for shared leaves. Returns ``None`` for a monochromatic wavefront.
+        """
+        if not self.is_chromatic:
+            return None
+
+        get_axis = lambda array: 0 if array.ndim > 0 else None
+        return self.set(
+            phasor=0 if self.ndim > 0 else None,
+            wavelength=0,
+            pixel_scale=get_axis(self.pixel_scale),
+            center=get_axis(self.center),
+        )
 
     @property
     def power(self: Wavefront) -> Array:
