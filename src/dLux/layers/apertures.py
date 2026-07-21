@@ -7,7 +7,7 @@ import jax.tree as jtu
 import dLux.utils as dlu
 
 from ..wavefronts import Wavefront
-from ..transformations import BaseCoordTransform
+from ..coordinates import BaseCoordTransform
 from .optical_layers import OpticalLayer, BasisLayer
 from .aberrations import ZernikeBasis
 
@@ -108,7 +108,7 @@ class BaseDynamicAperture(ApertureLayer):
                 raise TypeError(
                     f"transformation must be a BaseCoordTransform instance, "
                     f"got {actual_type}. Import with: "
-                    "from dLux.transformations import BaseCoordTransform. "
+                    "from dLux.coordinates import BaseCoordTransform. "
                     "Use a BaseCoordTransform-compatible type from this module."
                 )
         self.transformation = transformation
