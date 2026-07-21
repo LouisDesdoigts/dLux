@@ -29,7 +29,7 @@
     
     
       
-        <title>ChangeLog - dLux v0.15.1</title>
+        <title>ChangeLog - dLux</title>
       
     
     
@@ -105,7 +105,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="./.." title="dLux v0.15.1" class="md-header__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="./.." title="dLux" class="md-header__button md-logo" aria-label="dLux" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
@@ -119,7 +119,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            dLux v0.15.1
+            dLux
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -216,13 +216,13 @@
 
 <nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="./.." title="dLux v0.15.1" class="md-nav__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="./.." title="dLux" class="md-nav__button md-logo" aria-label="dLux" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
 
     </a>
-    dLux v0.15.1
+    dLux
   </label>
   
     <div class="md-nav__source">
@@ -689,6 +689,8 @@
       
         
       
+        
+      
     
     
     
@@ -931,6 +933,33 @@
     
   
   Spectra
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/transformations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Transformations
 
     
   </span>
@@ -1995,17 +2024,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#v0151" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        V0.15.1
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#v0150" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2085,144 +2103,148 @@
 
 <h1 id="changelog">ChangeLog<a class="headerlink" href="#changelog" title="Permanent link">¤</a></h1>
 <hr />
-<h2 id="v0151">V0.15.1<a class="headerlink" href="#v0151" title="Permanent link">¤</a></h2>
-<h3 id="new-features">✨ New Features<a class="headerlink" href="#new-features" title="Permanent link">¤</a></h3>
-<ul>
-<li>Aperture transformations now accept any <code>BaseCoordTransform</code>, including
-  <code>DistortedCoords</code> (<a href="https://github.com/LouisDesdoigts/dLux/issues/332">#332</a>).</li>
-<li>Static circular, HST-like, and Euclid-like apertures now accept <code>array_diameter</code>
-  for independently sizing the output grid
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/328">#328</a>).</li>
-<li><code>zernike_fast(...)</code> and <code>polike_fast(...)</code> now accept an optional <code>diameter</code>
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/275">#275</a>).</li>
-<li>Added <code>solve_basis(array, basis)</code> for recovering basis coefficients with a
-  least-squares solve (<a href="https://github.com/LouisDesdoigts/dLux/issues/299">#299</a>).</li>
-</ul>
-<h3 id="breaking-changes">⚠️ Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">¤</a></h3>
-<ul>
-<li>Coordinate transformation classes now live in <code>dLux.coordinates</code>; the
-  <code>dLux.transformations</code> module has been removed.</li>
-<li>Continuous scalar parameters are now consistently stored as scalar JAX arrays
-  rather than Python floats
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/338">#338</a>).</li>
-</ul>
-<h3 id="deprecations">⏳ Deprecations<a class="headerlink" href="#deprecations" title="Permanent link">¤</a></h3>
-<ul>
-<li>No APIs are deprecated in this release.</li>
-</ul>
-<h3 id="bug-fixes">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">¤</a></h3>
-<ul>
-<li>Fixed transmission, softening, and Zernike basis generation for apertures larger
-  than their sampling grids
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/305">#305</a>,
-  <a href="https://github.com/LouisDesdoigts/dLux/issues/328">#328</a>).</li>
-<li>Composite apertures now apply aberrations regardless of normalisation and no longer
-  fail when they contain no aberrated sub-apertures
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/320">#320</a>).</li>
-</ul>
-<h3 id="new-contributors">🎉 New Contributors<a class="headerlink" href="#new-contributors" title="Permanent link">¤</a></h3>
-<ul>
-<li>🌟 <a href="https://github.com/MatthijsMars">Matthijs Mars (@MatthijsMars)</a> made their first
-  contribution by expanding aperture transformations to support all
-  <code>BaseCoordTransform</code> implementations
-  (<a href="https://github.com/LouisDesdoigts/dLux/pull/333">#333</a>).</li>
-<li>🌟 <a href="https://github.com/yinzi-xin">Yinzi Xin (@yinzi-xin)</a> made their first
-  contribution by adding independently sized aperture grids through
-  <code>array_diameter</code>, including tests
-  (<a href="https://github.com/LouisDesdoigts/dLux/pull/336">#336</a>).</li>
-</ul>
 <h2 id="v0150">V0.15.0<a class="headerlink" href="#v0150" title="Permanent link">¤</a></h2>
-<h3 id="highlights">🚀 Highlights<a class="headerlink" href="#highlights" title="Permanent link">¤</a></h3>
+<h3 id="wavefront">Wavefront<a class="headerlink" href="#wavefront" title="Permanent link">¤</a></h3>
 <ul>
-<li><strong>Complex wavefronts:</strong> <code>Wavefront</code> now stores the complex electric-field <code>phasor</code>
-  directly, improving field arithmetic and avoiding undefined gradients when fields
-  cancel (<a href="https://github.com/LouisDesdoigts/dLux/issues/291">#291</a>,
-  <a href="https://github.com/LouisDesdoigts/dLux/issues/295">#295</a>).</li>
-<li><strong>Sampling-aware propagation:</strong> FFT and MFT propagation now track coordinate
-  sampling, support inverse propagation, and correct centring-dependent phase ramps.</li>
-<li><strong>Callable models:</strong> optical layers, detector layers, unified layers, and detectors
-  now share a consistent <code>object(target)</code> interface.</li>
-<li><strong>Expanded modelling toolkit:</strong> this release adds ABCD propagation, static telescope
-  apertures, cached Fourier bases, mask-design tools, and NaN-safe norms.</li>
+<li>Replaced stored <code>amplitude</code> and <code>phase</code> with a stored complex <code>phasor</code>.</li>
+<li><code>amplitude</code>, <code>phase</code>, <code>real</code>, <code>imaginary</code>, <code>complex</code>, <code>polar</code>, <code>power</code>, and <code>psf</code> are now derived from <code>phasor</code>.</li>
+<li><code>psf</code> now returns the current-plane intensity, <code>abs(phasor) ** 2</code>.</li>
+<li>Constructor signature changed to <code>Wavefront(wavelength, npixels, ...)</code>.</li>
+<li>Initialisation now accepts exactly one of <code>diameter</code> or <code>pixel_scale</code>.</li>
+<li>Added optional 1D <code>center</code> metadata and <code>spec</code> / <code>xs</code> helpers.</li>
+<li>Added <code>Wavefront.from_phasor(...)</code>, <code>Wavefront.to_psf()</code>, and <code>Wavefront.set_spec(...)</code>.</li>
+<li><code>coordinates</code> is now a method and supports optional scaling and polar output.</li>
+<li>Arithmetic operators now act directly on the complex field.</li>
+<li><code>+</code> no longer means “add OPD”; use <code>add_opd(...)</code>.</li>
+<li><code>*</code> no longer applies optical layers; layers are called explicitly.</li>
+<li>Added <code>-</code>, <code>/</code>, and in-place variants for wavefront arithmetic.</li>
+<li><code>add_phase(...)</code> and <code>add_opd(...)</code> now multiply by complex phase factors.</li>
+<li><code>tilt(...)</code> now supports angular unit conversion via <code>unit=...</code>.</li>
+<li><code>normalise(...)</code> now supports <code>mode="power"</code> and <code>mode="peak"</code>.</li>
+<li><code>flip</code>, <code>resize</code>, <code>rotate</code>, and <code>scale_to</code> now operate on the complex field by default.</li>
 </ul>
-<h3 id="new-features_1">✨ New Features<a class="headerlink" href="#new-features_1" title="Permanent link">¤</a></h3>
+<h3 id="coordinates-and-sampling">Coordinates and Sampling<a class="headerlink" href="#coordinates-and-sampling" title="Permanent link">¤</a></h3>
 <ul>
-<li><strong>Wavefronts:</strong> added <code>from_phasor(...)</code>, <code>to_psf()</code>, coordinate specifications,
-  configurable power or peak normalisation, angular units for <code>tilt(...)</code>, and direct
-  complex-field arithmetic
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/288">#288</a>).</li>
-<li><strong>Coordinates:</strong> added <code>Spec</code>, <code>PadSpec</code>, and <code>CoordSpec</code>; expanded
-  <code>pixel_coords(...)</code> to support diameter, radius, pixel scale, and FFT-style
-  centring; and added generic angular-unit conversion helpers.</li>
-<li><strong>Propagation:</strong> added ABCD elements and ABCD-backed MFT, FFT, and ASM propagators,
-  plus coordinate sampling, inverse propagation, padding, cropping, and phase-ramp
-  utilities.</li>
-<li><strong>Optical systems:</strong> added <code>ParametricOpticalSystem</code>, output field-of-view metadata,
-  wavefront initialisation, intermediate-state debugging, and physically consistent
-  <code>sqrt(weight)</code> spectral weighting
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/268">#268</a>).</li>
-<li><strong>Layers:</strong> publicly exported <code>OpticalLayer</code>, added the cached <code>FourierBasis</code> OPD
-  layer, and added the no-op <code>Lambda</code> layer
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/301">#301</a>,
-  <a href="https://github.com/LouisDesdoigts/dLux/issues/315">#315</a>).</li>
-<li><strong>Apertures:</strong> added circular, segmented, sparse, HST-like, JWST-like, and
-  Euclid-like static aperture builders, with optional support masks for basis
-  normalisation.</li>
-<li><strong>Numerical utilities:</strong> added CLIMB-style <code>soft_binarise(...)</code>, masked NaN-safe
-  norms, n-dimensional Gaussian kernels, cached Fourier helpers, and fill values for
-  resizing and padding
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/276">#276</a>,
-  <a href="https://github.com/LouisDesdoigts/dLux/issues/317">#317</a>).</li>
-<li><strong>Detectors and PSFs:</strong> added <code>BaseDetector</code>, made layered detectors callable,
-  expanded PSF arithmetic, and updated <code>ApplyJitter</code> with pixel-based sigma and
-  oversampled kernel generation
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/262">#262</a>).</li>
-<li><strong>Sources and spectra:</strong> added consistent return-mode and shape validation, 2D
-  spectral weights, inferred default weight shapes, and consistent <code>PSF</code> outputs.</li>
+<li>Added <code>Spec</code>, <code>PadSpec</code>, and <code>CoordSpec</code> objects for sampling metadata.</li>
+<li><code>CoordSpec</code> provides <code>xs</code>, <code>fov</code>, and <code>extent</code>.</li>
+<li><code>pixel_coords(...)</code> now accepts exactly one of <code>diameter</code>, <code>radius</code>, or <code>pixel_scale</code>.</li>
+<li><code>pixel_coords(...)</code> added FFT-style centering via <code>fft_style=True</code>.</li>
+<li><code>nd_coords(...)</code> has stricter casting and validation for pixel counts, scales, offsets, and indexing.</li>
+<li>Added <code>DistortedCoords</code> transformation using the existing polynomial distortion utilities.</li>
 </ul>
-<h3 id="breaking-changes_1">⚠️ Breaking Changes<a class="headerlink" href="#breaking-changes_1" title="Permanent link">¤</a></h3>
+<h3 id="propagation">Propagation<a class="headerlink" href="#propagation" title="Permanent link">¤</a></h3>
 <ul>
-<li><code>Wavefront</code> construction changed from <code>Wavefront(npixels, diameter, wavelength)</code> to
-  <code>Wavefront(wavelength, npixels, diameter=...)</code>, with <code>pixel_scale</code> available as an
-  alternative to <code>diameter</code>.</li>
-<li><code>Wavefront</code> stores <code>phasor</code>; <code>amplitude</code> and <code>phase</code> are now derived properties and
-  should be modified through <code>phasor</code>, <code>add_phase(...)</code>, or <code>add_opd(...)</code>.</li>
-<li><code>wavefront.coordinates</code> became the method <code>wavefront.coordinates()</code>.</li>
-<li>Wavefront arithmetic now acts on complex fields. In particular, <code>wavefront + opd</code>
-  no longer applies OPD; use <code>wavefront.add_opd(opd)</code>.</li>
-<li>Custom layers should implement <code>__call__(...)</code>, and optical systems now invoke layers
-  as callables rather than through <code>.apply(...)</code>.</li>
-<li>The Fourier-transform sign convention and propagation interfaces changed. FFT
-  propagation now produces corrected coordinates and phases after centring
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/300">#300</a>).</li>
-<li>Removed <code>ShiftedMFT</code>, <code>FarFieldFresnel</code>, <code>fresnel_MFT(...)</code>,
-  <code>fresnel_phase_factors(...)</code>, and <code>quadratic_phase(...)</code>.</li>
-<li>Resolved-source convolution no longer supports <code>return_wf=True</code>, because image-plane
-  convolution cannot preserve coherent wavefront information.</li>
-<li>Minimum requirements increased to Python 3.10 and Zodiax 0.5, with
-  <code>abcdLux&gt;=0.0.2</code> added as a runtime dependency.</li>
+<li>FFT and MFT propagation now operate on <code>phasor</code>.</li>
+<li>Fourier transform sign convention changed.</li>
+<li>FFT propagation now tracks output sampling through <code>CoordSpec</code>.</li>
+<li>FFT propagation added support for inverse propagation, explicit centering, padding, cropping, and phase-ramp correction.</li>
+<li>MFT propagation added inverse propagation support.</li>
+<li>Removed <code>ShiftedMFT</code> and <code>FarFieldFresnel</code> from the standard propagator layer API.</li>
+<li>Added ABCD/LCT propagation infrastructure:</li>
+<li><code>ABCDElement</code></li>
+<li><code>ABCDFreeSpace</code></li>
+<li><code>ABCDLens</code></li>
+<li><code>ABCDMirror</code></li>
+<li><code>ABCDConjugatePlane</code></li>
+<li><code>ABCDPropagator</code></li>
+<li><code>MFTPropagator</code></li>
+<li><code>FFTPropagator</code></li>
+<li><code>ASMPropagator</code></li>
+<li>Added placeholder <code>Fraunhofer</code> and <code>Fresnel</code> ABCD propagator classes.</li>
 </ul>
-<h3 id="deprecations_1">⏳ Deprecations<a class="headerlink" href="#deprecations_1" title="Permanent link">¤</a></h3>
+<h3 id="optical-systems">Optical Systems<a class="headerlink" href="#optical-systems" title="Permanent link">¤</a></h3>
 <ul>
-<li><code>.apply(...)</code> remains available on base layers and coordinate transformations as a
-  compatibility alias, but new code should use the callable interface.</li>
+<li>Added <code>ParametricOpticalSystem</code>.</li>
+<li>Added <code>fov = psf_npixels * psf_pixel_scale</code>.</li>
+<li>Added <code>initialise_wavefront(...)</code> to layered optical systems.</li>
+<li>Added <code>debug_propagate_mono(...)</code> for collecting intermediate wavefronts.</li>
+<li>Optical systems now apply layers via <code>layer(wavefront)</code>.</li>
+<li><code>return_wf=True</code> and <code>return_psf=True</code> are now mutually exclusive.</li>
+<li>Polychromatic propagation now weights phasors by <code>sqrt(weight)</code> before summing intensities.</li>
+<li>Offsets are now normalised internally from <code>None</code> to a <code>(2,)</code> zero vector.</li>
+<li>Layer attribute lookup now searches both layer keys and layer attributes.</li>
 </ul>
-<h3 id="bug-fixes_1">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_1" title="Permanent link">¤</a></h3>
+<h3 id="layers">Layers<a class="headerlink" href="#layers" title="Permanent link">¤</a></h3>
 <ul>
-<li>Fixed NaN-prone and undefined-gradient wavefront arithmetic by retaining complex
-  fields throughout propagation and numerical operations
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/291">#291</a>,
-  <a href="https://github.com/LouisDesdoigts/dLux/issues/295">#295</a>).</li>
-<li>Fixed FFT coordinate centring, propagation phase ramps, and forward/inverse Fourier
-  sign consistency (<a href="https://github.com/LouisDesdoigts/dLux/issues/300">#300</a>).</li>
-<li>Fixed propagation paths that operated on amplitude instead of the full complex
-  phasor.</li>
-<li>Fixed <code>nandiv(...)</code> for Python float inputs and safe division under JAX NaN debugging
-  (<a href="https://github.com/LouisDesdoigts/dLux/issues/269">#269</a>).</li>
-<li>Fixed <code>factorial(0)</code>, associated Zernike factor evaluation, resizing edge cases, and
-  regular-polygon aperture initialisation.</li>
-<li>Improved validation and error reporting across coordinates, sources, spectra,
-  detectors, apertures, optical systems, and transformations.</li>
+<li>Layer interface moved from <code>.apply(...)</code> to <code>__call__(...)</code>.</li>
+<li><code>.apply(...)</code> remains as a compatibility alias on base layer classes.</li>
+<li>Added <code>Lambda</code>, a no-op unified layer.</li>
+<li>Added <code>FourierBasis</code>, an optical OPD layer using cached real Fourier kernels.</li>
+<li><code>TransmissiveLayer</code>, <code>AberratedLayer</code>, <code>BasisLayer</code>, <code>Tilt</code>, and <code>Normalise</code> now use <code>__call__</code>.</li>
+<li><code>AberratedLayer</code> and <code>BasisLayer</code> now apply OPD explicitly through <code>add_opd(...)</code>.</li>
+<li>Unified <code>Resize</code>, <code>Rotate</code>, and <code>Flip</code> now operate through <code>__call__</code>.</li>
+</ul>
+<h3 id="apertures">Apertures<a class="headerlink" href="#apertures" title="Permanent link">¤</a></h3>
+<ul>
+<li>Refactored aperture layers around <code>ApertureLayer</code>, <code>BaseDynamicAperture</code>, and <code>DynamicAperture</code>.</li>
+<li>Apertures now multiply the wavefront phasor by their transmission.</li>
+<li>Dynamic apertures now use <code>wavefront.coordinates()</code> and <code>wavefront.pixel_scale</code>.</li>
+<li>Added/standardised <code>extent</code> and <code>nsides</code> properties for dynamic apertures.</li>
+<li>Improved transformation type checking and missing-attribute errors.</li>
+</ul>
+<h3 id="sources-and-spectra">Sources and Spectra<a class="headerlink" href="#sources-and-spectra" title="Permanent link">¤</a></h3>
+<ul>
+<li>Added shared validation for return modes, wavelength arrays, spectra, and 2D positions.</li>
+<li>Sources reject simultaneous <code>return_wf=True</code> and <code>return_psf=True</code>.</li>
+<li><code>Spectrum</code> now supports 2D weights with wavelength shape checked on the trailing axis.</li>
+<li>Binary and point-resolved sources now infer default weight arrays from wavelengths or spectra.</li>
+<li>Resolved-source models now explicitly reject <code>return_wf=True</code> because convolution destroys coherent wavefront information.</li>
+<li>Composite source outputs now construct <code>PSF</code> objects consistently when <code>return_psf=True</code>.</li>
+<li>Source and scene attribute errors are more explicit.</li>
+</ul>
+<h3 id="detectors-and-psfs">Detectors and PSFs<a class="headerlink" href="#detectors-and-psfs" title="Permanent link">¤</a></h3>
+<ul>
+<li>Added <code>BaseDetector</code>.</li>
+<li><code>LayeredDetector</code> is now callable; <code>.model(...)</code> delegates to <code>__call__(...)</code>.</li>
+<li>Detector layers now use <code>__call__</code>; <code>.apply(...)</code> remains as a compatibility alias.</li>
+<li>Detector attribute lookup now searches layer keys and layer attributes.</li>
+<li><code>ApplyJitter</code> now takes <code>sigma</code> in pixels, adds <code>oversample</code>, and removes pixel-scale dependence.</li>
+<li>Detector kernels and downsampling factors now validate positive integer sizes.</li>
+<li>PSF arithmetic now uses a unified implementation over <code>.data</code>.</li>
+<li>PSF arithmetic now supports <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>None</code>, arrays, scalars, and other <code>PSF</code> objects.</li>
+</ul>
+<h3 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">¤</a></h3>
+<ul>
+<li>Added generic angular conversion helpers:</li>
+<li><code>unit_factor_to_rad(...)</code></li>
+<li><code>convert(...)</code></li>
+<li>Existing angular conversions now use the generic conversion backend.</li>
+<li>Angular units now support aliases and SI-style prefixes such as <code>mas</code>, <code>mrad</code>, and <code>uarcsec</code>.</li>
+<li>Added n-dimensional <code>gaussian(...)</code>.</li>
+<li>Added <code>mv_gaussian(...)</code> stub that currently raises <code>NotImplementedError</code>.</li>
+<li>Fixed <code>factorial(0)</code>.</li>
+<li>Updated <code>nandiv(...)</code> to avoid evaluating division by zero under JAX NaN debugging.</li>
+<li>Added <code>soft_binarise(...)</code> using the CLIMB-style soft binarisation algorithm.</li>
+<li>Added <code>utils.norms</code> with NaN-safe norm functions, including peak-to-valley support and mask broadcasting.</li>
+<li>Added static aperture builders:</li>
+<li><code>circular_aperture(...)</code></li>
+<li><code>segmented_aperture(...)</code></li>
+<li><code>sparse_aperture(...)</code></li>
+<li><code>hst_like(...)</code></li>
+<li><code>jwst_like(...)</code></li>
+<li><code>euclid_like(...)</code></li>
+<li>Static aperture builders can optionally return support masks for basis normalisation.</li>
+<li>Added cached real Fourier basis helpers:</li>
+<li><code>fourier_kernel_1d(...)</code></li>
+<li><code>fourier_kernels(...)</code></li>
+<li><code>eval_fourier_basis(...)</code></li>
+<li>Added <code>fft_spec(...)</code> and <code>fft_phase_ramp(...)</code> helpers.</li>
+</ul>
+<h3 id="zernikes-and-basis-evaluation">Zernikes and Basis Evaluation<a class="headerlink" href="#zernikes-and-basis-evaluation" title="Permanent link">¤</a></h3>
+<ul>
+<li>Added caching for static Zernike components.</li>
+<li>Updated Zernike code for safe <code>factorial(0)</code> behaviour.</li>
+<li>Added cached Fourier-basis evaluation support for the new <code>FourierBasis</code> layer.</li>
+</ul>
+<h3 id="public-api-and-internals">Public API and Internals<a class="headerlink" href="#public-api-and-internals" title="Permanent link">¤</a></h3>
+<ul>
+<li>Added centralised export helpers in <code>_exports.py</code>.</li>
+<li>Top-level and subpackage exports now follow module <code>__all__</code>.</li>
+<li>Added public exports for new coordinate specs, aperture utilities, norm utilities, ABCD propagators, <code>Lambda</code>, and <code>FourierBasis</code>.</li>
+<li>Standardised imports around <code>zodiax as zdx</code> and <code>equinox as eqx</code>.</li>
+<li>Modernised type hints to <code>|</code> unions.</li>
+<li>Removed dead imports and legacy compatibility shims.</li>
+<li>Improved error messages across wavefronts, sources, detectors, apertures, coordinates, and transformations.</li>
 </ul>
 
 
