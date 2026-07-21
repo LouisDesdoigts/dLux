@@ -35,7 +35,7 @@ class BaseOpticalSystem(zdx.Base):
     concrete optical-system implementations.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseOpticalSystem.png)
+        ![UML](../assets/uml/BaseOpticalSystem.png)
     """
 
     def __init_subclass__(cls, **kwargs):
@@ -141,7 +141,7 @@ class OpticalSystem(BaseOpticalSystem):
     universal to all optics classes.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/OpticalSystem.png)
+        ![UML](../assets/uml/OpticalSystem.png)
     """
 
     def propagate(
@@ -237,7 +237,7 @@ class ParametricOpticalSystem(OpticalSystem):
     pixel scale and number of pixels.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ParametricOpticalSystem.png)
+        ![UML](../assets/uml/ParametricOpticalSystem.png)
 
     Attributes
     ----------
@@ -248,6 +248,8 @@ class ParametricOpticalSystem(OpticalSystem):
         parameter while increasing the psf_npixels parameter.
     psf_pixel_scale : float
         The pixel scale of the final PSF.
+    fov : float, property
+        Derived field of view of the optical system in pixel-scale units.
     """
 
     psf_npixels: int
@@ -274,7 +276,7 @@ class ParametricOpticalSystem(OpticalSystem):
         """
         self.psf_npixels = int(psf_npixels)
         self.oversample = int(oversample)
-        self.psf_pixel_scale = float(psf_pixel_scale)
+        self.psf_pixel_scale = np.asarray(psf_pixel_scale, float)
         super().__init__(**kwargs)
 
     @property
@@ -298,7 +300,7 @@ class LayeredOpticalSystem(OpticalSystem):
     A flexible optical system that allows for the arbitrary chaining of OpticalLayers.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/LayeredOpticalSystem.png)
+        ![UML](../assets/uml/LayeredOpticalSystem.png)
 
     Attributes
     ----------
@@ -333,7 +335,7 @@ class LayeredOpticalSystem(OpticalSystem):
             specify a key for the layer in the layers dictionary.
         """
         self.wf_npixels = int(wf_npixels)
-        self.diameter = float(diameter)
+        self.diameter = np.asarray(diameter, float)
         self.layers = dlu.list2dictionary(layers, True, OpticalLayer)
 
     def __getattr__(self: LayeredOpticalSystem, key: str) -> Any:
@@ -513,7 +515,7 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
     CartesianOpticalSystem classes.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ParametricLayeredOpticalSystem.png)
+        ![UML](../assets/uml/ParametricLayeredOpticalSystem.png)
     """
 
     @abstractmethod
@@ -598,7 +600,7 @@ class AngularOpticalSystem(ParametricLayeredOpticalSystem):
     image plane with `psf_pixel_scale` in units of arcseconds.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AngularOpticalSystem.png)
+        ![UML](../assets/uml/AngularOpticalSystem.png)
 
     Attributes
     ----------
@@ -684,7 +686,7 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
     image plane with `psf_pixel_scale` in units of microns.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CartesianOpticalSystem.png)
+        ![UML](../assets/uml/CartesianOpticalSystem.png)
 
     Attributes
     ----------
@@ -738,7 +740,7 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
             The oversampling factor of the final PSF. Decreases the psf_pixel_scale
             parameter while increasing the psf_npixels parameter.
         """
-        self.focal_length = float(focal_length)
+        self.focal_length = np.asarray(focal_length, float)
 
         super().__init__(
             wf_npixels=wf_npixels,
