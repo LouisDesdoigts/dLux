@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.40">
+      <meta name="generator" content="zensical-0.0.51">
     
     
       
@@ -34,7 +34,7 @@
       
         
       
-      <link rel="stylesheet" href="../assets/stylesheets/modern/main.fba56155.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.62c9b9cc.min.css">
       
         
           
@@ -2080,6 +2080,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#package-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Package Updates
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2158,6 +2169,29 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;
 <hr />
 <h2 id="contributing-the-changes">Contributing the Changes<a class="headerlink" href="#contributing-the-changes" title="Permanent link">¤</a></h2>
 <p>After these steps have been completed, you can commit your changes and push them to your forked repository. These changes should have its formatting and linting checked by the pre-commit hooks. If there are any issues, you will need to fix them before you can commit your changes. Once you have pushed your changes to your forked repository, you can submit a pull request to the main repository. This will allow the maintainers to review your changes and merge them into the main repository!</p>
+<hr />
+<h2 id="package-updates">Package Updates<a class="headerlink" href="#package-updates" title="Permanent link">¤</a></h2>
+<p>Package releases are published to PyPI from tagged commits on <code>main</code>.</p>
+<ol>
+<li>Update the version in <code>pyproject.toml</code> and add the user-facing changes to <code>CHANGELOG.md</code>.</li>
+<li>Open a pull request and wait for the remote tests to pass before merging.</li>
+<li>
+<p>Update the local <code>main</code> branch:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>switch<span class="w"> </span>main
+git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+</li>
+<li>
+<p>Tag and push the release:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v0.15.1<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;dLux v0.15.1&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v0.15.1
+</code></pre></div>
+</li>
+<li>
+<p>Check the release workflow and approve the PyPI deployment.</p>
+</li>
+</ol>
+<p>The tag and <code>pyproject.toml</code> version must match. Published versions and release tags should not be reused.</p>
 
 
 
@@ -2215,10 +2249,10 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.dbc0afdc.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7f30b55.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
