@@ -522,6 +522,43 @@ class TestPolarisedWavefrontFromWavefront:
         assert_polarised_identity(actual.phasor, wavefront.phasor)
 
 
+class TestPolarisedWavefrontMagicMethods:
+    @pytest.mark.parametrize(
+        ("method", "operation"),
+        [
+            ("__add__", np.add),
+            ("__sub__", np.subtract),
+            ("__mul__", np.multiply),
+            ("__truediv__", lambda x, y: x * (1 / y)),
+            ("__iadd__", np.add),
+            ("__isub__", np.subtract),
+            ("__imul__", np.multiply),
+            ("__itruediv__", lambda x, y: x * (1 / y)),
+        ],
+    )
+    def test_promotes_mixed_wavefront_operands(self, method, operation):
+        wavefront = Wavefront(1.0e-6, npixels=8, diameter=1.0)
+        polarised = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+        polarised = polarised.set(phasor=np.ones_like(polarised.phasor) * (2 + 1j))
+        promoted = PolarisedWavefront.from_wavefront(wavefront)
+
+        normal_first = getattr(wavefront, method)(polarised)
+        polarised_first = getattr(polarised, method)(wavefront)
+
+        assert isinstance(normal_first, PolarisedWavefront)
+        assert isinstance(polarised_first, PolarisedWavefront)
+        assert np.allclose(
+            normal_first.phasor,
+            operation(promoted.phasor, polarised.phasor),
+            equal_nan=True,
+        )
+        assert np.allclose(
+            polarised_first.phasor,
+            operation(polarised.phasor, promoted.phasor),
+            equal_nan=True,
+        )
+
+
 class TestPolarisedWavefrontFromPhasor:
     def test_from_regular_phasor(self):
         phasor = np.ones((8, 8), dtype=complex)
