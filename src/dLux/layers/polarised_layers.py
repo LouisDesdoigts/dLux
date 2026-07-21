@@ -1,7 +1,6 @@
 """Polarised optical layers and parameterised polarisation fields."""
 
 from __future__ import annotations
-from abc import abstractmethod
 import equinox as eqx
 import jax.numpy as np
 import zodiax as zdx
@@ -13,10 +12,8 @@ from .optical_layers import OpticalLayer
 from ..wavefronts import Wavefront
 
 __all__ = [
-    "Parameter",
-    "Constant",
-    "Basis",
-    "FourierParameter",
+    "FieldDict",
+    "ExplicitBasis",
     "PolarisingOptic",
     "UniformPolarisingOptic",
     "LinearPolariser",
@@ -26,195 +23,96 @@ __all__ = [
 ]
 
 
-class Parameter(zdx.Base):
+class FieldDict(zdx.Base):
     """
-    Base class for scalar or spatially varying values evaluated at runtime.
+    A small dict-backed container with attribute access.
 
-    Polarisation layers use parameters for values such as angle and retardance. This
-    keeps the layers independent of how those values are represented: a parameter may
-    be a scalar, an array, an explicit basis expansion, or an implicit basis expansion.
-    """
-
-    @abstractmethod
-    def __call__(self: Parameter) -> Array:  # pragma: no cover
-        """
-        Evaluates the parameter.
-
-        Returns
-        -------
-        value : Array
-            Scalar or spatially varying parameter value.
-        """
-        pass
-
-
-class Constant(Parameter):
-    """
-    A scalar or array-valued parameter.
+    Spatially varying polarisation layers store their raw parameter leaves, basis
+    objects, and coefficients in separate `FieldDict`s. This keeps paths like
+    `layer.parameters.angle`, `layer.basis.angle`, and `layer.coefficients.angle`
+    explicit and optimisable while letting each layer support arbitrary field names.
 
     Attributes
     ----------
-    value : Array
-        The scalar or array value returned when the parameter is evaluated.
+    values : dict
+        Dictionary mapping field names to values.
     """
 
-    value: Array
+    values: dict
 
-    def __init__(self: Constant, value: Array):
+    def __init__(self: FieldDict, values: dict = None, **kwargs):
         """
         Parameters
         ----------
-        value : Array
-            Scalar or array value.
+        values : dict = None
+            Initial field dictionary.
+        **kwargs
+            Additional field values.
         """
-        self.value = np.asarray(value, float)
+        values = {} if values is None else dict(values)
+        values.update(kwargs)
+        self.values = values
 
-    def __call__(self: Constant) -> Array:
+    def __getitem__(self: FieldDict, key: str):
         """
-        Returns the stored value.
+        Returns a field by name.
 
         Returns
         -------
         value : Array
-            Scalar or array value.
+            Field value.
         """
-        return self.value
+        return self.values[key]
+
+    def __getattr__(self: FieldDict, key: str):
+        """
+        Returns a field by attribute access.
+        """
+        try:
+            return self.values[key]
+        except KeyError as err:
+            raise AttributeError(key) from err
+
+    def get(self: FieldDict, key: str, default=None):
+        """
+        Returns a field by name, or `default` if it is absent.
+        """
+        return self.values.get(key, default)
+
+    def __contains__(self: FieldDict, key: str) -> bool:
+        """
+        Returns whether a field is present.
+        """
+        return key in self.values
 
 
-class Basis(Parameter):
+class ExplicitBasis(zdx.Base):
+    """Leaf marker for a parameter evaluated from an explicit basis array."""
+
+
+class FourierBasis(zdx.Base):
+    """Leaf marker for a parameter evaluated from cached Fourier kernels."""
+
+
+def _eval_leaf(leaf, basis, coefficients) -> Array:
     """
-    An explicit basis parameter evaluated by `dlu.eval_basis`.
+    Evaluates a parameter leaf using the matching basis and coefficients.
 
-    Attributes
-    ----------
-    basis : Array
-        Explicit basis array with shape `(..., n, n)`.
-    coefficients : Array
-        Coefficients with shape matching `basis.shape[:-2]`.
+    Raw scalar and array leaves are returned directly. `ExplicitBasis` leaves use an
+    explicit basis array with `dlu.eval_basis`, while `FourierBasis` leaves use cached
+    Fourier kernels with `dlu.eval_fourier_basis`.
     """
+    if isinstance(leaf, ExplicitBasis):
+        if basis is None or coefficients is None:
+            raise ValueError("Explicit basis leaves require basis and coefficients.")
+        return dlu.eval_basis(basis, coefficients)
 
-    basis: Array
-    coefficients: Array
+    if isinstance(leaf, FourierBasis):
+        if basis is None or coefficients is None:
+            raise ValueError("Fourier basis leaves require basis and coefficients.")
+        return dlu.eval_fourier_basis(coefficients, *basis)
 
-    def __init__(self: Basis, basis: Array, coefficients: Array = None):
-        """
-        Parameters
-        ----------
-        basis : Array
-            Explicit basis array with shape `(..., n, n)`.
-        coefficients : Array = None
-            Coefficients for the basis. Defaults to zeros with shape
-            `basis.shape[:-2]`.
-        """
-        self.basis = np.asarray(basis, float)
-        if coefficients is None:
-            coefficients = np.zeros(self.basis.shape[:-2])
-        self.coefficients = np.asarray(coefficients, float)
-
-        if self.basis.shape[:-2] != self.coefficients.shape:
-            raise ValueError(
-                "The number of basis vectors must match the number of coefficients."
-            )
-
-    def __call__(self: Basis) -> Array:
-        """
-        Evaluates the explicit basis.
-
-        Returns
-        -------
-        value : Array
-            Evaluated basis array with shape `(n, n)`.
-        """
-        return dlu.eval_basis(self.basis, self.coefficients)
-
-
-class FourierParameter(Parameter):
-    """
-    A Fourier-basis parameter evaluated from cached Fourier kernels.
-
-    This stores Fourier evaluation kernels rather than an explicit `(modes, n, n)`
-    basis array. The coefficients use the same `(x, y)` mode ordering as
-    `dlu.eval_fourier_basis`.
-
-    Attributes
-    ----------
-    coefficients : Array
-        Fourier coefficients with shape `(n_modes_x, n_modes_y)`.
-    kernels : tuple[Array, Array]
-        Cached x and y Fourier evaluation kernels.
-    """
-
-    coefficients: Array
-    kernels: tuple[Array, Array]
-
-    def __init__(
-        self: FourierParameter,
-        npix: int | tuple[int, int],
-        n_modes: int | tuple[int, int],
-        coefficients: Array = None,
-        scale: float = 1.0,
-    ):
-        """
-        Parameters
-        ----------
-        npix : int or tuple[int, int]
-            Output number of pixels in `(x, y)` order.
-        n_modes : int or tuple[int, int]
-            Number of Fourier modes in `(x, y)` order.
-        coefficients : Array = None
-            Fourier coefficients. Defaults to zeros.
-        scale : float = 1.0
-            Per-axis Fourier kernel scale.
-        """
-        self.kernels = dlu.fourier_kernels(n_modes, npix, scale)
-        coefficient_shape = tuple(kernel.shape[1] for kernel in self.kernels)
-
-        if coefficients is None:
-            coefficients = np.zeros(coefficient_shape)
-        self.coefficients = np.asarray(coefficients, float)
-
-        if self.coefficients.shape != coefficient_shape:
-            raise ValueError(
-                "The Fourier coefficient array must match the number of modes in each "
-                "dimension."
-            )
-
-    def update_kernels(
-        self: FourierParameter, npix: int | tuple[int, int]
-    ) -> FourierParameter:
-        """
-        Returns a copy with kernels updated for a new output size.
-
-        Parameters
-        ----------
-        npix : int or tuple[int, int]
-            Updated output number of pixels in `(x, y)` order.
-
-        Returns
-        -------
-        parameter : FourierParameter
-            Copy with updated Fourier kernels.
-        """
-        kernels = dlu.fourier_kernels(self.coefficients.shape, npix)
-        return self.set(kernels=kernels)
-
-    def __call__(self: FourierParameter) -> Array:
-        """
-        Evaluates the Fourier parameter.
-
-        Returns
-        -------
-        value : Array
-            Evaluated Fourier basis array.
-        """
-        return dlu.eval_fourier_basis(self.coefficients, *self.kernels)
-
-
-def _as_parameter(value: Array | Parameter) -> Parameter:
-    """Promote scalar and array inputs to a common parameter interface."""
-    if isinstance(value, Parameter):
-        return value
-    return Constant(value)
+    return np.asarray(leaf, float)
 
 
 class BasePolarisingOptic(OpticalLayer):
@@ -368,25 +266,59 @@ class SVLinearPolariser(BasePolarisingOptic):
     """
     A spatially varying ideal linear polariser.
 
-    The angle may be a scalar, array, or `Parameter`. It is evaluated when `jones` is
-    accessed, allowing basis-backed parameters to be optimised directly.
+    `angle` may be a scalar, array, or basis marker. The evaluated physical angle is
+    exposed by `layer.angle`; the raw leaf, basis, and coefficients are available via
+    `layer.parameters.angle`, `layer.basis.angle`, and `layer.coefficients.angle`.
 
     Attributes
     ----------
-    angle : Parameter
-        Transmission-axis angle in radians.
+    parameters : FieldDict
+        Raw parameter leaves.
+    basis : FieldDict
+        Basis data for basis-backed leaves.
+    coefficients : FieldDict
+        Coefficients for basis-backed leaves.
     """
 
-    angle: Parameter
+    parameters: FieldDict
+    basis: FieldDict
+    coefficients: FieldDict
 
-    def __init__(self: SVLinearPolariser, angle: Array):
+    def __init__(
+        self: SVLinearPolariser,
+        angle: Array,
+        basis: dict = None,
+        coefficients: dict = None,
+    ):
         """
         Parameters
         ----------
-        angle : Array or Parameter
+        angle : Array
+            Transmission-axis angle in radians, or a basis marker.
+        basis : dict = None
+            Basis data keyed by parameter name.
+        coefficients : dict = None
+            Basis coefficients keyed by parameter name.
+        """
+        self.parameters = FieldDict(angle=angle)
+        self.basis = FieldDict(basis)
+        self.coefficients = FieldDict(coefficients)
+
+    @property
+    def angle(self: SVLinearPolariser) -> Array:
+        """
+        Evaluated transmission-axis angle.
+
+        Returns
+        -------
+        angle : Array
             Transmission-axis angle in radians.
         """
-        self.angle = _as_parameter(angle)
+        return _eval_leaf(
+            self.parameters.angle,
+            self.basis.get("angle"),
+            self.coefficients.get("angle"),
+        )
 
     @property
     def jones(self: SVLinearPolariser) -> Array:
@@ -398,38 +330,86 @@ class SVLinearPolariser(BasePolarisingOptic):
         jones : Array
             Linear polariser Jones matrix with shape `(2, 2, ...)`.
         """
-        return dlu.linear_polariser(self.angle())
+        return dlu.linear_polariser(self.angle)
 
 
 class SVRetarder(BasePolarisingOptic):
     """
     A spatially varying retarder.
 
-    Retardance and angle may be independently specified as scalars, arrays, or
-    `Parameter` objects.
+    Retardance and angle may be independently specified as scalars, arrays, or basis
+    markers. Evaluated physical values are exposed by `layer.retardance` and
+    `layer.angle`; raw leaves, basis data, and coefficients are stored in matching
+    `FieldDict`s.
 
     Attributes
     ----------
-    retardance : Parameter
-        Retardance in radians.
-    angle : Parameter
-        Fast-axis angle in radians.
+    parameters : FieldDict
+        Raw parameter leaves.
+    basis : FieldDict
+        Basis data for basis-backed leaves.
+    coefficients : FieldDict
+        Coefficients for basis-backed leaves.
     """
 
-    retardance: Parameter
-    angle: Parameter
+    parameters: FieldDict
+    basis: FieldDict
+    coefficients: FieldDict
 
-    def __init__(self: SVRetarder, retardance: Array, angle: Array):
+    def __init__(
+        self: SVRetarder,
+        retardance: Array,
+        angle: Array,
+        basis: dict = None,
+        coefficients: dict = None,
+    ):
         """
         Parameters
         ----------
-        retardance : Array or Parameter
+        retardance : Array
+            Retardance in radians, or a basis marker.
+        angle : Array
+            Fast-axis angle in radians, or a basis marker.
+        basis : dict = None
+            Basis data keyed by parameter name.
+        coefficients : dict = None
+            Basis coefficients keyed by parameter name.
+        """
+        self.parameters = FieldDict(retardance=retardance, angle=angle)
+        self.basis = FieldDict(basis)
+        self.coefficients = FieldDict(coefficients)
+
+    @property
+    def retardance(self: SVRetarder) -> Array:
+        """
+        Evaluated retardance.
+
+        Returns
+        -------
+        retardance : Array
             Retardance in radians.
-        angle : Array or Parameter
+        """
+        return _eval_leaf(
+            self.parameters.retardance,
+            self.basis.get("retardance"),
+            self.coefficients.get("retardance"),
+        )
+
+    @property
+    def angle(self: SVRetarder) -> Array:
+        """
+        Evaluated fast-axis angle.
+
+        Returns
+        -------
+        angle : Array
             Fast-axis angle in radians.
         """
-        self.retardance = _as_parameter(retardance)
-        self.angle = _as_parameter(angle)
+        return _eval_leaf(
+            self.parameters.angle,
+            self.basis.get("angle"),
+            self.coefficients.get("angle"),
+        )
 
     @property
     def jones(self: SVRetarder) -> Array:
@@ -441,4 +421,4 @@ class SVRetarder(BasePolarisingOptic):
         jones : Array
             Retarder Jones matrix with shape `(2, 2, ...)`.
         """
-        return dlu.retarder(self.retardance(), self.angle())
+        return dlu.retarder(self.retardance, self.angle)
