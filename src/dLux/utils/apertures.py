@@ -155,6 +155,7 @@ def circular_aperture(
     diameter: float,
     oversample: int = 5,
     secondary_diameter: float | None = None,
+    array_diameter: float | None = None,
     spider_width: float | None = None,
     spider_angles: list | tuple | Array | None = None,
     zernike_nolls: list | tuple | Array | None = None,
@@ -174,6 +175,8 @@ def circular_aperture(
         The oversampling factor used to build soft pixel edges.
     secondary_diameter : float | None = None
         Optional central obscuration diameter.
+    array_diameter : float | None = None
+        Optional diameter of the array. If None, defaults to `diameter`.
     spider_width : float | None = None
         Optional spider vane width.
     spider_angles : list | tuple | Array | None = None
@@ -203,7 +206,8 @@ def circular_aperture(
         )
 
     # Get the oversampled primary aperture
-    coords = dlu.pixel_coords(npixels * oversample, diameter=diameter)
+    coord_diam = diameter if array_diameter is None else array_diameter
+    coords = dlu.pixel_coords(npixels * oversample, diameter=coord_diam)
     layers = [dlu.circle(coords, diameter / 2)]
 
     # Add the secondary if requested
@@ -222,7 +226,7 @@ def circular_aperture(
         return transmission
 
     # Get the non-oversampled Zernike basis for the primary aperture
-    coords = dlu.pixel_coords(npixels, diameter=diameter)
+    coords = dlu.pixel_coords(npixels, diameter=coord_diam)
     z_diam = diameter * (1.0 + zernike_oversize)
     basis = dlu.zernike_basis(zernike_nolls, coords, z_diam)
 
@@ -470,6 +474,7 @@ def hst_like(
     diameter: float = 2.4,
     oversample: int = 5,
     secondary_diameter: float = 0.305,
+    array_diameter: float | None = None,
     spider_width: float | None = 0.038,
     spider_angles: list | tuple = (0, 90, 180, 270),
     zernike_nolls: list | tuple | Array | None = None,
@@ -489,6 +494,8 @@ def hst_like(
         The oversampling factor used to build soft pixel edges.
     secondary_diameter : float = 0.305
         The secondary obscuration diameter.
+    array_diameter : float | None = None
+        Optional diameter of the array. If None, defaults to `diameter`.
     spider_width : float | None = 0.038
         Width of the spider vanes.
     spider_angles : list | tuple = (0, 90, 180, 270)
@@ -515,6 +522,7 @@ def hst_like(
         diameter=diameter,
         oversample=oversample,
         secondary_diameter=secondary_diameter,
+        array_diameter=array_diameter,
         spider_width=spider_width,
         spider_angles=spider_angles,
         zernike_nolls=zernike_nolls,
@@ -603,6 +611,7 @@ def euclid_like(
     diameter: float = 1.21,
     oversample: int = 5,
     secondary_diameter: float = 0.395,
+    array_diameter: float | None = None,
     spider_width: float = 0.012,
     spider_angles: list | tuple = (0, 120, 240),
     zernike_nolls: list | tuple | Array | None = None,
@@ -622,6 +631,8 @@ def euclid_like(
         The oversampling factor used to build soft pixel edges.
     secondary_diameter : float = 0.395
         The secondary obscuration diameter.
+    array_diameter : float | None = None
+        Optional diameter of the array. If None, defaults to `diameter`.
     spider_width : float = 0.012
         Width of the spider vanes.
     spider_angles : list | tuple = (0, 120, 240)
@@ -652,10 +663,12 @@ def euclid_like(
         npixels=npixels * oversample,
         diameter=diameter,
         secondary_diameter=secondary_diameter,
+        array_diameter=array_diameter,
     )
 
     # Get the coordinates for the spiders
-    ap_coords = dlu.pixel_coords(npixels * oversample, diameter=diameter)
+    ap_coord_diam = diameter if array_diameter is None else array_diameter
+    ap_coords = dlu.pixel_coords(npixels * oversample, diameter=ap_coord_diam)
 
     # Get the generation functions
     spider_shift = np.array([secondary_diameter / 2 - spider_width / 2, diameter / 2])
@@ -678,6 +691,7 @@ def euclid_like(
         diameter=diameter,
         oversample=oversample,
         secondary_diameter=secondary_diameter,
+        array_diameter=array_diameter,
         zernike_nolls=zernike_nolls,
         zernike_oversize=zernike_oversize,
         return_support=True,

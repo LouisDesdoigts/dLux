@@ -29,43 +29,36 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install ".[dev]"
           python -m pip install zensical mkdocstrings-python
+          python -m pip install git+https://github.com/squidfunk/mike.git
 
       - name: Verify docs environment
         run: |
           python -m pip show zensical mkdocs
           python -c "import zensical, mkdocs; print('Docs deps OK')"
+          mike --version
 
       - name: Build Documentation
-        run: zensical build --strict
-
-      - name: Prepare publish directory
         run: |
-          rm -rf .publish
-          mkdir -p .publish
-          cp -R site/. .publish/
+          DLUX_VERSION="$(python -c 'from importlib.metadata import version; print(version("dLux"))')"
+          DLUX_DOCS_SITE_NAME="dLux v${DLUX_VERSION}" zensical build --strict
 
-          # If this is a normal push to main, update the 'dev' and 'latest' aliases
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            mkdir -p .publish/dev .publish/latest
-            cp -R site/. .publish/dev/
-            cp -R site/. .publish/latest/
-          fi
+      - name: Configure Git
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
-          # If this is a tag (e.g. v0.5.0), create permanent versioned folders
-          # with and without the 'v' prefix for robust backwards compatibility.
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION_TAG=${GITHUB_REF#refs/tags/}
-            VERSION=${VERSION_TAG#v}
-            mkdir -p ".publish/$VERSION_TAG" ".publish/$VERSION" .publish/latest
-            cp -R site/. ".publish/$VERSION_TAG/"
-            cp -R site/. ".publish/$VERSION/"
-            cp -R site/. .publish/latest/
-          fi
+      - name: Deploy development documentation
+        if: github.ref == 'refs/heads/main'
+        run: |
+          DLUX_VERSION="$(python -c 'from importlib.metadata import version; print(version("dLux"))')"
+          DLUX_DOCS_SITE_NAME="dLux v${DLUX_VERSION}" \
+            mike deploy --config-file mkdocs.yml --push dev
+          mike set-default --config-file mkdocs.yml --push dev
 
-      - name: Deploy Documentation
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .publish
-          keep_files: true
-
+      - name: Deploy release documentation
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DLUX_DOCS_SITE_NAME="dLux v${VERSION}" \
+            mike deploy --config-file mkdocs.yml --push \
+              --update-aliases "$VERSION" latest

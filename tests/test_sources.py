@@ -42,7 +42,9 @@ def spectrum():
 
 
 def test_point_source(wavelengths, spectrum):
-    _test_model(PointSource(wavelengths))
+    source = PointSource(wavelengths)
+    _test_model(source)
+    assert source.flux.shape == ()
     _test_model(PointSource(wavelengths, spectrum=spectrum))
 
     with pytest.raises(ValueError):
@@ -72,14 +74,21 @@ def test_resolved_source(wavelengths, spectrum):
 
 
 def test_binary_source(wavelengths, spectrum):
-    _test_model(BinarySource(wavelengths, separation=1.0))
+    source = BinarySource(wavelengths, separation=1.0)
+    _test_model(source)
+    assert source.mean_flux.shape == ()
+    assert source.separation.shape == ()
+    assert source.position_angle.shape == ()
+    assert source.contrast.shape == ()
 
     with pytest.raises(ValueError):
         BinarySource(wavelengths, separation=1.0, position=np.ones(1))
 
 
 def test_point_resolved_source(wavelengths, spectrum):
-    _test_model(PointResolvedSource(wavelengths))
+    source = PointResolvedSource(wavelengths)
+    _test_model(source)
+    assert source.contrast.shape == ()
 
 
 def test_scene():

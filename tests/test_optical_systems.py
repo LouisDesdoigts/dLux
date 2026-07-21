@@ -218,6 +218,8 @@ def test_angular_optics(
     _test_debug_propagate_mono(optics)
 
     assert optics.fov == psf_npixels * psf_pixel_scale
+    assert optics.diameter.shape == ()
+    assert optics.psf_pixel_scale.shape == ()
 
 
 def test_cartesian_optics(
@@ -245,3 +247,6 @@ def test_cartesian_optics(
     _test_debug_propagate_mono(optics)
 
     assert optics.fov == psf_npixels * psf_pixel_scale
+    assert optics.diameter.shape == ()
+    assert optics.focal_length.shape == ()
+    assert optics.psf_pixel_scale.shape == ()

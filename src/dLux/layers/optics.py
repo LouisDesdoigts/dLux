@@ -19,7 +19,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
     the input wavefront, with optional normalisation afterward.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Optic.png)
+        ![UML](../assets/uml/Optic.png)
 
     Attributes
     ----------
@@ -102,7 +102,7 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
     attribute. Also optionally applies a transmission and normalisation.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BasisOptic.png)
+        ![UML](../assets/uml/BasisOptic.png)
 
     Attributes
     ----------
