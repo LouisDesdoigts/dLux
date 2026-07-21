@@ -4,12 +4,13 @@ import pytest
 config.update("jax_debug_nans", True)
 
 from dLux import PolarisedWavefront, Wavefront
+import dLux.layers as dl
+from dLux.layers.optical_layers import FourierBasis as OpticalFourierBasis
 from dLux.layers.polarised_layers import (
-    Basis,
-    Constant,
-    FourierParameter,
+    ExplicitBasis,
+    FieldDict,
+    FourierBasis,
     LinearPolariser,
-    Parameter,
     PolarisingOptic,
     Retarder,
     SVLinearPolariser,
@@ -33,59 +34,28 @@ def explicit_basis(npixels=8):
     return np.array([np.ones((npixels, npixels)), x / npixels, y / npixels])
 
 
-class TestParameters:
-    def test_constant(self):
-        scalar = Constant(0.3)
-        array = Constant(np.ones((4, 4)))
+def fourier_basis(npixels=8, n_modes=3):
+    return dlu.fourier_kernels(n_modes, npixels)
 
-        assert isinstance(scalar, Parameter)
-        assert scalar().shape == ()
-        assert array().shape == (4, 4)
-        assert np.allclose(array(), 1.0)
 
-    def test_explicit_basis(self):
-        basis = explicit_basis()
-        coefficients = np.array([0.1, 0.2, 0.3])
-        parameter = Basis(basis, coefficients)
+class TestFieldDict:
+    def test_accessors(self):
+        fields = FieldDict({"angle": 0.1}, retardance=0.2)
 
-        assert parameter().shape == (8, 8)
-        assert np.allclose(parameter(), dlu.eval_basis(basis, coefficients))
+        assert fields["angle"] == 0.1
+        assert fields.angle == 0.1
+        assert fields.get("retardance") == 0.2
+        assert fields.get("missing", None) is None
+        assert "angle" in fields
 
-    def test_explicit_basis_default_coefficients(self):
-        parameter = Basis(explicit_basis())
+    def test_missing_attribute(self):
+        with pytest.raises(AttributeError):
+            FieldDict().angle
 
-        assert parameter.coefficients.shape == (3,)
-        assert np.allclose(parameter(), 0.0)
 
-    def test_explicit_basis_invalid_coefficients(self):
-        with pytest.raises(ValueError, match="basis vectors"):
-            Basis(explicit_basis(), np.ones(4))
-
-    def test_fourier_basis(self):
-        coefficients = np.ones((3, 5))
-        parameter = FourierParameter(npix=8, n_modes=(3, 5), coefficients=coefficients)
-
-        assert parameter().shape == (8, 8)
-        assert np.allclose(
-            parameter(), dlu.eval_fourier_basis(coefficients, *parameter.kernels)
-        )
-
-    def test_fourier_basis_default_coefficients(self):
-        parameter = FourierParameter(npix=8, n_modes=3)
-
-        assert parameter.coefficients.shape == (3, 3)
-        assert np.allclose(parameter(), 0.0)
-
-    def test_fourier_basis_invalid_coefficients(self):
-        with pytest.raises(ValueError, match="Fourier coefficient"):
-            FourierParameter(npix=8, n_modes=3, coefficients=np.ones((2, 3)))
-
-    def test_fourier_basis_update_kernels(self):
-        parameter = FourierParameter(npix=8, n_modes=3)
-        updated = parameter.update_kernels(10)
-
-        assert updated().shape == (10, 10)
-        assert updated.coefficients.shape == parameter.coefficients.shape
+def test_layers_fourier_basis_export_is_optical_layer():
+    assert dl.FourierBasis is OpticalFourierBasis
+    assert dl.FourierBasis is not FourierBasis
 
 
 class TestUniformPolarisingLayers:
@@ -145,7 +115,8 @@ class TestSpatiallyVaryingPolarisingLayers:
     def test_sv_linear_polariser_scalar_angle(self):
         optic = SVLinearPolariser(0.0)
 
-        assert isinstance(optic.angle, Constant)
+        assert optic.parameters.angle == 0.0
+        assert optic.angle.shape == ()
         assert optic.jones.shape == (2, 2)
         assert np.allclose(optic.jones, dlu.horizontal_polariser())
 
@@ -154,43 +125,106 @@ class TestSpatiallyVaryingPolarisingLayers:
         optic = SVLinearPolariser(angle)
         out = optic(wavefront())
 
+        assert optic.parameters.angle is angle
+        assert optic.angle.shape == (8, 8)
         assert optic.jones.shape == (2, 2, 8, 8)
         assert out.phasor.shape == (2, 2, 8, 8)
 
     def test_sv_linear_polariser_explicit_basis_angle(self):
         basis = explicit_basis()
         coefficients = np.array([0.0, 0.1, 0.2])
-        angle = Basis(basis, coefficients)
-        optic = SVLinearPolariser(angle)
+        optic = SVLinearPolariser(
+            ExplicitBasis(),
+            basis={"angle": basis},
+            coefficients={"angle": coefficients},
+        )
 
-        assert optic.angle is angle
+        assert isinstance(optic.parameters.angle, ExplicitBasis)
+        assert optic.basis.angle is basis
+        assert optic.coefficients.angle is coefficients
         assert optic.jones.shape == (2, 2, 8, 8)
-        assert np.allclose(optic.angle(), dlu.eval_basis(basis, coefficients))
+        assert np.allclose(optic.angle, dlu.eval_basis(basis, coefficients))
 
     def test_sv_linear_polariser_fourier_angle(self):
-        angle = FourierParameter(npix=8, n_modes=3)
-        optic = SVLinearPolariser(angle)
+        basis = fourier_basis()
+        coefficients = np.ones((3, 3))
+        optic = SVLinearPolariser(
+            FourierBasis(),
+            basis={"angle": basis},
+            coefficients={"angle": coefficients},
+        )
 
-        assert optic.angle is angle
+        assert isinstance(optic.parameters.angle, FourierBasis)
+        assert optic.basis.angle is basis
+        assert optic.coefficients.angle is coefficients
+        assert optic.jones.shape == (2, 2, 8, 8)
+        assert np.allclose(optic.angle, dlu.eval_fourier_basis(coefficients, *basis))
+
+    def test_sv_retarder_scalar_inputs(self):
+        optic = SVRetarder(np.pi / 2, 0.0)
+
+        assert optic.retardance.shape == ()
+        assert optic.angle.shape == ()
+        assert optic.jones.shape == (2, 2)
+
+    def test_sv_retarder_array_inputs(self):
+        retardance = np.ones((8, 8)) * np.pi / 2
+        angle = np.zeros((8, 8))
+        optic = SVRetarder(retardance, angle)
+
+        assert np.allclose(optic.retardance, retardance)
+        assert np.allclose(optic.angle, angle)
         assert optic.jones.shape == (2, 2, 8, 8)
 
-    @pytest.mark.parametrize(
-        "retardance, angle",
-        [
-            (np.pi / 2, 0.0),
-            (np.ones((8, 8)) * np.pi / 2, np.zeros((8, 8))),
-            (Basis(explicit_basis(), np.array([0.1, 0.2, 0.3])), 0.0),
-            (FourierParameter(npix=8, n_modes=3), Basis(explicit_basis())),
-        ],
-        ids=["scalar", "array", "basis-retardance", "fourier-and-basis"],
-    )
-    def test_sv_retarder_parameter_inputs(self, retardance, angle):
-        optic = SVRetarder(retardance, angle)
-        jones = optic.jones
+    def test_sv_retarder_explicit_basis_retardance(self):
+        basis = explicit_basis()
+        coefficients = np.array([0.1, 0.2, 0.3])
+        optic = SVRetarder(
+            ExplicitBasis(),
+            0.0,
+            basis={"retardance": basis},
+            coefficients={"retardance": coefficients},
+        )
 
-        assert isinstance(optic.retardance, Parameter)
-        assert isinstance(optic.angle, Parameter)
-        assert jones.shape[:2] == (2, 2)
+        assert isinstance(optic.parameters.retardance, ExplicitBasis)
+        assert optic.basis.retardance is basis
+        assert optic.coefficients.retardance is coefficients
+        assert np.allclose(optic.retardance, dlu.eval_basis(basis, coefficients))
+        assert optic.jones.shape == (2, 2, 8, 8)
+
+    def test_sv_retarder_mixed_fourier_and_explicit_basis(self):
+        retardance_basis = fourier_basis()
+        angle_basis = explicit_basis()
+        retardance_coefficients = np.ones((3, 3))
+        angle_coefficients = np.array([0.0, 0.1, 0.2])
+        optic = SVRetarder(
+            FourierBasis(),
+            ExplicitBasis(),
+            basis={"retardance": retardance_basis, "angle": angle_basis},
+            coefficients={
+                "retardance": retardance_coefficients,
+                "angle": angle_coefficients,
+            },
+        )
+
+        assert np.allclose(
+            optic.retardance,
+            dlu.eval_fourier_basis(retardance_coefficients, *retardance_basis),
+        )
+        assert np.allclose(optic.angle, dlu.eval_basis(angle_basis, angle_coefficients))
+        assert optic.jones.shape == (2, 2, 8, 8)
+
+    def test_missing_explicit_basis_inputs(self):
+        optic = SVLinearPolariser(ExplicitBasis())
+
+        with pytest.raises(ValueError, match="Explicit basis"):
+            optic.angle
+
+    def test_missing_fourier_basis_inputs(self):
+        optic = SVLinearPolariser(FourierBasis())
+
+        with pytest.raises(ValueError, match="Fourier basis"):
+            optic.angle
 
     def test_sv_retarder_applies_to_chromatic_wavefront(self):
         optic = SVRetarder(np.ones((8, 8)) * np.pi / 2, np.zeros((8, 8)))
