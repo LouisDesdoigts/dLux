@@ -12,7 +12,7 @@ dLux is an open-source differentiable optical modelling framework built within t
 
 Under the hood, dLux takes inspiration from the isomorphic nature between optical system and neural networks, enabling the description of arbitrary optical systems as a series of layers that operate sequentially on a wavefront. This 'layers based' design provides near-complete flexibility to end users (since you can easily define your own layer!), while also enabling most optical systems to be composed from layers that are already implemented within dLux. Unlike other optical simulators, dLux aims to put tools in users hands and teach them how to use them, not provide a pre-built system that works in unknown ways. This formulation puts more power in the hands of users and also helps them learn optical modelling along the way!
 
-## Documentation & Tutorials
+## Documentation
 
 dLux has extensive docummentation and a growing set of tutorials to help users get up and running. The documentation includes a detailed API reference, as well as guides on how to use the various features of dLux. The tutorials cover a range of topics, from basic usage to more advanced techniques, and are designed to help users learn how to use dLux effectively.
 
