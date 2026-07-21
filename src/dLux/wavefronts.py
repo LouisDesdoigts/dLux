@@ -600,7 +600,9 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             New wavefront with updated `pixel_scale` and `center`.
         """
-        return self.set(pixel_scale=spec.d, center=spec.c)
+        pixel_scale = None if spec.d is None else np.asarray(spec.d, float)
+        center = None if spec.c is None else np.asarray(spec.c, float)
+        return self.set(pixel_scale=pixel_scale, center=center)
 
     def propagate_FFT(
         self,

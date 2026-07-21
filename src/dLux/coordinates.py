@@ -89,8 +89,8 @@ class CoordSpec(Spec):
             Centre coordinate of the grid, in metres.
         """
         self.n = n
-        self.d = d
-        self.c = c
+        self.d = None if d is None else np.asarray(d, float)
+        self.c = None if c is None else np.asarray(c, float)
 
     @property
     def xs(self):
