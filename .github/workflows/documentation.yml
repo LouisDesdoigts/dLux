@@ -46,11 +46,23 @@ jobs:
           mkdir -p .publish
           cp -R site/. .publish/
 
-          # If this is a normal push to main, update the 'dev' and 'latest' aliases
+          git fetch origin gh-pages:refs/remotes/origin/gh-pages
+          git worktree add --detach .gh-pages origin/gh-pages
+
+          CURRENT_VERSION=""
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            CURRENT_VERSION="${GITHUB_REF_NAME#v}"
+          fi
+
+          LATEST_VERSION=$(python docs/scripts/generate_versions.py \
+            .gh-pages .publish/versions.json "$CURRENT_VERSION")
+
+          # If this is a normal push to main, update the development docs while
+          # keeping 'latest' pointed at the newest published release.
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             mkdir -p .publish/dev .publish/latest
             cp -R site/. .publish/dev/
-            cp -R site/. .publish/latest/
+            cp -R ".gh-pages/$LATEST_VERSION/." .publish/latest/
           fi
 
           # If this is a tag (e.g. v0.5.0), create permanent versioned folders
