@@ -73,6 +73,7 @@ class TestWavefront:
         assert isinstance(wavefront.flip(0), Wavefront)
         assert wavefront.scale_to(8, 1 / 32).npixels == 8
         assert np.allclose(wavefront.scale_to(8, 1 / 32).pixel_scale, 1 / 32)
+        assert wavefront.scale_to(8, 1 / 32).pixel_scale.shape == ()
         assert np.allclose(wavefront.scale_to(8, 1 / 32, False).pixel_scale, 1 / 32)
         assert isinstance(wavefront.rotate(np.pi), Wavefront)
         assert isinstance(wavefront.rotate(np.pi, complex=False), Wavefront)
@@ -81,6 +82,16 @@ class TestWavefront:
         assert isinstance(
             wavefront.set_spec(CoordSpec(n=16, d=1 / 16, c=0.0)), Wavefront
         )
+
+    def test_set_spec_normalises_coordinates(self, wavefront):
+        spec = CoordSpec(n=16, d=1 / 16, c=0.0).set(d=0.5, c=1.0)
+
+        result = wavefront.set_spec(spec)
+
+        assert result.pixel_scale.shape == ()
+        assert result.center.shape == ()
+        assert np.allclose(result.pixel_scale, 0.5)
+        assert np.allclose(result.center, 1.0)
 
     def test_magic_add(self, wavefront):
         # Test arrays

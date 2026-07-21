@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import jax.numpy as np
+
 __all__ = ["UnifiedLayer", "Rotate", "Flip", "Resize", "Lambda"]
 
 
@@ -16,7 +18,7 @@ class UnifiedLayer(OpticalLayer, DetectorLayer):
     Base class for unified layers that can be applied to either wavefronts or PSFs.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/UnifiedLayer.png)
+        ![UML](../assets/uml/UnifiedLayer.png)
     """
 
 
@@ -27,7 +29,7 @@ class Resize(UnifiedLayer):
     odd sizes to ensure all operations are paraxial.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Resize.png)
+        ![UML](../assets/uml/Resize.png)
 
     Attributes
     ----------
@@ -71,7 +73,7 @@ class Rotate(UnifiedLayer):
     wavefront.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Rotate.png)
+        ![UML](../assets/uml/Rotate.png)
 
     Attributes
     ----------
@@ -108,7 +110,7 @@ class Rotate(UnifiedLayer):
             the input is a wavefront.
         """
         super().__init__()
-        self.angle = float(angle)
+        self.angle = np.asarray(angle, float)
         self.method = str(method)
         self.complex = bool(complex)
 
@@ -138,7 +140,7 @@ class Flip(UnifiedLayer):
     y-axis, and axis 1 is the x-axis.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Flip.png)
+        ![UML](../assets/uml/Flip.png)
 
     Attributes
     ----------
@@ -190,7 +192,7 @@ class Lambda(UnifiedLayer):
     as a placeholder in a pipeline.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Lambda.png)
+        ![UML](../assets/uml/Lambda.png)
     """
 
     def __call__(self: Lambda, target: Wavefront | PSF) -> Wavefront | PSF:

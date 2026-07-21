@@ -24,7 +24,7 @@ class Instrument(zdx.Base):
     array or PSF object from their configured components.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Instrument.png)
+        ![UML](../assets/uml/Instrument.png)
     """
 
     @abstractmethod
@@ -44,7 +44,7 @@ class Telescope(Instrument):
     class can be inherited and modified to suit the needs of the user.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Telescope.png)
+        ![UML](../assets/uml/Telescope.png)
 
     Attributes
     ----------
@@ -179,7 +179,7 @@ class Dither(Telescope):
     dithered observations.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Dither.png)
+        ![UML](../assets/uml/Dither.png)
 
     Attributes
     ----------

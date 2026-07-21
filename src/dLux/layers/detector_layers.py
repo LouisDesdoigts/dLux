@@ -24,7 +24,7 @@ class DetectorLayer(BaseLayer):
     software.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/DetectorLayer.png)
+        ![UML](../assets/uml/DetectorLayer.png)
     """
 
     def __init__(self: DetectorLayer):
@@ -70,7 +70,7 @@ class ApplyPixelResponse(DetectorLayer):
     to most detectors.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApplyPixelResponse.png)
+        ![UML](../assets/uml/ApplyPixelResponse.png)
 
     Attributes
     ----------
@@ -103,7 +103,7 @@ class ApplyJitter(DetectorLayer):
     standard deviation (sigma).
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApplyJitter.png)
+        ![UML](../assets/uml/ApplyJitter.png)
 
     Attributes
     ----------
@@ -114,6 +114,8 @@ class ApplyJitter(DetectorLayer):
     oversample : int
         The oversampling factor to use when generating the kernel. This is used to
         mitigate aliasing when the kernel is small compared to the pixel size.
+    kernel : Array, property
+        The derived normalised Gaussian convolution kernel.
     """
 
     sigma: float
@@ -136,7 +138,7 @@ class ApplyJitter(DetectorLayer):
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
-        self.sigma = float(sigma)
+        self.sigma = np.asarray(sigma, float)
         self.oversample = int(oversample)
 
         if self.kernel_size <= 0:
@@ -169,7 +171,7 @@ class ApplySaturation(DetectorLayer):
     the threshold value.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApplySaturation.png)
+        ![UML](../assets/uml/ApplySaturation.png)
 
     Attributes
     ----------
@@ -187,7 +189,7 @@ class ApplySaturation(DetectorLayer):
             The threshold at which the saturation is applied.
         """
         super().__init__()
-        self.threshold = float(threshold)
+        self.threshold = np.asarray(threshold, float)
 
     def __call__(self: ApplySaturation, psf: PSF) -> PSF:
         return psf.min("data", self.threshold)
@@ -199,7 +201,7 @@ class AddConstant(DetectorLayer):
     the detector noise.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AddConstant.png)
+        ![UML](../assets/uml/AddConstant.png)
 
     Attributes
     ----------
@@ -217,7 +219,7 @@ class AddConstant(DetectorLayer):
             The value to add to the PSF.
         """
         super().__init__()
-        self.value = float(value)
+        self.value = np.asarray(value, float)
 
     def __call__(self: AddConstant, psf: PSF) -> PSF:
         return psf + self.value
@@ -230,7 +232,7 @@ class Downsample(DetectorLayer):
     must be divisible by kernel_size.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Downsample.png)
+        ![UML](../assets/uml/Downsample.png)
 
     Attributes
     ----------
