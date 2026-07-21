@@ -3,10 +3,11 @@ import equinox as eqx
 
 config.update("jax_debug_nans", True)
 import pytest
-from dLux import Wavefront
+from dLux import Wavefront, PolarisedWavefront
 from dLux.psfs import PSF
 from dLux.coordinates import CoordSpec
 from dLux.utils import pixel_coords
+import dLux.utils as dlu
 
 
 def complex_pattern(npixels):
@@ -14,6 +15,49 @@ def complex_pattern(npixels):
     amplitude = 1 + 0.1 * x + 0.2 * y
     phase = 0.3 * x - 0.2 * y + 0.05 * x * y
     return amplitude * np.exp(1j * phase)
+
+
+def jones_pattern(npixels):
+    weights = np.array([[1.0, 0.2 - 0.1j], [0.4 + 0.3j, 0.7]])
+    return weights[..., None, None] * complex_pattern(npixels)
+
+
+def assert_polarised_identity(phasor, scalar_phasor):
+    assert np.allclose(phasor[..., 0, 0, :, :], scalar_phasor)
+    assert np.allclose(phasor[..., 1, 1, :, :], scalar_phasor)
+    assert np.allclose(phasor[..., 0, 1, :, :], 0.0)
+    assert np.allclose(phasor[..., 1, 0, :, :], 0.0)
+
+
+def polarised_componentwise_expected(wavefront, operation, *args):
+    leading = wavefront.phasor.shape[:-2]
+
+    def match_leading(array):
+        array = np.asarray(array)
+        return array.reshape(array.shape + (1,) * (len(leading) - array.ndim))
+
+    def apply(phasor, wavelength, pixel_scale, center):
+        component = Wavefront.from_phasor(
+            phasor,
+            wavelength,
+            pixel_scale=pixel_scale,
+            center=center,
+        )
+        out = operation(component, *args)
+        return out.phasor, out.pixel_scale, out.center
+
+    apply = np.vectorize(apply, signature="(n,n),(),(),()->(m,m),(),()")
+    phasor, pixel_scale, center = apply(
+        wavefront.phasor,
+        match_leading(wavefront.wavelength),
+        match_leading(wavefront.pixel_scale),
+        match_leading(wavefront.center),
+    )
+    return wavefront.set(
+        phasor=phasor,
+        pixel_scale=wavefront._from_vec(pixel_scale),
+        center=wavefront._from_vec(center),
+    )
 
 
 class BaseWavefrontTests:
@@ -302,6 +346,17 @@ class TestWavefront(BaseWavefrontTests):
         assert isinstance(wf, Wavefront)
         assert wf.npixels == 8
 
+    def test_apply_jones_promotes_to_polarised(self):
+        wavefront = Wavefront(1.0e-6, npixels=8, diameter=1.0)
+        actual = wavefront.apply_jones(dlu.horizontal_polariser())
+        expected = np.zeros((4, 8, 8))
+        expected = expected.at[0].set(0.5 / 8**4)
+        expected = expected.at[1].set(0.5 / 8**4)
+
+        assert isinstance(actual, PolarisedWavefront)
+        assert actual.phasor.shape == (2, 2, 8, 8)
+        assert np.allclose(actual.stokes(), expected)
+
 
 class TestChromaticWavefront(BaseWavefrontTests):
     """Run the standard Wavefront tests on chromatic Wavefront construction paths."""
@@ -364,3 +419,255 @@ class TestChromaticWavefront(BaseWavefrontTests):
         wf = Wavefront.from_phasor(phasor, wavelengths, pixel_scale=1 / 8)
         assert wf.phasor.shape == wavelengths.shape + (8, 8)
         assert np.allclose(wf.phasor, phasor)
+
+
+class TestPolarisedWavefront(BaseWavefrontTests):
+    """Run the standard Wavefront tests on a polarised Wavefront."""
+
+    @pytest.fixture
+    def ndim(self):
+        return 0
+
+    @pytest.fixture
+    def chromatic(self):
+        return False
+
+    @pytest.fixture
+    def wavefront(self):
+        return PolarisedWavefront.from_phasor(
+            jones_pattern(16),
+            wavelength=1.0e-6,
+            pixel_scale=1 / 16,
+        )
+
+    @pytest.fixture
+    def output_pixel_scale(self):
+        return 1 / 32
+
+    @pytest.fixture
+    def expected(self, wavefront):
+        return lambda operation, *args: polarised_componentwise_expected(
+            wavefront, operation, *args
+        )
+
+    def test_coordinates(self, wavefront):
+        coords = wavefront.coordinates(polar=True)
+        expected = Wavefront(1.0e-6, npixels=16, pixel_scale=1 / 16).coordinates(
+            polar=True
+        )
+        assert coords.shape == (2, 16, 16)
+        assert np.allclose(coords, expected)
+
+
+class TestPolarisedWavefrontConstruction:
+    def test_constructor(self):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=16, diameter=1.0)
+        assert wavefront.phasor.shape == (2, 2, 16, 16)
+        assert wavefront.ndim == 0
+        assert wavefront.npixels == 16
+        assert wavefront.chromatic is False
+        assert_polarised_identity(
+            wavefront.phasor, np.ones((16, 16), dtype=complex) / 16**2
+        )
+
+    def test_chromatic_constructor(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = PolarisedWavefront(wavelengths, npixels=16, diameter=1.0)
+        assert wavefront.phasor.shape == (3, 2, 2, 16, 16)
+        assert wavefront.ndim == 1
+        assert wavefront.npixels == 16
+        assert wavefront.chromatic is True
+        assert_polarised_identity(
+            wavefront.phasor, np.ones((3, 16, 16), dtype=complex) / 16**2
+        )
+
+
+class TestPolarisedWavefrontFromWavefront:
+    def test_from_wavefront(self):
+        wavefront = Wavefront(1.0e-6, npixels=16, diameter=1.0)
+        wavefront = wavefront.set(phasor=np.arange(16**2).reshape(16, 16))
+
+        actual = PolarisedWavefront.from_wavefront(wavefront)
+        assert actual.phasor.shape == (2, 2, 16, 16)
+        assert actual.ndim == 0
+        assert np.allclose(actual.wavelength, wavefront.wavelength)
+        assert np.allclose(actual.pixel_scale, wavefront.pixel_scale)
+        assert np.allclose(actual.center, wavefront.center)
+        assert_polarised_identity(actual.phasor, wavefront.phasor)
+
+    def test_from_chromatic_wavefront(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = Wavefront(wavelengths, npixels=16, diameter=1.0)
+        wavefront = wavefront.set(
+            phasor=wavefront.phasor * np.arange(1, wavelengths.size + 1)[:, None, None]
+        )
+
+        actual = PolarisedWavefront.from_wavefront(wavefront)
+        assert actual.phasor.shape == (3, 2, 2, 16, 16)
+        assert actual.ndim == 1
+        assert np.allclose(actual.wavelength, wavefront.wavelength)
+        assert np.allclose(actual.pixel_scale, wavefront.pixel_scale)
+        assert np.allclose(actual.center, wavefront.center)
+        assert_polarised_identity(actual.phasor, wavefront.phasor)
+
+
+class TestPolarisedWavefrontFromPhasor:
+    def test_from_regular_phasor(self):
+        phasor = np.ones((8, 8), dtype=complex)
+        actual = PolarisedWavefront.from_phasor(phasor, 1.0e-6, pixel_scale=1 / 8)
+        assert actual.phasor.shape == (2, 2, 8, 8)
+        assert actual.ndim == 0
+        assert_polarised_identity(actual.phasor, phasor)
+
+    def test_from_chromatic_regular_phasor(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        phasor = np.ones((8, 8), dtype=complex)
+        actual = PolarisedWavefront.from_phasor(phasor, wavelengths, pixel_scale=1 / 8)
+        assert actual.phasor.shape == (3, 2, 2, 8, 8)
+        assert actual.ndim == 1
+        assert_polarised_identity(actual.phasor, np.ones((3, 8, 8), dtype=complex))
+
+    def test_from_jones_phasor(self):
+        phasor = np.ones((2, 2, 8, 8), dtype=complex)
+        actual = PolarisedWavefront.from_phasor(phasor, 1.0e-6, pixel_scale=1 / 8)
+        assert actual.phasor.shape == phasor.shape
+        assert actual.ndim == 0
+        assert np.allclose(actual.phasor, phasor)
+
+    def test_from_chromatic_jones_phasor(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        phasor = np.ones((2, 2, 8, 8), dtype=complex)
+        actual = PolarisedWavefront.from_phasor(phasor, wavelengths, pixel_scale=1 / 8)
+        assert actual.phasor.shape == (3, 2, 2, 8, 8)
+        assert actual.ndim == 1
+        assert np.allclose(actual.phasor, np.ones((3, 2, 2, 8, 8)))
+
+
+class TestPolarisedWavefrontStokes:
+    def test_stokes(self):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+        expected = np.zeros((4, 8, 8))
+        expected = expected.at[0].set(1 / 8**4)
+        assert wavefront.stokes().shape == (4, 8, 8)
+        assert np.allclose(wavefront.stokes(), expected)
+
+    def test_chromatic_stokes(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = PolarisedWavefront(wavelengths, npixels=8, diameter=1.0)
+        expected = np.zeros((3, 4, 8, 8))
+        expected = expected.at[:, 0].set(1 / 8**4)
+        assert wavefront.stokes().shape == (3, 4, 8, 8)
+        assert np.allclose(wavefront.stokes(), expected)
+
+    def test_psf(self):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+        expected = np.ones((8, 8)) / 8**4
+        assert wavefront.psf.shape == (8, 8)
+        assert np.allclose(wavefront.psf, expected)
+        assert np.allclose(wavefront.psf_from_stokes(), expected)
+        assert np.allclose(wavefront.psf, wavefront.stokes()[0])
+
+    def test_chromatic_psf(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = PolarisedWavefront(wavelengths, npixels=8, diameter=1.0)
+        expected = np.ones((3, 8, 8)) / 8**4
+        assert wavefront.psf.shape == (3, 8, 8)
+        assert np.allclose(wavefront.psf, expected)
+        assert np.allclose(wavefront.psf_from_stokes(), expected)
+        assert np.allclose(wavefront.psf, wavefront.stokes()[:, 0])
+
+    def test_input_stokes(self):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+        stokes = np.array([1.0, 1.0, 0.0, 0.0])
+        expected = np.zeros((4, 8, 8))
+        expected = expected.at[0].set(1 / 8**4)
+        expected = expected.at[1].set(1 / 8**4)
+        assert np.allclose(wavefront.stokes(stokes), expected)
+
+
+class TestPolarisedWavefrontApplyJones:
+    def test_apply_jones(self):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+        actual = wavefront.apply_jones(dlu.horizontal_polariser())
+        expected = np.zeros((4, 8, 8))
+        expected = expected.at[0].set(0.5 / 8**4)
+        expected = expected.at[1].set(0.5 / 8**4)
+        assert isinstance(actual, PolarisedWavefront)
+        assert actual.phasor.shape == (2, 2, 8, 8)
+        assert np.allclose(actual.stokes(), expected)
+
+    def test_chromatic_apply_jones(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = PolarisedWavefront(wavelengths, npixels=8, diameter=1.0)
+        actual = wavefront.apply_jones(dlu.vertical_polariser())
+        expected = np.zeros((3, 4, 8, 8))
+        expected = expected.at[:, 0].set(0.5 / 8**4)
+        expected = expected.at[:, 1].set(-0.5 / 8**4)
+        assert isinstance(actual, PolarisedWavefront)
+        assert actual.phasor.shape == (3, 2, 2, 8, 8)
+        assert np.allclose(actual.stokes(), expected)
+
+    def test_apply_spatial_jones(self):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+        jones = dlu.linear_polariser(np.zeros((8, 8)))
+        actual = wavefront.apply_jones(jones)
+        expected = np.zeros((4, 8, 8))
+        expected = expected.at[0].set(0.5 / 8**4)
+        expected = expected.at[1].set(0.5 / 8**4)
+        assert actual.phasor.shape == (2, 2, 8, 8)
+        assert np.allclose(actual.stokes(), expected)
+
+    def test_chromatic_apply_spatial_jones(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = PolarisedWavefront(wavelengths, npixels=8, diameter=1.0)
+        jones = dlu.linear_polariser(np.zeros((8, 8)))
+        actual = wavefront.apply_jones(jones)
+        expected = np.zeros((3, 4, 8, 8))
+        expected = expected.at[:, 0].set(0.5 / 8**4)
+        expected = expected.at[:, 1].set(0.5 / 8**4)
+        assert actual.phasor.shape == (3, 2, 2, 8, 8)
+        assert np.allclose(actual.stokes(), expected)
+
+
+class TestChromaticPolarisedWavefront(BaseWavefrontTests):
+    """Run the standard Wavefront tests on a chromatic polarised Wavefront."""
+
+    @pytest.fixture
+    def ndim(self):
+        return 1
+
+    @pytest.fixture
+    def chromatic(self):
+        return True
+
+    @pytest.fixture
+    def wavelengths(self):
+        return np.array([1.0e-6, 1.5e-6, 2.0e-6])
+
+    @pytest.fixture
+    def wavefront(self, wavelengths):
+        weights = np.array([0.2, 0.3, 0.5])
+        phasor = weights[:, None, None, None, None] * jones_pattern(16)
+        return PolarisedWavefront.from_phasor(
+            phasor,
+            wavelength=wavelengths,
+            pixel_scale=1 / 16,
+        )
+
+    @pytest.fixture
+    def output_pixel_scale(self):
+        return 1 / 32
+
+    @pytest.fixture
+    def expected(self, wavefront):
+        return lambda operation, *args: polarised_componentwise_expected(
+            wavefront, operation, *args
+        )
+
+    def test_coordinates(self, wavefront):
+        coords = wavefront.coordinates(polar=True)
+        expected = Wavefront(1.0e-6, npixels=16, pixel_scale=1 / 16).coordinates(
+            polar=True
+        )
+        assert coords.shape == (2, 16, 16)
+        assert np.allclose(coords, expected)
