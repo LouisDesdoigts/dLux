@@ -3,6 +3,7 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 
+import dLux.utils as dlu
 from dLux.utils import apertures as apertures_utils
 
 
@@ -172,6 +173,23 @@ class TestCircularAperture:
         assert trans_pad.shape == (npixels, npixels)
         # Transmission should decrease with larger array diameter due to padding
         assert trans_pad.sum() < trans_nopad.sum()
+
+    def test_array_diameter_with_zernike(self, npixels, diameter, oversample):
+        """Zernikes use the same enlarged coordinate grid as the transmission."""
+        array_diameter = diameter * 2
+        _, basis, support = apertures_utils.circular_aperture(
+            npixels=npixels,
+            diameter=diameter,
+            oversample=oversample,
+            array_diameter=array_diameter,
+            zernike_nolls=[2],
+            return_support=True,
+        )
+        coords = dlu.pixel_coords(npixels, diameter=array_diameter)
+        expected = dlu.zernike_basis([2], coords, diameter * 1.01)
+        expected *= support[None, ...]
+
+        assert np.allclose(basis, expected, equal_nan=True)
 
     def test_with_secondary(self, npixels, diameter, oversample):
         """Secondary obscuration reduces transmission area."""
@@ -476,6 +494,16 @@ class TestHSTLike:
         assert trans.shape == (npixels, npixels)
         assert (trans >= 0).all() and (trans <= 1).all()
 
+    def test_array_diameter(self, npixels, oversample):
+        """Increasing the array diameter pads the HST-like aperture."""
+        trans = apertures_utils.hst_like(npixels=npixels, oversample=oversample)
+        padded = apertures_utils.hst_like(
+            npixels=npixels, oversample=oversample, array_diameter=4.8
+        )
+
+        assert padded.shape == trans.shape
+        assert padded.sum() < trans.sum()
+
     def test_with_zernike(self, npixels, oversample):
         """HST-like with Zernike basis."""
         result = apertures_utils.hst_like(
@@ -536,6 +564,16 @@ class TestEuclidLike:
         trans = apertures_utils.euclid_like(npixels=npixels, oversample=oversample)
         assert trans.shape == (npixels, npixels)
         assert (trans >= 0).all() and (trans <= 1).all()
+
+    def test_array_diameter(self, npixels, oversample):
+        """Increasing the array diameter pads the Euclid-like aperture."""
+        trans = apertures_utils.euclid_like(npixels=npixels, oversample=oversample)
+        padded = apertures_utils.euclid_like(
+            npixels=npixels, oversample=oversample, array_diameter=2.42
+        )
+
+        assert padded.shape == trans.shape
+        assert padded.sum() < trans.sum()
 
     def test_with_zernike(self, npixels, oversample):
         """Euclid-like with Zernike basis."""
