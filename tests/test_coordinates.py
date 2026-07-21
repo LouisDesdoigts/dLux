@@ -3,7 +3,15 @@ from jax import numpy as np, config
 config.update("jax_debug_nans", True)
 import pytest
 
-from dLux.coordinates import Spec, PadSpec, CoordSpec
+from dLux.coordinates import (
+    BaseCoordTransform,
+    CoordSpec,
+    CoordTransform,
+    DistortedCoords,
+    PadSpec,
+    Spec,
+)
+from dLux.utils import pixel_coords
 
 
 class TestSpec:
@@ -67,3 +75,37 @@ class TestCoordSpec:
 
         with pytest.raises(ValueError, match=message):
             getattr(spec, prop_name)
+
+
+class TestCoordTransform:
+    def test_calculate_and_apply(self):
+        CoordTransform().calculate(1, 16)
+        CoordTransform([0.0, 0.0], np.pi, [1, 1], [1, 1]).calculate(1, 16)
+        CoordTransform().apply(pixel_coords(1, 16))
+
+    @pytest.mark.parametrize(
+        ("parameter", "value"),
+        [
+            ("translation", [0.0]),
+            ("rotation", [0.0]),
+            ("compression", [0.0]),
+            ("shear", [0.0]),
+        ],
+    )
+    def test_invalid_shape(self, parameter, value):
+        with pytest.raises(ValueError):
+            CoordTransform(**{parameter: value})
+
+    def test_base_class(self):
+        assert issubclass(CoordTransform, BaseCoordTransform)
+
+
+class TestDistortedCoords:
+    def test_calculate_and_apply(self):
+        DistortedCoords().calculate(1, 16)
+        DistortedCoords(2, np.zeros((2, 5))).calculate(1, 16)
+        DistortedCoords().apply(pixel_coords(1, 16))
+
+    def test_invalid_shape(self):
+        with pytest.raises(ValueError):
+            DistortedCoords(2, np.zeros(5))
