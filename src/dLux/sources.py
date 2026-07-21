@@ -309,7 +309,7 @@ class PointSource(Source):
         """
         # Position and Flux
         self.position = _as_position_2d(position)
-        self.flux = float(flux)
+        self.flux = np.asarray(flux, float)
 
         super().__init__(wavelengths=wavelengths, weights=weights, spectrum=spectrum)
 
@@ -589,12 +589,12 @@ class BinarySource(Source):
 
         # Position and Flux
         self.position = _as_position_2d(position)
-        self.mean_flux = float(mean_flux)
+        self.mean_flux = np.asarray(mean_flux, float)
 
         # Binary values
-        self.separation = float(separation)
-        self.position_angle = float(position_angle)
-        self.contrast = float(contrast)
+        self.separation = np.asarray(separation, float)
+        self.position_angle = np.asarray(position_angle, float)
+        self.contrast = np.asarray(contrast, float)
 
         super().__init__(
             wavelengths=wavelengths,
@@ -697,7 +697,7 @@ class PointResolvedSource(ResolvedSource):
             n_wavelengths = _infer_n_wavelengths(wavelengths, spectrum)
             weights = np.ones((2, n_wavelengths))
 
-        self.contrast = float(contrast)
+        self.contrast = np.asarray(contrast, float)
 
         super().__init__(
             wavelengths=wavelengths,

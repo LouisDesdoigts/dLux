@@ -205,7 +205,7 @@ class DynamicAperture(BaseDynamicAperture):
             normalise=normalise,
         )
         self.occulting = bool(occulting)
-        self.softness = float(softening)
+        self.softness = np.asarray(softening, float)
         if self.softness <= 0:
             raise ValueError("softening must be greater than 0.")
 
@@ -294,7 +294,7 @@ class CircularAperture(DynamicAperture):
             softening=softening,
             normalise=normalise,
         )
-        self.radius = float(radius)
+        self.radius = np.asarray(radius, float)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
         if self.transformation is not None:
@@ -370,7 +370,7 @@ class SquareAperture(DynamicAperture):
             normalise=normalise,
         )
 
-        self.width = float(width)
+        self.width = np.asarray(width, float)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
         if self.transformation is not None:
@@ -445,8 +445,8 @@ class RectangularAperture(DynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the aperture.
         """
-        self.height = float(height)
-        self.width = float(width)
+        self.height = np.asarray(height, float)
+        self.width = np.asarray(width, float)
 
         super().__init__(
             transformation=transformation,
@@ -529,7 +529,7 @@ class RegPolyAperture(DynamicAperture):
             Whether to normalise the wavefront after passing through the aperture.
         """
         self._nsides = int(nsides)
-        self.rmax = float(rmax)
+        self.rmax = np.asarray(rmax, float)
 
         super().__init__(
             transformation=transformation,
@@ -620,7 +620,7 @@ class Spider(DynamicAperture):
             normalise=normalise,
         )
 
-        self.width = float(width)
+        self.width = np.asarray(width, float)
         self.angles = np.asarray(angles, dtype=float)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:

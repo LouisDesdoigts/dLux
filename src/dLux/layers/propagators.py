@@ -49,7 +49,7 @@ class Propagator(OpticalLayer):
         super().__init__()
 
         if focal_length is not None:
-            focal_length = float(focal_length)
+            focal_length = np.asarray(focal_length, float)
         self.focal_length = focal_length
         self.inverse = bool(inverse)
 

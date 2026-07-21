@@ -377,7 +377,7 @@ class ASMPropagator(OpticalLayer):
         spec : CoordSpec | PadSpec
             Output specification. If `CoordSpec` is provided, `d` and `c` must be None.
         """
-        self.distance = float(distance)
+        self.distance = np.asarray(distance, float)
         if isinstance(spec, CoordSpec):
             if spec.d is not None or spec.c is not None:
                 raise ValueError("ASMPropagator CoordSpec can not specify d or c.")
