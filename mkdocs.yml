@@ -105,7 +105,6 @@ nav:
       - Psfs: API/core/psfs.md
       - Sources: API/core/sources.md
       - Spectra: API/core/spectra.md
-      - Transformations: API/core/transformations.md
       - Wavefronts: API/core/wavefronts.md
 
     - Layers API:
