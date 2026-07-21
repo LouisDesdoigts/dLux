@@ -460,6 +460,8 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The new interpolated wavefront.
         """
+        pixel_scale = np.asarray(pixel_scale, float)
+
         # Get field in either (amplitude, phase) or (real, imaginary)
         fields = self.complex if complex else self.polar
 
