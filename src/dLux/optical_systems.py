@@ -43,7 +43,50 @@ class BaseOpticalSystem(zdx.Base):
         Automatically inherit method docstrings from parent class.
         """
         super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls, ["propagate_mono", "propagate", "model"])
+        dlu.helpers.inherit_docstrings(
+            cls,
+            ["__call__", "propagate_mono", "propagate", "model"],
+        )
+
+    @abstractmethod
+    def __call__(
+        self: BaseOpticalSystem,
+        wavefront: Wavefront,
+    ) -> Wavefront:  # pragma: no cover
+        """
+        Applies the complete optical system to an existing wavefront.
+
+        Chromatic wavefronts are vectorised over their wavelength dimensions so that
+        each system layer receives a monochromatic wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate through the optical system.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront after propagation through the complete optical system.
+        """
+
+    def apply(self: BaseOpticalSystem, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the complete optical system to an existing wavefront.
+
+        This method is an alias for calling the optical system directly.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate through the optical system.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront after propagation through the complete optical system.
+        """
+        return self(wavefront)
 
     @abstractmethod
     def propagate_mono(
@@ -402,6 +445,41 @@ class LayeredOpticalSystem(OpticalSystem):
         wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
         return wavefront.tilt(offset)
 
+    def _apply_mono(self: LayeredOpticalSystem, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies all system layers to a monochromatic wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The monochromatic wavefront to propagate through the layers.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront after applying every layer in the system.
+        """
+        # Apply the layers sequentially
+        for layer in self.layers.values():
+            wavefront = layer(wavefront)
+        return wavefront
+
+    def __call__(self: LayeredOpticalSystem, wavefront: Wavefront) -> Wavefront:
+        if not isinstance(wavefront, Wavefront):
+            raise TypeError(
+                f"wavefront must be a Wavefront instance, got "
+                f"{type(wavefront).__name__}."
+            )
+
+        # Monochromatic wavefronts can just be applied directly
+        if not wavefront.is_chromatic:
+            return self._apply_mono(wavefront)
+
+        # Chromatic wavefronts are vectorised over their wavelength dimensions so that
+        # each system layer receives a monochromatic wavefront.
+        apply_fn = eqx.filter_vmap(self._apply_mono, in_axes=(wavefront._mapped_axis,))
+        return apply_fn(wavefront)
+
     def propagate_mono(
         self: LayeredOpticalSystem,
         wavelength: Array,
@@ -434,9 +512,8 @@ class LayeredOpticalSystem(OpticalSystem):
         # Initialise wavefront
         wavefront = self.initialise_wavefront(wavelength, offset)
 
-        # Apply layers
-        for layer in list(self.layers.values()):
-            wavefront = layer(wavefront)
+        # Apply the complete system
+        wavefront = self(wavefront)
 
         # Return PSF or Wavefront
         if return_wf:
@@ -576,6 +653,27 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
         # Return the wavefront and the outputs dictionary for debugging
         return wf, outputs
 
+    def _apply_mono(
+        self: ParametricLayeredOpticalSystem, wavefront: Wavefront
+    ) -> Wavefront:
+        """
+        Applies all system layers and propagates to the configured focal plane.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The monochromatic wavefront to propagate through the complete system.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront at the configured focal plane.
+        """
+        # This runs inside the system's mapped monochromatic operation, ensuring
+        # to_focus never receives a chromatic wavefront.
+        wavefront = super()._apply_mono(wavefront)
+        return self.to_focus(wavefront)
+
     def propagate_mono(
         self: ParametricLayeredOpticalSystem,
         wavelength: Array,
@@ -606,11 +704,8 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
             If `return_wf` is False, returns the PSF array.
             If `return_wf` is True, returns the Wavefront object.
         """
-        # Upstream layers propagation
-        wf = super().propagate_mono(wavelength, offset, return_wf=True, stokes=stokes)
-
-        # Propagate
-        wf = self.to_focus(wf)
+        # Initialise and apply the complete system
+        wf = self(self.initialise_wavefront(wavelength, offset))
 
         # Return PSF or Wavefront
         if return_wf:
