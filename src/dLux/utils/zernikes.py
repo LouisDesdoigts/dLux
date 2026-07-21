@@ -241,7 +241,14 @@ def zernike(j: int, coordinates: Array, diameter: float = 2) -> Array:
     return aperture * eval_radial(rho, n, c, k) * eval_azimuthal(theta, n, m)
 
 
-def zernike_fast(n: int, m: int, c: Array, k: Array, coordinates: Array) -> Array:
+def zernike_fast(
+    n: int,
+    m: int,
+    c: Array,
+    k: Array,
+    coordinates: Array,
+    diameter: float = 2,
+) -> Array:
     """
     Calculates the Zernike polynomial using the pre-calculated c and k parameters, such
     that this function is jittable.
@@ -258,12 +265,15 @@ def zernike_fast(n: int, m: int, c: Array, k: Array, coordinates: Array) -> Arra
         The powers of the Zernike polynomial.
     coordinates : Array
         The Cartesian coordinates to calculate the Zernike polynomial upon.
+    diameter : float = 2
+        The diameter of the aperture to calculate the Zernike polynomial upon.
 
     Returns
     -------
     zernike : Array
         The Zernike polynomial.
     """
+    coordinates = scale_coords(coordinates, diameter / 2)
     polar_coordinates = dlu.cart2polar(coordinates)
     rho = polar_coordinates[0]
     theta = polar_coordinates[1]
@@ -327,7 +337,13 @@ def polike(nsides: int, j: int, coordinates: Array, diameter: float = 2) -> Arra
 
 
 def polike_fast(
-    nsides: int, n: int, m: int, c: Array, k: Array, coordinates: Array
+    nsides: int,
+    n: int,
+    m: int,
+    c: Array,
+    k: Array,
+    coordinates: Array,
+    diameter: float = 2,
 ) -> Array:
     """
     Calculates the Zernike polynomial on an n-sided aperture using the pre-calculated
@@ -347,6 +363,8 @@ def polike_fast(
         The powers of the Zernike polynomial.
     coordinates : Array
         The Cartesian coordinates to calculate the Zernike polynomial upon.
+    diameter : float = 2
+        The diameter of the aperture to calculate the polygonal polynomial upon.
 
     Returns
     -------
@@ -355,6 +373,7 @@ def polike_fast(
     """
     if nsides < 3:
         raise ValueError(f"nsides must be >= 3, not {nsides}.")
+    coordinates = scale_coords(coordinates, diameter / 2)
     alpha = np.pi / nsides
     phi = dlu.cart2polar(coordinates)[1] + alpha
     wedge = np.floor((phi + alpha) / (2.0 * alpha))
