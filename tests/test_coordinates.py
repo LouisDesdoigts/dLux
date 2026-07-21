@@ -28,6 +28,14 @@ class TestCoordSpec:
         assert spec.n == 4
         assert spec.d == 0.5
         assert spec.c == 1.0
+        assert spec.d.shape == ()
+        assert spec.c.shape == ()
+
+    def test_constructor_preserves_none(self):
+        spec = CoordSpec(n=4, d=None, c=None)
+
+        assert spec.d is None
+        assert spec.c is None
 
     def test_xs(self):
         spec = CoordSpec(n=4, d=0.5, c=1.0)
