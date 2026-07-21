@@ -123,6 +123,16 @@ def test_non_tf(rmax):
         CircularAperture(rmax, transformation=2)
 
 
+@pytest.mark.parametrize(
+    "aperture",
+    [CircularAperture(2.4), SquareAperture(4.8)],
+)
+def test_oversized_aperture_transmission(aperture):
+    wavefront = Wavefront(npixels=16, diameter=1, wavelength=1e-6)
+    transmission = aperture.transmission(wavefront.coordinates(), wavefront.pixel_scale)
+    assert np.allclose(transmission, 1)
+
+
 # Testing other aperture types separately, as they are more complex
 
 
