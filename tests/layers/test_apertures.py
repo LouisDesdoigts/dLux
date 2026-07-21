@@ -184,6 +184,20 @@ def test_compound_aperture(aperture_list, transformation, normalise, noll_indice
         CompoundAperture([aber_ap, aber_ap])
 
 
+def test_compound_aperture_without_aberrations():
+    aperture = CompoundAperture([CircularAperture(0.4)])
+    _test_apply(aperture)
+
+
+def test_compound_aperture_normalises_after_aberrations():
+    aperture = CircularAperture(2.4)
+    aberrated = AberratedAperture(aperture, [2], coefficients=np.array([1e-7]))
+    result = CompoundAperture([aberrated], normalise=True)(wf)
+
+    assert np.allclose(result.power, 1)
+    assert not np.allclose(result.phase, 0)
+
+
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 @pytest.mark.parametrize("normalise", [True, False])
 def test_multi_aperture(aperture_list, transformation, normalise, noll_indices):

@@ -978,22 +978,24 @@ class CompositeAperture(BaseDynamicAperture):
         """
         # Transmission
         wavefront *= self.transmission(wavefront.coordinates(), wavefront.pixel_scale)
+
+        if self._aberrated_apertures():
+            # Transform coordinate
+            if self.transformation is not None:
+                coords = self.transformation(wavefront.coordinates())
+            else:
+                coords = wavefront.coordinates()
+
+            # Aberrations
+            aberrations = self.eval_basis(coords)
+            # TODO: Add add_phase as an option
+            # if self.as_phase:
+            #     wavefront = wavefront.add_phase(aberrations)
+            # else:
+            wavefront = wavefront.add_opd(aberrations)
+
         if self.normalise:
-            return wavefront.normalise()
-
-        # Transform coordinate
-        if self.transformation is not None:
-            coords = self.transformation(wavefront.coordinates())
-        else:
-            coords = wavefront.coordinates()
-
-        # Aberrations
-        aberrations = self.eval_basis(coords)
-        # TODO: Add add_phase as an option
-        # if self.as_phase:
-        #     wavefront = wavefront.add_phase(aberrations)
-        # else:
-        wavefront = wavefront.add_opd(aberrations)
+            wavefront = wavefront.normalise()
         return wavefront
 
 
