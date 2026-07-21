@@ -986,29 +986,180 @@ class Wavefront(zdx.Base):
                 "Wavefront, or None."
             )
 
-        # Promote both Wavefront operands when either carries polarisation. This keeps
-        # the return type and Jones broadcasting semantics independent of operand order.
-        if isinstance(other, Wavefront):
-            if isinstance(self, PolarisedWavefront) or isinstance(
-                other, PolarisedWavefront
-            ):
-                if not isinstance(self, PolarisedWavefront):
-                    self = PolarisedWavefront.from_wavefront(self)
-                if not isinstance(other, PolarisedWavefront):
-                    other = PolarisedWavefront.from_wavefront(other)
-            other = other.phasor
+        if op not in ("add", "subtract", "multiply", "divide"):
+            raise ValueError(f"Unsupported operation '{op}'.")
+
+        # Division between two wavefront states has no well-defined optical meaning.
+        if op == "divide" and isinstance(other, Wavefront):
+            raise TypeError(
+                "dLux has detected an attempt to perform dark optics. Your wavefront "
+                "privileges have been temporarily suspended and the authorities have "
+                "been notified."
+            )
+
+        # Align the operand for chromatic and polarisation broadcasting.
+        self, other = self._prepare_operand(other)
 
         # Apply the operation
         if op == "add":
-            return self.add("phasor", other)
+            output = self.add("phasor", other)
         elif op == "subtract":
-            return self.add("phasor", -other)
+            output = self.add("phasor", -other)
         elif op == "multiply":
-            return self.multiply("phasor", other)
+            output = self.multiply("phasor", other)
         elif op == "divide":
-            return self.multiply("phasor", 1 / other)
-        else:
-            raise ValueError(f"Unsupported operation '{op}'.")
+            output = self.multiply("phasor", 1 / other)
+        return output
+
+    def _prepare_operand(
+        self: Wavefront, other: Wavefront | Array | float | int | complex
+    ) -> tuple[Wavefront, Array | float | int | complex]:
+        """Dispatches operand preparation according to the operand type."""
+        if isinstance(other, Wavefront):
+            return self._prepare_wavefront_operand(other)
+        if isinstance(other, Array):
+            return self._prepare_array_operand(other)
+        return self, other
+
+    def _promote_for_arithmetic(self: Wavefront) -> PolarisedWavefront:
+        """Promotes the base type while retaining scalar Jones broadcasting."""
+        phasor = self.phasor[..., None, None, :, :]
+        return PolarisedWavefront.from_wavefront(self).set(phasor=phasor)
+
+    def _prepare_wavefront_operand(
+        self: Wavefront, other: Wavefront
+    ) -> tuple[Wavefront, Array]:
+        """
+        Prepares an operand for elementwise wavefront arithmetic.
+
+        The left operand is treated as the base wavefront and therefore supplies the
+        output wavelength and sampling metadata. A monochromatic right operand can
+        broadcast over a chromatic base, but a chromatic right operand must match the
+        base wavelength shape. For mixed polarisation, singleton Jones axes are added
+        to the regular phasor so it broadcasts across every polarisation component.
+
+        Parameters
+        ----------
+        other : Wavefront | Array
+            The operand to align with the base wavefront.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The base wavefront, promoted to `PolarisedWavefront` if required.
+        operand : Array
+            The array operand aligned for elementwise arithmetic.
+        """
+        if self.npixels != other.npixels:
+            raise ValueError("Wavefront operands must have matching spatial shapes.")
+
+        # A chromatic right operand cannot be represented by a monochromatic base,
+        # and two chromatic operands require matching wavelength dimensions.
+        if other.is_chromatic and (
+            not self.is_chromatic or self.wavelength.shape != other.wavelength.shape
+        ):
+            raise ValueError(
+                "A chromatic Wavefront operand requires a chromatic base with the "
+                "same wavelength shape."
+            )
+
+        self_polarised = isinstance(self, PolarisedWavefront)
+        other_polarised = isinstance(other, PolarisedWavefront)
+
+        # Matching polarisation types already have compatible intrinsic dimensions.
+        if self_polarised == other_polarised:
+            return self, other.phasor
+
+        # Regular phasors act as scalar Jones modulation, so insert singleton Jones
+        # axes immediately before their spatial dimensions.
+        if self_polarised:
+            return self, other.phasor[..., None, None, :, :]
+
+        return self._promote_for_arithmetic(), other.phasor
+
+    def _prepare_array_operand(
+        self: Wavefront, other: Array
+    ) -> tuple[Wavefront, Array]:
+        """
+        Classifies and aligns an array operand by its semantic dimensions.
+
+        Supported array layouts are scalar, spectral, spatial, spectral-spatial,
+        Jones, spectral-Jones, Jones-spatial, and spectral-Jones-spatial. Ambiguous
+        layouts are rejected rather than assigned an implicit interpretation.
+
+        Parameters
+        ----------
+        other : Array
+            The array operand to align with the base wavefront.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The base wavefront, promoted to `PolarisedWavefront` if required.
+        operand : Array
+            The operand reshaped for elementwise arithmetic.
+        """
+        # Layouts use the canonical wavelength, Jones, then spatial axis order.
+        layouts = (
+            (),
+            ("w",),
+            ("x", "y"),
+            ("w", "x", "y"),
+            ("j0", "j1"),
+            ("w", "j0", "j1"),
+            ("j0", "j1", "x", "y"),
+            ("w", "j0", "j1", "x", "y"),
+        )
+
+        def matches(layout):
+            """Checks whether the operand shape matches a semantic layout."""
+            if len(layout) != other.ndim or ("w" in layout and not self.is_chromatic):
+                return False
+
+            axes = dict(zip(layout, other.shape))
+            wavelength_matches = (
+                axes.get("w", self.wavelength.size) == self.wavelength.size
+            )
+            jones_matches = all(axes.get(axis, 2) == 2 for axis in ("j0", "j1"))
+            spatial_matches = axes.get("x") == axes.get("y")
+
+            # A two-pixel spatial axis is only spatial when the base agrees. This
+            # leaves (2, 2) arrays unambiguously Jones-valued for larger wavefronts.
+            if "x" in axes and axes["x"] == 2 and self.npixels != 2:
+                spatial_matches = False
+            return wavelength_matches and jones_matches and spatial_matches
+
+        matches = [layout for layout in layouts if matches(layout)]
+        if len(matches) > 1:
+            if other.ndim == 2:
+                raise ValueError("Array shape (2, 2) is ambiguous for npixels=2.")
+            raise ValueError(
+                "Array shape is ambiguous between spectral-spatial and "
+                "spectral-Jones layouts."
+            )
+        if not matches:
+            if other.ndim == 1:
+                raise ValueError(
+                    "A vector operand must match the base wavelength shape."
+                )
+            raise ValueError(
+                f"Unsupported array shape {other.shape} for a Wavefront with phasor "
+                f"shape {self.phasor.shape}."
+            )
+
+        layout = matches[0]
+        if "j0" in layout and not isinstance(self, PolarisedWavefront):
+            self = self._promote_for_arithmetic()
+
+        # Insert singleton dimensions for semantic axes absent from the operand.
+        axes = ("w",) if self.is_chromatic else ()
+        if isinstance(self, PolarisedWavefront):
+            axes += ("j0", "j1")
+        axes += ("x", "y")
+        shape = tuple(
+            other.shape[layout.index(axis)] if axis in layout else 1 for axis in axes
+        )
+        return self, other.reshape(shape)
 
     def __add__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
@@ -1033,8 +1184,8 @@ class Wavefront(zdx.Base):
 
     def __truediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
         """
-        Allows complex phasors or Wavefront objects to be divided. None values are
-        ignored.
+        Allows the wavefront phasor to be divided by a scalar or array. Division by
+        another Wavefront is undefined. None values are ignored.
         """
         return self._magic_unified_op(other, "divide")
 
