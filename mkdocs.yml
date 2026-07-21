@@ -31,7 +31,7 @@ theme:
         icon: lucide/moon
         name: Switch to light mode
 
-site_name: dLux
+site_name: !ENV [DLUX_DOCS_SITE_NAME, "dLux"]
 docs_dir: docs/
 site_description: Documentation for dLux.
 site_author: Louis Desdoigts
@@ -105,7 +105,6 @@ nav:
       - Psfs: API/core/psfs.md
       - Sources: API/core/sources.md
       - Spectra: API/core/spectra.md
-      - Transformations: API/core/transformations.md
       - Wavefronts: API/core/wavefronts.md
 
     - Layers API:
@@ -137,7 +136,5 @@ nav:
       - Units: API/utils/units.md
       - Zernikes: API/utils/zernikes.md
   - FAQ & Troubleshooting: faq.md
-  - Previous Versions:
-      - v0.14.3: https://louisdesdoigts.github.io/dLux/0.14.3/
   - Change Log: changelog.md
   - Contributing: contributing.md

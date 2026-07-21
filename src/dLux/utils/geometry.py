@@ -85,7 +85,10 @@ def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
     # TODO: Possibly clip from -clip_dist:0 to ensure zernikes have full pupil support
     if invert:
         distances *= -1
-    return shift_and_scale(np.clip(distances, -clip_dist, clip_dist))
+    distances = np.clip(distances, -clip_dist, clip_dist)
+    cond = distances.max() == distances.min()
+    constant_support = (distances > 0).astype(distances.dtype)
+    return np.where(cond, constant_support, shift_and_scale(distances))
 
 
 #####################

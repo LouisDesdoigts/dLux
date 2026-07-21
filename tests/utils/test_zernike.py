@@ -117,6 +117,17 @@ class TestZernikeFast:
         result = zernike_utils.zernike_fast(*indices, *factors, coordinates)
         assert not np.isnan(result).any()
 
+    @pytest.mark.parametrize("diameter", [2.0, 1.5])
+    def test_matches_zernike(self, coordinates, diameter):
+        j = 5
+        indices = zernike_utils.noll_indices(j)
+        factors = zernike_utils.zernike_factors(j)
+
+        result = zernike_utils.zernike_fast(*indices, *factors, coordinates, diameter)
+        expected = zernike_utils.zernike(j, coordinates, diameter)
+
+        assert np.allclose(result, expected)
+
 
 class TestPolikeFast:
     """Tests for fast polygonal Zernike-like evaluation."""
@@ -128,6 +139,20 @@ class TestPolikeFast:
         factors = zernike_utils.zernike_factors(j)
         result = zernike_utils.polike_fast(6, *indices, *factors, coordinates)
         assert not np.isnan(result).any()
+
+    @pytest.mark.parametrize("diameter", [2.0, 1.5])
+    def test_matches_polike(self, coordinates, diameter):
+        nsides = 6
+        j = 5
+        indices = zernike_utils.noll_indices(j)
+        factors = zernike_utils.zernike_factors(j)
+
+        result = zernike_utils.polike_fast(
+            nsides, *indices, *factors, coordinates, diameter
+        )
+        expected = zernike_utils.polike(nsides, j, coordinates, diameter)
+
+        assert np.allclose(result, expected)
 
     def test_invalid_nsides_raises(self, coordinates):
         """Fast polike evaluation rejects polygons with fewer than three sides."""
