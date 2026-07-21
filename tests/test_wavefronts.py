@@ -82,6 +82,16 @@ class TestWavefront:
             wavefront.set_spec(CoordSpec(n=16, d=1 / 16, c=0.0)), Wavefront
         )
 
+    def test_set_spec_normalises_coordinates(self, wavefront):
+        spec = CoordSpec(n=16, d=1 / 16, c=0.0).set(d=0.5, c=1.0)
+
+        result = wavefront.set_spec(spec)
+
+        assert result.pixel_scale.shape == ()
+        assert result.center.shape == ()
+        assert np.allclose(result.pixel_scale, 0.5)
+        assert np.allclose(result.center, 1.0)
+
     def test_magic_add(self, wavefront):
         # Test arrays
         wavefront += np.ones(1)
