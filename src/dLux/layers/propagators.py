@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import jax.numpy as np
+
 from .optical_layers import OpticalLayer
 from ..wavefronts import Wavefront
 from ..coordinates import CoordSpec
@@ -14,7 +16,7 @@ class Propagator(OpticalLayer):
     Base propagator class, instantiating the focal_length attribute.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Propagator.png)
+        ![UML](../assets/uml/Propagator.png)
 
     Attributes
     ----------
@@ -47,7 +49,7 @@ class Propagator(OpticalLayer):
         super().__init__()
 
         if focal_length is not None:
-            focal_length = float(focal_length)
+            focal_length = np.asarray(focal_length, float)
         self.focal_length = focal_length
         self.inverse = bool(inverse)
 
@@ -57,7 +59,7 @@ class FFT(Propagator):
     Propagates a `Wavefront` using the FFT algorithm.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/FFT.png)
+        ![UML](../assets/uml/FFT.png)
 
     Attributes
     ----------
@@ -146,7 +148,7 @@ class MFT(Propagator):
     number of pixels to be specified in the output plane.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/MFT.png)
+        ![UML](../assets/uml/MFT.png)
 
     Attributes
     ----------
@@ -190,7 +192,7 @@ class MFT(Propagator):
         """
         super().__init__(focal_length=focal_length, inverse=inverse)
 
-        self.pixel_scale = float(pixel_scale)
+        self.pixel_scale = np.asarray(pixel_scale, float)
         self.npixels = int(npixels)
 
     def __call__(self: MFT, wavefront: Wavefront) -> Wavefront:

@@ -25,17 +25,23 @@ def test_apply_pixel_response():
 
 
 def test_apply_jitter():
-    _test_apply(ApplyJitter(0.1, 5))
+    layer = ApplyJitter(0.1, 5)
+    _test_apply(layer)
+    assert layer.sigma.shape == ()
     with pytest.raises(ValueError):
         ApplyJitter(0.1, 0)
 
 
 def test_apply_saturation():
-    _test_apply(ApplySaturation(1e4))
+    layer = ApplySaturation(1e4)
+    _test_apply(layer)
+    assert layer.threshold.shape == ()
 
 
 def test_add_constant():
-    _test_apply(AddConstant(1))
+    layer = AddConstant(1)
+    _test_apply(layer)
+    assert layer.value.shape == ()
 
 
 def test_downsample():

@@ -7,7 +7,7 @@ import jax.tree as jtu
 import dLux.utils as dlu
 
 from ..wavefronts import Wavefront
-from ..transformations import CoordTransform
+from ..coordinates import BaseCoordTransform
 from .optical_layers import OpticalLayer, BasisLayer
 from .aberrations import ZernikeBasis
 
@@ -28,7 +28,7 @@ class ApertureLayer(OpticalLayer):
     Base ApertureLayer class, instantiates the normalise attribute.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApertureLayer.png)
+        ![UML](../assets/uml/ApertureLayer.png)
 
     Attributes
     ----------
@@ -76,40 +76,40 @@ class BaseDynamicAperture(ApertureLayer):
     An abstract base class that implements the coordinate transformation attribute.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseDynamicAperture.png)
+        ![UML](../assets/uml/BaseDynamicAperture.png)
 
     Attributes
     ----------
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
 
     def __init__(
         self: BaseDynamicAperture,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         normalise: bool = False,
     ):
         """
         Parameters
         ----------
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         normalise : bool = False
             Should the aperture normalise the wavefront after being applied.
         """
         super().__init__(normalise=normalise)
         if transformation is not None:
-            if not isinstance(transformation, CoordTransform):
+            if not isinstance(transformation, BaseCoordTransform):
                 actual_type = type(transformation).__name__
                 raise TypeError(
-                    f"transformation must be a CoordTransform instance, "
+                    f"transformation must be a BaseCoordTransform instance, "
                     f"got {actual_type}. Import with: "
-                    "from dLux.transformations import CoordTransform. "
-                    "Use a CoordTransform-compatible type from this module."
+                    "from dLux.coordinates import BaseCoordTransform. "
+                    "Use a BaseCoordTransform-compatible type from this module."
                 )
         self.transformation = transformation
 
@@ -158,7 +158,7 @@ class DynamicAperture(BaseDynamicAperture):
     edges to the apertures, and the ability to occult the aperture.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/DynamicAperture.png)
+        ![UML](../assets/uml/DynamicAperture.png)
 
     Attributes
     ----------
@@ -167,7 +167,7 @@ class DynamicAperture(BaseDynamicAperture):
         transmissive aperture, and True results in an occulting aperture.
     softness: float, pixels
         The approximate pixel width of the soft boundary applied to the aperture.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
@@ -182,7 +182,7 @@ class DynamicAperture(BaseDynamicAperture):
 
     def __init__(
         self: DynamicAperture,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
@@ -190,7 +190,7 @@ class DynamicAperture(BaseDynamicAperture):
         """
         Parameters
         ----------
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
@@ -205,7 +205,7 @@ class DynamicAperture(BaseDynamicAperture):
             normalise=normalise,
         )
         self.occulting = bool(occulting)
-        self.softness = float(softening)
+        self.softness = np.asarray(softening, float)
         if self.softness <= 0:
             raise ValueError("softening must be greater than 0.")
 
@@ -243,13 +243,13 @@ class CircularAperture(DynamicAperture):
     grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CircularAperture.png)
+        ![UML](../assets/uml/CircularAperture.png)
 
     Attributes
     ----------
     radius: float, meters
         The radius of the aperture.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
@@ -268,7 +268,7 @@ class CircularAperture(DynamicAperture):
     def __init__(
         self: ApertureLayer,
         radius: float,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
@@ -278,7 +278,7 @@ class CircularAperture(DynamicAperture):
         ----------
         radius: float, meters
             The radius of the aperture.
-        transformation: CoordTransform = None
+        transformation: BaseCoordTransform = None
             The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
@@ -294,7 +294,7 @@ class CircularAperture(DynamicAperture):
             softening=softening,
             normalise=normalise,
         )
-        self.radius = float(radius)
+        self.radius = np.asarray(radius, float)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
         if self.transformation is not None:
@@ -317,13 +317,13 @@ class SquareAperture(DynamicAperture):
     Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/SquareAperture.png)
+        ![UML](../assets/uml/SquareAperture.png)
 
     Attributes
     ----------
     width: float, meters
         The side length of the aperture.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
@@ -343,7 +343,7 @@ class SquareAperture(DynamicAperture):
     def __init__(
         self: ApertureLayer,
         width: float,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
@@ -353,7 +353,7 @@ class SquareAperture(DynamicAperture):
         ----------
         width: Array, meters
             The side length of the aperture.
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
@@ -370,7 +370,7 @@ class SquareAperture(DynamicAperture):
             normalise=normalise,
         )
 
-        self.width = float(width)
+        self.width = np.asarray(width, float)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
         if self.transformation is not None:
@@ -393,7 +393,7 @@ class RectangularAperture(DynamicAperture):
     Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/RectangularAperture.png)
+        ![UML](../assets/uml/RectangularAperture.png)
 
     Attributes
     ----------
@@ -401,7 +401,7 @@ class RectangularAperture(DynamicAperture):
         The length of the aperture in the y-direction.
     width: float, meters
         The length of the aperture in the x-direction.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
@@ -423,7 +423,7 @@ class RectangularAperture(DynamicAperture):
         self: ApertureLayer,
         height: float,
         width: float,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
@@ -435,7 +435,7 @@ class RectangularAperture(DynamicAperture):
             The length of the aperture in the y-direction.
         width: Array, meters
             The length of the aperture in the x-direction.
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
@@ -445,8 +445,8 @@ class RectangularAperture(DynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the aperture.
         """
-        self.height = float(height)
-        self.width = float(width)
+        self.height = np.asarray(height, float)
+        self.width = np.asarray(width, float)
 
         super().__init__(
             transformation=transformation,
@@ -478,7 +478,7 @@ class RegPolyAperture(DynamicAperture):
     number of sides and maximum radius. Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/RegPolyAperture.png)
+        ![UML](../assets/uml/RegPolyAperture.png)
 
     Attributes
     ----------
@@ -486,7 +486,7 @@ class RegPolyAperture(DynamicAperture):
         The number of sides of the aperture.
     rmax: float, meters
         The maximum radius to the vertices from its center.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
@@ -506,7 +506,7 @@ class RegPolyAperture(DynamicAperture):
         self: ApertureLayer,
         nsides: int,
         rmax: float,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
@@ -518,7 +518,7 @@ class RegPolyAperture(DynamicAperture):
             The number of sides of the aperture.
         rmax: float, meters
             The maximum radius to the vertices from its center.
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
@@ -529,7 +529,7 @@ class RegPolyAperture(DynamicAperture):
             Whether to normalise the wavefront after passing through the aperture.
         """
         self._nsides = int(nsides)
-        self.rmax = float(rmax)
+        self.rmax = np.asarray(rmax, float)
 
         super().__init__(
             transformation=transformation,
@@ -561,7 +561,7 @@ class Spider(DynamicAperture):
     number of arms. Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Spider.png)
+        ![UML](../assets/uml/Spider.png)
 
     Attributes
     ----------
@@ -569,7 +569,7 @@ class Spider(DynamicAperture):
         The width of the spider.
     angles: Array, degrees
         The angle of each arm of the spider.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
@@ -591,7 +591,7 @@ class Spider(DynamicAperture):
         self: ApertureLayer,
         width: float,
         angles: Array,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         occulting: bool = True,
         softening: float = 1.0,
         normalise: bool = False,
@@ -603,7 +603,7 @@ class Spider(DynamicAperture):
             The width of the spider.
         angles: Array, degrees
             The angle of each arm of the spider.
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         occulting: bool = True
             Is the aperture occulting or transmissive. False results in a
@@ -620,7 +620,7 @@ class Spider(DynamicAperture):
             normalise=normalise,
         )
 
-        self.width = float(width)
+        self.width = np.asarray(width, float)
         self.angles = np.asarray(angles, dtype=float)
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
@@ -646,7 +646,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
     compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AberratedAperture.png)
+        ![UML](../assets/uml/AberratedAperture.png)
 
     Attributes
     ----------
@@ -800,13 +800,13 @@ class CompositeAperture(BaseDynamicAperture):
     different aperture shapes. Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CompositeAperture.png)
+        ![UML](../assets/uml/CompositeAperture.png)
 
     Attributes
     ----------
     apertures: dict
        The sub-apertures that make up the full aperture.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
@@ -820,7 +820,7 @@ class CompositeAperture(BaseDynamicAperture):
     def __init__(
         self: ApertureLayer,
         apertures: list,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         normalise: bool = False,
     ):
         """
@@ -828,7 +828,7 @@ class CompositeAperture(BaseDynamicAperture):
         ----------
         apertures: list[ApertureLayer]
             The sub-apertures that make up the full aperture.
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         normalise : bool = False
             Whether to normalise the wavefront after passing through the aperture.
@@ -978,22 +978,24 @@ class CompositeAperture(BaseDynamicAperture):
         """
         # Transmission
         wavefront *= self.transmission(wavefront.coordinates(), wavefront.pixel_scale)
+
+        if self._aberrated_apertures():
+            # Transform coordinate
+            if self.transformation is not None:
+                coords = self.transformation(wavefront.coordinates())
+            else:
+                coords = wavefront.coordinates()
+
+            # Aberrations
+            aberrations = self.eval_basis(coords)
+            # TODO: Add add_phase as an option
+            # if self.as_phase:
+            #     wavefront = wavefront.add_phase(aberrations)
+            # else:
+            wavefront = wavefront.add_opd(aberrations)
+
         if self.normalise:
-            return wavefront.normalise()
-
-        # Transform coordinate
-        if self.transformation is not None:
-            coords = self.transformation(wavefront.coordinates())
-        else:
-            coords = wavefront.coordinates()
-
-        # Aberrations
-        aberrations = self.eval_basis(coords)
-        # TODO: Add add_phase as an option
-        # if self.as_phase:
-        #     wavefront = wavefront.add_phase(aberrations)
-        # else:
-        wavefront = wavefront.add_opd(aberrations)
+            wavefront = wavefront.normalise()
         return wavefront
 
 
@@ -1014,13 +1016,13 @@ class CompoundAperture(CompositeAperture):
     contain CompoundApertures.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CompoundAperture.png)
+        ![UML](../assets/uml/CompoundAperture.png)
 
     Attributes
     ----------
     apertures: dict
         The sub-apertures that make up the full aperture.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
@@ -1029,7 +1031,7 @@ class CompoundAperture(CompositeAperture):
     def __init__(
         self: ApertureLayer,
         apertures: list,
-        transformation: CoordTransform = None,
+        transformation: BaseCoordTransform = None,
         normalise: bool = False,
     ):
         """
@@ -1037,7 +1039,7 @@ class CompoundAperture(CompositeAperture):
         ----------
         apertures: list[ApertureLayer]
             The sub-apertures that make up the full aperture.
-        transformation: CoordTransform
+        transformation: BaseCoordTransform
             The object that applies the coordinate transformations to the aperture.
         normalise : bool = False
             Whether to normalise the wavefront after passing through the aperture.
@@ -1078,13 +1080,13 @@ class MultiAperture(CompositeAperture):
     as HST-like aperture, use the CompoundAperture class.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/MultiAperture.png)
+        ![UML](../assets/uml/MultiAperture.png)
 
     Attributes
     ----------
     apertures: dict
         The sub-apertures that make up the full aperture.
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
         The object that applies the coordinate transformations to the aperture.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.

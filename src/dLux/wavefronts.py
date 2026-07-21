@@ -20,7 +20,7 @@ class Wavefront(zdx.Base):
     through an optical system. All wavefronts assume square arrays.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Wavefront.png)
+        ![UML](../assets/uml/Wavefront.png)
 
     Attributes
     ----------
@@ -44,9 +44,9 @@ class Wavefront(zdx.Base):
         Derived property from `phasor`; field amplitude `abs(phasor)`.
     phase : Array, property
         Derived property from `phasor`; field phase angle.
-    complex : tuple[Array, Array], property
+    complex : Array, property
         Derived property from `phasor`; `(real, imaginary)` representation.
-    polar : tuple[Array, Array], property
+    polar : Array, property
         Derived property from `phasor`; `(amplitude, phase)` representation.
     psf : Array, property
         Derived property from `phasor`; intensity image `abs(phasor) ** 2`.
@@ -56,6 +56,10 @@ class Wavefront(zdx.Base):
         Derived property from `pixel_scale`; vectorisation rank of wavefront state.
     power : Array, property
         Derived property from `amplitude`; total wavefront power.
+    spec : CoordSpec, property
+        Derived coordinate specification for the current wavefront sampling.
+    xs : Array, property
+        Derived pixel-centre coordinates along one axis, in metres.
     """
 
     phasor: Array[complex]
@@ -460,6 +464,8 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The new interpolated wavefront.
         """
+        pixel_scale = np.asarray(pixel_scale, float)
+
         # Get field in either (amplitude, phase) or (real, imaginary)
         fields = self.complex if complex else self.polar
 
@@ -600,7 +606,9 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             New wavefront with updated `pixel_scale` and `center`.
         """
-        return self.set(pixel_scale=spec.d, center=spec.c)
+        pixel_scale = None if spec.d is None else np.asarray(spec.d, float)
+        center = None if spec.c is None else np.asarray(spec.c, float)
+        return self.set(pixel_scale=pixel_scale, center=center)
 
     def propagate_FFT(
         self,
