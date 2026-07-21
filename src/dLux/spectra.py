@@ -17,7 +17,7 @@ class BaseSpectrum(zdx.Base):
     weighting over configured wavelengths.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseSpectrum.png)
+        ![UML](../assets/uml/BaseSpectrum.png)
     """
 
     @abstractmethod
@@ -30,7 +30,7 @@ class SimpleSpectrum(BaseSpectrum):
     Base class for arbitrary spectral parametrisations.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/SimpleSpectrum.png)
+        ![UML](../assets/uml/SimpleSpectrum.png)
 
     Attributes
     ----------
@@ -58,7 +58,7 @@ class Spectrum(SimpleSpectrum):
     A simple spectrum class using wavelengths and weights.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Spectrum.png)
+        ![UML](../assets/uml/Spectrum.png)
 
     Attributes
     ----------
@@ -124,7 +124,7 @@ class PolySpectrum(SimpleSpectrum):
     This implements a polynomial as follows: f(x) = c0 + c1*x + c2*x^2 + ... + cn*x^n
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/PolySpectrum.png)
+        ![UML](../assets/uml/PolySpectrum.png)
 
     Attributes
     ----------

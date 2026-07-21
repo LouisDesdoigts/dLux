@@ -28,7 +28,7 @@ class ApertureLayer(OpticalLayer):
     Base ApertureLayer class, instantiates the normalise attribute.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApertureLayer.png)
+        ![UML](../assets/uml/ApertureLayer.png)
 
     Attributes
     ----------
@@ -76,7 +76,7 @@ class BaseDynamicAperture(ApertureLayer):
     An abstract base class that implements the coordinate transformation attribute.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseDynamicAperture.png)
+        ![UML](../assets/uml/BaseDynamicAperture.png)
 
     Attributes
     ----------
@@ -158,7 +158,7 @@ class DynamicAperture(BaseDynamicAperture):
     edges to the apertures, and the ability to occult the aperture.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/DynamicAperture.png)
+        ![UML](../assets/uml/DynamicAperture.png)
 
     Attributes
     ----------
@@ -243,7 +243,7 @@ class CircularAperture(DynamicAperture):
     grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CircularAperture.png)
+        ![UML](../assets/uml/CircularAperture.png)
 
     Attributes
     ----------
@@ -317,7 +317,7 @@ class SquareAperture(DynamicAperture):
     Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/SquareAperture.png)
+        ![UML](../assets/uml/SquareAperture.png)
 
     Attributes
     ----------
@@ -393,7 +393,7 @@ class RectangularAperture(DynamicAperture):
     Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/RectangularAperture.png)
+        ![UML](../assets/uml/RectangularAperture.png)
 
     Attributes
     ----------
@@ -478,7 +478,7 @@ class RegPolyAperture(DynamicAperture):
     number of sides and maximum radius. Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/RegPolyAperture.png)
+        ![UML](../assets/uml/RegPolyAperture.png)
 
     Attributes
     ----------
@@ -561,7 +561,7 @@ class Spider(DynamicAperture):
     number of arms. Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Spider.png)
+        ![UML](../assets/uml/Spider.png)
 
     Attributes
     ----------
@@ -646,7 +646,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
     compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AberratedAperture.png)
+        ![UML](../assets/uml/AberratedAperture.png)
 
     Attributes
     ----------
@@ -800,7 +800,7 @@ class CompositeAperture(BaseDynamicAperture):
     different aperture shapes. Both jit and grad compatible.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CompositeAperture.png)
+        ![UML](../assets/uml/CompositeAperture.png)
 
     Attributes
     ----------
@@ -1016,7 +1016,7 @@ class CompoundAperture(CompositeAperture):
     contain CompoundApertures.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CompoundAperture.png)
+        ![UML](../assets/uml/CompoundAperture.png)
 
     Attributes
     ----------
@@ -1080,7 +1080,7 @@ class MultiAperture(CompositeAperture):
     as HST-like aperture, use the CompoundAperture class.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/MultiAperture.png)
+        ![UML](../assets/uml/MultiAperture.png)
 
     Attributes
     ----------

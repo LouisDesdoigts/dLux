@@ -29,7 +29,7 @@ class Zernike(zdx.Base):
     7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3) : Coma, Trefoil
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Zernike.png)
+        ![UML](../assets/uml/Zernike.png)
 
     Attributes
     ----------
@@ -117,7 +117,7 @@ class ZernikeBasis(zdx.Base):
     7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3) : Coma, Trefoil
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ZernikeBasis.png)
+        ![UML](../assets/uml/ZernikeBasis.png)
 
     Attributes
     ----------

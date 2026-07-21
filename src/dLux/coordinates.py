@@ -9,7 +9,7 @@ class Spec(zdx.Base):
     Abstract base class for coordinate/sampling specifications.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Spec.png)
+        ![UML](../assets/uml/Spec.png)
     """
 
     pass
@@ -21,7 +21,7 @@ class PadSpec(Spec):
     relative to an input grid size.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/PadSpec.png)
+        ![UML](../assets/uml/PadSpec.png)
 
     Attributes
     ----------
@@ -61,7 +61,7 @@ class CoordSpec(Spec):
     scale, and centre offset.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CoordSpec.png)
+        ![UML](../assets/uml/CoordSpec.png)
 
     Attributes
     ----------

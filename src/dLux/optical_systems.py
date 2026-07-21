@@ -35,7 +35,7 @@ class BaseOpticalSystem(zdx.Base):
     concrete optical-system implementations.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseOpticalSystem.png)
+        ![UML](../assets/uml/BaseOpticalSystem.png)
     """
 
     def __init_subclass__(cls, **kwargs):
@@ -141,7 +141,7 @@ class OpticalSystem(BaseOpticalSystem):
     universal to all optics classes.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/OpticalSystem.png)
+        ![UML](../assets/uml/OpticalSystem.png)
     """
 
     def propagate(
@@ -237,7 +237,7 @@ class ParametricOpticalSystem(OpticalSystem):
     pixel scale and number of pixels.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ParametricOpticalSystem.png)
+        ![UML](../assets/uml/ParametricOpticalSystem.png)
 
     Attributes
     ----------
@@ -298,7 +298,7 @@ class LayeredOpticalSystem(OpticalSystem):
     A flexible optical system that allows for the arbitrary chaining of OpticalLayers.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/LayeredOpticalSystem.png)
+        ![UML](../assets/uml/LayeredOpticalSystem.png)
 
     Attributes
     ----------
@@ -513,7 +513,7 @@ class ParametricLayeredOpticalSystem(ParametricOpticalSystem, LayeredOpticalSyst
     CartesianOpticalSystem classes.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ParametricLayeredOpticalSystem.png)
+        ![UML](../assets/uml/ParametricLayeredOpticalSystem.png)
     """
 
     @abstractmethod
@@ -598,7 +598,7 @@ class AngularOpticalSystem(ParametricLayeredOpticalSystem):
     image plane with `psf_pixel_scale` in units of arcseconds.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AngularOpticalSystem.png)
+        ![UML](../assets/uml/AngularOpticalSystem.png)
 
     Attributes
     ----------
@@ -684,7 +684,7 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
     image plane with `psf_pixel_scale` in units of microns.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CartesianOpticalSystem.png)
+        ![UML](../assets/uml/CartesianOpticalSystem.png)
 
     Attributes
     ----------
