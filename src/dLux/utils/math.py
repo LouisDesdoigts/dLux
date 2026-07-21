@@ -12,6 +12,7 @@ __all__ = [
     "factorial",
     "triangular_number",
     "eval_basis",
+    "solve_basis",
     "nandiv",
 ]
 
@@ -186,6 +187,35 @@ def eval_basis(basis: Array, coefficients: Array) -> Array:
     """
     ndim = coefficients.ndim
     return np.tensordot(basis, coefficients, axes=2 * (tuple(range(ndim)),))
+
+
+def solve_basis(array: Array, basis: Array) -> Array:
+    """
+    Solves for the coefficients of an array over a basis using least squares.
+
+    Parameters
+    ----------
+    array : Array
+        The array to solve for the basis coefficients of.
+    basis : Array
+        The basis to solve over. Its trailing dimensions must match the shape of
+        ``array``.
+
+    Returns
+    -------
+    coefficients : Array
+        The least-squares coefficients with shape ``basis.shape[:-array.ndim]``.
+    """
+    output_shape = basis.shape[-array.ndim :] if array.ndim else ()
+    if output_shape != array.shape:
+        raise ValueError(
+            "The trailing dimensions of basis must match the shape of array, "
+            f"received {output_shape} and {array.shape}."
+        )
+
+    matrix = basis.reshape((-1, array.size)).T
+    out_shape = basis.shape[: -array.ndim] if array.ndim else basis.shape
+    return np.linalg.lstsq(matrix, array.ravel(), rcond=None)[0].reshape(out_shape)
 
 
 def nandiv(a: Array, b: Array, fill: Any = np.inf) -> Array:
