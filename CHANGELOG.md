@@ -2,6 +2,48 @@
 
 ---
 
+## V0.15.1
+
+### ✨ New Features
+- Aperture transformations now accept any `BaseCoordTransform`, including
+  `DistortedCoords` ([#332](https://github.com/LouisDesdoigts/dLux/issues/332)).
+- Static circular, HST-like, and Euclid-like apertures now accept `array_diameter`
+  for independently sizing the output grid
+  ([#328](https://github.com/LouisDesdoigts/dLux/issues/328)).
+- `zernike_fast(...)` and `polike_fast(...)` now accept an optional `diameter`
+  ([#275](https://github.com/LouisDesdoigts/dLux/issues/275)).
+- Added `solve_basis(array, basis)` for recovering basis coefficients with a
+  least-squares solve ([#299](https://github.com/LouisDesdoigts/dLux/issues/299)).
+
+### ⚠️ Breaking Changes
+- Coordinate transformation classes now live in `dLux.coordinates`; the
+  `dLux.transformations` module has been removed.
+- Continuous scalar parameters are now consistently stored as scalar JAX arrays
+  rather than Python floats
+  ([#338](https://github.com/LouisDesdoigts/dLux/issues/338)).
+
+### ⏳ Deprecations
+- No APIs are deprecated in this release.
+
+### 🐛 Bug Fixes
+- Fixed transmission, softening, and Zernike basis generation for apertures larger
+  than their sampling grids
+  ([#305](https://github.com/LouisDesdoigts/dLux/issues/305),
+  [#328](https://github.com/LouisDesdoigts/dLux/issues/328)).
+- Composite apertures now apply aberrations regardless of normalisation and no longer
+  fail when they contain no aberrated sub-apertures
+  ([#320](https://github.com/LouisDesdoigts/dLux/issues/320)).
+
+### 🎉 New Contributors
+- 🌟 [Matthijs Mars (@MatthijsMars)](https://github.com/MatthijsMars) made their first
+  contribution by expanding aperture transformations to support all
+  `BaseCoordTransform` implementations
+  ([#333](https://github.com/LouisDesdoigts/dLux/pull/333)).
+- 🌟 [Yinzi Xin (@yinzi-xin)](https://github.com/yinzi-xin) made their first
+  contribution by adding independently sized aperture grids through
+  `array_diameter`, including tests
+  ([#336](https://github.com/LouisDesdoigts/dLux/pull/336)).
+
 ## V0.15.0
 
 ### Wavefront
