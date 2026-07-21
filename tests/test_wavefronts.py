@@ -529,18 +529,15 @@ class TestPolarisedWavefrontMagicMethods:
             ("__add__", np.add),
             ("__sub__", np.subtract),
             ("__mul__", np.multiply),
-            ("__truediv__", lambda x, y: x * (1 / y)),
             ("__iadd__", np.add),
             ("__isub__", np.subtract),
             ("__imul__", np.multiply),
-            ("__itruediv__", lambda x, y: x * (1 / y)),
         ],
     )
     def test_promotes_mixed_wavefront_operands(self, method, operation):
         wavefront = Wavefront(1.0e-6, npixels=8, diameter=1.0)
         polarised = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
         polarised = polarised.set(phasor=np.ones_like(polarised.phasor) * (2 + 1j))
-        promoted = PolarisedWavefront.from_wavefront(wavefront)
 
         normal_first = getattr(wavefront, method)(polarised)
         polarised_first = getattr(polarised, method)(wavefront)
@@ -549,14 +546,160 @@ class TestPolarisedWavefrontMagicMethods:
         assert isinstance(polarised_first, PolarisedWavefront)
         assert np.allclose(
             normal_first.phasor,
-            operation(promoted.phasor, polarised.phasor),
-            equal_nan=True,
+            operation(wavefront.phasor, polarised.phasor),
         )
         assert np.allclose(
             polarised_first.phasor,
-            operation(polarised.phasor, promoted.phasor),
-            equal_nan=True,
+            operation(polarised.phasor, wavefront.phasor),
         )
+        assert np.all(np.isfinite(normal_first.phasor))
+        assert np.all(np.isfinite(polarised_first.phasor))
+
+    @pytest.mark.parametrize("method", ["__truediv__", "__itruediv__"])
+    def test_rejects_wavefront_division(self, method):
+        wavefront = Wavefront(1.0e-6, npixels=8, diameter=1.0)
+        polarised = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+
+        with pytest.raises(TypeError):
+            getattr(wavefront, method)(polarised)
+        with pytest.raises(TypeError):
+            getattr(polarised, method)(wavefront)
+
+    @pytest.mark.parametrize("nwavelengths", [2, 3])
+    def test_chromatic_mixed_polarisation_dimensions(self, nwavelengths):
+        wavelengths = np.linspace(1.0e-6, 2.0e-6, nwavelengths)
+        wavefront = Wavefront(wavelengths, npixels=8, diameter=1.0)
+        polarised = PolarisedWavefront(wavelengths, npixels=8, diameter=1.0)
+
+        normal_first = wavefront * polarised
+        polarised_first = polarised * wavefront
+        expected = wavefront.phasor[..., None, None, :, :] * polarised.phasor
+
+        assert isinstance(normal_first, PolarisedWavefront)
+        assert isinstance(polarised_first, PolarisedWavefront)
+        assert normal_first.phasor.shape == (nwavelengths, 2, 2, 8, 8)
+        assert polarised_first.phasor.shape == (nwavelengths, 2, 2, 8, 8)
+        assert np.allclose(normal_first.phasor, expected)
+        assert np.allclose(polarised_first.phasor, expected)
+
+    def test_monochromatic_operand_broadcasts_over_chromatic_base(self):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = Wavefront(wavelengths, npixels=8, diameter=1.0)
+        polarised = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+
+        output = wavefront * polarised
+
+        assert isinstance(output, PolarisedWavefront)
+        assert output.wavelength.shape == wavelengths.shape
+        assert output.phasor.shape == (3, 2, 2, 8, 8)
+
+    def test_rejects_incompatible_chromatic_operand(self):
+        monochromatic = Wavefront(1.0e-6, npixels=8, diameter=1.0)
+        chromatic = PolarisedWavefront(
+            np.array([1.0e-6, 1.5e-6]), npixels=8, diameter=1.0
+        )
+        incompatible = Wavefront(
+            np.array([1.0e-6, 1.5e-6, 2.0e-6]), npixels=8, diameter=1.0
+        )
+
+        with pytest.raises(ValueError, match="requires a chromatic base"):
+            monochromatic * chromatic
+        with pytest.raises(ValueError, match="same wavelength shape"):
+            incompatible * chromatic
+
+
+class TestWavefrontArrayOperandDimensions:
+    @pytest.mark.parametrize(
+        "shape",
+        [
+            (),
+            (3,),
+            (8, 8),
+            (3, 8, 8),
+            (2, 2),
+            (3, 2, 2),
+            (2, 2, 8, 8),
+            (3, 2, 2, 8, 8),
+        ],
+    )
+    def test_chromatic_polarised_array_layouts(self, shape):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = PolarisedWavefront(wavelengths, npixels=8, diameter=1.0)
+
+        output = wavefront * np.ones(shape)
+
+        assert isinstance(output, PolarisedWavefront)
+        assert output.phasor.shape == (3, 2, 2, 8, 8)
+
+    @pytest.mark.parametrize("shape", [(3,), (8, 8), (3, 8, 8)])
+    def test_chromatic_regular_array_layouts(self, shape):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = Wavefront(wavelengths, npixels=8, diameter=1.0)
+
+        output = wavefront * np.ones(shape)
+
+        assert type(output) is Wavefront
+        assert output.phasor.shape == (3, 8, 8)
+
+    def test_spatial_array_broadcasts_over_single_pixel_wavefront(self):
+        wavefront = Wavefront(1.0e-6, npixels=1, diameter=1.0)
+
+        output = wavefront * np.ones((8, 8))
+
+        assert output.phasor.shape == (8, 8)
+
+    @pytest.mark.parametrize(
+        "shape", [(2, 2), (3, 2, 2), (2, 2, 8, 8), (3, 2, 2, 8, 8)]
+    )
+    def test_jones_arrays_promote_chromatic_regular_wavefront(self, shape):
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        wavefront = Wavefront(wavelengths, npixels=8, diameter=1.0)
+
+        output = wavefront * np.ones(shape)
+
+        assert isinstance(output, PolarisedWavefront)
+        assert output.phasor.shape == (3, 2, 2, 8, 8)
+
+    @pytest.mark.parametrize("shape", [(8, 8), (2, 2), (2, 2, 8, 8)])
+    def test_monochromatic_array_layouts(self, shape):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+
+        output = wavefront * np.ones(shape)
+
+        assert isinstance(output, PolarisedWavefront)
+        assert output.phasor.shape == (2, 2, 8, 8)
+
+    def test_invalid_array_layouts(self):
+        monochromatic = Wavefront(1.0e-6, npixels=8, diameter=1.0)
+        wavelengths = np.array([1.0e-6, 1.5e-6, 2.0e-6])
+        chromatic = Wavefront(wavelengths, npixels=8, diameter=1.0)
+
+        with pytest.raises(ValueError, match="vector operand"):
+            monochromatic * np.ones(3)
+        with pytest.raises(ValueError, match="vector operand"):
+            chromatic * np.ones(4)
+        with pytest.raises(ValueError, match="Unsupported array shape"):
+            monochromatic * np.ones((3, 8, 8))
+        with pytest.raises(ValueError, match="Unsupported array shape"):
+            chromatic * np.ones((4, 5))
+
+    def test_ambiguous_array_layouts(self):
+        monochromatic = Wavefront(1.0e-6, npixels=2, diameter=1.0)
+        chromatic = Wavefront(
+            np.array([1.0e-6, 1.5e-6, 2.0e-6]), npixels=2, diameter=1.0
+        )
+
+        with pytest.raises(ValueError, match="ambiguous for npixels=2"):
+            monochromatic * np.ones((2, 2))
+        with pytest.raises(ValueError, match="ambiguous between"):
+            chromatic * np.ones((3, 2, 2))
+
+    def test_wavefront_operands_require_matching_spatial_shapes(self):
+        wavefront = Wavefront(1.0e-6, npixels=8, diameter=1.0)
+        other = Wavefront(1.0e-6, npixels=4, diameter=1.0)
+
+        with pytest.raises(ValueError, match="matching spatial shapes"):
+            wavefront * other
 
 
 class TestPolarisedWavefrontFromPhasor:
