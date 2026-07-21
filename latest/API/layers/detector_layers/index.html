@@ -29,7 +29,7 @@
     
     
       
-        <title>Detector Layers - dLux v0.15.1</title>
+        <title>Detector Layers - dLux</title>
       
     
     
@@ -105,7 +105,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="dLux v0.15.1" class="md-header__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="../../.." title="dLux" class="md-header__button md-logo" aria-label="dLux" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
@@ -119,7 +119,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            dLux v0.15.1
+            dLux
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -216,13 +216,13 @@
 
 <nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="dLux v0.15.1" class="md-nav__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="../../.." title="dLux" class="md-nav__button md-logo" aria-label="dLux" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
 
     </a>
-    dLux v0.15.1
+    dLux
   </label>
   
     <div class="md-nav__source">
@@ -691,6 +691,8 @@
       
         
       
+        
+      
     
     
     
@@ -933,6 +935,33 @@
     
   
   Spectra
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/transformations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Transformations
 
     
   </span>
@@ -2145,7 +2174,7 @@ used to model inter- and intra-pixel sensitivity variations common
 to most detectors.</p>
 <details class="abstract">
 <summary>UML</summary>
-<p><img alt="UML" src="../../assets/uml/ApplyPixelResponse.png" /></p>
+<p><img alt="UML" src="../../../assets/uml/ApplyPixelResponse.png" /></p>
 </details>
 
 
@@ -2220,7 +2249,7 @@ to most detectors.</p>
 <span class="sd">    to most detectors.</span>
 
 <span class="sd">    ??? abstract &quot;UML&quot;</span>
-<span class="sd">        ![UML](../assets/uml/ApplyPixelResponse.png)</span>
+<span class="sd">        ![UML](../../assets/uml/ApplyPixelResponse.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -2369,7 +2398,7 @@ matches the PSF shape at time of application.</p>
 standard deviation (sigma).</p>
 <details class="abstract">
 <summary>UML</summary>
-<p><img alt="UML" src="../../assets/uml/ApplyJitter.png" /></p>
+<p><img alt="UML" src="../../../assets/uml/ApplyJitter.png" /></p>
 </details>
 
 
@@ -2414,21 +2443,6 @@ standard deviation (sigma).</p>
               <div class="doc-md-description">
                 <p>The oversampling factor to use when generating the kernel. This is used to
 mitigate aliasing when the kernel is small compared to the pixel size.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;kernel&lt;/span&gt;&lt;/code&gt;
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.layers.detector_layers.ApplyJitter.kernel">kernel</a></code></td>
-            <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The derived normalised Gaussian convolution kernel.</p>
               </div>
             </td>
           </tr>
@@ -2507,15 +2521,13 @@ mitigate aliasing when the kernel is small compared to the pixel size.</p>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ApplyJitter</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
+<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ApplyJitter</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convolves the PSF with a radially symmetric Gaussian kernel parameterised by its</span>
 <span class="sd">    standard deviation (sigma).</span>
 
 <span class="sd">    ??? abstract &quot;UML&quot;</span>
-<span class="sd">        ![UML](../assets/uml/ApplyJitter.png)</span>
+<span class="sd">        ![UML](../../assets/uml/ApplyJitter.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -2526,8 +2538,6 @@ mitigate aliasing when the kernel is small compared to the pixel size.</p>
 <span class="sd">    oversample : int</span>
 <span class="sd">        The oversampling factor to use when generating the kernel. This is used to</span>
 <span class="sd">        mitigate aliasing when the kernel is small compared to the pixel size.</span>
-<span class="sd">    kernel : Array, property</span>
-<span class="sd">        The derived normalised Gaussian convolution kernel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span>
@@ -2550,7 +2560,7 @@ mitigate aliasing when the kernel is small compared to the pixel size.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kernel_size</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">oversample</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -2715,7 +2725,9 @@ mitigate aliasing when the kernel is small compared to the pixel size.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/detector_layers.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">125</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
@@ -2733,9 +2745,7 @@ mitigate aliasing when the kernel is small compared to the pixel size.</p>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">ApplyJitter</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2751,7 +2761,7 @@ mitigate aliasing when the kernel is small compared to the pixel size.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kernel_size</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">oversample</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -2794,7 +2804,7 @@ mitigate aliasing when the kernel is small compared to the pixel size.</p>
 the threshold value.</p>
 <details class="abstract">
 <summary>UML</summary>
-<p><img alt="UML" src="../../assets/uml/ApplySaturation.png" /></p>
+<p><img alt="UML" src="../../../assets/uml/ApplySaturation.png" /></p>
 </details>
 
 
@@ -2831,7 +2841,9 @@ the threshold value.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>dLux/layers/detector_layers.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -2856,15 +2868,13 @@ the threshold value.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ApplySaturation</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
+<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ApplySaturation</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies a simple saturation model to the input PSF by clipping any values above</span>
 <span class="sd">    the threshold value.</span>
 
 <span class="sd">    ??? abstract &quot;UML&quot;</span>
-<span class="sd">        ![UML](../assets/uml/ApplySaturation.png)</span>
+<span class="sd">        ![UML](../../assets/uml/ApplySaturation.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -2882,7 +2892,7 @@ the threshold value.</p>
 <span class="sd">            The threshold at which the saturation is applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApplySaturation</span><span class="p">,</span> <span class="n">psf</span><span class="p">:</span> <span class="n">PSF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PSF</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">psf</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">)</span>
@@ -2948,15 +2958,15 @@ the threshold value.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/detector_layers.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">184</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
 <span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApplySaturation</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApplySaturation</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2964,7 +2974,7 @@ the threshold value.</p>
 <span class="sd">        The threshold at which the saturation is applied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3003,7 +3013,7 @@ the threshold value.</p>
 the detector noise.</p>
 <details class="abstract">
 <summary>UML</summary>
-<p><img alt="UML" src="../../assets/uml/AddConstant.png" /></p>
+<p><img alt="UML" src="../../../assets/uml/AddConstant.png" /></p>
 </details>
 
 
@@ -3040,7 +3050,9 @@ the detector noise.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>dLux/layers/detector_layers.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span>
 <span class="normal">201</span>
@@ -3065,15 +3077,13 @@ the detector noise.</p>
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AddConstant</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
+<span class="normal">223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AddConstant</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a constant to the output PSF. This is typically used to model the mean value of</span>
 <span class="sd">    the detector noise.</span>
 
 <span class="sd">    ??? abstract &quot;UML&quot;</span>
-<span class="sd">        ![UML](../assets/uml/AddConstant.png)</span>
+<span class="sd">        ![UML](../../assets/uml/AddConstant.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -3091,7 +3101,7 @@ the detector noise.</p>
 <span class="sd">            The value to add to the PSF.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AddConstant</span><span class="p">,</span> <span class="n">psf</span><span class="p">:</span> <span class="n">PSF</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PSF</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">psf</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
@@ -3157,15 +3167,15 @@ the detector noise.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/detector_layers.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
 <span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AddConstant</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AddConstant</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3173,7 +3183,7 @@ the detector noise.</p>
 <span class="sd">        The value to add to the PSF.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3213,7 +3223,7 @@ to downsample an oversampled PSF to the true pixel size. Note the input PSF size
 must be divisible by kernel_size.</p>
 <details class="abstract">
 <summary>UML</summary>
-<p><img alt="UML" src="../../assets/uml/Downsample.png" /></p>
+<p><img alt="UML" src="../../../assets/uml/Downsample.png" /></p>
 </details>
 
 
@@ -3250,7 +3260,9 @@ must be divisible by kernel_size.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>dLux/layers/detector_layers.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">228</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
@@ -3279,16 +3291,14 @@ must be divisible by kernel_size.</p>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Downsample</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
+<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Downsample</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Downsamples an input PSF by an integer number of pixels via a sum. Typically used</span>
 <span class="sd">    to downsample an oversampled PSF to the true pixel size. Note the input PSF size</span>
 <span class="sd">    must be divisible by kernel_size.</span>
 
 <span class="sd">    ??? abstract &quot;UML&quot;</span>
-<span class="sd">        ![UML](../assets/uml/Downsample.png)</span>
+<span class="sd">        ![UML](../../assets/uml/Downsample.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -3375,7 +3385,9 @@ must be divisible by kernel_size.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/detector_layers.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
@@ -3384,9 +3396,7 @@ must be divisible by kernel_size.</p>
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Downsample</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Downsample</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
