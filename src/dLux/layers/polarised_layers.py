@@ -1,6 +1,7 @@
 """Polarised optical layers and parameterised polarisation fields."""
 
 from __future__ import annotations
+from abc import abstractmethod
 import equinox as eqx
 import jax.numpy as np
 import zodiax as zdx
@@ -34,7 +35,8 @@ class Parameter(zdx.Base):
     be a scalar, an array, an explicit basis expansion, or an implicit basis expansion.
     """
 
-    def __call__(self: Parameter) -> Array:
+    @abstractmethod
+    def __call__(self: Parameter) -> Array:  # pragma: no cover
         """
         Evaluates the parameter.
 
@@ -43,7 +45,7 @@ class Parameter(zdx.Base):
         value : Array
             Scalar or spatially varying parameter value.
         """
-        raise NotImplementedError("Parameter subclasses must implement __call__.")
+        pass
 
 
 class Constant(Parameter):
