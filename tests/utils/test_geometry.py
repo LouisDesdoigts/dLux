@@ -78,6 +78,27 @@ class TestSoften:
         result = geometry_utils.soften(distances, clip_dist, invert)
         assert result.shape == distances.shape
 
+    @pytest.mark.parametrize(
+        ("distances", "expected"),
+        [(np.ones(3), 1.0), (-np.ones(3), 0.0)],
+    )
+    def test_uniform_support(self, distances, expected):
+        """Fields entirely inside or outside retain the correct support."""
+        result = geometry_utils.soften(distances, 0.5)
+        assert np.allclose(result, expected)
+
+    @pytest.mark.parametrize("invert", [True, False])
+    def test_non_degenerate_output_is_unchanged(self, invert):
+        """Non-degenerate fields retain the original shift-and-scale behaviour."""
+        distances = np.array([-0.1, 0.0, 0.2, 0.3])
+        signed_distances = -distances if invert else distances
+        clipped = np.clip(signed_distances, -0.5, 0.5)
+        expected = geometry_utils.shift_and_scale(clipped)
+
+        result = geometry_utils.soften(distances, 0.5, invert)
+
+        assert np.array_equal(result, expected)
+
 
 # ============================================================================
 # Tests for primitive aperture generators
