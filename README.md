@@ -1,4 +1,4 @@
-![alt text](docs/assets/logo.jpg)
+![dLux logo](https://raw.githubusercontent.com/LouisDesdoigts/dLux/main/docs/assets/logo.jpg)
 
 # ∂Lux
 
