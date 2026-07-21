@@ -333,7 +333,7 @@ class LayeredOpticalSystem(OpticalSystem):
             specify a key for the layer in the layers dictionary.
         """
         self.wf_npixels = int(wf_npixels)
-        self.diameter = float(diameter)
+        self.diameter = np.asarray(diameter, float)
         self.layers = dlu.list2dictionary(layers, True, OpticalLayer)
 
     def __getattr__(self: LayeredOpticalSystem, key: str) -> Any:
@@ -738,7 +738,7 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
             The oversampling factor of the final PSF. Decreases the psf_pixel_scale
             parameter while increasing the psf_npixels parameter.
         """
-        self.focal_length = float(focal_length)
+        self.focal_length = np.asarray(focal_length, float)
 
         super().__init__(
             wf_npixels=wf_npixels,

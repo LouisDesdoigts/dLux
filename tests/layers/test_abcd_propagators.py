@@ -84,6 +84,7 @@ def test_asm_propagator_constructor_error():
 
 def test_asm_propagator_call_coordspec(wavefront):
     prop = abcd_props.ASMPropagator(1.0, CoordSpec(n=20, c=None))
+    assert prop.distance.shape == ()
 
     out = prop(wavefront)
     assert isinstance(out, Wavefront)

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import jax.numpy as np
+
 __all__ = ["UnifiedLayer", "Rotate", "Flip", "Resize", "Lambda"]
 
 
@@ -108,7 +110,7 @@ class Rotate(UnifiedLayer):
             the input is a wavefront.
         """
         super().__init__()
-        self.angle = float(angle)
+        self.angle = np.asarray(angle, float)
         self.method = str(method)
         self.complex = bool(complex)
 
