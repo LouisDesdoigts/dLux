@@ -24,7 +24,7 @@ class DetectorLayer(BaseLayer):
     software.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/DetectorLayer.png)
+        ![UML](../assets/uml/DetectorLayer.png)
     """
 
     def __init__(self: DetectorLayer):
@@ -70,7 +70,7 @@ class ApplyPixelResponse(DetectorLayer):
     to most detectors.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApplyPixelResponse.png)
+        ![UML](../assets/uml/ApplyPixelResponse.png)
 
     Attributes
     ----------
@@ -103,7 +103,7 @@ class ApplyJitter(DetectorLayer):
     standard deviation (sigma).
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApplyJitter.png)
+        ![UML](../assets/uml/ApplyJitter.png)
 
     Attributes
     ----------
@@ -169,7 +169,7 @@ class ApplySaturation(DetectorLayer):
     the threshold value.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ApplySaturation.png)
+        ![UML](../assets/uml/ApplySaturation.png)
 
     Attributes
     ----------
@@ -199,7 +199,7 @@ class AddConstant(DetectorLayer):
     the detector noise.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AddConstant.png)
+        ![UML](../assets/uml/AddConstant.png)
 
     Attributes
     ----------
@@ -230,7 +230,7 @@ class Downsample(DetectorLayer):
     must be divisible by kernel_size.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Downsample.png)
+        ![UML](../assets/uml/Downsample.png)
 
     Attributes
     ----------

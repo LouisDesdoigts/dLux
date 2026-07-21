@@ -31,7 +31,7 @@ class BaseLayer(zdx.Base):
     object to another (for example Wavefront -> Wavefront or PSF -> PSF).
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BaseLayer.png)
+        ![UML](../assets/uml/BaseLayer.png)
     """
 
     @abstractmethod
@@ -66,7 +66,7 @@ class OpticalLayer(BaseLayer):
     through their `apply` method, and are stored by the `OpticalSystem` classes.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/OpticalLayer.png)
+        ![UML](../assets/uml/OpticalLayer.png)
     """
 
     @abstractmethod
@@ -94,7 +94,7 @@ class TransmissiveLayer(OpticalLayer):
     normalise parameter.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/TransmissiveLayer.png)
+        ![UML](../assets/uml/TransmissiveLayer.png)
 
     Attributes
     ----------
@@ -140,7 +140,7 @@ class AberratedLayer(OpticalLayer):
     a phase or OPD, or both.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AberratedLayer.png)
+        ![UML](../assets/uml/AberratedLayer.png)
 
     Attributes
     ----------
@@ -196,7 +196,7 @@ class BasisLayer(OpticalLayer):
     a phase or OPD, by setting the `as_phase` attribute.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/BasisLayer.png)
+        ![UML](../assets/uml/BasisLayer.png)
 
     Attributes
     ----------
@@ -276,7 +276,7 @@ class Tilt(OpticalLayer):
     Tilts the wavefront by the input (x, y) angles.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Tilt.png)
+        ![UML](../assets/uml/Tilt.png)
 
     Attributes
     ----------
@@ -308,7 +308,7 @@ class Normalise(OpticalLayer):
     Normalises the wavefront to unit intensity.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Normalise.png)
+        ![UML](../assets/uml/Normalise.png)
     """
 
     def __call__(self: Normalise, wavefront: Wavefront) -> Wavefront:
@@ -320,7 +320,7 @@ class FourierBasis(OpticalLayer):
     Optical layer for representing an OPD using a 2D real Fourier basis.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/FourierBasis.png)
+        ![UML](../assets/uml/FourierBasis.png)
 
     Attributes
     ----------
