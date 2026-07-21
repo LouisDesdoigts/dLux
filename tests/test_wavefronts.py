@@ -73,6 +73,7 @@ class TestWavefront:
         assert isinstance(wavefront.flip(0), Wavefront)
         assert wavefront.scale_to(8, 1 / 32).npixels == 8
         assert np.allclose(wavefront.scale_to(8, 1 / 32).pixel_scale, 1 / 32)
+        assert wavefront.scale_to(8, 1 / 32).pixel_scale.shape == ()
         assert np.allclose(wavefront.scale_to(8, 1 / 32, False).pixel_scale, 1 / 32)
         assert isinstance(wavefront.rotate(np.pi), Wavefront)
         assert isinstance(wavefront.rotate(np.pi, complex=False), Wavefront)

@@ -53,6 +53,8 @@ def test_fft(focal_length, pad):
 
 @pytest.mark.parametrize("focal_length", [None, 1e2])
 def test_mft(focal_length, npixels, pixel_scale):
-    _test_apply(
-        MFT(npixels=npixels, pixel_scale=pixel_scale, focal_length=focal_length)
+    propagator = MFT(
+        npixels=npixels, pixel_scale=pixel_scale, focal_length=focal_length
     )
+    _test_apply(propagator)
+    assert propagator.pixel_scale.shape == ()

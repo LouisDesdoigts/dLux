@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import jax.numpy as np
+
 from .optical_layers import OpticalLayer
 from ..wavefronts import Wavefront
 from ..coordinates import CoordSpec
@@ -190,7 +192,7 @@ class MFT(Propagator):
         """
         super().__init__(focal_length=focal_length, inverse=inverse)
 
-        self.pixel_scale = float(pixel_scale)
+        self.pixel_scale = np.asarray(pixel_scale, float)
         self.npixels = int(npixels)
 
     def __call__(self: MFT, wavefront: Wavefront) -> Wavefront:

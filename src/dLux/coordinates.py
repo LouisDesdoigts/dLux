@@ -52,7 +52,7 @@ class PadSpec(Spec):
         """
         self.pad = int(pad)
         self.crop = int(crop)
-        self.c = c
+        self.c = np.asarray(c, float)
 
 
 class CoordSpec(Spec):

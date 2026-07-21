@@ -274,7 +274,7 @@ class ParametricOpticalSystem(OpticalSystem):
         """
         self.psf_npixels = int(psf_npixels)
         self.oversample = int(oversample)
-        self.psf_pixel_scale = float(psf_pixel_scale)
+        self.psf_pixel_scale = np.asarray(psf_pixel_scale, float)
         super().__init__(**kwargs)
 
     @property

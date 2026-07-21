@@ -19,6 +19,7 @@ class TestPadSpec:
         assert spec.pad == 2
         assert spec.crop == 3
         assert spec.c == 1.5
+        assert spec.c.shape == ()
 
 
 class TestCoordSpec:
