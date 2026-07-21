@@ -26,7 +26,7 @@ class ABCDElement(zdx.Base):
     base class for such elements, and should not be used directly.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ABCDElement.png)
+        ![UML](../assets/uml/ABCDElement.png)
     """
 
     pass
@@ -37,7 +37,7 @@ class ABCDFreeSpace(ABCDElement):
     A free space propagation element represented by an ABCD matrix.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ABCDFreeSpace.png)
+        ![UML](../assets/uml/ABCDFreeSpace.png)
     """
 
     distance: float
@@ -71,7 +71,7 @@ class ABCDLens(ABCDElement):
     the ABCDConjugatePlane element.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ABCDLens.png)
+        ![UML](../assets/uml/ABCDLens.png)
     """
 
     focal_length: float
@@ -101,7 +101,7 @@ class ABCDMirror(ABCDElement):
     A mirror element represented by an ABCD matrix.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ABCDMirror.png)
+        ![UML](../assets/uml/ABCDMirror.png)
     """
 
     radius: float
@@ -132,7 +132,7 @@ class ABCDConjugatePlane(ABCDElement):
     'pupil-focal Fourier relationship' seen in fourier/physical optics.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ABCDConjugatePlane.png)
+        ![UML](../assets/uml/ABCDConjugatePlane.png)
     """
 
     focal_length: float
@@ -165,7 +165,7 @@ class ABCDPropagator(OpticalLayer):
     Propagator defined by a composition of ABCD elements.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ABCDPropagator.png)
+        ![UML](../assets/uml/ABCDPropagator.png)
 
     Attributes
     ----------
@@ -221,7 +221,7 @@ class MFTPropagator(ABCDPropagator):
     tracking, but the present Wavefront class is not compatible with this formulation.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/MFTPropagator.png)
+        ![UML](../assets/uml/MFTPropagator.png)
 
     Parameters
     ----------
@@ -272,7 +272,7 @@ class FFTPropagator(ABCDPropagator):
     tracking, but the present Wavefront class is not compatible with this formulation.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/FFTPropagator.png)
+        ![UML](../assets/uml/FFTPropagator.png)
 
     Parameters
     ----------
@@ -362,7 +362,7 @@ class ASMPropagator(OpticalLayer):
     tracking, but the present Wavefront class is not compatible with this formulation.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/ASMPropagator.png)
+        ![UML](../assets/uml/ASMPropagator.png)
     """
 
     distance: float
@@ -434,7 +434,7 @@ class Fraunhofer(ABCDPropagator):
     Placeholder for a dedicated Fraunhofer propagator.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Fraunhofer.png)
+        ![UML](../assets/uml/Fraunhofer.png)
     """
 
     spec_out: tuple[int, float]
@@ -449,7 +449,7 @@ class Fresnel(ABCDPropagator):
     Placeholder for a dedicated Fresnel propagator.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Fresnel.png)
+        ![UML](../assets/uml/Fresnel.png)
     """
 
     spec_out: tuple[int, float]
