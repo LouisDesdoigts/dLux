@@ -986,8 +986,16 @@ class Wavefront(zdx.Base):
                 "Wavefront, or None."
             )
 
-        # Extract phasor if other is a Wavefront
+        # Promote both Wavefront operands when either carries polarisation. This keeps
+        # the return type and Jones broadcasting semantics independent of operand order.
         if isinstance(other, Wavefront):
+            if isinstance(self, PolarisedWavefront) or isinstance(
+                other, PolarisedWavefront
+            ):
+                if not isinstance(self, PolarisedWavefront):
+                    self = PolarisedWavefront.from_wavefront(self)
+                if not isinstance(other, PolarisedWavefront):
+                    other = PolarisedWavefront.from_wavefront(other)
             other = other.phasor
 
         # Apply the operation
