@@ -38,6 +38,13 @@ class ABCDFreeSpace(ABCDElement):
 
     ??? abstract "UML"
         ![UML](../assets/uml/ABCDFreeSpace.png)
+
+    Attributes
+    ----------
+    distance : float
+        The free-space propagation distance.
+    abcd : Array, property
+        The analytic ABCD matrix for free-space propagation.
     """
 
     distance: float
@@ -72,6 +79,13 @@ class ABCDLens(ABCDElement):
 
     ??? abstract "UML"
         ![UML](../assets/uml/ABCDLens.png)
+
+    Attributes
+    ----------
+    focal_length : float
+        The lens focal length.
+    abcd : Array, property
+        The analytic ABCD matrix for the lens.
     """
 
     focal_length: float
@@ -102,6 +116,13 @@ class ABCDMirror(ABCDElement):
 
     ??? abstract "UML"
         ![UML](../assets/uml/ABCDMirror.png)
+
+    Attributes
+    ----------
+    radius : float
+        The mirror radius of curvature.
+    abcd : Array, property
+        The analytic ABCD matrix for the mirror.
     """
 
     radius: float
@@ -133,6 +154,13 @@ class ABCDConjugatePlane(ABCDElement):
 
     ??? abstract "UML"
         ![UML](../assets/uml/ABCDConjugatePlane.png)
+
+    Attributes
+    ----------
+    focal_length : float
+        The effective focal length of the conjugate-plane transform.
+    abcd : Array, property
+        The analytic ABCD matrix for conjugate-plane propagation.
     """
 
     focal_length: float
@@ -173,6 +201,8 @@ class ABCDPropagator(OpticalLayer):
         Dictionary of ABCD elements in propagation order.
     spec : CoordSpec | PadSpec
         Output coordinate specification.
+    abcd : Array, property
+        The composed ABCD matrix for this propagator.
     """
 
     ABCDs: dict

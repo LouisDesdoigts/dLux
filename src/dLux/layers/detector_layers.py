@@ -114,6 +114,8 @@ class ApplyJitter(DetectorLayer):
     oversample : int
         The oversampling factor to use when generating the kernel. This is used to
         mitigate aliasing when the kernel is small compared to the pixel size.
+    kernel : Array, property
+        The derived normalised Gaussian convolution kernel.
     """
 
     sigma: float

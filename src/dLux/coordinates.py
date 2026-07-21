@@ -87,6 +87,12 @@ class CoordSpec(Spec):
         Pixel scale (spacing between adjacent pixels), in metres.
     c : float
         Centre coordinate of the grid, in metres.
+    xs : Array, property
+        Derived pixel-centre coordinates along one axis, in metres.
+    fov : float, property
+        Derived total field of view of the grid, in metres.
+    extent : tuple[float, float], property
+        Derived coordinate range of the grid edges, in metres.
     """
 
     n: int

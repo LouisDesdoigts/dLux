@@ -44,9 +44,9 @@ class Wavefront(zdx.Base):
         Derived property from `phasor`; field amplitude `abs(phasor)`.
     phase : Array, property
         Derived property from `phasor`; field phase angle.
-    complex : tuple[Array, Array], property
+    complex : Array, property
         Derived property from `phasor`; `(real, imaginary)` representation.
-    polar : tuple[Array, Array], property
+    polar : Array, property
         Derived property from `phasor`; `(amplitude, phase)` representation.
     psf : Array, property
         Derived property from `phasor`; intensity image `abs(phasor) ** 2`.
@@ -56,6 +56,10 @@ class Wavefront(zdx.Base):
         Derived property from `pixel_scale`; vectorisation rank of wavefront state.
     power : Array, property
         Derived property from `amplitude`; total wavefront power.
+    spec : CoordSpec, property
+        Derived coordinate specification for the current wavefront sampling.
+    xs : Array, property
+        Derived pixel-centre coordinates along one axis, in metres.
     """
 
     phasor: Array[complex]

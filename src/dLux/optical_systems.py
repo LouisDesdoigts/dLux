@@ -248,6 +248,8 @@ class ParametricOpticalSystem(OpticalSystem):
         parameter while increasing the psf_npixels parameter.
     psf_pixel_scale : float
         The pixel scale of the final PSF.
+    fov : float, property
+        Derived field of view of the optical system in pixel-scale units.
     """
 
     psf_npixels: int
