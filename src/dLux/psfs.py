@@ -16,7 +16,7 @@ class PSF(zdx.Base):
     layers.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/PSF.png)
+        ![UML](../assets/uml/PSF.png)
 
     Attributes
     ----------

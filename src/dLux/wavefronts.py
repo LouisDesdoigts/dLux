@@ -22,7 +22,7 @@ class Wavefront(zdx.Base):
     creates a chromatic wavefront with matching leading phasor dimensions.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/Wavefront.png)
+        ![UML](../assets/uml/Wavefront.png)
 
     Attributes
     ----------
@@ -49,9 +49,9 @@ class Wavefront(zdx.Base):
         Derived property from `phasor`; field amplitude `abs(phasor)`.
     phase : Array, property
         Derived property from `phasor`; field phase angle.
-    complex : tuple[Array, Array], property
+    complex : Array, property
         Derived property from `phasor`; `(real, imaginary)` representation.
-    polar : tuple[Array, Array], property
+    polar : Array, property
         Derived property from `phasor`; `(amplitude, phase)` representation.
     wavenumber : float or Array, property
         Derived property from `wavelength`; scalar `2 * pi / wavelength`.
@@ -61,6 +61,10 @@ class Wavefront(zdx.Base):
         Derived property from `wavelength`; whether wavelength is vector-valued.
     power : Array, property
         Derived property from `amplitude`; total wavefront power.
+    spec : CoordSpec, property
+        Derived coordinate specification for the current wavefront sampling.
+    xs : Array, property
+        Derived pixel-centre coordinates along one axis, in metres.
     """
 
     phasor: Array[complex]
@@ -568,16 +572,13 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The new interpolated wavefront.
         """
-        if isinstance(method, bool):
-            complex, method = method, "linear"
-
         pixel_scale = np.asarray(pixel_scale, float)
         ratio = pixel_scale / self.pixel_scale
-        scale = np.vectorize(
-            lambda phasor, ratio: dlu.scale(phasor, npixels, ratio, method, complex),
-            signature="(n,n),()->(m,m)",
-        )
-        return self.set(phasor=scale(self.phasor, ratio), pixel_scale=pixel_scale)
+
+        # Interpolate the phasor to the new pixel scale and size
+        fn = lambda phasor, ratio: dlu.scale(phasor, npixels, ratio, method, complex)
+        phasor = np.vectorize(fn, signature="(n,n),()->(m,m)")(self.phasor, ratio)
+        return self.set(phasor=phasor, pixel_scale=pixel_scale)
 
     def interpolate(
         self: Wavefront,
@@ -758,7 +759,9 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             New wavefront with updated `pixel_scale` and `center`.
         """
-        return self.set(pixel_scale=spec.d, center=spec.c)
+        pixel_scale = None if spec.d is None else np.asarray(spec.d, float)
+        center = None if spec.c is None else np.asarray(spec.c, float)
+        return self.set(pixel_scale=pixel_scale, center=center)
 
     def propagate_FFT(
         self,

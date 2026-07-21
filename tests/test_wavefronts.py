@@ -134,16 +134,15 @@ class BaseWavefrontTests:
         operation = lambda wavefront, pixel_scale: wavefront.scale_to(
             8, pixel_scale, complex=complex
         )
-        self.assert_matches(
-            operation(wavefront, output_pixel_scale),
-            expected(operation, output_pixel_scale),
-        )
+        actual = operation(wavefront, output_pixel_scale)
+        self.assert_matches(actual, expected(operation, output_pixel_scale))
+        assert actual.pixel_scale.shape == np.shape(output_pixel_scale)
 
-    def test_scale_to_legacy_complex_argument(
+    def test_scale_to_positional_arguments(
         self, wavefront, expected, output_pixel_scale
     ):
         operation = lambda wavefront, pixel_scale: wavefront.scale_to(
-            8, pixel_scale, False
+            8, pixel_scale, "linear", False
         )
         self.assert_matches(
             operation(wavefront, output_pixel_scale),
