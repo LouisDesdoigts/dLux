@@ -23,7 +23,9 @@ def test_resize(npixels):
 @pytest.mark.parametrize("method", ["nearest", "linear", "cubic"])
 @pytest.mark.parametrize("complex", [True, False])
 def test_rotate(angle, method, complex):
-    _test_apply(Rotate(angle, method, complex))
+    layer = Rotate(angle, method, complex)
+    _test_apply(layer)
+    assert layer.angle.shape == ()
 
 
 @pytest.mark.parametrize("axes", [0, 1, (0, 1)])

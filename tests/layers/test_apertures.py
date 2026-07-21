@@ -58,6 +58,8 @@ def test_circular_aperture(rmax, occulting, softening, normalise, transformation
     _test_apply(ap)
     _test_extent(ap)
     _test_nsides(ap)
+    assert ap.softness.shape == ()
+    assert ap.radius.shape == ()
 
     # Small hack here to test softening parameter
     with pytest.raises(ValueError):
@@ -72,6 +74,7 @@ def test_square_aperture(rmax, occulting, softening, normalise, transformation):
     _test_apply(ap)
     _test_extent(ap)
     _test_nsides(ap)
+    assert ap.width.shape == ()
 
 
 @pytest.mark.parametrize("occulting", [True, False])
@@ -84,6 +87,8 @@ def test_rectangular_aperture(rmax, occulting, softening, normalise, transformat
     _test_apply(ap)
     _test_extent(ap)
     _test_nsides(ap)
+    assert ap.height.shape == ()
+    assert ap.width.shape == ()
 
 
 @pytest.mark.parametrize("occulting", [True, False])
@@ -96,6 +101,7 @@ def test_reg_poly_aperture(
     _test_apply(ap)
     _test_extent(ap)
     _test_nsides(ap)
+    assert ap.rmax.shape == ()
 
 
 @pytest.mark.parametrize("occulting", [True, False])
@@ -104,6 +110,7 @@ def test_reg_poly_aperture(
 def test_spider(rmax, angles, occulting, softening, normalise, transformation):
     ap = Spider(rmax, angles, transformation, occulting, softening, normalise)
     _test_apply(ap)
+    assert ap.width.shape == ()
     with pytest.raises(TypeError):
         _test_extent(ap)
     with pytest.raises(TypeError):

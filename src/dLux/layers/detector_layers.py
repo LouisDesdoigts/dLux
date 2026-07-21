@@ -136,7 +136,7 @@ class ApplyJitter(DetectorLayer):
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
-        self.sigma = float(sigma)
+        self.sigma = np.asarray(sigma, float)
         self.oversample = int(oversample)
 
         if self.kernel_size <= 0:
@@ -187,7 +187,7 @@ class ApplySaturation(DetectorLayer):
             The threshold at which the saturation is applied.
         """
         super().__init__()
-        self.threshold = float(threshold)
+        self.threshold = np.asarray(threshold, float)
 
     def __call__(self: ApplySaturation, psf: PSF) -> PSF:
         return psf.min("data", self.threshold)
@@ -217,7 +217,7 @@ class AddConstant(DetectorLayer):
             The value to add to the PSF.
         """
         super().__init__()
-        self.value = float(value)
+        self.value = np.asarray(value, float)
 
     def __call__(self: AddConstant, psf: PSF) -> PSF:
         return psf + self.value

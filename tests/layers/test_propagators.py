@@ -47,7 +47,10 @@ def _test_apply(layer):
 
 @pytest.mark.parametrize("focal_length", [None, 1e2])
 def test_fft(focal_length, pad):
-    _test_apply(FFT(focal_length=focal_length, pad=pad))
+    propagator = FFT(focal_length=focal_length, pad=pad)
+    _test_apply(propagator)
+    if focal_length is not None:
+        assert propagator.focal_length.shape == ()
     _test_apply(FFT(focal_length=focal_length, pad=pad, center=False))
 
 
