@@ -9,11 +9,11 @@ from jax import Array
 
 
 from .optical_layers import OpticalLayer
+from ..parametric import Parametric
 from ..wavefronts import Wavefront
 
 __all__ = [
     "FieldDict",
-    "ExplicitBasis",
     "PolarisingOptic",
     "UniformPolarisingOptic",
     "LinearPolariser",
@@ -86,31 +86,15 @@ class FieldDict(zdx.Base):
         return key in self.values
 
 
-class ExplicitBasis(zdx.Base):
-    """Leaf marker for a parameter evaluated from an explicit basis array."""
-
-
-class FourierBasis(zdx.Base):
-    """Leaf marker for a parameter evaluated from cached Fourier kernels."""
-
-
 def _eval_leaf(leaf, basis, coefficients) -> Array:
     """
     Evaluates a parameter leaf using the matching basis and coefficients.
 
-    Raw scalar and array leaves are returned directly. `ExplicitBasis` leaves use an
-    explicit basis array with `dlu.eval_basis`, while `FourierBasis` leaves use cached
-    Fourier kernels with `dlu.eval_fourier_basis`.
+    Parametric leaves are evaluated directly through the common parameterisation
+    interface. Raw scalar and array leaves are returned directly.
     """
-    if isinstance(leaf, ExplicitBasis):
-        if basis is None or coefficients is None:
-            raise ValueError("Explicit basis leaves require basis and coefficients.")
-        return dlu.eval_basis(basis, coefficients)
-
-    if isinstance(leaf, FourierBasis):
-        if basis is None or coefficients is None:
-            raise ValueError("Fourier basis leaves require basis and coefficients.")
-        return dlu.eval_fourier_basis(coefficients, *basis)
+    if isinstance(leaf, Parametric):
+        return leaf.evaluate()
 
     return np.asarray(leaf, float)
 
