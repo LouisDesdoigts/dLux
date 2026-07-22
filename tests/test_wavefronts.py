@@ -2,9 +2,10 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 import pytest
+import dLux.utils as dlu
 from dLux import Wavefront
 from dLux.psfs import PSF
-from dLux.coordinates import CoordSpec
+from dLux.coordinates import CoordSpec, CoordTransform
 
 
 @pytest.fixture
@@ -75,6 +76,10 @@ class TestWavefront:
         assert np.allclose(wavefront.scale_to(8, 1 / 32).pixel_scale, 1 / 32)
         assert wavefront.scale_to(8, 1 / 32).pixel_scale.shape == ()
         assert np.allclose(wavefront.scale_to(8, 1 / 32, False).pixel_scale, 1 / 32)
+        assert isinstance(
+            wavefront.interpolate(CoordTransform(shear=[0.1, -0.2]), complex=False),
+            Wavefront,
+        )
         assert isinstance(wavefront.rotate(np.pi), Wavefront)
         assert isinstance(wavefront.rotate(np.pi, complex=False), Wavefront)
         assert isinstance(wavefront.resize(8), Wavefront)
@@ -82,6 +87,36 @@ class TestWavefront:
         assert isinstance(
             wavefront.set_spec(CoordSpec(n=16, d=1 / 16, c=0.0)), Wavefront
         )
+
+    def test_interpolate_validation(self, wavefront):
+        with pytest.raises(TypeError, match="transformation"):
+            wavefront.interpolate(transformation="rotate")
+
+    def test_interpolate_matches_explicit_coordinate_mapping(self, wavefront):
+        phasor = np.arange(16**2).reshape(16, 16) + 1j
+        wavefront = wavefront.set(phasor=phasor)
+        transformation = CoordTransform(
+            translation=[1 / 32, -1 / 32], shear=[0.1, -0.05]
+        )
+        sample_coords = transformation(wavefront.coordinates())
+        expected_real = dlu.interp(
+            wavefront.real, wavefront.coordinates(), sample_coords
+        )
+        expected_imaginary = dlu.interp(
+            wavefront.imaginary, wavefront.coordinates(), sample_coords
+        )
+
+        output = wavefront.interpolate(transformation)
+
+        assert np.allclose(output.real, expected_real)
+        assert np.allclose(output.imaginary, expected_imaginary)
+
+    def test_interpolate_fill(self, wavefront):
+        output = wavefront.interpolate(
+            CoordTransform(translation=[10.0, 10.0]), fill=2.0
+        )
+
+        assert np.allclose(output.phasor, 2.0 + 2.0j)
 
     def test_set_spec_normalises_coordinates(self, wavefront):
         spec = CoordSpec(n=16, d=1 / 16, c=0.0).set(d=0.5, c=1.0)
