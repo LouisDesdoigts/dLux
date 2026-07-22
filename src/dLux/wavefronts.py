@@ -7,7 +7,7 @@ import zodiax as zdx
 import dLux.utils as dlu
 
 from .psfs import PSF
-from .coordinates import CoordSpec
+from .coordinates import BaseCoordTransform, CoordSpec
 
 __all__ = ["Wavefront"]
 
@@ -481,6 +481,47 @@ class Wavefront(zdx.Base):
 
         # Return new wavefront
         return self.set(phasor=phasor, pixel_scale=pixel_scale)
+
+    def interpolate(
+        self: Wavefront,
+        transformation: BaseCoordTransform,
+        method: str = "linear",
+        complex: bool = True,
+        fill: float = 0.0,
+    ) -> Wavefront:
+        """Interpolate the wavefront through a coordinate transformation.
+
+        Parameters
+        ----------
+        transformation : BaseCoordTransform
+            Transformation applied to the wavefront sampling coordinates.
+        method : str = "linear"
+            Interpolation method passed to ``interpax``.
+        complex : bool = True
+            Interpolate real and imaginary components if True, otherwise amplitude
+            and phase components.
+        fill : float = 0.0
+            Value used when sampling outside the input grid.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The interpolated wavefront.
+        """
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
+        knot_coords = self.coordinates()
+        sample_coords = transformation(knot_coords)
+        fields = self.complex if complex else self.polar
+        interpolate = lambda field: dlu.interp(
+            field, knot_coords, sample_coords, method, fill
+        )
+        fields = vmap(interpolate)(fields)
+        if complex:
+            phasor = fields[0] + 1j * fields[1]
+        else:
+            phasor = fields[0] * np.exp(1j * fields[1])
+        return self.set(phasor=phasor)
 
     def rotate(
         self: Wavefront,

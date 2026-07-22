@@ -12,10 +12,12 @@ import dLux.utils as dlu
 
 from ..wavefronts import Wavefront
 from ..parametric import Parametric
+from ..coordinates import BaseCoordTransform
 
 __all__ = [
     "BaseLayer",
     "OpticalLayer",
+    "Interpolate",
     "TransmissiveLayer",
     "AberratedLayer",
     "BasisLayer",
@@ -101,6 +103,38 @@ class OpticalLayer(BaseLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
+
+
+class Interpolate(OpticalLayer):
+    """Interpolate a wavefront through a coordinate transformation."""
+
+    transformation: BaseCoordTransform
+    method: str
+    complex: bool
+    fill: float
+
+    def __init__(
+        self,
+        transformation: BaseCoordTransform,
+        method: str = "linear",
+        complex: bool = True,
+        fill: float = 0.0,
+    ):
+        super().__init__()
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
+        self.transformation = transformation
+        self.method = str(method)
+        self.complex = bool(complex)
+        self.fill = np.asarray(fill, dtype=float)
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        return wavefront.interpolate(
+            self.transformation,
+            method=self.method,
+            complex=self.complex,
+            fill=self.fill,
+        )
 
 
 class TransmissiveLayer(OpticalLayer):
