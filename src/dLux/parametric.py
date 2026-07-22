@@ -19,6 +19,7 @@ __all__ = [
     "ExplicitBasis",
     "ImplicitBasis",
     "CoordBasis",
+    "CLIMBBasis",
     "FourierBasis",
     "SplineBasis",
 ]
@@ -134,6 +135,46 @@ class CoordBasis(ImplicitBasis):
         return wavefront.coordinates()
 
 
+class CLIMBBasis(ExplicitBasis):
+    """A continuous latent basis mapped through the CLIMB binarisation."""
+
+    values: Array
+    oversample: int = eqx.field(static=True)
+
+    def __init__(
+        self,
+        basis,
+        coefficients=None,
+        coefficient_shape=None,
+        values=(0.0, 1.0),
+        oversample=3,
+    ):
+        super().__init__(basis, coefficients, coefficient_shape)
+        output_shape = self.basis.shape[len(self.coefficient_shape) :]
+        if len(output_shape) != 2 or output_shape[0] != output_shape[1]:
+            raise ValueError("The CLIMB latent output must be a square 2D array.")
+        values = np.asarray(values, dtype=float)
+        if values.shape != (2,):
+            raise ValueError("values must contain exactly two output values.")
+        self.values = values
+        self.oversample = int(oversample)
+        if self.oversample < 1:
+            raise ValueError("oversample must be a positive integer.")
+        if output_shape[0] % self.oversample != 0:
+            raise ValueError(
+                "The CLIMB latent output size must be divisible by oversample."
+            )
+
+    def evaluate_latent(self) -> Array:
+        """Evaluate the continuous, pre-binarised latent basis."""
+        return super().evaluate()
+
+    def evaluate(self, **kwargs: Any) -> Array:
+        binary = dlu.soft_binarise(self.evaluate_latent(), self.oversample)
+        low, high = self.values
+        return low + (high - low) * binary
+
+
 class FourierBasis(ImplicitBasis):
     """A parameterisation over a separable real Fourier basis."""
 
@@ -169,6 +210,8 @@ class SplineBasis(ImplicitBasis):
         n_knots = (n_knots, n_knots) if isinstance(n_knots, int) else tuple(n_knots)
         if len(npix) != 2 or len(n_knots) != 2:
             raise ValueError("npix and n_knots must be integers or length-two tuples.")
+        if any(n < 1 for n in npix):
+            raise ValueError("npix must contain positive integers.")
         if any(n < 2 for n in n_knots):
             raise ValueError("n_knots must contain values greater than one.")
         knot_axes = [np.linspace(-1.0, 1.0, n) for n in n_knots]
