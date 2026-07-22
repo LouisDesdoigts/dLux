@@ -1,5 +1,8 @@
 # Detector Layers
 
+???+ info "ApplyInterpolation"
+    ::: dLux.layers.detector_layers.ApplyInterpolation
+
 ???+ info "ApplyPixelResponse"
     ::: dLux.layers.detector_layers.ApplyPixelResponse
 
