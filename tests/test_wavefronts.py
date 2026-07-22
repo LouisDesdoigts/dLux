@@ -5,8 +5,7 @@ config.update("jax_debug_nans", True)
 import pytest
 from dLux import Wavefront, PolarisedWavefront
 from dLux.psfs import PSF
-from dLux.coordinates import CoordSpec
-from dLux.utils import pixel_coords
+from dLux.coordinates import CoordSpec, CoordTransform
 import dLux.utils as dlu
 
 
@@ -151,12 +150,24 @@ class BaseWavefrontTests:
 
     @pytest.mark.parametrize("complex", [True, False])
     def test_interpolate(self, wavefront, expected, complex):
-        coords_in = pixel_coords(16, diameter=1.0)
-        coords_out = pixel_coords(8, diameter=1.0)
+        transformation = CoordTransform(
+            translation=[1 / 32, -1 / 32], shear=[0.1, -0.05]
+        )
         operation = lambda wavefront: wavefront.interpolate(
-            coords_in, coords_out, complex=complex
+            transformation, complex=complex
         )
         self.assert_matches(operation(wavefront), expected(operation))
+
+    def test_interpolate_validation(self, wavefront):
+        with pytest.raises(TypeError, match="transformation"):
+            wavefront.interpolate(transformation="rotate")
+
+    def test_interpolate_fill(self, wavefront):
+        output = wavefront.interpolate(
+            CoordTransform(translation=[10.0, 10.0]), fill=2.0
+        )
+
+        assert np.allclose(output.phasor, 2.0 + 2.0j)
 
     @pytest.mark.parametrize("angle", [np.pi / 8])
     @pytest.mark.parametrize("complex", [True, False])
