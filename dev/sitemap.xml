@@ -49,6 +49,12 @@
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/optical_systems/</loc>
       </url>
       <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/parametric/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/polynomials/</loc>
+      </url>
+      <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/psfs/</loc>
       </url>
       <url>
@@ -65,9 +71,6 @@
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/abcd_propagators/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/aberrations/</loc>
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/apertures/</loc>

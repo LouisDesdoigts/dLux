@@ -29,7 +29,7 @@
     
     
       
-        <title>ChangeLog - dLux v0.15.1</title>
+        <title>ChangeLog - dLux v0.16.0</title>
       
     
     
@@ -105,7 +105,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="./.." title="dLux v0.15.1" class="md-header__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="./.." title="dLux v0.16.0" class="md-header__button md-logo" aria-label="dLux v0.16.0" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
@@ -119,7 +119,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            dLux v0.15.1
+            dLux v0.16.0
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -216,13 +216,13 @@
 
 <nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="./.." title="dLux v0.15.1" class="md-nav__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="./.." title="dLux v0.16.0" class="md-nav__button md-logo" aria-label="dLux v0.16.0" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
 
     </a>
-    dLux v0.15.1
+    dLux v0.16.0
   </label>
   
     <div class="md-nav__source">
@@ -689,6 +689,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -869,6 +873,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../API/core/parametric/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Parametric
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/polynomials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Polynomials
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../API/core/psfs/" class="md-nav__link">
         
   
@@ -1003,8 +1061,6 @@
       
         
       
-        
-      
     
     
     
@@ -1085,33 +1141,6 @@
     
   
   Abcd Propagators
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../API/layers/aberrations/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Aberrations
 
     
   </span>
@@ -1912,6 +1941,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#v0160" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        V0.16.0
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#v0151" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2002,8 +2042,36 @@
 
 <h1 id="changelog">ChangeLog<a class="headerlink" href="#changelog" title="Permanent link">¤</a></h1>
 <hr />
-<h2 id="v0151">V0.15.1<a class="headerlink" href="#v0151" title="Permanent link">¤</a></h2>
+<h2 id="v0160">V0.16.0<a class="headerlink" href="#v0160" title="Permanent link">¤</a></h2>
 <h3 id="new-features">✨ New Features<a class="headerlink" href="#new-features" title="Permanent link">¤</a></h3>
+<ul>
+<li>Added a general parametric basis interface, including explicit and generated
+  bases with coefficient evaluation and solving support.</li>
+<li>Added polynomial basis models that integrate directly with the parametric
+  basis API.</li>
+<li>Added coordinate-transform interpolation methods to <code>Wavefront</code> and <code>PSF</code>
+  (<a href="https://github.com/LouisDesdoigts/dLux/issues/302">#302</a>).</li>
+<li>Added dedicated <code>Interpolate</code> optical and <code>ApplyInterpolation</code> detector layers
+  for use in layered propagation and detector models.</li>
+</ul>
+<h3 id="breaking-changes">⚠️ Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">¤</a></h3>
+<ul>
+<li>Reworked basis aberrations around the general <code>BasisLayer</code> and parametric basis
+  interfaces, replacing the previous specialised aberration-layer module and
+  standardising OPD, phase, and amplitude effects
+  (<a href="https://github.com/LouisDesdoigts/dLux/issues/331">#331</a>).</li>
+</ul>
+<h3 id="deprecations">⏳ Deprecations<a class="headerlink" href="#deprecations" title="Permanent link">¤</a></h3>
+<ul>
+<li>No APIs are deprecated in this release.</li>
+</ul>
+<h3 id="bug-fixes">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">¤</a></h3>
+<ul>
+<li>Wavefront and PSF interpolation now share the established interpolation utility
+  while preserving their distinct complex and real-valued data requirements.</li>
+</ul>
+<h2 id="v0151">V0.15.1<a class="headerlink" href="#v0151" title="Permanent link">¤</a></h2>
+<h3 id="new-features_1">✨ New Features<a class="headerlink" href="#new-features_1" title="Permanent link">¤</a></h3>
 <ul>
 <li>Aperture transformations now accept any <code>BaseCoordTransform</code>, including
   <code>DistortedCoords</code> (<a href="https://github.com/LouisDesdoigts/dLux/issues/332">#332</a>).</li>
@@ -2015,7 +2083,7 @@
 <li>Added <code>solve_basis(array, basis)</code> for recovering basis coefficients with a
   least-squares solve (<a href="https://github.com/LouisDesdoigts/dLux/issues/299">#299</a>).</li>
 </ul>
-<h3 id="breaking-changes">⚠️ Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">¤</a></h3>
+<h3 id="breaking-changes_1">⚠️ Breaking Changes<a class="headerlink" href="#breaking-changes_1" title="Permanent link">¤</a></h3>
 <ul>
 <li>Coordinate transformation classes now live in <code>dLux.coordinates</code>; the
   <code>dLux.transformations</code> module has been removed.</li>
@@ -2023,11 +2091,11 @@
   rather than Python floats
   (<a href="https://github.com/LouisDesdoigts/dLux/issues/338">#338</a>).</li>
 </ul>
-<h3 id="deprecations">⏳ Deprecations<a class="headerlink" href="#deprecations" title="Permanent link">¤</a></h3>
+<h3 id="deprecations_1">⏳ Deprecations<a class="headerlink" href="#deprecations_1" title="Permanent link">¤</a></h3>
 <ul>
 <li>No APIs are deprecated in this release.</li>
 </ul>
-<h3 id="bug-fixes">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">¤</a></h3>
+<h3 id="bug-fixes_1">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_1" title="Permanent link">¤</a></h3>
 <ul>
 <li>Fixed transmission, softening, and Zernike basis generation for apertures larger
   than their sampling grids
@@ -2062,7 +2130,7 @@
 <li><strong>Expanded modelling toolkit:</strong> this release adds ABCD propagation, static telescope
   apertures, cached Fourier bases, mask-design tools, and NaN-safe norms.</li>
 </ul>
-<h3 id="new-features_1">✨ New Features<a class="headerlink" href="#new-features_1" title="Permanent link">¤</a></h3>
+<h3 id="new-features_2">✨ New Features<a class="headerlink" href="#new-features_2" title="Permanent link">¤</a></h3>
 <ul>
 <li><strong>Wavefronts:</strong> added <code>from_phasor(...)</code>, <code>to_psf()</code>, coordinate specifications,
   configurable power or peak normalisation, angular units for <code>tilt(...)</code>, and direct
@@ -2097,7 +2165,7 @@
 <li><strong>Sources and spectra:</strong> added consistent return-mode and shape validation, 2D
   spectral weights, inferred default weight shapes, and consistent <code>PSF</code> outputs.</li>
 </ul>
-<h3 id="breaking-changes_1">⚠️ Breaking Changes<a class="headerlink" href="#breaking-changes_1" title="Permanent link">¤</a></h3>
+<h3 id="breaking-changes_2">⚠️ Breaking Changes<a class="headerlink" href="#breaking-changes_2" title="Permanent link">¤</a></h3>
 <ul>
 <li><code>Wavefront</code> construction changed from <code>Wavefront(npixels, diameter, wavelength)</code> to
   <code>Wavefront(wavelength, npixels, diameter=...)</code>, with <code>pixel_scale</code> available as an
@@ -2119,12 +2187,12 @@
 <li>Minimum requirements increased to Python 3.10 and Zodiax 0.5, with
   <code>abcdLux&gt;=0.0.2</code> added as a runtime dependency.</li>
 </ul>
-<h3 id="deprecations_1">⏳ Deprecations<a class="headerlink" href="#deprecations_1" title="Permanent link">¤</a></h3>
+<h3 id="deprecations_2">⏳ Deprecations<a class="headerlink" href="#deprecations_2" title="Permanent link">¤</a></h3>
 <ul>
 <li><code>.apply(...)</code> remains available on base layers and coordinate transformations as a
   compatibility alias, but new code should use the callable interface.</li>
 </ul>
-<h3 id="bug-fixes_1">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_1" title="Permanent link">¤</a></h3>
+<h3 id="bug-fixes_2">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_2" title="Permanent link">¤</a></h3>
 <ul>
 <li>Fixed NaN-prone and undefined-gradient wavefront arithmetic by retaining complex
   fields throughout propagation and numerical operations

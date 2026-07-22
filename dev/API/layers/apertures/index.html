@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://louisdesdoigts.github.io/dlux/dev/API/layers/apertures/">
       
       
-        <link rel="prev" href="../aberrations/">
+        <link rel="prev" href="../abcd_propagators/">
       
       
         <link rel="next" href="../detector_layers/">
@@ -29,7 +29,7 @@
     
     
       
-        <title>Apertures - dLux v0.15.1</title>
+        <title>Apertures - dLux v0.16.0</title>
       
     
     
@@ -105,7 +105,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="dLux v0.15.1" class="md-header__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="../../.." title="dLux v0.16.0" class="md-header__button md-logo" aria-label="dLux v0.16.0" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
@@ -119,7 +119,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            dLux v0.15.1
+            dLux v0.16.0
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -216,13 +216,13 @@
 
 <nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="dLux v0.15.1" class="md-nav__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+    <a href="../../.." title="dLux v0.16.0" class="md-nav__button md-logo" aria-label="dLux v0.16.0" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
 
     </a>
-    dLux v0.15.1
+    dLux v0.16.0
   </label>
   
     <div class="md-nav__source">
@@ -691,6 +691,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -871,6 +875,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../core/parametric/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Parametric
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/polynomials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Polynomials
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../core/psfs/" class="md-nav__link">
         
   
@@ -1007,8 +1065,6 @@
       
         
       
-        
-      
     
     
     
@@ -1089,33 +1145,6 @@
     
   
   Abcd Propagators
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../aberrations/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Aberrations
 
     
   </span>
@@ -4608,7 +4637,7 @@ transmissive aperture, and True results in an occulting aperture.</p>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.layers.optical_layers.BasisLayer&lt;/code&gt;" href="../optical_layers/#dLux.layers.optical_layers.BasisLayer">BasisLayer</a></code>, <code><span title="dLux.layers.apertures.ApertureLayer">ApertureLayer</span></code></p>
+              Bases: <code><span title="dLux.layers.apertures.ApertureLayer">ApertureLayer</span></code></p>
 
 
 
@@ -4642,36 +4671,24 @@ compatible.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="dLux.layers.apertures.AberratedAperture.basis">basis</span></code></td>
+            <td><code><span title="dLux.layers.apertures.AberratedAperture.aberrations">aberrations</span></code></td>
             <td>
-                  <code><span title="list">list</span>[<span title="Zernike">Zernike</span>]</code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.polynomials.DynamicZernikeBasis&lt;/code&gt;" href="../../core/polynomials/#dLux.polynomials.DynamicZernikeBasis">DynamicZernikeBasis</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A list of basis functions that generate the basis vectors.</p>
+                <p>The dynamic Zernike parameterisation of the aberrations.</p>
               </div>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="dLux.layers.apertures.AberratedAperture.coefficients">coefficients</span></code></td>
+            <td><code><span title="dLux.layers.apertures.AberratedAperture.effect">effect</span></code></td>
             <td>
-                  <code><span title="jax.Array">Array</span></code>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The amplitude of each basis vector of the aberrations.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="dLux.layers.apertures.AberratedAperture.as_phase">as_phase</span></code></td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Whether to apply the basis as a phase or OPD. If True the basis is
-applied as a phase, else it is applied as an OPD.</p>
+                <p>How to apply the basis: <code>"opd"</code>, <code>"phase"</code>, or <code>"amplitude"</code>.</p>
               </div>
             </td>
           </tr>
@@ -4849,7 +4866,13 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="normal">791</span>
 <span class="normal">792</span>
 <span class="normal">793</span>
-<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AberratedAperture</span><span class="p">(</span><span class="n">BasisLayer</span><span class="p">,</span> <span class="n">ApertureLayer</span><span class="p">):</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AberratedAperture</span><span class="p">(</span><span class="n">ApertureLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a dynamically generated Aperture with aberrations. Both jit and grad</span>
 <span class="sd">    compatible.</span>
@@ -4861,25 +4884,24 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    aperture: ApertureLayer</span>
 <span class="sd">        The aperture on which the aberration basis is defined.</span>
-<span class="sd">    basis: list[Zernike]</span>
-<span class="sd">        A list of basis functions that generate the basis vectors.</span>
-<span class="sd">    coefficients: Array</span>
-<span class="sd">        The amplitude of each basis vector of the aberrations.</span>
-<span class="sd">    as_phase : bool</span>
-<span class="sd">        Whether to apply the basis as a phase or OPD. If True the basis is</span>
-<span class="sd">        applied as a phase, else it is applied as an OPD.</span>
+<span class="sd">    aberrations: DynamicZernikeBasis</span>
+<span class="sd">        The dynamic Zernike parameterisation of the aberrations.</span>
+<span class="sd">    effect : str</span>
+<span class="sd">        How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
 <span class="sd">    normalise : bool</span>
 <span class="sd">        Whether to normalise the wavefront after passing through the aperture.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">aperture</span><span class="p">:</span> <span class="n">ApertureLayer</span>
+    <span class="n">aberrations</span><span class="p">:</span> <span class="n">DynamicZernikeBasis</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">eqx</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span>
         <span class="n">aperture</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span>
         <span class="n">noll_inds</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
         <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">as_phase</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;opd&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -4890,9 +4912,8 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="sd">            The noll indices of the basis functions to use.</span>
 <span class="sd">        coefficients: Array = None</span>
 <span class="sd">            The amplitude of each basis vector of the aberrations.</span>
-<span class="sd">        as_phase : bool = False</span>
-<span class="sd">            Whether to apply the basis as a phase or OPD. If True the basis is</span>
-<span class="sd">            applied as a phase, else it is applied as an OPD.</span>
+<span class="sd">        effect : str = &quot;opd&quot;</span>
+<span class="sd">            How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Ensure aperture is dynamic</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aperture</span><span class="p">,</span> <span class="n">DynamicAperture</span><span class="p">):</span>
@@ -4903,7 +4924,10 @@ applied as a phase, else it is applied as an OPD.</p>
                 <span class="s2">&quot;promoted to Static.&quot;</span>
             <span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="n">aperture</span><span class="o">.</span><span class="n">normalise</span><span class="p">,</span> <span class="n">as_phase</span><span class="o">=</span><span class="n">as_phase</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="n">aperture</span><span class="o">.</span><span class="n">normalise</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">effect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;opd&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;effect must be &#39;opd&#39;, &#39;phase&#39;, or &#39;amplitude&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">=</span> <span class="n">effect</span>
 
         <span class="c1"># Ensure transmissive</span>
         <span class="k">if</span> <span class="n">aperture</span><span class="o">.</span><span class="n">occulting</span><span class="p">:</span>
@@ -4914,11 +4938,18 @@ applied as a phase, else it is applied as an OPD.</p>
 
         <span class="c1"># Set Aperture</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span> <span class="o">=</span> <span class="n">aperture</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">ZernikeBasis</span><span class="p">(</span><span class="n">noll_inds</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">coefficients</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">noll_inds</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aberrations</span> <span class="o">=</span> <span class="n">DynamicZernikeBasis</span><span class="p">(</span>
+            <span class="n">js</span><span class="o">=</span><span class="n">noll_inds</span><span class="p">,</span>
+            <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span>
+            <span class="n">nsides</span><span class="o">=</span><span class="n">aperture</span><span class="o">.</span><span class="n">nsides</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AberratedAperture</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The coefficients of the Zernike parameterisation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aberrations</span><span class="o">.</span><span class="n">coefficients</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4950,7 +4981,7 @@ applied as a phase, else it is applied as an OPD.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">coords</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">extent</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">nsides</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aberrations</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4966,8 +4997,10 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="sd">        aberrations : Array</span>
 <span class="sd">            The aberrations at the given coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">basis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">dlu</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">extent</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aberrations</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AberratedAperture</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4988,18 +5021,14 @@ applied as a phase, else it is applied as an OPD.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
 
-        <span class="c1"># Transform coordinate</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span><span class="p">(</span><span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">())</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">coords</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span>
-
         <span class="c1"># Aberrations</span>
-        <span class="n">aberrations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_phase</span><span class="p">:</span>
+        <span class="n">aberrations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">&quot;phase&quot;</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_phase</span><span class="p">(</span><span class="n">aberrations</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">&quot;opd&quot;</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_opd</span><span class="p">(</span><span class="n">aberrations</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wavefront</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">aberrations</span>
         <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -5013,6 +5042,28 @@ applied as a phase, else it is applied as an OPD.</p>
 
 
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="dLux.layers.apertures.AberratedAperture.coefficients" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">coefficients</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#dLux.layers.apertures.AberratedAperture.coefficients" class="headerlink" title="Permanent link">¤</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The coefficients of the Zernike parameterisation.</p>
+
+    </div>
+
+</div>
 
 
 
@@ -5087,17 +5138,7 @@ applied as a phase, else it is applied as an OPD.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
-<span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span>
-<span class="normal">773</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">773</span>
 <span class="normal">774</span>
 <span class="normal">775</span>
 <span class="normal">776</span>
@@ -5118,7 +5159,13 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="normal">791</span>
 <span class="normal">792</span>
 <span class="normal">793</span>
-<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AberratedAperture</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AberratedAperture</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies the aperture transmission and aberrations to the wavefront.</span>
 
@@ -5137,18 +5184,14 @@ applied as a phase, else it is applied as an OPD.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">:</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
 
-    <span class="c1"># Transform coordinate</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span><span class="p">(</span><span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">())</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span>
-
     <span class="c1"># Aberrations</span>
-    <span class="n">aberrations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_phase</span><span class="p">:</span>
+    <span class="n">aberrations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">())</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">&quot;phase&quot;</span><span class="p">:</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_phase</span><span class="p">(</span><span class="n">aberrations</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">&quot;opd&quot;</span><span class="p">:</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_opd</span><span class="p">(</span><span class="n">aberrations</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wavefront</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">aberrations</span>
     <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5160,7 +5203,7 @@ applied as a phase, else it is applied as an OPD.</p>
 
 
 <h3 id="dLux.layers.apertures.AberratedAperture.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">aperture</span><span class="p">,</span> <span class="n">noll_inds</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">as_phase</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">aperture</span><span class="p">,</span> <span class="n">noll_inds</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="s1">&#39;opd&#39;</span><span class="p">)</span></code>
 
 <a href="#dLux.layers.apertures.AberratedAperture.__init__" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -5230,19 +5273,18 @@ applied as a phase, else it is applied as an OPD.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>as_phase</code>
+                <code>effect</code>
             </td>
             <td>
-                  <code>bool = False</code>
+                  <code>str = &#34;opd&#34;</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to apply the basis as a phase or OPD. If True the basis is
-applied as a phase, else it is applied as an OPD.</p>
+                <p>How to apply the basis: <code>"opd"</code>, <code>"phase"</code>, or <code>"amplitude"</code>.</p>
               </div>
             </td>
             <td>
-                  <code>False</code>
+                  <code>&#39;opd&#39;</code>
             </td>
           </tr>
       </tbody>
@@ -5251,7 +5293,8 @@ applied as a phase, else it is applied as an OPD.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">668</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">667</span>
+<span class="normal">668</span>
 <span class="normal">669</span>
 <span class="normal">670</span>
 <span class="normal">671</span>
@@ -5295,12 +5338,15 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="normal">709</span>
 <span class="normal">710</span>
 <span class="normal">711</span>
-<span class="normal">712</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span>
     <span class="n">aperture</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span>
     <span class="n">noll_inds</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">as_phase</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;opd&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters</span>
@@ -5311,9 +5357,8 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="sd">        The noll indices of the basis functions to use.</span>
 <span class="sd">    coefficients: Array = None</span>
 <span class="sd">        The amplitude of each basis vector of the aberrations.</span>
-<span class="sd">    as_phase : bool = False</span>
-<span class="sd">        Whether to apply the basis as a phase or OPD. If True the basis is</span>
-<span class="sd">        applied as a phase, else it is applied as an OPD.</span>
+<span class="sd">    effect : str = &quot;opd&quot;</span>
+<span class="sd">        How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Ensure aperture is dynamic</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aperture</span><span class="p">,</span> <span class="n">DynamicAperture</span><span class="p">):</span>
@@ -5324,7 +5369,10 @@ applied as a phase, else it is applied as an OPD.</p>
             <span class="s2">&quot;promoted to Static.&quot;</span>
         <span class="p">)</span>
 
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="n">aperture</span><span class="o">.</span><span class="n">normalise</span><span class="p">,</span> <span class="n">as_phase</span><span class="o">=</span><span class="n">as_phase</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="n">aperture</span><span class="o">.</span><span class="n">normalise</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">effect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;opd&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;effect must be &#39;opd&#39;, &#39;phase&#39;, or &#39;amplitude&#39;.&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">=</span> <span class="n">effect</span>
 
     <span class="c1"># Ensure transmissive</span>
     <span class="k">if</span> <span class="n">aperture</span><span class="o">.</span><span class="n">occulting</span><span class="p">:</span>
@@ -5335,11 +5383,13 @@ applied as a phase, else it is applied as an OPD.</p>
 
     <span class="c1"># Set Aperture</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span> <span class="o">=</span> <span class="n">aperture</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">ZernikeBasis</span><span class="p">(</span><span class="n">noll_inds</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="n">coefficients</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">noll_inds</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">aberrations</span> <span class="o">=</span> <span class="n">DynamicZernikeBasis</span><span class="p">(</span>
+        <span class="n">js</span><span class="o">=</span><span class="n">noll_inds</span><span class="p">,</span>
+        <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span>
+        <span class="n">nsides</span><span class="o">=</span><span class="n">aperture</span><span class="o">.</span><span class="n">nsides</span><span class="p">,</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5416,15 +5466,7 @@ applied as a phase, else it is applied as an OPD.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
-<span class="normal">733</span>
-<span class="normal">734</span>
-<span class="normal">735</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">735</span>
 <span class="normal">736</span>
 <span class="normal">737</span>
 <span class="normal">738</span>
@@ -5433,7 +5475,15 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="normal">741</span>
 <span class="normal">742</span>
 <span class="normal">743</span>
-<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calc_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calc_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the basis vectors at the given coordinates.</span>
 
@@ -5450,7 +5500,7 @@ applied as a phase, else it is applied as an OPD.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
     <span class="n">coords</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">extent</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">nsides</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aberrations</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5473,15 +5523,15 @@ applied as a phase, else it is applied as an OPD.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">714</span>
-<span class="normal">715</span>
-<span class="normal">716</span>
-<span class="normal">717</span>
-<span class="normal">718</span>
-<span class="normal">719</span>
-<span class="normal">720</span>
-<span class="normal">721</span>
-<span class="normal">722</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Required abstract method. Raises NotImplementedError as it is invalid here.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -5566,22 +5616,24 @@ applied as a phase, else it is applied as an OPD.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">746</span>
-<span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">754</span>
 <span class="normal">755</span>
 <span class="normal">756</span>
 <span class="normal">757</span>
 <span class="normal">758</span>
 <span class="normal">759</span>
 <span class="normal">760</span>
-<span class="normal">761</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluates the basis vectors at the given coordinates.</span>
 
@@ -5595,8 +5647,10 @@ applied as a phase, else it is applied as an OPD.</p>
 <span class="sd">    aberrations : Array</span>
 <span class="sd">        The aberrations at the given coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">basis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">dlu</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">transformation</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">extent</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aberrations</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5701,10 +5755,7 @@ contain CompoundApertures.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1002</span>
-<span class="normal">1003</span>
-<span class="normal">1004</span>
-<span class="normal">1005</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1005</span>
 <span class="normal">1006</span>
 <span class="normal">1007</span>
 <span class="normal">1008</span>
@@ -5765,7 +5816,10 @@ contain CompoundApertures.</p>
 <span class="normal">1063</span>
 <span class="normal">1064</span>
 <span class="normal">1065</span>
-<span class="normal">1066</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CompoundAperture</span><span class="p">(</span><span class="n">CompositeAperture</span><span class="p">):</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CompoundAperture</span><span class="p">(</span><span class="n">CompositeAperture</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dynamically generates an aperture from a series of overlapping sub-apertures. Both</span>
 <span class="sd">    jit and grad compatible.</span>
@@ -5823,7 +5877,7 @@ contain CompoundApertures.</p>
                 <span class="n">naberrated</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">naberrated</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;CompoundAperture can only have a single &quot;</span> <span class="s2">&quot;AberratedAperture.&quot;</span>
+                    <span class="s2">&quot;CompoundAperture can only have a single AberratedAperture.&quot;</span>
                 <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
@@ -5924,10 +5978,7 @@ contain CompoundApertures.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1031</span>
-<span class="normal">1032</span>
-<span class="normal">1033</span>
-<span class="normal">1034</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1034</span>
 <span class="normal">1035</span>
 <span class="normal">1036</span>
 <span class="normal">1037</span>
@@ -5954,7 +6005,10 @@ contain CompoundApertures.</p>
 <span class="normal">1058</span>
 <span class="normal">1059</span>
 <span class="normal">1060</span>
-<span class="normal">1061</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span>
     <span class="n">apertures</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">transformation</span><span class="p">:</span> <span class="n">BaseCoordTransform</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5983,7 +6037,7 @@ contain CompoundApertures.</p>
             <span class="n">naberrated</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">naberrated</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;CompoundAperture can only have a single &quot;</span> <span class="s2">&quot;AberratedAperture.&quot;</span>
+                <span class="s2">&quot;CompoundAperture can only have a single AberratedAperture.&quot;</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6087,10 +6141,7 @@ as HST-like aperture, use the CompoundAperture class.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1069</span>
-<span class="normal">1070</span>
-<span class="normal">1071</span>
-<span class="normal">1072</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1072</span>
 <span class="normal">1073</span>
 <span class="normal">1074</span>
 <span class="normal">1075</span>
@@ -6132,7 +6183,10 @@ as HST-like aperture, use the CompoundAperture class.</p>
 <span class="normal">1111</span>
 <span class="normal">1112</span>
 <span class="normal">1113</span>
-<span class="normal">1114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiAperture</span><span class="p">(</span><span class="n">CompositeAperture</span><span class="p">):</span>
+<span class="normal">1114</span>
+<span class="normal">1115</span>
+<span class="normal">1116</span>
+<span class="normal">1117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiAperture</span><span class="p">(</span><span class="n">CompositeAperture</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dynamically generates an aperture from a series of separated sub-apertures. Both</span>
 <span class="sd">    jit and grad compatible.</span>
@@ -6264,10 +6318,7 @@ as HST-like aperture, use the CompoundAperture class.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/layers/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1095</span>
-<span class="normal">1096</span>
-<span class="normal">1097</span>
-<span class="normal">1098</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1098</span>
 <span class="normal">1099</span>
 <span class="normal">1100</span>
 <span class="normal">1101</span>
@@ -6278,7 +6329,10 @@ as HST-like aperture, use the CompoundAperture class.</p>
 <span class="normal">1106</span>
 <span class="normal">1107</span>
 <span class="normal">1108</span>
-<span class="normal">1109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">1109</span>
+<span class="normal">1110</span>
+<span class="normal">1111</span>
+<span class="normal">1112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluates the basis vectors at the given coordinates.</span>
 
