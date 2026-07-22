@@ -66,7 +66,11 @@ class DetectorLayer(BaseLayer):
 
 
 class ApplyInterpolation(DetectorLayer):
-    """Interpolate a PSF through a coordinate transformation."""
+    """Interpolate a PSF through a coordinate transformation.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/ApplyInterpolation.png)
+    """
 
     transformation: BaseCoordTransform
     method: str
