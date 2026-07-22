@@ -26,7 +26,11 @@ __all__ = [
 
 
 class Parametric(zdx.Base):
-    """Abstract parameterisation that evaluates to a value when consumed."""
+    """Abstract parameterisation that evaluates to a value when consumed.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/Parametric.png)
+    """
 
     @abstractmethod
     def evaluate(self: Parametric, **kwargs: Any) -> Array:  # pragma: no cover
@@ -34,7 +38,11 @@ class Parametric(zdx.Base):
 
 
 class ParametricBasis(Parametric):
-    """Base class for coefficient-weighted basis parameterisations."""
+    """Base class for coefficient-weighted basis parameterisations.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/ParametricBasis.png)
+    """
 
     coefficients: Array
 
@@ -75,7 +83,11 @@ class ParametricBasis(Parametric):
 
 
 class ExplicitBasis(ParametricBasis):
-    """A parameterisation over an explicitly sampled basis array."""
+    """A parameterisation over an explicitly sampled basis array.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/ExplicitBasis.png)
+    """
 
     basis: Array
 
@@ -108,7 +120,11 @@ class ExplicitBasis(ParametricBasis):
 
 
 class ImplicitBasis(ParametricBasis):
-    """Base class for bases generated or evaluated indirectly at runtime."""
+    """Base class for bases generated or evaluated indirectly at runtime.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/ImplicitBasis.png)
+    """
 
     @abstractmethod
     def calculate_basis(
@@ -124,7 +140,11 @@ class ImplicitBasis(ParametricBasis):
 
 
 class CoordBasis(ImplicitBasis):
-    """Base class for implicit bases evaluated at Cartesian coordinates."""
+    """Base class for implicit bases evaluated at Cartesian coordinates.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/CoordBasis.png)
+    """
 
     @staticmethod
     def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
@@ -136,7 +156,11 @@ class CoordBasis(ImplicitBasis):
 
 
 class CLIMBBasis(ExplicitBasis):
-    """A continuous latent basis mapped through the CLIMB binarisation."""
+    """A continuous latent basis mapped through the CLIMB binarisation.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/CLIMBBasis.png)
+    """
 
     values: Array
     oversample: int = eqx.field(static=True)
@@ -176,7 +200,11 @@ class CLIMBBasis(ExplicitBasis):
 
 
 class FourierBasis(ImplicitBasis):
-    """A parameterisation over a separable real Fourier basis."""
+    """A parameterisation over a separable real Fourier basis.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/FourierBasis.png)
+    """
 
     kernels: tuple[Array, Array]
 
@@ -199,7 +227,11 @@ class FourierBasis(ImplicitBasis):
 
 
 class SplineBasis(ImplicitBasis):
-    """A fixed 2D array represented by a lower-resolution grid of spline knots."""
+    """A fixed 2D array represented by a lower-resolution grid of spline knots.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/SplineBasis.png)
+    """
 
     knot_coords: Array
     sample_coords: Array
