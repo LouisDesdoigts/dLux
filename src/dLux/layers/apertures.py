@@ -8,8 +8,8 @@ import dLux.utils as dlu
 
 from ..wavefronts import Wavefront
 from ..coordinates import BaseCoordTransform
-from .optical_layers import OpticalLayer, BasisLayer
-from .aberrations import ZernikeBasis
+from .optical_layers import OpticalLayer
+from ..polynomials import DynamicZernikeBasis
 
 __all__ = [
     "CircularAperture",
@@ -640,7 +640,7 @@ class Spider(DynamicAperture):
         raise TypeError("Spiders do not have a number of sides.")
 
 
-class AberratedAperture(BasisLayer, ApertureLayer):
+class AberratedAperture(ApertureLayer):
     """
     Creates a dynamically generated Aperture with aberrations. Both jit and grad
     compatible.
@@ -652,25 +652,24 @@ class AberratedAperture(BasisLayer, ApertureLayer):
     ----------
     aperture: ApertureLayer
         The aperture on which the aberration basis is defined.
-    basis: list[Zernike]
-        A list of basis functions that generate the basis vectors.
-    coefficients: Array
-        The amplitude of each basis vector of the aberrations.
-    as_phase : bool
-        Whether to apply the basis as a phase or OPD. If True the basis is
-        applied as a phase, else it is applied as an OPD.
+    aberrations: DynamicZernikeBasis
+        The dynamic Zernike parameterisation of the aberrations.
+    effect : str
+        How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.
     normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
     aperture: ApertureLayer
+    aberrations: DynamicZernikeBasis
+    effect: str = eqx.field(static=True)
 
     def __init__(
         self: ApertureLayer,
         aperture: ApertureLayer,
         noll_inds: Array,
         coefficients: Array = None,
-        as_phase: bool = False,
+        effect: str = "opd",
     ):
         """
         Parameters
@@ -681,9 +680,8 @@ class AberratedAperture(BasisLayer, ApertureLayer):
             The noll indices of the basis functions to use.
         coefficients: Array = None
             The amplitude of each basis vector of the aberrations.
-        as_phase : bool = False
-            Whether to apply the basis as a phase or OPD. If True the basis is
-            applied as a phase, else it is applied as an OPD.
+        effect : str = "opd"
+            How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.
         """
         # Ensure aperture is dynamic
         if not isinstance(aperture, DynamicAperture):
@@ -694,7 +692,10 @@ class AberratedAperture(BasisLayer, ApertureLayer):
                 "promoted to Static."
             )
 
-        super().__init__(normalise=aperture.normalise, as_phase=as_phase)
+        super().__init__(normalise=aperture.normalise)
+        if effect not in ("opd", "phase", "amplitude"):
+            raise ValueError("effect must be 'opd', 'phase', or 'amplitude'.")
+        self.effect = effect
 
         # Ensure transmissive
         if aperture.occulting:
@@ -705,11 +706,18 @@ class AberratedAperture(BasisLayer, ApertureLayer):
 
         # Set Aperture
         self.aperture = aperture
-        self.basis = ZernikeBasis(noll_inds)
-
         if coefficients is None:
             coefficients = np.zeros(len(noll_inds))
-        self.coefficients = np.asarray(coefficients, dtype=float)
+        self.aberrations = DynamicZernikeBasis(
+            js=noll_inds,
+            coefficients=coefficients,
+            nsides=aperture.nsides,
+        )
+
+    @property
+    def coefficients(self: AberratedAperture) -> Array:
+        """The coefficients of the Zernike parameterisation."""
+        return self.aberrations.coefficients
 
     def calculate(self: ApertureLayer):
         """
@@ -741,7 +749,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         if self.aperture.transformation is not None:
             coords = self.aperture.transformation(coords)
         coords /= self.aperture.extent
-        return self.basis.calculate_basis(coords, self.aperture.nsides)
+        return self.aberrations.calculate_basis(coordinates=coords)
 
     def eval_basis(self: ApertureLayer, coords: Array) -> Array:
         """
@@ -757,8 +765,10 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         aberrations : Array
             The aberrations at the given coordinates.
         """
-        basis = self.calc_basis(coords)
-        return dlu.eval_basis(basis, self.coefficients)
+        if self.aperture.transformation is not None:
+            coords = self.aperture.transformation(coords)
+        coords /= self.aperture.extent
+        return self.aberrations.evaluate(coordinates=coords)
 
     def __call__(self: AberratedAperture, wavefront: Wavefront) -> Wavefront:
         """
@@ -779,18 +789,14 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         if self.normalise:
             wavefront = wavefront.normalise()
 
-        # Transform coordinate
-        if self.aperture.transformation is not None:
-            coords = self.aperture.transformation(wavefront.coordinates())
-        else:
-            coords = wavefront.coordinates()
-
         # Aberrations
-        aberrations = self.eval_basis(coords)
-        if self.as_phase:
+        aberrations = self.eval_basis(wavefront.coordinates())
+        if self.effect == "phase":
             wavefront = wavefront.add_phase(aberrations)
-        else:
+        elif self.effect == "opd":
             wavefront = wavefront.add_opd(aberrations)
+        else:
+            wavefront *= aberrations
         return wavefront
 
 
@@ -989,9 +995,6 @@ class CompositeAperture(BaseDynamicAperture):
             # Aberrations
             aberrations = self.eval_basis(coords)
             # TODO: Add add_phase as an option
-            # if self.as_phase:
-            #     wavefront = wavefront.add_phase(aberrations)
-            # else:
             wavefront = wavefront.add_opd(aberrations)
 
         if self.normalise:
@@ -1057,7 +1060,7 @@ class CompoundAperture(CompositeAperture):
                 naberrated += 1
             if naberrated > 1:
                 raise TypeError(
-                    "CompoundAperture can only have a single " "AberratedAperture."
+                    "CompoundAperture can only have a single AberratedAperture."
                 )
 
     def transmission(self: ApertureLayer, coords: Array, pixel_scale: float) -> Array:
