@@ -7,6 +7,7 @@ import equinox as eqx
 __all__ = [
     "zernike_name",
     "noll_indices",
+    "radial_orders_to_indices",
     "zernike_factors",
     "eval_radial",
     "eval_azimuthal",
@@ -64,6 +65,18 @@ zernike_names = {
     35: "Heptafoil X",
     36: "Heptafoil Y",
 }
+
+
+def radial_orders_to_indices(radial_orders: list[int]) -> list[int]:
+    """Convert radial Zernike orders to their complete Noll index sequence."""
+    indices = []
+    for order in radial_orders:
+        order = int(order)
+        if order < 0:
+            raise ValueError("radial_orders must contain non-negative integers.")
+        first = order * (order + 1) // 2 + 1
+        indices.extend(range(first, first + order + 1))
+    return indices
 
 
 def zernike_name(j: int) -> str:
