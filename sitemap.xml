@@ -58,6 +58,9 @@
         <loc>https://louisdesdoigts.github.io/dlux/API/core/spectra/</loc>
       </url>
       <url>
+        <loc>https://louisdesdoigts.github.io/dlux/API/core/transformations/</loc>
+      </url>
+      <url>
         <loc>https://louisdesdoigts.github.io/dlux/API/core/wavefronts/</loc>
       </url>
       <url>
@@ -137,11 +140,5 @@
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/faq/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/changelog/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/contributing/</loc>
       </url>
 </urlset>

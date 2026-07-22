@@ -1,9 +1,8 @@
 import argparse
-import importlib
 import inspect
-import pkgutil
 import subprocess
 import dLux as dl
+from jax.tree_util import tree_flatten
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import os
@@ -11,7 +10,7 @@ import sys
 from pathlib import Path
 from selenium.common.exceptions import WebDriverException
 
-DOCS_ROOT = Path(__file__).resolve().parents[1]
+DOCS_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = DOCS_ROOT.parent
 UML_DIR = DOCS_ROOT / "assets" / "uml"
 PYREVERSE_TIMEOUT_SECONDS = 30
@@ -204,36 +203,26 @@ def parse_args():
 def main():
     args = parse_args()
 
-    classes = []
-    module_names = [dl.__name__]
-    module_names.extend(
-        module_info.name
-        for module_info in pkgutil.walk_packages(dl.__path__, f"{dl.__name__}.")
-    )
-    for module_name in module_names:
-        module = importlib.import_module(module_name)
-        classes.extend(
-            cls
-            for _, cls in inspect.getmembers(module, inspect.isclass)
-            if cls.__module__ == module_name
-            and "assets/uml/" in (inspect.getdoc(cls) or "")
-        )
-
+    dl_dict = dl.__dict__
+    classes = [
+        name
+        for name in tree_flatten(dl.__all__)[0]
+        if inspect.isclass(dl_dict.get(name))
+    ]
     all_pairs = [
         (
-            f"{cls.__module__}.{cls.__qualname__}",
-            get_parent_depth(cls),
-            cls.__name__,
+            f"{dl_dict[c].__module__}.{dl_dict[c].__qualname__}",
+            get_parent_depth(dl_dict[c]),
         )
-        for cls in classes
+        for c in classes
     ]
 
     if args.include:
         include_set = set(args.include)
         pairs = [pair for pair in all_pairs if pair[0] in include_set]
-        missing = sorted(include_set - {path for path, _, _ in pairs})
+        missing = sorted(include_set - {path for path, _ in pairs})
         for path in missing:
-            print(f"Warning: requested documented class not found: {path}")
+            print(f"Warning: requested class not found in dLux exports: {path}")
     else:
         pairs = all_pairs
 
@@ -247,8 +236,8 @@ def main():
     failed = 0
 
     # Generate UMLs for each class
-    for path, depth, export_name in pairs:
-        print(f"Generating UML for dLux.{export_name} ({path})")
+    for path, depth in pairs:
+        print(f"Generating UML for {path}")
 
         ancestor_levels = max(depth - 3, 0)
 
@@ -266,7 +255,7 @@ def main():
                     "-s0",
                     f"-a{ancestor_levels}",
                     "--colorized",
-                    str(REPO_ROOT / "src" / "dLux"),
+                    "dLux",
                     "--output-directory",
                     str(UML_DIR),
                 ],
@@ -289,6 +278,7 @@ def main():
             continue
 
         # Save to png
+        file_name = path.split(".")[-1]
         html_path = UML_DIR / f"{path}.html"
         if not html_path.exists():
             print(
@@ -298,7 +288,7 @@ def main():
             continue
 
         try:
-            save_to_png(str(html_path), str(UML_DIR / f"{export_name}.png"))
+            save_to_png(str(html_path), str(UML_DIR / f"{file_name}.png"))
             generated += 1
         except (WebDriverException, OSError, ValueError) as exc:
             print(f"Warning: screenshot conversion failed for {path}: {exc}")
