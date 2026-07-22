@@ -84,11 +84,21 @@ def test_binary_source(wavelengths, spectrum):
     with pytest.raises(ValueError):
         BinarySource(wavelengths, separation=1.0, position=np.ones(1))
 
+    weights = np.ones((2, wavelengths.size))
+    source = BinarySource(wavelengths, weights=weights)
+    assert source.weights.shape == weights.shape
+    assert np.allclose(source.weights.sum(-1), 1)
+
 
 def test_point_resolved_source(wavelengths, spectrum):
     source = PointResolvedSource(wavelengths)
     _test_model(source)
     assert source.contrast.shape == ()
+
+    weights = np.ones((2, wavelengths.size))
+    source = PointResolvedSource(wavelengths, weights=weights)
+    assert source.weights.shape == weights.shape
+    assert np.allclose(source.weights.sum(-1), 1)
 
 
 def test_scene():
