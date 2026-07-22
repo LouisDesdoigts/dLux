@@ -796,7 +796,7 @@ class AberratedAperture(ApertureLayer):
         elif self.effect == "opd":
             wavefront = wavefront.add_opd(aberrations)
         else:
-            wavefront *= aberrations
+            wavefront *= 1 + aberrations
         return wavefront
 
 

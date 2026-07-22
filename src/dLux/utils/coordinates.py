@@ -152,7 +152,7 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
         Coords with the distortion applied
     """
     pow_base = polynomial_basis(coords, pows)
-    distortion = np.sum(coeffs[..., None, None] * pow_base[None, ...], axis=1)
+    distortion = np.tensordot(coeffs, pow_base, axes=(-1, 0))
     return coords + distortion
 
 
