@@ -6,6 +6,7 @@ from jax.scipy.signal import convolve
 from jax import Array
 import zodiax as zdx
 import dLux.utils as dlu
+from .coordinates import BaseCoordTransform
 
 __all__ = ["PSF"]
 
@@ -125,6 +126,35 @@ class PSF(zdx.Base):
             The rotated PSF.
         """
         return self.set(data=dlu.rotate(self.data, angle, method=method))
+
+    def interpolate(
+        self: PSF,
+        transformation: BaseCoordTransform,
+        method: str = "linear",
+        fill: float = 0.0,
+    ) -> PSF:
+        """Interpolate the PSF through a coordinate transformation.
+
+        Parameters
+        ----------
+        transformation : BaseCoordTransform
+            Transformation applied to the PSF sampling coordinates.
+        method : str = "linear"
+            Interpolation method passed to ``interpax``.
+        fill : float = 0.0
+            Value used when sampling outside the input grid.
+
+        Returns
+        -------
+        psf : PSF
+            The interpolated PSF.
+        """
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
+        knot_coords = dlu.pixel_coords(self.npixels, self.npixels * self.pixel_scale)
+        sample_coords = transformation(knot_coords)
+        data = dlu.interp(self.data, knot_coords, sample_coords, method, fill)
+        return self.set(data=data)
 
     def resize(self: PSF, npixels: int) -> PSF:
         """

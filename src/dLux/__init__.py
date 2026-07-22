@@ -6,6 +6,8 @@ from ._exports import reexport
 __version__ = importlib.metadata.version("dLux")
 
 from . import (
+    parametric,
+    polynomials,
     layers,
     optical_systems,
     detectors,
@@ -18,6 +20,8 @@ from . import (
 )
 
 _modules = (
+    parametric,
+    polynomials,
     optical_systems,
     detectors,
     sources,
@@ -30,6 +34,8 @@ _modules = (
 )
 
 _module_names = [
+    "parametric",
+    "polynomials",
     "layers",
     "utils",
     "optical_systems",

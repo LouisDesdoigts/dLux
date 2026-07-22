@@ -9,7 +9,6 @@ from . import (
     unified_layers,
     propagators,
     apertures,
-    aberrations,
     abcd_propagators,
 )
 
@@ -20,7 +19,6 @@ _modules = (
     unified_layers,
     propagators,
     apertures,
-    aberrations,
     abcd_propagators,
 )
 
@@ -31,7 +29,6 @@ _module_names = [
     "unified_layers",
     "propagators",
     "apertures",
-    "aberrations",
     "abcd_propagators",
 ]
 __all__ = _module_names + reexport(_modules, globals())

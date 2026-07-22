@@ -4,22 +4,25 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Any
 import jax.numpy as np
+import equinox as eqx
 import zodiax as zdx
 from jax import Array
 import dLux.utils as dlu
 
 
 from ..wavefronts import Wavefront
+from ..parametric import Parametric
+from ..coordinates import BaseCoordTransform
 
 __all__ = [
     "BaseLayer",
     "OpticalLayer",
+    "Interpolate",
     "TransmissiveLayer",
     "AberratedLayer",
     "BasisLayer",
     "Tilt",
     "Normalise",
-    "FourierBasis",
 ]
 
 
@@ -53,6 +56,20 @@ class BaseLayer(zdx.Base):
             The transformed object.
         """
         return self(target)
+
+    @staticmethod
+    def resolve(value: Any, **kwargs: Any) -> Any:
+        """Evaluate a parametric leaf, or return an ordinary value unchanged."""
+        if isinstance(value, Parametric):
+            return value.evaluate(**kwargs)
+        return value
+
+    @staticmethod
+    def as_parametric(value: Any, dtype: Any = float) -> Any:
+        """Preserve parametric leaves and convert ordinary values to arrays."""
+        if value is None or isinstance(value, Parametric):
+            return value
+        return np.asarray(value, dtype=dtype)
 
     def __init_subclass__(cls, **kwargs):
         """Automatically inherit __call__ docstring from parent if child has none."""
@@ -88,6 +105,38 @@ class OpticalLayer(BaseLayer):
         """
 
 
+class Interpolate(OpticalLayer):
+    """Interpolate a wavefront through a coordinate transformation."""
+
+    transformation: BaseCoordTransform
+    method: str
+    complex: bool
+    fill: float
+
+    def __init__(
+        self,
+        transformation: BaseCoordTransform,
+        method: str = "linear",
+        complex: bool = True,
+        fill: float = 0.0,
+    ):
+        super().__init__()
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
+        self.transformation = transformation
+        self.method = str(method)
+        self.complex = bool(complex)
+        self.fill = np.asarray(fill, dtype=float)
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        return wavefront.interpolate(
+            self.transformation,
+            method=self.method,
+            complex=self.complex,
+            fill=self.fill,
+        )
+
+
 class TransmissiveLayer(OpticalLayer):
     """
     Base class to hold transmissive layers imbuing them with a transmission and
@@ -98,7 +147,7 @@ class TransmissiveLayer(OpticalLayer):
 
     Attributes
     ----------
-    transmission: Array
+    transmission: Array | Parametric
         The Array of transmission values to be applied to the input wavefront.
     normalise: bool
         Whether to normalise the wavefront after passing through the optic.
@@ -109,7 +158,7 @@ class TransmissiveLayer(OpticalLayer):
 
     def __init__(
         self: TransmissiveLayer,
-        transmission: Array = None,
+        transmission: Array | Parametric = None,
         normalise: bool = False,
         **kwargs,
     ):
@@ -121,14 +170,13 @@ class TransmissiveLayer(OpticalLayer):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the optic.
         """
-        if transmission is not None:
-            transmission = np.asarray(transmission, dtype=float)
-        self.transmission = transmission
+        self.transmission = self.as_parametric(transmission)
         self.normalise = bool(normalise)
         super().__init__(**kwargs)
 
     def __call__(self: TransmissiveLayer, wavefront: Wavefront) -> Wavefront:
-        wavefront *= self.transmission
+        transmission = self.resolve(self.transmission, wavefront=wavefront)
+        wavefront *= transmission
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
@@ -150,13 +198,13 @@ class AberratedLayer(OpticalLayer):
         The Array of phase values to be applied to the input wavefront.
     """
 
-    opd: Array
-    phase: Array
+    opd: Array | Parametric
+    phase: Array | Parametric
 
     def __init__(
         self: AberratedLayer,
-        opd: Array = None,
-        phase: Array = None,
+        opd: Array | Parametric = None,
+        phase: Array | Parametric = None,
         **kwargs,
     ):
         """
@@ -167,15 +215,10 @@ class AberratedLayer(OpticalLayer):
         phase : Array, radians = None
             The Array of phase values to be applied to the input wavefront.
         """
-        if opd is not None:
-            opd = np.asarray(opd, dtype=float)
-        self.opd = opd
+        self.opd = self.as_parametric(opd)
+        self.phase = self.as_parametric(phase)
 
-        if phase is not None:
-            phase = np.asarray(phase, dtype=float)
-        self.phase = phase
-
-        if self.opd is not None and self.phase is not None:
+        if isinstance(self.opd, Array) and isinstance(self.phase, Array):
             if self.opd.shape != self.phase.shape:
                 raise ValueError(
                     "opd and phase must have the same shape. Got "
@@ -184,8 +227,8 @@ class AberratedLayer(OpticalLayer):
         super().__init__(**kwargs)
 
     def __call__(self: AberratedLayer, wavefront: Wavefront) -> Wavefront:
-        wavefront = wavefront.add_opd(self.opd)
-        wavefront = wavefront.add_phase(self.phase)
+        wavefront = wavefront.add_opd(self.resolve(self.opd, wavefront=wavefront))
+        wavefront = wavefront.add_phase(self.resolve(self.phase, wavefront=wavefront))
         return wavefront
 
 
@@ -193,63 +236,66 @@ class BasisLayer(OpticalLayer):
     """
     An OpticalLayer class that holds a set of basis vectors and coefficients, which are
     dot-producted at run time to produce the output. The basis can be applied as either
-    a phase or OPD, by setting the `as_phase` attribute.
+    an OPD, phase, or amplitude transmission according to ``effect``.
 
     ??? abstract "UML"
         ![UML](../assets/uml/BasisLayer.png)
 
     Attributes
     ----------
-    basis: Array | list
-        The set of basis vectors. Should in general be a 3 dimensional array.
+    basis: Array
+        The object that evaluates coefficients into an array.
     coefficients: Array
         The array of coefficients to be applied to each basis vector.
-    as_phase: bool = False
-        Whether to apply the basis as a phase or OPD. If True the output is applied as
-        a phase, else it is applied as an OPD.
+    effect: str = "opd"
+        How to apply the evaluated basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.
     """
 
-    basis: Array | list
+    basis: Array
     coefficients: Array
-    as_phase: bool
+    effect: str = eqx.field(static=True)
 
     # NOTE: We need the None basis input for aberrated apertures
     def __init__(
         self: BasisLayer,
         basis: Array = None,
         coefficients: Array = None,
-        as_phase: bool = False,
+        effect: str = "opd",
+        coefficient_shape: tuple[int, ...] = None,
         **kwargs,
     ):
         """
         Parameters
         ----------
-        basis: Array | list = None
-            The set of basis vectors. Should in general be a 3 dimensional array.
+        basis: Array = None
+            The explicit basis vectors.
         coefficients: Array = None
             The Array of coefficients to be applied to each basis vector. Defaults
             to zeros if `basis` is provided and `coefficients` is None.
-        as_phase: bool = False
-            Whether to apply the basis as a phase or OPD. If True the output is applied
-            as a phase, else it is applied as an OPD.
+        effect: str = "opd"
+            How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.
         """
         super().__init__(**kwargs)
 
         if basis is not None:
             basis = np.asarray(basis, dtype=float)
             if coefficients is None:
-                coefficients = np.zeros(basis.shape[:-2])
+                if coefficient_shape is None:
+                    coefficient_shape = basis.shape[:-2]
+                coefficients = np.zeros(coefficient_shape)
             else:
                 coefficients = np.asarray(coefficients, dtype=float)
-                if basis.shape[:-2] != coefficients.shape:
-                    raise ValueError(
-                        "The number of basis vectors must be equal to "
-                        "the number of coefficients."
-                    )
+                coefficient_shape = coefficients.shape
+            if basis.shape[: len(coefficient_shape)] != coefficient_shape:
+                raise ValueError(
+                    "The coefficient shape must match the leading basis dimensions."
+                )
 
         self.basis = basis
         self.coefficients = coefficients
-        self.as_phase = bool(as_phase)
+        if effect not in ("opd", "phase", "amplitude"):
+            raise ValueError("effect must be 'opd', 'phase', or 'amplitude'.")
+        self.effect = effect
 
     def eval_basis(self: BasisLayer) -> Array:
         """
@@ -262,12 +308,18 @@ class BasisLayer(OpticalLayer):
         """
         return dlu.eval_basis(self.basis, self.coefficients)
 
+    def solve_basis(self: BasisLayer, value: Array) -> Array:
+        """Solve for coefficients representing ``value`` over this layer's basis."""
+        return dlu.solve_basis(value, self.basis)
+
     def __call__(self: BasisLayer, wavefront: Wavefront) -> Wavefront:
         output = self.eval_basis()
-        if self.as_phase:
+        if self.effect == "phase":
             wavefront = wavefront.add_phase(output)
-        else:
+        elif self.effect == "opd":
             wavefront = wavefront.add_opd(output)
+        else:
+            wavefront *= 1 + output
         return wavefront
 
 
@@ -313,99 +365,3 @@ class Normalise(OpticalLayer):
 
     def __call__(self: Normalise, wavefront: Wavefront) -> Wavefront:
         return wavefront.normalise()
-
-
-class FourierBasis(OpticalLayer):
-    """
-    Optical layer for representing an OPD using a 2D real Fourier basis.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/FourierBasis.png)
-
-    Attributes
-    ----------
-    coefficients : Array
-        The Fourier coefficients, ordered in `(x, y)` mode order.
-    kernels : tuple[Array, Array]
-        The cached Fourier evaluation kernels for the x and y axes.
-    """
-
-    coefficients: Array
-    kernels: tuple[Array, Array]
-
-    def __init__(
-        self: FourierBasis,
-        npix: int | tuple[int, int],
-        n_modes: int | tuple[int, int],
-        coefficients: Array = None,
-        **kwargs,
-    ):
-        """
-        Parameters
-        ----------
-        npix : int | tuple[int, int]
-            The output number of pixels in `(x, y)` order.
-        n_modes : int | tuple[int, int]
-            The number of Fourier modes in `(x, y)` order.
-        coefficients : Array = None
-            The Fourier coefficients. Defaults to zeros if not provided.
-        """
-        self.kernels = dlu.fourier_kernels(n_modes, npix)
-        coefficient_shape = tuple(kernel.shape[1] for kernel in self.kernels)
-
-        if coefficients is None:
-            coefficients = np.zeros(coefficient_shape)
-        else:
-            coefficients = np.asarray(coefficients, dtype=float)
-            if coefficients.shape != coefficient_shape:
-                raise ValueError(
-                    "The Fourier coefficient array must match the number of "
-                    "modes in each dimension."
-                )
-
-        self.coefficients = coefficients
-        super().__init__(**kwargs)
-
-    def update_kernels(self: FourierBasis, npix: int | tuple[int, int]) -> FourierBasis:
-        """
-        Returns a copy of the layer with kernels updated for a new output size.
-
-        Parameters
-        ----------
-        npix : int | tuple[int, int]
-            The updated output number of pixels in `(x, y)` order.
-
-        Returns
-        -------
-        layer : FourierBasis
-            A copy of the layer with updated Fourier kernels.
-        """
-        kernels = dlu.fourier_kernels(self.coefficients.shape, npix)
-        return self.set(kernels=kernels)
-
-    def eval_basis(self: FourierBasis) -> Array:
-        """
-        Evaluates the Fourier basis represented by the current coefficients.
-
-        Returns
-        -------
-        output : Array
-            The evaluated Fourier basis.
-        """
-        return dlu.eval_fourier_basis(self.coefficients, *self.kernels)
-
-    def __call__(self: FourierBasis, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the evaluated Fourier basis to the input wavefront as an OPD.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The input wavefront.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the Fourier basis applied as an OPD.
-        """
-        return wavefront.add_opd(self.eval_basis())

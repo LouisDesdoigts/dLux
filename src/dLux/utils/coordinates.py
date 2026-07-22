@@ -15,6 +15,7 @@ __all__ = [
     "shear_coords",
     "rotate_coords",
     "gen_powers",
+    "polynomial_basis",
     "distort_coords",
 ]
 
@@ -150,9 +151,16 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     distorted_coords : Array
         Coords with the distortion applied
     """
-    pow_base = np.multiply(*(coords[:, None, ...] ** pows[..., None, None]))
-    distortion = np.sum(coeffs[..., None, None] * pow_base[None, ...], axis=1)
+    pow_base = polynomial_basis(coords, pows)
+    distortion = np.tensordot(coeffs, pow_base, axes=(-1, 0))
     return coords + distortion
+
+
+def polynomial_basis(coords: Array, pows: Array) -> Array:
+    """Evaluate 2D polynomial monomials at Cartesian coordinates."""
+    pows = np.asarray(pows)
+    shape = pows.shape + (1,) * (coords.ndim - 1)
+    return np.prod(coords[:, None] ** pows.reshape(shape), axis=0)
 
 
 def cart2polar(coordinates: Array) -> Array:
