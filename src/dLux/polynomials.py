@@ -18,7 +18,11 @@ __all__ = [
 
 
 class DynamicZernike(zdx.Base):
-    """A dynamically evaluable Zernike polynomial."""
+    """A dynamically evaluable Zernike polynomial.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/DynamicZernike.png)
+    """
 
     j: int = eqx.field(static=True)
     n: int = eqx.field(static=True)
@@ -64,6 +68,12 @@ class _ZernikeBasis:
 
 
 class ZernikeBasis(_ZernikeBasis, ExplicitBasis):
+    """An explicitly sampled Zernike basis.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/ZernikeBasis.png)
+    """
+
     def __init__(
         self, coordinates, js=None, radial_orders=None, coefficients=None, diameter=2.0
     ):
@@ -73,6 +83,12 @@ class ZernikeBasis(_ZernikeBasis, ExplicitBasis):
 
 
 class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
+    """A Zernike basis evaluated dynamically from coordinate context.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/DynamicZernikeBasis.png)
+    """
+
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
 
@@ -100,6 +116,12 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
 
 
 class PolynomialBasis(CoordBasis):
+    """A Cartesian polynomial basis evaluated from coordinate context.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/PolynomialBasis.png)
+    """
+
     powers: Array
 
     def __init__(self, degree: int, coefficients=None):

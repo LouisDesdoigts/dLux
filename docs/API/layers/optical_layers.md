@@ -6,6 +6,9 @@
 ???+ info "OpticalLayer"
     ::: dLux.layers.optical_layers.OpticalLayer
 
+???+ info "Interpolate"
+    ::: dLux.layers.optical_layers.Interpolate
+
 ???+ info "TransmissiveLayer"
     ::: dLux.layers.optical_layers.TransmissiveLayer
 
@@ -20,6 +23,3 @@
 
 ???+ info "Normalise"
     ::: dLux.layers.optical_layers.Normalise
-
-???+ info "FourierBasis"
-    ::: dLux.layers.optical_layers.FourierBasis
