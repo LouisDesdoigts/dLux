@@ -285,7 +285,7 @@ class BasisLayer(OpticalLayer):
         elif self.effect == "opd":
             wavefront = wavefront.add_opd(output)
         else:
-            wavefront *= output
+            wavefront *= 1 + output
         return wavefront
 
 
