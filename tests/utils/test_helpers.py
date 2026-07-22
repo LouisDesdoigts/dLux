@@ -158,6 +158,20 @@ class TestInheritDocstrings:
         helpers_utils.inherit_docstrings(Child)
         assert Child.__call__.__doc__ == "Parent docstring."
 
+    def test_missing_parent_docstring(self):
+        """Methods remain undocumented when no parent provides documentation."""
+
+        class Parent:
+            def method(self):
+                pass
+
+        class Child(Parent):
+            def method(self):
+                pass
+
+        helpers_utils.inherit_docstrings(Child, ["method"])
+        assert Child.method.__doc__ is None
+
 
 # ============================================================================
 # Tests for imshow_extent

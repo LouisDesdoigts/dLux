@@ -185,8 +185,15 @@ def eval_basis(basis: Array, coefficients: Array) -> Array:
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
     """
-    ndim = coefficients.ndim
-    return np.tensordot(basis, coefficients, axes=2 * (tuple(range(ndim)),))
+    coefficient_shape = coefficients.shape
+    if basis.shape[: coefficients.ndim] != coefficient_shape:
+        raise ValueError(
+            "The leading basis dimensions must match the coefficient shape, "
+            f"received {basis.shape} and {coefficient_shape}."
+        )
+
+    axes = tuple(range(coefficients.ndim))
+    return np.tensordot(basis, coefficients, axes=(axes, axes))
 
 
 def solve_basis(array: Array, basis: Array) -> Array:
