@@ -1,0 +1,2909 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for dLux.">
+      
+      
+        <meta name="author" content="Louis Desdoigts">
+      
+      
+        <link rel="canonical" href="https://louisdesdoigts.github.io/dlux/0.15.1/coronagraphs/">
+      
+      
+        <link rel="prev" href="../mask_design/">
+      
+      
+        <link rel="next" href="../abcd_fresnel/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.51">
+    
+    
+      
+        <title>Coronagraphs & Multi-Plane Optical Systems - dLux v0.15.1</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.62c9b9cc.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="amber" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#coronagraphs-multi-plane-optical-systems" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="dLux v0.15.1" class="md-header__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dLux v0.15.1
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Coronagraphs &amp; Multi-Plane Optical Systems
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="amber" data-md-color-accent="orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="amber" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/LouisDesdoigts/dlux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    louisdesdoigts/dlux
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="dLux v0.15.1" class="md-nav__button md-logo" aria-label="dLux v0.15.1" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    dLux v0.15.1
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LouisDesdoigts/dlux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    louisdesdoigts/dlux
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Tutorials
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Tutorials
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase_retrieval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  A Basic Overview
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apertures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Building Apertures
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Instrumental Calibration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mask_design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Phase Mask Design
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Coronagraphs
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Coronagraphs
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#building-the-multi-plane-optical-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Building the Multi-Plane Optical System
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-the-focal-plane-mask-and-lyot-stop" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Building the Focal Plane Mask and Lyot Stop
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coronagraph-optimisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Coronagraph Optimisation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-soummer-mft-style-coronagraph" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        A Soummer MFT-style Coronagraph
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../abcd_fresnel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  ABCD Fresnel
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../asm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  ASM Fresnel
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sparse_propagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Sparse Propagation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optical_systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Optical Systems Overview
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Sources Overview
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  API
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  API
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Core API
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Core API
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Overview
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/coordinates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Coordinates
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/detectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Detectors
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/instruments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Instruments
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/optical_systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Optical Systems
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/psfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Psfs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Sources
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/spectra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Spectra
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/core/wavefronts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Wavefronts
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Layers API
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Layers API
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Overview
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/abcd_propagators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Abcd Propagators
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/aberrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Aberrations
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/apertures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Apertures
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/detector_layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Detector Layers
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/optical_layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Optical Layers
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/optics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Optics
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/propagators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Propagators
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/layers/unified_layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Unified Layers
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Utils API
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Utils API
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Overview
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/apertures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Apertures
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/array_ops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Array Ops
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/coordinates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Coordinates
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/fourier/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Fourier
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Geometry
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/helpers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Helpers
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/interpolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Interpolation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/math/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Math
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/misc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Misc
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/norms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Norms
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/optics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Optics
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/propagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Propagation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Source
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/units/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Units
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/utils/zernikes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Zernikes
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  FAQ & Troubleshooting
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Change Log
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Contributing
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+    <a href="https://github.com/LouisDesdoigts/dlux/edit/main/docs/coronagraphs.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-file-pen" viewBox="0 0 24 24"><path d="M12.659 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v9.34"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10.378 12.622a1 1 0 0 1 3 3.003L8.36 20.637a2 2 0 0 1-.854.506l-2.867.837a.5.5 0 0 1-.62-.62l.836-2.869a2 2 0 0 1 .506-.853z"/></svg>
+    </a>
+  
+  
+    
+      
+    
+    <a href="https://github.com/LouisDesdoigts/dlux/raw/main/docs/coronagraphs.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-file-code-2" viewBox="0 0 24 24"><path d="M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5M5 16l-3 3 3 3M9 22l3-3-3-3"/></svg>
+    </a>
+  
+
+
+<h1 id="coronagraphs-multi-plane-optical-systems">Coronagraphs &amp; Multi-Plane Optical Systems<a class="headerlink" href="#coronagraphs-multi-plane-optical-systems" title="Permanent link">¤</a></h1>
+<p>This tutorial is designed to be an exploration of how we can construct more complex optical systems with multiple planes, such as a coronograph. We will also use this as a way to explore how to create custom and parametric layers. It highlights dLux's focus on flexibility and composability, designed to be a optical modelling <em>framework</em>, rather than a another optical modelling package. We will also see two different ways of constructing a coronagraphs, one using internal FFT's and one using the algorithm from Soummer et al. 2007 to model complex high-res focal plane masks without needing to propagate very large wavefronts.</p>
+<p>This tutorial will be broken up into these sections:</p>
+<ol>
+<li>Building a Multi-Plane Optical System</li>
+<li>Building the Focal Plane Mask and Lyot Stop</li>
+<li>Coronagraph Optimisation</li>
+<li>A Soummer MFT-style Coronagraph</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Basic imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.random</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">vmap</span>
+
+<span class="c1"># # Optimisation imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">equinox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">eqx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zodiax</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">zdx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">optax</span>
+
+<span class="c1"># dLux imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dLux</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dLux.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dlu</span>
+
+<span class="c1"># Visualisation imports</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.notebook</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;image.cmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;inferno&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;serif&quot;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;image.origin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lower&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.dpi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">90</span>
+
+<span class="c1"># Nan friendly colormapping</span>
+<span class="n">inferno</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colormaps</span><span class="p">[</span><span class="s2">&quot;inferno&quot;</span><span class="p">]</span>
+<span class="n">seismic</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colormaps</span><span class="p">[</span><span class="s2">&quot;seismic&quot;</span><span class="p">]</span>
+<span class="n">inferno</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">seismic</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="building-the-multi-plane-optical-system">Building the Multi-Plane Optical System<a class="headerlink" href="#building-the-multi-plane-optical-system" title="Permanent link">¤</a></h2>
+<p>We will follow our previous tutorials and construct a Euclid-like telescope, but this time we will see what it would look like if we had a basic coronagraph in the system. We start here by making the aperture and aberrations of the system as in previous tutorials.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define our wavefront properties</span>
+<span class="n">wf_npix</span> <span class="o">=</span> <span class="mi">256</span>  <span class="c1"># Number of pixels in the wavefront</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># Diameter of the wavefront, meters</span>
+
+<span class="c1"># Define our detector properties</span>
+<span class="n">psf_npix</span> <span class="o">=</span> <span class="mi">64</span>  <span class="c1"># Number of pixels in the PSF</span>
+<span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">50e-3</span>  <span class="c1"># 50 mili-arcseconds</span>
+
+<span class="c1"># Generate a euclid-like aperture and Zernike</span>
+<span class="n">m2_diam</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="c1"># Secondary diameter</span>
+<span class="n">spider_width</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="c1"># Spider width</span>
+<span class="n">aper</span><span class="p">,</span> <span class="n">basis</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">euclid_like</span><span class="p">(</span>
+    <span class="n">npixels</span><span class="o">=</span><span class="n">wf_npix</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
+    <span class="n">secondary_diameter</span><span class="o">=</span><span class="n">m2_diam</span><span class="p">,</span>
+    <span class="n">spider_width</span><span class="o">=</span><span class="n">spider_width</span><span class="p">,</span>
+    <span class="n">zernike_nolls</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Normalise the basis to nm and generate some random coefficients</span>
+<span class="n">basis</span> <span class="o">*=</span> <span class="mf">1e-9</span>
+<span class="n">coeffs</span> <span class="o">=</span> <span class="mi">25</span> <span class="o">*</span> <span class="n">jr</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">lamd</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">/</span> <span class="n">diameter</span>
+
+<span class="c1"># Define the optical layers</span>
+<span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;aperture&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">TransmissiveLayer</span><span class="p">(</span><span class="n">aper</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;aberrations&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">BasisLayer</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;to_focal&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">FFT</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;fpm&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">Lambda</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s2">&quot;from_focal&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">FFT</span><span class="p">(</span><span class="n">crop</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;lyot&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">Lambda</span><span class="p">()),</span>
+<span class="p">]</span>
+
+<span class="c1"># Construct the optics object</span>
+<span class="n">optics</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">AngularOpticalSystem</span><span class="p">(</span>
+    <span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npix</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
+    <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span>
+    <span class="n">psf_npixels</span><span class="o">=</span><span class="n">psf_npix</span><span class="p">,</span>
+    <span class="n">psf_pixel_scale</span><span class="o">=</span><span class="n">psf_pixel_scale</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Examine the optics object</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>AngularOpticalSystem(
+  wf_npixels=256,
+  diameter=1.0,
+  layers={
+    'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
+    'aberrations':
+    BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+    'to_focal':
+    FFT(focal_length=None, inverse=False, pad=4, crop=1, center=True),
+    'fpm': Lambda(),
+    'from_focal':
+    FFT(focal_length=None, inverse=False, pad=1, crop=4, center=True),
+    'lyot': Lambda()
+  },
+  psf_npixels=64,
+  oversample=1,
+  psf_pixel_scale=0.05
+)
+</code></pre>
+<p>Okay cool, you might be wondering how this is a coronograph, since we don't have a focal plane mask or a Lyot stop in the system, just some extra FFTs. This is because we are going to construct these components as custom layers, showing how we can create parametric focal plane masks that will deal with the varying pixel scale in the focal plane. We will start here by looking at our wavefront in each plane using the <code>debug_propagate_mono</code> method, which propagates a wavefront and returns the intermediate wavefront at each layer, which is very useful for debugging and visualisation. From this we will build our new layers and add them to the system and then have a look again later.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Propagate a wavefront through the system and get the intermediate wavefronts</span>
+<span class="n">wf</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">debug_propagate_mono</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
+</code></pre></div>
+<p>Plot the wavefront at each layer</p>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;aberrations&quot;</span><span class="p">,</span> <span class="s2">&quot;to_focal&quot;</span><span class="p">,</span> <span class="s2">&quot;from_focal&quot;</span><span class="p">,</span> <span class="s2">&quot;final_wavefront&quot;</span><span class="p">]):</span>
+    <span class="c1"># Get the amplitude and phase of the wavefront</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">amplitude</span><span class="p">)</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">phase</span>
+
+    <span class="c1"># Get the units and extent</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;to_focal&quot;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">amp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="n">amp</span><span class="p">[</span><span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">]</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="p">[</span><span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">]</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">rad2arcsec</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span> <span class="o">*</span> <span class="n">amp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;arcsec&quot;</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;final_wavefront&quot;</span><span class="p">:</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">fov</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;arcsec&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">diameter</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">diam</span><span class="p">)</span>
+
+    <span class="c1"># Plot the plane</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">amp</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Amplitude&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;X [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Y [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="s2">&quot;twilight_shifted&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;radians&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Phase&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;X [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Y [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_7_0.png" /></p>
+<hr />
+<h2 id="building-the-focal-plane-mask-and-lyot-stop">Building the Focal Plane Mask and Lyot Stop<a class="headerlink" href="#building-the-focal-plane-mask-and-lyot-stop" title="Permanent link">¤</a></h2>
+<p>Great, as we can see we essentially get the same psf at the intermediate focal plane and the final plane, which is what we would expect since we haven't added any components in the focal plane yet. Now lets build the focal plane mask and insert it into our system.</p>
+<p>For this focal plane mask, we will use a simple dynamic circular aperture. We choose to make it dynamic so we can propagate <em>multiple</em> wavelengths through the system and generate the mask at the correct pixel scale for each wavelength. We can parametrise this mask however we want, here we will define its size in lambda/D units (for a target wavelength) and also add an xy shift so we can represent mask misalignments. If you are unfamiliar with the aperture generating syntax, you can check our our apertures tutorial to get the basic idea. Let see how we can do this now.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create a child-class of OpticalLayer, so dLux can recognise it as a layer</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FocalPlaneMask</span><span class="p">(</span><span class="n">dl</span><span class="o">.</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applies a dynamic circular focal plane mask to the wavefront in FFT coordinates.&quot;&quot;&quot;</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># Focal plane mask radius in lambda / D units</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>  <span class="c1"># Shift of the focal plane mask, in lambda / D units</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="c1"># Size of lambda / D in radians</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the focal plane mask to the wavefront. Assumes the wavefront is in </span>
+<span class="sd">        FFT coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the wavefront coordinates and shift them</span>
+        <span class="n">fp_coords</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span>
+        <span class="n">fp_coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">translate_coords</span><span class="p">(</span><span class="n">fp_coords</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the focal plane mask with a soft-edge and apply it</span>
+        <span class="n">softness</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">pixel_scale</span>
+        <span class="n">radius_phys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="n">fp_mask</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">soft_circle</span><span class="p">(</span><span class="n">fp_coords</span><span class="p">,</span> <span class="n">radius_phys</span><span class="p">,</span> <span class="n">softness</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">wavefront</span> <span class="o">*=</span> <span class="n">fp_mask</span>
+
+        <span class="c1"># Return the wavefront with the focal plane mask applied</span>
+        <span class="k">return</span> <span class="n">wavefront</span>
+
+<span class="c1"># Generate the focal plane mask, targeting a wavelength of 1 micron</span>
+<span class="n">fpm</span> <span class="o">=</span> <span class="n">FocalPlaneMask</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1e-6</span> <span class="o">/</span> <span class="n">diameter</span><span class="p">)</span>
+
+<span class="c1"># Examine</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fpm</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>FocalPlaneMask(radius=f32[], shift=f32[2], scale=f32[])
+</code></pre>
+<p>Great now lets construct the Lyot-stop layer. We will also make this a dynamic circular aperture, not because the wavefront pixel scale changes in the Lyot plane, but so we can solve for the optimal size of the Lyot stop by making it a parameter and optimising it later. Since we also have our aperture spiders, we will store a copy of the aperture in this layer and also apply it. We will also add a shift here to represent misalignments. The process is more or less the same here.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create a child-class of OpticalLayer, so dLux can recognise it as a layer</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LyotMask</span><span class="p">(</span><span class="n">dl</span><span class="o">.</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applies a dynamic circular Lyot mask to the wavefront in FFT coordinates.&quot;&quot;&quot;</span>
+    <span class="n">undersize</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># Lyot mask undersize, ie 0.9 = 90% of the pupil radius</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>  <span class="c1"># Shift of the Lyot mask, in physical units (i.e. meters)</span>
+    <span class="n">aperture</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>  <span class="c1"># The static aperture to apply in the Lyot plane, including spiders</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">undersize</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">aperture</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undersize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">undersize</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">aperture</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">aperture</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span> <span class="c1"># empty mask if not provided</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">aperture</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the Lyot stop to the wavefront.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the wavefront coordinates and shift them,</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">translate_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the Lyot mask with a soft-edge and apply it</span>
+        <span class="n">softness</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">pixel_scale</span>
+        <span class="n">radius_phys</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">diameter</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">undersize</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">lyot_stop</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">soft_circle</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">radius_phys</span><span class="p">,</span> <span class="n">softness</span><span class="p">)</span>
+        <span class="n">wavefront</span> <span class="o">*=</span> <span class="n">lyot_stop</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span>
+
+        <span class="c1"># Return the wavefront with the Lyot mask applied</span>
+        <span class="k">return</span> <span class="n">wavefront</span>
+
+<span class="n">lyot</span> <span class="o">=</span> <span class="n">LyotMask</span><span class="p">(</span><span class="n">undersize</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">aperture</span><span class="o">=</span><span class="n">aper</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Examine</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">lyot</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>LyotMask(undersize=f32[], shift=f32[2], aperture=f32[256,256])
+</code></pre>
+<p>Okay great, now lets update our optics object to include these new layers. We can use the <code>set</code> method to update the existing layers with the same name, which is a lot easier than having to insert new layers and then rewire the system. Now we have these new layers in place, we can have a look at the wavefronts again and see how they look.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Insert our optical layers</span>
+<span class="n">coron</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">fpm</span><span class="o">=</span><span class="n">fpm</span><span class="p">)</span>
+<span class="n">coron</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">lyot</span><span class="o">=</span><span class="n">lyot</span><span class="p">)</span>
+
+<span class="c1"># Examine the optics object again to see the new layers</span>
+<span class="n">coron</span>
+</code></pre></div>
+<pre><code>AngularOpticalSystem(
+  wf_npixels=256,
+  diameter=1.0,
+  layers={
+    'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
+    'aberrations':
+    BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+    'to_focal':
+    FFT(focal_length=None, inverse=False, pad=4, crop=1, center=True),
+    'fpm': FocalPlaneMask(radius=f32[], shift=f32[2], scale=f32[]),
+    'from_focal':
+    FFT(focal_length=None, inverse=False, pad=1, crop=4, center=True),
+    'lyot': LyotMask(undersize=f32[], shift=f32[2], aperture=f32[256,256])
+  },
+  psf_npixels=64,
+  oversample=1,
+  psf_pixel_scale=0.05
+)
+</code></pre>
+<p>Great, now we can see we have our new layers in the system! Lets use the debug prop to have a look at the wavefronts in each plane again to see the effect of our new layers. We are also going to remove the wavefront aberrations for this part so we can see the effect of the coronagraph more clearly.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Remove the wavefront error</span>
+<span class="n">coron</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+
+<span class="c1"># Propagate a wavefront through the system and get the intermediate wavefronts</span>
+<span class="n">wf</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">debug_propagate_mono</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;fpm&quot;</span><span class="p">,</span> <span class="s2">&quot;from_focal&quot;</span><span class="p">,</span> <span class="s2">&quot;lyot&quot;</span><span class="p">,</span> <span class="s2">&quot;final_wavefront&quot;</span><span class="p">]):</span>
+    <span class="c1"># Get the amplitude and phase of the wavefront</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">amplitude</span><span class="p">)</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">phase</span>
+
+    <span class="c1"># Get the units and extent</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;fpm&quot;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="mi">40</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">amp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="n">amp</span><span class="p">[</span><span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">]</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span><span class="p">[</span><span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span> <span class="o">-</span> <span class="n">s</span> <span class="p">:</span> <span class="n">c</span> <span class="o">+</span> <span class="n">s</span><span class="p">]</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">rad2arcsec</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span> <span class="o">*</span> <span class="n">amp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;arcsec&quot;</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;final_wavefront&quot;</span><span class="p">:</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">fov</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;arcsec&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">diameter</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">diam</span><span class="p">)</span>
+
+    <span class="c1"># Plot the plane</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">amp</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Amplitude&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;X [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Y [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="s2">&quot;twilight&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;radians&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Phase&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;X [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Y [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_16_0.png" /></p>
+<p>Now lets propagate a few PSFs through the system to see how the coronagraph performs as a function of source position</p>
+<div class="highlight"><pre><span></span><code><span class="n">wavels</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">lamd</span> <span class="o">=</span> <span class="n">wavels</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="n">diameter</span>
+<span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">psfs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">oset</span> <span class="ow">in</span> <span class="n">offsets</span><span class="p">:</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">lamd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">oset</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">psf</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavels</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+    <span class="n">psfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
+<span class="n">psfs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psfs</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">ext</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">coron</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">psfs</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;log10 Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_19_0.png" /></p>
+<p><img alt="png" src="../assets/coronagraphs_files/output_19_1.png" /></p>
+<hr />
+<h2 id="coronagraph-optimisation">Coronagraph Optimisation<a class="headerlink" href="#coronagraph-optimisation" title="Permanent link">¤</a></h2>
+<p>Now that we have our simple model, lets do a toy optimisation problem to show how we can use dLux to solve for optimal coronagraph parameters. For our metric we will use a simple annular contrast metric, where we want to minimise the flux in a 2-5 lambda/D annulus in the final focal plane, while maximising the average off-axis throughput of the companion sources. in that annulus. This is not meant to be rigorous by any sense, simply a demonstrative toy problem. </p>
+<p>Let set up the annular mask and the companion position and build our oss function.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Focal plane coordinates</span>
+<span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">optics</span><span class="o">.</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">optics</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
+<span class="n">coords_lamd</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">arcsec2rad</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">/</span> <span class="n">lamd</span>
+
+<span class="c1"># Annular mask to suppress starlight within</span>
+<span class="n">inner</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">coords_lamd</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">outer</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">coords_lamd</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">annular_mask</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">outer</span> <span class="o">&amp;</span> <span class="n">inner</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Companion PSF samples</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">lamd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">4.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+<span class="c1"># Define the loss function</span>
+<span class="nd">@eqx</span><span class="o">.</span><span class="n">filter_jit</span>
+<span class="nd">@eqx</span><span class="o">.</span><span class="n">filter_value_and_grad</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">coron</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple Loss function&quot;&quot;&quot;</span>
+    <span class="c1"># fpm size, lyot size</span>
+    <span class="n">coron</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="c1"># Get the primary PSF throughput in the annular region</span>
+    <span class="n">primary</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavels</span><span class="p">)</span>
+    <span class="n">primary_throughput</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">annular_mask</span> <span class="o">*</span> <span class="n">primary</span><span class="p">)</span>
+
+    <span class="c1"># Propagate companion PSFs</span>
+    <span class="n">companions</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pos</span><span class="p">:</span> <span class="n">coron</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavels</span><span class="p">,</span> <span class="n">pos</span><span class="p">))(</span><span class="n">positions</span><span class="p">)</span>
+    <span class="n">companion_throughput</span> <span class="o">=</span> <span class="n">companions</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Loss metric</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">primary_throughput</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">companion_throughput</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">ext_lamd</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">arcsec2rad</span><span class="p">(</span><span class="n">coron</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span> <span class="o">/</span> <span class="n">lamd</span><span class="p">)</span>
+
+<span class="c1">## COLLAPSE: Plotting code</span>
+<span class="n">positions_lamd</span> <span class="o">=</span> <span class="n">positions</span> <span class="o">/</span> <span class="n">lamd</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">annular_mask</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext_lamd</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">positions_lamd</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Companion positions&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Mask weight&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Optimisation region&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [λ/D]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [λ/D]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_22_0.png" /></p>
+<p>Now lets run a little optimisation loop</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Set the initial parameters</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;fpm.radius&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.5</span><span class="p">),</span>
+    <span class="s2">&quot;lyot.undersize&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.95</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="c1"># Set up the optimisers for each parameter</span>
+<span class="n">optimisers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;fpm.radius&quot;</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">sgd</span><span class="p">(</span><span class="mf">5e-2</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+    <span class="s2">&quot;lyot.undersize&quot;</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">sgd</span><span class="p">(</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">optim</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">zdx</span><span class="o">.</span><span class="n">map_optimisers</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">optimisers</span><span class="p">)</span>
+
+<span class="c1"># Now we can run a simple optimisation loop</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">))</span>
+<span class="n">losses</span><span class="p">,</span> <span class="n">params_history</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
+    <span class="n">loss</span><span class="p">,</span> <span class="n">grads</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">coron</span><span class="p">)</span>
+    <span class="n">updates</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
+    <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">(</span><span class="n">log_loss</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+    <span class="n">params_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+<span class="n">losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>  0%|          | 0/25 [00:00&lt;?, ?it/s]
+</code></pre>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Map the parameter history to arrays for plotting</span>
+<span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="n">values</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">params</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">params_history</span><span class="p">])</span>
+
+<span class="c1"># Plot the losses</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Loss value&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Loss&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;fpm.radius&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;FPM Radius&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;FPM Radius (lambda / D)&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;lyot.undersize&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lyot Undersize&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Lyot Undersize (Fraction)&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_25_0.png" /></p>
+<p>Nice that seems to have worked, lets propagate a few PSFs through the system to see how the coronagraph is doing. </p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Propagate some wavelengths thought the system</span>
+<span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">psfs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">oset</span> <span class="ow">in</span> <span class="n">offsets</span><span class="p">:</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">lamd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">oset</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">psf</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavels</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+    <span class="n">psfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
+<span class="n">psfs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psfs</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">ext</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">coron</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">psfs</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;log10 Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_28_0.png" /></p>
+<p><img alt="png" src="../assets/coronagraphs_files/output_28_1.png" /></p>
+<hr />
+<h2 id="a-soummer-mft-style-coronagraph">A Soummer MFT-style Coronagraph<a class="headerlink" href="#a-soummer-mft-style-coronagraph" title="Permanent link">¤</a></h2>
+<p>Okay so now lets see how we can implement another algorithm for modelling the focal plane mask, which is based on the method from Soummer et al. 2007, which allows us to model complex high-res focal plane masks without needing to propagate very large wavefronts. To do this, we will construct a new custom layer that replaces our FFT's with MFTs - A fourier transform that allows us to specify the output sampling of our propagation. This lets us propagate <em>every</em> wavelength through our system to the same pixel scale in the focal plane - this is the same algorithm dLux uses by default to propagate to the final focal plane for polychromatic PSFs. The key here is that we can now use a focal plane mask with very fine features (That would otherwise require very large padding and arrays for FFT based propagations) or ones that are non-parametric and can't be generated analytically for each wavelength. </p>
+<p>Lets create this new layer now, where we will use a gaussian shaped transmissive mask raised to a power to be able to tune the shape.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SoummerFPM</span><span class="p">(</span><span class="n">dl</span><span class="o">.</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implements the Soummer et al. (2007) algorithm to apply a high-res focal plane</span>
+<span class="sd">    mask without large FFTs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lamd</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># The size of the an optical fringe</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># The standard deviation of the Gaussian mask in lambda / D units</span>
+    <span class="n">power</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># The power to raise the Gaussian mask to</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># The number of pixels in the focal plane mask</span>
+    <span class="n">pixel_scale</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># The pixel scale of the focal plane mask, in lamda / D units</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">lamd</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">5.</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lamd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lamd</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes the gaussian mask&quot;&quot;&quot;</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lamd</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">gaussian</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mask</span> <span class="o">/</span> <span class="n">mask</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the focal plane mask to the wavefront.&quot;&quot;&quot;</span>
+        <span class="c1"># MFT propagate to the focal plane and apply the mask</span>
+        <span class="n">npixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">fp_wf</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">)</span>
+        <span class="n">fp_wf</span> <span class="o">=</span> <span class="n">fp_wf</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">phasor</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="c1"># Inverse MFT propagate back to the pupil plane</span>
+        <span class="n">npixels</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">npixels</span>
+        <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">pixel_scale</span>
+        <span class="n">pup_wf</span> <span class="o">=</span> <span class="n">fp_wf</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Subtract wavefront from the original the get the applied mask</span>
+        <span class="k">return</span> <span class="n">wavefront</span> <span class="o">-</span> <span class="n">pup_wf</span>
+
+<span class="c1"># Construct our Soummer Focal plane mask layer</span>
+<span class="n">fpm</span> <span class="o">=</span> <span class="n">SoummerFPM</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="o">=</span><span class="n">lamd</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="n">lamd</span><span class="o">=</span><span class="n">lamd</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+
+<span class="c1"># Examine the new layer</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fpm</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>SoummerFPM(lamd=f32[], sigma=f32[], power=f32[], npixels=128, pixel_scale=f32[])
+</code></pre>
+<p>Now we can construct our new system using this new layer, rather than the FFTs. We will also re-use our Lyot stop layer from before to make this a more complete system.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define the optical layers</span>
+<span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;aperture&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">TransmissiveLayer</span><span class="p">(</span><span class="n">aper</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;aberrations&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">BasisLayer</span><span class="p">(</span><span class="n">basis</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;fpm&quot;</span><span class="p">,</span> <span class="n">fpm</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;lyot&quot;</span><span class="p">,</span> <span class="n">LyotMask</span><span class="p">(</span><span class="n">undersize</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">aperture</span><span class="o">=</span><span class="n">aper</span><span class="p">)),</span>
+<span class="p">]</span>
+
+<span class="c1"># Construct the optics object</span>
+<span class="n">coron</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">AngularOpticalSystem</span><span class="p">(</span>
+    <span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npix</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
+    <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span>
+    <span class="n">psf_npixels</span><span class="o">=</span><span class="n">psf_npix</span><span class="p">,</span>
+    <span class="n">psf_pixel_scale</span><span class="o">=</span><span class="n">psf_pixel_scale</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Examine the optics object again to see the new layers</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">coron</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>AngularOpticalSystem(
+  wf_npixels=256,
+  diameter=1.0,
+  layers={
+    'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
+    'aberrations':
+    BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+    'fpm':
+    SoummerFPM(
+      lamd=f32[], sigma=f32[], power=f32[], npixels=128, pixel_scale=f32[]
+    ),
+    'lyot': LyotMask(undersize=f32[], shift=f32[2], aperture=f32[256,256])
+  },
+  psf_npixels=64,
+  oversample=1,
+  psf_pixel_scale=0.05
+)
+</code></pre>
+<p>Now lets do a debug propagation again to examine the wavefronts at each plane and make sure everything is working. Note that since we are propagating to the focal plane, applying the mask, and inverse propagating back to the Lyot plane all in one layer, we no longer see the wavefront in the focal plane, since it is not an intermediate plane anymore, but we can still see the effect of the mask in the Lyot plane and the final focal plane.</p>
+<div class="highlight"><pre><span></span><code><span class="n">wf</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">debug_propagate_mono</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
+</code></pre></div>
+<p>Examine the wavefronts</p>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;aberrations&quot;</span><span class="p">,</span> <span class="s2">&quot;fpm&quot;</span><span class="p">,</span> <span class="s2">&quot;lyot&quot;</span><span class="p">,</span> <span class="s2">&quot;final_wavefront&quot;</span><span class="p">]):</span>
+    <span class="c1"># Get the amplitude and phase of the wavefront</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">amplitude</span><span class="p">)</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">phase</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;final_wavefront&quot;</span><span class="p">:</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">fov</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;arcsec&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">diameter</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">diam</span><span class="p">)</span>
+
+    <span class="c1"># Plot the plane</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">amp</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Amplitude&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;X [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Y [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="s2">&quot;twilight&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;radians&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: Phase&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;X [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Y [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_36_0.png" /></p>
+<p>This looks good, so now lets propagate a source at a few different offsets to see how the off-axis throughput of the companion sources changes with the new mask.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Propagate some wavelengths thought the system</span>
+<span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">psfs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">oset</span> <span class="ow">in</span> <span class="n">offsets</span><span class="p">:</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">lamd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">oset</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">psf</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavels</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+    <span class="n">psfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
+<span class="n">psfs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psfs</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">ext</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">coron</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">psfs</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;log10 Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_39_0.png" /></p>
+<p><img alt="png" src="../assets/coronagraphs_files/output_39_1.png" /></p>
+<p>Awesome, this all looks great. So, lets follow our same process as before and do a little optimisation to see if we can improve the performance of this new mask by tuning the parameters. </p>
+<p>Since our focal plane parameters are the same, we can just re-use our loss function from before and dive right in.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Set the initial parameters</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;fpm.sigma&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.5</span><span class="p">),</span>
+    <span class="s2">&quot;lyot.undersize&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.9</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="c1"># Set up the optimisers for each parameter</span>
+<span class="n">optimisers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;fpm.sigma&quot;</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">sgd</span><span class="p">(</span><span class="mf">5e-2</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+    <span class="s2">&quot;lyot.undersize&quot;</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">sgd</span><span class="p">(</span><span class="mf">2e-3</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">optim</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">zdx</span><span class="o">.</span><span class="n">map_optimisers</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">optimisers</span><span class="p">)</span>
+
+<span class="c1"># Now we can run a simple optimisation loop</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">))</span>
+<span class="n">losses</span><span class="p">,</span> <span class="n">params_history</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
+    <span class="n">loss</span><span class="p">,</span> <span class="n">grads</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">coron</span><span class="p">)</span>
+    <span class="n">updates</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
+    <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">(</span><span class="n">log_loss</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+    <span class="n">params_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+<span class="n">losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>  0%|          | 0/100 [00:00&lt;?, ?it/s]
+</code></pre>
+<p>Cool, lets have a look at our optimisation</p>
+<details class="info">
+<summary>Plotting</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Map the parameter history to arrays for plotting</span>
+<span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="n">values</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">params</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">params_history</span><span class="p">])</span>
+
+<span class="c1"># Plot the losses</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Loss value&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Loss&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;fpm.sigma&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;FPM Sigma&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;FPM Sigma (lambda / D)&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;lyot.undersize&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lyot Undersize&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Lyot Undersize (Fraction)&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_43_0.png" /></p>
+<p>Now lets propagate a few PSFs through the system to see how the coronagraph is doing with the new mask.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Propagate some wavelengths thought the system</span>
+<span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">psfs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">oset</span> <span class="ow">in</span> <span class="n">offsets</span><span class="p">:</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">lamd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">oset</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">psf</span> <span class="o">=</span> <span class="n">coron</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavels</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+    <span class="n">psfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
+<span class="n">psfs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psfs</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Plotting code</summary>
+<div class="highlight"><pre><span></span><code><span class="n">ext</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">imshow_extent</span><span class="p">(</span><span class="n">coron</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">psfs</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">psfs</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">ext</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;log10 Intensity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;X [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Y [arcsec]&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">offsets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> $</span><span class="se">\\</span><span class="s2">lambda$/D, TPut=</span><span class="si">{</span><span class="n">tp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</details>
+<p><img alt="png" src="../assets/coronagraphs_files/output_46_0.png" /></p>
+<p><img alt="png" src="../assets/coronagraphs_files/output_46_1.png" /></p>
+<p>Awesome, as we can see, we now have a new optimised coronograph! Interestingly, compared to our first system we can see that this new mask has much better on-axis supression, but worse off-axis throughput, which is what we would expect since the gaussian mask better matches the PSF shape, but also has more extended wings than the hard edged mask, which will block more of the off-axis companion light. This is a good example of how we can use dLux to quickly iterate on different designs and see the effect on performance, and then tune the parameters to find an optimal design.</p>
+<div class="highlight"><pre><span></span><code>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7f30b55.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
