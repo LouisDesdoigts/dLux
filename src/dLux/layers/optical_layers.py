@@ -106,7 +106,11 @@ class OpticalLayer(BaseLayer):
 
 
 class Interpolate(OpticalLayer):
-    """Interpolate a wavefront through a coordinate transformation."""
+    """Interpolate a wavefront through a coordinate transformation.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/Interpolate.png)
+    """
 
     transformation: BaseCoordTransform
     method: str
