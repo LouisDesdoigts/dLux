@@ -5,6 +5,7 @@ from . import (
     unified_layers,
     detector_layers,
     optical_layers,
+    refractive_layers,
     polarised_layers,
     propagation_layers,
 )
@@ -13,6 +14,7 @@ _modules = (
     unified_layers,
     detector_layers,
     optical_layers,
+    refractive_layers,
     polarised_layers,
     propagation_layers,
 )
@@ -21,6 +23,7 @@ _module_names = [
     "unified_layers",
     "detector_layers",
     "optical_layers",
+    "refractive_layers",
     "polarised_layers",
     "propagation_layers",
 ]

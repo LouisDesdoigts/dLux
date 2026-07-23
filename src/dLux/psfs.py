@@ -90,6 +90,31 @@ class PSF(zdx.Base):
         pixel_scale = self.pixel_scale * n
         return self.set(data=data, pixel_scale=pixel_scale)
 
+    def normalise(self: PSF, mode: str = "power", value: float = 1.0) -> PSF:
+        """
+        Normalise the PSF.
+
+        Parameters
+        ----------
+        mode : {"power","peak"} = "power"
+            - "power": scales so ``sum(data) == value``.
+            - "peak": scales so ``max(data) == value``.
+        value : float = 1.0
+            Target value for the selected mode.
+
+        Returns
+        -------
+        psf : PSF
+            New PSF scaled to achieve the normalisation.
+        """
+        if mode == "power":
+            scale = value / self.data.sum()
+        elif mode == "peak":
+            scale = value / self.data.max()
+        else:
+            raise ValueError("mode must be 'power' or 'peak'")
+        return self.multiply("data", scale)
+
     def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
         """
         Convolves the PSF with an input array.

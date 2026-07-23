@@ -121,13 +121,6 @@ def test_lens_supports_chromatic_wavefront_variants(wavefront_type, mapped_sampl
     assert np.allclose(output.phasor, expected.phasor)
 
 
-@pytest.mark.parametrize("normalise", [False, True])
-def test_lens_applies_transmission_and_normalisation(normalise):
-    output = Lens(0, n=1.5, transmission=0.5, normalise=normalise)(WAVEFRONT)
-    expected_power = 1.0 if normalise else 0.25 * WAVEFRONT.power
-    assert np.allclose(output.power, expected_power)
-
-
 def test_wedge_applies_linear_opd():
     angle = np.array([1e-3, -2e-3])
     output = Wedge(angle, n=1.5)(WAVEFRONT)

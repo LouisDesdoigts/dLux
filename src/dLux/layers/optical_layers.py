@@ -2,32 +2,74 @@
 
 from __future__ import annotations
 
+from abc import abstractmethod
 from typing import Any
 
 import jax.numpy as np
+import zodiax as zdx
 from jax import Array
 
+import dLux.utils as dlu
 from ..coordinates import BaseCoordTransform
 from ..parametric import BaseParametric, Shape
 from ..wavefronts import Wavefront
-from .polarised_layers import PolarisationLayer
-from .propagation_layers import PropagatorLayer
-from .unified_layers import BaseOpticalLayer
 
 __all__ = [
+    "BaseLayer",
+    "BaseOpticalLayer",
+    "OpticalLayer",
     "TransmissiveLayer",
     "AberratedLayer",
-    "Normalise",
     "Optic",
     "DynamicOptic",
-    "Lens",
-    "Wedge",
-    "Interpolate",
     "Tilt",
 ]
 
 
-class TransmissiveLayer(BaseOpticalLayer):
+class BaseLayer(zdx.Base):
+    """Base class for callable transformations of dLux objects."""
+
+    @abstractmethod
+    def __call__(self, target: Any) -> Any:  # pragma: no cover
+        """Apply this layer to its target."""
+
+    def apply(self, target: Any) -> Any:
+        """Backwards-compatible alias for calling the layer."""
+        return self(target)
+
+    @staticmethod
+    def resolve(value: Any, **kwargs: Any) -> Any:
+        """Evaluate a parametric value, or return an ordinary value unchanged."""
+        if isinstance(value, BaseParametric):
+            return value.evaluate(**kwargs)
+        return value
+
+    @staticmethod
+    def as_parametric(value: Any, dtype: Any = float) -> Any:
+        """Preserve parametric values and convert ordinary values to arrays."""
+        if value is None or isinstance(value, BaseParametric):
+            return value
+        return np.asarray(value, dtype=dtype)
+
+    def __init_subclass__(cls, **kwargs):
+        """Inherit callable documentation for concrete layer implementations."""
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["__call__"])
+
+
+class BaseOpticalLayer(BaseLayer):
+    """Base class for layers that transform wavefronts."""
+
+    @abstractmethod
+    def __call__(self, wavefront: Wavefront) -> Wavefront:  # pragma: no cover
+        """Transform a wavefront."""
+
+
+class OpticalLayer(BaseOpticalLayer):
+    """Public contract for layers that transform wavefronts."""
+
+
+class TransmissiveLayer(OpticalLayer):
     """Apply a transmission, with optional output normalisation."""
 
     transmission: Array | BaseParametric | None
@@ -47,7 +89,7 @@ class TransmissiveLayer(BaseOpticalLayer):
         return wavefront
 
 
-class AberratedLayer(BaseOpticalLayer):
+class AberratedLayer(OpticalLayer):
     """Apply optical-path and phase aberrations to a wavefront."""
 
     opd: Array | BaseParametric | None
@@ -64,21 +106,8 @@ class AberratedLayer(BaseOpticalLayer):
         return wavefront.add_phase(phase)
 
 
-class Normalise(BaseOpticalLayer):
-    """Normalise a wavefront to unit power."""
-
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        return wavefront.normalise()
-
-
-class Optic(
-    TransmissiveLayer,
-    AberratedLayer,
-    Normalise,
-    PolarisationLayer,
-    PropagatorLayer,
-):
-    """A physical optic evaluated at one plane, with optional onward propagation."""
+class Optic(TransmissiveLayer, AberratedLayer):
+    """A scalar physical optic evaluated at one plane."""
 
     transmission: Array | BaseParametric | None
     opd: Array | BaseParametric | None
@@ -90,14 +119,10 @@ class Optic(
         transmission=None,
         opd=None,
         phase=None,
-        polarisation=None,
         normalise=False,
-        propagator=None,
     ):
         TransmissiveLayer.__init__(self, transmission, normalise)
         AberratedLayer.__init__(self, opd, phase)
-        PolarisationLayer.__init__(self, polarisation)
-        PropagatorLayer.__init__(self, propagator)
 
     def context(self, wavefront: Wavefront) -> dict[str, Any]:
         """Return the parameter context shared by this optic's properties."""
@@ -133,10 +158,9 @@ class Optic(
         params = self.params(wavefront)
         phasor = wavefront.phasor * self.phasor(wavefront, params)
         wavefront = wavefront.set(phasor=phasor)
-        wavefront = PolarisationLayer.__call__(self, wavefront)
         if self.normalise:
             wavefront = wavefront.normalise()
-        return PropagatorLayer.__call__(self, wavefront)
+        return wavefront
 
 
 class DynamicOptic(Optic):
@@ -151,9 +175,7 @@ class DynamicOptic(Optic):
         transformation=None,
         opd=None,
         phase=None,
-        polarisation=None,
         normalise=False,
-        propagator=None,
     ):
         if not isinstance(aperture, Shape):
             raise TypeError("aperture must be a Shape.")
@@ -166,9 +188,7 @@ class DynamicOptic(Optic):
         super().__init__(
             opd=opd,
             phase=phase,
-            polarisation=polarisation,
             normalise=normalise,
-            propagator=propagator,
         )
 
     def context(self, wavefront: Wavefront) -> dict[str, Any]:
@@ -195,152 +215,7 @@ class DynamicOptic(Optic):
         }
 
 
-class Lens(Optic):
-    """A residual refractive lens applied as an optical layer."""
-
-    thickness: Array | BaseParametric
-    n: Array | BaseParametric
-
-    def __init__(
-        self,
-        thickness,
-        n,
-        transmission=None,
-        opd=None,
-        phase=None,
-        polarisation=None,
-        normalise=False,
-        propagator=None,
-    ):
-        """
-        Parameters
-        ----------
-        thickness : Array | BaseParametric, metres
-            Material thickness relative to the ideal optic. This represents residual
-            figure or fabrication errors; ideal focusing remains in the propagator.
-        n : Array | BaseParametric
-            Refractive index, optionally dependent on wavefront wavelength.
-        """
-        self.thickness = self.as_parametric(thickness)
-        self.n = self.as_parametric(n)
-        super().__init__(
-            transmission=transmission,
-            opd=opd,
-            phase=phase,
-            polarisation=polarisation,
-            normalise=normalise,
-            propagator=propagator,
-        )
-
-    def params(self, wavefront: Wavefront) -> dict[str, Any]:
-        """Resolve the optic properties and residual refractive OPD once."""
-        context = self.context(wavefront)
-        thickness = self.resolve(self.thickness, **context)
-        n = np.asarray(self.resolve(self.n, **context) - 1)
-        if n.ndim:
-            n = n[..., None, None]
-        opd = self.resolve(self.opd, **context)
-        opd = 0.0 if opd is None else opd
-        return {
-            "transmission": self.resolve(self.transmission, **context),
-            "opd": opd + n * thickness,
-            "phase": self.resolve(self.phase, **context),
-        }
-
-
-class Wedge(Optic):
-    """A thin refractive wedge applied as an optical layer."""
-
-    angle: Array
-    n: Array | BaseParametric
-    reference_wavelength: Array | None
-
-    def __init__(
-        self,
-        angle,
-        n,
-        reference_wavelength=None,
-        transmission=None,
-        opd=None,
-        phase=None,
-        polarisation=None,
-        normalise=False,
-        propagator=None,
-    ):
-        self.angle = np.asarray(angle, dtype=float)
-        if self.angle.shape != (2,):
-            raise ValueError("angle must have shape (2,).")
-        self.n = self.as_parametric(n)
-        self.reference_wavelength = (
-            None
-            if reference_wavelength is None
-            else np.asarray(reference_wavelength, dtype=float)
-        )
-        super().__init__(
-            transmission=transmission,
-            opd=opd,
-            phase=phase,
-            polarisation=polarisation,
-            normalise=normalise,
-            propagator=propagator,
-        )
-
-    def params(self, wavefront: Wavefront) -> dict[str, Any]:
-        """Resolve the optic properties and chromatic wedge OPD once."""
-        context = self.context(wavefront)
-        n = self.resolve(self.n, **context)
-        index_difference = n - 1
-        if self.reference_wavelength is not None:
-            reference = wavefront.set(wavelength=self.reference_wavelength)
-            index_difference = n - self.resolve(self.n, wavefront=reference)
-
-        coordinates = wavefront.coordinates()
-        x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
-        thickness = x * np.tan(self.angle[0]) + y * np.tan(self.angle[1])
-        index_difference = np.asarray(index_difference)
-        if index_difference.ndim:
-            index_difference = index_difference[..., None, None]
-        opd = self.resolve(self.opd, **context)
-        opd = 0.0 if opd is None else opd
-        return {
-            "transmission": self.resolve(self.transmission, **context),
-            "opd": opd + index_difference * thickness,
-            "phase": self.resolve(self.phase, **context),
-        }
-
-
-class Interpolate(BaseOpticalLayer):
-    """Interpolate a wavefront through a coordinate transformation."""
-
-    transformation: BaseCoordTransform
-    method: str
-    complex: bool
-    fill: Array
-
-    def __init__(
-        self,
-        transformation,
-        method="linear",
-        complex=True,
-        fill=0.0,
-    ):
-        if not isinstance(transformation, BaseCoordTransform):
-            raise TypeError("transformation must be a BaseCoordTransform.")
-        self.transformation = transformation
-        self.method = str(method)
-        self.complex = bool(complex)
-        self.fill = np.asarray(fill, dtype=float)
-
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        return wavefront.interpolate(
-            self.transformation,
-            method=self.method,
-            complex=self.complex,
-            fill=self.fill,
-        )
-
-
-class Tilt(BaseOpticalLayer):
+class Tilt(OpticalLayer):
     """Tilt a wavefront by two angular coordinates."""
 
     angles: Array

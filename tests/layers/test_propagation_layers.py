@@ -13,14 +13,6 @@ def wavefront():
     return Wavefront(npixels=16, diameter=1.0, wavelength=1e-6)
 
 
-def test_propagator_layer(wavefront):
-    assert abcd_props.PropagatorLayer()(wavefront) is wavefront
-    layer = abcd_props.PropagatorLayer(abcd_props.FFT())
-    assert isinstance(layer(wavefront), Wavefront)
-    with pytest.raises(TypeError, match="propagator"):
-        abcd_props.PropagatorLayer(object())
-
-
 def test_abcd_elements():
     elements = [
         abcd_props.ABCDFreeSpace(1.0),

@@ -110,6 +110,7 @@ nav:
       - Unified Layers: API/unified_layers.md
       - Detector Layers: API/detector_layers.md
       - Optical Layers: API/optical_layers.md
+      - Refractive Layers: API/refractive_layers.md
       - Polarised Layers: API/polarised_layers.md
       - Propagation Layers: API/propagation_layers.md
     - Parametric API:
