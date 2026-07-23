@@ -2,7 +2,14 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 import pytest
-from dLux.layers import Flip, Lambda, Resize
+from dLux.layers import (
+    AberratedLayer,
+    Flip,
+    Lambda,
+    Normalise,
+    Resize,
+    TransmissiveLayer,
+)
 from dLux import Wavefront, PSF
 
 wf = Wavefront(npixels=16, diameter=1, wavelength=1e-6)
@@ -33,3 +40,21 @@ def test_lambda():
 
     assert layer.apply(wf) is wf
     assert layer.apply(psf) is psf
+
+
+def test_transmissive_layer():
+    assert np.allclose(TransmissiveLayer()(wf).phasor, wf.phasor)
+    attenuated = TransmissiveLayer(0.5)(wf)
+    assert np.allclose(attenuated.power, 0.25 * wf.power)
+    assert np.allclose(TransmissiveLayer(0.5, normalise=True)(wf).power, 1)
+
+
+def test_aberrated_layer():
+    layer = AberratedLayer(opd=1e-7, phase=0.2)
+    expected = wf.add_opd(1e-7).add_phase(0.2)
+    assert np.allclose(layer(wf).phasor, expected.phasor)
+    assert np.allclose(AberratedLayer()(wf).phasor, wf.phasor)
+
+
+def test_normalise():
+    assert np.allclose(Normalise()(wf).power, 1)
