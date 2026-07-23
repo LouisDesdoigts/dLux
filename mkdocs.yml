@@ -114,6 +114,7 @@ nav:
       - Abcd Propagators: API/layers/abcd_propagators.md
       - Apertures: API/layers/apertures.md
       - Detector Layers: API/layers/detector_layers.md
+      - Lenses: API/layers/lenses.md
       - Optical Layers: API/layers/optical_layers.md
       - Optics: API/layers/optics.md
       - Propagators: API/layers/propagators.md

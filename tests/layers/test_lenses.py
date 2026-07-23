@@ -3,7 +3,7 @@ import jax
 import jax.numpy as np
 import pytest
 
-from dLux import Wavefront
+from dLux import PolarisedWavefront, Wavefront
 from dLux.layers import CauchyIndex, InterpolatedIndex, Lens, Wedge
 from dLux.parametric import Parametric
 
@@ -24,6 +24,14 @@ def test_cauchy_index():
     assert np.allclose(
         CauchyIndex([1.5, 0.01, 0.001]).evaluate(wavefront=WAVEFRONT), 1.511
     )
+
+
+def test_cauchy_index_is_vectorised_over_wavelength():
+    wavefront = Wavefront(np.array([0.5e-6, 1e-6, 2e-6]), 8, diameter=1.0)
+    output = CauchyIndex([1.5, 0.01]).evaluate(wavefront=wavefront)
+
+    assert output.shape == (3,)
+    assert np.allclose(output, np.array([1.54, 1.51, 1.5025]))
 
 
 @pytest.mark.parametrize("coefficients", [[], [[1.5, 0.01]]])
@@ -90,6 +98,25 @@ def test_lens_is_chromatic():
     assert np.allclose(lens(red).phasor, red.add_opd(0.51e-7).phasor)
 
 
+@pytest.mark.parametrize("wavefront_type", [Wavefront, PolarisedWavefront])
+@pytest.mark.parametrize("mapped_sampling", [False, True])
+def test_lens_supports_chromatic_wavefront_variants(wavefront_type, mapped_sampling):
+    wavelengths = np.array([0.5e-6, 1e-6, 2e-6])
+    wavefront = wavefront_type(wavelengths, 8, diameter=1.0)
+    if mapped_sampling:
+        wavefront = wavefront.set(pixel_scale=np.array([1 / 8, 1 / 10, 1 / 12]))
+    thickness = np.ones((8, 8)) * 1e-7
+    index = CauchyIndex([1.5, 0.01])
+
+    output = Lens(thickness, n=index)(wavefront)
+    n = index.evaluate(wavefront=wavefront)
+    expected = wavefront.add_opd((n - 1)[..., None, None] * thickness)
+
+    assert type(output) is wavefront_type
+    assert output.phasor.shape == wavefront.phasor.shape
+    assert np.allclose(output.phasor, expected.phasor)
+
+
 @pytest.mark.parametrize("normalise", [False, True])
 def test_lens_applies_transmission_and_normalisation(normalise):
     output = Lens(0, n=1.5, transmission=0.5, normalise=normalise)(WAVEFRONT)
@@ -125,6 +152,28 @@ def test_referenced_wedge_applies_differential_dispersion():
     x, _ = wavefront.coordinates()
     expected = wavefront.add_opd(0.1 * x * np.tan(1e-6))
     assert np.allclose(wedge(wavefront).phasor, expected.phasor)
+
+
+@pytest.mark.parametrize("wavefront_type", [Wavefront, PolarisedWavefront])
+@pytest.mark.parametrize("mapped_sampling", [False, True])
+def test_wedge_supports_chromatic_wavefront_variants(wavefront_type, mapped_sampling):
+    wavelengths = np.array([1e-6, 1.5e-6, 2e-6])
+    wavefront = wavefront_type(wavelengths, 8, diameter=1.0)
+    if mapped_sampling:
+        wavefront = wavefront.set(pixel_scale=np.array([1 / 8, 1 / 10, 1 / 12]))
+    index = InterpolatedIndex([1e-6, 2e-6], [1.6, 1.5])
+    angle = np.array([1e-3, -2e-3])
+
+    output = Wedge(angle, n=index)(wavefront)
+    n = index.evaluate(wavefront=wavefront)
+    coordinates = wavefront.coordinates()
+    x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
+    thickness = x * np.tan(angle[0]) + y * np.tan(angle[1])
+    expected = wavefront.add_opd((n - 1)[..., None, None] * thickness)
+
+    assert type(output) is wavefront_type
+    assert output.phasor.shape == wavefront.phasor.shape
+    assert np.allclose(output.phasor, expected.phasor)
 
 
 def test_lens_supports_jit_and_gradients():
