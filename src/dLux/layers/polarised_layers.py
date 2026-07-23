@@ -1,9 +1,7 @@
 """Polarised optical layers and parameterised polarisation fields."""
 
 from __future__ import annotations
-import equinox as eqx
 import jax.numpy as np
-import zodiax as zdx
 import dLux.utils as dlu
 from jax import Array
 
@@ -13,102 +11,22 @@ from ..parametric import Parametric
 from ..wavefronts import Wavefront
 
 __all__ = [
-    "FieldDict",
     "PolarisingOptic",
     "UniformPolarisingOptic",
     "LinearPolariser",
     "Retarder",
-    "SVLinearPolariser",
-    "SVRetarder",
 ]
-
-
-class FieldDict(zdx.Base):
-    """
-    A small dict-backed container with attribute access.
-
-    Spatially varying polarisation layers store their raw parameter leaves, basis
-    objects, and coefficients in separate `FieldDict`s. This keeps paths like
-    `layer.parameters.angle`, `layer.basis.angle`, and `layer.coefficients.angle`
-    explicit and optimisable while letting each layer support arbitrary field names.
-
-    Attributes
-    ----------
-    values : dict
-        Dictionary mapping field names to values.
-    """
-
-    values: dict
-
-    def __init__(self: FieldDict, values: dict = None, **kwargs):
-        """
-        Parameters
-        ----------
-        values : dict = None
-            Initial field dictionary.
-        **kwargs
-            Additional field values.
-        """
-        values = {} if values is None else dict(values)
-        values.update(kwargs)
-        self.values = values
-
-    def __getitem__(self: FieldDict, key: str):
-        """
-        Returns a field by name.
-
-        Returns
-        -------
-        value : Array
-            Field value.
-        """
-        return self.values[key]
-
-    def __getattr__(self: FieldDict, key: str):
-        """
-        Returns a field by attribute access.
-        """
-        try:
-            return self.values[key]
-        except KeyError as err:
-            raise AttributeError(key) from err
-
-    def get(self: FieldDict, key: str, default=None):
-        """
-        Returns a field by name, or `default` if it is absent.
-        """
-        return self.values.get(key, default)
-
-    def __contains__(self: FieldDict, key: str) -> bool:
-        """
-        Returns whether a field is present.
-        """
-        return key in self.values
-
-
-def _eval_leaf(leaf, basis, coefficients) -> Array:
-    """
-    Evaluates a parameter leaf using the matching basis and coefficients.
-
-    Parametric leaves are evaluated directly through the common parameterisation
-    interface. Raw scalar and array leaves are returned directly.
-    """
-    if isinstance(leaf, Parametric):
-        return leaf.evaluate()
-
-    return np.asarray(leaf, float)
 
 
 class BasePolarisingOptic(OpticalLayer):
     """
     Base class for layers that apply a Jones matrix to a wavefront.
 
-    Subclasses expose `jones` with shape `(2, 2, ...)`, matching the polarisation
-    utility convention. The trailing axes may be empty for global optics or spatial
-    for spatially varying optics.
+    Subclasses expose Jones matrices with shape `(2, 2, ...)`, matching the
+    polarisation utility convention. The trailing axes may be empty for global
+    optics or spatial for spatially varying optics. Context-dependent layers resolve
+    their Jones matrices when applied to a wavefront.
     """
-
-    jones: eqx.AbstractVar
 
     def __call__(self: PolarisingOptic, wavefront: Wavefront) -> Wavefront:
         """
@@ -204,205 +122,107 @@ class UniformPolarisingOptic(PolarisingOptic):
         return wavefront.apply_jones(dlu.rotate_jones(self.jones, self.orientation))
 
 
-class LinearPolariser(UniformPolarisingOptic):
+class LinearPolariser(BasePolarisingOptic):
     """
-    A spatially uniform ideal linear polariser.
+    An ideal linear polariser.
 
-    `orientation` is the transmission-axis angle measured counter-clockwise from the
-    horizontal x-axis.
+    `angle` is the transmission-axis angle measured counter-clockwise from the
+    horizontal x-axis. It may be a scalar, array, or `Parametric` object. Parametric
+    angles are evaluated against the input wavefront when the layer is applied.
+
+    Attributes
+    ----------
+    angle : Array or Parametric
+        Transmission-axis angle in radians.
     """
 
-    def __init__(self: LinearPolariser, orientation: Array | None = None):
+    angle: Array | Parametric
+
+    def __init__(
+        self: LinearPolariser,
+        angle: Array | Parametric = 0.0,
+    ):
         """
         Parameters
         ----------
-        orientation : Array or None = None
+        angle : Array or Parametric = 0.0
             Transmission-axis angle in radians.
         """
-        super().__init__(dlu.linear_polariser(0.0), orientation)
+        self.angle = self.as_parametric(angle)
+
+    def evaluate_angle(self: LinearPolariser, wavefront: Wavefront = None) -> Array:
+        """Returns the transmission-axis angle evaluated in context."""
+        return self.resolve(self.angle, wavefront=wavefront)
+
+    def evaluate_jones(self: LinearPolariser, wavefront: Wavefront = None) -> Array:
+        """Returns the Jones matrix evaluated in context."""
+        return dlu.linear_polariser(self.evaluate_angle(wavefront))
+
+    @property
+    def jones(self: LinearPolariser) -> Array:
+        """Returns the Jones matrix for context-independent angles."""
+        return self.evaluate_jones()
+
+    def __call__(self: LinearPolariser, wavefront: Wavefront) -> Wavefront:
+        """Applies the linear polariser to the input wavefront."""
+        return wavefront.apply_jones(self.evaluate_jones(wavefront))
 
 
-class Retarder(UniformPolarisingOptic):
+class Retarder(BasePolarisingOptic):
     """
-    A spatially uniform retarder.
+    A retarder with uniform or spatially varying parameters.
 
     `retardance` is the phase delay of the vertical component relative to horizontal.
-    `orientation` rotates the retarder fast axis counter-clockwise from horizontal.
+    `angle` rotates the fast axis counter-clockwise from horizontal. Both parameters
+    may be scalars, arrays, or `Parametric` objects and are evaluated against the
+    input wavefront when the layer is applied.
+
+    Attributes
+    ----------
+    retardance : Array or Parametric
+        Retardance in radians.
+    angle : Array or Parametric
+        Fast-axis angle in radians.
     """
+
+    retardance: Array | Parametric
+    angle: Array | Parametric
 
     def __init__(
         self: Retarder,
-        retardance: Array,
-        orientation: Array | None = None,
+        retardance: Array | Parametric,
+        angle: Array | Parametric = 0.0,
     ):
         """
         Parameters
         ----------
-        retardance : Array
+        retardance : Array or Parametric
             Retardance in radians.
-        orientation : Array or None = None
-            Fast-axis rotation angle in radians.
-        """
-        super().__init__(dlu.retarder(retardance, 0.0), orientation)
-
-
-class SVLinearPolariser(BasePolarisingOptic):
-    """
-    A spatially varying ideal linear polariser.
-
-    `angle` may be a scalar, array, or basis marker. The evaluated physical angle is
-    exposed by `layer.angle`; the raw leaf, basis, and coefficients are available via
-    `layer.parameters.angle`, `layer.basis.angle`, and `layer.coefficients.angle`.
-
-    Attributes
-    ----------
-    parameters : FieldDict
-        Raw parameter leaves.
-    basis : FieldDict
-        Basis data for basis-backed leaves.
-    coefficients : FieldDict
-        Coefficients for basis-backed leaves.
-    """
-
-    parameters: FieldDict
-    basis: FieldDict
-    coefficients: FieldDict
-
-    def __init__(
-        self: SVLinearPolariser,
-        angle: Array,
-        basis: dict = None,
-        coefficients: dict = None,
-    ):
-        """
-        Parameters
-        ----------
-        angle : Array
-            Transmission-axis angle in radians, or a basis marker.
-        basis : dict = None
-            Basis data keyed by parameter name.
-        coefficients : dict = None
-            Basis coefficients keyed by parameter name.
-        """
-        self.parameters = FieldDict(angle=angle)
-        self.basis = FieldDict(basis)
-        self.coefficients = FieldDict(coefficients)
-
-    @property
-    def angle(self: SVLinearPolariser) -> Array:
-        """
-        Evaluated transmission-axis angle.
-
-        Returns
-        -------
-        angle : Array
-            Transmission-axis angle in radians.
-        """
-        return _eval_leaf(
-            self.parameters.angle,
-            self.basis.get("angle"),
-            self.coefficients.get("angle"),
-        )
-
-    @property
-    def jones(self: SVLinearPolariser) -> Array:
-        """
-        Returns the evaluated Jones matrix.
-
-        Returns
-        -------
-        jones : Array
-            Linear polariser Jones matrix with shape `(2, 2, ...)`.
-        """
-        return dlu.linear_polariser(self.angle)
-
-
-class SVRetarder(BasePolarisingOptic):
-    """
-    A spatially varying retarder.
-
-    Retardance and angle may be independently specified as scalars, arrays, or basis
-    markers. Evaluated physical values are exposed by `layer.retardance` and
-    `layer.angle`; raw leaves, basis data, and coefficients are stored in matching
-    `FieldDict`s.
-
-    Attributes
-    ----------
-    parameters : FieldDict
-        Raw parameter leaves.
-    basis : FieldDict
-        Basis data for basis-backed leaves.
-    coefficients : FieldDict
-        Coefficients for basis-backed leaves.
-    """
-
-    parameters: FieldDict
-    basis: FieldDict
-    coefficients: FieldDict
-
-    def __init__(
-        self: SVRetarder,
-        retardance: Array,
-        angle: Array,
-        basis: dict = None,
-        coefficients: dict = None,
-    ):
-        """
-        Parameters
-        ----------
-        retardance : Array
-            Retardance in radians, or a basis marker.
-        angle : Array
-            Fast-axis angle in radians, or a basis marker.
-        basis : dict = None
-            Basis data keyed by parameter name.
-        coefficients : dict = None
-            Basis coefficients keyed by parameter name.
-        """
-        self.parameters = FieldDict(retardance=retardance, angle=angle)
-        self.basis = FieldDict(basis)
-        self.coefficients = FieldDict(coefficients)
-
-    @property
-    def retardance(self: SVRetarder) -> Array:
-        """
-        Evaluated retardance.
-
-        Returns
-        -------
-        retardance : Array
-            Retardance in radians.
-        """
-        return _eval_leaf(
-            self.parameters.retardance,
-            self.basis.get("retardance"),
-            self.coefficients.get("retardance"),
-        )
-
-    @property
-    def angle(self: SVRetarder) -> Array:
-        """
-        Evaluated fast-axis angle.
-
-        Returns
-        -------
-        angle : Array
+        angle : Array or Parametric = 0.0
             Fast-axis angle in radians.
         """
-        return _eval_leaf(
-            self.parameters.angle,
-            self.basis.get("angle"),
-            self.coefficients.get("angle"),
-        )
+        self.retardance = self.as_parametric(retardance)
+        self.angle = self.as_parametric(angle)
+
+    def evaluate_retardance(self: Retarder, wavefront: Wavefront = None) -> Array:
+        """Returns the retardance evaluated in context."""
+        return self.resolve(self.retardance, wavefront=wavefront)
+
+    def evaluate_angle(self: Retarder, wavefront: Wavefront = None) -> Array:
+        """Returns the fast-axis angle evaluated in context."""
+        return self.resolve(self.angle, wavefront=wavefront)
+
+    def evaluate_jones(self: Retarder, wavefront: Wavefront = None) -> Array:
+        """Returns the Jones matrix evaluated in context."""
+        retardance = self.evaluate_retardance(wavefront)
+        angle = self.evaluate_angle(wavefront)
+        return dlu.retarder(retardance, angle)
 
     @property
-    def jones(self: SVRetarder) -> Array:
-        """
-        Returns the evaluated Jones matrix.
+    def jones(self: Retarder) -> Array:
+        """Returns the Jones matrix for context-independent parameters."""
+        return self.evaluate_jones()
 
-        Returns
-        -------
-        jones : Array
-            Retarder Jones matrix with shape `(2, 2, ...)`.
-        """
-        return dlu.retarder(self.retardance, self.angle)
+    def __call__(self: Retarder, wavefront: Wavefront) -> Wavefront:
+        """Applies the retarder to the input wavefront."""
+        return wavefront.apply_jones(self.evaluate_jones(wavefront))
