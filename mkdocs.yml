@@ -102,6 +102,8 @@ nav:
       - Detectors: API/core/detectors.md
       - Instruments: API/core/instruments.md
       - Optical Systems: API/core/optical_systems.md
+      - Parametric: API/core/parametric.md
+      - Polynomials: API/core/polynomials.md
       - Psfs: API/core/psfs.md
       - Sources: API/core/sources.md
       - Spectra: API/core/spectra.md
@@ -110,9 +112,9 @@ nav:
     - Layers API:
       - Overview: API/layers/overview.md
       - Abcd Propagators: API/layers/abcd_propagators.md
-      - Aberrations: API/layers/aberrations.md
       - Apertures: API/layers/apertures.md
       - Detector Layers: API/layers/detector_layers.md
+      - Lenses: API/layers/lenses.md
       - Optical Layers: API/layers/optical_layers.md
       - Optics: API/layers/optics.md
       - Propagators: API/layers/propagators.md

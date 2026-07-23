@@ -2,6 +2,42 @@
 
 ---
 
+## V0.17.0
+
+### ✨ New Features
+- Polarisation layers now accept scalar, sampled, or parametric angle and retardance
+  fields, including bases evaluated dynamically from wavefront coordinates.
+
+### ⚠️ Breaking Changes
+- `LinearPolariser` and `Retarder` now cover both uniform and spatially varying
+  fields. Their axis parameter is consistently named `angle`, and the redundant
+  `SVLinearPolariser` and `SVRetarder` classes have been removed.
+
+## V0.16.0
+
+### ✨ New Features
+- Added a general parametric basis interface, including explicit and generated
+  bases with coefficient evaluation and solving support.
+- Added polynomial basis models that integrate directly with the parametric
+  basis API.
+- Added coordinate-transform interpolation methods to `Wavefront` and `PSF`
+  ([#302](https://github.com/LouisDesdoigts/dLux/issues/302)).
+- Added dedicated `Interpolate` optical and `ApplyInterpolation` detector layers
+  for use in layered propagation and detector models.
+
+### ⚠️ Breaking Changes
+- Reworked basis aberrations around the general `BasisLayer` and parametric basis
+  interfaces, replacing the previous specialised aberration-layer module and
+  standardising OPD, phase, and amplitude effects
+  ([#331](https://github.com/LouisDesdoigts/dLux/issues/331)).
+
+### ⏳ Deprecations
+- No APIs are deprecated in this release.
+
+### 🐛 Bug Fixes
+- Wavefront and PSF interpolation now share the established interpolation utility
+  while preserving their distinct complex and real-valued data requirements.
+
 ## V0.15.1
 
 ### ✨ New Features
