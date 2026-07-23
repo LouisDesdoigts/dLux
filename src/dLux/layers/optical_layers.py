@@ -13,14 +13,63 @@ from ..coordinates import BaseCoordTransform
 from ..parametric import BaseParametric, Shape
 from ..wavefronts import Wavefront
 from .polarised_layers import BasePolarisingOptic
-from .unified_layers import (
-    AberratedLayer,
-    BaseOpticalLayer,
-    Normalise,
-    TransmissiveLayer,
-)
+from .unified_layers import BaseOpticalLayer
 
-__all__ = ["Optic", "DynamicOptic", "Lens", "Wedge", "Interpolate", "Tilt"]
+__all__ = [
+    "TransmissiveLayer",
+    "AberratedLayer",
+    "Normalise",
+    "Optic",
+    "DynamicOptic",
+    "Lens",
+    "Wedge",
+    "Interpolate",
+    "Tilt",
+]
+
+
+class TransmissiveLayer(BaseOpticalLayer):
+    """Apply a transmission, with optional output normalisation."""
+
+    transmission: Array | BaseParametric | None
+    normalise: bool
+
+    def __init__(self, transmission=None, normalise=False):
+        self.transmission = self.as_parametric(transmission)
+        self.normalise = bool(normalise)
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        transmission = self.resolve(self.transmission, wavefront=wavefront)
+        if transmission is not None:
+            transmission = wavefront._to_phasor_shape(transmission)
+            wavefront = wavefront.set(phasor=wavefront.phasor * transmission)
+        if self.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront
+
+
+class AberratedLayer(BaseOpticalLayer):
+    """Apply optical-path and phase aberrations to a wavefront."""
+
+    opd: Array | BaseParametric | None
+    phase: Array | BaseParametric | None
+
+    def __init__(self, opd=None, phase=None):
+        self.opd = self.as_parametric(opd)
+        self.phase = self.as_parametric(phase)
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        opd = self.resolve(self.opd, wavefront=wavefront)
+        phase = self.resolve(self.phase, wavefront=wavefront)
+        wavefront = wavefront.add_opd(opd)
+        return wavefront.add_phase(phase)
+
+
+class Normalise(BaseOpticalLayer):
+    """Normalise a wavefront to unit power."""
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        return wavefront.normalise()
 
 
 class Optic(TransmissiveLayer, AberratedLayer, Normalise):

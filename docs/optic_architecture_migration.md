@@ -53,7 +53,7 @@ are intentionally left untouched until the source migration is structurally comp
 - [x] Keep `BaseLayer`, `BaseOpticalLayer`, and `BaseUnifiedLayer` in
   `unified_layers.py`.
 - [x] Retain standalone `TransmissiveLayer`, `AberratedLayer`, and `Normalise`
-  implementations and compose their contracts through `Optic`.
+  implementations in `optical_layers.py` and compose their contracts through `Optic`.
 - [x] Add an ordered `Affine` container whose translation, rotation, scaling, shearing,
   and raw-matrix operations retain semantic JAX leaves.
 - [x] Add ordered `TransformChain`.
