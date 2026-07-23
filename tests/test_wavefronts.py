@@ -575,6 +575,14 @@ class TestPolarisedWavefrontMagicMethods:
         with pytest.raises(TypeError):
             getattr(polarised, method)(wavefront)
 
+    def test_scalar_division(self):
+        wavefront = PolarisedWavefront(1.0e-6, npixels=8, diameter=1.0)
+
+        output = wavefront / 2
+
+        assert isinstance(output, PolarisedWavefront)
+        assert np.allclose(output.phasor, wavefront.phasor / 2)
+
     @pytest.mark.parametrize("nwavelengths", [2, 3])
     def test_chromatic_mixed_polarisation_dimensions(self, nwavelengths):
         wavelengths = np.linspace(1.0e-6, 2.0e-6, nwavelengths)

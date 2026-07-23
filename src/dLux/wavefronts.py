@@ -313,7 +313,7 @@ class Wavefront(zdx.Base):
         wavenumber : Array, 1/meters
             The wavenumber of the wavefront.
         """
-        return 2 * np.pi / self.wavelength
+        return 2 * np.pi / np.asarray(self.wavelength)
 
     @property
     def ndim(self: Wavefront) -> int:
@@ -394,7 +394,7 @@ class Wavefront(zdx.Base):
             The input reshaped to broadcast over the phasor axes.
         """
         array = np.asarray(array)
-        chromatic_ndim = self.wavelength.ndim
+        chromatic_ndim = np.asarray(self.wavelength).ndim
         extra_ndim = self.phasor.ndim - chromatic_ndim - 2
 
         if array.ndim == chromatic_ndim:
@@ -1030,7 +1030,7 @@ class Wavefront(zdx.Base):
             output = self.add("phasor", -other)
         elif op == "multiply":
             output = self.multiply("phasor", other)
-        elif op == "divide":
+        else:
             output = self.multiply("phasor", 1 / other)
         return output
 
