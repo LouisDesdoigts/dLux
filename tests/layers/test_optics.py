@@ -30,9 +30,27 @@ def test_optic(transmission, opd, phase, normalise):
 @pytest.mark.parametrize("basis", [np.ones((5, 16, 16))])
 @pytest.mark.parametrize("transmission", [None, np.ones((16, 16))])
 @pytest.mark.parametrize("coefficients", [None, np.ones(5)])
-@pytest.mark.parametrize("as_phase", [True, False])
+@pytest.mark.parametrize("effect", ["opd", "phase", "amplitude"])
 @pytest.mark.parametrize("normalise", [True, False])
-def test_basis_optic(basis, transmission, coefficients, as_phase, normalise):
+def test_basis_optic(basis, transmission, coefficients, effect, normalise):
     _test_apply(
-        BasisOptic(basis, transmission, coefficients, as_phase, normalise)
+        BasisOptic(
+            basis,
+            transmission,
+            coefficients,
+            normalise=normalise,
+            effect=effect,
+        )
     )
+
+
+def test_normalised_amplitude_basis_defaults_to_identity():
+    optic = BasisOptic(
+        np.ones((5, 16, 16)),
+        effect="amplitude",
+        normalise=True,
+    )
+
+    result = optic(wf)
+
+    assert np.allclose(result.power, 1.0)

@@ -7,10 +7,12 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..psfs import PSF
+from ..coordinates import BaseCoordTransform
 from .optical_layers import BaseLayer
 
 __all__ = [
     "ApplyPixelResponse",
+    "ApplyInterpolation",
     "ApplyJitter",
     "ApplySaturation",
     "AddConstant",
@@ -61,6 +63,38 @@ class DetectorLayer(BaseLayer):
             The transformed PSF.
         """
         return self(psf)
+
+
+class ApplyInterpolation(DetectorLayer):
+    """Interpolate a PSF through a coordinate transformation.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/ApplyInterpolation.png)
+    """
+
+    transformation: BaseCoordTransform
+    method: str
+    fill: float
+
+    def __init__(
+        self,
+        transformation: BaseCoordTransform,
+        method: str = "linear",
+        fill: float = 0.0,
+    ):
+        super().__init__()
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
+        self.transformation = transformation
+        self.method = str(method)
+        self.fill = np.asarray(fill, dtype=float)
+
+    def __call__(self, psf: PSF) -> PSF:
+        return psf.interpolate(
+            self.transformation,
+            method=self.method,
+            fill=self.fill,
+        )
 
 
 class ApplyPixelResponse(DetectorLayer):
