@@ -154,7 +154,7 @@ def aperture(rmax):
 
 
 @pytest.mark.parametrize("coefficients", [None, np.zeros(4)])
-@pytest.mark.parametrize("as_phase", [True, False])
+@pytest.mark.parametrize("effect", ["opd", "phase", "amplitude"])
 @pytest.mark.parametrize(
     "aperture",
     [
@@ -162,8 +162,8 @@ def aperture(rmax):
         CircularAperture(0.1, CoordTransform()),
     ],
 )
-def test_aberrated_aperture(aperture, noll_indices, coefficients, as_phase):
-    ap = AberratedAperture(aperture, noll_indices, coefficients, as_phase)
+def test_aberrated_aperture(aperture, noll_indices, coefficients, effect):
+    ap = AberratedAperture(aperture, noll_indices, coefficients, effect)
     _test_apply(ap)
 
 
@@ -176,6 +176,27 @@ def test_aberrated_aperture_error(noll_indices, rmax, angles):
         AberratedAperture(None, noll_indices)
     with pytest.raises(NotImplementedError):
         AberratedAperture(CircularAperture(rmax), noll_indices).calculate()
+    with pytest.raises(ValueError, match="effect"):
+        AberratedAperture(CircularAperture(rmax), noll_indices, effect="invalid")
+
+
+def test_aberrated_aperture_transformed_basis(noll_indices):
+    aperture = CircularAperture(0.1, transformation=CoordTransform())
+    aberrated = AberratedAperture(aperture, noll_indices)
+
+    assert aberrated.calc_basis(wf.coordinates()).shape == (
+        len(noll_indices),
+        wf.npixels,
+        wf.npixels,
+    )
+
+
+def test_aberrated_amplitude_is_perturbation_from_unity(noll_indices):
+    aperture = CircularAperture(0.1)
+    plain = aperture(wf)
+    aberrated = AberratedAperture(aperture, noll_indices, effect="amplitude")(wf)
+
+    assert np.allclose(aberrated.amplitude, plain.amplitude)
 
 
 @pytest.fixture

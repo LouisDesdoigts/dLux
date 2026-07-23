@@ -84,6 +84,19 @@ class TestEvalBasis:
         result = math_utils.eval_basis(basis, coefficients)
         assert result.shape == (10, 10)
 
+    def test_arbitrary_coefficient_and_output_dimensions(self):
+        coefficients = np.arange(6.0).reshape(2, 3)
+        basis = np.arange(2 * 3 * 4 * 5 * 6.0).reshape(2, 3, 4, 5, 6)
+
+        result = math_utils.eval_basis(basis, coefficients)
+
+        assert result.shape == (4, 5, 6)
+        assert np.allclose(result, np.tensordot(basis, coefficients, ((0, 1), (0, 1))))
+
+    def test_invalid_leading_dimensions(self):
+        with pytest.raises(ValueError, match="leading basis dimensions"):
+            math_utils.eval_basis(np.ones((2, 3, 4)), np.ones((3, 2)))
+
 
 # ============================================================================
 # Tests for solve_basis

@@ -7,7 +7,7 @@ import zodiax as zdx
 import dLux.utils as dlu
 
 from .psfs import PSF
-from .coordinates import CoordSpec
+from .coordinates import BaseCoordTransform, CoordSpec
 
 __all__ = ["Wavefront", "PolarisedWavefront"]
 
@@ -313,7 +313,7 @@ class Wavefront(zdx.Base):
         wavenumber : Array, 1/meters
             The wavenumber of the wavefront.
         """
-        return 2 * np.pi / self.wavelength
+        return 2 * np.pi / np.asarray(self.wavelength)
 
     @property
     def ndim(self: Wavefront) -> int:
@@ -394,7 +394,7 @@ class Wavefront(zdx.Base):
             The input reshaped to broadcast over the phasor axes.
         """
         array = np.asarray(array)
-        chromatic_ndim = self.wavelength.ndim
+        chromatic_ndim = np.asarray(self.wavelength).ndim
         extra_ndim = self.phasor.ndim - chromatic_ndim - 2
 
         if array.ndim == chromatic_ndim:
@@ -582,42 +582,62 @@ class Wavefront(zdx.Base):
 
     def interpolate(
         self: Wavefront,
-        knot_coords: Array,
-        sample_coords: Array,
+        transformation: BaseCoordTransform,
         method: str = "linear",
-        fill: float = 0.0,
         complex: bool = True,
+        fill: float = 0.0,
     ) -> Wavefront:
-        """
-        Interpolates the wavefront onto a set of sample coordinates. Leading phasor
-        dimensions are vectorised over directly.
+        """Interpolate through a coordinate transformation.
+
+        Leading phasor dimensions, including wavelength and Jones matrix axes, are
+        vectorised over directly.
 
         Parameters
         ----------
-        knot_coords : Array
-            The coordinates of the sampled points in the wavefront.
-        sample_coords : Array
-            The coordinates to interpolate onto.
+        transformation : BaseCoordTransform
+            Transformation applied to the wavefront sampling coordinates.
         method : str = "linear"
-            The interpolation method.
-        fill : float = 0.0
-            Fill value used outside `knot_coords`.
+            Interpolation method passed to ``interpax``.
         complex : bool = True
             If True, interpolate the real and imaginary components. If False,
             interpolate the amplitude and phase components.
+        fill : float = 0.0
+            Value used when sampling outside the input grid.
 
         Returns
         -------
         wavefront : Wavefront
-            The new interpolated wavefront.
+            The interpolated wavefront.
         """
-        interp = np.vectorize(
-            lambda phasor: dlu.interp(
-                phasor, knot_coords, sample_coords, method, fill, complex
-            ),
-            signature="(n,n)->(m,m)",
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
+        knot_coords = self.coordinates()
+        transform = np.vectorize(
+            transformation,
+            signature="(c,n,n)->(c,n,n)",
         )
-        return self.set(phasor=interp(self.phasor))
+        sample_coords = transform(knot_coords)
+
+        # Per-wavelength coordinate grids need singleton axes inserted for intrinsic
+        # leading dimensions such as the Jones matrix axes of PolarisedWavefront.
+        chromatic_ndim = self.wavelength.ndim
+        extra_ndim = self.phasor.ndim - chromatic_ndim - 2
+        if knot_coords.ndim == chromatic_ndim + 3:
+            shape = (
+                knot_coords.shape[:chromatic_ndim]
+                + (1,) * extra_ndim
+                + knot_coords.shape[-3:]
+            )
+            knot_coords = knot_coords.reshape(shape)
+            sample_coords = sample_coords.reshape(shape)
+
+        interp = np.vectorize(
+            lambda phasor, knots, samples: dlu.interp(
+                phasor, knots, samples, method, fill, complex
+            ),
+            signature="(n,n),(c,n,n),(c,m,m)->(m,m)",
+        )
+        return self.set(phasor=interp(self.phasor, knot_coords, sample_coords))
 
     def rotate(
         self: Wavefront,
@@ -1010,7 +1030,7 @@ class Wavefront(zdx.Base):
             output = self.add("phasor", -other)
         elif op == "multiply":
             output = self.multiply("phasor", other)
-        elif op == "divide":
+        else:
             output = self.multiply("phasor", 1 / other)
         return output
 
