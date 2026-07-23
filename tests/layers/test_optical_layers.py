@@ -11,7 +11,7 @@ from dLux.layers import (
     Tilt,
     UniformPolarisingOptic,
 )
-from dLux.layers.unified_layers import AberratedLayer, Normalise, TransmissiveLayer
+from dLux.layers.optical_layers import AberratedLayer, Normalise, TransmissiveLayer
 from dLux.parametric import Circle
 
 
@@ -30,6 +30,24 @@ def test_optic_phasor_and_normalisation(wavefront):
     assert optic.phasor(wavefront).shape == (1, 1)
     assert optic.phasor(wavefront, params).shape == (1, 1)
     assert np.allclose(optic(wavefront).power, 1)
+
+
+def test_transmissive_layer(wavefront):
+    assert np.allclose(TransmissiveLayer()(wavefront).phasor, wavefront.phasor)
+    attenuated = TransmissiveLayer(0.5)(wavefront)
+    assert np.allclose(attenuated.power, 0.25 * wavefront.power)
+    assert np.allclose(TransmissiveLayer(0.5, normalise=True)(wavefront).power, 1)
+
+
+def test_aberrated_layer(wavefront):
+    layer = AberratedLayer(opd=1e-7, phase=0.2)
+    expected = wavefront.add_opd(1e-7).add_phase(0.2)
+    assert np.allclose(layer(wavefront).phasor, expected.phasor)
+    assert np.allclose(AberratedLayer()(wavefront).phasor, wavefront.phasor)
+
+
+def test_normalise(wavefront):
+    assert np.allclose(Normalise()(wavefront).power, 1)
 
 
 def test_optic_validation_and_propagator(wavefront):
