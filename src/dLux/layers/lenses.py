@@ -15,7 +15,11 @@ __all__ = ["CauchyIndex", "InterpolatedIndex", "Lens", "Wedge"]
 
 
 class CauchyIndex(Parametric):
-    """A refractive index represented by a Cauchy dispersion relation."""
+    """A refractive index represented by a Cauchy dispersion relation.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/CauchyIndex.png)
+    """
 
     coefficients: Array
     scale: Array
@@ -34,11 +38,15 @@ class CauchyIndex(Parametric):
         """Evaluate ``A + B/x² + C/x⁴ + ...`` at the wavefront wavelength."""
         x = wavefront.wavelength / self.scale
         powers = 2 * np.arange(self.coefficients.size)
-        return np.sum(self.coefficients / x**powers)
+        return np.sum(self.coefficients / x[..., None] ** powers, axis=-1)
 
 
 class InterpolatedIndex(Parametric):
-    """A refractive index interpolated from wavelength-index samples."""
+    """A refractive index interpolated from wavelength-index samples.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/InterpolatedIndex.png)
+    """
 
     wavelengths: Array
     indices: Array
@@ -76,7 +84,11 @@ class InterpolatedIndex(Parametric):
 
 
 class Lens(TransmissiveLayer):
-    """Apply residual refractive OPD from a material-thickness profile."""
+    """Apply residual refractive OPD from a material-thickness profile.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/Lens.png)
+    """
 
     thickness: Array | Parametric
     n: Array | Parametric
@@ -105,12 +117,19 @@ class Lens(TransmissiveLayer):
         thickness = self.resolve(self.thickness, wavefront=wavefront)
         n = self.resolve(self.n, wavefront=wavefront)
         wavefront *= self.resolve(self.transmission, wavefront=wavefront)
-        wavefront = wavefront.add_opd((n - 1) * thickness)
+        index_difference = np.asarray(n - 1)
+        if index_difference.ndim:
+            index_difference = index_difference[..., None, None]
+        wavefront = wavefront.add_opd(index_difference * thickness)
         return wavefront.normalise() if self.normalise else wavefront
 
 
 class Wedge(TransmissiveLayer):
-    """Apply the chromatic linear OPD of a thin refractive wedge."""
+    """Apply the chromatic linear OPD of a thin refractive wedge.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/Wedge.png)
+    """
 
     angle: Array
     n: Array | Parametric
@@ -143,8 +162,12 @@ class Wedge(TransmissiveLayer):
             n_reference = self.resolve(self.n, wavefront=reference)
             index_difference = n - n_reference
 
-        x, y = wavefront.coordinates()
+        coordinates = wavefront.coordinates()
+        x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
         thickness = x * np.tan(self.angle[0]) + y * np.tan(self.angle[1])
         wavefront *= self.resolve(self.transmission, wavefront=wavefront)
+        index_difference = np.asarray(index_difference)
+        if index_difference.ndim:
+            index_difference = index_difference[..., None, None]
         wavefront = wavefront.add_opd(index_difference * thickness)
         return wavefront.normalise() if self.normalise else wavefront
