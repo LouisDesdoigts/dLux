@@ -1,28 +1,20 @@
 # Optical Layers
 
+???+ info "Optical layer contracts"
+    ::: dLux.layers.optical_layers.BaseOpticalLayer
+    ::: dLux.layers.optical_layers.OpticalLayer
+
 ???+ info "TransmissiveLayer"
     ::: dLux.layers.optical_layers.TransmissiveLayer
 
 ???+ info "AberratedLayer"
     ::: dLux.layers.optical_layers.AberratedLayer
 
-???+ info "Normalise"
-    ::: dLux.layers.optical_layers.Normalise
-
 ???+ info "Optic"
     ::: dLux.layers.optical_layers.Optic
 
 ???+ info "DynamicOptic"
     ::: dLux.layers.optical_layers.DynamicOptic
-
-???+ info "Lens"
-    ::: dLux.layers.optical_layers.Lens
-
-???+ info "Wedge"
-    ::: dLux.layers.optical_layers.Wedge
-
-???+ info "Interpolate"
-    ::: dLux.layers.optical_layers.Interpolate
 
 ???+ info "Tilt"
     ::: dLux.layers.optical_layers.Tilt

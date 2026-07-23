@@ -11,8 +11,8 @@ are intentionally left untouched until the source migration is structurally comp
 - `dLux.layers.unified_layers`: operations that can act on both wavefronts and PSFs.
 - `dLux.parametric.shapes`: analytic, composite, and sparse aperture geometries that
   evaluate to transmissions.
-- `dLux.coord_specs`, `dLux.coordinates`, and `dLux.affine`: flat modules separating
-  sampling specifications, coordinate transformations, and affine operations.
+- `dLux.coord_specs` and `dLux.coordinates`: flat modules separating sampling
+  specifications from coordinate transformations.
 - `dLux.layers.optical_layers`: high-level user-facing `Optic`, `DynamicOptic`,
   interpolation, and small wavefront operations.
 - `dLux.parametric.bases` / `dLux.parametric.polynomials`: reusable
@@ -26,16 +26,13 @@ are intentionally left untouched until the source migration is structurally comp
 - `Optic` is the standard physical element at one optical plane.
 - Local scalar effects reduce to one complex phasor before wavefront multiplication.
 - `params(wavefront)` returns a plain dictionary and is evaluated once per call.
-- `polarisation` stores an ordered dictionary of existing polarising optics.
 - `Lens` and `Wedge` are optical layers whose material models contribute through OPD.
-- Propagation is optional and occurs after all local effects and normalisation.
-- Polarisation and onward propagation are implemented by reusable
-  `PolarisationLayer` and `PropagatorLayer` contracts inherited by `Optic`.
-- Dynamic optics share one transformed coordinate context across aperture, OPD, phase,
-  and polarisation parameterisations.
+- Polarisation and propagation remain independent optical layers.
+- Dynamic optics share one transformed coordinate context across aperture, OPD, and
+  phase parameterisations.
 - Heterogeneous ordered collections use `dlu.list2dictionary(..., ordered=True, ...)`.
-- Affine operations retain semantic JAX leaves and are explicitly ordered by `Affine`;
-  `TransformChain` composes affine and nonlinear transformations.
+- `Affine` retains semantic JAX leaves with an explicit operation order and also
+  accepts a direct transformation matrix and offset.
 - Softening and transmission inversion are independent. `Complement` inverts shapes.
 - Sparse apertures use vectorised local coordinates rather than recursive layer trees.
 
@@ -52,15 +49,15 @@ are intentionally left untouched until the source migration is structurally comp
 ### Foundations
 
 - [x] Keep each abstract base class in its respective domain module.
-- [x] Keep `BaseLayer`, `BaseOpticalLayer`, and `BaseUnifiedLayer` in
-  `unified_layers.py`.
+- [x] Keep `BaseOpticalLayer` and `OpticalLayer` in `optical_layers.py`, and make
+  unified layers satisfy both the optical and detector contracts.
 - [x] Retain standalone `TransmissiveLayer`, `AberratedLayer`, and `Normalise`
   implementations in `optical_layers.py` and compose their contracts through `Optic`.
 - [x] Add an ordered `Affine` container whose translation, rotation, scaling, shearing,
   and raw-matrix operations retain semantic JAX leaves.
 - [x] Add ordered `TransformChain`.
-- [x] Split coordinate specifications, general transformations, and affine operations
-  into the flat `dLux.coord_specs`, `dLux.coordinates`, and `dLux.affine` modules.
+- [x] Split coordinate specifications and transformations into the flat
+  `dLux.coord_specs` and `dLux.coordinates` modules.
 - [x] Remove the fixed-order `CoordTransform` and redundant atomic affine classes.
 - [x] Add `dlu.tilt_opd` and call it from `Wavefront.tilt`.
 
@@ -76,13 +73,13 @@ are intentionally left untouched until the source migration is structurally comp
 
 ### Unified optics
 
-- [x] Rebuild `Optic` as a direct `BaseOpticalLayer` with transmission, OPD, phase,
-  polarisation, normalisation, and optional propagation.
+- [x] Rebuild `Optic` as a scalar optical layer with transmission, OPD, phase, and
+  optional normalisation.
 - [x] Add `DynamicOptic` with a shared transformed coordinate context.
-- [x] Implement `Lens` and `Wedge` as optical layers and reuse existing polarisation
-  models as optic properties.
-- [x] Move user-facing interpolation and wavefront operations into `optical_layers`.
-- [x] Remove or hide `TransmissiveLayer`, `AberratedLayer`, and `Normalise`.
+- [x] Implement `Lens` and `Wedge` as direct optical layers in `refractive_layers`.
+- [x] Make interpolation, normalisation, resizing, flipping, and downsampling unified
+  optical/detector layers.
+- [x] Retain standalone `TransmissiveLayer` and `AberratedLayer`.
 - [x] Remove `BasisLayer` and `BasisOptic`; use parametric properties instead.
 
 ### Integration and cleanup
@@ -90,7 +87,7 @@ are intentionally left untouched until the source migration is structurally comp
 - [x] Consolidate `optics` into `optical_layers` and remove the redundant module.
 - [x] Move unified target operations into `unified_layers`.
 - [x] Remove the redundant interpolation-based `Rotate` layer; use `Interpolate`
-  with `Affine.rotate`.
+  with `Affine(rotation=...)`.
 - [x] Remove the unused instrument abstraction and concrete instrument wrappers.
 - [x] Consolidate direct and ABCD propagation APIs into `propagation_layers`.
 - [x] Group parametric bases, polynomials, shapes, and refractive models under

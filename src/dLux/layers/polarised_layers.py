@@ -8,7 +8,7 @@ from jax import Array
 
 from ..parametric import BaseParametric
 from ..wavefronts import Wavefront
-from .unified_layers import BaseOpticalLayer
+from .optical_layers import OpticalLayer
 
 __all__ = [
     "PolarisationLayer",
@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-class BasePolarisingOptic(BaseOpticalLayer):
+class BasePolarisingOptic(OpticalLayer):
     """
     Base class for layers that apply a Jones matrix to a wavefront.
 
@@ -47,7 +47,7 @@ class BasePolarisingOptic(BaseOpticalLayer):
         return wavefront.apply_jones(self.jones)
 
 
-class PolarisationLayer(BaseOpticalLayer):
+class PolarisationLayer(OpticalLayer):
     """Apply an ordered collection of polarising optics."""
 
     polarisation: dict | None

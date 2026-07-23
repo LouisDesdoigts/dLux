@@ -9,7 +9,7 @@ import equinox as eqx
 import zodiax as zdx
 from typing import Any
 import dLux.utils as dlu
-from .layers.unified_layers import BaseOpticalLayer
+from .layers.optical_layers import BaseOpticalLayer
 
 __all__ = [
     "BaseOpticalSystem",

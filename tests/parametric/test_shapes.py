@@ -79,7 +79,7 @@ def test_shape_validation(constructor, args, message):
 def test_complement_and_transformation(context):
     circle = Circle(0.5)
     complement = Complement(circle)
-    transformed = TransformedShape(circle, Affine.translate([0.1, 0]))
+    transformed = TransformedShape(circle, Affine(translation=[0.1, 0]))
     assert complement.extent == circle.extent
     assert transformed.extent == circle.extent
     assert np.allclose(complement.evaluate(**context), 1 - circle.evaluate(**context))

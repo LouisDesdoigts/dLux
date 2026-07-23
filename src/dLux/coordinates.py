@@ -6,12 +6,13 @@ from abc import abstractmethod
 
 import jax.numpy as np
 import zodiax as zdx
-from jax import Array
+from jax import Array, lax
 
 import dLux.utils as dlu
 
 __all__ = [
     "BaseCoordTransform",
+    "Affine",
     "TransformChain",
     "DistortedCoords",
     "Distort",
@@ -37,6 +38,111 @@ class BaseCoordTransform(zdx.Base):
     def apply(self, coordinates: Array) -> Array:
         """Backwards-compatible alias for calling the transformation."""
         return self(coordinates)
+
+
+class Affine(BaseCoordTransform):
+    """A general affine coordinate transform with semantic parameters.
+
+    Coordinates are mapped as ``x' = M x + t``. ``matrix`` and ``offset`` expose
+    that low-level form directly, while translation, rotation, scale, and shear
+    provide the common physical parameterisation. Operations are composed in the
+    order supplied by ``order``.
+    """
+
+    translation: Array | None
+    rotation: Array | None
+    scale: Array | None
+    shear: Array | None
+    matrix: Array | None
+    offset: Array | None
+    order: tuple[str, ...]
+
+    def __init__(
+        self,
+        translation=None,
+        rotation=None,
+        scale=None,
+        shear=None,
+        matrix=None,
+        offset=None,
+        order=("translation", "rotation", "scale", "shear", "matrix"),
+    ):
+        self.translation = self._vector(translation, "translation")
+        self.rotation = None if rotation is None else np.asarray(rotation, dtype=float)
+        if self.rotation is not None and self.rotation.shape != ():
+            raise ValueError("rotation must be scalar.")
+        self.scale = None
+        if scale is not None:
+            self.scale = np.broadcast_to(np.asarray(scale, dtype=float), (2,))
+            if np.any(self.scale == 0):
+                raise ValueError("scale values must be non-zero.")
+        self.shear = self._vector(shear, "shear")
+        self.matrix = None if matrix is None else np.asarray(matrix, dtype=float)
+        if self.matrix is not None and self.matrix.shape != (2, 2):
+            raise ValueError("matrix must have shape (2, 2).")
+        self.offset = self._vector(offset, "offset")
+
+        valid = ("translation", "rotation", "scale", "shear", "matrix")
+        self.order = tuple(order)
+        if len(set(self.order)) != len(self.order) or not set(self.order) <= set(valid):
+            raise ValueError(f"order entries must be unique values from {valid}.")
+
+    @staticmethod
+    def _vector(value, name):
+        if value is None:
+            return None
+        value = np.asarray(value, dtype=float)
+        if value.shape != (2,):
+            raise ValueError(f"{name} must have shape (2,).")
+        return value
+
+    def _matrices(self) -> Array:
+        """Return all affine components as ordered homogeneous matrices."""
+        identity = np.eye(3)
+
+        translation = identity
+        if self.translation is not None:
+            translation = identity.at[:2, 2].set(-self.translation)
+
+        rotation = identity
+        if self.rotation is not None:
+            cosine, sine = np.cos(self.rotation), np.sin(self.rotation)
+            rotation = np.array([[cosine, -sine, 0], [sine, cosine, 0], [0, 0, 1]])
+
+        scale = identity
+        if self.scale is not None:
+            scale = np.diag(np.concatenate((1 / self.scale, np.ones(1))))
+
+        shear = identity
+        if self.shear is not None:
+            shear = shear.at[0, 1].set(self.shear[0])
+            shear = shear.at[1, 0].set(self.shear[1])
+
+        matrix = identity
+        if self.matrix is not None:
+            matrix = matrix.at[:2, :2].set(self.matrix)
+        if self.offset is not None:
+            matrix = matrix.at[:2, 2].set(self.offset)
+
+        matrices = np.stack((translation, rotation, scale, shear, matrix))
+        indices = np.array(
+            tuple(
+                ("translation", "rotation", "scale", "shear", "matrix").index(name)
+                for name in self.order
+            )
+        )
+        return matrices[indices]
+
+    def coefficients(self) -> tuple[Array, Array]:
+        """Return the composed transformation matrix and offset."""
+        combine = lambda cumulative, operation: (operation @ cumulative, None)
+        homogeneous, _ = lax.scan(combine, np.eye(3), self._matrices())
+        return homogeneous[:2, :2], homogeneous[:2, 2]
+
+    def __call__(self, coords: Array) -> Array:
+        matrix, offset = self.coefficients()
+        shift = offset.reshape((2,) + (1,) * (coords.ndim - 1))
+        return np.einsum("ij,j...->i...", matrix, coords) + shift
 
 
 class TransformChain(BaseCoordTransform):
