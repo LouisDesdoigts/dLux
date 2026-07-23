@@ -13,12 +13,17 @@ from ..coordinates import BaseCoordTransform
 from ..parametric import BaseParametric, Shape
 from ..wavefronts import Wavefront
 from .polarised_layers import BasePolarisingOptic
-from .unified_layers import BaseOpticalLayer
+from .unified_layers import (
+    AberratedLayer,
+    BaseOpticalLayer,
+    Normalise,
+    TransmissiveLayer,
+)
 
 __all__ = ["Optic", "DynamicOptic", "Lens", "Wedge", "Interpolate", "Tilt"]
 
 
-class Optic(BaseOpticalLayer):
+class Optic(TransmissiveLayer, AberratedLayer, Normalise):
     """A physical optic evaluated at one plane, with optional onward propagation."""
 
     transmission: Array | BaseParametric | None
@@ -37,11 +42,9 @@ class Optic(BaseOpticalLayer):
         normalise=False,
         propagator=None,
     ):
-        self.transmission = self.as_parametric(transmission)
-        self.opd = self.as_parametric(opd)
-        self.phase = self.as_parametric(phase)
+        TransmissiveLayer.__init__(self, transmission, normalise)
+        AberratedLayer.__init__(self, opd, phase)
         self.polarisation = self._parse_polarisation(polarisation)
-        self.normalise = bool(normalise)
         if propagator is not None and not isinstance(propagator, BaseOpticalLayer):
             raise TypeError("propagator must be a BaseOpticalLayer or None.")
         self.propagator = propagator

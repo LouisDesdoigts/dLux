@@ -11,6 +11,7 @@ from dLux.layers import (
     Tilt,
     UniformPolarisingOptic,
 )
+from dLux.layers.unified_layers import AberratedLayer, Normalise, TransmissiveLayer
 from dLux.parametric import Circle
 
 
@@ -21,6 +22,9 @@ def wavefront():
 
 def test_optic_phasor_and_normalisation(wavefront):
     optic = Optic(transmission=0.5, opd=1e-7, phase=0.2, normalise=True)
+    assert isinstance(optic, TransmissiveLayer)
+    assert isinstance(optic, AberratedLayer)
+    assert isinstance(optic, Normalise)
     params = optic.params(wavefront)
     assert optic.context(wavefront) == {"wavefront": wavefront}
     assert optic.phasor(wavefront).shape == (1, 1)
