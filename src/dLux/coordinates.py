@@ -126,7 +126,9 @@ class CoordSpec(Spec):
         """
         if self.d is None:
             raise ValueError("d must be specified to calculate coordinates.")
-        return self.c + (np.arange(self.n) - (self.n - 1) / 2) * self.d
+        pixels = np.arange(self.n) - (self.n - 1) / 2
+        fn = lambda d, c: c + pixels * d
+        return np.vectorize(fn, signature="(),()->(n)")(self.d, self.c)
 
     @property
     def fov(self):

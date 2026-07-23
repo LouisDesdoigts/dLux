@@ -1,5 +1,5 @@
 import jax.numpy as np
-from jax import Array
+from jax import Array, vmap
 import interpax as ipx
 import dLux.utils as dlu
 
@@ -16,7 +16,8 @@ def interp(
     sample_coords: Array,
     method: str = "linear",
     fill: float = 0.0,
-):
+    complex: bool = True,
+) -> Array:
     """
     General 2D interpolation wrapper around `interpax.interp2d`.
 
@@ -32,21 +33,38 @@ def interp(
         The interpolation method.
     fill : float = 0.0
         Fill value used outside `knot_coords`.
+    complex : bool = True
+        If the input image is complex, interpolate the real and imaginary components
+        when True, or the amplitude and phase components when False.
 
     Returns
     -------
     array: Array
         The interpolated array.
     """
+    # In the complex case we recurse on the cartesian/polar decomposition
+    if np.iscomplexobj(image):
+        vals, return_fn = dlu.from_complex(image, complex=complex)
+        interp_fn = vmap(lambda x: interp(x, knot_coords, sample_coords, method, fill))
+        return return_fn(interp_fn(vals))
+
+    # Get the input/output coordinates
     xs, ys = knot_coords
     xpts, ypts = sample_coords.reshape(2, -1)
 
+    # Interpolate using interpax
     return ipx.interp2d(
         ypts, xpts, ys[:, 0], xs[0], image, method=method, extrap=fill
     ).reshape(sample_coords[0].shape)
 
 
-def scale(array: Array, npixels: int, ratio: float, method: str = "linear") -> Array:
+def scale(
+    array: Array,
+    npixels: int,
+    ratio: float,
+    method: str = "linear",
+    complex: bool = True,
+) -> Array:
     """
     Paraxially interpolate a square array using a sampling ratio.
 
@@ -61,6 +79,9 @@ def scale(array: Array, npixels: int, ratio: float, method: str = "linear") -> A
         The sampling scale of the input relative to the output.
     method : str = "linear"
         The interpolation method.
+    complex : bool = True
+        If the input array is complex, interpolate the real and imaginary components
+        when True, or the amplitude and phase components when False.
 
     Returns
     -------
@@ -71,15 +92,16 @@ def scale(array: Array, npixels: int, ratio: float, method: str = "linear") -> A
     npixels_in = array.shape[-1]
     coords_in = dlu.pixel_coords(npixels_in, 1)
     coords_out = dlu.compress_coords(
-        dlu.pixel_coords(npixels, 1),
-        np.array([ratio, ratio]) * npixels / npixels_in,
+        dlu.pixel_coords(npixels, 1), np.array([ratio, ratio]) * npixels / npixels_in
     )
 
     # Interpolate
-    return interp(array, coords_in, coords_out, method)
+    return interp(array, coords_in, coords_out, method, complex=complex)
 
 
-def rotate(array: Array, angle: Array, method: str = "linear") -> Array:
+def rotate(
+    array: Array, angle: Array, method: str = "linear", complex: bool = True
+) -> Array:
     """
     Rotates a square array by the angle, using interpolation.
 
@@ -91,6 +113,9 @@ def rotate(array: Array, angle: Array, method: str = "linear") -> Array:
         The angle to rotate the array by.
     method : str = "linear"
         The interpolation method.
+    complex : bool = True
+        If the input array is complex, interpolate the real and imaginary components
+        when True, or the amplitude and phase components when False.
 
     Returns
     -------
@@ -103,4 +128,4 @@ def rotate(array: Array, angle: Array, method: str = "linear") -> Array:
     coords_out = dlu.rotate_coords(coords_in, angle)
 
     # Interpolate
-    return interp(array, coords_in, coords_out, method)
+    return interp(array, coords_in, coords_out, method, complex=complex)
