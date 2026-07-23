@@ -52,6 +52,8 @@ are intentionally left untouched until the source migration is structurally comp
 - [x] Keep each abstract base class in its respective domain module.
 - [x] Keep `BaseLayer`, `BaseOpticalLayer`, and `BaseUnifiedLayer` in
   `unified_layers.py`.
+- [x] Retain standalone `TransmissiveLayer`, `AberratedLayer`, and `Normalise`
+  implementations and compose their contracts through `Optic`.
 - [x] Add an ordered `Affine` container whose translation, rotation, scaling, shearing,
   and raw-matrix operations retain semantic JAX leaves.
 - [x] Add ordered `TransformChain`.
