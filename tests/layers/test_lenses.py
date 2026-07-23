@@ -4,13 +4,17 @@ import jax.numpy as np
 import pytest
 
 from dLux import PolarisedWavefront, Wavefront
-from dLux.layers import CauchyIndex, InterpolatedIndex, Lens, Wedge
-from dLux.parametric import Parametric
+from dLux.layers import Lens, Wedge
+from dLux.parametric import (
+    BaseParametric,
+    CauchyIndex,
+    InterpolatedIndex,
+)
 
 WAVEFRONT = Wavefront(1e-6, 8, diameter=1.0)
 
 
-class WavefrontValue(Parametric):
+class WavefrontValue(BaseParametric):
     scale: float
 
     def __init__(self, scale):

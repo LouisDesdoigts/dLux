@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from abc import abstractmethod
+
 import jax.numpy as np
 import zodiax as zdx
 from jax import vmap, Array
@@ -10,19 +11,11 @@ __all__ = ["BaseSpectrum", "Spectrum", "PolySpectrum"]
 
 
 class BaseSpectrum(zdx.Base):
-    """
-    Abstract base class for spectral parameterisations.
-
-    Concrete spectrum classes must provide `normalise(...)` and expose spectral
-    weighting over configured wavelengths.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/BaseSpectrum.png)
-    """
+    """Base class for spectral parameterisations."""
 
     @abstractmethod
-    def normalise(self: BaseSpectrum) -> BaseSpectrum:  # pragma: no cover
-        pass
+    def normalise(self) -> BaseSpectrum:  # pragma: no cover
+        """Return a normalised spectrum."""
 
 
 class SimpleSpectrum(BaseSpectrum):

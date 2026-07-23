@@ -6,9 +6,9 @@ import dLux.utils as dlu
 from jax import Array
 
 
-from .optical_layers import OpticalLayer
-from ..parametric import Parametric
+from ..parametric import BaseParametric
 from ..wavefronts import Wavefront
+from .unified_layers import BaseOpticalLayer
 
 __all__ = [
     "PolarisingOptic",
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class BasePolarisingOptic(OpticalLayer):
+class BasePolarisingOptic(BaseOpticalLayer):
     """
     Base class for layers that apply a Jones matrix to a wavefront.
 
@@ -136,11 +136,11 @@ class LinearPolariser(BasePolarisingOptic):
         Transmission-axis angle in radians.
     """
 
-    angle: Array | Parametric
+    angle: Array | BaseParametric
 
     def __init__(
         self: LinearPolariser,
-        angle: Array | Parametric = 0.0,
+        angle: Array | BaseParametric = 0.0,
     ):
         """
         Parameters
@@ -185,13 +185,13 @@ class Retarder(BasePolarisingOptic):
         Fast-axis angle in radians.
     """
 
-    retardance: Array | Parametric
-    angle: Array | Parametric
+    retardance: Array | BaseParametric
+    angle: Array | BaseParametric
 
     def __init__(
         self: Retarder,
-        retardance: Array | Parametric,
-        angle: Array | Parametric = 0.0,
+        retardance: Array | BaseParametric,
+        angle: Array | BaseParametric = 0.0,
     ):
         """
         Parameters

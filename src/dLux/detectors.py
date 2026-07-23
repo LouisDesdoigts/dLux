@@ -2,45 +2,32 @@
 
 from __future__ import annotations
 from collections import OrderedDict
-from abc import abstractmethod
 from typing import Any
-import zodiax as zdx
+from abc import abstractmethod
+
 from jax import Array
+import zodiax as zdx
 import dLux.utils as dlu
 
-from .layers.detector_layers import DetectorLayer
+from .layers.detector_layers import BaseDetectorLayer
 from .psfs import PSF
 
 __all__ = ["BaseDetector", "LayeredDetector"]
 
 
 class BaseDetector(zdx.Base):
-    """
-    Abstract base class for detector models.
-
-    Concrete detectors implement `model(...)` to transform input PSFs into
-    detector-space outputs.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/BaseDetector.png)
-    """
+    """Base class for detector models."""
 
     @abstractmethod
     def __call__(
-        self: BaseDetector, psf: PSF, return_psf: bool = False
-    ) -> Array | PSF:  # pragma: no cover
-        pass
-
-    def model(
-        self: LayeredDetector,
+        self,
         psf: PSF,
         return_psf: bool = False,
-    ) -> Array | PSF:
-        """
-        Backwards compatibility method that invokes __call__.
+    ) -> Array | PSF:  # pragma: no cover
+        """Apply the detector model to a PSF."""
 
-        Delegates to the __call__ method.
-        """
+    def model(self, psf: PSF, return_psf: bool = False) -> Array | PSF:
+        """Backwards-compatible alias for calling the detector."""
         return self(psf, return_psf)
 
 
@@ -54,24 +41,24 @@ class LayeredDetector(BaseDetector):
     Attributes
     ----------
     layers: OrderedDict
-        A series of `DetectorLayer` transformations to apply to the input PSF.
+        A series of `BaseDetectorLayer` transformations to apply to the input PSF.
     """
 
     layers: OrderedDict
 
     def __init__(
         self: LayeredDetector,
-        layers: list[DetectorLayer | tuple[str, DetectorLayer]],
+        layers: list[BaseDetectorLayer | tuple[str, BaseDetectorLayer]],
     ):
         """
         Parameters
         ----------
-        layers : list[DetectorLayer | tuple[str, DetectorLayer]]
-            A list of DetectorLayer objects to apply to the input PSF. List entries
+        layers : list[BaseDetectorLayer | tuple[str, BaseDetectorLayer]]
+            A list of BaseDetectorLayer objects to apply to the input PSF. List entries
             can be tuples of (key, layer) to specify a key, else the key is taken as
             the class name of the layer.
         """
-        self.layers = dlu.list2dictionary(layers, True, DetectorLayer)
+        self.layers = dlu.list2dictionary(layers, True, BaseDetectorLayer)
         super().__init__()
 
     def __getattr__(self: LayeredDetector, key: str) -> Any:
@@ -129,7 +116,7 @@ class LayeredDetector(BaseDetector):
 
     def insert_layer(
         self: LayeredDetector,
-        layer: DetectorLayer | tuple[str, DetectorLayer],
+        layer: BaseDetectorLayer | tuple[str, BaseDetectorLayer],
         index: int,
     ) -> LayeredDetector:
         """
@@ -141,7 +128,7 @@ class LayeredDetector(BaseDetector):
 
         Parameters
         ----------
-        layer : DetectorLayer | tuple[str, DetectorLayer]
+        layer : BaseDetectorLayer | tuple[str, BaseDetectorLayer]
             The layer to be inserted.
         index : int
             The index at which to insert the layer.
@@ -153,7 +140,7 @@ class LayeredDetector(BaseDetector):
         """
         return self.set(
             "layers",
-            dlu.insert_layer(self.layers, layer, index, DetectorLayer),
+            dlu.insert_layer(self.layers, layer, index, BaseDetectorLayer),
         )
 
     def remove_layer(self: LayeredDetector, key: str) -> LayeredDetector:

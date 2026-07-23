@@ -1,12 +1,13 @@
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 from abc import abstractmethod
+
 from jax import Array
 import jax.numpy as np
 import jax.scipy as jsp
 import jax.tree as jtu
-import zodiax as zdx
 import equinox as eqx
+import zodiax as zdx
 import dLux.utils as dlu
 from dLux import spectra
 
@@ -26,6 +27,28 @@ __all__ = [
     "PointResolvedSource",
     "Scene",
 ]
+
+
+class BaseSource(zdx.Base):
+    """Base class for source models."""
+
+    def __init_subclass__(cls, **kwargs):
+        """Inherit the source modelling contract documentation."""
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["model"])
+
+    @abstractmethod
+    def normalise(self) -> BaseSource:  # pragma: no cover
+        """Return a normalised source."""
+
+    @abstractmethod
+    def model(
+        self,
+        optics: Any,
+        return_wf: bool = False,
+        return_psf: bool = False,
+    ) -> Any:  # pragma: no cover
+        """Model this source through an optical system."""
 
 
 def _validate_return_mode(return_wf: bool, return_psf: bool) -> None:
@@ -127,55 +150,6 @@ def _as_position_2d(position: Array) -> Array:
             "Pass position=[x, y] where x, y are on-sky angles in radians."
         )
     return position
-
-
-class BaseSource(zdx.Base):
-    """
-    Abstract base class for source models.
-
-    Concrete source classes define normalisation behavior and the optical
-    modelling interface via `normalise(...)` and `model(...)`.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/BaseSource.png)
-    """
-
-    def __init_subclass__(cls, **kwargs):
-        """Inherit docstrings from parent classes for model method."""
-        super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls, ["model"])
-
-    @abstractmethod
-    def normalise(self: BaseSource) -> BaseSource:  # pragma: no cover
-        pass
-
-    @abstractmethod
-    def model(
-        self: BaseSource,
-        optics: BaseOpticalSystem,
-        return_wf: bool = False,
-        return_psf: bool = False,
-    ) -> Array | Wavefront | PSF:  # pragma: no cover
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
 
 
 class Source(BaseSource):

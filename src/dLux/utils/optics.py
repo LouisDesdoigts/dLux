@@ -1,11 +1,13 @@
 import jax.numpy as np
 from jax import Array
+from .units import unit_factor_to_rad
 
 __all__ = [
     "wavenumber",
     "opd2phase",
     "phase2opd",
     "fringe_size",
+    "tilt_opd",
 ]
 
 
@@ -91,3 +93,12 @@ def fringe_size(
         return wavelength / diameter
     else:
         return wavelength * focal_length / diameter
+
+
+def tilt_opd(coordinates: Array, angles: Array, unit: str = "rad") -> Array:
+    """Return the linear OPD ramp produced by a two-axis wavefront tilt."""
+    angles = np.asarray(angles, dtype=float)
+    if angles.shape != (2,):
+        raise ValueError("angles must have shape (2,).")
+    angles = angles * unit_factor_to_rad(unit)
+    return np.einsum("i,...ijk->...jk", angles, coordinates)

@@ -4,8 +4,8 @@ config.update("jax_debug_nans", True)
 import pytest
 
 from dLux import Wavefront
-from dLux.coordinates import CoordSpec, PadSpec
-import dLux.layers.abcd_propagators as abcd_props
+from dLux.coord_specs import CoordSpec, PadSpec
+import dLux.layers.propagation_layers as abcd_props
 
 
 @pytest.fixture

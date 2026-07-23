@@ -3,7 +3,7 @@ import jax.numpy as np
 import pytest
 
 import dLux.utils as dlu
-from dLux.polynomials import (
+from dLux.parametric.polynomials import (
     DynamicZernike,
     DynamicZernikeBasis,
     PolynomialBasis,

@@ -51,6 +51,8 @@ def test_point_source(wavelengths, spectrum):
         PointSource(wavelengths, position=np.ones(1))
     with pytest.raises(TypeError):
         PointSource(wavelengths, spectrum=1)
+    with pytest.raises(AttributeError, match="spectrum"):
+        _ = source.not_a_spectrum_attribute
 
 
 def test_point_sources(wavelengths, spectrum):
