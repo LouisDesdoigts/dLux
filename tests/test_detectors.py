@@ -13,7 +13,7 @@ def test_layered_detector():
 
     # Test getattr
     det.Downsample
-    assert det.kernel_size == 4
+    assert det.n == 4
     with pytest.raises(AttributeError):
         det.not_an_attr
 

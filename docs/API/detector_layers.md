@@ -1,10 +1,8 @@
 # Detector Layers
 
-???+ info "BaseDetectorLayer"
+???+ info "Detector layer contracts"
     ::: dLux.layers.detector_layers.BaseDetectorLayer
-
-???+ info "ApplyInterpolation"
-    ::: dLux.layers.detector_layers.ApplyInterpolation
+    ::: dLux.layers.detector_layers.DetectorLayer
 
 ???+ info "ApplyPixelResponse"
     ::: dLux.layers.detector_layers.ApplyPixelResponse
@@ -17,6 +15,3 @@
 
 ???+ info "AddConstant"
     ::: dLux.layers.detector_layers.AddConstant
-
-???+ info "Downsample"
-    ::: dLux.layers.detector_layers.Downsample

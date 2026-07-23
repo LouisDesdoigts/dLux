@@ -7,11 +7,10 @@ from abcdLux import abcd, lct, asm
 import dLux.utils as dlu
 
 from ..coord_specs import CoordSpec, PadSpec
-from .unified_layers import BaseOpticalLayer
+from .optical_layers import OpticalLayer
 
 __all__ = [
     "BaseABCDElement",
-    "PropagatorLayer",
     "Propagator",
     "FFT",
     "MFT",
@@ -30,21 +29,7 @@ class BaseABCDElement(zdx.Base):
     """Base class for elements represented by an ABCD matrix."""
 
 
-class PropagatorLayer(BaseOpticalLayer):
-    """Optionally propagate a wavefront with another optical layer."""
-
-    propagator: BaseOpticalLayer | None
-
-    def __init__(self, propagator=None):
-        if propagator is not None and not isinstance(propagator, BaseOpticalLayer):
-            raise TypeError("propagator must be a BaseOpticalLayer or None.")
-        self.propagator = propagator
-
-    def __call__(self, wavefront):
-        return wavefront if self.propagator is None else self.propagator(wavefront)
-
-
-class Propagator(BaseOpticalLayer):
+class Propagator(OpticalLayer):
     """Base class for direct Fourier propagators."""
 
     focal_length: float | None
@@ -270,7 +255,7 @@ class ABCDConjugatePlane(BaseABCDElement):
 ###################
 ### Propagators ###
 ###################
-class ABCDPropagator(BaseOpticalLayer):
+class ABCDPropagator(OpticalLayer):
     """
     Propagator defined by a composition of ABCD elements.
 
@@ -465,7 +450,7 @@ class FFTPropagator(ABCDPropagator):
         return wavefront.set(phasor=field, pixel_scale=dx_out, center=self.spec.c)
 
 
-class ASMPropagator(BaseOpticalLayer):
+class ASMPropagator(OpticalLayer):
     """
     Angular Spectrum Method (ASM) propagator.
 

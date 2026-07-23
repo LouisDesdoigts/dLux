@@ -2,71 +2,31 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
-from typing import Any
-
 import jax.numpy as np
-import zodiax as zdx
+from jax import Array
 
-import dLux.utils as dlu
-from ..parametric import BaseParametric
+from ..coordinates import BaseCoordTransform
 from ..psfs import PSF
 from ..wavefronts import Wavefront
+from .detector_layers import DetectorLayer
+from .optical_layers import OpticalLayer
 
 __all__ = [
-    "BaseLayer",
-    "BaseOpticalLayer",
-    "BaseUnifiedLayer",
+    "UnifiedLayer",
     "Resize",
+    "Downsample",
     "Flip",
+    "Interpolate",
+    "Normalise",
     "Lambda",
 ]
 
 
-class BaseLayer(zdx.Base):
-    """Base class for callable transformations of dLux objects."""
-
-    @abstractmethod
-    def __call__(self, target: Any) -> Any:  # pragma: no cover
-        """Apply this layer to its target."""
-
-    def apply(self, target: Any) -> Any:
-        """Backwards-compatible alias for calling the layer."""
-        return self(target)
-
-    @staticmethod
-    def resolve(value: Any, **kwargs: Any) -> Any:
-        """Evaluate a parametric value, or return an ordinary value unchanged."""
-        if isinstance(value, BaseParametric):
-            return value.evaluate(**kwargs)
-        return value
-
-    @staticmethod
-    def as_parametric(value: Any, dtype: Any = float) -> Any:
-        """Preserve parametric values and convert ordinary values to arrays."""
-        if value is None or isinstance(value, BaseParametric):
-            return value
-        return np.asarray(value, dtype=dtype)
-
-    def __init_subclass__(cls, **kwargs):
-        """Inherit callable documentation for concrete layer implementations."""
-        super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls, ["__call__"])
+class UnifiedLayer(OpticalLayer, DetectorLayer):
+    """Public contract for operations shared by wavefronts and PSFs."""
 
 
-class BaseOpticalLayer(BaseLayer):
-    """Base class for layers that transform wavefronts."""
-
-    @abstractmethod
-    def __call__(self, wavefront: Any) -> Any:  # pragma: no cover
-        """Transform a wavefront."""
-
-
-class BaseUnifiedLayer(BaseLayer):
-    """Base class for operations shared by wavefronts and PSFs."""
-
-
-class Resize(BaseUnifiedLayer):
+class Resize(UnifiedLayer):
     """Resize a wavefront or PSF by padding or cropping."""
 
     npixels: int
@@ -78,7 +38,21 @@ class Resize(BaseUnifiedLayer):
         return target.resize(self.npixels)
 
 
-class Flip(BaseUnifiedLayer):
+class Downsample(UnifiedLayer):
+    """Downsample a wavefront or PSF by an integer factor."""
+
+    n: int
+
+    def __init__(self, n: int):
+        self.n = int(n)
+        if self.n <= 0:
+            raise ValueError("n must be greater than 0.")
+
+    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+        return target.downsample(self.n)
+
+
+class Flip(UnifiedLayer):
     """Flip a wavefront or PSF about one or more array axes."""
 
     axes: tuple[int, ...] | int
@@ -93,7 +67,50 @@ class Flip(BaseUnifiedLayer):
         return target.flip(self.axes)
 
 
-class Lambda(BaseUnifiedLayer):
+class Interpolate(UnifiedLayer):
+    """Interpolate a wavefront or PSF through a coordinate transformation."""
+
+    transformation: BaseCoordTransform
+    method: str
+    complex: bool
+    fill: Array
+
+    def __init__(self, transformation, method="linear", complex=True, fill=0.0):
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
+        self.transformation = transformation
+        self.method = str(method)
+        self.complex = bool(complex)
+        self.fill = np.asarray(fill, dtype=float)
+
+    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+        if isinstance(target, Wavefront):
+            return target.interpolate(
+                self.transformation,
+                method=self.method,
+                complex=self.complex,
+                fill=self.fill,
+            )
+        return target.interpolate(
+            self.transformation, method=self.method, fill=self.fill
+        )
+
+
+class Normalise(UnifiedLayer):
+    """Normalise a wavefront or PSF to unit total power."""
+
+    mode: str
+    value: Array
+
+    def __init__(self, mode="power", value=1.0):
+        self.mode = str(mode)
+        self.value = np.asarray(value, dtype=float)
+
+    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+        return target.normalise(self.mode, self.value)
+
+
+class Lambda(UnifiedLayer):
     """Return a wavefront or PSF unchanged."""
 
     def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:

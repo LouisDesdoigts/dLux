@@ -10,15 +10,7 @@
     ::: dLux.coord_specs.CoordSpec
 
 ???+ info "Affine"
-    ::: dLux.affine.Affine
-
-???+ info "Affine operations"
-    ::: dLux.affine.BaseAffineOperation
-    ::: dLux.affine.MatrixAffine
-    ::: dLux.affine.Translation
-    ::: dLux.affine.Rotation
-    ::: dLux.affine.Scaling
-    ::: dLux.affine.Shearing
+    ::: dLux.coordinates.Affine
 
 ???+ info "TransformChain"
     ::: dLux.coordinates.BaseCoordTransform

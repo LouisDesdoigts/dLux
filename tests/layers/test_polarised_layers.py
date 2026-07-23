@@ -41,6 +41,7 @@ def test_polarisation_layer():
         [
             UniformPolarisingOptic(dlu.horizontal_polariser(), 0.1),
             PolarisingOptic(np.eye(2)),
+            LinearPolariser(0.0),
         ]
     )
     assert layer.evaluate_jones(wf).shape == (2, 2)

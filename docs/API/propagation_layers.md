@@ -1,8 +1,5 @@
 # Propagation Layers
 
-???+ info "PropagatorLayer"
-    ::: dLux.layers.propagation_layers.PropagatorLayer
-
 ???+ info "BaseABCDElement"
     ::: dLux.layers.propagation_layers.BaseABCDElement
 
