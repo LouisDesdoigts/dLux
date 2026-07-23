@@ -496,7 +496,9 @@ print("Gradients for coeffs:", grads["coeffs"])
 
 Awesome, now we have a dynamic version of our aperture! We can easily use this in optimization and inference problems, which is super exciting!
 
-In practice, these dynamic aperture can be generated using the `dLux.layers.apertures` module, which provides a number of pre-built dynamic apertures, as well as the tools to create custom dynamic apertures. In some cases it is more practical to create a custom dynamic aperture using the low-level tools like shown here, and then to build a custom layer for this to reduce object clutter, but everything can be done with the existing infrastructure.
+In the new optic architecture, dynamic apertures are built from parametric shapes in
+`dLux.parametric.shapes` and supplied to `dLux.DynamicOptic`. Coordinate transformations and
+shape composition can therefore be reused without defining a dedicated aperture layer.
 
 It's also worth noting that we can also dynamically and differentiably generate Zernike polynomials over these dynamic apertures with the same API as before, which opens up even more possibilities for calibration and design problems! The syntax is more-or-less the same, so we wont show that here as it would be a lot of just copy-pasting from the previous section, but feel free to try it out yourself!
 

@@ -9,6 +9,7 @@ import equinox as eqx
 import zodiax as zdx
 from typing import Any
 import dLux.utils as dlu
+from .layers.unified_layers import BaseOpticalLayer
 
 __all__ = [
     "BaseOpticalSystem",
@@ -18,7 +19,6 @@ __all__ = [
     "LayeredOpticalSystem",
 ]
 
-from .layers.optical_layers import OpticalLayer
 from .wavefronts import Wavefront
 from .sources import BaseSource as Source
 from .psfs import PSF
@@ -28,20 +28,10 @@ from .psfs import PSF
 # Private Classes #
 ###################
 class BaseOpticalSystem(zdx.Base):
-    """
-    Abstract base class for optical-system models.
-
-    Defines the required propagation and source-modelling interfaces used by
-    concrete optical-system implementations.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/BaseOpticalSystem.png)
-    """
+    """Base class for optical-system models."""
 
     def __init_subclass__(cls, **kwargs):
-        """
-        Automatically inherit method docstrings from parent class.
-        """
+        """Inherit the optical-system interface documentation."""
         super().__init_subclass__(**kwargs)
         dlu.helpers.inherit_docstrings(
             cls,
@@ -49,139 +39,43 @@ class BaseOpticalSystem(zdx.Base):
         )
 
     @abstractmethod
-    def __call__(
-        self: BaseOpticalSystem,
-        wavefront: Wavefront,
-    ) -> Wavefront:  # pragma: no cover
-        """
-        Applies the complete optical system to an existing wavefront.
+    def __call__(self, wavefront: Wavefront) -> Wavefront:  # pragma: no cover
+        """Apply the optical system to a wavefront."""
 
-        Chromatic wavefronts are vectorised over their wavelength dimensions so that
-        each system layer receives a monochromatic wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate through the optical system.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront after propagation through the complete optical system.
-        """
-
-    def apply(self: BaseOpticalSystem, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the complete optical system to an existing wavefront.
-
-        This method is an alias for calling the optical system directly.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate through the optical system.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront after propagation through the complete optical system.
-        """
+    def apply(self, wavefront: Wavefront) -> Wavefront:
+        """Backwards-compatible alias for calling the optical system."""
         return self(wavefront)
 
     @abstractmethod
     def propagate_mono(
-        self: BaseOpticalSystem,
+        self,
         wavelength: float,
         offset: Array | None = None,
         return_wf: bool = False,
         stokes: Array | None = None,
-    ) -> Array | Wavefront:  # pragma: no cover
-        """
-        Propagates a monochromatic point source through the optical layers.
-
-        Parameters
-        ----------
-        wavelength : float, metres
-            The wavelength of the wavefront to propagate through the optical layers.
-        offset : Array | None, radians = None
-            The (x, y) offset from the optical axis of the source.
-        return_wf: bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        stokes : Array | None = None
-            The input Stokes vector [I, Q, U, V] of the source.
-
-        Returns
-        -------
-        result : Array | Wavefront
-            If `return_wf` is False, returns the PSF array.
-            If `return_wf` is True, returns the Wavefront object.
-        """
+    ) -> Any:  # pragma: no cover
+        """Propagate a monochromatic point source."""
 
     @abstractmethod
     def propagate(
-        self: BaseOpticalSystem,
+        self,
         wavelengths: Array,
         offset: Array | None = None,
         weights: Array = None,
         return_wf: bool = False,
         return_psf: bool = False,
         stokes: Array | None = None,
-    ) -> Array | Wavefront | PSF:  # pragma: no cover
-        """
-        Propagates a Polychromatic point source through the optics.
-
-        Parameters
-        ----------
-        wavelengths : Array, metres
-            The wavelengths of the wavefronts to propagate through the optics.
-        offset : Array | None, radians = None
-            The (x, y) offset from the optical axis of the source.
-        weights : Array = None
-            The weight of each wavelength. If None, all weights are equal.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-        stokes : Array | None = None
-            The input Stokes vector [I, Q, U, V] of the source.
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-
-        """
+    ) -> Any:  # pragma: no cover
+        """Propagate a polychromatic point source."""
 
     @abstractmethod
     def model(
-        self: BaseOpticalSystem,
+        self,
         source: Source,
         return_wf: bool = False,
         return_psf: bool = False,
-    ) -> Array | Wavefront | PSF:  # pragma: no cover
-        """
-        Models the input Source object through the optics.
-
-        Parameters
-        ----------
-        source : Source
-            The Source object to model through the optics.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
+    ) -> Any:  # pragma: no cover
+        """Model a source through the optical system."""
 
 
 class OpticalSystem(BaseOpticalSystem):
@@ -367,7 +261,7 @@ class LayeredOpticalSystem(OpticalSystem):
     diameter : float, metres
         The diameter of the wavefront to propagate.
     layers : OrderedDict
-        A series of `OpticalLayer` transformations to apply to wavefronts.
+        A series of `BaseOpticalLayer` transformations to apply to wavefronts.
     """
 
     wf_npixels: int
@@ -378,7 +272,7 @@ class LayeredOpticalSystem(OpticalSystem):
         self: LayeredOpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list[OpticalLayer | tuple[str, OpticalLayer]],
+        layers: list[BaseOpticalLayer | tuple[str, BaseOpticalLayer]],
     ):
         """
         Parameters
@@ -387,14 +281,14 @@ class LayeredOpticalSystem(OpticalSystem):
             The size of the initial wavefront to propagate.
         diameter : float
             The diameter of the wavefront to propagate.
-        layers : list[OpticalLayer | tuple[str, OpticalLayer]]
-            A list of `OpticalLayer` transformations to apply to wavefronts. The list
-            entries can be either `OpticalLayer` objects or tuples of (key, layer) to
+        layers : list[BaseOpticalLayer | tuple[str, BaseOpticalLayer]]
+            A list of `BaseOpticalLayer` transformations to apply to wavefronts. The
+            list entries can be either `BaseOpticalLayer` objects or tuples of
             specify a key for the layer in the layers dictionary.
         """
         self.wf_npixels = int(wf_npixels)
         self.diameter = np.asarray(diameter, float)
-        self.layers = dlu.list2dictionary(layers, True, OpticalLayer)
+        self.layers = dlu.list2dictionary(layers, True, BaseOpticalLayer)
 
     def __getattr__(self: LayeredOpticalSystem, key: str) -> Any:
         """
@@ -562,7 +456,7 @@ class LayeredOpticalSystem(OpticalSystem):
 
     def insert_layer(
         self: LayeredOpticalSystem,
-        layer: OpticalLayer | tuple[str, OpticalLayer],
+        layer: BaseOpticalLayer | tuple[str, BaseOpticalLayer],
         index: int,
     ) -> OpticalSystem:
         """
@@ -574,7 +468,7 @@ class LayeredOpticalSystem(OpticalSystem):
 
         Parameters
         ----------
-        layer : OpticalLayer | tuple[str, OpticalLayer]
+        layer : BaseOpticalLayer | tuple[str, BaseOpticalLayer]
             The layer to be inserted.
         index : int
             The index at which to insert the layer.
@@ -585,7 +479,7 @@ class LayeredOpticalSystem(OpticalSystem):
             The updated optical system.
         """
         return self.set(
-            "layers", dlu.insert_layer(self.layers, layer, index, OpticalLayer)
+            "layers", dlu.insert_layer(self.layers, layer, index, BaseOpticalLayer)
         )
 
     def remove_layer(self: LayeredOpticalSystem, key: str) -> OpticalSystem:
@@ -730,7 +624,7 @@ class AngularOpticalSystem(ParametricLayeredOpticalSystem):
     diameter : Array, metres
         The diameter of the initial wavefront to propagate.
     layers : OrderedDict
-        A series of `OpticalLayer` transformations to apply to wavefronts.
+        A series of `BaseOpticalLayer` transformations to apply to wavefronts.
     psf_npixels : int
         The number of pixels of the final PSF.
     psf_pixel_scale : float, arcseconds
@@ -744,7 +638,7 @@ class AngularOpticalSystem(ParametricLayeredOpticalSystem):
         self: AngularOpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list[OpticalLayer | tuple[str, OpticalLayer]],
+        layers: list[BaseOpticalLayer | tuple[str, BaseOpticalLayer]],
         psf_npixels: int,
         psf_pixel_scale: float,
         oversample: int = 1,
@@ -756,9 +650,9 @@ class AngularOpticalSystem(ParametricLayeredOpticalSystem):
             The number of pixels representing the wavefront.
         diameter : Array, metres
             The diameter of the initial wavefront to propagate.
-        layers : list[OpticalLayer | tuple[str, OpticalLayer]]
-            A list of `OpticalLayer` transformations to apply to wavefronts. The list
-            entries can be either `OpticalLayer` objects or tuples of (key, layer) to
+        layers : list[BaseOpticalLayer | tuple[str, BaseOpticalLayer]]
+            A list of `BaseOpticalLayer` transformations to apply to wavefronts. The
+            list entries can be either `BaseOpticalLayer` objects or tuples of
             specify a key for the layer in the layers dictionary.
         psf_npixels : int
             The number of pixels of the final PSF.
@@ -816,7 +710,7 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
     diameter : Array, metres
         The diameter of the initial wavefront to propagate.
     layers : OrderedDict
-        A series of `OpticalLayer` transformations to apply to wavefronts.
+        A series of `BaseOpticalLayer` transformations to apply to wavefronts.
     focal_length : float, metres
         The focal length of the system.
     psf_npixels : int
@@ -834,7 +728,7 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
         self: CartesianOpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list[OpticalLayer | tuple[str, OpticalLayer]],
+        layers: list[BaseOpticalLayer | tuple[str, BaseOpticalLayer]],
         focal_length: float,
         psf_npixels: int,
         psf_pixel_scale: float,
@@ -847,9 +741,9 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
             The number of pixels representing the wavefront.
         diameter : Array, metres
             The diameter of the initial wavefront to propagate.
-        layers : list[OpticalLayer | tuple[str, OpticalLayer]]
-            A list of `OpticalLayer` transformations to apply to wavefronts. The list
-            entries can be either `OpticalLayer` objects or tuples of (key, layer) to
+        layers : list[BaseOpticalLayer | tuple[str, BaseOpticalLayer]]
+            A list of `BaseOpticalLayer` transformations to apply to wavefronts. The
+            list entries can be either `BaseOpticalLayer` objects or tuples of
             specify a key for the layer in the layers dictionary.
         focal_length : float, metres
             The focal length of the system.

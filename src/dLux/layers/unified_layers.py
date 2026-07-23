@@ -1,212 +1,100 @@
-"""Unified layers that operate on either wavefronts or PSFs."""
+"""Layers that operate on both wavefronts and PSFs."""
 
 from __future__ import annotations
 
+from abc import abstractmethod
+from typing import Any
+
 import jax.numpy as np
+import zodiax as zdx
 
-__all__ = ["UnifiedLayer", "Rotate", "Flip", "Resize", "Lambda"]
-
-
-from .optical_layers import OpticalLayer
-from .detector_layers import DetectorLayer
-from ..wavefronts import Wavefront
+import dLux.utils as dlu
+from ..parametric import BaseParametric
 from ..psfs import PSF
+from ..wavefronts import Wavefront
+
+__all__ = [
+    "BaseLayer",
+    "BaseOpticalLayer",
+    "BaseUnifiedLayer",
+    "Resize",
+    "Flip",
+    "Lambda",
+]
 
 
-class UnifiedLayer(OpticalLayer, DetectorLayer):
-    """
-    Base class for unified layers that can be applied to either wavefronts or PSFs.
+class BaseLayer(zdx.Base):
+    """Base class for callable transformations of dLux objects."""
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/UnifiedLayer.png)
-    """
+    @abstractmethod
+    def __call__(self, target: Any) -> Any:  # pragma: no cover
+        """Apply this layer to its target."""
+
+    def apply(self, target: Any) -> Any:
+        """Backwards-compatible alias for calling the layer."""
+        return self(target)
+
+    @staticmethod
+    def resolve(value: Any, **kwargs: Any) -> Any:
+        """Evaluate a parametric value, or return an ordinary value unchanged."""
+        if isinstance(value, BaseParametric):
+            return value.evaluate(**kwargs)
+        return value
+
+    @staticmethod
+    def as_parametric(value: Any, dtype: Any = float) -> Any:
+        """Preserve parametric values and convert ordinary values to arrays."""
+        if value is None or isinstance(value, BaseParametric):
+            return value
+        return np.asarray(value, dtype=dtype)
+
+    def __init_subclass__(cls, **kwargs):
+        """Inherit callable documentation for concrete layer implementations."""
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["__call__"])
 
 
-class Resize(UnifiedLayer):
-    """
-    Resizes either a wavefront or PSF by padding or cropping. Note this class
-    only supports padding and cropping of even sizes to even sizes, and odd sizes to
-    odd sizes to ensure all operations are paraxial.
+class BaseOpticalLayer(BaseLayer):
+    """Base class for layers that transform wavefronts."""
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/Resize.png)
+    @abstractmethod
+    def __call__(self, wavefront: Any) -> Any:  # pragma: no cover
+        """Transform a wavefront."""
 
-    Attributes
-    ----------
-    npixels : int
-        The desired output size.
-    """
+
+class BaseUnifiedLayer(BaseLayer):
+    """Base class for operations shared by wavefronts and PSFs."""
+
+
+class Resize(BaseUnifiedLayer):
+    """Resize a wavefront or PSF by padding or cropping."""
 
     npixels: int
 
-    def __init__(self: Resize, npixels: int):
-        """
-        Parameters
-        ----------
-        npixels : int
-            The desired output size.
-        """
-        super().__init__()
+    def __init__(self, npixels: int):
         self.npixels = int(npixels)
 
-    def __call__(self: Resize, target: Wavefront | PSF) -> Wavefront | PSF:
-        """
-        Resizes the input.
-
-        Parameters
-        ----------
-        target : Wavefront | PSF
-            The input to resize.
-
-        Returns
-        -------
-        target : Wavefront | PSF
-            The resized input.
-        """
+    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
         return target.resize(self.npixels)
 
 
-class Rotate(UnifiedLayer):
-    """
-    Rotates either a wavefront or PSF by a given angle. This is done using
-    interpolation methods. The 'complex' input only has an effect if the input is a
-    wavefront.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/Rotate.png)
-
-    Attributes
-    ----------
-    angle : float, radians
-        The angle by which to rotate the input in the clockwise direction.
-    method : str
-        The interpolation method.
-    complex : bool
-        Should the rotation be performed on the 'complex' (real, imaginary), as opposed
-        to the default 'phasor' (amplitude, phase) arrays. Only applies if the input is
-        a wavefront.
-    """
-
-    angle: float
-    method: str
-    complex: bool
-
-    def __init__(
-        self: Rotate,
-        angle: float,
-        method: str = "linear",
-        complex: bool = False,
-    ):
-        """
-        Parameters
-        ----------
-        angle : float, radians
-            The angle by which to rotate the input in the clockwise direction.
-        method : str = "linear"
-            The interpolation method.
-        complex : bool = False
-            Should the rotation be performed on the 'complex' (real, imaginary), as
-            opposed to the default 'phasor' (amplitude, phase) arrays. Only applies if
-            the input is a wavefront.
-        """
-        super().__init__()
-        self.angle = np.asarray(angle, float)
-        self.method = str(method)
-        self.complex = bool(complex)
-
-    def __call__(self: Rotate, target: Wavefront | PSF) -> Wavefront | PSF:
-        """
-        Applies the rotation to the input.
-
-        Parameters
-        ----------
-        target : Wavefront | PSF
-            The input to rotate.
-
-        Returns
-        -------
-        target : Wavefront | PSF
-            The rotated input.
-        """
-        if isinstance(target, PSF):
-            return target.rotate(self.angle, self.method)
-        return target.rotate(self.angle, self.method, self.complex)
-
-
-class Flip(UnifiedLayer):
-    """
-    Flips either a wavefront or PSF about the input axes. Can be either an int or a
-    tuple of ints. This class uses the 'ij' indexing convention, i.e. axis 0 is the
-    y-axis, and axis 1 is the x-axis.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/Flip.png)
-
-    Attributes
-    ----------
-    axes : tuple[int, ...] | int
-        The axes to flip the input about. This class uses the 'ij' indexing convention,
-        i.e. axis 0 is the y-axis, and axis 1 is the x-axis.
-    """
+class Flip(BaseUnifiedLayer):
+    """Flip a wavefront or PSF about one or more array axes."""
 
     axes: tuple[int, ...] | int
 
-    def __init__(self: Flip, axes: tuple[int, ...] | int):
-        """
-        Parameters
-        ----------
-        axes : tuple[int, ...] | int
-            The axes to flip the input about. This class uses the 'ij' indexing
-            convention, i.e. axis 0 is the y-axis, and axis 1 is the x-axis.
-        """
-        super().__init__()
+    def __init__(self, axes: tuple[int, ...] | int):
         self.axes = axes
-
-        if isinstance(self.axes, tuple):
-            for axis in self.axes:
-                if not isinstance(axis, int):
-                    raise ValueError("All axes must be integers.")
-        elif not isinstance(self.axes, int):
+        axes = self.axes if isinstance(self.axes, tuple) else (self.axes,)
+        if not all(isinstance(axis, int) for axis in axes):
             raise ValueError("axes must be an int or tuple of ints.")
 
-    def __call__(self: Flip, target: Wavefront | PSF) -> Wavefront | PSF:
-        """
-        Flips the input about the specified axes.
-
-        Parameters
-        ----------
-        target : Wavefront | PSF
-            The input to flip.
-
-        Returns
-        -------
-        target : Wavefront | PSF
-            The flipped input.
-        """
+    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
         return target.flip(self.axes)
 
 
-class Lambda(UnifiedLayer):
-    """
-    A no-op layer that returns the input unchanged. This can be useful for debugging or
-    as a placeholder in a pipeline.
+class Lambda(BaseUnifiedLayer):
+    """Return a wavefront or PSF unchanged."""
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/Lambda.png)
-    """
-
-    def __call__(self: Lambda, target: Wavefront | PSF) -> Wavefront | PSF:
-        """
-        Returns the input unchanged.
-
-        Parameters
-        ----------
-        target : Wavefront | PSF
-            The input to return.
-
-        Returns
-        -------
-        target : Wavefront | PSF
-            The input, unchanged.
-        """
+    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
         return target

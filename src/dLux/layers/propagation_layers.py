@@ -1,14 +1,19 @@
+"""Propagation layers and ABCD-system elements."""
+
 from __future__ import annotations
-import zodiax as zdx
 import jax.numpy as np
+import zodiax as zdx
 from abcdLux import abcd, lct, asm
 import dLux.utils as dlu
 
-from .propagators import OpticalLayer
-from ..coordinates import CoordSpec, PadSpec
+from ..coord_specs import CoordSpec, PadSpec
+from .unified_layers import BaseOpticalLayer
 
 __all__ = [
-    "ABCDElement",
+    "BaseABCDElement",
+    "Propagator",
+    "FFT",
+    "MFT",
     "ABCDFreeSpace",
     "ABCDLens",
     "ABCDMirror",
@@ -20,19 +25,81 @@ __all__ = [
 ]
 
 
-class ABCDElement(zdx.Base):
-    """
-    An ABCD element is a layer that can be represented by an ABCD matrix. This is a
-    base class for such elements, and should not be used directly.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ABCDElement.png)
-    """
-
-    pass
+class BaseABCDElement(zdx.Base):
+    """Base class for elements represented by an ABCD matrix."""
 
 
-class ABCDFreeSpace(ABCDElement):
+class Propagator(BaseOpticalLayer):
+    """Base class for direct Fourier propagators."""
+
+    focal_length: float | None
+    inverse: bool
+
+    def __init__(self, focal_length: float | None = None, inverse: bool = False):
+        if focal_length is not None:
+            focal_length = np.asarray(focal_length, float)
+        self.focal_length = focal_length
+        self.inverse = bool(inverse)
+
+
+class FFT(Propagator):
+    """Propagate a wavefront using its FFT propagation interface."""
+
+    pad: int
+    crop: int
+    center: bool
+
+    def __init__(
+        self,
+        focal_length: float = None,
+        inverse: bool = False,
+        pad: int = 1,
+        crop: int = 1,
+        center: bool = True,
+    ):
+        super().__init__(focal_length=focal_length, inverse=inverse)
+        self.pad = int(pad)
+        self.crop = int(crop)
+        self.center = bool(center)
+
+    def __call__(self, wavefront):
+        spec = CoordSpec(c=0.0) if self.center else None
+        size_out = wavefront.npixels * self.pad // self.crop
+        return wavefront.propagate_FFT(
+            pad=self.pad,
+            focal_length=self.focal_length,
+            inverse=self.inverse,
+            spec_out=spec,
+        ).resize(size_out)
+
+
+class MFT(Propagator):
+    """Propagate a wavefront using its matrix Fourier transform interface."""
+
+    npixels: int
+    pixel_scale: float
+
+    def __init__(
+        self,
+        npixels: int,
+        pixel_scale: float,
+        focal_length: float = None,
+        inverse: bool = False,
+    ):
+        super().__init__(focal_length=focal_length, inverse=inverse)
+        self.pixel_scale = np.asarray(pixel_scale, float)
+        self.npixels = int(npixels)
+
+    def __call__(self, wavefront):
+        return wavefront.propagate(
+            npixels=self.npixels,
+            pixel_scale=self.pixel_scale,
+            focal_length=self.focal_length,
+            inverse=self.inverse,
+        )
+
+
+class ABCDFreeSpace(BaseABCDElement):
     """
     A free space propagation element represented by an ABCD matrix.
 
@@ -69,7 +136,7 @@ class ABCDFreeSpace(ABCDElement):
         return abcd.abcd_free_space(self.distance)
 
 
-class ABCDLens(ABCDElement):
+class ABCDLens(BaseABCDElement):
     """
     A lens element represented by an ABCD matrix. Note this element alone does not
     produce the standard 'pupil-focal Fourier relationship' as that is between the front
@@ -110,7 +177,7 @@ class ABCDLens(ABCDElement):
         return abcd.abcd_lens(self.focal_length)
 
 
-class ABCDMirror(ABCDElement):
+class ABCDMirror(BaseABCDElement):
     """
     A mirror element represented by an ABCD matrix.
 
@@ -147,7 +214,7 @@ class ABCDMirror(ABCDElement):
         return abcd.abcd_mirror(self.radius)
 
 
-class ABCDConjugatePlane(ABCDElement):
+class ABCDConjugatePlane(BaseABCDElement):
     """
     A conjugate plane element represented by an ABCD matrix. This produces the classic
     'pupil-focal Fourier relationship' seen in fourier/physical optics.
@@ -188,7 +255,7 @@ class ABCDConjugatePlane(ABCDElement):
 ###################
 ### Propagators ###
 ###################
-class ABCDPropagator(OpticalLayer):
+class ABCDPropagator(BaseOpticalLayer):
     """
     Propagator defined by a composition of ABCD elements.
 
@@ -212,12 +279,12 @@ class ABCDPropagator(OpticalLayer):
         """
         Parameters
         ----------
-        ABCDs : list[ABCDElement] | dict[str, ABCDElement]
+        ABCDs : list[BaseABCDElement] | dict[str, BaseABCDElement]
             ABCD elements to compose into a single propagation transform.
         spec : CoordSpec | PadSpec
             Output coordinate specification.
         """
-        self.ABCDs = dlu.list2dictionary(ABCDs, True, allowed_types=(ABCDElement,))
+        self.ABCDs = dlu.list2dictionary(ABCDs, True, allowed_types=(BaseABCDElement,))
         self.spec = spec
 
     def __getattr__(self, key):
@@ -255,7 +322,7 @@ class MFTPropagator(ABCDPropagator):
 
     Parameters
     ----------
-    ABCDs: list[ABCDElement]
+    ABCDs: list[BaseABCDElement]
         A list of ABCD elements to compose into the overall ABCD matrix for the
         propagation.
     spec: CoordSpec
@@ -306,7 +373,7 @@ class FFTPropagator(ABCDPropagator):
 
     Parameters
     ----------
-    ABCDs : list[ABCDElement] | dict[str, ABCDElement]
+    ABCDs : list[BaseABCDElement] | dict[str, BaseABCDElement]
         ABCD elements to compose into a single propagation transform.
     spec : CoordSpec | PadSpec
         Output coordinate specification. If `CoordSpec` is provided, `d` must be None.
@@ -316,7 +383,7 @@ class FFTPropagator(ABCDPropagator):
         """
         Parameters
         ----------
-        ABCDs : list[ABCDElement] | dict[str, ABCDElement]
+        ABCDs : list[BaseABCDElement] | dict[str, BaseABCDElement]
             ABCD elements to compose into a single propagation transform.
         spec : CoordSpec | PadSpec
             Output coordinate specification. If `CoordSpec` is provided, `d` must be
@@ -383,7 +450,7 @@ class FFTPropagator(ABCDPropagator):
         return wavefront.set(phasor=field, pixel_scale=dx_out, center=self.spec.c)
 
 
-class ASMPropagator(OpticalLayer):
+class ASMPropagator(BaseOpticalLayer):
     """
     Angular Spectrum Method (ASM) propagator.
 

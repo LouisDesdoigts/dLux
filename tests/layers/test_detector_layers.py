@@ -11,7 +11,7 @@ from dLux.layers import (
     Downsample,
     ApplyInterpolation,
 )
-from dLux import CoordTransform, PSF
+from dLux import Affine, PSF, Rotation, Scaling, Shearing, Translation
 
 psf = PSF(np.ones((16, 16)), 1 / 16)
 
@@ -55,11 +55,13 @@ def test_downsample():
 @pytest.mark.parametrize("method", ["nearest", "linear", "cubic"])
 def test_apply_interpolation(method):
     layer = ApplyInterpolation(
-        CoordTransform(
-            translation=[0.01, -0.02],
-            shear=[0.1, -0.1],
-            compression=[0.9, 1.1],
-            rotation=0.1,
+        Affine(
+            [
+                Translation([0.01, -0.02]),
+                Shearing([0.1, -0.1]),
+                Scaling([0.9, 1.1]),
+                Rotation(0.1),
+            ]
         ),
         method=method,
     )

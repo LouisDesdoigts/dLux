@@ -7,7 +7,8 @@ import zodiax as zdx
 import dLux.utils as dlu
 
 from .psfs import PSF
-from .coordinates import BaseCoordTransform, CoordSpec
+from .coord_specs import CoordSpec
+from .coordinates import BaseCoordTransform
 
 __all__ = ["Wavefront", "PolarisedWavefront"]
 
@@ -487,15 +488,7 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The tilted wavefront.
         """
-        angles = np.asarray(angles, dtype=float)
-        if angles.shape != (2,):
-            raise ValueError("angles must be a 1d array of shape (2,).")
-
-        # Calculate scaled coordinates
-        coords = self.coordinates(scale=dlu.unit_factor_to_rad(unit))
-
-        # Tilt the wavefront
-        return self.add_opd(np.einsum("i,...ijk->...jk", angles, coords))
+        return self.add_opd(dlu.tilt_opd(self.coordinates(), angles, unit))
 
     def normalise(
         self: Wavefront,
