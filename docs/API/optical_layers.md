@@ -1,5 +1,14 @@
 # Optical Layers
 
+???+ info "TransmissiveLayer"
+    ::: dLux.layers.optical_layers.TransmissiveLayer
+
+???+ info "AberratedLayer"
+    ::: dLux.layers.optical_layers.AberratedLayer
+
+???+ info "Normalise"
+    ::: dLux.layers.optical_layers.Normalise
+
 ???+ info "Optic"
     ::: dLux.layers.optical_layers.Optic
 
