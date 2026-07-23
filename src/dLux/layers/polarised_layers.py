@@ -11,6 +11,7 @@ from ..wavefronts import Wavefront
 from .unified_layers import BaseOpticalLayer
 
 __all__ = [
+    "PolarisationLayer",
     "PolarisingOptic",
     "UniformPolarisingOptic",
     "LinearPolariser",
@@ -44,6 +45,42 @@ class BasePolarisingOptic(BaseOpticalLayer):
             Wavefront after applying the Jones matrix.
         """
         return wavefront.apply_jones(self.jones)
+
+
+class PolarisationLayer(BaseOpticalLayer):
+    """Apply an ordered collection of polarising optics."""
+
+    polarisation: dict | None
+
+    def __init__(self, polarisation=None):
+        if polarisation is None:
+            self.polarisation = None
+            return
+        items = (
+            list(polarisation)
+            if isinstance(polarisation, (list, tuple))
+            else [polarisation]
+        )
+        self.polarisation = dlu.list2dictionary(items, True, BasePolarisingOptic)
+
+    def evaluate_jones(self, wavefront: Wavefront) -> Array | None:
+        """Evaluate and compose the stored optics in physical order."""
+        if self.polarisation is None:
+            return None
+        matrix = np.eye(2, dtype=complex)
+        for optic in self.polarisation.values():
+            if hasattr(optic, "evaluate_jones"):
+                jones = optic.evaluate_jones(wavefront)
+            elif hasattr(optic, "orientation"):
+                jones = dlu.rotate_jones(optic.jones, optic.orientation)
+            else:
+                jones = optic.jones
+            matrix = np.einsum("ij...,jk...->ik...", jones, matrix)
+        return matrix
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        matrix = self.evaluate_jones(wavefront)
+        return wavefront if matrix is None else wavefront.apply_jones(matrix)
 
 
 class PolarisingOptic(BasePolarisingOptic):

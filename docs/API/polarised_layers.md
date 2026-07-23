@@ -1,5 +1,8 @@
 # Polarised Layers
 
+???+ info "PolarisationLayer"
+    ::: dLux.layers.polarised_layers.PolarisationLayer
+
 ???+ info "PolarisingOptic"
     ::: dLux.layers.polarised_layers.PolarisingOptic
 

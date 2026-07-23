@@ -8,6 +8,7 @@ from dLux.parametric import ExplicitBasis, FourierBasis
 from dLux.parametric.polynomials import PolynomialBasis
 from dLux.layers.polarised_layers import (
     LinearPolariser,
+    PolarisationLayer,
     PolarisingOptic,
     Retarder,
     UniformPolarisingOptic,
@@ -31,6 +32,19 @@ def explicit_basis(npixels=8):
 
 def fourier_basis(npixels=8, n_modes=3):
     return dlu.fourier_kernels(n_modes, npixels)
+
+
+def test_polarisation_layer():
+    wf = Wavefront(1.0e-6, npixels=8, diameter=1.0)
+    assert PolarisationLayer()(wf) is wf
+    layer = PolarisationLayer(
+        [
+            UniformPolarisingOptic(dlu.horizontal_polariser(), 0.1),
+            PolarisingOptic(np.eye(2)),
+        ]
+    )
+    assert layer.evaluate_jones(wf).shape == (2, 2)
+    assert layer(wf).phasor.shape == (2, 2, 8, 8)
 
 
 class TestUniformPolarisingLayers:

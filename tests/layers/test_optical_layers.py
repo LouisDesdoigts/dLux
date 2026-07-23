@@ -7,7 +7,9 @@ from dLux.layers import (
     Interpolate,
     LinearPolariser,
     Optic,
+    PolarisationLayer,
     PolarisingOptic,
+    PropagatorLayer,
     Tilt,
     UniformPolarisingOptic,
 )
@@ -25,6 +27,8 @@ def test_optic_phasor_and_normalisation(wavefront):
     assert isinstance(optic, TransmissiveLayer)
     assert isinstance(optic, AberratedLayer)
     assert isinstance(optic, Normalise)
+    assert isinstance(optic, PolarisationLayer)
+    assert isinstance(optic, PropagatorLayer)
     params = optic.params(wavefront)
     assert optic.context(wavefront) == {"wavefront": wavefront}
     assert optic.phasor(wavefront).shape == (1, 1)
