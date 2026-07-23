@@ -3,7 +3,7 @@ from jax import numpy as np, config
 config.update("jax_debug_nans", True)
 import pytest
 import dLux.utils as dlu
-from dLux import CoordTransform, PSF
+from dLux import Affine, PSF, Scaling, Translation
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ class TestPSF:
         assert isinstance(psf.convolve(np.ones((2, 2))), PSF)
         assert isinstance(psf.convolve(np.ones((2, 2)), method="fft"), PSF)
         assert isinstance(psf.rotate(np.pi), PSF)
-        assert isinstance(psf.interpolate(CoordTransform()), PSF)
+        assert isinstance(psf.interpolate(Affine()), PSF)
         assert isinstance(psf.resize(8), PSF)
         assert isinstance(psf.flip(0), PSF)
 
@@ -35,9 +35,7 @@ class TestPSF:
 
     def test_interpolate_matches_explicit_coordinate_mapping(self, psf):
         psf = psf.set(data=np.arange(16**2).reshape(16, 16))
-        transformation = CoordTransform(
-            translation=[1 / 32, -1 / 32], compression=[0.9, 1.1]
-        )
+        transformation = Affine([Translation([1 / 32, -1 / 32]), Scaling([0.9, 1.1])])
         coords = dlu.pixel_coords(psf.npixels, psf.npixels * psf.pixel_scale)
         expected = dlu.interp(psf.data, coords, transformation(coords))
 
@@ -46,7 +44,7 @@ class TestPSF:
         assert np.allclose(output.data, expected)
 
     def test_interpolate_fill(self, psf):
-        output = psf.interpolate(CoordTransform(translation=[10.0, 10.0]), fill=2.0)
+        output = psf.interpolate(Affine.translate([10.0, 10.0]), fill=2.0)
 
         assert np.allclose(output.data, 2.0)
 

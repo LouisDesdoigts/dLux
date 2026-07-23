@@ -5,7 +5,7 @@ config.update("jax_debug_nans", True)
 
 from dLux import PolarisedWavefront, Wavefront
 from dLux.parametric import ExplicitBasis, FourierBasis
-from dLux.polynomials import PolynomialBasis
+from dLux.parametric.polynomials import PolynomialBasis
 from dLux.layers.polarised_layers import (
     LinearPolariser,
     PolarisingOptic,

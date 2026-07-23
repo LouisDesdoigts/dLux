@@ -7,7 +7,7 @@ import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
-from .parametric import CoordBasis, ExplicitBasis
+from .bases import CoordBasis, ExplicitBasis
 
 __all__ = [
     "DynamicZernike",

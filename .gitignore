@@ -9,4 +9,7 @@ build/
 dLux.egg-info/
 docs/notebooks/files
 .idea/
-dev/
+.coverage
+site/
+dev/*
+!dev/dynamic_optics.py

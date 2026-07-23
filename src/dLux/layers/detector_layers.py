@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 from abc import abstractmethod
+
 import jax.numpy as np
 from jax import Array
 import dLux.utils as dlu
 
 from ..psfs import PSF
 from ..coordinates import BaseCoordTransform
-from .optical_layers import BaseLayer
+from .unified_layers import BaseLayer
 
 __all__ = [
+    "BaseDetectorLayer",
     "ApplyPixelResponse",
     "ApplyInterpolation",
     "ApplyJitter",
@@ -20,52 +22,15 @@ __all__ = [
 ]
 
 
-class DetectorLayer(BaseLayer):
-    """
-    A base detector layer class to help with type checking throughout the rest of the
-    software.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/DetectorLayer.png)
-    """
-
-    def __init__(self: DetectorLayer):
-        super().__init__()
+class BaseDetectorLayer(BaseLayer):
+    """Base class for layers that transform PSFs."""
 
     @abstractmethod
-    def __call__(self: DetectorLayer, psf: PSF) -> PSF:  # pragma: no cover
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
-
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
-        """
-        Backwards compatibility alias for `__call__`.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
-        return self(psf)
+    def __call__(self, psf: PSF) -> PSF:  # pragma: no cover
+        """Transform a PSF."""
 
 
-class ApplyInterpolation(DetectorLayer):
+class ApplyInterpolation(BaseDetectorLayer):
     """Interpolate a PSF through a coordinate transformation.
 
     ??? abstract "UML"
@@ -97,7 +62,7 @@ class ApplyInterpolation(DetectorLayer):
         )
 
 
-class ApplyPixelResponse(DetectorLayer):
+class ApplyPixelResponse(BaseDetectorLayer):
     """
     Applies a pixel response array to the input PSF via multiplication. This can be
     used to model inter- and intra-pixel sensitivity variations common
@@ -131,7 +96,7 @@ class ApplyPixelResponse(DetectorLayer):
         return psf * self.pixel_response
 
 
-class ApplyJitter(DetectorLayer):
+class ApplyJitter(BaseDetectorLayer):
     """
     Convolves the PSF with a radially symmetric Gaussian kernel parameterised by its
     standard deviation (sigma).
@@ -199,7 +164,7 @@ class ApplyJitter(DetectorLayer):
         return psf.convolve(self.kernel)
 
 
-class ApplySaturation(DetectorLayer):
+class ApplySaturation(BaseDetectorLayer):
     """
     Applies a simple saturation model to the input PSF by clipping any values above
     the threshold value.
@@ -229,7 +194,7 @@ class ApplySaturation(DetectorLayer):
         return psf.min("data", self.threshold)
 
 
-class AddConstant(DetectorLayer):
+class AddConstant(BaseDetectorLayer):
     """
     Adds a constant to the output PSF. This is typically used to model the mean value of
     the detector noise.
@@ -259,7 +224,7 @@ class AddConstant(DetectorLayer):
         return psf + self.value
 
 
-class Downsample(DetectorLayer):
+class Downsample(BaseDetectorLayer):
     """
     Downsamples an input PSF by an integer number of pixels via a sum. Typically used
     to downsample an oversampled PSF to the true pixel size. Note the input PSF size

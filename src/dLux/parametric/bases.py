@@ -14,7 +14,7 @@ from jax import Array
 import dLux.utils as dlu
 
 __all__ = [
-    "Parametric",
+    "BaseParametric",
     "ParametricBasis",
     "ExplicitBasis",
     "ImplicitBasis",
@@ -25,19 +25,15 @@ __all__ = [
 ]
 
 
-class Parametric(zdx.Base):
-    """Abstract parameterisation that evaluates to a value when consumed.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/Parametric.png)
-    """
+class BaseParametric(zdx.Base):
+    """A contextual parameterisation consumed by another dLux object."""
 
     @abstractmethod
-    def evaluate(self: Parametric, **kwargs: Any) -> Array:  # pragma: no cover
-        pass
+    def evaluate(self, **kwargs: Any) -> Array:  # pragma: no cover
+        """Evaluate the parameterisation in the supplied context."""
 
 
-class ParametricBasis(Parametric):
+class ParametricBasis(BaseParametric):
     """Base class for coefficient-weighted basis parameterisations.
 
     ??? abstract "UML"

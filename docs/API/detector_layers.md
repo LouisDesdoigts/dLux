@@ -1,5 +1,8 @@
 # Detector Layers
 
+???+ info "BaseDetectorLayer"
+    ::: dLux.layers.detector_layers.BaseDetectorLayer
+
 ???+ info "ApplyInterpolation"
     ::: dLux.layers.detector_layers.ApplyInterpolation
 

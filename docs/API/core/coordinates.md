@@ -1,19 +1,31 @@
 # Coordinates
 
-???+ info "Spec"
-    ::: dLux.coordinates.Spec
+???+ info "Specification contract"
+    ::: dLux.coord_specs.BaseSpec
 
 ???+ info "PadSpec"
-    ::: dLux.coordinates.PadSpec
+    ::: dLux.coord_specs.PadSpec
 
 ???+ info "CoordSpec"
-    ::: dLux.coordinates.CoordSpec
+    ::: dLux.coord_specs.CoordSpec
 
-???+ info "BaseCoordTransform"
+???+ info "Affine"
+    ::: dLux.affine.Affine
+
+???+ info "Affine operations"
+    ::: dLux.affine.BaseAffineOperation
+    ::: dLux.affine.MatrixAffine
+    ::: dLux.affine.Translation
+    ::: dLux.affine.Rotation
+    ::: dLux.affine.Scaling
+    ::: dLux.affine.Shearing
+
+???+ info "TransformChain"
     ::: dLux.coordinates.BaseCoordTransform
-
-???+ info "CoordTransform"
-    ::: dLux.coordinates.CoordTransform
+    ::: dLux.coordinates.TransformChain
 
 ???+ info "DistortedCoords"
     ::: dLux.coordinates.DistortedCoords
+
+???+ info "Distort"
+    ::: dLux.coordinates.Distort
