@@ -29,6 +29,8 @@ are intentionally left untouched until the source migration is structurally comp
 - `polarisation` stores an ordered dictionary of existing polarising optics.
 - `Lens` and `Wedge` are optical layers whose material models contribute through OPD.
 - Propagation is optional and occurs after all local effects and normalisation.
+- Polarisation and onward propagation are implemented by reusable
+  `PolarisationLayer` and `PropagatorLayer` contracts inherited by `Optic`.
 - Dynamic optics share one transformed coordinate context across aperture, OPD, phase,
   and polarisation parameterisations.
 - Heterogeneous ordered collections use `dlu.list2dictionary(..., ordered=True, ...)`.

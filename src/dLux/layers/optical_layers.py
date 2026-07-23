@@ -7,12 +7,11 @@ from typing import Any
 import jax.numpy as np
 from jax import Array
 
-import dLux.utils as dlu
-
 from ..coordinates import BaseCoordTransform
 from ..parametric import BaseParametric, Shape
 from ..wavefronts import Wavefront
-from .polarised_layers import BasePolarisingOptic
+from .polarised_layers import PolarisationLayer
+from .propagation_layers import PropagatorLayer
 from .unified_layers import BaseOpticalLayer
 
 __all__ = [
@@ -72,15 +71,19 @@ class Normalise(BaseOpticalLayer):
         return wavefront.normalise()
 
 
-class Optic(TransmissiveLayer, AberratedLayer, Normalise):
+class Optic(
+    TransmissiveLayer,
+    AberratedLayer,
+    Normalise,
+    PolarisationLayer,
+    PropagatorLayer,
+):
     """A physical optic evaluated at one plane, with optional onward propagation."""
 
     transmission: Array | BaseParametric | None
     opd: Array | BaseParametric | None
     phase: Array | BaseParametric | None
-    polarisation: dict | None
     normalise: bool
-    propagator: BaseOpticalLayer | None
 
     def __init__(
         self,
@@ -93,21 +96,8 @@ class Optic(TransmissiveLayer, AberratedLayer, Normalise):
     ):
         TransmissiveLayer.__init__(self, transmission, normalise)
         AberratedLayer.__init__(self, opd, phase)
-        self.polarisation = self._parse_polarisation(polarisation)
-        if propagator is not None and not isinstance(propagator, BaseOpticalLayer):
-            raise TypeError("propagator must be a BaseOpticalLayer or None.")
-        self.propagator = propagator
-
-    @staticmethod
-    def _parse_polarisation(polarisation) -> dict | None:
-        if polarisation is None:
-            return None
-        items = (
-            list(polarisation)
-            if isinstance(polarisation, (list, tuple))
-            else [polarisation]
-        )
-        return dlu.list2dictionary(items, True, BasePolarisingOptic)
+        PolarisationLayer.__init__(self, polarisation)
+        PropagatorLayer.__init__(self, propagator)
 
     def context(self, wavefront: Wavefront) -> dict[str, Any]:
         """Return the parameter context shared by this optic's properties."""
@@ -120,7 +110,6 @@ class Optic(TransmissiveLayer, AberratedLayer, Normalise):
             "transmission": self.resolve(self.transmission, **context),
             "opd": self.resolve(self.opd, **context),
             "phase": self.resolve(self.phase, **context),
-            "polarisation": self.polarisation,
         }
 
     def phasor(self, wavefront: Wavefront, params: dict = None) -> Array:
@@ -140,34 +129,14 @@ class Optic(TransmissiveLayer, AberratedLayer, Normalise):
         transmission = wavefront._to_phasor_shape(transmission)
         return transmission * np.exp(1j * (wavenumber * opd + phase))
 
-    @staticmethod
-    def polarisation_matrix(polarisation, wavefront: Wavefront) -> Array | None:
-        """Evaluate and compose polarising optics in their listed physical order."""
-        if polarisation is None:
-            return None
-        matrix = np.eye(2, dtype=complex)
-        for optic in polarisation.values():
-            if hasattr(optic, "evaluate_jones"):
-                jones = optic.evaluate_jones(wavefront)
-            elif hasattr(optic, "orientation"):
-                jones = dlu.rotate_jones(optic.jones, optic.orientation)
-            else:
-                jones = optic.jones
-            matrix = np.einsum("ij...,jk...->ik...", jones, matrix)
-        return matrix
-
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         params = self.params(wavefront)
         phasor = wavefront.phasor * self.phasor(wavefront, params)
         wavefront = wavefront.set(phasor=phasor)
-        polarisation = self.polarisation_matrix(params["polarisation"], wavefront)
-        if polarisation is not None:
-            wavefront = wavefront.apply_jones(polarisation)
+        wavefront = PolarisationLayer.__call__(self, wavefront)
         if self.normalise:
             wavefront = wavefront.normalise()
-        if self.propagator is not None:
-            wavefront = self.propagator(wavefront)
-        return wavefront
+        return PropagatorLayer.__call__(self, wavefront)
 
 
 class DynamicOptic(Optic):
@@ -223,7 +192,6 @@ class DynamicOptic(Optic):
             "transmission": self.aperture.evaluate(**context),
             "opd": self.resolve(self.opd, **context),
             "phase": self.resolve(self.phase, **context),
-            "polarisation": self.polarisation,
         }
 
 
@@ -277,7 +245,6 @@ class Lens(Optic):
             "transmission": self.resolve(self.transmission, **context),
             "opd": opd + n * thickness,
             "phase": self.resolve(self.phase, **context),
-            "polarisation": self.polarisation,
         }
 
 
@@ -339,7 +306,6 @@ class Wedge(Optic):
             "transmission": self.resolve(self.transmission, **context),
             "opd": opd + index_difference * thickness,
             "phase": self.resolve(self.phase, **context),
-            "polarisation": self.polarisation,
         }
 
 

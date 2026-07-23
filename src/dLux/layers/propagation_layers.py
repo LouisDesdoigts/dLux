@@ -11,6 +11,7 @@ from .unified_layers import BaseOpticalLayer
 
 __all__ = [
     "BaseABCDElement",
+    "PropagatorLayer",
     "Propagator",
     "FFT",
     "MFT",
@@ -27,6 +28,20 @@ __all__ = [
 
 class BaseABCDElement(zdx.Base):
     """Base class for elements represented by an ABCD matrix."""
+
+
+class PropagatorLayer(BaseOpticalLayer):
+    """Optionally propagate a wavefront with another optical layer."""
+
+    propagator: BaseOpticalLayer | None
+
+    def __init__(self, propagator=None):
+        if propagator is not None and not isinstance(propagator, BaseOpticalLayer):
+            raise TypeError("propagator must be a BaseOpticalLayer or None.")
+        self.propagator = propagator
+
+    def __call__(self, wavefront):
+        return wavefront if self.propagator is None else self.propagator(wavefront)
 
 
 class Propagator(BaseOpticalLayer):
