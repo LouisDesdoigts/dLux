@@ -50,62 +50,6 @@ def kernels(n_modes, npixels):
 
 
 # ============================================================================
-# Tests for fft_spec
-# ============================================================================
-class TestFFTSpec:
-    """Tests for FFT output pixel scale specification."""
-
-    def test_even_without_focal_length(self, wavelength, pixel_scale):
-        """Even npixels_in without focal_length returns non-zero offset."""
-        d_out, offset = fourier_utils.fft_spec(16, pixel_scale, wavelength)
-        assert np.isfinite(d_out)
-        assert offset != 0.0  # even case returns non-zero offset
-
-    def test_odd_without_focal_length(self, wavelength, pixel_scale):
-        """Odd npixels_in without focal_length returns zero offset."""
-        d_out, offset = fourier_utils.fft_spec(15, pixel_scale, wavelength)
-        assert np.isfinite(d_out)
-        assert offset == 0.0
-
-    def test_with_focal_length(self, wavelength, pixel_scale, focal_length):
-        """focal_length scales the output pixel size."""
-        d_out_no_fl, _ = fourier_utils.fft_spec(16, pixel_scale, wavelength)
-        d_out_fl, _ = fourier_utils.fft_spec(
-            16, pixel_scale, wavelength, focal_length=focal_length
-        )
-        assert np.isclose(d_out_fl, d_out_no_fl * focal_length)
-
-
-# ============================================================================
-# Tests for fft_phase_ramp
-# ============================================================================
-class TestFFTPhaseRamp:
-    """Tests for FFT phase ramp computation."""
-
-    def test_forward(self, wavelength, shift, pixel_scale):
-        """Forward phase ramp has shape (npix, npix) and is complex."""
-        xs = np.linspace(-0.5, 0.5, 16) * pixel_scale
-        ramp = fourier_utils.fft_phase_ramp(xs, wavelength, shift)
-        assert ramp.shape == (16, 16)
-        assert np.iscomplexobj(ramp)
-
-    def test_inverse(self, wavelength, shift, pixel_scale):
-        """Inverse phase ramp is conjugate of forward."""
-        xs = np.linspace(-0.5, 0.5, 16) * pixel_scale
-        ramp_fwd = fourier_utils.fft_phase_ramp(xs, wavelength, shift)
-        ramp_inv = fourier_utils.fft_phase_ramp(xs, wavelength, shift, inverse=True)
-        assert np.allclose(ramp_fwd, np.conj(ramp_inv))
-
-    def test_with_focal_length(self, wavelength, shift, pixel_scale):
-        """Focal length affects the phase scaling (using fl != 1 to see difference)."""
-        xs = np.linspace(-0.5, 0.5, 16) * pixel_scale
-        ramp_no_fl = fourier_utils.fft_phase_ramp(xs, wavelength, shift)
-        ramp_fl = fourier_utils.fft_phase_ramp(xs, wavelength, shift, focal_length=2.0)
-        # Results differ when focal_length != 1 (fl=1 would give same alpha=wavelength)
-        assert not np.allclose(ramp_no_fl, ramp_fl)
-
-
-# ============================================================================
 # Tests for _to_xy (private helper)
 # ============================================================================
 class TestToXY:

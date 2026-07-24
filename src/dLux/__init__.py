@@ -7,44 +7,41 @@ __version__ = importlib.metadata.version("dLux")
 
 from . import (
     parametric,
-    polynomials,
     layers,
     optical_systems,
     detectors,
-    instruments,
     sources,
     spectra,
     wavefronts,
     psfs,
     coordinates,
+    abcd,
 )
 
 _modules = (
     parametric,
-    polynomials,
+    layers,
     optical_systems,
     detectors,
     sources,
     spectra,
-    instruments,
-    layers,
     wavefronts,
     psfs,
     coordinates,
+    abcd,
 )
 
 _module_names = [
     "parametric",
-    "polynomials",
     "layers",
     "utils",
     "optical_systems",
     "detectors",
-    "instruments",
     "sources",
     "spectra",
     "wavefronts",
     "psfs",
     "coordinates",
+    "abcd",
 ]
 __all__ = _module_names + reexport(_modules, globals())

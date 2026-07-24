@@ -208,11 +208,11 @@ def circular_aperture(
     # Get the oversampled primary aperture
     coord_diam = diameter if array_diameter is None else array_diameter
     coords = dlu.pixel_coords(npixels * oversample, diameter=coord_diam)
-    layers = [dlu.circle(coords, diameter / 2)]
+    layers = [dlu.circle(coords, diameter)]
 
     # Add the secondary if requested
     if secondary_diameter is not None and secondary_diameter > 0:
-        layers.append(dlu.circle(coords, secondary_diameter / 2, invert=True))
+        layers.append(dlu.circle(coords, secondary_diameter, invert=True))
 
     # Add the spiders if requested
     if spider_width is not None:
@@ -329,7 +329,7 @@ def segmented_aperture(
     shift_fn = fjit(lambda c: dlu.translate_coords(coords, c))
 
     # Get the individual hexagonal segments (only for kept centres)
-    hex_fn = fjit(lambda c: dlu.reg_polygon(shift_fn(c), rmax, 6))
+    hex_fn = fjit(lambda c: dlu.reg_polygon(shift_fn(c), 2 * rmax, 6))
     hexes = np.array([hex_fn(c) for c in cens])
 
     # Build the list of transmission layers
@@ -337,7 +337,7 @@ def segmented_aperture(
 
     # Add the secondary if requested
     if secondary_diameter is not None and secondary_diameter > 0:
-        layers.append(dlu.circle(coords, secondary_diameter / 2, invert=True))
+        layers.append(dlu.circle(coords, secondary_diameter, invert=True))
 
     # Add the spiders if requested
     if spider_width is not None:
@@ -429,10 +429,10 @@ def sparse_aperture(
 
     # Pick the sub-aperture shape function
     if shape == "circle":
-        aperture_fn = fjit(lambda c: dlu.circle(shift_fn(c), hole_diameter / 2))
+        aperture_fn = fjit(lambda c: dlu.circle(shift_fn(c), hole_diameter))
     else:
         rmax = hole_diameter / np.sqrt(3.0)
-        aperture_fn = fjit(lambda c: dlu.reg_polygon(shift_fn(c), rmax, 6))
+        aperture_fn = fjit(lambda c: dlu.reg_polygon(shift_fn(c), 2 * rmax, 6))
 
     # Get the individual sub-apertures
     centers = np.array(centers, float)

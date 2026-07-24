@@ -100,24 +100,27 @@ nav:
       - Overview: API/core/overview.md
       - Coordinates: API/core/coordinates.md
       - Detectors: API/core/detectors.md
-      - Instruments: API/core/instruments.md
       - Optical Systems: API/core/optical_systems.md
-      - Parametric: API/core/parametric.md
-      - Polynomials: API/core/polynomials.md
       - Psfs: API/core/psfs.md
       - Sources: API/core/sources.md
       - Spectra: API/core/spectra.md
       - Wavefronts: API/core/wavefronts.md
 
     - Layers API:
-      - Overview: API/layers/overview.md
-      - Abcd Propagators: API/layers/abcd_propagators.md
-      - Apertures: API/layers/apertures.md
-      - Detector Layers: API/layers/detector_layers.md
-      - Optical Layers: API/layers/optical_layers.md
-      - Optics: API/layers/optics.md
-      - Propagators: API/layers/propagators.md
-      - Unified Layers: API/layers/unified_layers.md
+      - Unified Layers: API/unified_layers.md
+      - Detector Layers: API/detector_layers.md
+      - Optical Layers: API/optical_layers.md
+      - Dynamic Layers: API/dynamic_layers.md
+      - Sparse Layers: API/sparse_layers.md
+      - Refractive Layers: API/refractive_layers.md
+      - Polarised Layers: API/polarised_layers.md
+      - Propagation Layers: API/propagation_layers.md
+    - Parametric API:
+      - Parametrics: API/parametric/parametrics.md
+      - Bases: API/parametric/bases.md
+      - Polynomials: API/parametric/polynomials.md
+      - Shapes: API/parametric/shapes.md
+      - Refractive Models: API/parametric/refractive.md
 
     - Utils API:
       - Overview: API/utils/overview.md

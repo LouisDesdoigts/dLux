@@ -3,6 +3,7 @@ from jax import Array
 from functools import lru_cache
 
 __all__ = [
+    "unit_factor",
     "unit_factor_to_rad",
     "convert",
     "rad2arcsec",
@@ -28,6 +29,10 @@ _BASE_TO_RAD = {
     "arcsec": np.pi / (180.0 * 3600.0),
 }
 
+_BASE_TO_METRE = {
+    "m": 1.0,
+}
+
 # ---- aliases (lowercase lookup only) ----
 _ALIASES = {
     "radian": "rad",
@@ -42,6 +47,10 @@ _ALIASES = {
     "arcsecs": "arcsec",
     "arcsecond": "arcsec",
     "arcseconds": "arcsec",
+    "metre": "m",
+    "metres": "m",
+    "meter": "m",
+    "meters": "m",
 }
 
 # ---- SI-like prefixes ----
@@ -87,6 +96,27 @@ def unit_factor_to_rad(unit: str):
         return _PREFIX[p] * _BASE_TO_RAD[base]
 
     raise ValueError(f"Unknown angular unit '{unit}'.")
+
+
+@lru_cache(maxsize=None)
+def unit_factor(unit: str):
+    """Return the factor converting a supported unit to canonical SI units.
+
+    Angular units convert to radians and length units convert to metres.
+    """
+    u = _canon(unit)
+    if u in _BASE_TO_RAD:
+        return _BASE_TO_RAD[u]
+    if u in _BASE_TO_METRE:
+        return _BASE_TO_METRE[u]
+
+    prefix = u[0]
+    base = u[1:]
+    if prefix in _PREFIX and base in _BASE_TO_RAD:
+        return _PREFIX[prefix] * _BASE_TO_RAD[base]
+    if prefix in _PREFIX and base in _BASE_TO_METRE:
+        return _PREFIX[prefix] * _BASE_TO_METRE[base]
+    raise ValueError(f"Unknown unit '{unit}'.")
 
 
 def convert(value, unit_in: str, unit_out: str, scale: float = 1.0):

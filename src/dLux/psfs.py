@@ -4,14 +4,13 @@ from __future__ import annotations
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import Array
-import zodiax as zdx
-import dLux.utils as dlu
-from .coordinates import BaseCoordTransform
+from .coordinates import CoordSpec
+from .wavefronts import BaseSpatial
 
 __all__ = ["PSF"]
 
 
-class PSF(zdx.Base):
+class PSF(BaseSpatial):
     """
     A simple class that holds the state of a PSF as it is transformed by detector
     layers.
@@ -32,9 +31,13 @@ class PSF(zdx.Base):
     """
 
     data: Array
-    pixel_scale: Array
+    spec: CoordSpec
 
-    def __init__(self: PSF, data: Array, pixel_scale: Array):
+    @property
+    def _field_name(self) -> str:
+        return "data"
+
+    def __init__(self: PSF, data: Array, spec: CoordSpec):
         """
         Parameters
         ----------
@@ -44,22 +47,25 @@ class PSF(zdx.Base):
             The pixel scale of the PSF.
         """
         self.data = np.asarray(data, dtype=float)
-        self.pixel_scale = np.asarray(pixel_scale, dtype=float)
+        if self.data.ndim < 2:
+            raise ValueError("data must have at least two spatial dimensions.")
+        if not isinstance(spec, CoordSpec):
+            raise TypeError("spec must be a CoordSpec.")
+        spec = spec.broadcast(2)
+        inferred_n = np.asarray(self.data.shape[-2:][::-1], int)
+        if spec.n is None:
+            spec = spec.set(n=inferred_n)
+        elif tuple(int(value) for value in spec.n) != tuple(inferred_n):
+            raise ValueError("data spatial shape must match spec.n.")
+        BaseSpatial.__init__(self, spec)
+
+    @classmethod
+    def from_wavefront(cls, wavefront) -> PSF:
+        """Construct a PSF from a wavefront's intensity and coordinate specification."""
+        return cls(wavefront.psf, wavefront.spec)
 
     @property
-    def npixels(self: PSF) -> int:
-        """
-        Returns the side length of the arrays currently representing the PSF.
-
-        Returns
-        -------
-        npixels : int
-            The number of pixels that represent the `PSF`.
-        """
-        return self.data.shape[-1]
-
-    @property
-    def ndim(self: PSF) -> int:
+    def batch_ndim(self: PSF) -> int:
         """
         Returns the number of dimensions of the PSF. This is used to track the
         vectorised version of the PSF returned from vmapping.
@@ -69,26 +75,32 @@ class PSF(zdx.Base):
         ndim : int
             The dimensionality of the PSF.
         """
-        return self.pixel_scale.ndim
+        return self.data.ndim - 2
 
-    def downsample(self: PSF, n: int) -> PSF:
+    def normalise(self: PSF, mode: str = "power", value: float = 1.0) -> PSF:
         """
-        Downsamples the PSF by a factor of n. This is done by summing the PSF pixels in
-        n x n blocks.
+        Normalise the PSF.
 
         Parameters
         ----------
-        n : int
-            The factor by which to downsample the PSF.
+        mode : {"power","peak"} = "power"
+            - "power": scales so ``sum(data) == value``.
+            - "peak": scales so ``max(data) == value``.
+        value : float = 1.0
+            Target value for the selected mode.
 
         Returns
         -------
         psf : PSF
-            The downsampled PSF.
+            New PSF scaled to achieve the normalisation.
         """
-        data = dlu.downsample(self.data, n, mean=False)
-        pixel_scale = self.pixel_scale * n
-        return self.set(data=data, pixel_scale=pixel_scale)
+        if mode == "power":
+            scale = value / self.data.sum()
+        elif mode == "peak":
+            scale = value / self.data.max()
+        else:
+            raise ValueError("mode must be 'power' or 'peak'")
+        return self.multiply("data", scale)
 
     def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
         """
@@ -108,86 +120,6 @@ class PSF(zdx.Base):
             The convolved PSF.
         """
         return self.set(data=convolve(self.data, other, mode="same", method=method))
-
-    def rotate(self: PSF, angle: float, method: str = "linear") -> PSF:
-        """
-        Rotates the PSF by a given angle via interpolation.
-
-        Parameters
-        ----------
-        angle : float
-            The angle by which to rotate the PSF.
-        method : str = "linear"
-            The interpolation method.
-
-        Returns
-        -------
-        psf : PSF
-            The rotated PSF.
-        """
-        return self.set(data=dlu.rotate(self.data, angle, method=method))
-
-    def interpolate(
-        self: PSF,
-        transformation: BaseCoordTransform,
-        method: str = "linear",
-        fill: float = 0.0,
-    ) -> PSF:
-        """Interpolate the PSF through a coordinate transformation.
-
-        Parameters
-        ----------
-        transformation : BaseCoordTransform
-            Transformation applied to the PSF sampling coordinates.
-        method : str = "linear"
-            Interpolation method passed to ``interpax``.
-        fill : float = 0.0
-            Value used when sampling outside the input grid.
-
-        Returns
-        -------
-        psf : PSF
-            The interpolated PSF.
-        """
-        if not isinstance(transformation, BaseCoordTransform):
-            raise TypeError("transformation must be a BaseCoordTransform.")
-        knot_coords = dlu.pixel_coords(self.npixels, self.npixels * self.pixel_scale)
-        sample_coords = transformation(knot_coords)
-        data = dlu.interp(self.data, knot_coords, sample_coords, method, fill)
-        return self.set(data=data)
-
-    def resize(self: PSF, npixels: int) -> PSF:
-        """
-        Resizes the PSF via a zero-padding or cropping operation.
-
-        Parameters
-        ----------
-        npixels : int
-            The size to resize the PSF to.
-
-        Returns
-        -------
-        psf : PSF
-            The resized PSF.
-        """
-        return self.set(data=dlu.resize(self.data, npixels))
-
-    def flip(self: PSF, axis: tuple) -> PSF:
-        """
-        Flips the PSF along the specified axes. Note we use 'ij' indexing, so axis 0 is
-        the y-axis and axis 1 is the x-axis.
-
-        Parameters
-        ----------
-        axis : tuple
-            The axes along which to flip the PSF.
-
-        Returns
-        -------
-        psf : PSF
-            The new flipped PSF.
-        """
-        return self.set(data=np.flip(self.data, axis))
 
     def _magic_unified_op(self: PSF, other: Array | PSF | None, op: str) -> PSF:
         """
@@ -221,54 +153,4 @@ class PSF(zdx.Base):
         if isinstance(other, PSF):
             other = other.data
 
-        # Apply the operation
-        if op == "add":
-            return self.add("data", other)
-        elif op == "subtract":
-            return self.add("data", -other)
-        elif op == "multiply":
-            return self.multiply("data", other)
-        elif op == "divide":
-            return self.multiply("data", 1 / other)
-        else:
-            raise ValueError(f"Unsupported operation '{op}'.")
-
-    def __add__(self: PSF, other: PSF | Array | None) -> PSF:
-        """
-        Allows arrays or PSFs to be added together. None values are ignored.
-        """
-        return self._magic_unified_op(other, "add")
-
-    def __sub__(self: PSF, other: PSF | Array | None) -> PSF:
-        """
-        Allows arrays or PSFs to be subtracted. None values are ignored.
-        """
-        return self._magic_unified_op(other, "subtract")
-
-    def __mul__(self: PSF, other: PSF | Array | None) -> PSF:
-        """
-        Allows arrays or PSFs to be multiplied. None values are ignored.
-        """
-        return self._magic_unified_op(other, "multiply")
-
-    def __truediv__(self: PSF, other: PSF | Array | None) -> PSF:
-        """
-        Allows arrays or PSFs to be divided. None values are ignored.
-        """
-        return self._magic_unified_op(other, "divide")
-
-    def __iadd__(self: PSF, other: PSF | Array | None) -> PSF:
-        """In-place addition."""
-        return self.__add__(other)
-
-    def __isub__(self: PSF, other: PSF | Array | None) -> PSF:
-        """In-place subtraction."""
-        return self.__sub__(other)
-
-    def __imul__(self: PSF, other: PSF | Array | None) -> PSF:
-        """In-place multiplication."""
-        return self.__mul__(other)
-
-    def __itruediv__(self: PSF, other: PSF | Array | None) -> PSF:
-        """In-place division."""
-        return self.__truediv__(other)
+        return self._apply_field_op(other, op)

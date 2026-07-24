@@ -2,6 +2,17 @@
 
 ---
 
+## V0.17.0
+
+### ✨ New Features
+- Polarisation layers now accept scalar, sampled, or parametric angle and retardance
+  fields, including bases evaluated dynamically from wavefront coordinates.
+
+### ⚠️ Breaking Changes
+- `LinearPolariser` and `Retarder` now cover both uniform and spatially varying
+  fields. Their axis parameter is consistently named `angle`, and the redundant
+  `SVLinearPolariser` and `SVRetarder` classes have been removed.
+
 ## V0.16.0
 
 ### ✨ New Features
@@ -41,8 +52,9 @@
   least-squares solve ([#299](https://github.com/LouisDesdoigts/dLux/issues/299)).
 
 ### ⚠️ Breaking Changes
-- Coordinate transformation classes now live in `dLux.coordinates`; the
-  `dLux.transformations` module has been removed.
+- Coordinate transformations now live in `dLux.coordinates`, affine operations in
+  `dLux.affine`, and sampling specifications in `dLux.coord_specs`; the former
+  transformation and coordinate-package paths have been removed.
 - Continuous scalar parameters are now consistently stored as scalar JAX arrays
   rather than Python floats
   ([#338](https://github.com/LouisDesdoigts/dLux/issues/338)).

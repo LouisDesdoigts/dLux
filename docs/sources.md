@@ -40,7 +40,7 @@ psf_pixel_scale = 50e-3  # 50 mili-arcseconds
 oversample = 3  # Oversampling factor for the PSF
 
 # Define the optical layers
-layers = [('aperture', dl.layers.Optic(aperture, normalise=True))]
+layers = [('aperture', dl.Optic(aperture, normalise=True))]
 
 # Construct the optics object
 optics = dl.AngularOpticalSystem(

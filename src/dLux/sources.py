@@ -1,12 +1,13 @@
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 from abc import abstractmethod
+
 from jax import Array
 import jax.numpy as np
 import jax.scipy as jsp
 import jax.tree as jtu
-import zodiax as zdx
 import equinox as eqx
+import zodiax as zdx
 import dLux.utils as dlu
 from dLux import spectra
 
@@ -26,6 +27,28 @@ __all__ = [
     "PointResolvedSource",
     "Scene",
 ]
+
+
+class BaseSource(zdx.Base):
+    """Base class for source models."""
+
+    def __init_subclass__(cls, **kwargs):
+        """Inherit the source modelling contract documentation."""
+        super().__init_subclass__(**kwargs)
+        dlu.helpers.inherit_docstrings(cls, ["model"])
+
+    @abstractmethod
+    def normalise(self) -> BaseSource:  # pragma: no cover
+        """Return a normalised source."""
+
+    @abstractmethod
+    def model(
+        self,
+        optics: Any,
+        return_wf: bool = False,
+        return_psf: bool = False,
+    ) -> Any:  # pragma: no cover
+        """Model this source through an optical system."""
 
 
 def _validate_return_mode(return_wf: bool, return_psf: bool) -> None:
@@ -127,55 +150,6 @@ def _as_position_2d(position: Array) -> Array:
             "Pass position=[x, y] where x, y are on-sky angles in radians."
         )
     return position
-
-
-class BaseSource(zdx.Base):
-    """
-    Abstract base class for source models.
-
-    Concrete source classes define normalisation behavior and the optical
-    modelling interface via `normalise(...)` and `model(...)`.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/BaseSource.png)
-    """
-
-    def __init_subclass__(cls, **kwargs):
-        """Inherit docstrings from parent classes for model method."""
-        super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls, ["model"])
-
-    @abstractmethod
-    def normalise(self: BaseSource) -> BaseSource:  # pragma: no cover
-        pass
-
-    @abstractmethod
-    def model(
-        self: BaseSource,
-        optics: BaseOpticalSystem,
-        return_wf: bool = False,
-        return_psf: bool = False,
-    ) -> Array | Wavefront | PSF:  # pragma: no cover
-        """
-        Models the source object through the provided optics.
-
-        Parameters
-        ----------
-        optics : OpticalSystem
-            The optics through which to model the source object.
-        return_wf : bool = False
-            Should the Wavefront object be returned instead of the PSF array?
-        return_psf : bool = False
-            Should the PSF object be returned instead of the PSF array?
-
-        Returns
-        -------
-        result : Array | Wavefront | PSF
-            If `return_wf` is False and `return_psf` is False, returns the PSF array.
-            If `return_wf` is True and `return_psf` is False, returns the Wavefront
-                object.
-            If `return_wf` is False and `return_psf` is True, returns the PSF object.
-        """
 
 
 class Source(BaseSource):
@@ -406,7 +380,7 @@ class PointSources(Source):
         if return_wf:
             return wfs
         if return_psf:
-            return PSF(wfs.psf.sum((0, 1)), wfs.pixel_scale.mean())
+            return PSF(wfs.psf.sum((0, 1)), wfs.spec)
         else:
             return wfs.psf.sum((0, 1))
 
@@ -515,7 +489,7 @@ class ResolvedSource(PointSource):
         # Return PSF object
         conv_psf = jsp.signal.convolve(wf.psf.sum(0), self.distribution, mode="same")
         if return_psf:
-            return PSF(conv_psf, wf.pixel_scale.mean())
+            return PSF(conv_psf, wf.spec)
 
         # Return PSF array
         return conv_psf
@@ -629,7 +603,7 @@ class BinarySource(Source):
 
         # Return PSF case just requires constructing the object
         if return_psf:
-            return PSF(output.data.sum(0), output.pixel_scale.mean())
+            return PSF(output.data.sum(0), output.spec)
 
         # Return array is simple
         return output.sum(0)
@@ -742,7 +716,7 @@ class PointResolvedSource(ResolvedSource):
         conv_psf = jsp.signal.convolve(resolved_psf, self.distribution, mode="same")
         psf = point_psf + conv_psf
         if return_psf:
-            return PSF(psf, wf.pixel_scale.mean())
+            return PSF(psf, wf.spec)
 
         # Return PSF array
         return psf
@@ -807,11 +781,7 @@ class Scene(BaseSource):
         """
         if key in self.sources.keys():
             return self.sources[key]
-        raise dlu.helpers.missing_attribute_error(
-            self,
-            key,
-            list(self.sources.keys()),
-        )
+        raise dlu.helpers.missing_attribute_error(self, key, list(self.sources.keys()))
 
     def model(
         self: Scene,
@@ -838,13 +808,12 @@ class Scene(BaseSource):
         if return_psf:
             # Define mapping function
             leaf_fn = lambda leaf: isinstance(leaf, PSF)
-            get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
-            get_pscales = lambda psf: psf.pixel_scale.mean()
+            get_psfs = lambda psf: psf.data.sum(tuple(range(psf.batch_ndim)))
 
             # Get values and return PSF
             psf = dlu.map2array(get_psfs, output, leaf_fn).sum(0)
-            pixel_scale = dlu.map2array(get_pscales, output, leaf_fn).mean()
-            return PSF(psf, pixel_scale)
+            spec = jtu.leaves(output, is_leaf=leaf_fn)[0].spec
+            return PSF(psf, spec)
 
         # Return array is simple
         return dlu.map2array(lambda x: x, output).sum(0)

@@ -1,34 +1,37 @@
-"""Public layer interfaces and concrete layer implementations."""
+"""Layer contracts and concrete optical, detector, and propagation layers."""
 
 from .._exports import reexport
-
 from . import (
-    optical_layers,
-    optics,
-    detector_layers,
     unified_layers,
-    propagators,
-    apertures,
-    abcd_propagators,
+    detector_layers,
+    optical_layers,
+    dynamic_layers,
+    sparse_layers,
+    refractive_layers,
+    polarised_layers,
+    propagation_layers,
 )
 
 _modules = (
-    optical_layers,
-    optics,
-    detector_layers,
     unified_layers,
-    propagators,
-    apertures,
-    abcd_propagators,
+    detector_layers,
+    optical_layers,
+    dynamic_layers,
+    sparse_layers,
+    refractive_layers,
+    polarised_layers,
+    propagation_layers,
 )
 
 _module_names = [
-    "optical_layers",
-    "optics",
-    "detector_layers",
     "unified_layers",
-    "propagators",
-    "apertures",
-    "abcd_propagators",
+    "detector_layers",
+    "optical_layers",
+    "dynamic_layers",
+    "sparse_layers",
+    "refractive_layers",
+    "polarised_layers",
+    "propagation_layers",
 ]
+
 __all__ = _module_names + reexport(_modules, globals())
