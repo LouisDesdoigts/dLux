@@ -10,84 +10,13 @@ from ..coordinates import CoordSpec, PadSpec
 from .optical_layers import OpticalLayer
 
 __all__ = [
-    "Propagator",
-    "FFT",
-    "MFT",
     "ABCDPropagator",
     "MFTPropagator",
     "FFTPropagator",
     "ASMPropagator",
+    "Fraunhofer",
+    "Fresnel",
 ]
-
-
-class Propagator(OpticalLayer):
-    """Base class for direct Fourier propagators."""
-
-    focal_length: float | None
-    inverse: bool
-
-    def __init__(self, focal_length: float | None = None, inverse: bool = False):
-        if focal_length is not None:
-            focal_length = np.asarray(focal_length, float)
-        self.focal_length = focal_length
-        self.inverse = bool(inverse)
-
-
-class FFT(Propagator):
-    """Propagate a wavefront using its FFT propagation interface."""
-
-    pad: int
-    crop: int
-    center: bool
-
-    def __init__(
-        self,
-        focal_length: float = None,
-        inverse: bool = False,
-        pad: int = 1,
-        crop: int = 1,
-        center: bool = True,
-    ):
-        super().__init__(focal_length=focal_length, inverse=inverse)
-        self.pad = int(pad)
-        self.crop = int(crop)
-        self.center = bool(center)
-
-    def __call__(self, wavefront):
-        spec = CoordSpec(c=0.0) if self.center else None
-        size_out = wavefront.npixels * self.pad // self.crop
-        return wavefront.propagate_FFT(
-            pad=self.pad,
-            focal_length=self.focal_length,
-            inverse=self.inverse,
-            spec_out=spec,
-        ).resize(size_out)
-
-
-class MFT(Propagator):
-    """Propagate a wavefront using its matrix Fourier transform interface."""
-
-    npixels: int
-    pixel_scale: float
-
-    def __init__(
-        self,
-        npixels: int,
-        pixel_scale: float,
-        focal_length: float = None,
-        inverse: bool = False,
-    ):
-        super().__init__(focal_length=focal_length, inverse=inverse)
-        self.pixel_scale = np.asarray(pixel_scale, float)
-        self.npixels = int(npixels)
-
-    def __call__(self, wavefront):
-        return wavefront.propagate(
-            npixels=self.npixels,
-            pixel_scale=self.pixel_scale,
-            focal_length=self.focal_length,
-            inverse=self.inverse,
-        )
 
 
 ###################
