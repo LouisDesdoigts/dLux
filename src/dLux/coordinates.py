@@ -32,12 +32,14 @@ class PadSpec(BaseSpec):
 
     pad: int
     crop: int
-    c: float
+    c: Array
 
     def __init__(self, pad=1, crop=1, c=0.0):
         self.pad = int(pad)
         self.crop = int(crop)
         self.c = np.asarray(c, float)
+        if self.pad < 1 or self.crop < 1:
+            raise ValueError("pad and crop must be positive integers.")
 
 
 class CoordSpec(BaseSpec):
@@ -64,7 +66,7 @@ class CoordSpec(BaseSpec):
 
         self.n = self._as_n(n, ndim)
         self.d = self._as_axes(d, ndim, float, "d")
-        self.c = self._as_axes(c, ndim, float, "c")
+        self.c = self._as_centers(c, ndim)
         if self.d is not None and np.any(self.d <= 0):
             raise ValueError("d must contain positive values.")
         self.unit = None if unit is None else self._validate_unit(unit)
@@ -115,6 +117,21 @@ class CoordSpec(BaseSpec):
             ) from error
 
     @staticmethod
+    def _as_centers(value, ndim):
+        if value is None:
+            return None
+        value = np.asarray(value, dtype=float)
+        if ndim == 0:
+            ndim = 1
+        if value.ndim == 0:
+            return np.broadcast_to(value, (ndim,))
+        if value.shape[-1] == ndim:
+            return value
+        if value.shape[-1] == 1:
+            return np.broadcast_to(value, value.shape[:-1] + (ndim,))
+        raise ValueError("c must be scalar or have one value per spatial axis.")
+
+    @staticmethod
     def _validate_unit(unit):
         if not isinstance(unit, str):
             raise TypeError("unit must be a string.")
@@ -129,7 +146,7 @@ class CoordSpec(BaseSpec):
         """Return the number of coordinate dimensions."""
         for value in (self.n, self.d, self.c):
             if value is not None:
-                return len(value) if isinstance(value, tuple) else value.shape[0]
+                return len(value) if isinstance(value, tuple) else value.shape[-1]
         return 0
 
     def broadcast(self, ndim: int) -> CoordSpec:
@@ -142,12 +159,12 @@ class CoordSpec(BaseSpec):
             if value is None:
                 return None
             shape = (len(value),) if isinstance(value, tuple) else value.shape
-            if shape == (ndim,):
+            if shape[-1:] == (ndim,):
                 return value
-            if shape == (1,):
+            if shape[-1:] == (1,):
                 if isinstance(value, tuple):
                     return value * ndim
-                return np.broadcast_to(value, (ndim,))
+                return np.broadcast_to(value, shape[:-1] + (ndim,))
             raise ValueError(f"{name} cannot be broadcast to {ndim} dimensions.")
 
         return self.set(
@@ -183,7 +200,8 @@ class CoordSpec(BaseSpec):
             raise ValueError("n dimensionality must match the coordinate spec.")
         center = np.zeros(self.ndim) if self.c is None else self.c
         return tuple(
-            (center[i] + (np.arange(size) - (size - 1) / 2) * self.d[i]) * self.scale
+            (center[..., i, None] + (np.arange(size) - (size - 1) / 2) * self.d[i])
+            * self.scale
             for i, size in enumerate(n)
         )
 
@@ -196,12 +214,21 @@ class CoordSpec(BaseSpec):
 
     def coordinates_for(self, n: tuple[int, ...]) -> Array:
         """Return full coordinates for concrete physical-axis pixel counts."""
-        coordinates = np.meshgrid(*self.axes_for(n), indexing="ij")
+        axes = tuple(
+            (np.arange(size) - (size - 1) / 2) * self.d[i] for i, size in enumerate(n)
+        )
+        coordinates = np.meshgrid(*axes, indexing="ij")
         spatial_axes = tuple(range(self.ndim - 1, -1, -1))
-        return np.stack(
+        coordinates = np.stack(
             tuple(np.transpose(axis, spatial_axes) for axis in coordinates),
             axis=0,
         )
+        if self.c is None:
+            return coordinates * self.scale
+        batch = self.c.shape[:-1]
+        coordinates = coordinates.reshape((1,) * len(batch) + coordinates.shape)
+        center = self.c.reshape(batch + (self.ndim,) + (1,) * self.ndim)
+        return (coordinates + center) * self.scale
 
     @property
     def xs(self):
@@ -213,7 +240,7 @@ class CoordSpec(BaseSpec):
     def xs_for(self, n: tuple[int, ...]):
         """Return stacked axes for concrete physical-axis pixel counts."""
         try:
-            return np.stack(self.axes_for(n))
+            return np.stack(self.axes_for(n), axis=-2)
         except ValueError as error:
             raise ValueError(
                 "xs requires equal axis lengths; use axes for a rectangular grid."

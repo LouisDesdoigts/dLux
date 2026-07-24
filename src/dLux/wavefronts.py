@@ -99,7 +99,7 @@ class BaseSpatial(zdx.Base):
     @property
     def center(self) -> Array:
         """Return the x-axis grid center in canonical SI units."""
-        return 0.0 if self.c is None else self.c[0] * self.scale
+        return 0.0 if self.c is None else self.c[..., 0] * self.scale
 
     @property
     def diameter(self) -> Array:
