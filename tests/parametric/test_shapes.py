@@ -4,7 +4,6 @@ import pytest
 import dLux.utils as dlu
 from dLux import Affine
 from dLux.parametric.shapes import (
-    ApertureArray,
     Circle,
     Complement,
     Intersection,
@@ -62,7 +61,7 @@ def test_analytic_shapes(shape, context):
 @pytest.mark.parametrize(
     "constructor,args,message",
     [
-        (Circle, (0,), "radius"),
+        (Circle, (0,), "diameter"),
         (Square, (0,), "width"),
         (Rectangle, (0, 1), "width and height"),
         (Rectangle, (1, 0), "width and height"),
@@ -88,7 +87,7 @@ def test_complement_and_transformation(context):
         Complement(object())
     with pytest.raises(TypeError, match="Shape"):
         TransformedShape(object(), Affine())
-    with pytest.raises(TypeError, match="BaseCoordTransform"):
+    with pytest.raises(TypeError, match="CoordTransform"):
         TransformedShape(circle, object())
 
 
@@ -104,15 +103,13 @@ def test_composite_shapes(context):
     assert Intersection([InfiniteShape()]).extent is None
 
 
-def test_aperture_array(context):
+def test_sparse_union(context):
     circle = Circle(0.2)
-    array = ApertureArray(circle, [[-0.3, 0], [0.3, 0]])
-    assert array.extent > circle.extent
-    assert array.local_coordinates(context["coordinates"]).shape == (2, 2, 16, 16)
-    assert array.evaluate(**context).shape == (16, 16)
-    with pytest.raises(TypeError, match="Shape"):
-        ApertureArray(object(), [[0, 0]])
-    with pytest.raises(TypeError, match="finite"):
-        ApertureArray(InfiniteShape(), [[0, 0]])
-    with pytest.raises(ValueError, match="positions"):
-        ApertureArray(circle, [0, 0])
+    aperture = Union(
+        [
+            TransformedShape(circle, Affine(translation=[-0.3, 0])),
+            TransformedShape(circle, Affine(translation=[0.3, 0])),
+        ]
+    )
+    assert aperture.extent == circle.extent
+    assert aperture.evaluate(**context).shape == (16, 16)

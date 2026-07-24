@@ -91,8 +91,16 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
 
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
+    diameter: Array | None
 
-    def __init__(self, js=None, radial_orders=None, coefficients=None, nsides=0):
+    def __init__(
+        self,
+        js=None,
+        radial_orders=None,
+        coefficients=None,
+        nsides=0,
+        diameter=None,
+    ):
         js = self.get_indices(js, radial_orders)
         self.zernikes = [DynamicZernike(j) for j in js]
         coefficients = np.zeros(len(js)) if coefficients is None else coefficients
@@ -100,12 +108,17 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
         self.nsides = int(nsides)
         if self.nsides not in (0,) and self.nsides < 3:
             raise ValueError("nsides must be zero or greater than two.")
+        self.diameter = None if diameter is None else np.asarray(diameter, dtype=float)
+        if self.diameter is not None and self.diameter <= 0:
+            raise ValueError("diameter must be greater than zero.")
 
     def calculate_basis(
         self, *, wavefront=None, coordinates=None, diameter=None, **kwargs
     ):
         infer_diameter = coordinates is None and wavefront is not None
         coordinates = self.get_coordinates(wavefront=wavefront, coordinates=coordinates)
+        if diameter is None:
+            diameter = self.diameter
         if diameter is None:
             diameter = wavefront.diameter if infer_diameter else 2.0
         is_zernike = lambda leaf: isinstance(leaf, DynamicZernike)

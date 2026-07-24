@@ -92,7 +92,7 @@ def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
 
 
 #####################
-def circle(coords: Array, radius: float, invert: bool = False) -> Array:
+def circle(coords: Array, diameter: float, invert: bool = False) -> Array:
     """
     Calculates a hard-edged circle. This function is not differentiable.
 
@@ -100,8 +100,8 @@ def circle(coords: Array, radius: float, invert: bool = False) -> Array:
     ----------
     coords : Array
         The coordinates to calculate the circle on.
-    radius : float
-        The radius of the circle.
+    diameter : float
+        The diameter of the circle.
     invert : bool = False
         Whether to invert the circle.
 
@@ -112,8 +112,8 @@ def circle(coords: Array, radius: float, invert: bool = False) -> Array:
     """
 
     if invert:
-        return (circ_distance(coords, radius) > 0).astype(float)
-    return (circ_distance(coords, radius) < 0).astype(float)
+        return (circ_distance(coords, diameter / 2) > 0).astype(float)
+    return (circ_distance(coords, diameter / 2) < 0).astype(float)
 
 
 def square(coords: Array, width: float, invert: bool = False) -> Array:
@@ -166,7 +166,9 @@ def rectangle(
     return (rectangle_distance(coords, width, height) < 0).astype(float)
 
 
-def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -> Array:
+def reg_polygon(
+    coords: Array, diameter: float, nsides: int, invert: bool = False
+) -> Array:
     """
     Calculates a hard-edged regular polygon. This function is not differentiable.
 
@@ -174,8 +176,8 @@ def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -
     ----------
     coords : Array
         The coordinates to calculate the polygon on.
-    rmax : float
-        The radius of the polygon.
+    diameter : float
+        The diameter of the polygon's circumscribed circle.
     nsides : int
         The number of sides of the polygon.
     invert : bool = False
@@ -188,8 +190,8 @@ def reg_polygon(coords: Array, rmax: float, nsides: int, invert: bool = False) -
     """
 
     if invert:
-        return (reg_polygon_distance(coords, nsides, rmax) > 0).astype(float)
-    return (reg_polygon_distance(coords, nsides, rmax) < 0).astype(float)
+        return (reg_polygon_distance(coords, nsides, diameter / 2) > 0).astype(float)
+    return (reg_polygon_distance(coords, nsides, diameter / 2) < 0).astype(float)
 
 
 def spider(coords: Array, width: float, angles: Array) -> Array:
@@ -227,7 +229,7 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
 ### Softened ###
 ################
 def soft_circle(
-    coords: Array, radius: float, clip_dist: float = 0.1, invert: bool = False
+    coords: Array, diameter: float, clip_dist: float = 0.1, invert: bool = False
 ) -> Array:
     """
     Calculates a soft-edged circle differentiably. The 'clip_dist' parameter defines
@@ -239,8 +241,8 @@ def soft_circle(
     ----------
     coords : Array
         The coordinates to calculate the circle on.
-    radius : float
-        The radius of the circle.
+    diameter : float
+        The diameter of the circle.
     clip_dist : float = 0.1
         The distance from the edge to 'soften' up to.
     invert : bool = False
@@ -251,7 +253,7 @@ def soft_circle(
     circle : Array
         The softened circle.
     """
-    distances = -circ_distance(coords, radius)
+    distances = -circ_distance(coords, diameter / 2)
     return soften(distances, clip_dist, invert)
 
 
@@ -321,7 +323,7 @@ def soft_rectangle(
 
 def soft_reg_polygon(
     coords: Array,
-    radius: float,
+    diameter: float,
     nsides: int,
     clip_dist: float = 0.1,
     invert: bool = False,
@@ -336,8 +338,8 @@ def soft_reg_polygon(
     ----------
     coords : Array
         The coordinates to calculate the polygon on.
-    radius : float
-        The radius of the polygon.
+    diameter : float
+        The diameter of the polygon's circumscribed circle.
     nsides : int
         The number of sides of the polygon.
     clip_dist : float = 0.1
@@ -350,7 +352,7 @@ def soft_reg_polygon(
     polygon : Array
         The softened polygon.
     """
-    distances = -reg_polygon_distance(coords, nsides, radius)
+    distances = -reg_polygon_distance(coords, nsides, diameter / 2)
     return soften(distances, clip_dist, invert)
 
 

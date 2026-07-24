@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import jax.numpy as np
-from jax import Array, vmap
+from jax import Array
 
 import dLux.utils as dlu
 
-from ..coordinates import BaseCoordTransform
-from .bases import BaseParametric
+from ..coordinates import CoordTransform
+from .parametrics import BaseParametric
 
 __all__ = [
     "Shape",
@@ -21,9 +21,6 @@ __all__ = [
     "Spider",
     "Complement",
     "TransformedShape",
-    "Intersection",
-    "Union",
-    "ApertureArray",
 ]
 
 
@@ -52,26 +49,26 @@ class SoftShape(Shape):
 
 
 class RadialShape(SoftShape):
-    """Base softened geometry parameterised by a bounding radius."""
+    """Base softened geometry parameterised by a bounding diameter."""
 
-    radius: Array
+    diameter: Array
 
-    def __init__(self, radius, softening=1.0):
+    def __init__(self, diameter, softening=1.0):
         super().__init__(softening)
-        self.radius = np.asarray(radius, dtype=float)
-        if self.radius <= 0:
-            raise ValueError("radius must be greater than zero.")
+        self.diameter = np.asarray(diameter, dtype=float)
+        if self.diameter <= 0:
+            raise ValueError("diameter must be greater than zero.")
 
     @property
     def extent(self) -> Array:
-        return self.radius
+        return self.diameter / 2
 
 
 class Circle(RadialShape):
-    """A circular transmissive aperture."""
+    """A circular transmissive aperture described by its diameter."""
 
     def evaluate(self, *, coordinates, pixel_scale, **kwargs) -> Array:
-        return dlu.soft_circle(coordinates, self.radius, self.clip(pixel_scale))
+        return dlu.soft_circle(coordinates, self.diameter, self.clip(pixel_scale))
 
 
 class Square(SoftShape):
@@ -120,12 +117,12 @@ class Rectangle(SoftShape):
 
 
 class RegularPolygon(RadialShape):
-    """A regular polygon described by side count and circumradius."""
+    """A regular polygon described by its circumscribed-circle diameter."""
 
     nsides: int
 
-    def __init__(self, nsides, radius, softening=1.0):
-        super().__init__(radius, softening)
+    def __init__(self, nsides, diameter, softening=1.0):
+        super().__init__(diameter, softening)
         self.nsides = int(nsides)
         if self.nsides < 3:
             raise ValueError("nsides must be at least three.")
@@ -133,7 +130,7 @@ class RegularPolygon(RadialShape):
     def evaluate(self, *, coordinates, pixel_scale, **kwargs) -> Array:
         return dlu.soft_reg_polygon(
             coordinates,
-            self.radius,
+            self.diameter,
             self.nsides,
             self.clip(pixel_scale),
         )
@@ -186,13 +183,13 @@ class TransformedShape(Shape):
     """Evaluate a shape in a transformed local coordinate frame."""
 
     shape: Shape
-    transformation: BaseCoordTransform
+    transformation: CoordTransform
 
     def __init__(self, shape, transformation):
         if not isinstance(shape, Shape):
             raise TypeError("shape must be a Shape.")
-        if not isinstance(transformation, BaseCoordTransform):
-            raise TypeError("transformation must be a BaseCoordTransform.")
+        if not isinstance(transformation, CoordTransform):
+            raise TypeError("transformation must be a CoordTransform.")
         self.shape = shape
         self.transformation = transformation
 
@@ -204,72 +201,3 @@ class TransformedShape(Shape):
         return self.shape.evaluate(
             coordinates=self.transformation(coordinates), **context
         )
-
-
-class CompositeShape(Shape):
-    """Base class for ordered collections of shapes."""
-
-    shapes: dict
-
-    def __init__(self, shapes):
-        self.shapes = dlu.list2dictionary(list(shapes), True, Shape)
-
-    @property
-    def extent(self) -> Array | None:
-        extents = [
-            shape.extent for shape in self.shapes.values() if shape.extent is not None
-        ]
-        return None if not extents else np.max(np.asarray(extents))
-
-    def transmissions(self, **context) -> Array:
-        return np.asarray([shape.evaluate(**context) for shape in self.shapes.values()])
-
-
-class Intersection(CompositeShape):
-    """Combine shape transmissions by multiplication."""
-
-    def evaluate(self, **context) -> Array:
-        return self.transmissions(**context).prod(0)
-
-
-class Union(CompositeShape):
-    """Combine shape transmissions by clipped addition."""
-
-    def evaluate(self, **context) -> Array:
-        return np.clip(self.transmissions(**context).sum(0), 0.0, 1.0)
-
-
-class ApertureArray(Shape):
-    """Vectorised copies of one finite shape at a set of aperture centres."""
-
-    shape: Shape
-    positions: Array
-
-    def __init__(self, shape, positions):
-        if not isinstance(shape, Shape):
-            raise TypeError("shape must be a Shape.")
-        if shape.extent is None:
-            raise TypeError("ApertureArray shapes must have a finite extent.")
-        self.shape = shape
-        self.positions = np.asarray(positions, dtype=float)
-        if self.positions.ndim != 2 or self.positions.shape[-1] != 2:
-            raise ValueError("positions must have shape (n_apertures, 2).")
-
-    @property
-    def extent(self) -> Array:
-        return np.max(np.linalg.norm(self.positions, axis=-1)) + self.shape.extent
-
-    def local_coordinates(self, coordinates) -> Array:
-        return vmap(dlu.translate_coords, in_axes=(None, 0))(
-            coordinates, self.positions
-        )
-
-    def evaluate(self, *, coordinates, pixel_scale, **context) -> Array:
-        local_coordinates = self.local_coordinates(coordinates)
-        evaluate = lambda coords: self.shape.evaluate(
-            coordinates=coords,
-            pixel_scale=pixel_scale,
-            **context,
-        )
-        transmissions = vmap(evaluate)(local_coordinates)
-        return np.clip(transmissions.sum(0), 0.0, 1.0)

@@ -6,21 +6,36 @@ from abc import abstractmethod
 
 import jax.numpy as np
 import zodiax as zdx
-from jax import Array, lax
+from jax import Array, lax, vmap
 
 import dLux.utils as dlu
+from .coord_specs import CoordSpec
 
 __all__ = [
-    "BaseCoordTransform",
+    "CoordTransform",
     "Affine",
+    "AffineMap",
     "TransformChain",
     "DistortedCoords",
-    "Distort",
 ]
 
 
-class BaseCoordTransform(zdx.Base):
-    """Base class for coordinate transformations."""
+class CoordTransform(zdx.Base):
+    """Base coordinate transformation with an optional coordinate source.
+
+    Coordinates supplied when calling the transform take precedence over the stored
+    source. The stored array or ``CoordSpec`` is used when the transform is called
+    without coordinates.
+    """
+
+    coordinates: Array | CoordSpec | None
+
+    def __init__(self, coordinates=None):
+        if coordinates is not None and not isinstance(coordinates, CoordSpec):
+            coordinates = np.asarray(coordinates, dtype=float)
+            if coordinates.shape[-3] != 2:
+                raise ValueError("coordinates must have shape (..., 2, n, n).")
+        self.coordinates = coordinates
 
     def __init_subclass__(cls, **kwargs):
         """Inherit the coordinate transformation interface documentation."""
@@ -31,8 +46,23 @@ class BaseCoordTransform(zdx.Base):
         """Generate a coordinate grid and apply this transformation."""
         return self(dlu.pixel_coords(npix, diameter))
 
+    @staticmethod
+    def _from_spec(spec: CoordSpec) -> Array:
+        xs = spec.xs
+        x, y = np.broadcast_arrays(xs[..., None, :], xs[..., :, None])
+        return np.stack((x, y), axis=-3)
+
+    def get_coordinates(self, coordinates=None) -> Array:
+        """Resolve call-time coordinates, falling back to the stored source."""
+        coordinates = self.coordinates if coordinates is None else coordinates
+        if coordinates is None:
+            raise ValueError("Provide coordinates when calling the transformation.")
+        if isinstance(coordinates, CoordSpec):
+            coordinates = self._from_spec(coordinates)
+        return np.asarray(coordinates, dtype=float)
+
     @abstractmethod
-    def __call__(self, coordinates: Array) -> Array:  # pragma: no cover
+    def __call__(self, coordinates: Array = None) -> Array:  # pragma: no cover
         """Transform an array of Cartesian coordinates."""
 
     def apply(self, coordinates: Array) -> Array:
@@ -40,21 +70,126 @@ class BaseCoordTransform(zdx.Base):
         return self(coordinates)
 
 
-class Affine(BaseCoordTransform):
-    """A general affine coordinate transform with semantic parameters.
+class TransformChain(CoordTransform):
+    """Apply an ordered collection of coordinate transformations."""
 
-    Coordinates are mapped as ``x' = M x + t``. ``matrix`` and ``offset`` expose
-    that low-level form directly, while translation, rotation, scale, and shear
-    provide the common physical parameterisation. Operations are composed in the
-    order supplied by ``order``.
+    transformations: dict
+
+    def __init__(self, transformations=(), coordinates=None):
+        super().__init__(coordinates)
+        if isinstance(transformations, dict):
+            transformations = list(transformations.items())
+        else:
+            transformations = list(transformations)
+        self.transformations = dlu.list2dictionary(
+            transformations, True, CoordTransform
+        )
+
+    def __call__(self, coords: Array = None) -> Array:
+        coords = self.get_coordinates(coords)
+        for transformation in self.transformations.values():
+            coords = transformation(coords)
+        return coords
+
+
+class DistortedCoords(CoordTransform):
+    """Polynomially distorted Cartesian coordinates."""
+
+    powers: Array
+    distortion: Array
+    shift_invariant: bool
+
+    def __init__(
+        self,
+        order: int | None = None,
+        distortion: Array | None = None,
+        *,
+        orders: tuple[int, ...] | list[int] | None = None,
+        powers: Array | None = None,
+        shift_invariant: bool = False,
+        coordinates=None,
+    ):
+        super().__init__(coordinates)
+        supplied = sum(value is not None for value in (order, orders, powers))
+        if supplied > 1:
+            raise ValueError("Provide only one of order, orders, or powers.")
+
+        if powers is not None:
+            powers = np.asarray(powers, dtype=float)
+            if powers.ndim != 2 or powers.shape[0] != 2:
+                raise ValueError("powers must have shape (2, n_terms).")
+        else:
+            if orders is None:
+                order = 1 if order is None else int(order)
+                orders = tuple(range(1, order + 1))
+            else:
+                orders = tuple(int(value) for value in orders)
+            if not orders or any(value < 1 for value in orders):
+                raise ValueError("orders must contain positive integers.")
+            powers = np.array(dlu.gen_powers(max(orders) + 1))[:, 1:]
+            powers = powers[:, np.isin(powers.sum(0), np.asarray(orders))]
+
+        self.shift_invariant = bool(shift_invariant)
+        if self.shift_invariant:
+            linear = np.logical_or(
+                np.all(powers == np.array([[1], [0]]), axis=0),
+                np.all(powers == np.array([[0], [1]]), axis=0),
+            )
+            powers = powers[:, ~linear]
+        self.powers = powers
+        if distortion is None:
+            distortion = np.zeros_like(self.powers)
+        distortion = np.asarray(distortion, dtype=float)
+        if distortion.shape[-2:] != self.powers.shape:
+            raise ValueError("distortion trailing dimensions must match powers shape.")
+        self.distortion = distortion
+
+    def __call__(self, coords: Array = None) -> Array:
+        coords = self.get_coordinates(coords)
+        if self.distortion.ndim > 2:
+            apply = lambda distortion, coordinates: dlu.distort_coords(
+                coordinates, distortion, self.powers
+            )
+            if coords.ndim > 3 and coords.shape[0] == self.distortion.shape[0]:
+                return vmap(apply)(self.distortion, coords)
+            return vmap(lambda distortion: apply(distortion, coords))(self.distortion)
+        return dlu.distort_coords(coords, self.distortion, self.powers)
+
+
+class AffineMap(CoordTransform):
+    """A direct affine coordinate map ``x' = matrix @ x + offset``."""
+
+    matrix: Array
+    offset: Array
+
+    def __init__(self, matrix=None, offset=None, coordinates=None):
+        super().__init__(coordinates)
+        matrix = np.eye(2) if matrix is None else np.asarray(matrix, dtype=float)
+        offset = np.zeros(2) if offset is None else np.asarray(offset, dtype=float)
+        if matrix.shape != (2, 2):
+            raise ValueError("matrix must have shape (2, 2).")
+        if offset.shape != (2,):
+            raise ValueError("offset must have shape (2,).")
+        self.matrix = matrix
+        self.offset = offset
+
+    def __call__(self, coords: Array = None) -> Array:
+        coords = self.get_coordinates(coords)
+        shift = self.offset.reshape((2,) + (1,) * (coords.ndim - 1))
+        return np.einsum("ij,j...->i...", self.matrix, coords) + shift
+
+
+class Affine(CoordTransform):
+    """An affine coordinate transform with semantic parameters.
+
+    Translation, rotation, scale, and shear map coordinates into a transformed
+    object's local frame. Operations are composed in the order supplied by ``order``.
     """
 
     translation: Array | None
     rotation: Array | None
     scale: Array | None
     shear: Array | None
-    matrix: Array | None
-    offset: Array | None
     order: tuple[str, ...]
 
     def __init__(
@@ -63,10 +198,10 @@ class Affine(BaseCoordTransform):
         rotation=None,
         scale=None,
         shear=None,
-        matrix=None,
-        offset=None,
-        order=("translation", "rotation", "scale", "shear", "matrix"),
+        order=("translation", "rotation", "scale", "shear"),
+        coordinates=None,
     ):
+        super().__init__(coordinates)
         self.translation = self._vector(translation, "translation")
         self.rotation = None if rotation is None else np.asarray(rotation, dtype=float)
         if self.rotation is not None and self.rotation.shape != ():
@@ -77,12 +212,8 @@ class Affine(BaseCoordTransform):
             if np.any(self.scale == 0):
                 raise ValueError("scale values must be non-zero.")
         self.shear = self._vector(shear, "shear")
-        self.matrix = None if matrix is None else np.asarray(matrix, dtype=float)
-        if self.matrix is not None and self.matrix.shape != (2, 2):
-            raise ValueError("matrix must have shape (2, 2).")
-        self.offset = self._vector(offset, "offset")
 
-        valid = ("translation", "rotation", "scale", "shear", "matrix")
+        valid = ("translation", "rotation", "scale", "shear")
         self.order = tuple(order)
         if len(set(self.order)) != len(self.order) or not set(self.order) <= set(valid):
             raise ValueError(f"order entries must be unique values from {valid}.")
@@ -118,16 +249,10 @@ class Affine(BaseCoordTransform):
             shear = shear.at[0, 1].set(self.shear[0])
             shear = shear.at[1, 0].set(self.shear[1])
 
-        matrix = identity
-        if self.matrix is not None:
-            matrix = matrix.at[:2, :2].set(self.matrix)
-        if self.offset is not None:
-            matrix = matrix.at[:2, 2].set(self.offset)
-
-        matrices = np.stack((translation, rotation, scale, shear, matrix))
+        matrices = np.stack((translation, rotation, scale, shear))
         indices = np.array(
             tuple(
-                ("translation", "rotation", "scale", "shear", "matrix").index(name)
+                ("translation", "rotation", "scale", "shear").index(name)
                 for name in self.order
             )
         )
@@ -139,62 +264,8 @@ class Affine(BaseCoordTransform):
         homogeneous, _ = lax.scan(combine, np.eye(3), self._matrices())
         return homogeneous[:2, :2], homogeneous[:2, 2]
 
-    def __call__(self, coords: Array) -> Array:
+    def __call__(self, coords: Array = None) -> Array:
+        coords = self.get_coordinates(coords)
         matrix, offset = self.coefficients()
         shift = offset.reshape((2,) + (1,) * (coords.ndim - 1))
         return np.einsum("ij,j...->i...", matrix, coords) + shift
-
-
-class TransformChain(BaseCoordTransform):
-    """Apply an ordered collection of coordinate transformations."""
-
-    transformations: dict
-
-    def __init__(self, transformations=()):
-        if isinstance(transformations, dict):
-            transformations = list(transformations.items())
-        else:
-            transformations = list(transformations)
-        self.transformations = dlu.list2dictionary(
-            transformations, True, BaseCoordTransform
-        )
-
-    def __call__(self, coords: Array) -> Array:
-        for transformation in self.transformations.values():
-            coords = transformation(coords)
-        return coords
-
-
-class DistortedCoords(BaseCoordTransform):
-    """Polynomially distorted Cartesian coordinates."""
-
-    powers: Array
-    distortion: Array
-
-    def __init__(self, order: int = 1, distortion: Array | None = None):
-        self.powers = np.array(dlu.gen_powers(order + 1))[:, 1:]
-        if distortion is None:
-            distortion = np.zeros_like(self.powers)
-        distortion = np.asarray(distortion, dtype=float)
-        if distortion.shape != self.powers.shape:
-            raise ValueError("distortion shape must match powers shape.")
-        self.distortion = distortion
-
-    def __call__(self, coords: Array) -> Array:
-        return dlu.distort_coords(coords, self.distortion, self.powers)
-
-
-class Distort(BaseCoordTransform):
-    """Apply a polynomial distortion as one coordinate transformation."""
-
-    distortion: DistortedCoords
-
-    def __init__(self, order=1, coefficients=None):
-        self.distortion = DistortedCoords(order, coefficients)
-
-    @property
-    def coefficients(self) -> Array:
-        return self.distortion.distortion
-
-    def __call__(self, coords: Array) -> Array:
-        return self.distortion(coords)

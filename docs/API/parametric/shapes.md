@@ -17,4 +17,3 @@
     ::: dLux.parametric.shapes.TransformedShape
     ::: dLux.parametric.shapes.Intersection
     ::: dLux.parametric.shapes.Union
-    ::: dLux.parametric.shapes.ApertureArray

@@ -8,13 +8,12 @@ from typing import Any
 import equinox as eqx
 import jax
 import jax.numpy as np
-import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
+from .parametrics import BaseParametric
 
 __all__ = [
-    "BaseParametric",
     "ParametricBasis",
     "ExplicitBasis",
     "ImplicitBasis",
@@ -25,14 +24,6 @@ __all__ = [
 ]
 
 
-class BaseParametric(zdx.Base):
-    """A contextual parameterisation consumed by another dLux object."""
-
-    @abstractmethod
-    def evaluate(self, **kwargs: Any) -> Array:  # pragma: no cover
-        """Evaluate the parameterisation in the supplied context."""
-
-
 class ParametricBasis(BaseParametric):
     """Base class for coefficient-weighted basis parameterisations.
 
@@ -41,6 +32,7 @@ class ParametricBasis(BaseParametric):
     """
 
     coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
 
     @property
     def coeffs(self: ParametricBasis) -> Array:
@@ -64,12 +56,29 @@ class ParametricBasis(BaseParametric):
         coefficient_shape: tuple[int, ...],
     ) -> None:
         coefficients = np.asarray(coefficients, dtype=float)
-        if coefficients.shape != coefficient_shape:
+        coefficient_shape = tuple(coefficient_shape)
+        if coefficients.shape[-len(coefficient_shape) :] != coefficient_shape:
             raise ValueError(
-                "Coefficient shape must match the leading basis dimensions. "
+                "Coefficient shape trailing dimensions must match the basis "
+                "dimensions. "
                 f"Expected {coefficient_shape}, got {coefficients.shape}."
             )
         self.coefficients = coefficients
+        self.basis_shape = coefficient_shape
+
+    def evaluate_basis(self, basis: Array) -> Array:
+        """Apply global or leading-axis-vectorised coefficients to a basis."""
+        if self.coefficients.ndim == len(self.basis_shape):
+            return dlu.eval_basis(basis, self.coefficients)
+        if self.coefficients.ndim != len(self.basis_shape) + 1:
+            raise ValueError("Only one leading coefficient axis is supported.")
+        axis = len(self.basis_shape)
+        if basis.shape[axis] != self.coefficients.shape[0]:
+            raise ValueError(
+                "The leading coefficient axis must match the leading basis axis."
+            )
+        basis = np.moveaxis(basis, axis, 0)
+        return jax.vmap(dlu.eval_basis)(basis, self.coefficients)
 
     @abstractmethod
     def solve_basis(
@@ -109,7 +118,7 @@ class ExplicitBasis(ParametricBasis):
         self._set_coefficients(coefficients, coefficient_shape)
 
     def evaluate(self: ExplicitBasis, **kwargs: Any) -> Array:
-        return dlu.eval_basis(self.basis, self.coefficients)
+        return self.evaluate_basis(self.basis)
 
     def solve_basis(self: ExplicitBasis, value: Array, **kwargs: Any) -> Array:
         return dlu.solve_basis(value, self.basis)
@@ -129,7 +138,7 @@ class ImplicitBasis(ParametricBasis):
         pass
 
     def evaluate(self: ImplicitBasis, **kwargs: Any) -> Array:
-        return dlu.eval_basis(self.calculate_basis(**kwargs), self.coefficients)
+        return self.evaluate_basis(self.calculate_basis(**kwargs))
 
     def solve_basis(self: ImplicitBasis, value: Array, **kwargs: Any) -> Array:
         return dlu.solve_basis(value, self.calculate_basis(**kwargs))

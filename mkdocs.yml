@@ -110,10 +110,13 @@ nav:
       - Unified Layers: API/unified_layers.md
       - Detector Layers: API/detector_layers.md
       - Optical Layers: API/optical_layers.md
+      - Dynamic Layers: API/dynamic_layers.md
+      - Sparse Layers: API/sparse_layers.md
       - Refractive Layers: API/refractive_layers.md
       - Polarised Layers: API/polarised_layers.md
       - Propagation Layers: API/propagation_layers.md
     - Parametric API:
+      - Parametrics: API/parametric/parametrics.md
       - Bases: API/parametric/bases.md
       - Polynomials: API/parametric/polynomials.md
       - Shapes: API/parametric/shapes.md
