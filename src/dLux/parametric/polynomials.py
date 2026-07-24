@@ -7,15 +7,17 @@ import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
+from ..coordinates import CoordSpec
 from .bases import CoordBasis, ExplicitBasis, ParametricBasis
-from .parametrics import BaseParametric, resolve_parametric
+from .parametrics import resolve_parametric
 
 __all__ = [
     "DynamicZernike",
     "ZernikeBasis",
     "DynamicZernikeBasis",
     "Polynomial",
-    "PolynomialBasis",
+    "ExplicitPolynomial",
+    "CoordinatePolynomial",
 ]
 
 
@@ -134,35 +136,31 @@ class Polynomial(ParametricBasis):
     """A general polynomial in one or more supplied variables."""
 
     powers: Array
-    variables: Array | BaseParametric | None
 
-    def __init__(self, coefficients, powers=None, variables=None):
-        coefficients = np.asarray(coefficients, dtype=float)
-        if coefficients.ndim != 1 or coefficients.size == 0:
-            raise ValueError("coefficients must be a non-empty 1d array.")
+    def __init__(self, degree, coefficients=None, ndim=1, powers=None):
         if powers is None:
-            powers = np.arange(coefficients.size)[None, :]
+            powers = dlu.polynomial_powers(degree, ndim)
         else:
             powers = np.asarray(powers, dtype=int)
             if powers.ndim == 1:
                 powers = powers[None, :]
-        if powers.ndim != 2 or powers.shape[1] != coefficients.size:
-            raise ValueError("powers must have shape (n_variables, n_coefficients).")
+        if powers.ndim != 2:
+            raise ValueError("powers must have shape (n_variables, n_terms).")
         if np.any(powers < 0):
             raise ValueError("powers must be non-negative.")
-        self.powers = powers
-        self.variables = (
-            variables
-            if variables is None or isinstance(variables, BaseParametric)
-            else np.asarray(variables, dtype=float)
+        coefficients = (
+            np.zeros(powers.shape[1]) if coefficients is None else coefficients
         )
+        coefficients = np.asarray(coefficients, dtype=float)
+        if coefficients.ndim != 1 or coefficients.shape[0] != powers.shape[1]:
+            raise ValueError("coefficients must have shape (n_terms,).")
+        self.powers = powers
         self._set_coefficients(coefficients, (coefficients.size,))
 
     def calculate_basis(self, *, variables=None, **context):
-        variables = self.variables if variables is None else variables
-        variables = resolve_parametric(variables, **context)
         if variables is None:
             raise ValueError("variables must be provided.")
+        variables = resolve_parametric(variables, **context)
         variables = np.asarray(variables, dtype=float)
         if self.powers.shape[0] == 1 and variables.ndim == 1:
             variables = variables[None, :]
@@ -187,28 +185,93 @@ class Polynomial(ParametricBasis):
         return dlu.solve_basis(value, basis)
 
 
-class PolynomialBasis(Polynomial):
-    """A Cartesian polynomial basis evaluated from coordinate context.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/PolynomialBasis.png)
-    """
+class ExplicitPolynomial(ExplicitBasis):
+    """A polynomial represented by basis vectors sampled on fixed coordinates."""
 
     powers: Array
 
-    def __init__(self, degree: int, coefficients=None):
-        degree = int(degree)
-        if degree < 0:
-            raise ValueError("degree must be non-negative.")
-        powers = dlu.gen_powers(degree + 1)
+    def __init__(
+        self,
+        coordinates: Array | CoordSpec,
+        degree,
+        coefficients=None,
+        ndim=None,
+        powers=None,
+    ):
+        if isinstance(coordinates, CoordSpec):
+            if ndim is None:
+                ndim = coordinates.ndim
+            if coordinates.ndim == 1 and ndim > 1:
+                coordinates = coordinates.broadcast(ndim)
+            if coordinates.ndim < ndim:
+                raise ValueError(
+                    "CoordSpec dimensionality must be greater than or equal to ndim."
+                )
+            if coordinates.d is None:
+                if coordinates.n is None:
+                    raise ValueError("CoordSpec must define n when d is not provided.")
+                coordinates = coordinates.set(
+                    d=2 / np.asarray(coordinates.n, dtype=float)
+                )
+            coordinates = coordinates.coordinates
+        else:
+            coordinates = np.asarray(coordinates, dtype=float)
+
+        if ndim is None:
+            ndim = 1 if coordinates.ndim == 1 else coordinates.shape[0]
+        ndim = int(ndim)
+        if ndim < 1:
+            raise ValueError("ndim must be positive.")
+        if coordinates.ndim == 1:
+            coordinates = coordinates[None, :]
+        if coordinates.shape[0] < ndim:
+            raise ValueError(
+                "coordinates must contain at least ndim coordinate arrays."
+            )
+        coordinates = coordinates[:ndim]
+
+        if powers is None:
+            powers = dlu.polynomial_powers(degree, ndim)
+        powers = np.asarray(powers, dtype=int)
+        if powers.ndim == 1:
+            powers = powers[None, :]
+        if powers.ndim != 2:
+            raise ValueError("powers must have shape (n_variables, n_terms).")
         coefficients = (
             np.zeros(powers.shape[1]) if coefficients is None else coefficients
         )
-        super().__init__(coefficients, powers)
+        coefficients = np.asarray(coefficients, dtype=float)
+        if coefficients.ndim != 1 or coefficients.shape[0] != powers.shape[1]:
+            raise ValueError("coefficients must have shape (n_terms,).")
+        if coordinates.shape[0] != powers.shape[0]:
+            raise ValueError(
+                "coordinate dimensionality must match the polynomial powers."
+            )
+        self.powers = powers
+        basis = dlu.polynomial_basis(coordinates, powers)
+        super().__init__(basis, coefficients)
+
+
+class CoordinatePolynomial(Polynomial):
+    """A polynomial evaluated dynamically from Cartesian coordinate context.
+
+    ??? abstract "UML"
+        ![UML](../assets/uml/CoordinatePolynomial.png)
+    """
+
+    ndim: int = eqx.field(static=True)
+
+    def __init__(self, degree: int, coefficients=None, ndim: int = 2):
+        self.ndim = int(ndim)
+        super().__init__(degree, coefficients, ndim)
 
     def calculate_basis(self, *, wavefront=None, coordinates=None, **kwargs):
         if coordinates is None:
             if wavefront is None:
                 raise ValueError("Provide either wavefront or coordinates.")
             coordinates = wavefront.coordinates
+        if coordinates.shape[0] != self.ndim:
+            raise ValueError(
+                "coordinates leading axis must match the polynomial dimensionality."
+            )
         return super().calculate_basis(variables=coordinates, **kwargs)

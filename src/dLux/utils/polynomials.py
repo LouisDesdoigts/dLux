@@ -1,10 +1,17 @@
+"""Utilities for ordinary, Zernike, and polygonal polynomials."""
+
 from __future__ import annotations
+
+from itertools import product
+
 import jax.numpy as np
 from jax import lax, vmap, Array
 import dLux.utils as dlu
 import equinox as eqx
 
 __all__ = [
+    "polynomial_powers",
+    "polynomial_basis",
     "zernike_name",
     "noll_indices",
     "radial_orders_to_indices",
@@ -18,6 +25,35 @@ __all__ = [
     "polike_fast",
     "polike_basis",
 ]
+
+
+def polynomial_powers(degree: int, ndim: int = 1) -> Array:
+    """Generate total-degree polynomial powers in one or more dimensions."""
+    degree = int(degree)
+    ndim = int(ndim)
+    if degree < 0:
+        raise ValueError("degree must be non-negative.")
+    if ndim < 1:
+        raise ValueError("ndim must be positive.")
+    powers = [
+        values
+        for total in range(degree + 1)
+        for values in product(range(total, -1, -1), repeat=ndim)
+        if sum(values) == total
+    ]
+    return np.asarray(powers, dtype=int).T
+
+
+def polynomial_basis(variables: Array, powers: Array) -> Array:
+    """Evaluate multivariate polynomial monomials."""
+    variables = np.asarray(variables)
+    powers = np.asarray(powers)
+    shape = powers.shape + (1,) * (variables.ndim - 1)
+    return np.prod(
+        variables[:, None] ** powers.reshape(shape),
+        axis=0,
+    )
+
 
 zernike_names = {
     # 0th Radial
