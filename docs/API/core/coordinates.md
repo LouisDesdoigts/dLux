@@ -9,15 +9,17 @@
 ???+ info "CoordSpec"
     ::: dLux.coord_specs.CoordSpec
 
+???+ info "CoordTransform"
+    ::: dLux.coordinates.CoordTransform
+
 ???+ info "Affine"
     ::: dLux.coordinates.Affine
 
+???+ info "AffineMap"
+    ::: dLux.coordinates.AffineMap
+
 ???+ info "TransformChain"
-    ::: dLux.coordinates.BaseCoordTransform
     ::: dLux.coordinates.TransformChain
 
 ???+ info "DistortedCoords"
     ::: dLux.coordinates.DistortedCoords
-
-???+ info "Distort"
-    ::: dLux.coordinates.Distort

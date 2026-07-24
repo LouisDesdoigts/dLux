@@ -13,8 +13,9 @@ are intentionally left untouched until the source migration is structurally comp
   evaluate to transmissions.
 - `dLux.coord_specs` and `dLux.coordinates`: flat modules separating sampling
   specifications from coordinate transformations.
-- `dLux.layers.optical_layers`: high-level user-facing `Optic`, `DynamicOptic`,
-  interpolation, and small wavefront operations.
+- `dLux.layers.optical_layers`: high-level user-facing scalar optics and small
+  wavefront operations.
+- `dLux.layers.dynamic_layers`: coordinate-aware mirrors of scalar optical layers.
 - `dLux.parametric.bases` / `dLux.parametric.polynomials`: reusable
   parameterisations consumed by optic properties.
 - `dLux.layers.propagation_layers`: direct Fourier, ABCD, LCT, and ASM propagation.
@@ -31,8 +32,8 @@ are intentionally left untouched until the source migration is structurally comp
 - Dynamic optics share one transformed coordinate context across aperture, OPD, and
   phase parameterisations.
 - Heterogeneous ordered collections use `dlu.list2dictionary(..., ordered=True, ...)`.
-- `Affine` retains semantic JAX leaves with an explicit operation order and also
-  accepts a direct transformation matrix and offset.
+- `Affine` retains semantic JAX leaves with an explicit operation order, while
+  `AffineMap` provides the direct matrix-and-offset coordinate map.
 - Softening and transmission inversion are independent. `Complement` inverts shapes.
 - Sparse apertures use vectorised local coordinates rather than recursive layer trees.
 
@@ -66,7 +67,7 @@ are intentionally left untouched until the source migration is structurally comp
 - [x] Add `Shape`, `SoftShape`, and `RadialShape` parameterisations.
 - [x] Add circle, square/rectangle, regular polygon, and spider geometries.
 - [x] Add `Complement`, `Intersection`, and `Union` composition.
-- [x] Add vectorised `ApertureArray` for sparse and segmented pupils.
+- [x] Express dense sparse pupils using `Union` and transformed component shapes.
 - [ ] Define global versus per-subaperture aberration coordinate conventions.
 - [ ] Migrate telescope and sparse-aperture helpers to the new shapes.
 - [x] Remove the obsolete dynamic aperture layer hierarchy.
@@ -75,7 +76,8 @@ are intentionally left untouched until the source migration is structurally comp
 
 - [x] Rebuild `Optic` as a scalar optical layer with transmission, OPD, phase, and
   optional normalisation.
-- [x] Add `DynamicOptic` with a shared transformed coordinate context.
+- [x] Add coordinate-aware transmissive, aberrated, and optic mirrors with shared
+  transformed coordinate contexts.
 - [x] Implement `Lens` and `Wedge` as direct optical layers in `refractive_layers`.
 - [x] Make interpolation, normalisation, resizing, flipping, and downsampling unified
   optical/detector layers.

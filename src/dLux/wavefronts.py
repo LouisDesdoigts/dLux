@@ -8,7 +8,7 @@ import dLux.utils as dlu
 
 from .psfs import PSF
 from .coord_specs import CoordSpec
-from .coordinates import BaseCoordTransform
+from .coordinates import CoordTransform
 
 __all__ = ["Wavefront", "PolarisedWavefront"]
 
@@ -575,7 +575,7 @@ class Wavefront(zdx.Base):
 
     def interpolate(
         self: Wavefront,
-        transformation: BaseCoordTransform,
+        transformation: CoordTransform,
         method: str = "linear",
         complex: bool = True,
         fill: float = 0.0,
@@ -587,7 +587,7 @@ class Wavefront(zdx.Base):
 
         Parameters
         ----------
-        transformation : BaseCoordTransform
+        transformation : CoordTransform
             Transformation applied to the wavefront sampling coordinates.
         method : str = "linear"
             Interpolation method passed to ``interpax``.
@@ -602,8 +602,8 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The interpolated wavefront.
         """
-        if not isinstance(transformation, BaseCoordTransform):
-            raise TypeError("transformation must be a BaseCoordTransform.")
+        if not isinstance(transformation, CoordTransform):
+            raise TypeError("transformation must be a CoordTransform.")
         knot_coords = self.coordinates()
         transform = np.vectorize(
             transformation,

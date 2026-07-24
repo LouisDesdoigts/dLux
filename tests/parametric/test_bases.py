@@ -3,7 +3,12 @@ import jax.numpy as np
 import pytest
 
 import dLux.utils as dlu
-from dLux.parametric import CLIMBBasis, ExplicitBasis, FourierBasis, SplineBasis
+from dLux.parametric import (
+    CLIMBBasis,
+    ExplicitBasis,
+    FourierBasis,
+    SplineBasis,
+)
 
 
 class TestExplicitBasis:

@@ -6,7 +6,7 @@ from jax.scipy.signal import convolve
 from jax import Array
 import zodiax as zdx
 import dLux.utils as dlu
-from .coordinates import BaseCoordTransform
+from .coordinates import CoordTransform
 
 __all__ = ["PSF"]
 
@@ -154,7 +154,7 @@ class PSF(zdx.Base):
 
     def interpolate(
         self: PSF,
-        transformation: BaseCoordTransform,
+        transformation: CoordTransform,
         method: str = "linear",
         fill: float = 0.0,
     ) -> PSF:
@@ -162,7 +162,7 @@ class PSF(zdx.Base):
 
         Parameters
         ----------
-        transformation : BaseCoordTransform
+        transformation : CoordTransform
             Transformation applied to the PSF sampling coordinates.
         method : str = "linear"
             Interpolation method passed to ``interpax``.
@@ -174,8 +174,8 @@ class PSF(zdx.Base):
         psf : PSF
             The interpolated PSF.
         """
-        if not isinstance(transformation, BaseCoordTransform):
-            raise TypeError("transformation must be a BaseCoordTransform.")
+        if not isinstance(transformation, CoordTransform):
+            raise TypeError("transformation must be a CoordTransform.")
         knot_coords = dlu.pixel_coords(self.npixels, self.npixels * self.pixel_scale)
         sample_coords = transformation(knot_coords)
         data = dlu.interp(self.data, knot_coords, sample_coords, method, fill)
