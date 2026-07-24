@@ -1,21 +1,217 @@
 """Wavefront state and propagation utilities used by optical systems."""
 
 from __future__ import annotations
+from math import prod
+
 import jax.numpy as np
-from jax import Array
 import zodiax as zdx
+from jax import Array
 import dLux.utils as dlu
 
-from .psfs import PSF
 from .coordinates import CoordSpec
 from .coordinates import CoordTransform
 
-__all__ = ["Wavefront", "PolarisedWavefront"]
-
-# TODO: Make coord specs 2d compatible
+__all__ = ["BaseSpatial", "Wavefront", "PolarisedWavefront"]
 
 
-class Wavefront(zdx.Base):
+class BaseSpatial(zdx.Base):
+    """Base class for regularly sampled real or complex spatial objects."""
+
+    spec: CoordSpec
+
+    def __init__(self, spec: CoordSpec):
+        if not isinstance(spec, CoordSpec):
+            raise TypeError("spec must be a CoordSpec.")
+        self.spec = spec
+
+    def __getattr__(self, key):
+        """Forward coordinate attributes to the stored specification."""
+        if key == "spec":
+            raise AttributeError(key)
+        try:
+            spec = object.__getattribute__(self, "spec")
+        except AttributeError:
+            raise AttributeError(key) from None
+        if hasattr(spec, key):
+            return getattr(spec, key)
+        raise AttributeError(f"{type(self).__name__!s} has no attribute {key!r}.")
+
+    @property
+    def _field_name(self) -> str:
+        """Return the name of the stored sampled array."""
+        raise NotImplementedError()
+
+    @property
+    def field(self) -> Array:
+        """Return the stored sampled array."""
+        return getattr(self, self._field_name)
+
+    def set_field(self, field: Array) -> BaseSpatial:
+        """Return a copy with an updated sampled array."""
+        return self.set(**{self._field_name: field})
+
+    def _apply_field_op(self, other, op: str) -> BaseSpatial:
+        """Apply one arithmetic operation to the stored sampled array."""
+        if op == "add":
+            field = self.field + other
+        elif op == "subtract":
+            field = self.field - other
+        elif op == "multiply":
+            field = self.field * other
+        elif op == "divide":
+            field = self.field / other
+        else:
+            raise ValueError(f"Unsupported operation '{op}'.")
+        return self.set_field(field)
+
+    @property
+    def spatial_shape(self) -> tuple[int, ...]:
+        """Return the spatial array shape."""
+        return self.field.shape[-2:]
+
+    @property
+    def axes(self) -> tuple[Array, ...]:
+        """Return coordinate axes using the field's static spatial shape."""
+        return self.spec.axes_for(self.spatial_shape[::-1])
+
+    @property
+    def coordinates(self) -> Array:
+        """Return coordinates using the field's static spatial shape."""
+        return self.spec.coordinates_for(self.spatial_shape[::-1])
+
+    @property
+    def xs(self) -> Array:
+        """Return stacked coordinate axes using the field's static spatial shape."""
+        return self.spec.xs_for(self.spatial_shape[::-1])
+
+    @property
+    def npixels(self) -> int:
+        """Return the final spatial-axis size for square-grid compatibility."""
+        return self.field.shape[-1]
+
+    @property
+    def pixel_scale(self) -> Array:
+        """Return x-axis sampling in canonical SI units."""
+        if self.d is None:
+            raise ValueError("spec.d is not defined.")
+        return self.d[0] * self.scale
+
+    @property
+    def center(self) -> Array:
+        """Return the x-axis grid center in canonical SI units."""
+        return 0.0 if self.c is None else self.c[0] * self.scale
+
+    @property
+    def diameter(self) -> Array:
+        """Return the x-axis field width for square-grid compatibility."""
+        return self.fov[0]
+
+    def scale_to(
+        self,
+        npixels: int,
+        pixel_scale: float | Array,
+        method: str = "linear",
+        complex: bool = True,
+    ) -> BaseSpatial:
+        """Interpolate to a square size and physical pixel scale.
+
+        ``complex`` selects Cartesian or polar decomposition for complex fields and
+        has no effect on real fields such as PSFs.
+        """
+        pixel_scale = np.asarray(pixel_scale, float)
+        ratio = pixel_scale / self.pixel_scale
+        scale = np.vectorize(
+            lambda field, value: dlu.scale(field, npixels, value, method, complex),
+            signature="(n,n),()->(m,m)",
+        )
+        field = scale(self.field, ratio)
+        spacing = np.broadcast_to(pixel_scale / self.spec.scale, (2,))
+        n = (int(npixels),) * 2
+        return self.set_field(field).set(spec=self.spec.set(n=n, d=spacing))
+
+    def interpolate(
+        self,
+        transformation: CoordTransform,
+        method: str = "linear",
+        complex: bool = True,
+        fill: float = 0.0,
+    ) -> BaseSpatial:
+        """Interpolate through a coordinate transformation.
+
+        ``complex`` has no effect when the stored sampled array is real.
+        """
+        if not isinstance(transformation, CoordTransform):
+            raise TypeError("transformation must be a CoordTransform.")
+        knots = self.coordinates
+        samples = transformation(knots)
+        interpolate = np.vectorize(
+            lambda field: dlu.interp(field, knots, samples, method, fill, complex),
+            signature="(n,m)->(n,m)",
+        )
+        return self.set_field(interpolate(self.field))
+
+    def rotate(
+        self,
+        angle: float | Array,
+        method: str = "linear",
+        complex: bool = True,
+    ) -> BaseSpatial:
+        """Rotate the sampled array clockwise through interpolation.
+
+        ``complex`` has no effect when the stored sampled array is real.
+        """
+        rotate = np.vectorize(
+            lambda field, value: dlu.rotate(field, value, method, complex),
+            signature="(n,n),()->(n,n)",
+        )
+        return self.set_field(rotate(self.field, angle))
+
+    def resize(self, npixels: int) -> BaseSpatial:
+        """Resize spatial axes by centered zero-padding or cropping."""
+        fill = 0j if np.iscomplexobj(self.field) else 0.0
+        field = dlu.resize(self.field, npixels, fill)
+        n = (int(npixels),) * 2
+        return self.set_field(field).set(spec=self.spec.set(n=n))
+
+    def downsample(self, n: int, mean: bool | None = None) -> BaseSpatial:
+        """Downsample spatial axes and update their sampling."""
+        if mean is None:
+            mean = bool(np.iscomplexobj(self.field))
+        field = dlu.downsample(self.field, n, mean)
+        size = tuple(value // n for value in self.n)
+        spec = self.spec.set(n=size, d=self.d * n)
+        return self.set_field(field).set(spec=spec)
+
+    def flip(self, axis: tuple[int, ...] | int) -> BaseSpatial:
+        """Flip the sampled array about one or more array axes."""
+        return self.set_field(np.flip(self.field, axis))
+
+    def __add__(self, other) -> BaseSpatial:
+        return self._magic_unified_op(other, "add")
+
+    def __sub__(self, other) -> BaseSpatial:
+        return self._magic_unified_op(other, "subtract")
+
+    def __mul__(self, other) -> BaseSpatial:
+        return self._magic_unified_op(other, "multiply")
+
+    def __truediv__(self, other) -> BaseSpatial:
+        return self._magic_unified_op(other, "divide")
+
+    def __iadd__(self, other) -> BaseSpatial:
+        return self.__add__(other)
+
+    def __isub__(self, other) -> BaseSpatial:
+        return self.__sub__(other)
+
+    def __imul__(self, other) -> BaseSpatial:
+        return self.__mul__(other)
+
+    def __itruediv__(self, other) -> BaseSpatial:
+        return self.__truediv__(other)
+
+
+class Wavefront(BaseSpatial):
     """
     Holds the state of a wavefront as it is transformed and propagated through an
     optical system. The final two phasor axes are the square spatial wavefront; any
@@ -70,16 +266,16 @@ class Wavefront(zdx.Base):
 
     phasor: Array[complex]
     wavelength: Array
-    pixel_scale: Array
-    center: Array
+
+    @property
+    def _field_name(self) -> str:
+        return "phasor"
 
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
-        npixels: int,
-        diameter: float | Array = None,
-        pixel_scale: float | Array = None,
-        center: float | Array = None,
+        spec: CoordSpec,
+        phasor: Array | None = None,
     ):
         """
         Parameters
@@ -98,44 +294,37 @@ class Wavefront(zdx.Base):
         center : float = None
             The centre coordinate of the wavefront grid, in metres. Defaults to zero.
         """
-        # Handle diameter vs pixel_scale
-        if diameter is None and pixel_scale is None:
-            raise ValueError("Provide one: diameter or pixel_scale.")
-        if diameter is not None and pixel_scale is not None:
-            raise ValueError(
-                "Cannot specify both 'diameter' and 'pixel_scale' - they are "
-                "interdependent (diameter = pixel_scale × npixels). Choose one: "
-                "use 'diameter' for wavefront diameter, or 'pixel_scale' for "
-                "wavefront sampling."
-            )
-
+        spec = spec.broadcast(2)
         self.wavelength = np.asarray(wavelength, float)
-        if diameter is not None:
-            self.pixel_scale = np.asarray(diameter / npixels, float)
+        if phasor is None:
+            if spec.n is None:
+                raise ValueError("spec.n is required when phasor is not provided.")
+            if spec.ndim != 2:
+                raise ValueError("Wavefront requires a two-dimensional CoordSpec.")
+            shape = self.wavelength.shape + spec.shape
+            self.phasor = np.ones(shape, dtype=complex) / prod(spec.n)
         else:
-            self.pixel_scale = np.asarray(pixel_scale, float)
-
-        shape = self.wavelength.shape + (npixels, npixels)
-        amplitude = np.ones(shape, dtype=float) / npixels**2
-        phase = np.zeros(shape, dtype=float)
-        self.phasor = amplitude * np.exp(1j * phase)
-
-        self.center = np.asarray(0.0 if center is None else center, float)
-        if self.center.ndim != 0:
-            raise ValueError(
-                f"center must be scalar, got shape {self.center.shape}. "
-                "For the current square-array wavefront convention, the same "
-                "centre coordinate is used for both axes."
-            )
+            phasor = np.asarray(phasor, complex)
+            if phasor.ndim < 2:
+                raise ValueError("phasor must have at least two spatial dimensions.")
+            inferred_n = np.asarray(phasor.shape[-2:][::-1], int)
+            if spec.n is None:
+                spec = spec.set(n=inferred_n)
+            elif tuple(int(value) for value in spec.n) != tuple(inferred_n):
+                raise ValueError("phasor spatial shape must match spec.n.")
+            if spec.ndim != 2:
+                raise ValueError("Wavefront requires a two-dimensional CoordSpec.")
+            if phasor.ndim == 2 and self.wavelength.ndim > 0:
+                phasor = phasor * np.ones(self.wavelength.shape + (1, 1))
+            self.phasor = phasor
+        BaseSpatial.__init__(self, spec)
 
     @classmethod
     def from_phasor(
         cls,
         phasor: Array[complex],
         wavelength: float | Array,
-        pixel_scale: float | Array = None,
-        diameter: float | Array = None,
-        center: float | Array = None,
+        spec: CoordSpec,
     ) -> Wavefront:
         """
         Create a Wavefront from an existing phasor array.
@@ -164,46 +353,7 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             A new Wavefront object with the specified phasor.
         """
-        phasor_arr = np.asarray(phasor, complex)
-        wavelength = np.asarray(wavelength, float)
-        if phasor_arr.ndim == 2 and wavelength.ndim > 0:
-            phasor_arr = phasor_arr * np.ones(wavelength.shape + (1, 1))
-        npixels = phasor_arr.shape[-1]
-
-        return cls(
-            npixels=npixels,
-            wavelength=wavelength,
-            diameter=diameter,
-            pixel_scale=pixel_scale,
-            center=center,
-        ).set(phasor=phasor_arr)
-
-    @property
-    def diameter(self: Wavefront) -> Array:
-        """
-        Returns the current wavefront diameter calculated using the pixel scale and
-        number of pixels. If the pixel scale is vectorised, the diameter is also
-        vectorised.
-
-        Returns
-        -------
-        diameter : Array, meters or radians
-            The current diameter of the wavefront.
-        """
-        return self.npixels * self.pixel_scale
-
-    @property
-    def npixels(self: Wavefront) -> int:
-        """
-        Returns the side length of the arrays currently representing the wavefront.
-        Taken from the final phasor axis.
-
-        Returns
-        -------
-        pixels : int
-            The number of pixels that represent the `Wavefront`.
-        """
-        return self.phasor.shape[-1]
+        return cls(wavelength=wavelength, spec=spec, phasor=phasor)
 
     @property
     def real(self: Wavefront) -> Array:
@@ -291,18 +441,6 @@ class Wavefront(zdx.Base):
         """
         return np.abs(self.phasor) ** 2
 
-    def to_psf(self: Wavefront) -> PSF:
-        """
-        Converts the wavefront to a dLux PSF object.
-
-        Returns
-        -------
-        psf : PSF
-            A PSF object containing the current wavefront intensity and pixel scale,
-            including any leading chromatic dimensions.
-        """
-        return PSF(self.psf, self.pixel_scale)
-
     @property
     def wavenumber(self: Wavefront) -> Array:
         """
@@ -317,7 +455,7 @@ class Wavefront(zdx.Base):
         return 2 * np.pi / np.asarray(self.wavelength)
 
     @property
-    def ndim(self: Wavefront) -> int:
+    def batch_ndim(self: Wavefront) -> int:
         """
         Returns the number of leading vectorisation dimensions on the phasor.
 
@@ -359,12 +497,11 @@ class Wavefront(zdx.Base):
         if not self.is_chromatic:
             return None
 
-        get_axis = lambda array: 0 if array.ndim > 0 else None
+        # get_axis = lambda array: 0 if array.ndim > 0 else None
         return self.set(
-            phasor=0 if self.ndim > 0 else None,
+            phasor=0 if self.batch_ndim > 0 else None,
             wavelength=0,
-            pixel_scale=get_axis(self.pixel_scale),
-            center=get_axis(self.center),
+            spec=None,
         )
 
     @property
@@ -410,14 +547,14 @@ class Wavefront(zdx.Base):
         """
         Reshape metadata before passing it into a vectorised scalar function.
 
-        Metadata lives on the physical vector axes counted by `self.ndim`. If a subclass
-        stores extra axes between those vector axes and the final spatial axes, append
-        singleton dimensions so NumPy's right-aligned broadcasting keeps metadata on the
-        physical axes.
+        Metadata lives on the physical vector axes counted by `self.batch_ndim`. If a
+        subclass stores extra axes between those vector axes and the final spatial
+        axes, append singleton dimensions so NumPy's right-aligned broadcasting keeps
+        metadata on the physical axes.
         """
         array = np.asarray(array)
-        extra_ndim = self.phasor.ndim - self.ndim - 2
-        if array.ndim == self.ndim:
+        extra_ndim = self.phasor.ndim - self.batch_ndim - 2
+        if array.ndim == self.batch_ndim:
             return array.reshape(array.shape + (1,) * extra_ndim)
         return array
 
@@ -426,8 +563,8 @@ class Wavefront(zdx.Base):
         Remove redundant non-physical axes from metadata returned by `np.vectorize`.
         """
         array = np.asarray(array)
-        extra_ndim = self.phasor.ndim - self.ndim - 2
-        if extra_ndim and array.ndim == self.ndim + extra_ndim:
+        extra_ndim = self.phasor.ndim - self.batch_ndim - 2
+        if extra_ndim and array.ndim == self.batch_ndim + extra_ndim:
             return array[(...,) + (0,) * extra_ndim]
         return array
 
@@ -488,7 +625,7 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             The tilted wavefront.
         """
-        return self.add_opd(dlu.tilt_opd(self.coordinates(), angles, unit))
+        return self.add_opd(dlu.tilt_opd(self.coordinates, angles, unit))
 
     def normalise(
         self: Wavefront,
@@ -518,60 +655,6 @@ class Wavefront(zdx.Base):
         else:
             raise ValueError("mode must be 'power' or 'peak'")
         return self.multiply("phasor", scale)
-
-    def flip(self: Wavefront, axis: tuple[int] | int) -> Wavefront:
-        """
-        Flip the complex phasor along one or more axes. The final two axes are spatial
-        (`-2=y`, `-1=x`); leading axes are vectorisation dimensions.
-
-        Parameters
-        ----------
-        axis : int or tuple of ints
-            Axes to flip.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            New wavefront with phasor flipped.
-        """
-        return self.set(phasor=np.flip(self.phasor, axis))
-
-    def scale_to(
-        self: Wavefront,
-        npixels: int,
-        pixel_scale: float | Array,
-        method: str = "linear",
-        complex: bool = True,
-    ) -> Wavefront:
-        """
-        Interpolates the wavefront to a given npixels and pixel_scale. Leading phasor
-        dimensions are vectorised over directly.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels to interpolate to.
-        pixel_scale: float or Array
-            The pixel scale to interpolate to. Scalar values are broadcast over leading
-            phasor dimensions.
-        method : str = "linear"
-            The interpolation method.
-        complex : bool = True
-            If True, interpolate the real and imaginary components. If False,
-            interpolate the amplitude and phase components.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new interpolated wavefront.
-        """
-        pixel_scale = np.asarray(pixel_scale, float)
-        ratio = pixel_scale / self.pixel_scale
-
-        # Interpolate the phasor to the new pixel scale and size
-        fn = lambda phasor, ratio: dlu.scale(phasor, npixels, ratio, method, complex)
-        phasor = np.vectorize(fn, signature="(n,n),()->(m,m)")(self.phasor, ratio)
-        return self.set(phasor=phasor, pixel_scale=pixel_scale)
 
     def interpolate(
         self: Wavefront,
@@ -604,7 +687,7 @@ class Wavefront(zdx.Base):
         """
         if not isinstance(transformation, CoordTransform):
             raise TypeError("transformation must be a CoordTransform.")
-        knot_coords = self.coordinates()
+        knot_coords = self.coordinates
         transform = np.vectorize(
             transformation,
             signature="(c,n,n)->(c,n,n)",
@@ -631,150 +714,6 @@ class Wavefront(zdx.Base):
             signature="(n,n),(c,n,n),(c,m,m)->(m,m)",
         )
         return self.set(phasor=interp(self.phasor, knot_coords, sample_coords))
-
-    def rotate(
-        self: Wavefront,
-        angle: float | Array,
-        method: str = "linear",
-        complex: bool = True,
-    ) -> Wavefront:
-        """
-        Rotates the wavefront by a given angle via interpolation. Leading phasor
-        dimensions are vectorised over directly.
-
-        Parameters
-        ----------
-        angle : float or Array, radians
-            The angle by which to rotate the wavefront in a clockwise direction. Scalar
-            values are broadcast over leading phasor dimensions.
-        method : str = "linear"
-            The interpolation method.
-        complex : bool = True
-            If True, rotate the real and imaginary components. If False, rotate the
-            amplitude and phase components.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront rotated by angle in the clockwise direction.
-        """
-        rotate = np.vectorize(
-            lambda phasor, angle: dlu.rotate(phasor, angle, method, complex),
-            signature="(n,n),()->(n,n)",
-        )
-        return self.set(phasor=rotate(self.phasor, angle))
-
-    def resize(self: Wavefront, npixels: int) -> Wavefront:
-        """
-        Resizes the spatial axes of the wavefront via zero-padding or cropping,
-        preserving leading vectorisation dimensions.
-
-        Parameters
-        ----------
-        npixels : int
-            The size to resize the wavefront to.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The resized wavefront.
-        """
-        return self.set(phasor=dlu.resize(self.phasor, npixels, 0j))
-
-    def downsample(self: Wavefront, n: int, mean: bool = True) -> Wavefront:
-        """
-        Downsamples the spatial axes of the wavefront by a factor of n, preserving
-        leading vectorisation dimensions.
-
-        Parameters
-        ----------
-        n : int
-            The factor by which to downsample the wavefront.
-        mean : bool = True
-            Whether to downsample by taking the mean or sum of the phasor.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The downsampled wavefront.
-        """
-        phasor = dlu.downsample(self.phasor, n, mean)
-        return self.set(phasor=phasor, pixel_scale=self.pixel_scale * n)
-
-    def coordinates(
-        self: Wavefront,
-        scale=1.0,
-        polar: bool = False,
-    ) -> Array:
-        """
-        Returns the physical positions of the wavefront pixels in meters, with an
-        optional scaling factor for numerical stability. If the coordinate spec is
-        vectorised, coordinates include matching leading dimensions.
-
-        Parameters
-        ----------
-        scale : float = 1.0
-            Optional scaling factor applied to the diameter for numerical stability.
-        polar : bool = False
-            Output the coordinates in polar (r, phi) coordinates.
-
-        Returns
-        -------
-        coordinates : Array
-            The coordinates of each pixel centre, with shape `(..., 2, n, n)`.
-        """
-        xs = self.xs * scale
-        coords_fn = lambda xs: np.array(np.meshgrid(xs, xs))
-        coords = np.vectorize(coords_fn, signature="(n)->(c,n,n)")(xs)
-
-        if polar:
-            return np.vectorize(dlu.cart2polar, signature="(c,n,n)->(c,n,n)")(coords)
-        return coords
-
-    @property
-    def spec(self):
-        """
-        Returns the current wavefront sampling as a `CoordSpec`.
-
-        Returns
-        -------
-        spec : CoordSpec
-            Coordinate specification with `n`, `d`, and `c` set from the
-            current wavefront state.
-        """
-        return CoordSpec(self.npixels, self.pixel_scale, self.center)
-
-    @property
-    def xs(self):
-        """
-        1D array of pixel centre coordinates along one axis. If the coordinate spec is
-        vectorised, the returned array has shape `(..., n)`.
-
-        Returns
-        -------
-        xs : Array
-            Coordinates of pixel centres, in metres.
-        """
-        return self.spec.xs
-
-    def set_spec(self, spec: CoordSpec):
-        """
-        Updates the wavefront pixel scale and centre from a `CoordSpec`, preserving
-        the current phasor.
-
-        Parameters
-        ----------
-        spec : CoordSpec
-            The coordinate specification to apply.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            New wavefront with updated `pixel_scale` and `center`.
-        """
-        pixel_scale = None if spec.d is None else np.asarray(spec.d, float)
-        center = None if spec.c is None else np.asarray(spec.c, float)
-        return self.set(pixel_scale=pixel_scale, center=center)
 
     def propagate_FFT(
         self,
@@ -838,11 +777,10 @@ class Wavefront(zdx.Base):
             self._to_vec(self.pixel_scale),
             self._to_vec(self.center),
         )
-        return self.set(
-            phasor=phasor,
-            pixel_scale=self._from_vec(pixel_scale),
-            center=self._from_vec(center),
-        )
+        output_spacing = self._from_vec(pixel_scale) / self.spec.scale
+        output_center = self._from_vec(center) / self.spec.scale
+        spec = self.spec.set(d=output_spacing, c=output_center)
+        return self.set(phasor=phasor, spec=spec)
 
     def propagate(
         self: Wavefront,
@@ -898,7 +836,11 @@ class Wavefront(zdx.Base):
             self._to_vec(self.pixel_scale),
             self._to_vec(pixel_scale),
         )
-        return self.set(phasor=phasor, pixel_scale=pixel_scale)
+        spec = self.spec.set(
+            n=(int(npixels),) * 2,
+            d=np.broadcast_to(pixel_scale / self.spec.scale, (2,)),
+        )
+        return self.set(phasor=phasor, spec=spec)
 
     def propagate_MFT(self, spec_out, focal_length=None, inverse=None):
         """
@@ -923,12 +865,17 @@ class Wavefront(zdx.Base):
         wavefront : Wavefront
             Propagated wavefront with updated phasor and pixel scale.
         """
+        if spec_out.n is None or spec_out.d is None:
+            raise ValueError("spec_out.n and spec_out.d must be specified.")
+        if not np.all(spec_out.n == spec_out.n[0]):
+            raise ValueError("Legacy MFT propagation requires a square output spec.")
+        npixels_out = int(spec_out.n[0])
         fn = np.vectorize(
             lambda phasor, wavelength, pixel_scale_in, pixel_scale_out: dlu.MFT(
                 phasor,
                 wavelength,
                 pixel_scale_in,
-                spec_out.n,
+                npixels_out,
                 pixel_scale_out,
                 focal_length,
                 inverse=inverse,
@@ -936,14 +883,14 @@ class Wavefront(zdx.Base):
             signature="(n,n),(),(),()->(m,m)",
         )
 
-        pixel_scale = np.asarray(spec_out.d, float)
+        pixel_scale = np.asarray(spec_out.d * spec_out.scale, float)
         phasor = fn(
             self.phasor,
             self._to_vec(self.wavelength),
             self._to_vec(self.pixel_scale),
             self._to_vec(pixel_scale),
         )
-        return self.set(phasor=phasor, pixel_scale=pixel_scale)
+        return self.set(phasor=phasor, spec=spec_out)
 
     #######################
     ### New Propagators ###
@@ -1016,16 +963,7 @@ class Wavefront(zdx.Base):
         # Align the operand for chromatic and polarisation broadcasting.
         self, other = self._prepare_operand(other)
 
-        # Apply the operation
-        if op == "add":
-            output = self.add("phasor", other)
-        elif op == "subtract":
-            output = self.add("phasor", -other)
-        elif op == "multiply":
-            output = self.multiply("phasor", other)
-        else:
-            output = self.multiply("phasor", 1 / other)
-        return output
+        return self._apply_field_op(other, op)
 
     def _prepare_operand(
         self: Wavefront, other: Wavefront | Array | float | int | complex
@@ -1066,7 +1004,7 @@ class Wavefront(zdx.Base):
         operand : Array
             The array operand aligned for elementwise arithmetic.
         """
-        if self.npixels != other.npixels:
+        if self.spatial_shape != other.spatial_shape:
             raise ValueError("Wavefront operands must have matching spatial shapes.")
 
         # A chromatic right operand cannot be represented by a monochromatic base,
@@ -1141,7 +1079,7 @@ class Wavefront(zdx.Base):
 
             # A two-pixel spatial axis is only spatial when the base agrees. This
             # leaves (2, 2) arrays unambiguously Jones-valued for larger wavefronts.
-            if "x" in axes and axes["x"] == 2 and self.npixels != 2:
+            if "x" in axes and axes["x"] == 2 and self.spatial_shape[-1] != 2:
                 spatial_matches = False
             return wavelength_matches and jones_matches and spatial_matches
 
@@ -1177,50 +1115,6 @@ class Wavefront(zdx.Base):
         )
         return self, other.reshape(shape)
 
-    def __add__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """
-        Allows complex phasors or Wavefront objects to be added together. None values
-        are ignored.
-        """
-        return self._magic_unified_op(other, "add")
-
-    def __sub__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """
-        Allows complex phasors or Wavefront objects to be subtracted. None values are
-        ignored.
-        """
-        return self._magic_unified_op(other, "subtract")
-
-    def __mul__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """
-        Allows complex phasors or Wavefront objects to be multiplied. None values are
-        ignored.
-        """
-        return self._magic_unified_op(other, "multiply")
-
-    def __truediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """
-        Allows the wavefront phasor to be divided by a scalar or array. Division by
-        another Wavefront is undefined. None values are ignored.
-        """
-        return self._magic_unified_op(other, "divide")
-
-    def __iadd__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """In-place addition."""
-        return self.__add__(other)
-
-    def __isub__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """In-place subtraction."""
-        return self.__sub__(other)
-
-    def __imul__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """In-place multiplication."""
-        return self.__mul__(other)
-
-    def __itruediv__(self: Wavefront, other: Wavefront | Array | None) -> Wavefront:
-        """In-place division."""
-        return self.__truediv__(other)
-
     def apply_jones(self, jones):
         """
         Applies a Jones matrix by promoting it to a PolarisedWavefront and applying the
@@ -1255,13 +1149,24 @@ class PolarisedWavefront(Wavefront):
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
-        npixels: int,
-        diameter: float | Array = None,
-        pixel_scale: float | Array = None,
-        center: Array = None,
+        spec: CoordSpec,
+        phasor: Array | None = None,
     ):
-        super().__init__(wavelength, npixels, diameter, pixel_scale, center)
-        self.phasor = self._promote_phasor(self.phasor)
+        if phasor is None:
+            super().__init__(wavelength, spec)
+            self.phasor = self._promote_phasor(self.phasor)
+            return
+
+        phasor = np.asarray(phasor, complex)
+        is_jones = phasor.ndim >= 4 and phasor.shape[-4:-2] == (2, 2)
+        wavelength = np.asarray(wavelength, float)
+        if phasor.ndim == 2 and wavelength.ndim > 0:
+            phasor = phasor * np.ones(wavelength.shape + (1, 1))
+        elif is_jones and phasor.ndim == 4 and wavelength.ndim > 0:
+            phasor = phasor * np.ones(wavelength.shape + (1, 1, 1, 1))
+        if not is_jones:
+            phasor = self._promote_phasor(phasor)
+        super().__init__(wavelength, spec, phasor)
 
     @staticmethod
     def _promote_phasor(phasor: Array) -> Array:
@@ -1285,9 +1190,7 @@ class PolarisedWavefront(Wavefront):
         cls,
         phasor: Array[complex],
         wavelength: float | Array,
-        pixel_scale: float | Array = None,
-        diameter: float | Array = None,
-        center: float = None,
+        spec: CoordSpec,
     ) -> PolarisedWavefront:
         """
         Create a PolarisedWavefront from a regular or Jones phasor.
@@ -1314,40 +1217,10 @@ class PolarisedWavefront(Wavefront):
         wavefront : PolarisedWavefront
             A new polarised wavefront with phasor shape `(..., 2, 2, n, n)`.
         """
-        phasor = np.asarray(phasor, complex)
-        wavelength = np.asarray(wavelength, float)
-
-        # Jones phasors already have the Jones axes immediately before the final two
-        # spatial axes: `(..., 2, 2, n, n)`.
-        is_jones = phasor.ndim >= 4 and phasor.shape[-4:-2] == (2, 2)
-
-        # A single spatial phasor with vector wavelengths represents the same spatial
-        # field at each wavelength, so add the wavelength axes before promotion.
-        if phasor.ndim == 2 and wavelength.ndim > 0:
-            phasor = phasor * np.ones(wavelength.shape + (1, 1))
-
-        # A single Jones phasor with vector wavelengths is broadcast in the same way,
-        # preserving the Jones axes before the spatial axes.
-        elif is_jones and phasor.ndim == 4 and wavelength.ndim > 0:
-            phasor = phasor * np.ones(wavelength.shape + (1, 1, 1, 1))
-
-        # Regular phasors are converted to an unpolarised Jones representation.
-        # Jones phasors are assumed to already be in the desired axis order.
-        if not is_jones:
-            phasor = cls._promote_phasor(phasor)
-
-        # Construct the object to initialise wavelength/sampling metadata, then replace
-        # the default identity phasor with the supplied phasor.
-        return cls(
-            wavelength=wavelength,
-            npixels=phasor.shape[-1],
-            diameter=diameter,
-            pixel_scale=pixel_scale,
-            center=center,
-        ).set(phasor=phasor)
+        return cls(wavelength=wavelength, spec=spec, phasor=phasor)
 
     @property
-    def ndim(self: PolarisedWavefront) -> int:
+    def batch_ndim(self: PolarisedWavefront) -> int:
         """
         Returns the number of leading vectorisation dimensions, excluding the Jones
         and spatial axes.
@@ -1371,14 +1244,11 @@ class PolarisedWavefront(Wavefront):
             as the input wavefront, and the phasor promoted
 
         """
-        pwf = PolarisedWavefront(
+        return PolarisedWavefront(
             wavelength=wavefront.wavelength,
-            npixels=wavefront.npixels,
-            pixel_scale=wavefront.pixel_scale,
-            center=wavefront.center,
+            spec=wavefront.spec,
+            phasor=wavefront.phasor,
         )
-
-        return pwf.set(phasor=PolarisedWavefront._promote_phasor(wavefront.phasor))
 
     @property
     def psf(self: Wavefront) -> Array:
