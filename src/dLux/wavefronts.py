@@ -7,7 +7,7 @@ import zodiax as zdx
 import dLux.utils as dlu
 
 from .psfs import PSF
-from .coord_specs import CoordSpec
+from .coordinates import CoordSpec
 from .coordinates import CoordTransform
 
 __all__ = ["Wavefront", "PolarisedWavefront"]

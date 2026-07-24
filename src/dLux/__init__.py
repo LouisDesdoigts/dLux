@@ -14,7 +14,6 @@ from . import (
     spectra,
     wavefronts,
     psfs,
-    coord_specs,
     coordinates,
     abcd,
 )
@@ -28,7 +27,6 @@ _modules = (
     spectra,
     wavefronts,
     psfs,
-    coord_specs,
     coordinates,
     abcd,
 )
@@ -43,7 +41,6 @@ _module_names = [
     "spectra",
     "wavefronts",
     "psfs",
-    "coord_specs",
     "coordinates",
     "abcd",
 ]

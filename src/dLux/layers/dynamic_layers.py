@@ -7,8 +7,7 @@ from typing import Any
 import jax.numpy as np
 from jax import Array
 
-from ..coord_specs import CoordSpec
-from ..coordinates import CoordTransform
+from ..coordinates import CoordSpec, CoordTransform
 from ..parametric import BaseParametric
 from ..wavefronts import Wavefront
 from .optical_layers import AberratedLayer, BaseOpticalLayer, Optic, TransmissiveLayer
@@ -41,9 +40,7 @@ class BaseDynamicLayer(BaseOpticalLayer):
 
     @staticmethod
     def _from_spec(spec: CoordSpec) -> Array:
-        xs = spec.xs
-        x, y = np.broadcast_arrays(xs[..., None, :], xs[..., :, None])
-        return np.stack((x, y), axis=-3)
+        return spec.coordinates
 
     def context(self, wavefront: Wavefront) -> dict[str, Any]:
         """Return the coordinate context used to resolve parametric leaves."""

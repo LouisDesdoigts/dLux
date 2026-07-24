@@ -6,8 +6,7 @@ import jax.numpy as np
 import jax.tree as jtu
 from jax import Array, vmap
 
-from ..coord_specs import CoordSpec
-from ..coordinates import AffineMap, DistortedCoords
+from ..coordinates import AffineMap, CoordSpec, DistortedCoords
 from ..parametric import ParametricBasis
 from ..wavefronts import Wavefront
 from .dynamic_layers import BaseDynamicLayer
