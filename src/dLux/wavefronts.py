@@ -307,10 +307,10 @@ class Wavefront(BaseSpatial):
             phasor = np.asarray(phasor, complex)
             if phasor.ndim < 2:
                 raise ValueError("phasor must have at least two spatial dimensions.")
-            inferred_n = np.asarray(phasor.shape[-2:][::-1], int)
+            inferred_n = phasor.shape[-2:][::-1]
             if spec.n is None:
                 spec = spec.set(n=inferred_n)
-            elif tuple(int(value) for value in spec.n) != tuple(inferred_n):
+            elif spec.n != inferred_n:
                 raise ValueError("phasor spatial shape must match spec.n.")
             if spec.ndim != 2:
                 raise ValueError("Wavefront requires a two-dimensional CoordSpec.")

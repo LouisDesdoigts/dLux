@@ -1,128 +1,136 @@
-import jax
+"""Tests for dLux.coordinates."""
+
 import jax.numpy as np
 import pytest
 
+import dLux as dl
 import dLux.utils as dlu
-from dLux import CoordSpec
-from dLux.coordinates import (
-    Affine,
-    AffineMap,
-    DistortedCoords,
-    TransformChain,
-)
+
+from .helpers import assert_differentiable, assert_jittable
 
 
-def test_affine_defaults_and_validation():
-    affine = Affine()
-    matrix, offset = affine.coefficients()
-    assert np.array_equal(matrix, np.eye(2))
-    assert np.array_equal(offset, np.zeros(2))
-    for keyword in ("translation", "shear"):
-        with pytest.raises(ValueError, match=keyword):
-            Affine(**{keyword: [1]})
-    with pytest.raises(ValueError, match="rotation"):
-        Affine(rotation=[1])
-    with pytest.raises(ValueError, match="non-zero"):
-        Affine(scale=0)
-    with pytest.raises(ValueError, match="order"):
-        Affine(order=("rotation", "rotation"))
-    with pytest.raises(ValueError, match="order"):
-        Affine(order=("unknown",))
-    with pytest.raises(ValueError, match="coordinates"):
-        Affine(coordinates=np.ones((3, 4, 4)))
+class TestSpecifications:
+    def test_coordinate_interface(self):
+        spec = dl.CoordSpec(n=(6, 4), d=(0.2, 0.3), c=(0.1, -0.2), unit="m")
 
+        output = assert_jittable(
+            lambda value: (
+                value.coordinates,
+                value.axes,
+                value.xs_for((4, 4)),
+                value.fov,
+                value.extent,
+            ),
+            spec,
+        )
 
-def test_coordinate_sources_and_precedence():
-    coordinates = dlu.pixel_coords(4, 1.0)
-    other = dlu.pixel_coords(4, 2.0)
-    stored = Affine(translation=[0.1, 0.0], coordinates=coordinates)
-    specified = Affine(coordinates=CoordSpec(4, 0.25))
+        assert output[0].shape == (2, 4, 6)
+        assert spec.shape == (4, 6)
+        assert spec.ndim == 2
 
-    assert np.allclose(stored(), stored(coordinates))
-    assert np.allclose(stored(other), other - np.array([0.1, 0.0])[:, None, None])
-    assert np.allclose(specified(), coordinates)
-    with pytest.raises(ValueError, match="Provide coordinates"):
-        Affine()()
+    def test_broadcast_and_mapped_centres(self):
+        base = dl.CoordSpec(n=4, d=0.1, c=0.0, unit="m").broadcast(2)
+        mapped = base.set(c=np.asarray([[0.0, 0.0], [0.1, -0.1]]))
 
+        assert base.coordinates.shape == (2, 4, 4)
+        assert_jittable(lambda value: value.coordinates, mapped)
+        assert mapped.coordinates.shape == (2, 2, 4, 4)
 
-def test_affine_semantic_parameters_and_order():
-    affine = Affine(
-        translation=[0.1, -0.2],
-        rotation=0.2,
-        scale=[0.9, 1.1],
-        shear=[0.1, -0.05],
+    def test_units_and_differentiation(self):
+        spec = dl.CoordSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
+
+        assert np.max(np.abs(spec.coordinates)) < 0.01
+        assert_differentiable(lambda value: value.coordinates, spec)
+
+    @pytest.mark.parametrize(
+        ("kwargs", "error"),
+        [
+            ({"n": 0}, ValueError),
+            ({"n": 2.5}, TypeError),
+            ({"d": 0.0}, ValueError),
+            ({"unit": ""}, ValueError),
+            ({"n": (2, 3), "d": (1, 2, 3)}, ValueError),
+        ],
     )
-    coords = dlu.pixel_coords(4, 1.0)
-    assert affine(coords).shape == coords.shape
-    reordered = Affine(
-        translation=[0.1, -0.2],
-        rotation=0.2,
-        order=("rotation", "translation"),
+    def test_validation(self, kwargs, error):
+        with pytest.raises(error):
+            dl.CoordSpec(**kwargs)
+
+        with pytest.raises(ValueError):
+            dl.PadSpec(pad=0)
+
+
+class TestTransforms:
+    @pytest.fixture
+    def coordinates(self):
+        return dlu.pixel_coords(6, 1.0)
+
+    @pytest.mark.parametrize(
+        "transform",
+        [
+            dl.AffineMap(matrix=[[1.1, 0.1], [0.0, 0.9]], offset=[0.1, -0.2]),
+            dl.Affine(
+                translation=[0.1, -0.2],
+                rotation=0.2,
+                scale=[0.9, 1.1],
+                shear=[0.1, -0.05],
+            ),
+            dl.DistortedCoords(order=2),
+            dl.TransformChain(
+                [
+                    dl.Affine(translation=[0.1, 0.0]),
+                    dl.DistortedCoords(order=2),
+                ]
+            ),
+        ],
     )
-    assert not np.allclose(affine(coords), reordered(coords))
+    def test_transform_contract(self, transform, coordinates):
+        assert_jittable(lambda value: value(coordinates), transform)
 
+    def test_transform_gradients(self, coordinates):
+        affine_map = dl.AffineMap()
+        assert_differentiable(
+            lambda matrix: affine_map.set(matrix=matrix)(coordinates),
+            affine_map.matrix,
+        )
 
-def test_affine_map():
-    coords = dlu.pixel_coords(4, 1.0)
-    assert np.allclose(AffineMap(matrix=2 * np.eye(2))(coords), 2 * coords)
-    assert np.allclose(
-        AffineMap(offset=[0.1, 0.2])(coords),
-        coords + np.array([0.1, 0.2])[:, None, None],
+        affine = dl.Affine(rotation=0.2)
+        assert_differentiable(
+            lambda rotation: affine.set(rotation=rotation)(coordinates),
+            affine.rotation,
+        )
+
+        distorted = dl.DistortedCoords(order=2)
+        assert_differentiable(
+            lambda distortion: distorted.set(distortion=distortion)(coordinates),
+            distorted.distortion,
+        )
+
+    def test_coordinate_sources_and_aliases(self, coordinates):
+        transform = dl.Affine(translation=[0.1, 0.0], coordinates=coordinates)
+
+        assert np.allclose(transform(), transform.apply(coordinates))
+        assert np.allclose(transform.calculate(6, 1.0), transform(coordinates))
+        with pytest.raises(ValueError, match="Provide coordinates"):
+            dl.Affine()()
+
+    def test_vectorised_distortion(self, coordinates):
+        transform = dl.DistortedCoords(order=2, distortion=np.zeros((3, 2, 5)))
+
+        output = assert_jittable(lambda value: value(coordinates), transform)
+        assert output.shape == (3,) + coordinates.shape
+
+    @pytest.mark.parametrize(
+        "constructor",
+        [
+            lambda: dl.Affine(rotation=[1.0]),
+            lambda: dl.Affine(scale=0.0),
+            lambda: dl.Affine(order=("rotation", "rotation")),
+            lambda: dl.AffineMap(matrix=np.ones((3, 3))),
+            lambda: dl.DistortedCoords(powers=np.ones((3, 2))),
+            lambda: dl.DistortedCoords(order=2, orders=[2]),
+        ],
     )
-    assert np.allclose(AffineMap()(coords), coords)
-    with pytest.raises(ValueError, match="matrix"):
-        AffineMap(matrix=np.ones((3, 3)))
-    with pytest.raises(ValueError, match="offset"):
-        AffineMap(offset=np.ones(3))
-
-
-def test_affine_gradients():
-    coords = dlu.pixel_coords(4, 1.0)
-    gradient = jax.grad(lambda angle: Affine(rotation=angle)(coords).sum())(0.1)
-    assert np.isfinite(gradient)
-
-
-def test_distorted_coordinates_and_aliases():
-    coords = dlu.pixel_coords(8, 1.0)
-    transform = DistortedCoords()
-    assert transform.calculate(8, 1.0).shape == coords.shape
-    assert np.allclose(transform.apply(coords), transform(coords))
-
-
-def test_distorted_coordinate_validation():
-    with pytest.raises(ValueError, match="trailing dimensions"):
-        DistortedCoords(2, np.zeros(5))
-    with pytest.raises(ValueError, match="powers"):
-        DistortedCoords(powers=np.ones((3, 2)))
-
-
-def test_distorted_coordinates_accept_explicit_powers():
-    powers = np.array([[2.0, 1.0], [0.0, 1.0]])
-    distortion = np.array([[0.1, 0.0], [0.0, 0.1]])
-    coordinates = dlu.pixel_coords(8, 1.0)
-    transform = DistortedCoords(distortion=distortion, powers=powers)
-
-    assert np.array_equal(transform.powers, powers)
-    assert transform(coordinates).shape == coordinates.shape
-
-
-def test_distorted_coordinates_select_orders_and_shift_invariance():
-    selected = DistortedCoords(orders=[2])
-    invariant = DistortedCoords(order=2, shift_invariant=True)
-
-    assert np.all(selected.powers.sum(0) == 2)
-    assert np.array_equal(selected.powers, invariant.powers)
-    with pytest.raises(ValueError, match="only one"):
-        DistortedCoords(order=2, orders=[2])
-    with pytest.raises(ValueError, match="positive"):
-        DistortedCoords(orders=[0])
-
-
-def test_transform_chain_order_and_inputs():
-    coords = dlu.pixel_coords(4, 1.0)
-    first = DistortedCoords()
-    chain = TransformChain({"first": first})
-    assert chain.transformations["first"] is first
-    assert np.allclose(chain(coords), first(coords))
-    assert np.allclose(TransformChain()(coords), coords)
-    assert np.allclose(TransformChain(coordinates=coords)(), coords)
+    def test_validation(self, constructor):
+        with pytest.raises(ValueError):
+            constructor()

@@ -1,56 +1,80 @@
+"""Tests for dLux.parametric.parametrics."""
+
 import jax.numpy as np
 import pytest
 
-from dLux import Affine
-from dLux.parametric import (
-    BaseParametric,
-    Combination,
-    TransformedParametric,
-)
+import dLux as dl
+
+from tests.helpers import assert_differentiable, assert_jittable
 
 
-class CoordinateValue(BaseParametric):
+class CoordinateValue(dl.BaseParametric):
+    """Small concrete parametric used to exercise composition."""
+
     def evaluate(self, *, coordinates, **kwargs):
         return coordinates[0]
 
 
-def test_transformed_parametric():
-    coordinates = np.zeros((2, 3, 3))
-    transformed = TransformedParametric(
-        CoordinateValue(), Affine(translation=[1.0, 0.0])
+@pytest.fixture
+def coordinates():
+    return np.linspace(0.1, 0.4, 32).reshape(2, 4, 4)
+
+
+def test_transformed_parametric_contract(coordinates):
+    parametric = dl.TransformedParametric(
+        CoordinateValue(),
+        dl.Affine(translation=[0.1, 0.0]),
     )
 
-    assert np.allclose(transformed.evaluate(coordinates=coordinates), -1)
-
-
-def test_transformed_validation():
-    with pytest.raises(TypeError, match="BaseParametric"):
-        TransformedParametric(np.ones(2), Affine())
-    with pytest.raises(TypeError, match="CoordTransform"):
-        TransformedParametric(CoordinateValue(), np.eye(2))
+    assert_jittable(
+        lambda value: value.evaluate(coordinates=coordinates),
+        parametric,
+    )
+    assert_differentiable(
+        lambda translation: parametric.set(
+            "transformation.translation",
+            translation,
+        ).evaluate(coordinates=coordinates),
+        parametric.transformation.translation,
+    )
 
 
 @pytest.mark.parametrize(
-    ("operation", "expected"),
+    "operation",
+    ["sum", "product", "union", "intersection"],
+)
+def test_combination_contract(operation, coordinates):
+    parametric = dl.Combination(
+        [
+            CoordinateValue(),
+            dl.TransformedParametric(
+                CoordinateValue(),
+                dl.Affine(scale=[1.1, 0.9]),
+            ),
+        ],
+        operation,
+    )
+
+    output = assert_jittable(
+        lambda value: value.evaluate(coordinates=coordinates),
+        parametric,
+    )
+    assert output.shape == coordinates.shape[-2:]
+    assert_differentiable(
+        lambda value: parametric.evaluate(coordinates=value),
+        coordinates,
+    )
+
+
+@pytest.mark.parametrize(
+    "constructor",
     [
-        ("sum", np.array([[1.0, 3.0], [1.0, 3.0]])),
-        ("product", np.array([[0.0, 2.0], [0.0, 2.0]])),
-        ("union", np.array([[1.0, 1.0], [1.0, 1.0]])),
-        ("intersection", np.array([[0.0, 2.0], [0.0, 2.0]])),
+        lambda: dl.TransformedParametric(np.ones(2), dl.Affine()),
+        lambda: dl.TransformedParametric(CoordinateValue(), np.eye(2)),
+        lambda: dl.Combination([CoordinateValue()], "invalid"),
+        lambda: dl.Combination([np.ones(2)]),
     ],
 )
-def test_combination(operation, expected):
-    coordinates = np.stack(np.meshgrid(np.arange(2.0), np.arange(2.0), indexing="xy"))
-    x = CoordinateValue()
-    shifted_x = TransformedParametric(x, Affine(translation=[-1.0, 0.0]))
-    composite = Combination([x, shifted_x], operation)
-
-    assert composite.values(coordinates=coordinates).shape == (2, 2, 2)
-    assert np.allclose(composite.evaluate(coordinates=coordinates), expected)
-
-
-def test_combination_validation():
-    with pytest.raises(ValueError, match="operation"):
-        Combination([CoordinateValue()], "invalid")
-    composite = Combination({"x": CoordinateValue()})
-    assert tuple(composite.parametrics) == ("x",)
+def test_validation(constructor):
+    with pytest.raises((TypeError, ValueError)):
+        constructor()

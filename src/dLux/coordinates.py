@@ -7,7 +7,7 @@ from numbers import Integral
 
 import jax.numpy as np
 import zodiax as zdx
-from jax import Array, lax, vmap
+from jax import Array, core, lax, vmap
 
 import dLux.utils as dlu
 
@@ -67,7 +67,11 @@ class CoordSpec(BaseSpec):
         self.n = self._as_n(n, ndim)
         self.d = self._as_axes(d, ndim, float, "d")
         self.c = self._as_centers(c, ndim)
-        if self.d is not None and np.any(self.d <= 0):
+        if (
+            self.d is not None
+            and not isinstance(self.d, core.Tracer)
+            and np.any(self.d <= 0)
+        ):
             raise ValueError("d must contain positive values.")
         self.unit = None if unit is None else self._validate_unit(unit)
 

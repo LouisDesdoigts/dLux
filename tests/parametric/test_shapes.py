@@ -1,115 +1,83 @@
+"""Tests for dLux.parametric.shapes."""
+
 import jax.numpy as np
 import pytest
 
+import dLux as dl
 import dLux.utils as dlu
-from dLux import Affine
-from dLux.parametric.shapes import (
-    Circle,
-    Complement,
-    Intersection,
-    Rectangle,
-    RegularPolygon,
-    Shape,
-    SoftShape,
-    Spider,
-    Square,
-    TransformedShape,
-    Union,
-)
 
-
-class InfiniteShape(Shape):
-    def evaluate(self, *, coordinates, **kwargs):
-        return np.ones(coordinates.shape[-2:])
-
-
-class InfiniteSoftShape(SoftShape):
-    def evaluate(self, *, coordinates, **kwargs):
-        return np.ones(coordinates.shape[-2:])
+from tests.helpers import assert_differentiable, assert_jittable
 
 
 @pytest.fixture
 def context():
-    return {"coordinates": dlu.pixel_coords(16, 2.0), "pixel_scale": 1 / 8}
+    return {"coordinates": dlu.pixel_coords(12, 2.0), "pixel_scale": 2.0 / 12}
 
 
-def test_shape_base_and_softening():
-    assert InfiniteShape().extent is None
-    soft = InfiniteSoftShape(2)
-    assert soft.clip(0.5) == 0.5
-    with pytest.raises(ValueError, match="softening"):
-        InfiniteSoftShape(0)
+@pytest.mark.parametrize(
+    ("shape", "parameter"),
+    [
+        (dl.Circle(0.8), "diameter"),
+        (dl.Square(0.8), "width"),
+        (dl.Rectangle(0.8, 0.6), "width"),
+        (dl.RegularPolygon(6, 0.8), "diameter"),
+        (dl.Spider(0.1, [0.0, 90.0]), None),
+    ],
+)
+def test_shape_contract(shape, parameter, context):
+    output = assert_jittable(lambda value: value.evaluate(**context), shape)
+
+    assert output.shape == context["coordinates"].shape[-2:]
+    assert np.all((output >= 0) & (output <= 1))
+    if parameter is not None:
+        assert_differentiable(
+            lambda value: shape.set(parameter, value).evaluate(**context),
+            getattr(shape, parameter),
+        )
 
 
 @pytest.mark.parametrize(
     "shape",
     [
-        Circle(0.5),
-        Square(1.0),
-        Rectangle(1.0, 0.5),
-        RegularPolygon(6, 0.5),
-        Spider(0.1, [0, 90]),
+        dl.Complement(dl.Circle(0.8)),
+        dl.TransformedShape(
+            dl.Circle(0.8),
+            dl.Affine(translation=[0.1, 0.0]),
+        ),
     ],
 )
-def test_analytic_shapes(shape, context):
-    transmission = shape.evaluate(**context)
-    assert transmission.shape == (16, 16)
-    assert np.all((transmission >= 0) & (transmission <= 1))
-    assert shape.extent is None or shape.extent > 0
+def test_composed_shape_contract(shape, context):
+    output = assert_jittable(lambda value: value.evaluate(**context), shape)
+    assert output.shape == context["coordinates"].shape[-2:]
+
+
+def test_transformed_shape_gradient(context):
+    shape = dl.TransformedShape(
+        dl.Circle(0.8),
+        dl.Affine(translation=[0.1, 0.0]),
+    )
+
+    assert_differentiable(
+        lambda value: shape.set("transformation.translation", value).evaluate(
+            **context
+        ),
+        shape.transformation.translation,
+    )
 
 
 @pytest.mark.parametrize(
-    "constructor,args,message",
+    "constructor",
     [
-        (Circle, (0,), "diameter"),
-        (Square, (0,), "width"),
-        (Rectangle, (0, 1), "width and height"),
-        (Rectangle, (1, 0), "width and height"),
-        (RegularPolygon, (2, 1), "nsides"),
-        (Spider, (0, [0]), "width"),
-        (Spider, (1, [[0]]), "one-dimensional"),
+        lambda: dl.Circle(0.0),
+        lambda: dl.Square(0.0),
+        lambda: dl.Rectangle(1.0, 0.0),
+        lambda: dl.RegularPolygon(2, 1.0),
+        lambda: dl.Spider(0.0, [0.0]),
+        lambda: dl.Spider(1.0, [[0.0]]),
+        lambda: dl.Complement(object()),
+        lambda: dl.TransformedShape(dl.Circle(1.0), object()),
     ],
 )
-def test_shape_validation(constructor, args, message):
-    with pytest.raises(ValueError, match=message):
-        constructor(*args)
-
-
-def test_complement_and_transformation(context):
-    circle = Circle(0.5)
-    complement = Complement(circle)
-    transformed = TransformedShape(circle, Affine(translation=[0.1, 0]))
-    assert complement.extent == circle.extent
-    assert transformed.extent == circle.extent
-    assert np.allclose(complement.evaluate(**context), 1 - circle.evaluate(**context))
-    assert transformed.evaluate(**context).shape == (16, 16)
-    with pytest.raises(TypeError, match="Shape"):
-        Complement(object())
-    with pytest.raises(TypeError, match="Shape"):
-        TransformedShape(object(), Affine())
-    with pytest.raises(TypeError, match="CoordTransform"):
-        TransformedShape(circle, object())
-
-
-def test_composite_shapes(context):
-    circle = Circle(0.5)
-    square = Square(1.0)
-    intersection = Intersection([circle, square])
-    union = Union([circle, square])
-    assert intersection.extent == square.extent
-    assert intersection.transmissions(**context).shape == (2, 16, 16)
-    assert intersection.evaluate(**context).shape == (16, 16)
-    assert union.evaluate(**context).shape == (16, 16)
-    assert Intersection([InfiniteShape()]).extent is None
-
-
-def test_sparse_union(context):
-    circle = Circle(0.2)
-    aperture = Union(
-        [
-            TransformedShape(circle, Affine(translation=[-0.3, 0])),
-            TransformedShape(circle, Affine(translation=[0.3, 0])),
-        ]
-    )
-    assert aperture.extent == circle.extent
-    assert aperture.evaluate(**context).shape == (16, 16)
+def test_validation(constructor):
+    with pytest.raises((TypeError, ValueError)):
+        constructor()

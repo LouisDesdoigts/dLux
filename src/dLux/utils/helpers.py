@@ -213,6 +213,7 @@ def remove_layer(layers: dict, key: str) -> dict:
     layers : dict
         The updated dictionary of layers.
     """
+    layers = layers.copy()
     layers.pop(key)
     return layers
 

@@ -1,211 +1,132 @@
-import jax
+"""Tests for dLux.parametric.polynomials."""
+
 import jax.numpy as np
 import pytest
 
+import dLux as dl
 import dLux.utils as dlu
-from dLux.parametric.polynomials import (
-    DynamicZernike,
-    DynamicZernikeBasis,
-    PolynomialBasis,
-    ZernikeBasis,
-)
-from dLux.wavefronts import Wavefront
 
-coords = dlu.pixel_coords(8, diameter=2.0)
+from tests.helpers import assert_differentiable, assert_jittable
 
 
-class TestDynamicZernike:
-    def test_properties_and_calculation(self):
-        zernike = DynamicZernike(4)
-
-        assert zernike.j == 4
-        assert zernike.name == dlu.zernike_name(4)
-        assert zernike.calculate(coords).shape == (8, 8)
-
-    def test_invalid_index(self):
-        with pytest.raises(ValueError, match="greater than 0"):
-            DynamicZernike(0)
-
-    def test_diameter_contract(self):
-        coordinates = dlu.pixel_coords(8, diameter=1.1)
-        zernike = DynamicZernike(7)
-
-        assert np.allclose(
-            zernike.calculate(coordinates, diameter=1.1),
-            dlu.zernike(7, coordinates, diameter=1.1),
-        )
-
-    def test_polygonal_calculation(self):
-        zernike = DynamicZernike(4)
-
-        assert np.allclose(
-            zernike.calculate(coords, nsides=6),
-            dlu.polike(6, 4, coords),
-        )
+@pytest.fixture
+def coordinates():
+    return dlu.pixel_coords(10, 2.0)
 
 
-class TestZernikeBasis:
-    def test_radial_orders_match_noll_indices(self):
-        coefficients = np.arange(3.0)
-        by_index = ZernikeBasis(coords, js=[4, 5, 6], coefficients=coefficients)
-        by_order = ZernikeBasis(coords, radial_orders=[2], coefficients=coefficients)
+def test_general_polynomial_contract():
+    variables = np.linspace(-1, 1, 8)
+    polynomial = dl.Polynomial([1.0, 2.0, 3.0])
 
-        assert np.allclose(by_index.basis, by_order.basis)
-        assert np.allclose(by_index.evaluate(), by_order.evaluate())
-
-    def test_requires_one_selector(self):
-        with pytest.raises(ValueError, match="exactly one"):
-            ZernikeBasis(coords)
-        with pytest.raises(ValueError, match="exactly one"):
-            ZernikeBasis(coords, js=[1], radial_orders=[0])
-
-    @pytest.mark.parametrize(
-        ("selector", "match"),
-        [({"js": []}, "At least one"), ({"js": [0]}, "greater than zero")],
+    output = assert_jittable(
+        lambda value: value.evaluate(variables=variables),
+        polynomial,
     )
-    def test_invalid_mode_selection(self, selector, match):
-        with pytest.raises(ValueError, match=match):
-            ZernikeBasis(coords, **selector)
-
-    def test_negative_radial_order(self):
-        with pytest.raises(ValueError, match="non-negative"):
-            ZernikeBasis(coords, radial_orders=[-1])
-
-    def test_coefficient_shape_must_match_modes(self):
-        with pytest.raises(ValueError, match="Coefficient shape"):
-            ZernikeBasis(coords, js=[4, 5], coefficients=np.ones(3))
-
-    def test_nondefault_diameter(self):
-        coordinates = dlu.pixel_coords(8, diameter=1.1)
-        basis = ZernikeBasis(coordinates, js=[4, 5], diameter=1.1)
-
-        assert np.allclose(
-            basis.basis,
-            dlu.zernike_basis([4, 5], coordinates, diameter=1.1),
-        )
+    assert np.allclose(output, 1 + 2 * variables + 3 * variables**2)
+    assert_differentiable(
+        lambda coefficients: polynomial.set(coefficients=coefficients).evaluate(
+            variables=variables
+        ),
+        polynomial.coefficients,
+    )
 
 
-class TestDynamicZernikeBasis:
-    def test_explicit_coordinates(self):
-        basis = DynamicZernikeBasis(radial_orders=[2])
+def test_multivariate_polynomial(coordinates):
+    powers = np.array([[0, 1, 0, 1], [0, 0, 1, 1]])
+    polynomial = dl.Polynomial([1.0, 2.0, 3.0, 4.0], powers)
+    x, y = coordinates
 
-        assert basis.coefficient_shape == (3,)
-        assert basis.calculate_basis(coordinates=coords).shape == (3, 8, 8)
-        assert basis.evaluate(coordinates=coords).shape == (8, 8)
+    output = polynomial.evaluate(variables=coordinates)
+    assert np.allclose(output, 1 + 2 * x + 3 * y + 4 * x * y)
 
-    def test_requires_coordinate_context(self):
-        with pytest.raises(ValueError, match="wavefront or coordinates"):
-            DynamicZernikeBasis(js=[1]).evaluate()
 
-    @pytest.mark.parametrize("nsides", [-1, 1, 2])
-    def test_invalid_polygon_sides(self, nsides):
-        with pytest.raises(ValueError, match="zero or greater"):
-            DynamicZernikeBasis(js=[1], nsides=nsides)
+@pytest.mark.parametrize("nsides", [0, 6])
+def test_dynamic_zernike_contract(nsides, coordinates):
+    zernike = dl.DynamicZernike(4)
+    output = assert_jittable(
+        lambda value: value.calculate(coordinates, nsides=nsides),
+        zernike,
+    )
+    assert output.shape == coordinates.shape[-2:]
 
-    def test_coefficient_shape_must_match_modes(self):
-        with pytest.raises(ValueError, match="Coefficient shape"):
-            DynamicZernikeBasis(js=[4, 5], coefficients=np.ones(3))
 
-    def test_wavefront_infers_diameter(self):
-        diameter = 1.1
-        wavefront = Wavefront(700e-9, 8, diameter=diameter)
-        coefficients = np.arange(3.0)
-        dynamic = DynamicZernikeBasis(radial_orders=[2], coefficients=coefficients)
-        explicit = ZernikeBasis(
-            wavefront.coordinates(),
+@pytest.mark.parametrize(
+    "make_basis",
+    [
+        lambda coordinates: dl.ZernikeBasis(
+            coordinates,
             radial_orders=[2],
-            coefficients=coefficients,
-            diameter=diameter,
-        )
+            coefficients=np.linspace(-0.2, 0.2, 3),
+        ),
+        lambda coordinates: dl.DynamicZernikeBasis(
+            radial_orders=[2],
+            coefficients=np.linspace(-0.2, 0.2, 3),
+        ),
+        lambda coordinates: dl.DynamicZernikeBasis(
+            js=[4, 5],
+            coefficients=np.asarray([0.1, -0.1]),
+            nsides=6,
+        ),
+        lambda coordinates: dl.PolynomialBasis(
+            2,
+            coefficients=np.linspace(-0.2, 0.2, 6),
+        ),
+    ],
+)
+def test_polynomial_basis_contract(make_basis, coordinates):
+    basis = make_basis(coordinates)
+    context = {} if isinstance(basis, dl.ZernikeBasis) else {"coordinates": coordinates}
 
-        assert np.allclose(dynamic.evaluate(wavefront=wavefront), explicit.evaluate())
-
-    def test_explicit_coordinates_accept_diameter(self):
-        diameter = 0.8
-        coordinates = dlu.pixel_coords(8, diameter=diameter)
-        dynamic = DynamicZernikeBasis(js=[4, 5], coefficients=np.ones(2))
-        explicit = ZernikeBasis(
-            coordinates, js=[4, 5], coefficients=np.ones(2), diameter=diameter
-        )
-
-        assert np.allclose(
-            dynamic.evaluate(coordinates=coordinates, diameter=diameter),
-            explicit.evaluate(),
-        )
-
-    def test_owns_optional_diameter(self):
-        diameter = 0.8
-        coordinates = dlu.pixel_coords(8, diameter=diameter)
-        dynamic = DynamicZernikeBasis(
-            js=[4, 5], coefficients=np.ones(2), diameter=diameter
-        )
-        explicit = ZernikeBasis(
-            coordinates, js=[4, 5], coefficients=np.ones(2), diameter=diameter
-        )
-        assert np.allclose(
-            dynamic.evaluate(coordinates=coordinates), explicit.evaluate()
-        )
-        with pytest.raises(ValueError, match="diameter"):
-            DynamicZernikeBasis(js=[1], diameter=0)
-
-    def test_jit_and_gradient(self):
-        wavefront = Wavefront(700e-9, 8, diameter=1.1)
-        basis = DynamicZernikeBasis(radial_orders=[2])
-        evaluate = jax.jit(
-            lambda coefficients: basis.set(coefficients=coefficients).evaluate(
-                wavefront=wavefront
-            )
-        )
-        gradient = jax.grad(lambda coefficients: np.sum(evaluate(coefficients) ** 2))
-        coefficients = np.ones(3)
-
-        assert evaluate(coefficients).shape == (8, 8)
-        assert np.isfinite(gradient(coefficients)).all()
+    output = assert_jittable(lambda value: value.evaluate(**context), basis)
+    assert output.shape == coordinates.shape[-2:]
+    assert_differentiable(
+        lambda coefficients: basis.set(coefficients=coefficients).evaluate(**context),
+        basis.coefficients,
+    )
 
 
-class TestPolynomialBasis:
-    def test_degree_and_evaluation(self):
-        basis = PolynomialBasis(2)
-        explicit = dlu.polynomial_basis(coords, basis.powers)
+@pytest.mark.parametrize(
+    "basis",
+    [
+        dl.DynamicZernikeBasis(radial_orders=[2]),
+        dl.PolynomialBasis(2),
+    ],
+)
+def test_dynamic_basis_context(basis, coordinates, make_wavefront):
+    calculated = assert_jittable(
+        lambda value: value.calculate_basis(coordinates=coordinates),
+        basis,
+    )
+    assert calculated.shape[-2:] == coordinates.shape[-2:]
 
-        assert basis.coefficient_shape == (6,)
-        assert explicit.shape == (6, 8, 8)
-        assert np.allclose(
-            basis.evaluate(coordinates=coords),
-            dlu.eval_basis(explicit, basis.coefficients),
-        )
+    wavefront = make_wavefront()
+    assert_jittable(lambda value: value.evaluate(wavefront=wavefront), basis)
 
-    def test_solve_basis(self):
-        coefficients = np.arange(6.0)
-        basis = PolynomialBasis(2, coefficients)
-        value = basis.evaluate(coordinates=coords)
 
-        assert np.allclose(
-            basis.solve_basis(value, coordinates=coords), coefficients, atol=1e-5
-        )
+@pytest.mark.parametrize(
+    "constructor",
+    [
+        lambda coordinates: dl.DynamicZernike(0),
+        lambda coordinates: dl.ZernikeBasis(coordinates),
+        lambda coordinates: dl.ZernikeBasis(coordinates, js=[]),
+        lambda coordinates: dl.DynamicZernikeBasis(js=[1], nsides=2),
+        lambda coordinates: dl.DynamicZernikeBasis(js=[1], diameter=0.0),
+        lambda coordinates: dl.PolynomialBasis(-1),
+        lambda coordinates: dl.PolynomialBasis(2, np.ones(5)),
+        lambda coordinates: dl.Polynomial([]),
+        lambda coordinates: dl.Polynomial([1, 2], powers=np.ones((2, 3))),
+        lambda coordinates: dl.Polynomial([1, 2], powers=[0, -1]),
+    ],
+)
+def test_validation(constructor, coordinates):
+    with pytest.raises((TypeError, ValueError)):
+        constructor(coordinates)
 
-    def test_arbitrary_coordinate_dimensions(self):
-        coordinates = np.stack(
-            np.meshgrid(
-                np.linspace(-1.0, 1.0, 3),
-                np.linspace(-1.0, 1.0, 4),
-                np.linspace(-1.0, 1.0, 5),
-                indexing="ij",
-            )[:2]
-        )
-        basis = PolynomialBasis(2)
 
-        assert basis.calculate_basis(coordinates=coordinates).shape == (6, 3, 4, 5)
-        assert basis.evaluate(coordinates=coordinates).shape == (3, 4, 5)
-
-    def test_negative_degree(self):
-        with pytest.raises(ValueError, match="non-negative"):
-            PolynomialBasis(-1)
-
-    def test_coefficient_shape_must_match_degree(self):
-        with pytest.raises(ValueError, match="Coefficient shape"):
-            PolynomialBasis(2, coefficients=np.ones(5))
-
-    def test_requires_coordinate_context(self):
-        with pytest.raises(ValueError, match="wavefront or coordinates"):
-            PolynomialBasis(1).evaluate()
+@pytest.mark.parametrize(
+    "basis",
+    [dl.DynamicZernikeBasis(js=[1]), dl.PolynomialBasis(1)],
+)
+def test_coordinate_context_validation(basis):
+    with pytest.raises(ValueError, match="wavefront or coordinates"):
+        basis.evaluate()

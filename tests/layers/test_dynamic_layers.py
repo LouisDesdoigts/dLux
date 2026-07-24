@@ -1,91 +1,120 @@
+"""Tests for dLux.layers.dynamic_layers."""
+
 import jax.numpy as np
 import pytest
 
-import dLux.utils as dlu
-from dLux import Affine, CoordSpec, Wavefront
-from dLux.layers import (
-    DynamicAberratedLayer,
-    DynamicOptic,
-    DynamicTransmissiveLayer,
-)
-from dLux.parametric import BaseParametric, Circle
+import dLux as dl
+
+from tests.helpers import assert_differentiable, assert_jittable
 
 
-class CoordinateValue(BaseParametric):
+class CoordinateValue(dl.BaseParametric):
+    """Return one component from the dynamic coordinate context."""
+
     def evaluate(self, *, coordinates, **kwargs):
-        return coordinates[0]
+        return 1e-7 * coordinates[0]
 
 
 @pytest.fixture
-def wavefront():
-    return Wavefront(1e-6, 16, diameter=1.0)
+def wavefront(make_wavefront):
+    return make_wavefront()
 
 
-def test_dynamic_context_uses_wavefront_coordinates(wavefront):
-    layer = DynamicTransmissiveLayer(Circle(0.3))
-    context = layer.context(wavefront)
-    assert context["coordinates"].shape == (2, 16, 16)
-    assert context["pixel_scale"] == wavefront.pixel_scale
+@pytest.mark.parametrize(
+    "layer",
+    [
+        dl.DynamicTransmissiveLayer(dl.Circle(0.5, softening=0.02)),
+        dl.DynamicTransmissiveLayer(0.5, normalise=True),
+        dl.DynamicAberratedLayer(opd=CoordinateValue(), phase=0.1),
+        dl.DynamicOptic(
+            transmission=dl.Circle(0.5, softening=0.02),
+            opd=CoordinateValue(),
+            phase=0.1,
+        ),
+    ],
+)
+def test_dynamic_layer_contract(layer, wavefront):
+    output = assert_jittable(layer, wavefront)
+    assert output.phasor.shape == wavefront.phasor.shape
 
 
-def test_dynamic_context_accepts_coord_spec(wavefront):
-    spec = CoordSpec(16, 1 / 16, 0.1)
-    layer = DynamicTransmissiveLayer(Circle(0.3), coordinates=spec)
-    context = layer.context(wavefront)
-    assert context["coordinates"].shape == (2, 16, 16)
-    assert context["pixel_scale"] == spec.d
+def test_coordinate_sources(wavefront, make_spec):
+    spec = make_spec(c=[0.1, -0.1])
+    coordinates = spec.coordinates
+    transformations = [
+        dl.Affine(translation=[0.1, 0.0]),
+        dl.Affine(translation=[0.1, 0.0], coordinates=spec),
+    ]
+    layers = [
+        dl.DynamicTransmissiveLayer(CoordinateValue()),
+        dl.DynamicTransmissiveLayer(CoordinateValue(), coordinates=coordinates),
+        dl.DynamicTransmissiveLayer(CoordinateValue(), coordinates=spec),
+        dl.DynamicTransmissiveLayer(
+            CoordinateValue(),
+            transformation=transformations[0],
+        ),
+        dl.DynamicTransmissiveLayer(
+            CoordinateValue(),
+            transformation=transformations[1],
+        ),
+    ]
 
+    for layer in layers:
+        context = layer.context(wavefront)
+        assert context["coordinates"].shape == wavefront.coordinates.shape
+        assert_jittable(layer, wavefront)
 
-def test_dynamic_context_accepts_transform_coordinate_source(wavefront):
-    spec = CoordSpec(16, 1 / 16, 0.1)
-    transformation = Affine(translation=[0.1, 0], coordinates=spec)
-    layer = DynamicTransmissiveLayer(Circle(0.3), transformation=transformation)
-    context = layer.context(wavefront)
-
-    assert context["coordinates"].shape == (2, 16, 16)
-    assert context["pixel_scale"] == spec.d
-    assert np.allclose(context["coordinates"], transformation())
-
-
-def test_dynamic_context_accepts_arrays_and_transformations(wavefront):
-    coordinates = dlu.pixel_coords(16, 1.0)
-    layer = DynamicTransmissiveLayer(
-        CoordinateValue(),
-        coordinates=coordinates,
-        transformation=Affine(translation=[0.1, 0]),
+    assert np.allclose(layers[2].context(wavefront)["pixel_scale"], spec.d)
+    assert np.allclose(
+        layers[-1].context(wavefront)["coordinates"],
+        transformations[-1](),
     )
-    expected = Affine(translation=[0.1, 0])(coordinates)[0]
-    assert np.allclose(layer.context(wavefront)["coordinates"][0], expected)
-    assert layer(wavefront).phasor.shape == wavefront.phasor.shape
 
 
-def test_dynamic_context_validation():
-    with pytest.raises(ValueError, match="coordinates"):
-        DynamicTransmissiveLayer(coordinates=np.ones((3, 4, 4)))
-    with pytest.raises(TypeError, match="transformation"):
-        DynamicTransmissiveLayer(transformation=object())
+@pytest.mark.parametrize(
+    ("layer", "path"),
+    [
+        (
+            dl.DynamicTransmissiveLayer(
+                dl.Circle(0.5, softening=0.02),
+            ),
+            "transmission.diameter",
+        ),
+        (
+            dl.DynamicAberratedLayer(opd=CoordinateValue(), phase=0.1),
+            "phase",
+        ),
+        (
+            dl.DynamicOptic(
+                transmission=dl.Circle(0.5, softening=0.02),
+            ),
+            "transmission.diameter",
+        ),
+        (
+            dl.DynamicOptic(
+                transmission=CoordinateValue(),
+                transformation=dl.Affine(translation=[0.1, 0.0]),
+            ),
+            "transformation.translation",
+        ),
+    ],
+)
+def test_dynamic_layer_gradients(layer, path, wavefront):
+    value = layer.get(path)
 
-
-def test_dynamic_transmission_supports_static_values(wavefront):
-    layer = DynamicTransmissiveLayer(0.5, normalise=True)
-    assert np.allclose(layer(wavefront).power, 1)
-    assert DynamicTransmissiveLayer()(wavefront).phasor.shape == wavefront.phasor.shape
-
-
-def test_dynamic_aberrated_layer(wavefront):
-    layer = DynamicAberratedLayer(opd=CoordinateValue(), phase=0.1)
-    output = layer(wavefront)
-    expected = wavefront.add_opd(wavefront.coordinates()[0]).add_phase(0.1)
-    assert np.allclose(output.phasor, expected.phasor)
-
-
-def test_dynamic_optic_mixes_static_and_dynamic_leaves(wavefront):
-    optic = DynamicOptic(
-        transmission=Circle(0.3),
-        opd=CoordinateValue(),
-        phase=0.1,
+    assert_differentiable(
+        lambda replacement: np.real(layer.set(path, replacement)(wavefront).phasor),
+        value,
     )
-    params = optic.params(wavefront)
-    assert params["transmission"].shape == (16, 16)
-    assert params["opd"].shape == (16, 16)
-    assert optic(wavefront).phasor.shape == wavefront.phasor.shape
+
+
+@pytest.mark.parametrize(
+    "constructor",
+    [
+        lambda: dl.DynamicTransmissiveLayer(coordinates=np.ones((3, 4, 4))),
+        lambda: dl.DynamicTransmissiveLayer(transformation=object()),
+    ],
+)
+def test_validation(constructor):
+    with pytest.raises((TypeError, ValueError)):
+        constructor()

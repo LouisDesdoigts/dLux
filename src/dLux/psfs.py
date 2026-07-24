@@ -52,10 +52,10 @@ class PSF(BaseSpatial):
         if not isinstance(spec, CoordSpec):
             raise TypeError("spec must be a CoordSpec.")
         spec = spec.broadcast(2)
-        inferred_n = np.asarray(self.data.shape[-2:][::-1], int)
+        inferred_n = self.data.shape[-2:][::-1]
         if spec.n is None:
             spec = spec.set(n=inferred_n)
-        elif tuple(int(value) for value in spec.n) != tuple(inferred_n):
+        elif spec.n != inferred_n:
             raise ValueError("data spatial shape must match spec.n.")
         BaseSpatial.__init__(self, spec)
 
