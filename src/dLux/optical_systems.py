@@ -9,6 +9,7 @@ import equinox as eqx
 import zodiax as zdx
 from typing import Any
 import dLux.utils as dlu
+from .coordinates import CoordSpec
 from .layers.optical_layers import BaseOpticalLayer
 
 __all__ = [
@@ -171,7 +172,7 @@ class OpticalSystem(BaseOpticalSystem):
         # Return psf object or array
         psf = wf.psf_from_stokes(stokes).sum(0)
         if return_psf:
-            return PSF(psf, wf.pixel_scale.mean())
+            return PSF(psf, wf.spec)
         return psf
 
     def model(
@@ -338,7 +339,13 @@ class LayeredOpticalSystem(OpticalSystem):
             offset = np.zeros(2)
 
         # Initialise wavefront
-        wavefront = Wavefront(wavelength, self.wf_npixels, self.diameter)
+        spec = CoordSpec(
+            n=(self.wf_npixels, self.wf_npixels),
+            d=self.diameter / self.wf_npixels,
+            c=0.0,
+            unit="m",
+        )
+        wavefront = Wavefront(wavelength, spec)
         return wavefront.tilt(offset)
 
     def _apply_mono(self: LayeredOpticalSystem, wavefront: Wavefront) -> Wavefront:
