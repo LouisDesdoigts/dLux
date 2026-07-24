@@ -1,95 +1,93 @@
-from jax import numpy as np, config
+"""Tests for dLux.psfs."""
 
-config.update("jax_debug_nans", True)
+import jax.numpy as np
 import pytest
-import dLux.utils as dlu
-from dLux import Affine, PSF
 
+import dLux as dl
 
-@pytest.fixture
-def psf():
-    return PSF(np.ones((16, 16)), 1 / 16)
+from .helpers import assert_differentiable, assert_jittable
 
 
 class TestPSF:
-    def test_constructor(self, psf):
-        assert psf.npixels == 16
-        assert psf.pixel_scale == 1 / 16
+    def test_construction(self, make_psf, make_wavefront):
+        psf = make_psf()
+        converted = dl.PSF.from_wavefront(make_wavefront())
 
-    def test_properties(self, psf):
-        assert psf.ndim == 0
+        assert psf.data.shape == psf.spec.shape
+        assert psf.batch_ndim == 0
+        assert converted.data.shape == converted.spec.shape
 
-    def test_methods(self, psf):
-        assert psf.downsample(2).npixels == 8
-        assert psf.downsample(2).pixel_scale == 1 / 8
-        assert np.allclose(psf.normalise().data.sum(), 1)
-        assert np.allclose(psf.normalise("power", 2).data.sum(), 2)
-        assert np.allclose(psf.normalise("peak", 2).data.max(), 2)
-        assert isinstance(psf.convolve(np.ones((2, 2))), PSF)
-        assert isinstance(psf.convolve(np.ones((2, 2)), method="fft"), PSF)
-        assert isinstance(psf.rotate(np.pi), PSF)
-        assert isinstance(psf.interpolate(Affine()), PSF)
-        assert isinstance(psf.resize(8), PSF)
-        assert isinstance(psf.flip(0), PSF)
+    @pytest.mark.parametrize(
+        "operation",
+        [
+            lambda psf: psf.normalise(),
+            lambda psf: psf.normalise("peak", 2.0),
+            lambda psf: psf.convolve(np.ones((3, 3)), method="direct"),
+            lambda psf: psf.convolve(np.ones((3, 3)), method="fft"),
+            lambda psf: psf.interpolate(dl.Affine(rotation=0.1)),
+            lambda psf: psf.rotate(0.1),
+            lambda psf: psf.scale_to(6, 0.08),
+            lambda psf: psf.resize(6),
+            lambda psf: psf.downsample(2),
+            lambda psf: psf.flip((0, 1)),
+        ],
+    )
+    def test_spatial_operation_contract(self, operation, make_psf):
+        data = np.arange(64.0).reshape(8, 8) + 1
+        assert_jittable(operation, make_psf(data=data), rtol=1e-5, atol=1e-5)
 
-    def test_interpolate_validation(self, psf):
-        with pytest.raises(TypeError, match="transformation"):
-            psf.interpolate(transformation="rotate")
+    @pytest.mark.parametrize(
+        "operation",
+        [
+            lambda psf: psf + 2.0,
+            lambda psf: psf - 2.0,
+            lambda psf: psf * 2.0,
+            lambda psf: psf / 2.0,
+        ],
+    )
+    def test_arithmetic_contract(self, operation, make_psf):
+        assert_jittable(operation, make_psf())
 
-    def test_normalise_validation(self, psf):
+    @pytest.mark.parametrize(
+        "operation",
+        [
+            lambda psf: psf.normalise(),
+            lambda psf: psf.convolve(np.ones((3, 3))),
+            lambda psf: psf.interpolate(dl.Affine(rotation=0.1)),
+        ],
+    )
+    def test_gradients(self, operation, make_psf):
+        psf = make_psf(data=np.arange(64.0).reshape(8, 8) + 1)
+
+        def apply(data):
+            return operation(psf.set(data=data)).data
+
+        assert_differentiable(apply, psf.data)
+
+    def test_sampling_updates(self, make_psf):
+        psf = make_psf().downsample(2)
+
+        assert psf.spec.n == (4, 4)
+        assert np.allclose(psf.spec.d, 0.2)
+
+    @pytest.mark.parametrize(
+        "constructor",
+        [
+            lambda spec: dl.PSF(np.ones(8), spec),
+            lambda spec: dl.PSF(np.ones((4, 4)), spec),
+            lambda spec: dl.PSF(np.ones((8, 8)), "invalid"),
+        ],
+    )
+    def test_construction_validation(self, constructor, make_spec):
+        with pytest.raises((TypeError, ValueError)):
+            constructor(make_spec())
+
+    def test_operation_validation(self, make_psf):
+        psf = make_psf()
+
         with pytest.raises(ValueError, match="mode"):
             psf.normalise("invalid")
-
-    def test_interpolate_matches_explicit_coordinate_mapping(self, psf):
-        psf = psf.set(data=np.arange(16**2).reshape(16, 16))
-        transformation = Affine(
-            translation=[1 / 32, -1 / 32],
-            scale=[0.9, 1.1],
-        )
-        coords = dlu.pixel_coords(psf.npixels, psf.npixels * psf.pixel_scale)
-        expected = dlu.interp(psf.data, coords, transformation(coords))
-
-        output = psf.interpolate(transformation)
-
-        assert np.allclose(output.data, expected)
-
-    def test_interpolate_fill(self, psf):
-        output = psf.interpolate(Affine(translation=[10.0, 10.0]), fill=2.0)
-
-        assert np.allclose(output.data, 2.0)
-
-    def test_magic(self, psf):
-        psf *= np.ones(1)
-        assert isinstance(psf, PSF)
-
-        psf += np.ones(1)
-        assert isinstance(psf, PSF)
-
-        psf -= np.ones(1)
-        assert isinstance(psf, PSF)
-
-        psf /= np.ones(1)
-        assert isinstance(psf, PSF)
-
-    def test_magic_with_psf_operand(self, psf):
-        other = PSF(np.full((16, 16), 2.0), 1 / 16)
-
-        added = psf + other
-        assert isinstance(added, PSF)
-        assert np.allclose(added.data, 3.0)
-
-        subtracted = psf - other
-        assert isinstance(subtracted, PSF)
-        assert np.allclose(subtracted.data, -1.0)
-
-    def test_magic_with_none(self, psf):
-        unchanged = psf._magic_unified_op(None, "add")
-        assert unchanged is psf
-
-    def test_magic_invalid_type(self, psf):
+        with pytest.raises(TypeError, match="transformation"):
+            psf.interpolate("invalid")
         with pytest.raises(TypeError, match="Unsupported type"):
             psf + "invalid"
-
-    def test_magic_invalid_operation(self, psf):
-        with pytest.raises(ValueError, match="Unsupported operation"):
-            psf._magic_unified_op(np.ones(1), "invalid")

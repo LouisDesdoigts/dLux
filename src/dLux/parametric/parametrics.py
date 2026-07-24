@@ -15,6 +15,7 @@ from ..coordinates import CoordTransform
 
 __all__ = [
     "BaseParametric",
+    "resolve_parametric",
     "TransformedParametric",
     "Combination",
 ]
@@ -26,6 +27,13 @@ class BaseParametric(zdx.Base):
     @abstractmethod
     def evaluate(self, **kwargs: Any) -> Array:  # pragma: no cover
         """Evaluate the parameterisation in the supplied context."""
+
+
+def resolve_parametric(value: Any, **context: Any) -> Any:
+    """Evaluate a parametric value or return an ordinary value unchanged."""
+    if isinstance(value, BaseParametric):
+        return value.evaluate(**context)
+    return value
 
 
 class TransformedParametric(BaseParametric):

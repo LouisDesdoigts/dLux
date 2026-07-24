@@ -7,12 +7,14 @@ import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
-from .bases import CoordBasis, ExplicitBasis
+from .bases import CoordBasis, ExplicitBasis, ParametricBasis
+from .parametrics import BaseParametric, resolve_parametric
 
 __all__ = [
     "DynamicZernike",
     "ZernikeBasis",
     "DynamicZernikeBasis",
+    "Polynomial",
     "PolynomialBasis",
 ]
 
@@ -128,7 +130,64 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
         return np.array(jtu.map(calculate, self.zernikes, is_leaf=is_zernike))
 
 
-class PolynomialBasis(CoordBasis):
+class Polynomial(ParametricBasis):
+    """A general polynomial in one or more supplied variables."""
+
+    powers: Array
+    variables: Array | BaseParametric | None
+
+    def __init__(self, coefficients, powers=None, variables=None):
+        coefficients = np.asarray(coefficients, dtype=float)
+        if coefficients.ndim != 1 or coefficients.size == 0:
+            raise ValueError("coefficients must be a non-empty 1d array.")
+        if powers is None:
+            powers = np.arange(coefficients.size)[None, :]
+        else:
+            powers = np.asarray(powers, dtype=int)
+            if powers.ndim == 1:
+                powers = powers[None, :]
+        if powers.ndim != 2 or powers.shape[1] != coefficients.size:
+            raise ValueError("powers must have shape (n_variables, n_coefficients).")
+        if np.any(powers < 0):
+            raise ValueError("powers must be non-negative.")
+        self.powers = powers
+        self.variables = (
+            variables
+            if variables is None or isinstance(variables, BaseParametric)
+            else np.asarray(variables, dtype=float)
+        )
+        self._set_coefficients(coefficients, (coefficients.size,))
+
+    def calculate_basis(self, *, variables=None, **context):
+        variables = self.variables if variables is None else variables
+        variables = resolve_parametric(variables, **context)
+        if variables is None:
+            raise ValueError("variables must be provided.")
+        variables = np.asarray(variables, dtype=float)
+        if self.powers.shape[0] == 1 and variables.ndim == 1:
+            variables = variables[None, :]
+        if variables.shape[0] != self.powers.shape[0]:
+            raise ValueError(
+                "variables leading axis must match the number of polynomial variables."
+            )
+        return dlu.polynomial_basis(variables, self.powers)
+
+    def evaluate(self, *, variables=None, **context):
+        if variables is None:
+            basis = self.calculate_basis(**context)
+        else:
+            basis = self.calculate_basis(variables=variables, **context)
+        return self.evaluate_basis(basis)
+
+    def solve_basis(self, value, *, variables=None, **context):
+        if variables is None:
+            basis = self.calculate_basis(**context)
+        else:
+            basis = self.calculate_basis(variables=variables, **context)
+        return dlu.solve_basis(value, basis)
+
+
+class PolynomialBasis(Polynomial):
     """A Cartesian polynomial basis evaluated from coordinate context.
 
     ??? abstract "UML"
@@ -141,11 +200,15 @@ class PolynomialBasis(CoordBasis):
         degree = int(degree)
         if degree < 0:
             raise ValueError("degree must be non-negative.")
-        self.powers = dlu.gen_powers(degree + 1)
-        shape = (self.powers.shape[1],)
-        coefficients = np.zeros(shape) if coefficients is None else coefficients
-        self._set_coefficients(coefficients, shape)
+        powers = dlu.gen_powers(degree + 1)
+        coefficients = (
+            np.zeros(powers.shape[1]) if coefficients is None else coefficients
+        )
+        super().__init__(coefficients, powers)
 
     def calculate_basis(self, *, wavefront=None, coordinates=None, **kwargs):
-        coordinates = self.get_coordinates(wavefront=wavefront, coordinates=coordinates)
-        return dlu.polynomial_basis(coordinates, self.powers)
+        if coordinates is None:
+            if wavefront is None:
+                raise ValueError("Provide either wavefront or coordinates.")
+            coordinates = wavefront.coordinates
+        return super().calculate_basis(variables=coordinates, **kwargs)

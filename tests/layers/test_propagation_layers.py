@@ -1,137 +1,163 @@
-from jax import numpy as np, config
+"""Tests for dLux.layers.propagation_layers."""
 
-config.update("jax_debug_nans", True)
+import jax.numpy as np
 import pytest
 
-from dLux import Wavefront
-from dLux.coord_specs import CoordSpec, PadSpec
-import dLux.layers.propagation_layers as abcd_props
+import dLux as dl
+
+from tests.helpers import (
+    assert_differentiable,
+    assert_jittable,
+    assert_tree_allclose,
+)
 
 
 @pytest.fixture
-def wavefront():
-    return Wavefront(npixels=16, diameter=1.0, wavelength=1e-6)
+def angular_spec():
+    return dl.CoordSpec(n=(6, 8), d=(2e-7, 3e-7), unit="rad")
 
 
-def test_abcd_elements():
-    elements = [
-        abcd_props.ABCDFreeSpace(1.0),
-        abcd_props.ABCDLens(2.0),
-        abcd_props.ABCDMirror(3.0),
-        abcd_props.ABCDConjugatePlane(4.0),
-    ]
-
-    for element in elements:
-        matrix = element.abcd
-        assert isinstance(matrix, np.ndarray)
-        assert matrix.shape == (2, 2)
+@pytest.fixture
+def physical_spec():
+    return dl.CoordSpec(n=(6, 8), d=(2e-6, 3e-6), unit="m")
 
 
-def test_abcd_propagator_base_and_getattr():
-    spec = CoordSpec(n=8, d=1 / 32, c=0.0)
-    prop = abcd_props.MFTPropagator(
-        [abcd_props.ABCDFreeSpace(1.0), abcd_props.ABCDLens(2.0)], spec
+class TestPropagation:
+    @pytest.mark.parametrize(
+        "make_layer",
+        [
+            lambda angular, physical: dl.Fraunhofer(angular, method="mft"),
+            lambda angular, physical: dl.Fraunhofer(
+                physical, focal_length=2.0, method="mft"
+            ),
+            lambda angular, physical: dl.Fraunhofer(
+                dl.PadSpec(pad=2, crop=2), method="fft"
+            ),
+            lambda angular, physical: dl.Fresnel(
+                physical, defocus=0.1, focal_length=2.0, method="mft"
+            ),
+            lambda angular, physical: dl.Fresnel(
+                physical, defocus=0.1, focal_length=2.0, method="lct"
+            ),
+            lambda angular, physical: dl.Fresnel(
+                dl.PadSpec(), defocus=0.1, focal_length=2.0, method="fft"
+            ),
+            lambda angular, physical: dl.ABCDPropagator(
+                [dl.ABCDFreeSpace(0.1)], physical, method="lct"
+            ),
+            lambda angular, physical: dl.ABCDPropagator(
+                [dl.ABCDConjugatePlane(2.0)], dl.PadSpec(), method="fft"
+            ),
+            lambda angular, physical: dl.ASM(0.1),
+        ],
     )
+    def test_propagator_contract(
+        self, make_layer, angular_spec, physical_spec, make_wavefront
+    ):
+        layer = make_layer(angular_spec, physical_spec)
+        assert_jittable(layer, make_wavefront(), rtol=1e-5, atol=1e-5)
 
-    assert prop.n == 8
-    assert isinstance(prop.ABCDFreeSpace, abcd_props.ABCDFreeSpace)
-    assert np.allclose(prop.focal_length, np.array(2.0))
-    assert prop.abcd.shape == (2, 2)
+    def test_vectorised_wavefronts(self, angular_spec, make_wavefront):
+        layer = dl.Fraunhofer(angular_spec)
 
-    with pytest.raises(AttributeError):
-        prop.not_an_attr
+        chromatic = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
+        polarised = make_wavefront(polarised=True)
 
+        assert_jittable(layer, chromatic, rtol=1e-5, atol=1e-5)
+        assert_jittable(layer, polarised, rtol=1e-5, atol=1e-5)
 
-def test_mft_propagator_call(wavefront):
-    spec = CoordSpec(n=8, d=1 / 32, c=0.0)
-    prop = abcd_props.MFTPropagator([abcd_props.ABCDFreeSpace(1.0)], spec)
+    def test_output_sampling(self, angular_spec, make_wavefront):
+        requested = dl.Fraunhofer(angular_spec)(make_wavefront())
+        assert_tree_allclose(requested.spec, angular_spec)
 
-    out = prop(wavefront)
-    assert isinstance(out, Wavefront)
-    assert out.npixels == 8
-    assert np.allclose(out.pixel_scale, 1 / 32)
+        native = dl.Fraunhofer(dl.PadSpec(), method="fft")(make_wavefront())
+        assert native.spec.unit == "rad"
+        assert native.spec.n == (8, 8)
 
+    def test_field_gradient(self, angular_spec, make_wavefront):
+        wavefront = make_wavefront()
+        layer = dl.Fraunhofer(angular_spec)
 
-def test_fft_propagator_constructor_error():
-    with pytest.raises(ValueError, match="can not specify d"):
-        abcd_props.FFTPropagator(
-            [abcd_props.ABCDFreeSpace(1.0)], CoordSpec(n=8, d=1.0, c=0.0)
+        assert_differentiable(
+            lambda phasor: layer(wavefront.set(phasor=phasor)),
+            wavefront.phasor,
+            rtol=1e-5,
+            atol=1e-5,
+        )
+
+    def test_physical_parameter_gradients(self, physical_spec, make_wavefront):
+        wavefront = make_wavefront()
+
+        fraunhofer = dl.Fraunhofer(physical_spec, focal_length=2.0)
+        assert_differentiable(
+            lambda focal_length: fraunhofer.set(focal_length=focal_length)(wavefront),
+            fraunhofer.focal_length,
+            rtol=1e-5,
+            atol=1e-5,
+        )
+
+        fresnel = dl.Fresnel(physical_spec, defocus=0.1, focal_length=2.0)
+        assert_differentiable(
+            lambda defocus: fresnel.set(defocus=defocus)(wavefront),
+            fresnel.defocus,
+            rtol=1e-5,
+            atol=1e-5,
+        )
+
+        angular_spectrum = dl.ASM(0.1)
+        assert_differentiable(
+            lambda distance: angular_spectrum.set(distance=distance)(wavefront),
+            angular_spectrum.distance,
+            rtol=1e-5,
+            atol=1e-5,
         )
 
 
-def test_fft_propagator_call_coordspec(wavefront):
-    spec = CoordSpec(n=20, c=0.0)
-    prop = abcd_props.FFTPropagator([abcd_props.ABCDConjugatePlane(1.0)], spec)
-
-    out = prop(wavefront)
-    assert isinstance(out, Wavefront)
-    assert out.npixels == 20
-
-
-def test_fft_propagator_call_padspec(wavefront):
-    spec = PadSpec(pad=2, crop=2, c=0.0)
-    prop = abcd_props.FFTPropagator([abcd_props.ABCDConjugatePlane(1.0)], spec)
-
-    out = prop(wavefront)
-    assert isinstance(out, Wavefront)
-    assert out.npixels == 16
-
-
-def test_asm_propagator_constructor_error():
-    with pytest.raises(ValueError, match="can not specify d or c"):
-        abcd_props.ASMPropagator(1.0, CoordSpec(n=8, d=1.0, c=0.0))
-
-
-def test_asm_propagator_call_coordspec(wavefront):
-    prop = abcd_props.ASMPropagator(1.0, CoordSpec(n=20, c=None))
-    assert prop.distance.shape == ()
-
-    out = prop(wavefront)
-    assert isinstance(out, Wavefront)
-    assert out.npixels == 20
-
-
-def test_asm_propagator_call_padspec(wavefront):
-    prop = abcd_props.ASMPropagator(1.0, PadSpec(pad=2, crop=2, c=0.0))
-
-    out = prop(wavefront)
-    assert isinstance(out, Wavefront)
-    assert out.npixels == 16
-
-
-def test_asm_propagator_getattr():
-    prop = abcd_props.ASMPropagator(1.0, CoordSpec(n=8, c=None))
-
-    assert prop.n == 8
-    with pytest.raises(AttributeError):
-        prop.not_an_attr
-
-
-def test_not_implemented_constructors():
-    spec = CoordSpec(n=8, c=None)
-    prop = abcd_props.ASMPropagator(1.0, spec)
-    assert isinstance(prop, abcd_props.ASMPropagator)
-
-    with pytest.raises(TypeError):
-        abcd_props.Fraunhofer()
-
-    with pytest.raises(TypeError):
-        abcd_props.Fresnel()
-
-
-def test_fraunhofer_init_not_implemented():
-    concrete_fraunhofer = type(
-        "ConcreteFraunhofer", (abcd_props.Fraunhofer,), {"__call__": lambda self, w: w}
+class TestValidation:
+    @pytest.mark.parametrize(
+        "constructor",
+        [
+            lambda spec: dl.Fraunhofer(spec, method="invalid"),
+            lambda spec: dl.Fraunhofer(dl.PadSpec(), method="mft"),
+            lambda spec: dl.Fresnel(spec, method="fft"),
+            lambda spec: dl.ABCDPropagator([], spec),
+            lambda spec: dl.ABCDPropagator(
+                [dl.ABCDFreeSpace(1.0)],
+                dl.PadSpec(),
+                method="lct",
+            ),
+            lambda spec: dl.ASM(1.0, spec),
+        ],
     )
+    def test_construction(self, constructor, physical_spec):
+        with pytest.raises((TypeError, ValueError)):
+            constructor(physical_spec)
 
-    with pytest.raises(NotImplementedError):
-        concrete_fraunhofer()
+    def test_coordinate_compatibility(
+        self,
+        angular_spec,
+        physical_spec,
+        make_wavefront,
+    ):
+        wavefront = make_wavefront()
 
+        with pytest.raises(ValueError, match="without a focal length"):
+            dl.Fraunhofer(physical_spec)(wavefront)
+        with pytest.raises(ValueError, match="with a focal length"):
+            dl.Fraunhofer(angular_spec, focal_length=2.0)(wavefront)
+        with pytest.raises(ValueError, match="physical units"):
+            dl.ABCDPropagator(
+                [dl.ABCDFreeSpace(0.1)],
+                angular_spec,
+            )(wavefront)
 
-def test_fresnel_init_not_implemented():
-    concrete_fresnel = type(
-        "ConcreteFresnel", (abcd_props.Fresnel,), {"__call__": lambda self, w: w}
-    )
+        angular_input = make_wavefront(spec=dl.CoordSpec(n=8, d=0.1, unit="rad"))
+        with pytest.raises(ValueError, match="physical units"):
+            dl.Fraunhofer(angular_spec)(angular_input)
 
-    with pytest.raises(NotImplementedError):
-        concrete_fresnel()
+    def test_fft_requires_monochromatic_wavefront(self, make_wavefront):
+        layer = dl.Fraunhofer(dl.PadSpec(), method="fft")
+        wavefront = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
+
+        with pytest.raises(ValueError, match="monochromatic"):
+            layer(wavefront)
