@@ -6,7 +6,7 @@ from abcdLux import abcd, lct, asm
 import dLux.utils as dlu
 
 from ..abcd import BaseABCDElement
-from ..coord_specs import CoordSpec, PadSpec
+from ..coordinates import CoordSpec, PadSpec
 from .optical_layers import OpticalLayer
 
 __all__ = [

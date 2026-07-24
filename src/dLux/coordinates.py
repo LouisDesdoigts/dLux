@@ -1,4 +1,4 @@
-"""Coordinate-transformation contracts and ordered composition."""
+"""Coordinate specifications, transformations, and ordered composition."""
 
 from __future__ import annotations
 
@@ -9,15 +9,158 @@ import zodiax as zdx
 from jax import Array, lax, vmap
 
 import dLux.utils as dlu
-from .coord_specs import CoordSpec
 
 __all__ = [
+    "BaseSpec",
+    "PadSpec",
+    "CoordSpec",
     "CoordTransform",
     "Affine",
     "AffineMap",
     "TransformChain",
     "DistortedCoords",
 ]
+
+
+class BaseSpec(zdx.Base):
+    """Base class for coordinate and sampling specifications."""
+
+
+class PadSpec(BaseSpec):
+    """Sampling specification defined by padding and cropping factors."""
+
+    pad: int
+    crop: int
+    c: float
+
+    def __init__(self, pad=1, crop=1, c=0.0):
+        self.pad = int(pad)
+        self.crop = int(crop)
+        self.c = np.asarray(c, float)
+
+
+class CoordSpec(BaseSpec):
+    """A complete regularly sampled Cartesian coordinate grid.
+
+    Axis parameters are ordered physically as ``(x, y, z, ...)``. Array dimensions
+    are ordered in reverse, so a two-dimensional specification with
+    ``n=(nx, ny)`` produces coordinate arrays with shape ``(2, ny, nx)``.
+    """
+
+    n: Array | None
+    d: Array | None
+    c: Array | None
+    unit: str | None
+
+    def __init__(self, n=None, d=None, c=None, unit=None):
+        values = [value for value in (n, d, c) if value is not None]
+        lengths = [
+            np.asarray(value).shape[0]
+            for value in values
+            if np.asarray(value).ndim == 1
+        ]
+        ndim = max(lengths, default=1 if values else 0)
+
+        self.n = self._as_axes(n, ndim, int, "n")
+        self.d = self._as_axes(d, ndim, float, "d")
+        self.c = self._as_axes(c, ndim, float, "c")
+        if self.n is not None and np.any(self.n < 1):
+            raise ValueError("n must contain positive integers.")
+        if self.d is not None and np.any(self.d <= 0):
+            raise ValueError("d must contain positive values.")
+        self.unit = None if unit is None else self._validate_unit(unit)
+
+    @staticmethod
+    def _as_axes(value, ndim, dtype, name):
+        if value is None:
+            return None
+        value = np.asarray(value, dtype=dtype)
+        if value.ndim > 1:
+            raise ValueError(f"{name} must be scalar or one-dimensional.")
+        if ndim == 0:
+            ndim = 1
+        try:
+            return np.broadcast_to(value, (ndim,))
+        except ValueError as error:
+            raise ValueError(
+                f"{name} must be scalar or have one value per axis."
+            ) from error
+
+    @staticmethod
+    def _validate_unit(unit):
+        if not isinstance(unit, str):
+            raise TypeError("unit must be a string.")
+        unit = unit.strip()
+        if not unit:
+            raise ValueError("unit cannot be empty.")
+        dlu.unit_factor(unit)
+        return unit
+
+    @property
+    def ndim(self) -> int:
+        """Return the number of coordinate dimensions."""
+        for value in (self.n, self.d, self.c):
+            if value is not None:
+                return value.shape[0]
+        return 0
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        """Return the array shape associated with this coordinate grid."""
+        if self.n is None:
+            raise ValueError("n must be specified to calculate shape.")
+        return tuple(int(value) for value in self.n[::-1])
+
+    @property
+    def scale(self) -> float:
+        """Return the factor converting coordinate values to canonical SI units."""
+        return 1.0 if self.unit is None else dlu.unit_factor(self.unit)
+
+    @property
+    def axes(self) -> tuple[Array, ...]:
+        """Return one pixel-centre coordinate vector per physical axis."""
+        if self.n is None or self.d is None:
+            raise ValueError("n and d must be specified to calculate axes.")
+        center = np.zeros(self.ndim) if self.c is None else self.c
+        return tuple(
+            (center[i] + (np.arange(self.n[i]) - (self.n[i] - 1) / 2) * self.d[i])
+            * self.scale
+            for i in range(self.ndim)
+        )
+
+    @property
+    def coordinates(self) -> Array:
+        """Return the full coordinate array with shape ``(ndim, *shape)``."""
+        coordinates = np.meshgrid(*self.axes, indexing="ij")
+        spatial_axes = tuple(range(self.ndim - 1, -1, -1))
+        return np.stack(
+            tuple(np.transpose(axis, spatial_axes) for axis in coordinates),
+            axis=0,
+        )
+
+    @property
+    def xs(self):
+        """Return all one-dimensional coordinate axes in one array."""
+        try:
+            return np.stack(self.axes)
+        except ValueError as error:
+            raise ValueError(
+                "xs requires equal axis lengths; use axes for a rectangular grid."
+            ) from error
+
+    @property
+    def fov(self):
+        """Return the field of view along every physical axis."""
+        if self.n is None or self.d is None:
+            raise ValueError("n and d must be specified to calculate fov.")
+        return self.n * self.d * self.scale
+
+    @property
+    def extent(self):
+        """Return lower and upper grid-edge coordinates for every axis."""
+        half_width = self.fov / 2
+        center = np.zeros(self.ndim) if self.c is None else self.c * self.scale
+        return center - half_width, center + half_width
 
 
 class CoordTransform(zdx.Base):
@@ -48,9 +191,7 @@ class CoordTransform(zdx.Base):
 
     @staticmethod
     def _from_spec(spec: CoordSpec) -> Array:
-        xs = spec.xs
-        x, y = np.broadcast_arrays(xs[..., None, :], xs[..., :, None])
-        return np.stack((x, y), axis=-3)
+        return spec.coordinates
 
     def get_coordinates(self, coordinates=None) -> Array:
         """Resolve call-time coordinates, falling back to the stored source."""
