@@ -32,21 +32,31 @@ Next you can start to make any changes you desire!
 
 **Unit Tests**
 
-It is important that any changes you make are tested to ensure that they work as intended and do not break any existing functionality. If you are creating _new_ functionality you will need to create some new unit tests, otherwise you should be able to modify the existing tests.
+It is important that any changes you make are tested to ensure that they work as intended and do not break any existing functionality. If you are creating _new_ functionality you will need to create some new unit tests, otherwise you should be able to modify the existing tests. Test files mirror the package structure, with one test file for each source file.
 
 To ensure that everything is working as expected, you can run the unit tests by running the following command:
 
 ```bash
-pytest tests/*
+python -m pytest
 ```
 
-This will run all the scripts labelled with `test_` in the `tests` directory. If you would like to run a specific test, you can run the following command:
+This will run the full test suite in the `tests` directory. If you would like to run a specific test, you can run the following command:
 
 ```bash
-pytest tests/test_file.py
+python -m pytest tests/test_file.py
 ```
 
-Note that just because the tests pass on your local machine, that does not mean that it will necessarily pass on all others! This can be due to a number of reasons such a different operating system, different python version, or different dependencies. This is why github actions are used to run the unit tests on a number of different operating systems and python versions. This should help ensure that the code works as expected on all platforms.
+Tests should exercise the public functionality in eager and transformed JAX execution where appropriate. Shared fixtures and assertions are defined in `tests/conftest.py` and `tests/helpers.py`. These include checks for JIT compilation, differentiation, compiled differentiation, and non-finite array values.
+
+Code coverage is measured locally with `pytest-cov` using the configuration in `pyproject.toml`. To run the same coverage measurement used in continuous integration, run:
+
+```bash
+python -m pytest --cov --cov-report=term-missing --cov-report=xml --cov-report=html
+```
+
+This prints missing lines in the terminal and writes `coverage.xml` and the browsable `htmlcov/` report. The project line-coverage target is 98%. Codecov consumes the same XML report in continuous integration and reports project and patch coverage on pull requests. Patch coverage is informational; tests should probe useful functionality rather than exist only to execute lines.
+
+Note that just because the tests pass on your local machine, that does not mean that they will necessarily pass on all others! This can be due to a number of reasons such as a different operating system, Python version, or dependencies. This is why github actions are used to run the unit tests on multiple Python versions. This should help ensure that the code works as expected across the supported environments.
 
 **Documentation**
 
