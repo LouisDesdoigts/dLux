@@ -7,7 +7,7 @@ import interpax as ipx
 import jax.numpy as np
 from jax import Array
 
-from ..wavefronts import Wavefront
+from ..states import Wavefront
 from .parametrics import BaseParametric
 
 __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]

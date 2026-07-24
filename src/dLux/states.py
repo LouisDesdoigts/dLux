@@ -1,4 +1,4 @@
-"""Wavefront state and propagation utilities used by optical systems."""
+"""Regularly sampled optical states and operations."""
 
 from __future__ import annotations
 from math import prod
@@ -6,12 +6,13 @@ from math import prod
 import jax.numpy as np
 import zodiax as zdx
 from jax import Array
+from jax.scipy.signal import convolve
 import dLux.utils as dlu
 
 from .coordinates import CoordSpec
 from .coordinates import CoordTransform
 
-__all__ = ["BaseSpatial", "Wavefront", "PolarisedWavefront"]
+__all__ = ["BaseSpatial", "Wavefront", "PolarisedWavefront", "PSF"]
 
 
 class BaseSpatial(zdx.Base):
@@ -1057,3 +1058,64 @@ class PolarisedWavefront(Wavefront):
         phasor = np.moveaxis(self.phasor, (-4, -3), (0, 1))
         phasor = dlu.apply_jones(jones, phasor)
         return self.set(phasor=np.moveaxis(phasor, (0, 1), (-4, -3)))
+
+
+class PSF(BaseSpatial):
+    """A real-valued point-spread function sampled on a coordinate grid."""
+
+    data: Array
+    spec: CoordSpec
+
+    @property
+    def _field_name(self) -> str:
+        return "data"
+
+    def __init__(self: PSF, data: Array, spec: CoordSpec):
+        self.data = np.asarray(data, dtype=float)
+        if self.data.ndim < 2:
+            raise ValueError("data must have at least two spatial dimensions.")
+        if not isinstance(spec, CoordSpec):
+            raise TypeError("spec must be a CoordSpec.")
+        spec = spec.broadcast(2)
+        inferred_n = self.data.shape[-2:][::-1]
+        if spec.n is None:
+            spec = spec.set(n=inferred_n)
+        elif spec.n != inferred_n:
+            raise ValueError("data spatial shape must match spec.n.")
+        BaseSpatial.__init__(self, spec)
+
+    @classmethod
+    def from_wavefront(cls, wavefront) -> PSF:
+        """Construct a PSF from a wavefront's intensity and specification."""
+        return cls(wavefront.psf, wavefront.spec)
+
+    @property
+    def batch_ndim(self: PSF) -> int:
+        """Return the number of leading vectorisation dimensions."""
+        return self.data.ndim - 2
+
+    def normalise(self: PSF, mode: str = "power", value: float = 1.0) -> PSF:
+        """Return a PSF normalised by total power or peak value."""
+        if mode == "power":
+            scale = value / self.data.sum()
+        elif mode == "peak":
+            scale = value / self.data.max()
+        else:
+            raise ValueError("mode must be 'power' or 'peak'")
+        return self.multiply("data", scale)
+
+    def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
+        """Convolve this PSF with an input array."""
+        return self.set(data=convolve(self.data, other, mode="same", method=method))
+
+    def _magic_unified_op(self: PSF, other: Array | PSF | None, op: str) -> PSF:
+        if other is None:
+            return self
+        if not isinstance(other, (PSF, Array, float, int, complex)):
+            raise TypeError(
+                f"Unsupported type for {op}: {type(other)}. Must be an array, "
+                "PSF, or None."
+            )
+        if isinstance(other, PSF):
+            other = other.data
+        return self._apply_field_op(other, op)

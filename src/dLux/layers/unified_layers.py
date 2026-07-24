@@ -6,8 +6,7 @@ import jax.numpy as np
 from jax import Array
 
 from ..coordinates import CoordTransform
-from ..psfs import PSF
-from ..wavefronts import Wavefront
+from ..states import PSF, Wavefront
 from .detector_layers import DetectorLayer
 from .optical_layers import OpticalLayer
 

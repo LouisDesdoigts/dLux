@@ -1,4 +1,4 @@
-"""Tests for dLux.psfs."""
+"""Tests for dLux.states."""
 
 import jax.numpy as np
 import pytest
