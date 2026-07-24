@@ -55,7 +55,7 @@ class Wedge(OpticalLayer):
             reference = wavefront.set(wavelength=self.reference_wavelength)
             index_difference = n - self.resolve(self.n, wavefront=reference)
 
-        coordinates = wavefront.coordinates()
+        coordinates = wavefront.coordinates
         x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
         thickness = x * np.tan(self.angle[0]) + y * np.tan(self.angle[1])
         index_difference = np.asarray(index_difference)

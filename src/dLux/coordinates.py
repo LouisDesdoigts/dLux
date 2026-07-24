@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from numbers import Integral
 
 import jax.numpy as np
 import zodiax as zdx
@@ -47,7 +48,7 @@ class CoordSpec(BaseSpec):
     ``n=(nx, ny)`` produces coordinate arrays with shape ``(2, ny, nx)``.
     """
 
-    n: Array | None
+    n: tuple[int, ...] | None
     d: Array | None
     c: Array | None
     unit: str | None
@@ -61,14 +62,41 @@ class CoordSpec(BaseSpec):
         ]
         ndim = max(lengths, default=1 if values else 0)
 
-        self.n = self._as_axes(n, ndim, int, "n")
+        self.n = self._as_n(n, ndim)
         self.d = self._as_axes(d, ndim, float, "d")
         self.c = self._as_axes(c, ndim, float, "c")
-        if self.n is not None and np.any(self.n < 1):
-            raise ValueError("n must contain positive integers.")
         if self.d is not None and np.any(self.d <= 0):
             raise ValueError("d must contain positive values.")
         self.unit = None if unit is None else self._validate_unit(unit)
+
+    @staticmethod
+    def _as_n(value, ndim):
+        if value is None:
+            return None
+        if isinstance(value, Integral):
+            value = (int(value),)
+        elif isinstance(value, (tuple, list)):
+            if not all(isinstance(item, Integral) for item in value):
+                raise TypeError("n must contain integers.")
+            value = tuple(int(item) for item in value)
+        else:
+            value = np.asarray(value)
+            if value.ndim > 1:
+                raise ValueError("n must be scalar or one-dimensional.")
+            if not np.issubdtype(value.dtype, np.integer):
+                raise TypeError("n must contain integers.")
+            value = tuple(int(item) for item in np.atleast_1d(value))
+        if ndim == 0:
+            ndim = 1
+        if len(value) == 1:
+            n = value * ndim
+        elif len(value) == ndim:
+            n = value
+        else:
+            raise ValueError("n must be scalar or have one value per axis.")
+        if any(item < 1 for item in n):
+            raise ValueError("n must contain positive integers.")
+        return n
 
     @staticmethod
     def _as_axes(value, ndim, dtype, name):
@@ -101,15 +129,39 @@ class CoordSpec(BaseSpec):
         """Return the number of coordinate dimensions."""
         for value in (self.n, self.d, self.c):
             if value is not None:
-                return value.shape[0]
+                return len(value) if isinstance(value, tuple) else value.shape[0]
         return 0
+
+    def broadcast(self, ndim: int) -> CoordSpec:
+        """Broadcast scalar or one-axis leaves to ``ndim`` dimensions."""
+        ndim = int(ndim)
+        if ndim < 1:
+            raise ValueError("ndim must be a positive integer.")
+
+        def expand(value, name):
+            if value is None:
+                return None
+            shape = (len(value),) if isinstance(value, tuple) else value.shape
+            if shape == (ndim,):
+                return value
+            if shape == (1,):
+                if isinstance(value, tuple):
+                    return value * ndim
+                return np.broadcast_to(value, (ndim,))
+            raise ValueError(f"{name} cannot be broadcast to {ndim} dimensions.")
+
+        return self.set(
+            n=expand(self.n, "n"),
+            d=expand(self.d, "d"),
+            c=expand(self.c, "c"),
+        )
 
     @property
     def shape(self) -> tuple[int, ...]:
         """Return the array shape associated with this coordinate grid."""
         if self.n is None:
             raise ValueError("n must be specified to calculate shape.")
-        return tuple(int(value) for value in self.n[::-1])
+        return self.n[::-1]
 
     @property
     def scale(self) -> float:
@@ -119,19 +171,32 @@ class CoordSpec(BaseSpec):
     @property
     def axes(self) -> tuple[Array, ...]:
         """Return one pixel-centre coordinate vector per physical axis."""
-        if self.n is None or self.d is None:
-            raise ValueError("n and d must be specified to calculate axes.")
+        if self.n is None:
+            raise ValueError("n must be specified to calculate axes.")
+        return self.axes_for(self.n)
+
+    def axes_for(self, n: tuple[int, ...]) -> tuple[Array, ...]:
+        """Return coordinate axes for concrete physical-axis pixel counts."""
+        if self.d is None:
+            raise ValueError("d must be specified to calculate axes.")
+        if len(n) != self.ndim:
+            raise ValueError("n dimensionality must match the coordinate spec.")
         center = np.zeros(self.ndim) if self.c is None else self.c
         return tuple(
-            (center[i] + (np.arange(self.n[i]) - (self.n[i] - 1) / 2) * self.d[i])
-            * self.scale
-            for i in range(self.ndim)
+            (center[i] + (np.arange(size) - (size - 1) / 2) * self.d[i]) * self.scale
+            for i, size in enumerate(n)
         )
 
     @property
     def coordinates(self) -> Array:
         """Return the full coordinate array with shape ``(ndim, *shape)``."""
-        coordinates = np.meshgrid(*self.axes, indexing="ij")
+        if self.n is None:
+            raise ValueError("n must be specified to calculate coordinates.")
+        return self.coordinates_for(self.n)
+
+    def coordinates_for(self, n: tuple[int, ...]) -> Array:
+        """Return full coordinates for concrete physical-axis pixel counts."""
+        coordinates = np.meshgrid(*self.axes_for(n), indexing="ij")
         spatial_axes = tuple(range(self.ndim - 1, -1, -1))
         return np.stack(
             tuple(np.transpose(axis, spatial_axes) for axis in coordinates),
@@ -141,8 +206,14 @@ class CoordSpec(BaseSpec):
     @property
     def xs(self):
         """Return all one-dimensional coordinate axes in one array."""
+        if self.n is None:
+            raise ValueError("n must be specified to calculate xs.")
+        return self.xs_for(self.n)
+
+    def xs_for(self, n: tuple[int, ...]):
+        """Return stacked axes for concrete physical-axis pixel counts."""
         try:
-            return np.stack(self.axes)
+            return np.stack(self.axes_for(n))
         except ValueError as error:
             raise ValueError(
                 "xs requires equal axis lengths; use axes for a rectangular grid."
@@ -153,7 +224,7 @@ class CoordSpec(BaseSpec):
         """Return the field of view along every physical axis."""
         if self.n is None or self.d is None:
             raise ValueError("n and d must be specified to calculate fov.")
-        return self.n * self.d * self.scale
+        return np.asarray(self.n) * self.d * self.scale
 
     @property
     def extent(self):

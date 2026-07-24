@@ -195,7 +195,7 @@ class MFTPropagator(ABCDPropagator):
         )
 
         # Update wavefront
-        return wavefront.set(phasor=field).set_spec(spec_out)
+        return wavefront.set(phasor=field, spec=spec_out)
 
 
 class FFTPropagator(ABCDPropagator):
@@ -254,7 +254,7 @@ class FFTPropagator(ABCDPropagator):
         if isinstance(self.spec, CoordSpec):
             n_padded = self.spec.n
         else:
-            n_padded = spec_in.n * self.spec.pad
+            n_padded = tuple(value * self.spec.pad for value in spec_in.n)
 
         # Get the effective focal length for the ABCD system
         fl = abcd.abcd_effective_focal_length(self.abcd)
@@ -269,7 +269,7 @@ class FFTPropagator(ABCDPropagator):
         # FFT-based LCT propagation
         field, spec_out_xys = lct.lct_prop_fft(
             u_in=wavefront.phasor * in_ramp,
-            spec_in=wavefront.spec.xs,
+            spec_in=wavefront.xs,
             lam=wavefront.wavelength,
             ABCD=self.abcd,
             npad=spec_out.n,
@@ -283,9 +283,16 @@ class FFTPropagator(ABCDPropagator):
         # # Get the output coordinates
         xs_out, ys_out = spec_out_xys
         dx_out = xs_out[1] - xs_out[0]
+        dy_out = ys_out[1] - ys_out[0]
+        spec_out = CoordSpec(
+            n=field.shape[-2:][::-1],
+            d=(dx_out, dy_out),
+            c=self.spec.c,
+            unit=spec_in.unit,
+        )
 
         # Update wavefront
-        return wavefront.set(phasor=field, pixel_scale=dx_out, center=self.spec.c)
+        return wavefront.set(phasor=field, spec=spec_out)
 
 
 class ASMPropagator(OpticalLayer):
@@ -360,8 +367,11 @@ class ASMPropagator(OpticalLayer):
             n_out = field.shape[0] // self.spec.crop
             field = dlu.crop_to(field, n_out)
 
-        # Update wavefront
-        return wavefront.set(phasor=field)
+        # ASM preserves the physical sampling while padding/cropping changes the
+        # sampled spatial shape.
+        n_out = field.shape[-2:][::-1]
+        spec_out = wavefront.spec.set(n=n_out)
+        return wavefront.set(phasor=field, spec=spec_out)
 
 
 class Fraunhofer(ABCDPropagator):

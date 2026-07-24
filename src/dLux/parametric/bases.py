@@ -157,7 +157,7 @@ class CoordBasis(ImplicitBasis):
             return coordinates
         if wavefront is None:
             raise ValueError("Provide either wavefront or coordinates.")
-        return wavefront.coordinates()
+        return wavefront.coordinates
 
 
 class CLIMBBasis(ExplicitBasis):

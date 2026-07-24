@@ -69,7 +69,7 @@ class SparseOptic(Optic):
         position: Array,
         optic: SparseOptic,
     ) -> dict:
-        coordinates = AffineMap(offset=-position)(wavefront.coordinates())
+        coordinates = AffineMap(offset=-position)(wavefront.coordinates)
         return {
             "wavefront": wavefront,
             "coordinates": coordinates,
@@ -131,7 +131,7 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
     def _context_at(self, wavefront, position, optic):
         coordinate_source = optic.coordinates
         if coordinate_source is None:
-            coordinates = wavefront.coordinates()
+            coordinates = wavefront.coordinates
             pixel_scale = wavefront.pixel_scale
         elif isinstance(coordinate_source, CoordSpec):
             coordinates = optic._from_spec(coordinate_source)

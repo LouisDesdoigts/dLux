@@ -52,7 +52,7 @@ class BaseDynamicLayer(BaseOpticalLayer):
         )
 
         if coordinate_source is None:
-            coordinates = wavefront.coordinates()
+            coordinates = wavefront.coordinates
             pixel_scale = wavefront.pixel_scale
         elif isinstance(coordinate_source, CoordSpec):
             coordinates = self._from_spec(coordinate_source)

@@ -84,15 +84,11 @@ class Interpolate(UnifiedLayer):
         self.fill = np.asarray(fill, dtype=float)
 
     def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
-        if isinstance(target, Wavefront):
-            return target.interpolate(
-                self.transformation,
-                method=self.method,
-                complex=self.complex,
-                fill=self.fill,
-            )
         return target.interpolate(
-            self.transformation, method=self.method, fill=self.fill
+            self.transformation,
+            method=self.method,
+            complex=self.complex,
+            fill=self.fill,
         )
 
 
