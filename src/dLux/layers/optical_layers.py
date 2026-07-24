@@ -10,8 +10,7 @@ import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
-from ..coordinates import BaseCoordTransform
-from ..parametric import BaseParametric, Shape
+from ..parametric import BaseParametric
 from ..wavefronts import Wavefront
 
 __all__ = [
@@ -21,7 +20,6 @@ __all__ = [
     "TransmissiveLayer",
     "AberratedLayer",
     "Optic",
-    "DynamicOptic",
     "Tilt",
 ]
 
@@ -161,58 +159,6 @@ class Optic(TransmissiveLayer, AberratedLayer):
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
-
-
-class DynamicOptic(Optic):
-    """An optic evaluated in one shared transformed coordinate frame."""
-
-    aperture: Shape
-    transformation: BaseCoordTransform | None
-
-    def __init__(
-        self,
-        aperture,
-        transformation=None,
-        opd=None,
-        phase=None,
-        normalise=False,
-    ):
-        if not isinstance(aperture, Shape):
-            raise TypeError("aperture must be a Shape.")
-        if transformation is not None and not isinstance(
-            transformation, BaseCoordTransform
-        ):
-            raise TypeError("transformation must be a BaseCoordTransform or None.")
-        self.aperture = aperture
-        self.transformation = transformation
-        super().__init__(
-            opd=opd,
-            phase=phase,
-            normalise=normalise,
-        )
-
-    def context(self, wavefront: Wavefront) -> dict[str, Any]:
-        """Return a shared coordinate context for every dynamic property."""
-        coordinates = wavefront.coordinates()
-        if self.transformation is not None:
-            coordinates = self.transformation(coordinates)
-        extent = self.aperture.extent
-        return {
-            "wavefront": wavefront,
-            "coordinates": coordinates,
-            "pixel_scale": wavefront.pixel_scale,
-            "diameter": wavefront.diameter if extent is None else 2 * extent,
-            "aperture": self.aperture,
-        }
-
-    def params(self, wavefront: Wavefront) -> dict[str, Any]:
-        """Resolve the aperture and remaining properties in one shared context."""
-        context = self.context(wavefront)
-        return {
-            "transmission": self.aperture.evaluate(**context),
-            "opd": self.resolve(self.opd, **context),
-            "phase": self.resolve(self.phase, **context),
-        }
 
 
 class Tilt(OpticalLayer):

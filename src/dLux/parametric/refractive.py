@@ -8,9 +8,9 @@ import jax.numpy as np
 from jax import Array
 
 from ..wavefronts import Wavefront
-from .bases import BaseParametric
+from .parametrics import BaseParametric
 
-__all__ = ["CauchyIndex", "InterpolatedIndex"]
+__all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 
 
 class CauchyIndex(BaseParametric):
@@ -38,6 +38,28 @@ class CauchyIndex(BaseParametric):
         x = wavefront.wavelength / self.scale
         powers = 2 * np.arange(self.coefficients.size)
         return np.sum(self.coefficients / x[..., None] ** powers, axis=-1)
+
+
+class PolynomialIndex(BaseParametric):
+    """A refractive index polynomial in normalised wavelength."""
+
+    coefficients: Array
+    scale: Array
+
+    def __init__(self, coefficients: Array, scale: float = 1e-6):
+        coefficients = np.asarray(coefficients, dtype=float)
+        if coefficients.ndim != 1 or coefficients.size == 0:
+            raise ValueError("coefficients must be a non-empty 1d array.")
+        if scale <= 0:
+            raise ValueError("scale must be positive.")
+        self.coefficients = coefficients
+        self.scale = np.asarray(scale, dtype=float)
+
+    def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
+        """Evaluate ``c₀ + c₁x + c₂x² + ...`` for ``x = wavelength / scale``."""
+        x = wavefront.wavelength / self.scale
+        powers = np.arange(self.coefficients.size)
+        return np.sum(self.coefficients * x[..., None] ** powers, axis=-1)
 
 
 class InterpolatedIndex(BaseParametric):

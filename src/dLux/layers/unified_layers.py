@@ -5,7 +5,7 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import Array
 
-from ..coordinates import BaseCoordTransform
+from ..coordinates import CoordTransform
 from ..psfs import PSF
 from ..wavefronts import Wavefront
 from .detector_layers import DetectorLayer
@@ -70,14 +70,14 @@ class Flip(UnifiedLayer):
 class Interpolate(UnifiedLayer):
     """Interpolate a wavefront or PSF through a coordinate transformation."""
 
-    transformation: BaseCoordTransform
+    transformation: CoordTransform
     method: str
     complex: bool
     fill: Array
 
     def __init__(self, transformation, method="linear", complex=True, fill=0.0):
-        if not isinstance(transformation, BaseCoordTransform):
-            raise TypeError("transformation must be a BaseCoordTransform.")
+        if not isinstance(transformation, CoordTransform):
+            raise TypeError("transformation must be a CoordTransform.")
         self.transformation = transformation
         self.method = str(method)
         self.complex = bool(complex)

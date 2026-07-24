@@ -1,14 +1,12 @@
 import jax.numpy as np
 import pytest
 
-from dLux import Affine, Wavefront
+from dLux import Wavefront
 from dLux.layers import (
-    DynamicOptic,
     Optic,
     Tilt,
 )
 from dLux.layers.optical_layers import AberratedLayer, TransmissiveLayer
-from dLux.parametric import Circle
 
 
 @pytest.fixture
@@ -39,24 +37,6 @@ def test_aberrated_layer(wavefront):
     expected = wavefront.add_opd(1e-7).add_phase(0.2)
     assert np.allclose(layer(wavefront).phasor, expected.phasor)
     assert np.allclose(AberratedLayer()(wavefront).phasor, wavefront.phasor)
-
-
-def test_dynamic_optic(wavefront):
-    aperture = Circle(0.3)
-    optic = DynamicOptic(aperture, transformation=Affine(translation=[0.1, 0]))
-    context = optic.context(wavefront)
-    assert context["diameter"] == 2 * aperture.extent
-    assert optic.params(wavefront)["transmission"].shape == (16, 16)
-    assert optic(wavefront).phasor.shape == wavefront.phasor.shape
-    assert DynamicOptic(aperture).context(wavefront)["coordinates"].shape == (
-        2,
-        16,
-        16,
-    )
-    with pytest.raises(TypeError, match="aperture"):
-        DynamicOptic(object())
-    with pytest.raises(TypeError, match="transformation"):
-        DynamicOptic(aperture, object())
 
 
 def test_tilt(wavefront):

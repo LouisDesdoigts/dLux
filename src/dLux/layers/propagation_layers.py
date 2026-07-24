@@ -1,32 +1,23 @@
-"""Propagation layers and ABCD-system elements."""
+"""Fourier, angular-spectrum, and ABCD propagation layers."""
 
 from __future__ import annotations
 import jax.numpy as np
-import zodiax as zdx
 from abcdLux import abcd, lct, asm
 import dLux.utils as dlu
 
+from ..abcd import BaseABCDElement
 from ..coord_specs import CoordSpec, PadSpec
 from .optical_layers import OpticalLayer
 
 __all__ = [
-    "BaseABCDElement",
     "Propagator",
     "FFT",
     "MFT",
-    "ABCDFreeSpace",
-    "ABCDLens",
-    "ABCDMirror",
-    "ABCDConjugatePlane",
     "ABCDPropagator",
     "MFTPropagator",
     "FFTPropagator",
     "ASMPropagator",
 ]
-
-
-class BaseABCDElement(zdx.Base):
-    """Base class for elements represented by an ABCD matrix."""
 
 
 class Propagator(OpticalLayer):
@@ -97,159 +88,6 @@ class MFT(Propagator):
             focal_length=self.focal_length,
             inverse=self.inverse,
         )
-
-
-class ABCDFreeSpace(BaseABCDElement):
-    """
-    A free space propagation element represented by an ABCD matrix.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ABCDFreeSpace.png)
-
-    Attributes
-    ----------
-    distance : float
-        The free-space propagation distance.
-    abcd : Array, property
-        The analytic ABCD matrix for free-space propagation.
-    """
-
-    distance: float
-
-    def __init__(self, distance):
-        """
-        Parameters
-        ----------
-        distance : float
-            The free-space propagation distance.
-        """
-        self.distance = np.array(distance, float)
-
-    @property
-    def abcd(self):
-        """
-        Returns
-        -------
-        matrix : Array
-            The analytic ABCD matrix for free-space propagation.
-        """
-        return abcd.abcd_free_space(self.distance)
-
-
-class ABCDLens(BaseABCDElement):
-    """
-    A lens element represented by an ABCD matrix. Note this element alone does not
-    produce the standard 'pupil-focal Fourier relationship' as that is between the front
-    and back focal planes. To represent a true pupil-focal plane propagation, apply a
-    free space propagation of the focal length both before _and_ after the lens, or use
-    the ABCDConjugatePlane element.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ABCDLens.png)
-
-    Attributes
-    ----------
-    focal_length : float
-        The lens focal length.
-    abcd : Array, property
-        The analytic ABCD matrix for the lens.
-    """
-
-    focal_length: float
-
-    def __init__(self, focal_length):
-        """
-        Parameters
-        ----------
-        focal_length : float
-            The lens focal length.
-        """
-        self.focal_length = np.array(focal_length, float)
-
-    @property
-    def abcd(self):
-        """
-        Returns
-        -------
-        matrix : Array
-            The analytic ABCD matrix for a lens.
-        """
-        return abcd.abcd_lens(self.focal_length)
-
-
-class ABCDMirror(BaseABCDElement):
-    """
-    A mirror element represented by an ABCD matrix.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ABCDMirror.png)
-
-    Attributes
-    ----------
-    radius : float
-        The mirror radius of curvature.
-    abcd : Array, property
-        The analytic ABCD matrix for the mirror.
-    """
-
-    radius: float
-
-    def __init__(self, radius):
-        """
-        Parameters
-        ----------
-        radius : float
-            The mirror radius of curvature.
-        """
-        self.radius = np.array(radius, float)
-
-    @property
-    def abcd(self):
-        """
-        Returns
-        -------
-        matrix : Array
-            The analytic ABCD matrix for a mirror.
-        """
-        return abcd.abcd_mirror(self.radius)
-
-
-class ABCDConjugatePlane(BaseABCDElement):
-    """
-    A conjugate plane element represented by an ABCD matrix. This produces the classic
-    'pupil-focal Fourier relationship' seen in fourier/physical optics.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ABCDConjugatePlane.png)
-
-    Attributes
-    ----------
-    focal_length : float
-        The effective focal length of the conjugate-plane transform.
-    abcd : Array, property
-        The analytic ABCD matrix for conjugate-plane propagation.
-    """
-
-    focal_length: float
-
-    def __init__(self, focal_length):
-        """
-        Parameters
-        ----------
-        focal_length : float
-            The effective focal length that defines the conjugate-plane transform.
-        """
-        self.focal_length = np.array(focal_length, float)
-
-    @property
-    def abcd(self):
-        """
-        Returns
-        -------
-        matrix : Array
-            The analytic ABCD matrix for a conjugate-plane propagation.
-        """
-        return abcd.abcd_fraunhofer(self.focal_length)
 
 
 ###################

@@ -133,6 +133,21 @@ class TestDynamicZernikeBasis:
             explicit.evaluate(),
         )
 
+    def test_owns_optional_diameter(self):
+        diameter = 0.8
+        coordinates = dlu.pixel_coords(8, diameter=diameter)
+        dynamic = DynamicZernikeBasis(
+            js=[4, 5], coefficients=np.ones(2), diameter=diameter
+        )
+        explicit = ZernikeBasis(
+            coordinates, js=[4, 5], coefficients=np.ones(2), diameter=diameter
+        )
+        assert np.allclose(
+            dynamic.evaluate(coordinates=coordinates), explicit.evaluate()
+        )
+        with pytest.raises(ValueError, match="diameter"):
+            DynamicZernikeBasis(js=[1], diameter=0)
+
     def test_jit_and_gradient(self):
         wavefront = Wavefront(700e-9, 8, diameter=1.1)
         basis = DynamicZernikeBasis(radial_orders=[2])

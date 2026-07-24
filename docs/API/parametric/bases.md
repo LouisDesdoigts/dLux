@@ -1,8 +1,5 @@
 # Parametric Bases
 
-???+ info "BaseParametric"
-    ::: dLux.parametric.bases.BaseParametric
-
 ???+ info "ParametricBasis"
     ::: dLux.parametric.bases.ParametricBasis
 

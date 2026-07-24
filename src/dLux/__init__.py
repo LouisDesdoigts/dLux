@@ -16,6 +16,7 @@ from . import (
     psfs,
     coord_specs,
     coordinates,
+    abcd,
 )
 
 _modules = (
@@ -29,6 +30,7 @@ _modules = (
     psfs,
     coord_specs,
     coordinates,
+    abcd,
 )
 
 _module_names = [
@@ -43,5 +45,6 @@ _module_names = [
     "psfs",
     "coord_specs",
     "coordinates",
+    "abcd",
 ]
 __all__ = _module_names + reexport(_modules, globals())

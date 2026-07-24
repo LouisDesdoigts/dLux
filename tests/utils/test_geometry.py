@@ -114,7 +114,7 @@ class TestCircle:
 
     def test_distance_relation(self, coords, radius):
         """Circle support matches the sign of the radial distance field."""
-        result = geometry_utils.circle(coords, radius)
+        result = geometry_utils.circle(coords, 2 * radius)
         distances = utils.cart2polar(coords)[0] - radius
         assert np.allclose(result, distances < 0)
 
@@ -166,7 +166,7 @@ class TestRegPolygon:
 
     def test_distance_relation(self, coords, nsides, radius):
         """Polygon support matches the sign of the polygon edge distance field."""
-        result = geometry_utils.reg_polygon(coords, radius, nsides)
+        result = geometry_utils.reg_polygon(coords, 2 * radius, nsides)
         slopes, vertices = geometry_utils.reg_polygon_edges(nsides, radius)
         distances = vmap(geometry_utils.line_distance, (None, 0, 0))(
             coords, slopes, vertices

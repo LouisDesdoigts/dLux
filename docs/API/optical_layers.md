@@ -13,8 +13,5 @@
 ???+ info "Optic"
     ::: dLux.layers.optical_layers.Optic
 
-???+ info "DynamicOptic"
-    ::: dLux.layers.optical_layers.DynamicOptic
-
 ???+ info "Tilt"
     ::: dLux.layers.optical_layers.Tilt
