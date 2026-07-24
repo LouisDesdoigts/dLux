@@ -94,6 +94,20 @@ class SparseOptic(Optic):
         )
         return phasors.sum(0)
 
+    def wavefronts(self, wavefront: Wavefront) -> Wavefront:
+        """Return one locally sampled Wavefront per aperture position."""
+        indices = np.arange(self.n_apertures)
+
+        def make_wavefront(index, position):
+            spec = wavefront.spec.set(c=position / wavefront.spec.scale)
+            local = wavefront.set(spec=spec)
+            phasor = local.phasor * self._phasor_at(index, position, local)
+            return phasor
+
+        phasor = vmap(make_wavefront)(indices, self.positions)
+        spec = wavefront.spec.set(c=self.positions / wavefront.spec.scale)
+        return wavefront.set(phasor=phasor, spec=spec)
+
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         phasor = wavefront.phasor * self.phasor(wavefront)
         wavefront = wavefront.set(phasor=phasor)
