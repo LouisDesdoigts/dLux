@@ -58,3 +58,25 @@ lines-after-imports = 2
 
 [tool.black]
 line-length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers"]
+markers = [
+    "slow: tests excluded from the default fast development loop",
+]
+
+[tool.coverage.run]
+source = ["dLux"]
+relative_files = true
+
+[tool.coverage.report]
+fail_under = 98
+precision = 2
+show_missing = true
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.coverage.html]
+directory = "htmlcov"
