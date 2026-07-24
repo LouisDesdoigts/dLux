@@ -1,9 +1,9 @@
 import jax.numpy as np
 import jax.tree as jtu
 from jax import Array
-from .math import triangular_number
 
 from .helpers import _cast_tuple, _cast_scalar, _input_len
+from .polynomials import polynomial_basis
 
 __all__ = [
     "cart2polar",
@@ -14,8 +14,6 @@ __all__ = [
     "compress_coords",
     "shear_coords",
     "rotate_coords",
-    "gen_powers",
-    "polynomial_basis",
     "distort_coords",
 ]
 
@@ -101,38 +99,6 @@ def rotate_coords(coords: Array, rotation: float) -> Array:
     return np.array([new_x, new_y])
 
 
-def gen_powers(degree: int):
-    """
-    Generates the powers required for a 2d polynomial
-
-    Parameters
-    ----------
-    degree : int
-        Maximum power to generate
-
-    Returns
-    -------
-    xpows : Array
-        x axis powers
-    ypows : Array
-        y axis powers
-    """
-    n = triangular_number(degree)
-    vals = np.arange(n)
-
-    # Ypows
-    tris = triangular_number(np.arange(degree))
-    ydiffs = np.repeat(tris, np.arange(1, degree + 1))
-    ypows = vals - ydiffs
-
-    # Xpows
-    tris = triangular_number(np.arange(1, degree + 1))
-    xdiffs = np.repeat(n - np.flip(tris), np.arange(degree, 0, -1))
-    xpows = np.flip(vals - xdiffs)
-
-    return np.array([xpows, ypows])
-
-
 def distort_coords(coords: Array, coeffs: Array, pows: Array):
     """
     Apply a 2D polynomial distortion to some coordinates
@@ -154,13 +120,6 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     pow_base = polynomial_basis(coords, pows)
     distortion = np.tensordot(coeffs, pow_base, axes=(-1, 0))
     return coords + distortion
-
-
-def polynomial_basis(coords: Array, pows: Array) -> Array:
-    """Evaluate 2D polynomial monomials at Cartesian coordinates."""
-    pows = np.asarray(pows)
-    shape = pows.shape + (1,) * (coords.ndim - 1)
-    return np.prod(coords[:, None] ** pows.reshape(shape), axis=0)
 
 
 def cart2polar(coordinates: Array) -> Array:

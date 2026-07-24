@@ -369,7 +369,7 @@ class DistortedCoords(CoordTransform):
                 orders = tuple(int(value) for value in orders)
             if not orders or any(value < 1 for value in orders):
                 raise ValueError("orders must contain positive integers.")
-            powers = np.array(dlu.gen_powers(max(orders) + 1))[:, 1:]
+            powers = dlu.polynomial_powers(max(orders), 2)[:, 1:]
             powers = powers[:, np.isin(powers.sum(0), np.asarray(orders))]
 
         self.shift_invariant = bool(shift_invariant)
