@@ -7,7 +7,7 @@ from jax import Array
 
 
 from ..parametric import BaseParametric
-from ..wavefronts import Wavefront
+from ..states import Wavefront
 from .optical_layers import OpticalLayer
 
 __all__ = [

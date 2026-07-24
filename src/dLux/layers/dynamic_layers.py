@@ -9,7 +9,7 @@ from jax import Array
 
 from ..coordinates import CoordSpec, CoordTransform
 from ..parametric import BaseParametric
-from ..wavefronts import Wavefront
+from ..states import Wavefront
 from .optical_layers import AberratedLayer, BaseOpticalLayer, Optic, TransmissiveLayer
 
 __all__ = [

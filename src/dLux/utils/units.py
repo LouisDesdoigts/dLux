@@ -31,6 +31,11 @@ _BASE_TO_RAD = {
 
 _BASE_TO_METRE = {
     "m": 1.0,
+    "angstrom": 1e-10,
+}
+
+_BASE_TO_PHOTON = {
+    "photon": 1.0,
 }
 
 # ---- aliases (lowercase lookup only) ----
@@ -51,6 +56,11 @@ _ALIASES = {
     "metres": "m",
     "meter": "m",
     "meters": "m",
+    "a": "angstrom",
+    "aa": "angstrom",
+    "ångström": "angstrom",
+    "angstroms": "angstrom",
+    "photons": "photon",
 }
 
 # ---- SI-like prefixes ----
@@ -109,6 +119,8 @@ def unit_factor(unit: str):
         return _BASE_TO_RAD[u]
     if u in _BASE_TO_METRE:
         return _BASE_TO_METRE[u]
+    if u in _BASE_TO_PHOTON:
+        return _BASE_TO_PHOTON[u]
 
     prefix = u[0]
     base = u[1:]
@@ -116,6 +128,8 @@ def unit_factor(unit: str):
         return _PREFIX[prefix] * _BASE_TO_RAD[base]
     if prefix in _PREFIX and base in _BASE_TO_METRE:
         return _PREFIX[prefix] * _BASE_TO_METRE[base]
+    if prefix in _PREFIX and base in _BASE_TO_PHOTON:
+        return _PREFIX[prefix] * _BASE_TO_PHOTON[base]
     raise ValueError(f"Unknown unit '{unit}'.")
 
 

@@ -76,7 +76,7 @@ def test_propagation_interfaces(system):
     weights = np.array([0.4, 0.6])
 
     mono = assert_jittable(
-        lambda value: system.propagate_mono(value, return_wf=True),
+        lambda value: system.propagate_mono(value, return_all=True),
         np.asarray(1e-6),
         rtol=1e-5,
         atol=1e-5,
@@ -85,19 +85,20 @@ def test_propagation_interfaces(system):
         lambda value: system.propagate(
             value,
             weights=weights,
-            return_wf=True,
+            return_all=True,
         ),
         wavelengths,
         rtol=1e-5,
         atol=1e-5,
     )
-    psf = system.propagate(wavelengths, weights=weights, return_psf=True)
+    results = system.propagate(wavelengths, weights=weights, return_all=True)
     array = system.propagate(wavelengths, weights=weights)
 
-    assert isinstance(mono, dl.Wavefront)
-    assert chromatic.wavelength.shape == wavelengths.shape
-    assert isinstance(psf, dl.PSF)
-    assert array.shape == psf.data.shape
+    assert isinstance(mono["Wavefront"], dl.Wavefront)
+    assert chromatic["Wavefront"].wavelength.shape == wavelengths.shape
+    assert isinstance(results["PSF"], dl.PSF)
+    assert array.shape == results["PSF"].data.shape
+    assert np.allclose(array, results["psf"])
 
 
 def test_detector_uses_common_system_contract(make_psf):
@@ -112,13 +113,13 @@ def test_detector_uses_common_system_contract(make_psf):
 
     array = assert_jittable(detector, psf)
     output = assert_jittable(
-        lambda value: detector(value, return_psf=True),
+        lambda value: detector(value, return_all=True),
         psf,
     )
 
     assert isinstance(detector, dl.LayeredSystem)
-    assert isinstance(output, dl.PSF)
-    assert np.allclose(array, output.data)
+    assert isinstance(output["PSF"], dl.PSF)
+    assert np.allclose(array, output["psf"])
 
 
 def test_chromatic_and_polarised_execution(system):
@@ -148,7 +149,7 @@ def test_nested_parameter_gradients(system):
                 "layers.pupil.opd.coefficients",
                 value,
             )
-            .propagate_mono(1e-6, return_wf=True)
+            .propagate_mono(1e-6, return_all=True)["Wavefront"]
             .phasor
         ),
         coefficients,
@@ -182,22 +183,34 @@ def test_layer_management_and_debugging(system):
 
 def test_model_interface(system):
     spectrum = dl.Spectrum([0.9e-6, 1.1e-6], [0.25, 0.75])
-    source = dl.PointSource(position=[0.1, -0.2])
+    source = dl.PointSource(
+        spectrum.wavelengths,
+        position=[0.1, -0.2],
+        weights=spectrum.weights,
+    )
+    binary = dl.BinarySource(
+        spectrum.wavelengths,
+        separation=0.1,
+        contrast=2.0,
+        weights=spectrum.weights,
+    )
 
     assert isinstance(system.model(spectrum), np.ndarray)
-    assert isinstance(system.model(spectrum, return_wf=True), dl.Wavefront)
-    assert isinstance(system.model(spectrum, return_psf=True), dl.PSF)
-    output = system.model(spectrum, return_wf=True)
-    assert np.allclose(output.wavelength, spectrum.wavelengths)
-    sourced = system.model(spectrum, source=source, return_wf=True)
-    assert np.allclose(sourced.wavelength, spectrum.wavelengths)
+    results = system.model(spectrum, return_all=True)
+    assert isinstance(results["Wavefront"], dl.Wavefront)
+    assert isinstance(results["PSF"], dl.PSF)
+    assert np.allclose(results["Wavefront"].wavelength, spectrum.wavelengths)
+    sourced = system.model(source, return_all=True)
+    assert np.allclose(sourced["Wavefront"].wavelength, spectrum.wavelengths)
+    binary = system.model(binary, return_all=True)
+    assert binary["PSF"].data.shape == (2, 8, 6)
+    assert binary["PSF"].spec.d.shape == (2, 2)
 
 
 @pytest.mark.parametrize(
     "operation",
     [
         lambda system: system(np.ones((8, 8))),
-        lambda system: system.propagate([1e-6], return_wf=True, return_psf=True),
         lambda system: system.propagate([1e-6, 2e-6], weights=[1.0]),
         lambda system: system.propagate([1e-6], offset=[0.0]),
         lambda system: system.not_an_attribute,

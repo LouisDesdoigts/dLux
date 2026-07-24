@@ -11,7 +11,7 @@ from jax import Array
 
 import dLux.utils as dlu
 from ..parametric import BaseParametric
-from ..wavefronts import Wavefront
+from ..states import Wavefront
 
 __all__ = [
     "BaseLayer",

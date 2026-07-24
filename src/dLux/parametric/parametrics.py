@@ -16,7 +16,8 @@ from ..coordinates import CoordTransform
 __all__ = [
     "BaseParametric",
     "resolve_parametric",
-    "TransformedParametric",
+    "Transform",
+    "DynamicParametric",
     "Combination",
 ]
 
@@ -28,6 +29,10 @@ class BaseParametric(zdx.Base):
     def evaluate(self, **kwargs: Any) -> Array:  # pragma: no cover
         """Evaluate the parameterisation in the supplied context."""
 
+    def map(self, transformation) -> BaseParametric:
+        """Apply a callable transformation to the realised value."""
+        return Transform(self, transformation)
+
 
 def resolve_parametric(value: Any, **context: Any) -> Any:
     """Evaluate a parametric value or return an ordinary value unchanged."""
@@ -36,7 +41,25 @@ def resolve_parametric(value: Any, **context: Any) -> Any:
     return value
 
 
-class TransformedParametric(BaseParametric):
+class Transform(BaseParametric):
+    """Apply a callable transformation to a realised parameterisation."""
+
+    parametric: BaseParametric
+    transformation: Any
+
+    def __init__(self, parametric, transformation):
+        if not isinstance(parametric, BaseParametric):
+            raise TypeError("parametric must be a BaseParametric.")
+        if not callable(transformation):
+            raise TypeError("transformation must be callable.")
+        self.parametric = parametric
+        self.transformation = transformation
+
+    def evaluate(self, **context):
+        return self.transformation(self.parametric.evaluate(**context))
+
+
+class DynamicParametric(BaseParametric):
     """Evaluate any coordinate-dependent parameterisation in a transformed frame."""
 
     parametric: BaseParametric

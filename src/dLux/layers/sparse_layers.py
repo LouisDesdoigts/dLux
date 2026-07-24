@@ -8,7 +8,7 @@ from jax import Array, vmap
 
 from ..coordinates import AffineMap, CoordSpec, DistortedCoords
 from ..parametric import ParametricBasis
-from ..wavefronts import Wavefront
+from ..states import Wavefront
 from .dynamic_layers import BaseDynamicLayer
 from .optical_layers import Optic
 

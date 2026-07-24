@@ -13,9 +13,8 @@ import dLux.utils as dlu
 from .coordinates import CoordSpec
 from .layers.detector_layers import BaseDetectorLayer
 from .layers.optical_layers import BaseLayer, BaseOpticalLayer
-from .psfs import PSF
-from .spectra import BaseSpectrum
-from .wavefronts import Wavefront
+from .states import PSF, Wavefront
+from .sources import Spectrum
 
 __all__ = ["LayeredSystem", "OpticalSystem", "Detector"]
 
@@ -84,25 +83,25 @@ class OpticalSystem(LayeredSystem):
         data = wavefront.psf_from_stokes(stokes)
         if wavefront.is_chromatic:
             data = data.sum(0)
-            d = wavefront.spec.d
-            c = wavefront.spec.c
-            spec = wavefront.spec.set(
-                d=d[0] if d is not None and d.ndim > 1 else d,
-                c=c[0] if c is not None and c.ndim > 1 else c,
-            )
-        else:
-            spec = wavefront.spec
-        return PSF(data, spec)
+        return PSF(data, wavefront.spec)
 
     def __call__(self, wavefront: Wavefront):
         if not isinstance(wavefront, Wavefront):
             raise TypeError("wavefront must be a Wavefront instance.")
 
-        apply = lambda value: LayeredSystem.__call__(self, value)
+        def apply(value):
+            output = LayeredSystem.__call__(self, value)
+            return output.set(spec=None), output.spec
+
         if not wavefront.is_chromatic:
-            return apply(wavefront)
-        mapped = eqx.filter_vmap(apply, in_axes=(wavefront._mapped_axis,))
-        return mapped(wavefront)
+            return LayeredSystem.__call__(self, wavefront)
+        mapped = eqx.filter_vmap(
+            apply,
+            in_axes=(wavefront._mapped_axis,),
+            out_axes=(eqx.if_array(0), None),
+        )
+        output, spec = mapped(wavefront)
+        return output.set(spec=spec)
 
     def initialise_wavefront(self, wavelength, offset=None) -> Wavefront:
         """Construct an input Wavefront and apply an optional angular offset."""
@@ -111,30 +110,23 @@ class OpticalSystem(LayeredSystem):
             raise ValueError("offset must have shape (2,).")
         return Wavefront(wavelength, self.spec).tilt(offset)
 
-    def propagate_mono(
-        self, wavelength, offset=None, return_wf=False, return_psf=False, stokes=None
-    ):
+    def propagate_mono(self, wavelength, offset=None, return_all=False, stokes=None):
         """Propagate a monochromatic point source through the system."""
-        if return_wf and return_psf:
-            raise ValueError("Cannot return both Wavefront and PSF objects.")
         wavefront = self(self.initialise_wavefront(wavelength, offset))
-        if return_wf:
-            return wavefront
         psf = self._to_psf(wavefront, stokes)
-        return psf if return_psf else psf.data
+        if return_all:
+            return {"Wavefront": wavefront, "PSF": psf, "psf": psf.data}
+        return psf.data
 
     def propagate(
         self,
         wavelengths,
         offset=None,
         weights=None,
-        return_wf=False,
-        return_psf=False,
+        return_all=False,
         stokes=None,
     ):
         """Propagate a weighted polychromatic point source through the system."""
-        if return_wf and return_psf:
-            raise ValueError("Cannot return both Wavefront and PSF objects.")
         wavelengths = np.atleast_1d(wavelengths)
         weights = (
             np.ones_like(wavelengths) / wavelengths.size
@@ -148,31 +140,20 @@ class OpticalSystem(LayeredSystem):
         weights = weights.reshape(weights.shape + (1, 1))
         wavefront = wavefront.set(phasor=wavefront.phasor * np.sqrt(weights))
         wavefront = self(wavefront)
-        if return_wf:
-            return wavefront
         psf = self._to_psf(wavefront, stokes)
-        return psf if return_psf else psf.data
+        if return_all:
+            return {"Wavefront": wavefront, "PSF": psf, "psf": psf.data}
+        return psf.data
 
     def model(
         self,
-        spectrum,
-        source=None,
-        return_wf=False,
-        return_psf=False,
+        source,
+        return_all=False,
     ):
-        """Model a required spectrum with optional spatial source structure."""
-        if not isinstance(spectrum, BaseSpectrum):
-            raise TypeError("spectrum must be a BaseSpectrum.")
-        if source is not None:
-            return source.model(self, spectrum, return_wf, return_psf)
-
-        wavelengths, weights = spectrum.params()
-        return self.propagate(
-            wavelengths,
-            weights=weights,
-            return_wf=return_wf,
-            return_psf=return_psf,
-        )
+        """Model a spectral source through the optical system."""
+        if not isinstance(source, Spectrum):
+            raise TypeError("source must be a Spectrum.")
+        return source.model(self, return_all)
 
     def debug_propagate_mono(self, wavelength, offset=None):
         """Propagate once and return all intermediate system states."""
@@ -191,12 +172,14 @@ class Detector(LayeredSystem):
     def __init__(self, layers):
         super().__init__(layers, BaseDetectorLayer)
 
-    def __call__(self, psf: PSF, return_psf=False):
+    def __call__(self, psf: PSF, return_all=False):
         if not isinstance(psf, PSF):
             raise TypeError("psf must be a PSF instance.")
         output = super().__call__(psf)
-        return output if return_psf else output.data
+        if return_all:
+            return {"PSF": output, "psf": output.data}
+        return output.data
 
-    def model(self, psf: PSF, return_psf=False):
+    def model(self, psf: PSF, return_all=False):
         """Apply this detector to a PSF."""
-        return self(psf, return_psf)
+        return self(psf, return_all)
