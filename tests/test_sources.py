@@ -6,7 +6,49 @@ import pytest
 import dLux as dl
 import dLux.utils as dlu
 
-from tests.helpers import assert_differentiable
+from tests.helpers import assert_differentiable, assert_jittable
+
+
+def test_array_spectrum_contract():
+    spectrum = dl.Spectrum([0.9e-6, 1.1e-6], [0.25, 0.75])
+
+    wavelengths, weights = assert_jittable(
+        lambda value: value.spectrum_params(), spectrum
+    )
+    assert np.allclose(wavelengths, spectrum.wavelengths)
+    assert np.allclose(weights, spectrum.weights)
+
+
+def test_parametric_spectrum_contract():
+    wavelengths = np.linspace(0.8e-6, 1.2e-6, 5)
+    weights = dl.Polynomial(1, [1.0, 2e5])
+    spectrum = dl.Spectrum(wavelengths, weights)
+
+    resolved_wavelengths, resolved_weights = assert_jittable(
+        lambda value: value.spectrum_params(),
+        spectrum,
+    )
+    assert np.allclose(resolved_wavelengths, wavelengths)
+    assert np.allclose(resolved_weights, 1 + 2e5 * wavelengths)
+    assert_differentiable(
+        lambda coefficients: spectrum.set(
+            "weights.coefficients",
+            coefficients,
+        ).spectrum_params()[1],
+        weights.coefficients,
+    )
+
+
+def test_basis_weight_spectrum():
+    wavelengths = np.linspace(0.8e-6, 1.2e-6, 5)
+    basis = np.stack([np.ones(5), np.linspace(-1, 1, 5)])
+    spectrum = dl.Spectrum(
+        wavelengths,
+        dl.ExplicitBasis(basis, coefficients=[1.0, 0.2]),
+    )
+
+    _, weights = spectrum.spectrum_params()
+    assert weights.shape == wavelengths.shape
 
 
 def test_spectrum_and_point_source_parameters():
@@ -92,6 +134,8 @@ def test_log_flux_units():
     [
         lambda: dl.Spectrum([[1e-6]]),
         lambda: dl.Spectrum([1e-6], [[1.0, 1.0], [1.0, 1.0]]),
+        lambda: dl.Spectrum(dl.Polynomial(0, [1])),
+        lambda: dl.Spectrum([1, 2], np.ones((2, 2, 2))),
         lambda: dl.Spectrum([1e-6], units={"unknown": "m"}),
         lambda: dl.PointSource([1e-6], position=np.zeros(3)),
         lambda: dl.PointSource([1e-6], flux=np.ones(2)),

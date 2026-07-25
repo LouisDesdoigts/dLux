@@ -1,1 +1,49 @@
 """Tests for dLux.utils.helpers."""
+
+from collections import OrderedDict
+
+import jax.numpy as np
+import pytest
+
+import dLux.utils as dlu
+
+
+def test_tree_and_dictionary_helpers():
+    assert np.array_equal(dlu.map2array(lambda x: x + 1, {"a": 1, "b": 2}), [2, 3])
+
+    values = dlu.list2dictionary([1, 2, ("named", 3)], ordered=True)
+    assert isinstance(values, OrderedDict)
+    assert list(values) == ["int_0", "int_1", "named"]
+
+
+def test_layer_dictionary_edits():
+    layers = OrderedDict((("first", 1), ("last", 3)))
+    inserted = dlu.insert_layer(layers, ("middle", 2), 1, (int,))
+    assert list(inserted.items()) == [("first", 1), ("middle", 2), ("last", 3)]
+    assert list(dlu.remove_layer(inserted, "middle")) == ["first", "last"]
+
+
+@pytest.mark.parametrize("cartesian", [True, False])
+def test_complex_roundtrip(cartesian):
+    value = np.asarray([1 + 2j, -3 + 0.5j])
+    values, reconstruct = dlu.from_complex(value, cartesian)
+    assert np.allclose(reconstruct(values), value)
+
+
+def test_display_and_error_helpers():
+    assert np.array_equal(dlu.imshow_extent(2), [-1, 1, -1, 1])
+    error = dlu.missing_attribute_error(object(), "bad", ["good"], "try this")
+    assert isinstance(error, AttributeError)
+    assert "bad" in str(error) and "good" in str(error)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda: dlu.list2dictionary([("bad name", 1)], ordered=False),
+        lambda: dlu.list2dictionary([1], ordered=False, allowed_types=(str,)),
+    ],
+)
+def test_validation(operation):
+    with pytest.raises((TypeError, ValueError)):
+        operation()
