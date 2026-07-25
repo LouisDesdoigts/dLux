@@ -4,6 +4,7 @@ from .._exports import reexport
 
 # Import as modules
 from . import (
+    abcd,
     propagation,
     coordinates,
     helpers,
@@ -23,6 +24,7 @@ from . import (
 )
 
 _modules = (
+    abcd,
     propagation,
     coordinates,
     helpers,
@@ -42,6 +44,7 @@ _modules = (
 )
 
 _module_names = [
+    "abcd",
     "propagation",
     "coordinates",
     "helpers",

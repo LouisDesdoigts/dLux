@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import OrderedDict
 from typing import Any
 
-import equinox as eqx
 import jax.numpy as np
 import zodiax as zdx
 
@@ -81,27 +80,17 @@ class OpticalSystem(LayeredSystem):
     @staticmethod
     def _to_psf(wavefront: Wavefront, stokes=None) -> PSF:
         data = wavefront.psf_from_stokes(stokes)
-        if wavefront.is_chromatic:
+        mapped_sampling = wavefront.d.ndim > 1 or (
+            wavefront.c is not None and wavefront.c.ndim > 1
+        )
+        if wavefront.is_chromatic and not mapped_sampling:
             data = data.sum(0)
         return PSF(data, wavefront.spec)
 
     def __call__(self, wavefront: Wavefront):
         if not isinstance(wavefront, Wavefront):
             raise TypeError("wavefront must be a Wavefront instance.")
-
-        def apply(value):
-            output = LayeredSystem.__call__(self, value)
-            return output.set(spec=None), output.spec
-
-        if not wavefront.is_chromatic:
-            return LayeredSystem.__call__(self, wavefront)
-        mapped = eqx.filter_vmap(
-            apply,
-            in_axes=(wavefront._mapped_axis,),
-            out_axes=(eqx.if_array(0), None),
-        )
-        output, spec = mapped(wavefront)
-        return output.set(spec=spec)
+        return LayeredSystem.__call__(self, wavefront)
 
     def initialise_wavefront(self, wavelength, offset=None) -> Wavefront:
         """Construct an input Wavefront and apply an optional angular offset."""

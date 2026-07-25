@@ -1,6 +1,7 @@
 import jax.numpy as np
 from jax import Array
-from .units import unit_factor_to_rad
+
+import dLux.utils as dlu
 
 __all__ = [
     "wavenumber",
@@ -8,6 +9,7 @@ __all__ = [
     "phase2opd",
     "fringe_size",
     "tilt_opd",
+    "tilt",
 ]
 
 
@@ -100,5 +102,17 @@ def tilt_opd(coordinates: Array, angles: Array, unit: str = "rad") -> Array:
     angles = np.asarray(angles, dtype=float)
     if angles.shape != (2,):
         raise ValueError("angles must have shape (2,).")
-    angles = angles * unit_factor_to_rad(unit)
+    angles = angles * dlu.unit_factor_to_rad(unit)
     return np.einsum("i,...ijk->...jk", angles, coordinates)
+
+
+def tilt(
+    phasor: Array,
+    coordinates: Array,
+    angles: Array,
+    wavelength: float,
+    unit: str = "rad",
+) -> Array:
+    """Apply a two-axis angular tilt to a complex field."""
+    opd = tilt_opd(coordinates, angles, unit)
+    return phasor * np.exp(1j * opd2phase(opd, wavelength))

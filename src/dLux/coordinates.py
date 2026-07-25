@@ -14,6 +14,7 @@ import dLux.utils as dlu
 __all__ = [
     "BaseSpec",
     "PadSpec",
+    "ResizeSpec",
     "CoordSpec",
     "CoordTransform",
     "Affine",
@@ -30,16 +31,46 @@ class BaseSpec(zdx.Base):
 class PadSpec(BaseSpec):
     """Sampling specification defined by padding and cropping factors."""
 
-    pad: int
+    pad: int | tuple[int, ...]
     crop: int
-    c: Array
+    c: Array | None
 
-    def __init__(self, pad=1, crop=1, c=0.0):
-        self.pad = int(pad)
+    def __init__(self, pad=1, crop=1, c=None):
+        if isinstance(pad, Integral):
+            self.pad = int(pad)
+        else:
+            if not all(isinstance(value, Integral) for value in pad):
+                raise TypeError("pad must contain integers.")
+            self.pad = tuple(int(value) for value in pad)
         self.crop = int(crop)
-        self.c = np.asarray(c, float)
-        if self.pad < 1 or self.crop < 1:
+        self.c = None if c is None else np.asarray(c, float)
+        pad_values = (self.pad,) if isinstance(self.pad, int) else self.pad
+        if any(value < 1 for value in pad_values) or self.crop < 1:
             raise ValueError("pad and crop must be positive integers.")
+
+
+class ResizeSpec(BaseSpec):
+    """FFT sampling specification defined by an explicit pixel-grid size."""
+
+    n: tuple[int, ...]
+    c: Array | None
+
+    def __init__(self, n, c=None):
+        value = np.asarray(n)
+        ndim = 1 if value.ndim == 0 else value.shape[0]
+        self.n = CoordSpec._as_n(n, ndim)
+        self.c = None if c is None else np.asarray(c, float)
+
+    def broadcast(self, ndim: int) -> ResizeSpec:
+        """Broadcast a one-axis pixel count to ``ndim`` dimensions."""
+        ndim = int(ndim)
+        if ndim < 1:
+            raise ValueError("ndim must be a positive integer.")
+        if len(self.n) == ndim:
+            return self
+        if len(self.n) == 1:
+            return self.set(n=self.n * ndim)
+        raise ValueError(f"n cannot be broadcast to {ndim} dimensions.")
 
 
 class CoordSpec(BaseSpec):
@@ -58,9 +89,9 @@ class CoordSpec(BaseSpec):
     def __init__(self, n=None, d=None, c=None, unit=None):
         values = [value for value in (n, d, c) if value is not None]
         lengths = [
-            np.asarray(value).shape[0]
+            np.asarray(value).shape[-1]
             for value in values
-            if np.asarray(value).ndim == 1
+            if np.asarray(value).ndim >= 1
         ]
         ndim = max(lengths, default=1 if values else 0)
 
@@ -109,16 +140,15 @@ class CoordSpec(BaseSpec):
         if value is None:
             return None
         value = np.asarray(value, dtype=dtype)
-        if value.ndim > 1:
-            raise ValueError(f"{name} must be scalar or one-dimensional.")
         if ndim == 0:
             ndim = 1
-        try:
+        if value.ndim == 0:
             return np.broadcast_to(value, (ndim,))
-        except ValueError as error:
-            raise ValueError(
-                f"{name} must be scalar or have one value per axis."
-            ) from error
+        if value.shape[-1] == ndim:
+            return value
+        if value.shape[-1] == 1:
+            return np.broadcast_to(value, value.shape[:-1] + (ndim,))
+        raise ValueError(f"{name} must be scalar or have one value per axis.")
 
     @staticmethod
     def _as_centers(value, ndim):
@@ -202,9 +232,20 @@ class CoordSpec(BaseSpec):
             raise ValueError("d must be specified to calculate axes.")
         if len(n) != self.ndim:
             raise ValueError("n dimensionality must match the coordinate spec.")
-        center = np.zeros(self.ndim) if self.c is None else self.c
+        batch = self.d.shape[:-1]
+        if self.c is not None:
+            batch = np.broadcast_shapes(batch, self.c.shape[:-1])
+        spacing = np.broadcast_to(self.d, batch + (self.ndim,))
+        center = (
+            np.zeros(batch + (self.ndim,))
+            if self.c is None
+            else np.broadcast_to(self.c, batch + (self.ndim,))
+        )
         return tuple(
-            (center[..., i, None] + (np.arange(size) - (size - 1) / 2) * self.d[i])
+            (
+                center[..., i, None]
+                + (np.arange(size) - (size - 1) / 2) * spacing[..., i, None]
+            )
             * self.scale
             for i, size in enumerate(n)
         )
@@ -218,20 +259,23 @@ class CoordSpec(BaseSpec):
 
     def coordinates_for(self, n: tuple[int, ...]) -> Array:
         """Return full coordinates for concrete physical-axis pixel counts."""
-        axes = tuple(
-            (np.arange(size) - (size - 1) / 2) * self.d[i] for i, size in enumerate(n)
-        )
-        coordinates = np.meshgrid(*axes, indexing="ij")
-        spatial_axes = tuple(range(self.ndim - 1, -1, -1))
-        coordinates = np.stack(
-            tuple(np.transpose(axis, spatial_axes) for axis in coordinates),
-            axis=0,
-        )
+        batch = self.d.shape[:-1]
+        if self.c is not None:
+            batch = np.broadcast_shapes(batch, self.c.shape[:-1])
+        spacing = np.broadcast_to(self.d, batch + (self.ndim,))
+        shape = tuple(n[::-1])
+        axes = []
+        for i, size in enumerate(n):
+            axis = (np.arange(size) - (size - 1) / 2) * spacing[..., i, None]
+            spatial_shape = [1] * self.ndim
+            spatial_shape[self.ndim - i - 1] = size
+            axis = axis.reshape(batch + tuple(spatial_shape))
+            axes.append(np.broadcast_to(axis, batch + shape))
+        coordinates = np.stack(tuple(axes), axis=len(batch))
         if self.c is None:
             return coordinates * self.scale
-        batch = self.c.shape[:-1]
-        coordinates = coordinates.reshape((1,) * len(batch) + coordinates.shape)
-        center = self.c.reshape(batch + (self.ndim,) + (1,) * self.ndim)
+        center = np.broadcast_to(self.c, batch + (self.ndim,))
+        center = center.reshape(batch + (self.ndim,) + (1,) * self.ndim)
         return (coordinates + center) * self.scale
 
     @property

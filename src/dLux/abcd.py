@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import jax.numpy as np
 import zodiax as zdx
-from abcdLux import abcd as _abcd
+
+import dLux.utils as dlu
 
 __all__ = [
     "BaseABCDElement",
@@ -30,7 +31,7 @@ class ABCDFreeSpace(BaseABCDElement):
     @property
     def abcd(self):
         """Return the analytic ABCD matrix for free-space propagation."""
-        return _abcd.abcd_free_space(self.distance)
+        return dlu.abcd_free_space(self.distance)
 
 
 class ABCDLens(BaseABCDElement):
@@ -44,7 +45,7 @@ class ABCDLens(BaseABCDElement):
     @property
     def abcd(self):
         """Return the analytic ABCD matrix for the lens."""
-        return _abcd.abcd_lens(self.focal_length)
+        return dlu.abcd_lens(self.focal_length)
 
 
 class ABCDMirror(BaseABCDElement):
@@ -58,7 +59,7 @@ class ABCDMirror(BaseABCDElement):
     @property
     def abcd(self):
         """Return the analytic ABCD matrix for the mirror."""
-        return _abcd.abcd_mirror(self.radius)
+        return dlu.abcd_mirror(self.radius)
 
 
 class ABCDConjugatePlane(BaseABCDElement):
@@ -72,4 +73,4 @@ class ABCDConjugatePlane(BaseABCDElement):
     @property
     def abcd(self):
         """Return the analytic ABCD matrix for conjugate-plane propagation."""
-        return _abcd.abcd_fraunhofer(self.focal_length)
+        return dlu.abcd_fraunhofer(self.focal_length)

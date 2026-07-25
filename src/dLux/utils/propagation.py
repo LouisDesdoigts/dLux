@@ -1,347 +1,353 @@
+"""High-level optical propagation wrappers around abcdLux."""
+
+from numbers import Integral
+
 import jax.numpy as np
-from jax import Array, vmap
+from abcdLux import asm, fraunhofer, lct
+from abcdLux.coords import unpack_coord_spec
+from abcdLux.mft import mft as _mft
+from jax import Array
+
 import dLux.utils as dlu
 
-__all__ = ["FFT", "FFT_spec", "FFT_ramp", "MFT"]
+__all__ = [
+    "FFT_pad",
+    "FFT_spec",
+    "FFT_shift",
+    "FFT_ramp",
+    "FFT",
+    "MFT",
+    "ABCD_MFT",
+    "ABCD_FFT",
+    "ASM",
+]
 
 
-def FFT_spec(npixels: int, pixel_scale: float, wavelength: float, focal_length=None):
-    """
-    Compute the native FFT output pixel scale and centre.
+def _resolve_pad(spec_in, pad=None, pad_to=None):
+    """Resolve exclusive factor-based or absolute FFT padding."""
+    if pad is not None and pad_to is not None:
+        raise ValueError("Provide only one of pad or pad_to.")
+    x_in, y_in = unpack_coord_spec(spec_in)
+    if pad is not None:
+        pad = (int(pad),) * 2 if isinstance(pad, Integral) else tuple(pad)
+        pad_to = (x_in.size * pad[0], y_in.size * pad[1])
+    return (x_in, y_in), pad_to
 
-    Parameters
-    ----------
-    npixels : int
-        Number of output pixels along one axis.
-    pixel_scale : float
-        Input pixel scale.
-    wavelength : float
-        Wavelength used for propagation.
-    focal_length : float = None
-        Effective focal length. If provided, the output sampling is converted from
-        angular to linear units.
 
-    Returns
-    -------
-    pixel_scale : float
-        Output pixel scale.
-    center : float
-        Output coordinate centre.
-    """
-    pixel_scale = wavelength / (npixels * pixel_scale)
-    if focal_length is not None:
-        pixel_scale *= focal_length
+def _spec_parameters(spec):
+    """Return axis sizes, spacings, and centres."""
+    x, y = unpack_coord_spec(spec)
+    sizes = (x.size, y.size)
+    spacings = (x[1] - x[0], y[1] - y[0])
+    centers = ((x[-1] + x[0]) / 2, (y[-1] + y[0]) / 2)
+    return sizes, spacings, centers
 
-    center = 0.0 if npixels % 2 else -0.5 * pixel_scale
-    return pixel_scale, center
+
+def FFT_pad(
+    phasor: Array,
+    spec_in: Array | tuple,
+    pad: int | tuple[int, int] | None = None,
+    pad_to: int | tuple[int, int] | None = None,
+) -> tuple[Array, tuple[Array, Array]]:
+    """Pad a field and its coordinate axes exactly once."""
+    spec_in, pad_to = _resolve_pad(spec_in, pad, pad_to)
+    if pad_to is None:
+        return phasor, spec_in
+    _, spacings, centers = _spec_parameters(spec_in)
+    spec_in = dlu.nd_axes(
+        pad_to,
+        spacings,
+        offsets=tuple(-center for center in centers),
+    )
+    return dlu.pad_to(phasor, pad_to), spec_in
+
+
+def FFT_spec(
+    spec_in: Array | tuple,
+    wavelength: float,
+    ABCD: Array,
+) -> tuple[Array, Array]:
+    """Return the native FFT output coordinate axes."""
+    return lct.lct_fft_output_spec(
+        spec_in=spec_in,
+        lam=wavelength,
+        ABCD=ABCD,
+        npad=None,
+    )
+
+
+def FFT_shift(
+    spec_out: Array | tuple,
+    output_center: Array | None = None,
+) -> tuple[tuple[Array, Array], Array | None]:
+    """Shift FFT output axes to a requested physical centre."""
+    x_out, y_out = unpack_coord_spec(spec_out)
+    if output_center is None:
+        return (x_out, y_out), None
+    native_center = np.asarray(
+        (
+            (x_out[-1] + x_out[0]) / 2,
+            (y_out[-1] + y_out[0]) / 2,
+        )
+    )
+    output_center = np.broadcast_to(np.asarray(output_center, float), (2,))
+    shift = output_center - native_center
+    return (x_out + shift[0], y_out + shift[1]), shift
 
 
 def FFT_ramp(
-    xs: Array,
     wavelength: float,
-    shift: float,
-    focal_length: float = None,
+    spec: Array | tuple,
+    ABCD: Array,
+    shift: Array | None,
+    plane: str = "input",
     inverse: bool = False,
-) -> Array:
+) -> Array | float:
+    """Return the phase ramp associated with a shifted FFT output grid.
+
+    The output-grid piston is the constant term in
+    ``|coordinate + shift|² - |coordinate|²``. It does not affect intensity, but it
+    must be retained when propagated fields are coherently compared or combined.
     """
-    Compute the 2D complex phase ramp for FFT coordinate shifting.
-
-    Parameters
-    ----------
-    xs : Array
-        One-dimensional coordinate vector.
-    wavelength : float
-        Wavelength used for propagation.
-    shift : float
-        Output coordinate shift to apply.
-    focal_length : float = None
-        Effective focal length. If provided, coordinates are interpreted in linear
-        units; otherwise angular units are assumed.
-    inverse : bool = False
-        If False, use the forward-transform phase sign convention. If True, use the
-        backward-transform phase sign convention.
-
-    Returns
-    -------
-    ramp : Array
-        Two-dimensional complex phase ramp.
-    """
-    sign = -1 if inverse else 1
-    alpha = wavelength if focal_length is None else wavelength * focal_length
-    ramp = np.exp(sign * 2j * np.pi * xs * shift / alpha)
-    return ramp[None, :] * ramp[:, None]
+    if shift is None:
+        return 1.0
+    if plane not in ("input", "output"):
+        raise ValueError("plane must be 'input' or 'output'.")
+    sizes, spacings, centers = _spec_parameters(spec)
+    coordinates = dlu.nd_coords(sizes, spacings, offsets=tuple(-c for c in centers))
+    _, b, _, d = np.asarray(ABCD).flatten()
+    field = np.ones(coordinates.shape[1:], dtype=complex)
+    if plane == "input":
+        sign = 1 if inverse else -1
+        return dlu.tilt(field, coordinates, sign * shift / b, wavelength)
+    ramp = dlu.tilt(field, coordinates, d * shift / b, wavelength)
+    piston = np.exp(1j * np.pi * d * np.sum(shift**2) / (wavelength * b))
+    return piston * ramp
 
 
-def FFT(
+def ABCD_MFT(
     phasor: Array,
     wavelength: float,
-    pixel_scale: float,
-    focal_length: float = None,
-    pad: int = 2,
-    inverse: bool = False,
-    center: float = 0.0,
-    output_center: float = None,
-) -> tuple[Array, Array, Array]:
-    """
-    Calculates the Fast Fourier Transform (FFT) of the input phasor.
-
-    Parameters
-    ----------
-    phasor : Array[complex]
-        The input phasor.
-    wavelength : float, meters
-        The wavelength of the input phasor.
-    pixel_scale : float, meters/pixel
-        The pixel scale of the input phasor.
-    focal_length : float = None
-        The focal length of the propagation. If None, the output pixel scale has units
-        of radians, else meters.
-    pad : int = 2
-        The amount to pad the input array by before propagation. Note this function
-        does not automatically crop the output.
-    inverse : bool = False
-        If False, apply the forward propagation transform. If True, apply the
-        backward propagation transform.
-    center : float = 0.0
-        The coordinate centre of the input phasor.
-    output_center : float = None
-        The requested output coordinate centre. If None, the native FFT output centre
-        is used.
-
-    Returns
-    -------
-    phasor : Array[complex]
-        The propagated phasor.
-    new_pixel_scale : float
-        The pixel scale of the output phasor.
-    center : float
-        The coordinate centre of the output phasor.
-    """
-    npixels = phasor.shape[-1]
-    npixels_out = npixels * pad
-    coords = lambda n, d, c: c + (np.arange(n) - (n - 1) / 2) * d
-
-    # Calculate the native output coordinate system of the padded FFT.
-    new_pixel_scale, native_center = FFT_spec(
-        npixels_out, pixel_scale, wavelength, focal_length
+    spec_in: Array | tuple,
+    spec_out: Array | tuple,
+    ABCD: Array,
+    apply_out_curv: bool = True,
+) -> Array:
+    """Propagate through an arbitrary ABCD system onto explicit axes."""
+    return lct.lct_prop(
+        u_in=phasor,
+        spec_in=spec_in,
+        spec_out=spec_out,
+        lam=wavelength,
+        ABCD=np.asarray(ABCD),
+        apply_out_curv=apply_out_curv,
     )
 
-    # Shift the input phasor if a non-native output centre is requested.
-    if output_center is None:
-        in_ramp = out_ramp = 1.0
-        output_center = native_center
-    else:
-        shift = native_center - output_center
-        xs_in = coords(npixels, pixel_scale, center)
-        in_ramp = FFT_ramp(xs_in, wavelength, shift, focal_length, inverse)
 
-        # Shift the propagated phasor back onto the requested output coordinate grid.
-        shift = FFT_spec(npixels_out, new_pixel_scale, wavelength, focal_length)[1]
-        xs_out = coords(npixels_out, new_pixel_scale, output_center)
-        out_ramp = FFT_ramp(xs_out, wavelength, shift, focal_length, inverse)
-
-    # Pad the input array
-    npixels = (npixels * (pad - 1)) // 2
-    phasor = np.pad(phasor * in_ramp, npixels)
-
-    # Perform the FFT
-    if inverse:
-        phasor = np.fft.fftshift(np.fft.ifft2(np.fft.ifftshift(phasor)))
-        phasor *= phasor.shape[-1]
-
-    else:
-        phasor = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(phasor)))
-        phasor /= phasor.shape[-1]
-    return phasor * out_ramp, new_pixel_scale, output_center
-
-
-def transfer_matrix(
+def ABCD_FFT(
+    phasor: Array,
     wavelength: float,
-    npixels_in: int,
-    pixel_scale_in: float,
-    npixels_out: int,
-    pixel_scale_out: float,
-    shift: float = 0.0,
-    focal_length: float = None,
-    focal_shift: float = 0.0,
-    inverse: bool = False,
-) -> Array:
-    """
-    Calculates the transfer matrix for the MFT.
-
-    Parameters
-    ----------
-    wavelength : float, meters
-        The wavelength of the input phasor.
-    npixels_in : int
-        The number of pixels in the input plane.
-    pixel_scale_in : float, meters/pixel, radians/pixel
-        The pixel scale of the input plane.
-    npixels_out : int
-        The number of pixels in the output plane.
-    pixel_scale_out : float, meters/pixel or radians/pixel
-        The pixel scale of the output plane.
-    shift : float = 0.0
-        The shift in output-plane coordinates.
-    focal_length : float = None
-        The focal length of the propagation. If None, the propagation is angular and
-        pixel_scale_out is taken in as radians/pixel, else meters/pixel.
-    focal_shift: float, meters
-        The shift from focus to propagate to. Used for fresnel propagation.
-    inverse: bool = False
-        If False, apply the forward propagation transform. If True, apply the
-        backward propagation transform.
-
-    Returns
-    -------
-    transfer_matrix : Array
-        The transfer matrix for the MFT.
-    """
-    # Get parameters
-    fringe_size = wavelength / (pixel_scale_in * npixels_in)
-
-    # Input coordinates
-    scale_in = 1.0 / npixels_in
-    in_vec = dlu.nd_coords(npixels_in, scale_in, shift * scale_in)
-
-    # Output coordinates
-    scale_out = pixel_scale_out / fringe_size
-    if focal_length is not None:
-        # scale_out /= focal_length
-        scale_out /= focal_length + focal_shift
-    out_vec = dlu.nd_coords(npixels_out, scale_out, shift * scale_out)
-
-    # Generate transfer matrix
-    matrix = -2j * np.pi * np.outer(in_vec, out_vec)
-    if inverse:
-        matrix *= -1
-    return np.exp(matrix)
+    spec_in: Array | tuple,
+    ABCD: Array,
+    pad: int | tuple[int, int] | None = None,
+    pad_to: int | tuple[int, int] | None = None,
+    output_center: Array | None = None,
+    apply_out_curv: bool = True,
+) -> tuple[Array, tuple[Array, Array]]:
+    """Propagate an ABCD system onto native or shifted FFT axes."""
+    ABCD = np.asarray(ABCD)
+    phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
+    spec_native = dlu.FFT_spec(spec_in, wavelength, ABCD)
+    spec_out, shift = dlu.FFT_shift(spec_native, output_center)
+    phasor = phasor * dlu.FFT_ramp(wavelength, spec_in, ABCD, shift)
+    field, _ = lct.lct_prop_fft(
+        u_in=phasor,
+        spec_in=spec_in,
+        lam=wavelength,
+        ABCD=ABCD,
+        npad=None,
+        apply_out_curv=apply_out_curv,
+    )
+    if apply_out_curv:
+        field *= dlu.FFT_ramp(
+            wavelength,
+            spec_native,
+            ABCD,
+            shift,
+            plane="output",
+        )
+    return field, spec_out
 
 
-def calc_nfringes(
+def _fraunhofer_abcd(focal_length, defocus):
+    """Build the ABCD matrix for a defocused focal propagation."""
+    return dlu.compose_abcd(
+        [
+            dlu.abcd_fraunhofer(focal_length),
+            dlu.abcd_free_space(defocus),
+        ]
+    )
+
+
+def _fraunhofer_fft(
+    phasor: Array,
     wavelength: float,
-    npixels_in: int,
-    pixel_scale_in: int,
-    npixels_out: int,
-    pixel_scale_out: float,
-    focal_length: float = None,
-    focal_shift: float = 0.0,
-) -> Array:
-    """
-    Calculates the number of fringes in the output plane.
-
-    Parameters
-    ----------
-    wavelength : float, meters
-        The wavelength of the input phasor.
-    npixels_in : int
-        The number of pixels in the input plane.
-    pixel_scale_in : float, meters/pixel, radians/pixel
-        The pixel scale of the input plane.
-    npixels_out : int
-        The number of pixels in the output plane.
-    pixel_scale_out : float, meters/pixel or radians/pixel
-        The pixel scale of the output plane.
-    focal_length : float = None
-        The focal length of the propagation. If None, the propagation is angular and
-        pixel_scale_out is taken in as radians/pixel, else meters/pixel.
-    focal_shift: float, meters
-        The shift from focus to propagate to. Used for fresnel propagation.
-
-    Returns
-    -------
-    nfringes : Array
-        The number of fringes in the output plane.
-    """
-    # Fringe size
-    diameter = npixels_in * pixel_scale_in
-    fringe_size = wavelength / diameter
-
-    # Output array size
-    output_size = npixels_out * pixel_scale_out
-    if focal_length is not None:
-        output_size /= focal_length + focal_shift
-
-    # Fringe size and number of fringes
-    return output_size / fringe_size
+    spec_in: Array | tuple,
+    focal_length: float,
+    inverse: bool,
+) -> tuple[Array, tuple[Array, Array]]:
+    """Apply a pure optical FFT without calculating LCT chirps."""
+    ABCD = dlu.abcd_fraunhofer(focal_length)
+    spec_out = dlu.FFT_spec(spec_in, wavelength, ABCD)
+    _, spacings, centers = _spec_parameters(spec_out)
+    coordinates = dlu.nd_coords(
+        phasor.shape[-2:][::-1],
+        spacings,
+        offsets=tuple(-center for center in centers),
+    )
+    sizes_in, spacings_in, centers_in = _spec_parameters(spec_in)
+    input_origin = np.asarray(
+        tuple(
+            center + (0.5 * spacing if size % 2 == 0 else 0.0)
+            for size, spacing, center in zip(
+                sizes_in,
+                spacings_in,
+                centers_in,
+            )
+        )
+    )
+    norm = np.sqrt(phasor.shape[-2] * phasor.shape[-1])
+    if inverse:
+        field = np.fft.fftshift(np.fft.ifft2(np.fft.ifftshift(phasor)))
+        field *= norm
+    else:
+        field = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(phasor)))
+        field /= norm
+    sign = 1 if inverse else -1
+    field = dlu.tilt(
+        field,
+        coordinates,
+        sign * input_origin / focal_length,
+        wavelength,
+    )
+    return field, spec_out
 
 
 def MFT(
     phasor: Array,
     wavelength: float,
-    pixel_scale_in: float,
-    npixels_out: int,
-    pixel_scale_out: float,
-    focal_length: float = None,
-    shift: Array = np.zeros(2),
-    pixel: bool = True,
+    spec_in: Array | tuple,
+    spec_out: Array | tuple,
+    focal_length: float | None = None,
+    defocus: float | None = None,
     inverse: bool = False,
+    apply_out_curv: bool = True,
 ) -> Array:
-    """
-    Propagates a phasor using a Matrix Fourier Transform (MFT), allowing for output
-    pixel scale and a shift to be specified.
+    """Propagate to an explicit grid using a pure MFT or defocused LCT."""
+    focal_length = 1.0 if focal_length is None else focal_length
+    if inverse and defocus is not None:
+        raise ValueError(
+            "LCT propagation has no inverse flag; reverse the longitudinal "
+            "distances in an explicit ABCD system."
+        )
+    field = phasor
+    if defocus is None:
+        if inverse:
+            scale, kernel_x, kernel_y = fraunhofer.fraunhofer_kernels(
+                spec_in=spec_in,
+                spec_out=spec_out,
+                lam=wavelength,
+                f=focal_length,
+            )
+            return scale * _mft(
+                phasor,
+                kernel_x,
+                kernel_y,
+                left_conj=True,
+                right_conj=True,
+            )
+        return fraunhofer.fraunhofer_prop(
+            u_pupil=phasor,
+            spec_in=spec_in,
+            spec_out=spec_out,
+            lam=wavelength,
+            f=focal_length,
+        )
+    else:
+        field = dlu.ABCD_MFT(
+            phasor=field,
+            wavelength=wavelength,
+            spec_in=spec_in,
+            spec_out=spec_out,
+            ABCD=_fraunhofer_abcd(focal_length, defocus),
+            apply_out_curv=apply_out_curv,
+        )
+    return field
 
-    Soummer et al. (2007) describes the MFT formulation: https://arxiv.org/pdf/0711.0368
 
-    Parameters
-    ----------
-    phasor : Array
-        The input phasor.
-    wavelength : float, meters
-        The wavelength of the input phasor.
-    pixel_scale_in : float, meters/pixel, radians/pixel
-        The pixel scale of the input plane.
-    npixels_out : int
-        The number of pixels in the output plane.
-    pixel_scale_out : float, meters/pixel or radians/pixel
-        The pixel scale of the output plane.
-    focal_length : float = None
-        The focal length of the propagation. If None, the propagation is angular and
-        pixel_scale_out is taken in as radians/pixel, else meters/pixel.
-    shift : Array = np.zeros(2)
-        The shift in the center of the output plane.
-    pixel : bool = True
-        Should the shift be taken in units of pixels, or pixel scale.
-    inverse : bool = False
-        If False, apply the forward propagation transform. If True, apply the
-        backward propagation transform.
-
-    Returns
-    -------
-    phasor : Array
-        The propagated phasor.
-    """
-    # Get parameters
-    npixels_in = phasor.shape[-1]
-    if not pixel:
-        shift /= pixel_scale_out
-
-    # Alias the transfer matrix function
-    get_tf_mat = lambda s: transfer_matrix(
-        wavelength,
-        npixels_in,
-        pixel_scale_in,
-        npixels_out,
-        pixel_scale_out,
-        s,
-        focal_length,
-        0.0,
-        inverse,
+def FFT(
+    phasor: Array,
+    wavelength: float,
+    spec_in: Array | tuple,
+    pad: int | tuple[int, int] | None = None,
+    pad_to: int | tuple[int, int] | None = None,
+    focal_length: float | None = None,
+    defocus: float | None = None,
+    inverse: bool = False,
+    output_center: Array | None = None,
+    apply_out_curv: bool = True,
+) -> tuple[Array, tuple[Array, Array]]:
+    """Propagate using a pure FFT or a defocused FFT-based LCT."""
+    focal_length = 1.0 if focal_length is None else focal_length
+    if inverse and defocus is not None:
+        raise ValueError(
+            "LCT propagation has no inverse flag; reverse the longitudinal "
+            "distances in an explicit ABCD system."
+        )
+    phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
+    if defocus is None:
+        ABCD = dlu.abcd_fraunhofer(focal_length)
+        spec_native = dlu.FFT_spec(spec_in, wavelength, ABCD)
+        spec_out, shift = dlu.FFT_shift(spec_native, output_center)
+        phasor *= dlu.FFT_ramp(wavelength, spec_in, ABCD, shift, inverse=inverse)
+        field, spec_native = _fraunhofer_fft(
+            phasor, wavelength, spec_in, focal_length, inverse
+        )
+        return field, spec_out
+    field, spec_out = dlu.ABCD_FFT(
+        phasor=phasor,
+        wavelength=wavelength,
+        spec_in=spec_in,
+        ABCD=_fraunhofer_abcd(focal_length, defocus),
+        output_center=output_center,
+        apply_out_curv=apply_out_curv,
     )
+    return field, spec_out
 
-    # Get transfer matrices and propagate
-    x_mat, y_mat = vmap(get_tf_mat)(shift)
-    phasor = (y_mat.T @ phasor) @ x_mat
 
-    # Normalise
-    nfringes = calc_nfringes(
-        wavelength,
-        npixels_in,
-        pixel_scale_in,
-        npixels_out,
-        pixel_scale_out,
-        focal_length,
+def ASM(
+    phasor: Array,
+    wavelength: float,
+    spec_in: Array | tuple,
+    distance: float,
+    pad: int | tuple[int, int] | None = None,
+    pad_to: int | tuple[int, int] | None = None,
+    crop: bool = True,
+) -> Array:
+    """Propagate through free space using the angular-spectrum method."""
+    shape = phasor.shape[-2:]
+    phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
+    kernel, nx, ny = asm.asm_kernels(
+        spec_in=spec_in,
+        lam=wavelength,
+        z=distance,
+        npad=None,
     )
-    phasor *= np.exp(np.log(nfringes) - (np.log(npixels_in) + np.log(npixels_out)))
-
-    return phasor
+    field = asm.asm_kernel_prop(
+        u_pad=phasor,
+        H=kernel,
+        Nx_in=nx,
+        Ny_in=ny,
+        crop=False,
+    )
+    return dlu.crop_to(field, shape[::-1]) if crop else field

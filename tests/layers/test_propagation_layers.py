@@ -74,6 +74,43 @@ class TestPropagation:
         assert native.spec.unit == "rad"
         assert native.spec.n == (8, 8)
 
+    @pytest.mark.parametrize(
+        ("make_fft", "make_mft"),
+        [
+            (
+                lambda spec: dl.Fraunhofer(dl.PadSpec(), method="fft"),
+                lambda spec: dl.Fraunhofer(spec, method="mft"),
+            ),
+            (
+                lambda spec: dl.Fresnel(
+                    dl.PadSpec(),
+                    defocus=0.1,
+                    focal_length=2.0,
+                    method="fft",
+                ),
+                lambda spec: dl.Fresnel(
+                    spec,
+                    defocus=0.1,
+                    focal_length=2.0,
+                    method="mft",
+                ),
+            ),
+        ],
+    )
+    def test_fft_matches_explicit_propagation(
+        self,
+        make_fft,
+        make_mft,
+        make_wavefront,
+    ):
+        wavefront = make_wavefront(
+            spec=dl.CoordSpec(n=8, d=1e-3, unit="m").broadcast(2)
+        )
+        fft_output = make_fft(None)(wavefront)
+        mft_output = make_mft(fft_output.spec)(wavefront)
+
+        assert_tree_allclose(fft_output, mft_output, rtol=2e-5, atol=2e-6)
+
     def test_field_gradient(self, angular_spec, make_wavefront):
         wavefront = make_wavefront()
         layer = dl.Fraunhofer(angular_spec)
@@ -155,9 +192,11 @@ class TestValidation:
         with pytest.raises(ValueError, match="physical units"):
             dl.Fraunhofer(angular_spec)(angular_input)
 
-    def test_fft_requires_monochromatic_wavefront(self, make_wavefront):
+    def test_fft_supports_chromatic_wavefront(self, make_wavefront):
         layer = dl.Fraunhofer(dl.PadSpec(), method="fft")
         wavefront = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
 
-        with pytest.raises(ValueError, match="monochromatic"):
-            layer(wavefront)
+        output = layer(wavefront)
+
+        assert output.phasor.shape == (2, 8, 8)
+        assert output.spec.d.shape == (2, 2)

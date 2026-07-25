@@ -95,7 +95,7 @@ class BaseSpatial(zdx.Base):
         """Return x-axis sampling in canonical SI units."""
         if self.d is None:
             raise ValueError("spec.d is not defined.")
-        return self.d[0] * self.scale
+        return self.d[..., 0] * self.scale
 
     @property
     def center(self) -> Array:
@@ -105,7 +105,7 @@ class BaseSpatial(zdx.Base):
     @property
     def diameter(self) -> Array:
         """Return the x-axis field width for square-grid compatibility."""
-        return self.fov[0]
+        return self.fov[..., 0]
 
     def scale_to(
         self,
