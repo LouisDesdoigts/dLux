@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import jax.numpy as np
-from abcdLux import abcd, asm, lct
 from jax import Array
 
 import dLux.utils as dlu
 
 from ..abcd import BaseABCDElement
-from ..coordinates import BaseSpec, CoordSpec, PadSpec
+from ..coordinates import BaseSpec, CoordSpec, PadSpec, ResizeSpec
 from .optical_layers import OpticalLayer
 
 __all__ = [
@@ -28,9 +27,11 @@ class Propagator(OpticalLayer):
     spec: BaseSpec
 
     def __init__(self, spec):
-        if not isinstance(spec, (CoordSpec, PadSpec)):
-            raise TypeError("spec must be a CoordSpec or PadSpec.")
-        self.spec = spec.broadcast(2) if isinstance(spec, CoordSpec) else spec
+        if not isinstance(spec, (CoordSpec, PadSpec, ResizeSpec)):
+            raise TypeError("spec must be a CoordSpec, PadSpec, or ResizeSpec.")
+        self.spec = (
+            spec.broadcast(2) if isinstance(spec, (CoordSpec, ResizeSpec)) else spec
+        )
 
     def validate(self, wavefront):
         """Validate the input coordinate specification."""
@@ -45,52 +46,85 @@ class Propagator(OpticalLayer):
             return
         raise ValueError("Input Wavefront coordinates must use physical units.")
 
-    def propagate_lct(self, wavefront, matrix):
-        """Propagate to an explicit output grid through the abcdLux LCT."""
+    def propagate_mft(self, wavefront, ABCD=None, **kwargs):
+        """Propagate to an explicit output grid using an MFT."""
         wavelength = np.asarray(wavefront.wavelength)
         extra = wavefront.phasor.ndim - wavelength.ndim - 2
         wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
         x, y = wavefront.axes
         propagate = np.vectorize(
-            lambda field, lam, x, y: lct.lct_prop(
-                u_in=field,
-                spec_in=(x, y),
-                spec_out=self.spec.axes,
-                lam=lam,
-                ABCD=matrix,
+            lambda field, lam, x, y: (
+                dlu.MFT(
+                    phasor=field,
+                    wavelength=lam,
+                    spec_in=(x, y),
+                    spec_out=self.spec.axes,
+                    **kwargs,
+                )
+                if ABCD is None
+                else dlu.ABCD_MFT(
+                    phasor=field,
+                    wavelength=lam,
+                    spec_in=(x, y),
+                    spec_out=self.spec.axes,
+                    ABCD=ABCD,
+                )
             ),
             signature="(n,m),(),(m),(n)->(p,q)",
         )
         field = propagate(wavefront.phasor, wavelength, x, y)
         return wavefront.set(phasor=field, spec=self.spec)
 
-    def propagate_fft(self, wavefront, matrix, unit):
-        """Propagate at native FFT sampling through the abcdLux LCT."""
-        if np.asarray(wavefront.wavelength).ndim:
-            raise ValueError(
-                "FFT propagation requires a monochromatic Wavefront because its "
-                "output sampling depends on wavelength."
-            )
-        npad = tuple(size * self.spec.pad for size in wavefront.spec.n)
-        field, axes = lct.lct_prop_fft(
-            u_in=wavefront.phasor,
-            spec_in=wavefront.axes,
-            lam=wavefront.wavelength,
-            ABCD=matrix,
-            npad=npad,
+    def propagate_fft(self, wavefront, unit, ABCD=None, **kwargs):
+        """Propagate at native FFT sampling."""
+        padding = (
+            {"pad": self.spec.pad}
+            if isinstance(self.spec, PadSpec)
+            else {"pad_to": self.spec.n}
         )
-        if self.spec.crop > 1:
+        output_center = (
+            None
+            if self.spec.c is None
+            else np.broadcast_to(self.spec.c, (2,)) * dlu.unit_factor(unit)
+        )
+
+        def propagate(field, wavelength, x, y):
+            propagate = dlu.FFT if ABCD is None else dlu.ABCD_FFT
+            inputs = kwargs if ABCD is None else {"ABCD": ABCD}
+            output, spec_out = propagate(
+                phasor=field,
+                wavelength=wavelength,
+                spec_in=(x, y),
+                output_center=output_center,
+                **padding,
+                **inputs,
+            )
+            return output, spec_out[0], spec_out[1]
+
+        propagate = np.vectorize(
+            propagate,
+            signature="(n,m),(),(m),(n)->(p,q),(q),(p)",
+        )
+        field, x, y = propagate(
+            wavefront.phasor,
+            wavefront.wavelength,
+            *wavefront.axes,
+        )
+        if isinstance(self.spec, PadSpec) and self.spec.crop > 1:
             ny, nx = (size // self.spec.crop for size in field.shape[-2:])
             sy = (field.shape[-2] - ny) // 2
             sx = (field.shape[-1] - nx) // 2
             field = field[..., sy : sy + ny, sx : sx + nx]
-            axes = (
-                axes[0][sx : sx + nx],
-                axes[1][sy : sy + ny],
-            )
-        x, y = axes
-        d = np.asarray((x[1] - x[0], y[1] - y[0]))
-        c = np.asarray(((x[-1] + x[0]) / 2, (y[-1] + y[0]) / 2))
+            x = x[..., sx : sx + nx]
+            y = y[..., sy : sy + ny]
+        d = np.stack((x[..., 1] - x[..., 0], y[..., 1] - y[..., 0]), axis=-1)
+        c = np.stack(
+            (
+                (x[..., -1] + x[..., 0]) / 2,
+                (y[..., -1] + y[..., 0]) / 2,
+            ),
+            axis=-1,
+        )
         scale = dlu.unit_factor(unit)
         spec = wavefront.spec.set(
             n=field.shape[-2:][::-1],
@@ -115,7 +149,7 @@ class FocalPropagator(Propagator):
     def validate(self, wavefront):
         """Validate the input and explicitly requested output coordinates."""
         super().validate(wavefront)
-        if isinstance(self.spec, PadSpec):
+        if isinstance(self.spec, (PadSpec, ResizeSpec)):
             return
         if self.spec.n is None or self.spec.d is None or self.spec.unit is None:
             raise ValueError("The output CoordSpec requires n, d, and unit.")
@@ -147,20 +181,24 @@ class Fraunhofer(FocalPropagator):
             raise ValueError("method must be 'mft' or 'fft'.")
         if method == "mft" and not isinstance(spec, CoordSpec):
             raise TypeError("MFT propagation requires a CoordSpec.")
-        if method == "fft" and not isinstance(spec, PadSpec):
-            raise TypeError("FFT propagation requires a PadSpec.")
+        if method == "fft" and not isinstance(spec, (PadSpec, ResizeSpec)):
+            raise TypeError("FFT propagation requires a PadSpec or ResizeSpec.")
         super().__init__(spec, focal_length)
         self.method = method
 
     def __call__(self, wavefront):
         self.validate(wavefront)
-        matrix = abcd.abcd_fraunhofer(
-            1.0 if self.focal_length is None else self.focal_length
-        )
         if self.method == "fft":
             unit = "rad" if self.focal_length is None else wavefront.spec.unit
-            return self.propagate_fft(wavefront, matrix, unit)
-        return self.propagate_lct(wavefront, matrix)
+            return self.propagate_fft(
+                wavefront,
+                unit,
+                focal_length=self.focal_length,
+            )
+        return self.propagate_mft(
+            wavefront,
+            focal_length=self.focal_length,
+        )
 
 
 class Fresnel(FocalPropagator):
@@ -175,25 +213,27 @@ class Fresnel(FocalPropagator):
             raise ValueError("method must be 'fft', 'mft', or 'lct'.")
         if method in ("mft", "lct") and not isinstance(spec, CoordSpec):
             raise TypeError("MFT and LCT propagation require a CoordSpec.")
-        if method == "fft" and not isinstance(spec, PadSpec):
-            raise TypeError("FFT propagation requires a PadSpec.")
+        if method == "fft" and not isinstance(spec, (PadSpec, ResizeSpec)):
+            raise TypeError("FFT propagation requires a PadSpec or ResizeSpec.")
         super().__init__(spec, focal_length)
         self.method = method
         self.defocus = np.asarray(defocus, dtype=float)
 
     def __call__(self, wavefront):
         self.validate(wavefront)
-        focal_length = 1.0 if self.focal_length is None else self.focal_length
-        matrix = abcd.compose_abcd(
-            [
-                abcd.abcd_fraunhofer(focal_length),
-                abcd.abcd_free_space(self.defocus),
-            ]
-        )
         if self.method == "fft":
             unit = "rad" if self.focal_length is None else wavefront.spec.unit
-            return self.propagate_fft(wavefront, matrix, unit)
-        return self.propagate_lct(wavefront, matrix)
+            return self.propagate_fft(
+                wavefront,
+                unit,
+                focal_length=self.focal_length,
+                defocus=self.defocus,
+            )
+        return self.propagate_mft(
+            wavefront,
+            focal_length=self.focal_length,
+            defocus=self.defocus,
+        )
 
 
 class ABCDPropagator(Propagator):
@@ -207,8 +247,8 @@ class ABCDPropagator(Propagator):
         method = str(method).lower()
         if method not in ("lct", "fft"):
             raise ValueError("method must be 'lct' or 'fft'.")
-        if method == "fft" and not isinstance(self.spec, PadSpec):
-            raise TypeError("FFT propagation requires a PadSpec.")
+        if method == "fft" and not isinstance(self.spec, (PadSpec, ResizeSpec)):
+            raise TypeError("FFT propagation requires a PadSpec or ResizeSpec.")
         if method == "lct" and not isinstance(self.spec, CoordSpec):
             raise TypeError("LCT propagation requires a CoordSpec.")
 
@@ -225,12 +265,12 @@ class ABCDPropagator(Propagator):
     @property
     def abcd(self) -> Array:
         """Return the composed ABCD matrix."""
-        return abcd.compose_abcd([element.abcd for element in self.ABCDs.values()])
+        return dlu.compose_abcd([element.abcd for element in self.ABCDs.values()])
 
     def validate(self, wavefront):
         """Validate physical ABCD input and output coordinates."""
         Propagator.validate(self, wavefront)
-        if isinstance(self.spec, PadSpec):
+        if isinstance(self.spec, (PadSpec, ResizeSpec)):
             return
         if self.spec.n is None or self.spec.d is None or self.spec.unit is None:
             raise ValueError("The output CoordSpec requires n, d, and unit.")
@@ -247,49 +287,54 @@ class ABCDPropagator(Propagator):
         if self.method == "fft":
             return self.propagate_fft(
                 wavefront,
-                self.abcd,
                 unit=wavefront.spec.unit,
+                ABCD=self.abcd,
             )
-        return self.propagate_lct(wavefront, self.abcd)
+        return self.propagate_mft(wavefront, ABCD=self.abcd)
 
 
 class ASM(Propagator):
     """Paraxial angular-spectrum propagation over a free-space distance."""
 
     distance: Array
+    crop: bool
 
-    def __init__(self, distance, spec=None):
+    def __init__(self, distance, spec=None, crop=True):
         if spec is None:
             spec = PadSpec()
-        if not isinstance(spec, PadSpec):
-            raise TypeError("ASM spec must be a PadSpec.")
+        if not isinstance(spec, (PadSpec, ResizeSpec)):
+            raise TypeError("ASM spec must be a PadSpec or ResizeSpec.")
         super().__init__(spec)
         self.distance = np.asarray(distance, dtype=float)
+        self.crop = bool(crop)
 
     def __call__(self, wavefront):
         self.validate(wavefront)
         wavelength = np.asarray(wavefront.wavelength)
         extra = wavefront.phasor.ndim - wavelength.ndim - 2
         wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
-        npad = tuple(size * self.spec.pad for size in wavefront.spec.n)
+        padding = (
+            {"pad": self.spec.pad}
+            if isinstance(self.spec, PadSpec)
+            else {"pad_to": self.spec.n}
+        )
         x, y = wavefront.axes
         propagate = np.vectorize(
-            lambda field, lam, x, y: asm.asm_prop(
-                u_in=field,
+            lambda field, lam, x, y: dlu.ASM(
+                phasor=field,
+                wavelength=lam,
                 spec_in=(x, y),
-                lam=lam,
-                z=self.distance,
-                npad=npad,
-                crop=False,
+                distance=self.distance,
+                crop=self.crop,
+                **padding,
             ),
-            signature="(n,m),(),(m),(n)->(p,q)",
+            signature=(
+                "(n,m),(),(m),(n)->(n,m)" if self.crop else "(n,m),(),(m),(n)->(p,q)"
+            ),
         )
         field = propagate(wavefront.phasor, wavelength, x, y)
-        if self.spec.crop > 1:
-            ny, nx = (size // self.spec.crop for size in field.shape[-2:])
-            sy = (field.shape[-2] - ny) // 2
-            sx = (field.shape[-1] - nx) // 2
-            field = field[..., sy : sy + ny, sx : sx + nx]
+        if self.crop:
+            return wavefront.set(phasor=field)
         return wavefront.set(
             phasor=field,
             spec=wavefront.spec.set(n=field.shape[-2:][::-1]),

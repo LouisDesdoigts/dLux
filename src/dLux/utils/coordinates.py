@@ -1,14 +1,15 @@
 import jax.numpy as np
-import jax.tree as jtu
 from jax import Array
 
+import dLux.utils as dlu
+
 from .helpers import _cast_tuple, _cast_scalar, _input_len
-from .polynomials import polynomial_basis
 
 __all__ = [
     "cart2polar",
     "polar2cart",
     "pixel_coords",
+    "nd_axes",
     "nd_coords",
     "translate_coords",
     "compress_coords",
@@ -117,7 +118,7 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     distorted_coords : Array
         Coords with the distortion applied
     """
-    pow_base = polynomial_basis(coords, pows)
+    pow_base = dlu.polynomial_basis(coords, pows)
     distortion = np.tensordot(coeffs, pow_base, axes=(-1, 0))
     return coords + distortion
 
@@ -225,6 +226,32 @@ def pixel_coords(
     return coords
 
 
+def nd_axes(
+    npixels: int | tuple[int, ...],
+    pixel_scales: float | tuple[float, ...] = 1.0,
+    offsets: float | tuple[float, ...] = 0.0,
+) -> tuple[Array, ...]:
+    """Return one regularly sampled coordinate vector per physical axis."""
+    npixels = _cast_tuple(npixels, "npixels")
+    ndim = max(
+        len(npixels), _input_len(pixel_scales, "mean"), _input_len(offsets, "std")
+    )
+    pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
+    offsets = _cast_scalar(offsets, ndim, "offsets")
+    if len(npixels) != ndim:
+        npixels *= ndim
+
+    def axis(n, offset, scale):
+        start = -(n - 1) / 2 * scale - offset
+        end = (n - 1) / 2 * scale - offset
+        return np.linspace(start, end, n)
+
+    return tuple(
+        axis(n, offset, scale)
+        for n, offset, scale in zip(npixels, offsets, pixel_scales)
+    )
+
+
 def nd_coords(
     npixels: int | tuple[int, ...],
     pixel_scales: float | tuple[float, ...] = 1.0,
@@ -270,31 +297,8 @@ def nd_coords(
     if indexing not in ["xy", "ij"]:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
 
-    # Validate npixels and ensure tuple
-    npixels = _cast_tuple(npixels, "npixels")
-
-    # Get the number of dimensions
-    ndim = max(
-        len(npixels), _input_len(pixel_scales, "mean"), _input_len(offsets, "std")
-    )
-
-    # Validate and ensure tuples
-    pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
-    offsets = _cast_scalar(offsets, ndim, "offsets")
-
-    if len(npixels) != ndim:
-        npixels *= ndim
-
-    def pixel_fn(n, offset, scale):
-        start = -(n - 1) / 2 * scale - offset
-        end = (n - 1) / 2 * scale - offset
-        return np.linspace(start, end, n)
-
-    # Generate the linear edges of each axes
-    lin_pixels = jtu.map(pixel_fn, npixels, offsets, pixel_scales)
-
-    # Output (x, y) for 2d, else in order.
-    positions = np.array(np.meshgrid(*lin_pixels, indexing=indexing))
+    axes = nd_axes(npixels, pixel_scales, offsets)
+    positions = np.array(np.meshgrid(*axes, indexing=indexing))
 
     # Squeeze the output in case of 1d input
     return np.squeeze(positions)

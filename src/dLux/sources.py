@@ -103,20 +103,35 @@ class Source(zdx.Base):
 
     @staticmethod
     def _convolve(data, distribution):
-        if distribution.ndim == 2 and data.ndim == 3:
-            distribution = np.broadcast_to(
-                distribution,
-                (data.shape[0],) + distribution.shape,
-            )
         if data.ndim == 2:
             return jsp.signal.convolve(data, distribution, mode="same")
-        return eqx.filter_vmap(
+        leading = data.shape[:-2]
+        if distribution.ndim == 2:
+            distribution = np.broadcast_to(
+                distribution,
+                leading + distribution.shape,
+            )
+        else:
+            extra = len(leading) - 1
+            distribution = distribution.reshape(
+                (distribution.shape[0],) + (1,) * extra + distribution.shape[-2:]
+            )
+            distribution = np.broadcast_to(
+                distribution,
+                leading + distribution.shape[-2:],
+            )
+        shape = data.shape
+        convolved = eqx.filter_vmap(
             lambda image, kernel: jsp.signal.convolve(
                 image,
                 kernel,
                 mode="same",
             )
-        )(data, distribution)
+        )(
+            data.reshape((-1,) + shape[-2:]),
+            distribution.reshape((-1,) + distribution.shape[-2:]),
+        )
+        return convolved.reshape(shape)
 
     def _model_components(
         self,
@@ -170,10 +185,11 @@ class Source(zdx.Base):
 
         results = eqx.filter_vmap(propagate)(position, flux, weights)
         wavefronts = results["Wavefront"]
-        data = wavefronts.psf.sum(1)
+        psf = results["PSF"]
         if distribution is not None:
-            data = self._convolve(data, distribution)
-        psf = PSF(data, wavefronts.spec)
+            psf = psf.set(
+                data=self._convolve(psf.data, distribution),
+            )
         if return_all:
             return {"Wavefront": wavefronts, "PSF": psf, "psf": psf.data}
         return psf.data
