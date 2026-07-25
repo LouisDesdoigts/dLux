@@ -16,7 +16,7 @@ def coordinates():
 
 def test_general_polynomial_contract():
     variables = np.linspace(-1, 1, 8)
-    polynomial = dl.Polynomial([1.0, 2.0, 3.0])
+    polynomial = dl.Polynomial(2, [1.0, 2.0, 3.0])
 
     output = assert_jittable(
         lambda value: value.evaluate(variables=variables),
@@ -33,11 +33,30 @@ def test_general_polynomial_contract():
 
 def test_multivariate_polynomial(coordinates):
     powers = np.array([[0, 1, 0, 1], [0, 0, 1, 1]])
-    polynomial = dl.Polynomial([1.0, 2.0, 3.0, 4.0], powers)
+    polynomial = dl.Polynomial(1, [1.0, 2.0, 3.0, 4.0], powers=powers)
     x, y = coordinates
 
     output = polynomial.evaluate(variables=coordinates)
     assert np.allclose(output, 1 + 2 * x + 3 * y + 4 * x * y)
+
+
+@pytest.mark.parametrize("coordinate_source", ["array", "spec"])
+def test_explicit_polynomial_contract(coordinate_source, coordinates):
+    if coordinate_source == "spec":
+        coordinate_source = dl.CoordSpec(n=10, d=0.2, unit="m").broadcast(2)
+    else:
+        coordinate_source = coordinates
+    polynomial = dl.ExplicitPolynomial(
+        coordinate_source,
+        1,
+        coefficients=[1.0, 2.0, 3.0],
+        ndim=2,
+    )
+
+    output = assert_jittable(lambda value: value.evaluate(), polynomial)
+    recovered = polynomial.solve_basis(output)
+    assert output.shape == coordinates.shape[-2:]
+    assert np.allclose(recovered, polynomial.coefficients, atol=1e-5)
 
 
 @pytest.mark.parametrize("nsides", [0, 6])
@@ -67,7 +86,7 @@ def test_dynamic_zernike_contract(nsides, coordinates):
             coefficients=np.asarray([0.1, -0.1]),
             nsides=6,
         ),
-        lambda coordinates: dl.PolynomialBasis(
+        lambda coordinates: dl.CoordinatePolynomial(
             2,
             coefficients=np.linspace(-0.2, 0.2, 6),
         ),
@@ -89,7 +108,7 @@ def test_polynomial_basis_contract(make_basis, coordinates):
     "basis",
     [
         dl.DynamicZernikeBasis(radial_orders=[2]),
-        dl.PolynomialBasis(2),
+        dl.CoordinatePolynomial(2),
     ],
 )
 def test_dynamic_basis_context(basis, coordinates, make_wavefront):
@@ -111,11 +130,11 @@ def test_dynamic_basis_context(basis, coordinates, make_wavefront):
         lambda coordinates: dl.ZernikeBasis(coordinates, js=[]),
         lambda coordinates: dl.DynamicZernikeBasis(js=[1], nsides=2),
         lambda coordinates: dl.DynamicZernikeBasis(js=[1], diameter=0.0),
-        lambda coordinates: dl.PolynomialBasis(-1),
-        lambda coordinates: dl.PolynomialBasis(2, np.ones(5)),
-        lambda coordinates: dl.Polynomial([]),
-        lambda coordinates: dl.Polynomial([1, 2], powers=np.ones((2, 3))),
-        lambda coordinates: dl.Polynomial([1, 2], powers=[0, -1]),
+        lambda coordinates: dl.CoordinatePolynomial(-1),
+        lambda coordinates: dl.CoordinatePolynomial(2, np.ones(5)),
+        lambda coordinates: dl.Polynomial(0, []),
+        lambda coordinates: dl.Polynomial(1, [1, 2], powers=np.ones((2, 3))),
+        lambda coordinates: dl.Polynomial(1, [1, 2], powers=[0, -1]),
     ],
 )
 def test_validation(constructor, coordinates):
@@ -125,7 +144,7 @@ def test_validation(constructor, coordinates):
 
 @pytest.mark.parametrize(
     "basis",
-    [dl.DynamicZernikeBasis(js=[1]), dl.PolynomialBasis(1)],
+    [dl.DynamicZernikeBasis(js=[1]), dl.CoordinatePolynomial(1)],
 )
 def test_coordinate_context_validation(basis):
     with pytest.raises(ValueError, match="wavefront or coordinates"):

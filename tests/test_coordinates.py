@@ -36,6 +36,14 @@ class TestSpecifications:
         assert_jittable(lambda value: value.coordinates, mapped)
         assert mapped.coordinates.shape == (2, 2, 4, 4)
 
+    def test_sampling_spec_contracts(self):
+        pad = dl.PadSpec(pad=2, crop=3, c=(0.1, -0.1))
+        resize = dl.ResizeSpec((8, 6), c=0.0).broadcast(2)
+
+        assert pad.pad == 2 and pad.crop == 3
+        assert resize.n == (8, 6)
+        assert resize.c.shape == ()
+
     def test_units_and_differentiation(self):
         spec = dl.CoordSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
 

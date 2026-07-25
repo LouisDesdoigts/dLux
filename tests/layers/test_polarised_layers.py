@@ -75,10 +75,10 @@ def test_polarisation_gradients(layer, path, wavefront):
 @pytest.mark.parametrize(
     "layer",
     [
-        dl.LinearPolariser(dl.PolynomialBasis(1, coefficients=[0.1, 0.01, -0.01])),
+        dl.LinearPolariser(dl.CoordinatePolynomial(1, coefficients=[0.1, 0.01, -0.01])),
         dl.Retarder(
-            dl.PolynomialBasis(0, coefficients=[np.pi / 2]),
-            dl.PolynomialBasis(1, coefficients=[0.1, 0.01, -0.01]),
+            dl.CoordinatePolynomial(0, coefficients=[np.pi / 2]),
+            dl.CoordinatePolynomial(1, coefficients=[0.1, 0.01, -0.01]),
         ),
     ],
 )
