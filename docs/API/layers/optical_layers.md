@@ -8,7 +8,6 @@ classDiagram
     BaseLayer <|-- BaseOpticalLayer
     BaseOpticalLayer <|-- OpticalLayer
     OpticalLayer <|-- AberratedLayer
-    OpticalLayer <|-- Filter
     OpticalLayer <|-- Tilt
     OpticalLayer <|-- TransmissiveLayer
     ParametricHolder <|-- BaseLayer
@@ -32,9 +31,6 @@ classDiagram
 
 ???+ info "Optic"
     ::: dLux.layers.optical_layers.Optic
-
-???+ info "Filter"
-    ::: dLux.layers.optical_layers.Filter
 
 ???+ info "Tilt"
     ::: dLux.layers.optical_layers.Tilt
