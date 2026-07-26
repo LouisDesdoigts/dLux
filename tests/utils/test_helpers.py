@@ -8,6 +8,36 @@ import pytest
 import dLux.utils as dlu
 
 
+@pytest.mark.parametrize(
+    ("value", "ndim", "expected"),
+    [(4, None, (4,)), (4, 3, (4, 4, 4)), ((4, 6), 2, (4, 6))],
+)
+def test_as_size(value, ndim, expected):
+    assert dlu.as_size(value, ndim) == expected
+
+
+def test_as_axis():
+    assert np.array_equal(dlu.as_axis(2.0, 2), [2.0, 2.0])
+    assert np.array_equal(dlu.as_axis([1.0, 2.0]), [1.0, 2.0])
+
+    mapped = dlu.as_axis(np.ones((3, 1)), 2)
+    assert mapped.shape == (3, 2)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda: dlu.as_size(2.5),
+        lambda: dlu.as_size((2, 3), 3),
+        lambda: dlu.as_size(0),
+        lambda: dlu.as_axis((1.0, 2.0, 3.0), 2),
+    ],
+)
+def test_axis_validation(operation):
+    with pytest.raises((TypeError, ValueError)):
+        operation()
+
+
 def test_tree_and_dictionary_helpers():
     assert np.array_equal(dlu.map2array(lambda x: x + 1, {"a": 1, "b": 2}), [2, 3])
 

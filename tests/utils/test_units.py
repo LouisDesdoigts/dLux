@@ -34,18 +34,12 @@ def test_angular_conversions(function, factor):
 
 @pytest.mark.parametrize(
     ("unit", "factor"),
-    [
-        ("mrad", 1e-3),
-        ("nm", 1e-9),
-        ("angstrom", 1e-10),
-        ("kphoton", 1e3),
-    ],
+    [("mrad", 1e-3), ("nm", 1e-9), ("angstrom", 1e-10), ("kphoton", 1e3)],
 )
 def test_unit_factor(unit, factor):
     assert np.isclose(dlu.unit_factor(unit), factor)
 
 
-@pytest.mark.xfail(strict=True, reason="'mas' is documented but not recognised.")
 def test_milliarcsecond_alias():
     assert np.isclose(dlu.unit_factor("mas"), np.pi / (180 * 3600 * 1000))
 

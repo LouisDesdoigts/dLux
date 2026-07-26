@@ -9,7 +9,6 @@ import dLux.utils as dlu
 from tests.helpers import assert_jittable
 
 
-@pytest.mark.xfail(strict=True, reason="Non-square Gaussian output axes are reversed.")
 def test_gaussian_contract():
     output = assert_jittable(
         dlu.gaussian,
@@ -34,10 +33,7 @@ def test_basis_roundtrip():
 
 @pytest.mark.parametrize(
     ("function", "value", "expected"),
-    [
-        (dlu.factorial, 5.0, 120.0),
-        (dlu.triangular_number, 4, 10),
-    ],
+    [(dlu.factorial, 5.0, 120.0), (dlu.triangular_number, 4, 10)],
 )
 def test_integer_sequences(function, value, expected):
     assert np.isclose(function(value), expected)
@@ -45,10 +41,7 @@ def test_integer_sequences(function, value, expected):
 
 def test_safe_division():
     output = assert_jittable(
-        dlu.nandiv,
-        np.asarray((1.0, 2.0)),
-        np.asarray((1.0, 0.0)),
-        0.0,
+        dlu.nandiv, np.asarray((1.0, 2.0)), np.asarray((1.0, 0.0)), 0.0
     )
     assert np.allclose(output, np.asarray((1.0, 0.0)))
 

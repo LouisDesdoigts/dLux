@@ -97,6 +97,7 @@ nav:
     - Sources Overview:         sources.md
 
   - API:
+    - Overview: API/overview.md
     - Core API:
       - Overview: API/core/overview.md
       - Fields: API/core/fields.md

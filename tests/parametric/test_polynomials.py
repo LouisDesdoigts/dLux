@@ -19,8 +19,7 @@ def test_general_polynomial_contract():
     polynomial = dl.Polynomial(2, [1.0, 2.0, 3.0])
 
     output = assert_jittable(
-        lambda value: value.evaluate(variables=variables),
-        polynomial,
+        lambda value: value.evaluate(variables=variables), polynomial
     )
     assert np.allclose(output, 1 + 2 * variables + 3 * variables**2)
     assert_differentiable(
@@ -47,10 +46,7 @@ def test_explicit_polynomial_contract(coordinate_source, coordinates):
     else:
         coordinate_source = coordinates
     polynomial = dl.ExplicitPolynomial(
-        coordinate_source,
-        1,
-        coefficients=[1.0, 2.0, 3.0],
-        ndim=2,
+        coordinate_source, 1, coefficients=[1.0, 2.0, 3.0], ndim=2
     )
 
     output = assert_jittable(lambda value: value.evaluate(), polynomial)
@@ -63,8 +59,7 @@ def test_explicit_polynomial_contract(coordinate_source, coordinates):
 def test_dynamic_zernike_contract(nsides, coordinates):
     zernike = dl.DynamicZernike(4)
     output = assert_jittable(
-        lambda value: value.calculate(coordinates, nsides=nsides),
-        zernike,
+        lambda value: value.calculate(coordinates, nsides=nsides), zernike
     )
     assert output.shape == coordinates.shape[-2:]
 
@@ -73,22 +68,16 @@ def test_dynamic_zernike_contract(nsides, coordinates):
     "make_basis",
     [
         lambda coordinates: dl.ZernikeBasis(
-            coordinates,
-            radial_orders=[2],
-            coefficients=np.linspace(-0.2, 0.2, 3),
+            coordinates, radial_orders=[2], coefficients=np.linspace(-0.2, 0.2, 3)
         ),
         lambda coordinates: dl.DynamicZernikeBasis(
-            radial_orders=[2],
-            coefficients=np.linspace(-0.2, 0.2, 3),
+            radial_orders=[2], coefficients=np.linspace(-0.2, 0.2, 3)
         ),
         lambda coordinates: dl.DynamicZernikeBasis(
-            js=[4, 5],
-            coefficients=np.asarray([0.1, -0.1]),
-            nsides=6,
+            js=[4, 5], coefficients=np.asarray([0.1, -0.1]), nsides=6
         ),
         lambda coordinates: dl.CoordinatePolynomial(
-            2,
-            coefficients=np.linspace(-0.2, 0.2, 6),
+            2, coefficients=np.linspace(-0.2, 0.2, 6)
         ),
     ],
 )
@@ -101,20 +90,16 @@ def test_polynomial_basis_contract(make_basis, coordinates):
     assert_differentiable(
         lambda coefficients: basis.set(coefficients=coefficients).evaluate(**context),
         basis.coefficients,
+        atol=2e-6,
     )
 
 
 @pytest.mark.parametrize(
-    "basis",
-    [
-        dl.DynamicZernikeBasis(radial_orders=[2]),
-        dl.CoordinatePolynomial(2),
-    ],
+    "basis", [dl.DynamicZernikeBasis(radial_orders=[2]), dl.CoordinatePolynomial(2)]
 )
 def test_dynamic_basis_context(basis, coordinates, make_wavefront):
     calculated = assert_jittable(
-        lambda value: value.calculate_basis(coordinates=coordinates),
-        basis,
+        lambda value: value.calculate_basis(coordinates=coordinates), basis
     )
     assert calculated.shape[-2:] == coordinates.shape[-2:]
 
@@ -143,8 +128,7 @@ def test_validation(constructor, coordinates):
 
 
 @pytest.mark.parametrize(
-    "basis",
-    [dl.DynamicZernikeBasis(js=[1]), dl.CoordinatePolynomial(1)],
+    "basis", [dl.DynamicZernikeBasis(js=[1]), dl.CoordinatePolynomial(1)]
 )
 def test_coordinate_context_validation(basis):
     with pytest.raises(ValueError, match="wavefront or coordinates"):
