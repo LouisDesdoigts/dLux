@@ -60,7 +60,7 @@ to_focal = dl.MFTPropagator(
         ("ThinLens", dl.ABCDConjugatePlane(focal_length)),  # Pupil -> Focal
         ("FreeSpace", dl.ABCDFreeSpace(-defocus)),  # Focal -> Defocused Detector
     ],
-    dl.CoordSpec(n=psf_npix, d=psf_pixel_scale),
+    dl.GridSpec(n=psf_npix, d=psf_pixel_scale),
 )
 
 # Generate other layers
@@ -99,7 +99,7 @@ print(optics)
             'ThinLens': ABCDConjugatePlane(focal_length=f32[]),
             'FreeSpace': ABCDFreeSpace(distance=f32[])
           },
-          spec=CoordSpec(n=256, d=1e-05, c=0.0)
+          spec=GridSpec(n=256, d=1e-05, c=0.0)
         )
       }
     )
