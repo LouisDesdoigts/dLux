@@ -1,17 +1,29 @@
-**/__pycache__/
-**/.ipynb_checkpoints/
-**.DS_Store
-**.ipynb
-**.npy
-dist/
-.vscode/
+# Python
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Build artifacts
 build/
-dLux.egg-info/
-docs/notebooks/files
-.idea/
+dist/
+site/
+
+# Coverage
 .coverage
 coverage.xml
 htmlcov/
-site/
-dev/*
-!dev/dynamic_optics.py
+
+# Notebooks and generated arrays
+.ipynb_checkpoints/
+*.ipynb
+*.npy
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+
+# Tool caches
+.cache/
