@@ -27,9 +27,7 @@ def system(input_spec, focal_spec):
                 dl.DynamicOptic(
                     transmission=dl.Circle(0.8, softening=0.02),
                     opd=dl.DynamicZernikeBasis(
-                        js=[4],
-                        coefficients=[1e-8],
-                        diameter=0.8,
+                        js=[4], coefficients=[1e-8], diameter=0.8
                     ),
                 ),
             ),
@@ -63,10 +61,7 @@ def test_nested_optical_system(input_spec):
 
 def test_layered_system_contract(make_psf):
     system = dl.LayeredSystem(
-        [
-            ("offset", dl.AddConstant(1)),
-            ("normalise", dl.Normalise()),
-        ]
+        [("offset", dl.AddConstant(1)), ("normalise", dl.Normalise())]
     )
     psf = make_psf()
 
@@ -93,11 +88,7 @@ def test_propagation_interfaces(system):
         atol=1e-5,
     )
     chromatic = assert_jittable(
-        lambda value: system.propagate(
-            value,
-            weights=weights,
-            return_all=True,
-        ),
+        lambda value: system.propagate(value, weights=weights, return_all=True),
         wavelengths,
         rtol=1e-5,
         atol=1e-5,
@@ -118,11 +109,7 @@ def test_propagation_interfaces(system):
 
 def test_detector_uses_common_system_contract(make_psf):
     detector = dl.DetectorSystem(
-        [
-            dl.ApplyPixelResponse(np.ones((8, 8))),
-            dl.AddConstant(1),
-            dl.Normalise(),
-        ]
+        [dl.ApplyPixelResponse(np.ones((8, 8))), dl.AddConstant(1), dl.Normalise()]
     )
     psf = make_psf()
 
@@ -144,12 +131,7 @@ def test_chromatic_and_polarised_execution(system):
     polarising = system.insert_layer(dl.LinearPolariser(0.2), 1)
 
     output = assert_jittable(system, chromatic, rtol=1e-5, atol=1e-5)
-    polarised = assert_jittable(
-        polarising,
-        chromatic,
-        rtol=1e-5,
-        atol=1e-5,
-    )
+    polarised = assert_jittable(polarising, chromatic, rtol=1e-5, atol=1e-5)
 
     assert output.phasor.shape[:1] == wavelengths.shape
     assert isinstance(polarised, dl.PolarisedWavefront)
@@ -161,10 +143,7 @@ def test_nested_parameter_gradients(system):
 
     assert_differentiable(
         lambda value: np.real(
-            system.set(
-                "layers.pupil.opd.coefficients",
-                value,
-            )
+            system.set("layers.pupil.opd.coefficients", value)
             .propagate_mono(1e-6, return_all=True)["Wavefront"]
             .phasor
         ),
@@ -179,12 +158,7 @@ def test_layer_management_and_debugging(system):
     removed = inserted.remove_layer("flip")
     output, intermediate = system.debug_propagate_mono(1e-6)
 
-    assert list(inserted.layers) == [
-        "pupil",
-        "propagator",
-        "flip",
-        "normalise",
-    ]
+    assert list(inserted.layers) == ["pupil", "propagator", "flip", "normalise"]
     assert list(removed.layers) == list(system.layers)
     assert list(intermediate) == [
         "initial_wavefront",
@@ -200,15 +174,10 @@ def test_layer_management_and_debugging(system):
 def test_model_interface(system):
     spectrum = dl.Spectrum([0.9e-6, 1.1e-6], [0.25, 0.75])
     source = dl.Source(
-        spectrum.wavelengths,
-        position=[0.1, -0.2],
-        weights=spectrum.weights,
+        spectrum.wavelengths, position=[0.1, -0.2], weights=spectrum.weights
     )
     binary = dl.BinarySource(
-        spectrum.wavelengths,
-        separation=0.1,
-        contrast=2.0,
-        weights=spectrum.weights,
+        spectrum.wavelengths, separation=0.1, contrast=2.0, weights=spectrum.weights
     )
 
     assert isinstance(system.model(spectrum), dl.PSF)
@@ -219,8 +188,9 @@ def test_model_interface(system):
     sourced = system.model(source, return_all=True)
     assert np.allclose(sourced["Wavefront"].wavelength, spectrum.wavelengths)
     binary = system.model(binary, return_all=True)
-    assert binary["PSF"].data.shape == (2, 8, 6)
-    assert binary["PSF"].spec.d.shape == (2, 2)
+    assert binary["Wavefront"].phasor.shape[0] == 2
+    assert binary["PSF"].data.shape == (8, 6)
+    assert binary["PSF"].spec.d.shape == (2,)
 
 
 @pytest.mark.parametrize(

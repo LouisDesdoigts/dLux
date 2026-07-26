@@ -9,8 +9,7 @@ import jax.numpy as np
 import equinox as eqx
 from jax import Array
 
-import dLux.utils as dlu
-from ..parametric import Interpolation, Parametric, ParametricHolder, to_param
+from ..parametric import Parametric, ParametricHolder, to_param
 from ..fields import Wavefront
 
 __all__ = [
@@ -20,7 +19,6 @@ __all__ = [
     "TransmissiveLayer",
     "AberratedLayer",
     "Optic",
-    "Filter",
     "Tilt",
 ]
 
@@ -125,79 +123,6 @@ class Optic(TransmissiveLayer, AberratedLayer):
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
-
-
-class Filter(OpticalLayer):
-    """Apply a parametric spectral throughput curve to a wavefront.
-
-    The throughput is an intensity response, so its square root is applied
-    to the complex field amplitude. Array inputs are promoted to an
-    :class:`Interpolation` evaluated at the actual wavefront wavelengths.
-
-    Parameters
-    ----------
-    throughput : Array or Parametric
-        Parametric intensity throughput, or sampled values to interpolate.
-    wavelengths : Array or None
-        Wavelength knots for an array throughput. Must be omitted when
-        throughput is already parametric.
-    unit : str
-        Unit of ``wavelengths`` and ``bin_width``. Values are converted
-        to metres internally.
-    bin_width : Array or None
-        Width of each modelled wavelength bin. When supplied, the filter
-        throughput is integrated over each bin and divided by its width.
-        When omitted, throughput is evaluated at the central wavelength.
-    """
-
-    throughput: Parametric
-    bin_width: Array | None
-
-    def __init__(
-        self, throughput, wavelengths=None, unit="m", method="linear", bin_width=None
-    ):
-        scale = dlu.unit_factor(unit)
-        self.bin_width = (
-            None if bin_width is None else np.asarray(bin_width, dtype=float) * scale
-        )
-        if self.bin_width is not None and not bool(np.all(self.bin_width > 0)):
-            raise ValueError("bin_width must contain positive values.")
-        if isinstance(throughput, Parametric):
-            if wavelengths is not None:
-                raise ValueError(
-                    "wavelengths must be omitted for parametric throughput."
-                )
-            self.throughput = throughput
-            return
-        if wavelengths is None:
-            raise ValueError("wavelengths are required for array throughput.")
-        if self.bin_width is not None and method != "linear":
-            raise ValueError(
-                "Integrated array throughput currently requires method='linear'."
-            )
-        wavelengths = np.asarray(wavelengths, dtype=float)
-        wavelengths = wavelengths * scale
-        self.throughput = Interpolation(
-            wavelengths, throughput, method=method, extrapolate=0.0
-        )
-
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        wavelength = wavefront.wavelength
-        context = {
-            "variables": wavelength,
-            "wavelengths": wavelength,
-            "wavefront": wavefront,
-        }
-        if self.bin_width is None:
-            throughput = self.throughput.evaluate(**context)
-        else:
-            lower = wavelength - self.bin_width / 2
-            upper = wavelength + self.bin_width / 2
-            throughput = self.throughput.integrate(lower, upper, **context)
-            throughput = throughput / self.bin_width
-        amplitude = np.sqrt(throughput)
-        amplitude = wavefront._to_phasor_shape(amplitude)
-        return wavefront.set(phasor=wavefront.phasor * amplitude)
 
 
 class Tilt(OpticalLayer):

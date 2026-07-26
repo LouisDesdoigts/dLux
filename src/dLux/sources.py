@@ -11,7 +11,6 @@ from jax import Array
 
 import dLux.utils as dlu
 from .parametric import Parametric, ParametricHolder, resolve
-from .fields import PSF
 
 __all__ = ["BaseSource", "Spectrum", "Source", "BinarySource"]
 
@@ -59,6 +58,11 @@ class BaseSource(ParametricHolder):
     flux: Array | Parametric | None
     distribution: Array | Parametric | None
     units: dict
+
+    def __init__(self, flux=None, distribution=None, units=None):
+        self.flux = _as_parameter(flux)
+        self.distribution = _as_parameter(distribution)
+        self.units = _merge_units(units)
 
     def source_params(self, nsource=None, **context):
         """Resolve flux and distribution in canonical source units."""
@@ -115,25 +119,20 @@ class BaseSource(ParametricHolder):
         )
         return convolved.reshape(shape)
 
-    def _model_components(
-        self, optics, wavelengths, weights, position, flux, distribution, return_all
-    ):
+    def _propagate(self, optics, params):
+        """Propagate one or more spatial source components."""
+        wavelengths = params["wavelengths"]
+        weights = params["weights"]
+        position = params["position"]
+        flux = params["flux"]
         if position.ndim == 1:
             if weights.ndim != 1:
                 raise ValueError(
                     "Single-component source weights must be one-dimensional."
                 )
-            result = optics.propagate(
+            return optics.propagate(
                 wavelengths, position, weights * flux, return_all=True
             )
-            if distribution is None:
-                return result if return_all else result["PSF"]
-            psf = PSF(
-                self._convolve(result["PSF"].data, distribution), result["PSF"].spec
-            )
-            if return_all:
-                return {"Wavefront": result["Wavefront"], "PSF": psf}
-            return psf
 
         if weights.ndim == 1:
             weights = np.broadcast_to(weights, position.shape[:-1] + weights.shape)
@@ -150,13 +149,23 @@ class BaseSource(ParametricHolder):
                 return_all=True,
             )
 
-        results = eqx.filter_vmap(propagate)(position, flux, weights)
-        wavefronts = results["Wavefront"]
-        psf = results["PSF"]
+        return eqx.filter_vmap(propagate)(position, flux, weights)
+
+    def model(self, optics, return_all=False):
+        """Model the source through an optical system."""
+        params = self.params()
+        result = self._propagate(optics, params)
+        psf = result["PSF"]
+        distribution = params["distribution"]
         if distribution is not None:
             psf = psf.set(data=self._convolve(psf.data, distribution))
+        if params["position"].ndim > 1:
+            spec = psf.spec
+            spec = spec.set(d=spec.d[0], c=None if spec.c is None else spec.c[0])
+            psf = psf.set(data=psf.data.sum(0), spec=spec)
+        result = {**result, "PSF": psf, "psf": psf.data}
         if return_all:
-            return {"Wavefront": wavefronts, "PSF": psf}
+            return result
         return psf
 
 
@@ -177,10 +186,6 @@ class Spectrum(ParametricHolder):
             weights = np.ones_like(self.wavelengths)
         self.weights = _as_parameter(weights)
         self.units = _merge_units(units)
-        if not isinstance(self.wavelengths, Parametric) and not isinstance(
-            self.weights, Parametric
-        ):
-            self.spectrum_params()
 
     def spectrum_params(self, **context: Any) -> tuple[Array, Array]:
         """Resolve wavelengths and weights in canonical wavelength units."""
@@ -228,31 +233,11 @@ class Source(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        self.wavelengths = _as_parameter(wavelengths)
-        if weights is None:
-            if isinstance(self.wavelengths, Parametric):
-                raise ValueError(
-                    "weights are required when wavelengths are parametric."
-                )
-            weights = np.ones_like(self.wavelengths)
-        self.weights = _as_parameter(weights)
         self.position = _as_parameter(position)
-        self.flux = _as_parameter(flux)
-        self.distribution = _as_parameter(distribution)
-        self.units = _merge_units(units)
-        if not any(
-            isinstance(value, Parametric)
-            for value in (
-                self.wavelengths,
-                self.weights,
-                self.position,
-                self.flux,
-                self.distribution,
-            )
-        ):
-            self.params()
+        BaseSource.__init__(self, flux, distribution, units)
+        Spectrum.__init__(self, wavelengths, weights, self.units)
 
-    def params(self):
+    def params(self) -> dict:
         """Resolve all point-source parameters in canonical units."""
         wavelengths, weights = self.spectrum_params()
         position = resolve(self.position, float, source=self, wavelengths=wavelengths)
@@ -263,11 +248,13 @@ class Source(BaseSource, Spectrum):
             raise ValueError("position must have shape (2,).")
         position = position * dlu.unit_factor(self.units["position"])
         flux, distribution = self.source_params(wavelengths=wavelengths)
-        return wavelengths, weights, position, flux, distribution
-
-    def model(self, optics, return_all=False):
-        """Model this point source through an optical system."""
-        return self._model_components(optics, *self.params(), return_all)
+        return {
+            "wavelengths": wavelengths,
+            "weights": weights,
+            "position": position,
+            "flux": flux,
+            "distribution": distribution,
+        }
 
 
 class BinarySource(BaseSource, Spectrum):
@@ -295,37 +282,14 @@ class BinarySource(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        self.wavelengths = _as_parameter(wavelengths)
-        if weights is None:
-            if isinstance(self.wavelengths, Parametric):
-                raise ValueError(
-                    "weights are required when wavelengths are parametric."
-                )
-            weights = np.ones_like(self.wavelengths)
-        self.weights = _as_parameter(weights)
         self.centre = _as_parameter(centre)
         self.separation = _as_parameter(separation)
         self.position_angle = _as_parameter(position_angle)
         self.contrast = _as_parameter(contrast)
-        self.flux = _as_parameter(flux)
-        self.distribution = _as_parameter(distribution)
-        self.units = _merge_units(units)
-        if not any(
-            isinstance(value, Parametric)
-            for value in (
-                self.wavelengths,
-                self.weights,
-                self.centre,
-                self.separation,
-                self.position_angle,
-                self.contrast,
-                self.flux,
-                self.distribution,
-            )
-        ):
-            self.params()
+        BaseSource.__init__(self, flux, distribution, units)
+        Spectrum.__init__(self, wavelengths, weights, self.units)
 
-    def params(self):
+    def params(self) -> dict:
         """Resolve all binary parameters in canonical units."""
         wavelengths, weights = self.spectrum_params()
         centre = resolve(self.centre, float, source=self)
@@ -342,8 +306,10 @@ class BinarySource(BaseSource, Spectrum):
         mean_flux, _ = self.source_params(wavelengths=wavelengths)
         distribution = self.distribution_params(2, wavelengths=wavelengths)
         flux = dlu.fluxes_from_contrast(mean_flux, contrast)
-        return wavelengths, weights, position, flux, distribution
-
-    def model(self, optics, return_all=False):
-        """Model both binary components through an optical system."""
-        return self._model_components(optics, *self.params(), return_all)
+        return {
+            "wavelengths": wavelengths,
+            "weights": weights,
+            "position": position,
+            "flux": flux,
+            "distribution": distribution,
+        }
