@@ -16,11 +16,7 @@ __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 
 
 class CauchyIndex(Parametric):
-    """A refractive index represented by a Cauchy dispersion relation.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/CauchyIndex.png)
-    """
+    """A refractive index represented by a Cauchy dispersion relation."""
 
     coefficients: Array
     scale: Array
@@ -65,11 +61,7 @@ class PolynomialIndex(Parametric):
 
 
 class InterpolatedIndex(Parametric):
-    """A refractive index interpolated from wavelength-index samples.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/InterpolatedIndex.png)
-    """
+    """A refractive index interpolated from wavelength-index samples."""
 
     wavelengths: Array
     indices: Array

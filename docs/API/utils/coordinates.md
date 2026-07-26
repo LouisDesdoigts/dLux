@@ -9,6 +9,9 @@
 ???+ info "pixel_coords"
     ::: dLux.utils.coordinates.pixel_coords
 
+???+ info "nd_axes"
+    ::: dLux.utils.coordinates.nd_axes
+
 ???+ info "nd_coords"
     ::: dLux.utils.coordinates.nd_coords
 
@@ -23,9 +26,6 @@
 
 ???+ info "rotate_coords"
     ::: dLux.utils.coordinates.rotate_coords
-
-???+ info "gen_powers"
-    ::: dLux.utils.coordinates.gen_powers
 
 ???+ info "distort_coords"
     ::: dLux.utils.coordinates.distort_coords

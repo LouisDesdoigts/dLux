@@ -1,17 +1,12 @@
-# Great resources: https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#with-section-index-pages
-# https://squidfunk.github.io/mkdocs-material/reference/buttons/
-# https://squidfunk.github.io/mkdocs-material/reference/admonitions/
-
-
 theme:
   name: material
   icon:
+    logo: material/telescope
     repo: fontawesome/brands/github  # Sets the logo to the GitHub 'cat'
   features:
     - navigation.top      # "Back to top" button
     - navigation.indexes   # Allows a section title to be its own page
     - content.code.copy   # Copy button on code blocks
-    - toc.integrate       # Put Table of Contents on the left sidebar
     - content.action.edit   # Adds an "Edit this page" button
     - content.action.view   # Adds a "View source" button
 
@@ -38,18 +33,17 @@ site_author: Louis Desdoigts
 site_url: https://louisdesdoigts.github.io/dlux/
 repo_url: https://github.com/LouisDesdoigts/dlux
 repo_name: louisdesdoigts/dlux
-edit_uri: edit/main/docs/   # Directs where the "Edit" link points 
+edit_uri: edit/main/docs/   # Directs where the "Edit" link points
 
-# Disable unresolved_references check: notebook outputs contain patterns like
-# f64[2], Latent[0], [00:00<?, ?it/s] that look like link references but aren't.
-# invalid_links and invalid_link_anchors remain active to catch real broken links.
+# Notebook outputs contain bracketed JAX shapes and progress-bar text that look
+# like unresolved link references. Invalid links and anchors remain validated.
 validation:
   unresolved_references: false
 
 strict: true # Prevent builds with warnings
 
 plugins:
-  - zensical/search      # High-performance built-in search
+  - zensical/search
   - mkdocstrings:        # Auto-generate API docs from code
       handlers:
         python:
@@ -60,7 +54,11 @@ plugins:
 markdown_extensions:
   - admonition           # Support for !!! note "Title" blocks
   - pymdownx.details     # Support for collapsible ??? note blocks
-  - pymdownx.superfences # Allows nesting code inside other blocks
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.snippets:   # Allows including code snippets from files
       base_path: [".", "docs"] # Look in the root AND the docs folder
   - pymdownx.arithmatex: # Required for LaTeX math
@@ -75,6 +73,8 @@ markdown_extensions:
 # MathJax setup for LaTeX rendering
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
+  - javascripts/mermaid.js
 
 extra:
   version:
@@ -83,6 +83,7 @@ extra:
 # ===== Navigation =====
 nav:
   - Home: index.md
+  - Installation: installation.md
   - Tutorials:
     - A Basic Overview:         phase_retrieval.md
     - Building Apertures:       apertures.md
@@ -98,32 +99,33 @@ nav:
   - API:
     - Core API:
       - Overview: API/core/overview.md
-      - Coordinates: API/core/coordinates.md
-      - Detectors: API/core/detectors.md
-      - Optical Systems: API/core/optical_systems.md
-      - Psfs: API/core/psfs.md
+      - Fields: API/core/fields.md
+      - Grids: API/core/grids.md
       - Sources: API/core/sources.md
-      - Spectra: API/core/spectra.md
-      - Wavefronts: API/core/wavefronts.md
+      - Systems: API/core/systems.md
 
     - Layers API:
-      - Unified Layers: API/unified_layers.md
-      - Detector Layers: API/detector_layers.md
-      - Optical Layers: API/optical_layers.md
-      - Dynamic Layers: API/dynamic_layers.md
-      - Sparse Layers: API/sparse_layers.md
-      - Refractive Layers: API/refractive_layers.md
-      - Polarised Layers: API/polarised_layers.md
-      - Propagation Layers: API/propagation_layers.md
+      - Overview: API/layers/overview.md
+      - Detector Layers: API/layers/detector_layers.md
+      - Dynamic Layers: API/layers/dynamic_layers.md
+      - Optical Layers: API/layers/optical_layers.md
+      - Polarised Layers: API/layers/polarised_layers.md
+      - Propagation Layers: API/layers/propagation_layers.md
+      - Refractive Layers: API/layers/refractive_layers.md
+      - Sparse Layers: API/layers/sparse_layers.md
+      - Unified Layers: API/layers/unified_layers.md
+
     - Parametric API:
-      - Parametrics: API/parametric/parametrics.md
+      - Overview: API/parametric/overview.md
       - Bases: API/parametric/bases.md
+      - Parametrics: API/parametric/parametrics.md
       - Polynomials: API/parametric/polynomials.md
+      - Refractive: API/parametric/refractive.md
       - Shapes: API/parametric/shapes.md
-      - Refractive Models: API/parametric/refractive.md
 
     - Utils API:
       - Overview: API/utils/overview.md
+      - Abcd: API/utils/abcd.md
       - Apertures: API/utils/apertures.md
       - Array Ops: API/utils/array_ops.md
       - Coordinates: API/utils/coordinates.md
@@ -135,10 +137,12 @@ nav:
       - Misc: API/utils/misc.md
       - Norms: API/utils/norms.md
       - Optics: API/utils/optics.md
+      - Polarisation: API/utils/polarisation.md
+      - Polynomials: API/utils/polynomials.md
       - Propagation: API/utils/propagation.md
       - Source: API/utils/source.md
       - Units: API/utils/units.md
-      - Zernikes: API/utils/zernikes.md
-  - FAQ & Troubleshooting: faq.md
+  - Publications: publications.md
+  - Citation: citation.md
   - Change Log: changelog.md
   - Contributing: contributing.md

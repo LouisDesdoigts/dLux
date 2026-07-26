@@ -1,22 +1,25 @@
 # Sources
 
+## Inheritance
+
+```mermaid
+classDiagram
+    BaseSource <|-- BinarySource
+    BaseSource <|-- Source
+    ParametricHolder <|-- BaseSource
+    ParametricHolder <|-- Spectrum
+    Spectrum <|-- BinarySource
+    Spectrum <|-- Source
+```
+
 ???+ info "BaseSource"
     ::: dLux.sources.BaseSource
 
-???+ info "PointSource"
-    ::: dLux.sources.PointSource
+???+ info "Spectrum"
+    ::: dLux.sources.Spectrum
 
-???+ info "PointSources"
-    ::: dLux.sources.PointSources
+???+ info "Source"
+    ::: dLux.sources.Source
 
 ???+ info "BinarySource"
     ::: dLux.sources.BinarySource
-
-???+ info "ResolvedSource"
-    ::: dLux.sources.ResolvedSource
-
-???+ info "PointResolvedSource"
-    ::: dLux.sources.PointResolvedSource
-
-???+ info "Scene"
-    ::: dLux.sources.Scene

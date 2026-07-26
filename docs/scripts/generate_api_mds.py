@@ -8,17 +8,17 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
-ROOT = Path(__file__).resolve().parent
-REPO_ROOT = ROOT.parent
+DOCS_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = DOCS_ROOT.parent
 SRC_ROOT = REPO_ROOT / "src"
-API_ROOT = ROOT / "API"
+API_ROOT = DOCS_ROOT / "API"
 PKG_ROOT = SRC_ROOT / "dLux"
 MKDOCS_FILE = REPO_ROOT / "mkdocs.yml"
 
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-SECTIONS = ("core", "layers", "utils")
+SECTIONS = ("core", "layers", "parametric", "utils")
 
 
 def flatten(items: Iterable):
@@ -33,6 +33,7 @@ def section_title(section: str) -> str:
     return {
         "core": "Core API",
         "layers": "Layers API",
+        "parametric": "Parametric API",
         "utils": "Utils API",
     }[section]
 
@@ -52,7 +53,7 @@ def module_from_path(py_path: Path) -> tuple[str, str, str] | None:
         module_name = f"dLux.{stem}"
         return section, stem, module_name
 
-    if len(rel.parts) == 2 and rel.parts[0] in ("layers", "utils"):
+    if len(rel.parts) == 2 and rel.parts[0] in ("layers", "parametric", "utils"):
         section = rel.parts[0]
         stem = rel.stem
         if stem.startswith("_"):
@@ -113,17 +114,50 @@ def exported_api_items(module_name: str) -> list[str]:
     return items
 
 
+def render_inheritance(module_name: str, names: list[str]) -> list[str]:
+    """Render direct class relationships as a Mermaid class diagram."""
+    module = importlib.import_module(module_name)
+    classes = [
+        getattr(module, name)
+        for name in names
+        if inspect.isclass(getattr(module, name, None))
+    ]
+    relationships = [
+        f"    {base.__name__} <|-- {cls.__name__}"
+        for cls in classes
+        for base in cls.__bases__
+        if base is not object
+    ]
+    if not relationships:
+        return []
+    return [
+        "## Inheritance",
+        "",
+        "```mermaid",
+        "classDiagram",
+        *sorted(set(relationships)),
+        "```",
+        "",
+    ]
+
+
 def render_page(title: str, module_name: str, names: list[str]) -> str:
     out = [f"# {title}", ""]
+    module = importlib.import_module(module_name)
 
     if not names:
         out.append("No public classes or functions are exported by this module.")
         out.append("")
         return "\n".join(out)
 
+    out.extend(render_inheritance(module_name, names))
+
     for i, name in enumerate(names):
+        obj = getattr(module, name)
+        target_module = getattr(obj, "__module__", module_name)
+        target_name = getattr(obj, "__qualname__", name)
         out.append(f'???+ info "{name}"')
-        out.append(f"    ::: {module_name}.{name}")
+        out.append(f"    ::: {target_module}.{target_name}")
         if i != len(names) - 1:
             out.append("")
 
@@ -202,7 +236,12 @@ def main() -> None:
         section_dir = API_ROOT / section
         overview = section_dir / "overview.md"
         overview.write_text(
-            f"# {section_title(section)}\n",
+            (
+                f"# {section_title(section)}\n\n"
+                "This reference is generated from the public ``__all__`` exports "
+                "of each dLux module. Inheritance diagrams and API entries therefore "
+                "track the implementation automatically.\n"
+            ),
             encoding="utf-8",
         )
         created += 1
@@ -220,7 +259,7 @@ def main() -> None:
             md_path.write_text(text, encoding="utf-8")
             nav_modules[section].append(stem)
             print(
-                f"CREATE {md_path.relative_to(ROOT)} "
+                f"CREATE {md_path.relative_to(DOCS_ROOT)} "
                 f"({module_name}: {len(names)} exported classes/functions)"
             )
             created += 1

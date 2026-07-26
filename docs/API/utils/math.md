@@ -15,5 +15,8 @@
 ???+ info "eval_basis"
     ::: dLux.utils.math.eval_basis
 
+???+ info "solve_basis"
+    ::: dLux.utils.math.solve_basis
+
 ???+ info "nandiv"
     ::: dLux.utils.math.nandiv

@@ -62,17 +62,15 @@ Note that just because the tests pass on your local machine, that does not mean 
 
 Any changes you make should also be appropriately documented! For small API changes this shouldn't require any changes, however if you are adding new functionality you will need to add some documentation. This can be done by modifying the appropriates files in the `docs` directory.
 
-To build the documentation locally and make sure everything is working correctly, you can run the following command:
+The API reference is regenerated from the package exports in documentation CI.
+Ordinary local builds do not require a separate API-generation step. Run a
+strict build before opening a pull request:
 
 ```bash
-zensical serve
+zensical build --strict
 ```
 
-This will build the documentation and serve it on a local server. You can then navigate to `localhost:8000` in your browser to view the documentation.
-
-**Generating UML Diagrams**
-
-Needs to be run from the docs/ directory... TODO: expand on this
+Use `zensical serve` to inspect the documentation locally at `localhost:8000`.
 
 ---
 
