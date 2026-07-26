@@ -1,7 +1,28 @@
 # Propagation
 
+???+ info "FFT_pad"
+    ::: dLux.utils.propagation.FFT_pad
+
+???+ info "FFT_spec"
+    ::: dLux.utils.propagation.FFT_spec
+
+???+ info "FFT_shift"
+    ::: dLux.utils.propagation.FFT_shift
+
+???+ info "FFT_ramp"
+    ::: dLux.utils.propagation.FFT_ramp
+
 ???+ info "FFT"
     ::: dLux.utils.propagation.FFT
 
 ???+ info "MFT"
     ::: dLux.utils.propagation.MFT
+
+???+ info "ABCD_MFT"
+    ::: dLux.utils.propagation.ABCD_MFT
+
+???+ info "ABCD_FFT"
+    ::: dLux.utils.propagation.ABCD_FFT
+
+???+ info "ASM"
+    ::: dLux.utils.propagation.ASM

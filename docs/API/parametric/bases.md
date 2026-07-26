@@ -1,4 +1,17 @@
-# Parametric Bases
+# Bases
+
+## Inheritance
+
+```mermaid
+classDiagram
+    ExplicitBasis <|-- CLIMBBasis
+    ImplicitBasis <|-- CoordBasis
+    ImplicitBasis <|-- FourierBasis
+    ImplicitBasis <|-- SplineBasis
+    Parametric <|-- ParametricBasis
+    ParametricBasis <|-- ExplicitBasis
+    ParametricBasis <|-- ImplicitBasis
+```
 
 ???+ info "ParametricBasis"
     ::: dLux.parametric.bases.ParametricBasis

@@ -1,29 +1,48 @@
 # Installation
 
-∂Lux is hosted on PyPI, so simply pip install!
+## Install dLux
 
-```
-pip install dLux
-```
+dLux requires Python 3.10 or newer and is available from PyPI:
 
-You can also build from source. To do so, clone the git repo, enter the directory, and run.
-
-```
-pip install .
+```bash
+python -m pip install dLux
 ```
 
-We encourage the creation of a virtual environment to run ∂Lux to prevent software conflicts as we keep the software up to date with the latest version of the core packages.
+JAX selects its compute backend independently. Follow the
+[JAX installation guide](https://docs.jax.dev/en/latest/installation.html) if
+you want GPU or TPU acceleration.
 
-## Windows/Google Colab Quickstart
-`jaxlib` is currently not supported by the Jax team on windows, however there are two work-arounds!
+## Development installation
 
-Firstly [here](https://github.com/cloudhan/jax-windows-builder) is some community built software to install jax on windows! We do not use this ourselves so have limited knowledge, but some users seems to have got everyting working fine!
+Clone the repository and install the development dependencies in editable mode:
 
-Secondly, users can also run our software on [Google Colab](https://research.google.com/colaboratory/). If you want to instal from source in colab, run this at the start of your notebook!
-
+```bash
+git clone https://github.com/LouisDesdoigts/dLux.git
+cd dLux
+python -m pip install -e ".[dev]"
+pre-commit install
 ```
-!git clone https://github.com/LouisDesdoigts/dLux.git # Download latest version
-!cd dLux; pip install . -q # Navigate to ∂Lux and install from source
+
+Run the tests and build the documentation before submitting changes:
+
+```bash
+pytest
+zensical build --strict
 ```
 
-From here everything should work! You can also run the code on GPU to take full advantage of Jax, simply by switch to a GPU runtime environment, no extra steps necessary!
+## Tutorial notebooks
+
+The runnable notebooks and their dependencies live in the separate
+[dLux tutorials repository](https://github.com/LouisDesdoigts/dLux_tutorials).
+Install that project in its own environment:
+
+```bash
+git clone https://github.com/LouisDesdoigts/dLux_tutorials.git
+cd dLux_tutorials
+python -m pip install -e .
+jupyter lab
+```
+
+The editable install is useful when developing notebooks and dLux together:
+install your local dLux checkout into the same environment with
+`python -m pip install -e /path/to/dLux`.

@@ -339,9 +339,6 @@ class Wavefront(ContinuousField):
     preceding axes are treated as vectorisation axes. Passing a vector of wavelengths
     creates a chromatic wavefront with matching leading phasor dimensions.
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/Wavefront.png)
-
     Attributes
     ----------
     wavelength : float or Array, meters
@@ -404,16 +401,11 @@ class Wavefront(ContinuousField):
         wavelength : float or Array, meters
             The wavelength of the `Wavefront`. Passing an array creates a chromatic
             wavefront with phasor shape `wavelength.shape + (npixels, npixels)`.
-        npixels : int
-            The number of pixels that represent the `Wavefront`.
-        diameter : float = None, meters
-            The total diameter of the `Wavefront`. Either `diameter` or `pixel_scale`
-            must be provided.
-        pixel_scale : float or Array = None, meters/pixel
-            The pixel scale of the `Wavefront`. Either `diameter` or `pixel_scale`
-            must be provided. Scalar values are broadcast across chromatic axes.
-        center : float = None
-            The centre coordinate of the wavefront grid, in metres. Defaults to zero.
+        spec : GridSpec
+            Sampling and coordinate definition for the wavefront.
+        phasor : Array or None
+            Optional complex electric field. If omitted, a uniform field is generated
+            from ``spec.n``.
         """
         spec = spec.broadcast(2)
         self.wavelength = np.asarray(wavelength, float)
@@ -459,15 +451,8 @@ class Wavefront(ContinuousField):
         wavelength : float or Array, meters
             The wavelength of the wavefront. Vector-valued wavelengths define a
             chromatic wavefront.
-        pixel_scale : float or Array = None, meters/pixel
-            The pixel scale of the phasor array. Either `pixel_scale` or
-            `diameter` must be provided. Scalar values are broadcast across
-            chromatic axes.
-        diameter : float = None, meters
-            The diameter of the phasor array. Either `pixel_scale` or
-            `diameter` must be provided.
-        center : float = None
-            The centre coordinate of the wavefront grid, in metres. Defaults to zero.
+        spec : GridSpec
+            Sampling and coordinate definition for the wavefront.
 
         Returns
         -------
@@ -1105,14 +1090,8 @@ class PolarisedWavefront(Wavefront):
         wavelength : float or Array, meters
             The wavelength of the wavefront. If a 2D phasor is passed with vector
             wavelengths, it is broadcast over the wavelength axes.
-        pixel_scale : float or Array = None, meters/pixel
-            The pixel scale of the phasor array. Either `pixel_scale` or `diameter`
-            must be provided.
-        diameter : float or Array = None, meters
-            The diameter of the phasor array. Either `pixel_scale` or `diameter`
-            must be provided.
-        center : float = None
-            The centre coordinate of the wavefront grid, in metres. Defaults to zero.
+        spec : GridSpec
+            Sampling and coordinate definition for the wavefront.
 
         Returns
         -------

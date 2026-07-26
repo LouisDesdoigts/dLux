@@ -51,10 +51,6 @@ If you have any other projects that use dLux and would like to be added to this 
 If you have any other papers that use dLux and would like to be added to this list, please let us know!
 
 
-## Collaboration & Development
-
-dLux is open source so we are always open to feedback, suggestions, and pull-requests! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
-
 ## Citation
 
 If you use dLux in your research, please cite

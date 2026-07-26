@@ -38,9 +38,6 @@ class ApplyPixelResponse(DetectorLayer):
     used to model inter- and intra-pixel sensitivity variations common
     to most detectors.
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/ApplyPixelResponse.png)
-
     Attributes
     ----------
     pixel_response : Array
@@ -70,9 +67,6 @@ class ApplyJitter(DetectorLayer):
     """
     Convolves the PSF with a radially symmetric Gaussian kernel parameterised by its
     standard deviation (sigma).
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ApplyJitter.png)
 
     Attributes
     ----------
@@ -139,9 +133,6 @@ class ApplySaturation(DetectorLayer):
     Applies a simple saturation model to the input PSF by clipping any values above
     the threshold value.
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/ApplySaturation.png)
-
     Attributes
     ----------
     threshold : float
@@ -168,9 +159,6 @@ class AddConstant(DetectorLayer):
     """
     Adds a constant to the output PSF. This is typically used to model the mean value of
     the detector noise.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/AddConstant.png)
 
     Attributes
     ----------

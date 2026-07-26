@@ -40,6 +40,7 @@ jobs:
       - name: Build Documentation
         run: |
           DLUX_VERSION="$(python -c 'from importlib.metadata import version; print(version("dLux"))')"
+          python docs/scripts/generate_api_mds.py
           DLUX_DOCS_SITE_NAME="dLux v${DLUX_VERSION}" zensical build --strict
 
       - name: Configure Git

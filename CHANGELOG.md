@@ -31,9 +31,6 @@
   standardising OPD, phase, and amplitude effects
   ([#331](https://github.com/LouisDesdoigts/dLux/issues/331)).
 
-### ⏳ Deprecations
-- No APIs are deprecated in this release.
-
 ### 🐛 Bug Fixes
 - Wavefront and PSF interpolation now share the established interpolation utility
   while preserving their distinct complex and real-valued data requirements.
@@ -58,9 +55,6 @@
 - Continuous scalar parameters are now consistently stored as scalar JAX arrays
   rather than Python floats
   ([#338](https://github.com/LouisDesdoigts/dLux/issues/338)).
-
-### ⏳ Deprecations
-- No APIs are deprecated in this release.
 
 ### 🐛 Bug Fixes
 - Fixed transmission, softening, and Zernike basis generation for apertures larger
