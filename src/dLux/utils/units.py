@@ -88,7 +88,7 @@ def unit_factor_to_rad(unit: str):
 
     # prefixed unit
     p = u[0]
-    base = u[1:]
+    base = _canon(u[1:])
 
     if p in _PREFIX and base in _BASE_TO_RAD:
         return _PREFIX[p] * _BASE_TO_RAD[base]
@@ -107,7 +107,7 @@ def unit_factor(unit: str):
         return _BASE_UNITS[u]
 
     prefix = u[0]
-    base = u[1:]
+    base = _canon(u[1:])
     if prefix in _PREFIX and base in _BASE_UNITS:
         return _PREFIX[prefix] * _BASE_UNITS[base]
     raise ValueError(f"Unknown unit '{unit}'.")

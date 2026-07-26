@@ -193,6 +193,29 @@ def test_model_interface(system):
     assert binary["PSF"].spec.d.shape == (2,)
 
 
+def test_resolved_source_model(system):
+    distribution = np.eye(3)
+    source = dl.BinarySource(
+        [0.9e-6, 1.1e-6],
+        separation=0.1,
+        contrast=2.0,
+        weights=[0.25, 0.75],
+        distribution=distribution,
+    )
+
+    psf = assert_jittable(
+        lambda value: value.model(system), source, rtol=1e-5, atol=1e-5
+    )
+    assert isinstance(psf, dl.PSF)
+    assert psf.data.shape == (8, 6)
+
+
+def test_binary_source_component_distributions(system):
+    distribution = np.stack((np.eye(3), np.flip(np.eye(3), 0)))
+    source = dl.BinarySource([1e-6], distribution=distribution)
+    assert source.model(system).data.shape == (8, 6)
+
+
 @pytest.mark.parametrize(
     "operation",
     [

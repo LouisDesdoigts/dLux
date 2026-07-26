@@ -60,6 +60,12 @@ class BaseSource(ParametricHolder):
 
     def source_params(self, nsource=None, **context):
         """Resolve flux and distribution in canonical source units."""
+        flux = self.flux_params(nsource, **context)
+        distribution = self.distribution_params(nsource, **context)
+        return flux, distribution
+
+    def flux_params(self, nsource=None, **context):
+        """Resolve and validate flux in canonical source units."""
         flux = resolve(self.flux, float, source=self, **context)
         flux = np.asarray(1.0 if flux is None else flux, dtype=float)
         if nsource is None:
@@ -70,9 +76,7 @@ class BaseSource(ParametricHolder):
                 flux = np.broadcast_to(flux, (nsource,))
             if flux.shape != (nsource,):
                 raise ValueError("Vectorised flux must have shape (nsource,).")
-        flux = _convert_flux(flux, self.units["flux"])
-        distribution = self.distribution_params(nsource, **context)
-        return flux, distribution
+        return _convert_flux(flux, self.units["flux"])
 
     def distribution_params(self, nsource, **context):
         """Resolve and validate optional per-source spatial distributions."""
@@ -297,7 +301,7 @@ class BinarySource(BaseSource, Spectrum):
         position = dlu.positions_from_sep(
             centre * factor, separation * factor, position_angle
         )
-        mean_flux, _ = self.source_params(wavelengths=wavelengths)
+        mean_flux = self.flux_params(wavelengths=wavelengths)
         distribution = self.distribution_params(2, wavelengths=wavelengths)
         flux = dlu.fluxes_from_contrast(mean_flux, contrast)
         return {

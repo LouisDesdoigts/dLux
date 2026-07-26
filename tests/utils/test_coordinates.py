@@ -24,15 +24,10 @@ def test_coordinate_transform_contract(operation, parameter):
 
 def test_shear_contract():
     coordinates = dlu.nd_coords((6, 6), (0.1, 0.2))
-    output = assert_jittable(
-        dlu.shear_coords,
-        coordinates,
-        np.asarray((0.1, -0.2)),
-    )
+    output = assert_jittable(dlu.shear_coords, coordinates, np.asarray((0.1, -0.2)))
     assert output.shape == coordinates.shape
 
 
-@pytest.mark.xfail(strict=True, reason="shear_coords transposes non-square grids.")
 def test_shear_non_square():
     coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
     assert dlu.shear_coords(coordinates, np.asarray((0.1, -0.2))).shape == (
@@ -50,12 +45,7 @@ def test_polynomial_distortion():
     coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
     powers = dlu.polynomial_powers(2, 2)
     coefficients = np.ones((2, powers.shape[-1])) * 0.01
-    output = assert_jittable(
-        dlu.distort_coords,
-        coordinates,
-        coefficients,
-        powers,
-    )
+    output = assert_jittable(dlu.distort_coords, coordinates, coefficients, powers)
     assert output.shape == coordinates.shape
 
 

@@ -50,11 +50,36 @@ class TestSpecifications:
         assert pad.crop_size((12, 12)) == (4, 4)
         assert resize.resize(array).shape == (6, 8)
 
+    def test_explicit_resize_contract(self):
+        spec = dl.ResizeSpec((8, 6)).broadcast(2)
+        array = np.ones((4, 4))
+
+        assert spec.explicit
+        assert spec.padding == {"pad_to": (8, 6)}
+        assert spec.output_size(array.shape) == (8, 6)
+        assert spec.crop_size(array.shape) == (8, 6)
+        assert spec.pad(array).shape == (6, 8)
+        assert spec.crop(np.ones((10, 10))).shape == (6, 8)
+
     def test_units_and_differentiation(self):
         spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
 
         assert np.max(np.abs(spec.coordinates)) < 0.01
         assert_differentiable(lambda value: value.coordinates, spec)
+
+    def test_diameter_sampling(self):
+        spec = dl.GridSpec(n=(4, 6), diam=(2.0, 3.0), unit="m")
+
+        assert np.allclose(spec.d, np.asarray((0.5, 0.5)))
+        assert all(np.isclose(axis.mean(), 0.0) for axis in spec.axes)
+        assert spec.coordinates.shape == (2, 6, 4)
+
+    def test_rectangular_axes_contract(self):
+        spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), unit="m")
+
+        assert tuple(axis.shape for axis in spec.axes) == ((6,), (4,))
+        with pytest.raises(ValueError, match="equal axis lengths"):
+            _ = spec.xs
 
     @pytest.mark.parametrize(
         ("kwargs", "error"),
@@ -64,6 +89,8 @@ class TestSpecifications:
             ({"d": 0.0}, ValueError),
             ({"unit": ""}, ValueError),
             ({"n": (2, 3), "d": (1, 2, 3)}, ValueError),
+            ({"n": 4, "d": 0.1, "diam": 1.0}, ValueError),
+            ({"diam": 1.0}, ValueError),
         ],
     )
     def test_validation(self, kwargs, error):
@@ -131,6 +158,15 @@ class TestTransforms:
         output = assert_jittable(lambda value: value(coordinates), transform)
         assert output.shape == (3,) + coordinates.shape
 
+    def test_paired_vectorised_distortion(self, coordinates):
+        base = dl.DistortCoords(orders=(1, 2))
+        distortion = np.stack((base.distortion, base.distortion.at[0, 0].set(0.1)))
+        transform = base.set(distortion=distortion)
+        mapped_coordinates = np.stack((coordinates, coordinates + 0.1))
+
+        output = assert_jittable(lambda value: transform(value), mapped_coordinates)
+        assert output.shape == mapped_coordinates.shape
+
     @pytest.mark.parametrize(
         "constructor",
         [
@@ -138,6 +174,8 @@ class TestTransforms:
             lambda: dl.Affine(scale=0.0),
             lambda: dl.Affine(order=("rotation", "rotation")),
             lambda: dl.AffineMap(matrix=np.ones((3, 3))),
+            lambda: dl.AffineMap(offset=np.ones(3)),
+            lambda: dl.Affine(translation=np.ones(3)),
             lambda: dl.DistortCoords(powers=np.ones((3, 2))),
             lambda: dl.DistortCoords(order=2, orders=[2]),
         ],

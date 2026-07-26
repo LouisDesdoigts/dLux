@@ -59,7 +59,7 @@ def gaussian(
     )
 
     # Construct nD separable Gaussian kernel from 1D marginals
-    kernel = np.array(np.meshgrid(*one_d_gauss, indexing="xy")).prod(0)
+    kernel = np.array(np.meshgrid(*one_d_gauss, indexing="ij")).prod(0)
     return kernel / np.sum(kernel)
 
 

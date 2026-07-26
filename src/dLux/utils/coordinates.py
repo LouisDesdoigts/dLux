@@ -71,8 +71,8 @@ def shear_coords(coords: Array, shear: Array) -> Array:
     coords : Array
         The sheared coordinates.
     """
-    trans_coords = np.transpose(coords, (0, 2, 1))
-    return coords + trans_coords * shear[:, None, None]
+    x, y = coords
+    return np.array((x + shear[0] * y, y + shear[1] * x))
 
 
 def rotate_coords(coords: Array, rotation: float) -> Array:

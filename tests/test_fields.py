@@ -13,9 +13,7 @@ class TestWavefront:
     def test_construction_and_properties(self, make_wavefront):
         wavefront = make_wavefront()
         restored = dl.Wavefront.from_phasor(
-            wavefront.phasor * np.exp(0.2j),
-            wavefront.wavelength,
-            wavefront.spec,
+            wavefront.phasor * np.exp(0.2j), wavefront.wavelength, wavefront.spec
         )
 
         assert restored.spatial_shape == restored.spec.shape
@@ -37,6 +35,30 @@ class TestWavefront:
         assert wavefront.batch_ndim == 1
         assert wavefront.is_chromatic
         assert wavefront._mapped_axis is not None
+
+    def test_chromatic_phasor_broadcasting(self, make_spec):
+        wavelengths = np.asarray((0.9e-6, 1.1e-6))
+        phasor = np.ones((8, 8), dtype=complex)
+        wavefront = dl.Wavefront(wavelengths, make_spec(), phasor)
+        polarised = dl.PolarisedWavefront(wavelengths, make_spec(), phasor)
+
+        assert wavefront.phasor.shape == (2, 8, 8)
+        assert polarised.phasor.shape == (2, 2, 2, 8, 8)
+
+    def test_chromatic_phase_broadcasting(self, make_spec):
+        wavefront = dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), make_spec())
+        phase = np.asarray((0.1, 0.2))
+        spatial = np.linspace(0.0, 0.1, 64).reshape((8, 8))
+
+        chromatic = assert_jittable(lambda value: wavefront.add_phase(value), phase)
+        output = assert_jittable(lambda value: wavefront.add_phase(value), spatial)
+
+        assert np.allclose(
+            chromatic.phasor[:, 0, 0], wavefront.phasor[:, 0, 0] * np.exp(1j * phase)
+        )
+        assert np.allclose(
+            output.phasor[:, 0], wavefront.phasor[:, 0] * np.exp(1j * spatial[0])
+        )
 
     @pytest.mark.parametrize(
         "operation",
@@ -70,6 +92,24 @@ class TestWavefront:
     def test_wavefront_arithmetic(self, operation, make_wavefront):
         assert_jittable(operation, make_wavefront())
 
+    def test_mixed_wavefront_arithmetic(self, make_wavefront):
+        wavefront = make_wavefront()
+        chromatic = dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.spec)
+        polarised = dl.PolarisedWavefront.from_wavefront(wavefront)
+
+        mixed = assert_jittable(lambda left, right: left * right, wavefront, polarised)
+        reverse = assert_jittable(
+            lambda left, right: left * right, polarised, wavefront
+        )
+        broadcast = assert_jittable(
+            lambda left, right: left * right, chromatic, wavefront
+        )
+
+        assert isinstance(mixed, dl.PolarisedWavefront)
+        assert mixed.phasor.shape == polarised.phasor.shape
+        assert reverse.phasor.shape == polarised.phasor.shape
+        assert broadcast.phasor.shape == chromatic.phasor.shape
+
     def test_phase_gradients(self, make_wavefront):
         wavefront = make_wavefront()
         assert_differentiable(lambda phase: wavefront.add_phase(phase), np.asarray(0.2))
@@ -81,8 +121,7 @@ class TestWavefront:
         assert polarised.phasor.shape == (2, 2, 8, 8)
         assert np.allclose(wavefront.psf_from_stokes(), wavefront.psf)
         assert np.allclose(
-            wavefront.psf_from_stokes(np.asarray((2.0, 0, 0, 0))),
-            2 * wavefront.psf,
+            wavefront.psf_from_stokes(np.asarray((2.0, 0, 0, 0))), 2 * wavefront.psf
         )
 
     @pytest.mark.parametrize(
@@ -93,6 +132,11 @@ class TestWavefront:
             lambda wavefront: wavefront.interpolate("invalid"),
             lambda wavefront: wavefront * "invalid",
             lambda wavefront: wavefront / wavefront,
+            lambda wavefront: wavefront
+            + dl.Wavefront(1e-6, wavefront.spec.set(n=(6, 6))),
+            lambda wavefront: wavefront
+            + dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.spec),
+            lambda wavefront: wavefront + np.ones((2, 3, 8, 8)),
         ],
     )
     def test_validation(self, operation, make_wavefront):
@@ -113,11 +157,17 @@ class TestPolarisedWavefront:
 
     def test_jones_application(self, make_wavefront):
         wavefront = make_wavefront(polarised=True)
-        output = assert_jittable(
-            lambda value: value.apply_jones(np.eye(2)),
-            wavefront,
-        )
+        output = assert_jittable(lambda value: value.apply_jones(np.eye(2)), wavefront)
         assert output.phasor.shape == wavefront.phasor.shape
+
+    def test_chromatic_jones_phasor(self, make_spec):
+        wavelengths = np.asarray((0.9e-6, 1.1e-6))
+        phasor = np.broadcast_to(np.eye(2)[:, :, None, None], (2, 2, 8, 8))
+        wavefront = dl.PolarisedWavefront(wavelengths, make_spec(), phasor)
+
+        assert wavefront.is_polarised
+        assert wavefront.phasor.shape == (2, 2, 2, 8, 8)
+        assert wavefront.psf_from_stokes(np.asarray((1.0, 0, 0, 0))).shape == (2, 8, 8)
 
 
 class TestPSF:
@@ -128,6 +178,19 @@ class TestPSF:
         assert psf.data.shape == psf.spec.shape
         assert psf.batch_ndim == 0
         assert converted.data.shape == converted.spec.shape
+
+    def test_sampling_contract(self):
+        spec = dl.GridSpec(d=(0.1, 0.2), c=(0.3, -0.4), unit="m")
+        psf = dl.PSF(np.ones((8, 8)), spec)
+
+        assert psf.spec.n == (8, 8)
+        assert psf.npixels == 8
+        assert len(psf.axes) == 2
+        assert psf.coordinates.shape == (2, 8, 8)
+        assert np.allclose(psf.xs[0].mean(), 0.3)
+        assert np.allclose(psf.pixel_scale, 0.1)
+        assert np.allclose(psf.center, 0.3)
+        assert np.allclose(psf.diameter, 0.8)
 
     @pytest.mark.parametrize(
         "operation",
@@ -155,6 +218,7 @@ class TestPSF:
             lambda psf: psf - 2.0,
             lambda psf: psf * 2.0,
             lambda psf: psf / 2.0,
+            lambda psf: psf + psf,
         ],
     )
     def test_arithmetic_contract(self, operation, make_psf):
@@ -209,12 +273,10 @@ class TestImage:
     def test_discrete_field_contract(self, make_spec):
         image = dl.Image(np.full((8, 8), 10.0), make_spec())
         poisson = assert_jittable(
-            lambda value: value.add_poisson_noise(jr.key(0)),
-            image,
+            lambda value: value.add_poisson_noise(jr.key(0)), image
         )
         noisy = assert_jittable(
-            lambda value: value.add_read_noise(jr.key(1), 2.0),
-            poisson,
+            lambda value: value.add_read_noise(jr.key(1), 2.0), poisson
         )
 
         assert isinstance(image, dl.DiscreteField)
@@ -222,6 +284,16 @@ class TestImage:
         assert poisson.variance.shape == image.data.shape
         assert noisy.error.shape == image.data.shape
         assert np.allclose(noisy.read_noise, 2.0)
+
+    def test_noise_variance_accumulates(self, make_spec):
+        image = dl.Image(
+            np.full((8, 8), 10.0), make_spec(), variance=np.full((8, 8), 4.0)
+        )
+        poisson = image.add_poisson_noise(jr.key(0))
+        noisy = poisson.add_read_noise(jr.key(1), 2.0)
+
+        assert np.allclose(poisson.variance, 14.0)
+        assert np.allclose(noisy.variance, 18.0)
 
     def test_fourier_spectra(self, make_spec):
         image = dl.Image(np.eye(8), make_spec())
@@ -237,19 +309,14 @@ class TestImage:
     def test_likelihood_contract(self, make_spec):
         model = dl.PSF(np.full((8, 8), 10.0), make_spec())
         image = dl.Image(
-            model.data,
-            model.spec,
-            variance=np.full((8, 8), 4.0),
-            read_noise=2.0,
+            model.data, model.spec, variance=np.full((8, 8), 4.0), read_noise=2.0
         )
 
         gaussian = assert_jittable(
-            lambda value: value.log_likelihood(model, "gaussian"),
-            image,
+            lambda value: value.log_likelihood(model, "gaussian"), image
         )
         poisson = assert_jittable(
-            lambda value: value.log_likelihood(model, "poisson"),
-            image,
+            lambda value: value.log_likelihood(model, "poisson"), image
         )
 
         assert np.isfinite(gaussian)
