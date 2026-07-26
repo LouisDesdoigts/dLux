@@ -199,6 +199,7 @@ class Propagator(OpticalLayer):
 class FocalPropagator(Propagator):
     """Base propagation layer with optional physical focal scaling."""
 
+    spec: BaseGridSpec
     focal_length: Array | None
 
     def __init__(self, spec, focal_length=None):
@@ -234,6 +235,8 @@ class FocalPropagator(Propagator):
 class Fraunhofer(FocalPropagator):
     """Conjugate-plane propagation using an MFT or FFT."""
 
+    spec: BaseGridSpec
+    focal_length: Array | None
     method: str
 
     def __init__(self, spec, focal_length=None, method="mft"):
@@ -265,6 +268,8 @@ class Fraunhofer(FocalPropagator):
 class Fresnel(FocalPropagator):
     """Defocused focal propagation using an FFT, MFT, or LCT."""
 
+    spec: BaseGridSpec
+    focal_length: Array | None
     defocus: Array
     method: str
 
@@ -358,6 +363,7 @@ class ABCDPropagator(Propagator):
 class FreeSpace(Propagator):
     """Paraxial angular-spectrum propagation over a free-space distance."""
 
+    spec: BaseGridSpec
     distance: Array
     crop: bool
 

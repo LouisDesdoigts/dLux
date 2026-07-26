@@ -51,6 +51,7 @@ class SoftShape(Shape):
 class RadialShape(SoftShape):
     """Base softened geometry parameterised by a bounding diameter."""
 
+    softening: Array
     diameter: Array
 
     def __init__(self, diameter, softening=1.0):
@@ -67,6 +68,9 @@ class RadialShape(SoftShape):
 class Circle(RadialShape):
     """A circular transmissive aperture described by its diameter."""
 
+    softening: Array
+    diameter: Array
+
     def evaluate(self, *, coordinates, pixel_scale, **kwargs) -> Array:
         return dlu.soft_circle(coordinates, self.diameter, self.clip(pixel_scale))
 
@@ -74,6 +78,7 @@ class Circle(RadialShape):
 class Square(SoftShape):
     """A square transmissive aperture."""
 
+    softening: Array
     width: Array
 
     def __init__(self, width, softening=1.0):
@@ -93,6 +98,7 @@ class Square(SoftShape):
 class Rectangle(SoftShape):
     """A rectangular transmissive aperture."""
 
+    softening: Array
     width: Array
     height: Array
 
@@ -119,6 +125,8 @@ class Rectangle(SoftShape):
 class RegularPolygon(RadialShape):
     """A regular polygon described by its circumscribed-circle diameter."""
 
+    softening: Array
+    diameter: Array
     nsides: int
 
     def __init__(self, nsides, diameter, softening=1.0):
@@ -139,6 +147,7 @@ class RegularPolygon(RadialShape):
 class Spider(SoftShape):
     """A general set of occulting radial support arms with angles in degrees."""
 
+    softening: Array
     width: Array
     angles: Array
 

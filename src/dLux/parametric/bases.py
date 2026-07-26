@@ -88,6 +88,8 @@ class ParametricBasis(Parametric):
 class ExplicitBasis(ParametricBasis):
     """A parameterisation over an explicitly sampled basis array."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
 
     def __init__(
@@ -121,6 +123,9 @@ class ExplicitBasis(ParametricBasis):
 class ImplicitBasis(ParametricBasis):
     """Base class for bases generated or evaluated indirectly at runtime."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
+
     @abstractmethod
     def calculate_basis(
         self: ImplicitBasis, **kwargs: Any
@@ -137,6 +142,9 @@ class ImplicitBasis(ParametricBasis):
 class CoordBasis(ImplicitBasis):
     """Base class for implicit bases evaluated at Cartesian coordinates."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
+
     @staticmethod
     def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
         if coordinates is not None:
@@ -149,6 +157,9 @@ class CoordBasis(ImplicitBasis):
 class CLIMBBasis(ExplicitBasis):
     """A continuous latent basis mapped through the CLIMB binarisation."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    basis: Array
     values: Array
     oversample: int = eqx.field(static=True)
 
@@ -189,6 +200,8 @@ class CLIMBBasis(ExplicitBasis):
 class FourierBasis(ImplicitBasis):
     """A parameterisation over a separable real Fourier basis."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
     kernels: tuple[Array, Array]
 
     def __init__(self, npix, n_modes, coefficients=None, scale: float = 1.0):
@@ -212,6 +225,8 @@ class FourierBasis(ImplicitBasis):
 class SplineBasis(ImplicitBasis):
     """A fixed 2D array represented by a lower-resolution grid of spline knots."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
     knot_coords: Array
     sample_coords: Array
     method: str = eqx.field(static=True)

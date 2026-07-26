@@ -120,6 +120,7 @@ class UniformPolarisingOptic(PolarisingOptic):
         Rotation angle in radians. If None, the Jones matrix is applied unchanged.
     """
 
+    jones: Array
     orientation: Array | None
 
     def __init__(

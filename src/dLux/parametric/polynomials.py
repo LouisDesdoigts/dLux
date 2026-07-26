@@ -70,6 +70,10 @@ class _ZernikeBasis:
 class ZernikeBasis(_ZernikeBasis, ExplicitBasis):
     """An explicitly sampled Zernike basis."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    basis: Array
+
     def __init__(
         self, coordinates, js=None, radial_orders=None, coefficients=None, diameter=2.0
     ):
@@ -81,6 +85,8 @@ class ZernikeBasis(_ZernikeBasis, ExplicitBasis):
 class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     """A Zernike basis evaluated dynamically from coordinate context."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
     diameter: Array | None
@@ -123,6 +129,8 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
 class Polynomial(ParametricBasis):
     """A general polynomial in one or more supplied variables."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
     powers: Array
 
     def __init__(self, degree, coefficients=None, ndim=1, powers=None):
@@ -176,6 +184,9 @@ class Polynomial(ParametricBasis):
 class ExplicitPolynomial(ExplicitBasis):
     """A polynomial represented by basis vectors sampled on fixed coordinates."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    basis: Array
     powers: Array
 
     def __init__(
@@ -243,6 +254,9 @@ class ExplicitPolynomial(ExplicitBasis):
 class CoordinatePolynomial(Polynomial):
     """A polynomial evaluated dynamically from Cartesian coordinate context."""
 
+    coefficients: Array
+    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    powers: Array
     ndim: int = eqx.field(static=True)
 
     def __init__(self, degree: int, coefficients=None, ndim: int = 2):

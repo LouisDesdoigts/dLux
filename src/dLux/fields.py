@@ -194,6 +194,8 @@ class BaseField(zdx.Base):
 class ContinuousField(BaseField):
     """Base class for fields representing a continuously sampled quantity."""
 
+    spec: GridSpec
+
     def scale_to(
         self,
         npixels: int,
@@ -258,6 +260,7 @@ class ContinuousField(BaseField):
 class DiscreteField(BaseField):
     """Base class for discrete detector-sampled fields."""
 
+    spec: GridSpec
     variance: Array | None
     read_noise: Array
 
@@ -382,6 +385,7 @@ class Wavefront(ContinuousField):
         Derived pixel-centre coordinates along one axis, in metres.
     """
 
+    spec: GridSpec
     phasor: Array[complex]
     wavelength: Array
 
@@ -1028,6 +1032,10 @@ class PolarisedWavefront(Wavefront):
     If, for whatever reason, you need a strictly polarised wavefront, add a PR.
     """
 
+    spec: GridSpec
+    phasor: Array[complex]
+    wavelength: Array
+
     @property
     def is_polarised(self: PolarisedWavefront) -> bool:
         """Return whether this wavefront carries Jones-matrix axes."""
@@ -1221,6 +1229,7 @@ class Image(DiscreteField):
     """
 
     data: Array
+    spec: GridSpec
     variance: Array | None
     read_noise: Array
 
