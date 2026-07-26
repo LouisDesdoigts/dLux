@@ -9,13 +9,13 @@ import jax.numpy as np
 import zodiax as zdx
 
 import dLux.utils as dlu
-from .coordinates import CoordSpec
+from .grids import GridSpec
 from .layers.detector_layers import BaseDetectorLayer
 from .layers.optical_layers import BaseLayer, BaseOpticalLayer
-from .states import PSF, Wavefront
+from .fields import Image, PSF, Wavefront
 from .sources import Spectrum
 
-__all__ = ["LayeredSystem", "OpticalSystem", "Detector"]
+__all__ = ["LayeredSystem", "OpticalSystem", "DetectorSystem", "Detector"]
 
 
 class LayeredSystem(zdx.Base):
@@ -64,11 +64,11 @@ class LayeredSystem(zdx.Base):
 class OpticalSystem(LayeredSystem):
     """Model an optical train from an input coordinate specification."""
 
-    spec: CoordSpec
+    spec: GridSpec
 
-    def __init__(self, layers, spec: CoordSpec):
-        if not isinstance(spec, CoordSpec):
-            raise TypeError("spec must be a CoordSpec.")
+    def __init__(self, layers, spec: GridSpec):
+        if not isinstance(spec, GridSpec):
+            raise TypeError("spec must be a GridSpec.")
         spec = spec.broadcast(2)
         if spec.n is None or spec.d is None:
             raise ValueError("spec must define n and d.")
@@ -92,6 +92,10 @@ class OpticalSystem(LayeredSystem):
             raise TypeError("wavefront must be a Wavefront instance.")
         return LayeredSystem.__call__(self, wavefront)
 
+    def apply(self, wavefront: Wavefront) -> Wavefront:
+        """Apply the optical layers using the supplied wavefront specification."""
+        return self(wavefront)
+
     def initialise_wavefront(self, wavelength, offset=None) -> Wavefront:
         """Construct an input Wavefront and apply an optional angular offset."""
         offset = np.zeros(2) if offset is None else np.asarray(offset)
@@ -108,12 +112,7 @@ class OpticalSystem(LayeredSystem):
         return psf.data
 
     def propagate(
-        self,
-        wavelengths,
-        offset=None,
-        weights=None,
-        return_all=False,
-        stokes=None,
+        self, wavelengths, offset=None, weights=None, return_all=False, stokes=None
     ):
         """Propagate a weighted polychromatic point source through the system."""
         wavelengths = np.atleast_1d(wavelengths)
@@ -131,7 +130,7 @@ class OpticalSystem(LayeredSystem):
         wavefront = self(wavefront)
         psf = self._to_psf(wavefront, stokes)
         if return_all:
-            return {"Wavefront": wavefront, "PSF": psf, "psf": psf.data}
+            return {"Wavefront": wavefront, "PSF": psf}
         return psf.data
 
     def model(
@@ -139,7 +138,7 @@ class OpticalSystem(LayeredSystem):
         source,
         return_all=False,
     ):
-        """Model a spectral source through the optical system."""
+        """Model a spectral source, returning its PSF by default."""
         if not isinstance(source, Spectrum):
             raise TypeError("source must be a Spectrum.")
         return source.model(self, return_all)
@@ -155,20 +154,29 @@ class OpticalSystem(LayeredSystem):
         return output, states
 
 
-class Detector(LayeredSystem):
-    """Apply detector and unified layers to a PSF."""
+class DetectorSystem(LayeredSystem):
+    """Transform a PSF through detector layers and produce an Image."""
 
     def __init__(self, layers):
         super().__init__(layers, BaseDetectorLayer)
 
-    def __call__(self, psf: PSF, return_all=False):
+    def __call__(self, psf: PSF) -> PSF:
         if not isinstance(psf, PSF):
             raise TypeError("psf must be a PSF instance.")
-        output = super().__call__(psf)
-        if return_all:
-            return {"PSF": output, "psf": output.data}
-        return output.data
+        return super().__call__(psf)
+
+    def apply(self, psf: PSF) -> PSF:
+        """Apply the detector layers while retaining the PSF container."""
+        return self(psf)
 
     def model(self, psf: PSF, return_all=False):
-        """Apply this detector to a PSF."""
-        return self(psf, return_all)
+        """Apply the detector model and return an Image."""
+        output = self(psf)
+        image = Image(output.data, output.spec)
+        if return_all:
+            return {"PSF": output, "Image": image}
+        return image
+
+
+# Backwards-compatible public name.
+Detector = DetectorSystem

@@ -6,8 +6,8 @@ import dLux.utils as dlu
 from jax import Array
 
 
-from ..parametric import BaseParametric
-from ..states import Wavefront
+from ..parametric import Parametric
+from ..fields import Wavefront
 from .optical_layers import OpticalLayer
 
 __all__ = [
@@ -173,11 +173,11 @@ class LinearPolariser(BasePolarisingOptic):
         Transmission-axis angle in radians.
     """
 
-    angle: Array | BaseParametric
+    angle: Array | Parametric
 
     def __init__(
         self: LinearPolariser,
-        angle: Array | BaseParametric = 0.0,
+        angle: Array | Parametric = 0.0,
     ):
         """
         Parameters
@@ -189,7 +189,7 @@ class LinearPolariser(BasePolarisingOptic):
 
     def evaluate_angle(self: LinearPolariser, wavefront: Wavefront = None) -> Array:
         """Returns the transmission-axis angle evaluated in context."""
-        return self.resolve(self.angle, wavefront=wavefront)
+        return self.resolve(wavefront=wavefront).angle
 
     def evaluate_jones(self: LinearPolariser, wavefront: Wavefront = None) -> Array:
         """Returns the Jones matrix evaluated in context."""
@@ -222,13 +222,13 @@ class Retarder(BasePolarisingOptic):
         Fast-axis angle in radians.
     """
 
-    retardance: Array | BaseParametric
-    angle: Array | BaseParametric
+    retardance: Array | Parametric
+    angle: Array | Parametric
 
     def __init__(
         self: Retarder,
-        retardance: Array | BaseParametric,
-        angle: Array | BaseParametric = 0.0,
+        retardance: Array | Parametric,
+        angle: Array | Parametric = 0.0,
     ):
         """
         Parameters
@@ -243,17 +243,16 @@ class Retarder(BasePolarisingOptic):
 
     def evaluate_retardance(self: Retarder, wavefront: Wavefront = None) -> Array:
         """Returns the retardance evaluated in context."""
-        return self.resolve(self.retardance, wavefront=wavefront)
+        return self.resolve(wavefront=wavefront).retardance
 
     def evaluate_angle(self: Retarder, wavefront: Wavefront = None) -> Array:
         """Returns the fast-axis angle evaluated in context."""
-        return self.resolve(self.angle, wavefront=wavefront)
+        return self.resolve(wavefront=wavefront).angle
 
     def evaluate_jones(self: Retarder, wavefront: Wavefront = None) -> Array:
         """Returns the Jones matrix evaluated in context."""
-        retardance = self.evaluate_retardance(wavefront)
-        angle = self.evaluate_angle(wavefront)
-        return dlu.retarder(retardance, angle)
+        resolved = self.resolve(wavefront=wavefront)
+        return dlu.retarder(resolved.retardance, resolved.angle)
 
     @property
     def jones(self: Retarder) -> Array:

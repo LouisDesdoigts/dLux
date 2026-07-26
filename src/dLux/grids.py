@@ -12,68 +12,126 @@ from jax import Array, core, lax, vmap
 import dLux.utils as dlu
 
 __all__ = [
-    "BaseSpec",
-    "PadSpec",
+    "GridSpec",
     "ResizeSpec",
-    "CoordSpec",
     "CoordTransform",
     "Affine",
     "AffineMap",
     "TransformChain",
-    "DistortedCoords",
+    "DistortCoords",
 ]
 
 
-class BaseSpec(zdx.Base):
+class BaseGridSpec(zdx.Base):
     """Base class for coordinate and sampling specifications."""
 
 
-class PadSpec(BaseSpec):
-    """Sampling specification defined by padding and cropping factors."""
+class ResizeSpec(BaseGridSpec):
+    """Array sampling defined by an explicit size or pad/crop factors."""
 
-    pad: int | tuple[int, ...]
-    crop: int
+    n: tuple[int, ...] | None
+    pad_factor: tuple[int, ...]
+    crop_factor: tuple[int, ...]
     c: Array | None
 
-    def __init__(self, pad=1, crop=1, c=None):
-        if isinstance(pad, Integral):
-            self.pad = int(pad)
+    def __init__(self, n=None, pad=1, crop=1, c=None):
+        if n is not None and (pad != 1 or crop != 1):
+            raise ValueError("Specify either n or pad/crop factors, not both.")
+        self.n = None if n is None else self._values(n, "n")
+        self.pad_factor = self._values(pad, "pad")
+        self.crop_factor = self._values(crop, "crop")
+        self.c = None if c is None else np.asarray(c, float)
+
+    @staticmethod
+    def _values(value, name):
+        if isinstance(value, Integral):
+            values = (int(value),)
+        elif isinstance(value, (tuple, list)) and value:
+            values = tuple(value)
         else:
-            if not all(isinstance(value, Integral) for value in pad):
-                raise TypeError("pad must contain integers.")
-            self.pad = tuple(int(value) for value in pad)
-        self.crop = int(crop)
-        self.c = None if c is None else np.asarray(c, float)
-        pad_values = (self.pad,) if isinstance(self.pad, int) else self.pad
-        if any(value < 1 for value in pad_values) or self.crop < 1:
-            raise ValueError("pad and crop must be positive integers.")
+            raise TypeError(f"{name} must be an integer or non-empty tuple.")
+        if not all(isinstance(item, Integral) for item in values):
+            raise TypeError(f"{name} must contain integers.")
+        if any(item < 1 for item in values):
+            raise ValueError(f"{name} must contain positive values.")
+        return tuple(int(item) for item in values)
 
+    @staticmethod
+    def _broadcast(values, ndim, name):
+        if len(values) == ndim:
+            return values
+        if len(values) == 1:
+            return values * ndim
+        raise ValueError(f"{name} cannot be broadcast to {ndim} dimensions.")
 
-class ResizeSpec(BaseSpec):
-    """FFT sampling specification defined by an explicit pixel-grid size."""
-
-    n: tuple[int, ...]
-    c: Array | None
-
-    def __init__(self, n, c=None):
-        value = np.asarray(n)
-        ndim = 1 if value.ndim == 0 else value.shape[0]
-        self.n = CoordSpec._as_n(n, ndim)
-        self.c = None if c is None else np.asarray(c, float)
-
-    def broadcast(self, ndim: int) -> ResizeSpec:
-        """Broadcast a one-axis pixel count to ``ndim`` dimensions."""
+    def broadcast(self, ndim: int) -> BaseGridSpec:
+        """Broadcast sizes and factors to ``ndim`` dimensions."""
         ndim = int(ndim)
         if ndim < 1:
             raise ValueError("ndim must be a positive integer.")
-        if len(self.n) == ndim:
-            return self
-        if len(self.n) == 1:
-            return self.set(n=self.n * ndim)
-        raise ValueError(f"n cannot be broadcast to {ndim} dimensions.")
+        n = None if self.n is None else self._broadcast(self.n, ndim, "n")
+        return self.set(
+            n=n,
+            pad_factor=self._broadcast(self.pad_factor, ndim, "pad"),
+            crop_factor=self._broadcast(self.crop_factor, ndim, "crop"),
+        )
+
+    @property
+    def explicit(self) -> bool:
+        """Whether this specification defines an absolute output size."""
+        return self.n is not None
+
+    @property
+    def padding(self) -> dict:
+        """Return keyword arguments for FFT propagation utilities."""
+        if self.explicit:
+            return {"pad_to": self.n}
+        return {"pad": self._broadcast(self.pad_factor, 2, "pad")}
+
+    def output_size(self, shape) -> tuple[int, ...]:
+        """Return the requested physical-axis size for an input array shape."""
+        if self.explicit:
+            return self.n
+        ndim = max(len(self.pad_factor), len(self.crop_factor), 2)
+        pad_factor = self._broadcast(self.pad_factor, ndim, "pad")
+        crop_factor = self._broadcast(self.crop_factor, ndim, "crop")
+        sizes = tuple(shape[-ndim:][::-1])
+        return tuple(
+            size * pad // crop
+            for size, pad, crop in zip(sizes, pad_factor, crop_factor)
+        )
+
+    def crop_size(self, shape) -> tuple[int, ...]:
+        """Return the size after applying only the crop factors."""
+        if self.explicit:
+            return self.n
+        ndim = max(len(self.crop_factor), 2)
+        factors = self._broadcast(self.crop_factor, ndim, "crop")
+        sizes = tuple(shape[-ndim:][::-1])
+        return tuple(size // factor for size, factor in zip(sizes, factors))
+
+    def pad(self, array: Array, fill: float = 0.0) -> Array:
+        """Pad an array using this specification."""
+        if self.explicit:
+            return dlu.pad_to(array, self.n, fill)
+        ndim = max(len(self.pad_factor), 2)
+        factors = self._broadcast(self.pad_factor, ndim, "pad")
+        sizes = tuple(array.shape[-ndim:][::-1])
+        target = tuple(size * factor for size, factor in zip(sizes, factors))
+        return dlu.pad_to(array, target, fill)
+
+    def crop(self, array: Array) -> Array:
+        """Crop an array using this specification."""
+        if self.explicit:
+            return dlu.crop_to(array, self.n)
+        return dlu.crop_to(array, self.crop_size(array.shape))
+
+    def resize(self, array: Array, fill: float = 0.0) -> Array:
+        """Resize an array to the final sampling represented by this object."""
+        return dlu.resize(array, self.output_size(array.shape), fill)
 
 
-class CoordSpec(BaseSpec):
+class GridSpec(BaseGridSpec):
     """A complete regularly sampled Cartesian coordinate grid.
 
     Axis parameters are ordered physically as ``(x, y, z, ...)``. Array dimensions
@@ -183,7 +241,7 @@ class CoordSpec(BaseSpec):
                 return len(value) if isinstance(value, tuple) else value.shape[-1]
         return 0
 
-    def broadcast(self, ndim: int) -> CoordSpec:
+    def broadcast(self, ndim: int) -> GridSpec:
         """Broadcast scalar or one-axis leaves to ``ndim`` dimensions."""
         ndim = int(ndim)
         if ndim < 1:
@@ -310,46 +368,25 @@ class CoordSpec(BaseSpec):
 
 
 class CoordTransform(zdx.Base):
-    """Base coordinate transformation with an optional coordinate source.
-
-    Coordinates supplied when calling the transform take precedence over the stored
-    source. The stored array or ``CoordSpec`` is used when the transform is called
-    without coordinates.
-    """
-
-    coordinates: Array | CoordSpec | None
-
-    def __init__(self, coordinates=None):
-        if coordinates is not None and not isinstance(coordinates, CoordSpec):
-            coordinates = np.asarray(coordinates, dtype=float)
-            if coordinates.shape[-3] != 2:
-                raise ValueError("coordinates must have shape (..., 2, n, n).")
-        self.coordinates = coordinates
+    """Base class for transformations applied to coordinate fields."""
 
     def __init_subclass__(cls, **kwargs):
         """Inherit the coordinate transformation interface documentation."""
         super().__init_subclass__(**kwargs)
         dlu.helpers.inherit_docstrings(cls, ["__call__"])
 
-    def calculate(self, npix: int, diameter: float) -> Array:
-        """Generate a coordinate grid and apply this transformation."""
-        return self(dlu.pixel_coords(npix, diameter))
-
     @staticmethod
-    def _from_spec(spec: CoordSpec) -> Array:
-        return spec.coordinates
-
-    def get_coordinates(self, coordinates=None) -> Array:
-        """Resolve call-time coordinates, falling back to the stored source."""
-        coordinates = self.coordinates if coordinates is None else coordinates
+    def get_coordinates(coordinates) -> Array:
+        """Validate and return a Cartesian coordinate array."""
         if coordinates is None:
             raise ValueError("Provide coordinates when calling the transformation.")
-        if isinstance(coordinates, CoordSpec):
-            coordinates = self._from_spec(coordinates)
+        coordinates = np.asarray(coordinates, dtype=float)
+        if coordinates.ndim < 3 or coordinates.shape[-3] != 2:
+            raise ValueError("coordinates must have shape (..., 2, ny, nx).")
         return np.asarray(coordinates, dtype=float)
 
     @abstractmethod
-    def __call__(self, coordinates: Array = None) -> Array:  # pragma: no cover
+    def __call__(self, coordinates: Array) -> Array:  # pragma: no cover
         """Transform an array of Cartesian coordinates."""
 
     def apply(self, coordinates: Array) -> Array:
@@ -362,8 +399,7 @@ class TransformChain(CoordTransform):
 
     transformations: dict
 
-    def __init__(self, transformations=(), coordinates=None):
-        super().__init__(coordinates)
+    def __init__(self, transformations=()):
         if isinstance(transformations, dict):
             transformations = list(transformations.items())
         else:
@@ -372,14 +408,14 @@ class TransformChain(CoordTransform):
             transformations, True, CoordTransform
         )
 
-    def __call__(self, coords: Array = None) -> Array:
+    def __call__(self, coords: Array) -> Array:
         coords = self.get_coordinates(coords)
         for transformation in self.transformations.values():
             coords = transformation(coords)
         return coords
 
 
-class DistortedCoords(CoordTransform):
+class DistortCoords(CoordTransform):
     """Polynomially distorted Cartesian coordinates."""
 
     powers: Array
@@ -394,9 +430,7 @@ class DistortedCoords(CoordTransform):
         orders: tuple[int, ...] | list[int] | None = None,
         powers: Array | None = None,
         shift_invariant: bool = False,
-        coordinates=None,
     ):
-        super().__init__(coordinates)
         supplied = sum(value is not None for value in (order, orders, powers))
         if supplied > 1:
             raise ValueError("Provide only one of order, orders, or powers.")
@@ -431,7 +465,7 @@ class DistortedCoords(CoordTransform):
             raise ValueError("distortion trailing dimensions must match powers shape.")
         self.distortion = distortion
 
-    def __call__(self, coords: Array = None) -> Array:
+    def __call__(self, coords: Array) -> Array:
         coords = self.get_coordinates(coords)
         if self.distortion.ndim > 2:
             apply = lambda distortion, coordinates: dlu.distort_coords(
@@ -449,8 +483,7 @@ class AffineMap(CoordTransform):
     matrix: Array
     offset: Array
 
-    def __init__(self, matrix=None, offset=None, coordinates=None):
-        super().__init__(coordinates)
+    def __init__(self, matrix=None, offset=None):
         matrix = np.eye(2) if matrix is None else np.asarray(matrix, dtype=float)
         offset = np.zeros(2) if offset is None else np.asarray(offset, dtype=float)
         if matrix.shape != (2, 2):
@@ -460,7 +493,7 @@ class AffineMap(CoordTransform):
         self.matrix = matrix
         self.offset = offset
 
-    def __call__(self, coords: Array = None) -> Array:
+    def __call__(self, coords: Array) -> Array:
         coords = self.get_coordinates(coords)
         shift = self.offset.reshape((2,) + (1,) * (coords.ndim - 1))
         return np.einsum("ij,j...->i...", self.matrix, coords) + shift
@@ -486,9 +519,7 @@ class Affine(CoordTransform):
         scale=None,
         shear=None,
         order=("translation", "rotation", "scale", "shear"),
-        coordinates=None,
     ):
-        super().__init__(coordinates)
         self.translation = self._vector(translation, "translation")
         self.rotation = None if rotation is None else np.asarray(rotation, dtype=float)
         if self.rotation is not None and self.rotation.shape != ():
@@ -551,7 +582,7 @@ class Affine(CoordTransform):
         homogeneous, _ = lax.scan(combine, np.eye(3), self._matrices())
         return homogeneous[:2, :2], homogeneous[:2, 2]
 
-    def __call__(self, coords: Array = None) -> Array:
+    def __call__(self, coords: Array) -> Array:
         coords = self.get_coordinates(coords)
         matrix, offset = self.coefficients()
         shift = offset.reshape((2,) + (1,) * (coords.ndim - 1))

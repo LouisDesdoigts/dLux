@@ -11,7 +11,7 @@ import jax.numpy as np
 from jax import Array
 
 import dLux.utils as dlu
-from .parametrics import BaseParametric
+from .parametrics import Parametric
 
 __all__ = [
     "ParametricBasis",
@@ -23,8 +23,10 @@ __all__ = [
     "SplineBasis",
 ]
 
+# TODO: Add Gaussian
 
-class ParametricBasis(BaseParametric):
+
+class ParametricBasis(Parametric):
     """Base class for coefficient-weighted basis parameterisations.
 
     ??? abstract "UML"

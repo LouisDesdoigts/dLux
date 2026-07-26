@@ -7,7 +7,7 @@ import jax.numpy as np
 from jax import Array
 import dLux.utils as dlu
 
-from ..states import PSF
+from ..fields import PSF
 from .optical_layers import BaseLayer
 
 __all__ = [

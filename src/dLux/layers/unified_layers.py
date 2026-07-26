@@ -5,8 +5,8 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import Array
 
-from ..coordinates import CoordTransform
-from ..states import PSF, Wavefront
+from ..grids import CoordTransform
+from ..fields import PSF, Wavefront
 from .detector_layers import DetectorLayer
 from .optical_layers import OpticalLayer
 

@@ -1,28 +1,39 @@
-"""Regularly sampled optical states and operations."""
+"""Regularly sampled optical fields and operations."""
 
 from __future__ import annotations
 from math import prod
 
 import jax.numpy as np
+import jax.random as jr
+import jax.scipy as jsp
 import zodiax as zdx
 from jax import Array
 from jax.scipy.signal import convolve
+
 import dLux.utils as dlu
 
-from .coordinates import CoordSpec
-from .coordinates import CoordTransform
+from .grids import GridSpec
+from .grids import CoordTransform
 
-__all__ = ["BaseSpatial", "Wavefront", "PolarisedWavefront", "PSF"]
+__all__ = [
+    "BaseField",
+    "ContinuousField",
+    "DiscreteField",
+    "Wavefront",
+    "PolarisedWavefront",
+    "PSF",
+    "Image",
+]
 
 
-class BaseSpatial(zdx.Base):
-    """Base class for regularly sampled real or complex spatial objects."""
+class BaseField(zdx.Base):
+    """Base class for regularly sampled real or complex fields."""
 
-    spec: CoordSpec
+    spec: GridSpec
 
-    def __init__(self, spec: CoordSpec):
-        if not isinstance(spec, CoordSpec):
-            raise TypeError("spec must be a CoordSpec.")
+    def __init__(self, spec: GridSpec):
+        if not isinstance(spec, GridSpec):
+            raise TypeError("spec must be a GridSpec.")
         self.spec = spec
 
     def __getattr__(self, key):
@@ -47,11 +58,11 @@ class BaseSpatial(zdx.Base):
         """Return the stored sampled array."""
         return getattr(self, self._field_name)
 
-    def set_field(self, field: Array) -> BaseSpatial:
+    def set_field(self, field: Array) -> BaseField:
         """Return a copy with an updated sampled array."""
         return self.set(**{self._field_name: field})
 
-    def _apply_field_op(self, other, op: str) -> BaseSpatial:
+    def _apply_field_op(self, other, op: str) -> BaseField:
         """Apply one arithmetic operation to the stored sampled array."""
         if op == "add":
             field = self.field + other
@@ -107,13 +118,89 @@ class BaseSpatial(zdx.Base):
         """Return the x-axis field width for square-grid compatibility."""
         return self.fov[..., 0]
 
+    def normalise(self, mode: str = "power", value: float = 1.0) -> BaseField:
+        """Return a field normalised by total power or peak value."""
+        if mode == "power":
+            scale = value / self.field.sum()
+        elif mode == "peak":
+            scale = value / self.field.max()
+        else:
+            raise ValueError("mode must be 'power' or 'peak'")
+        return self.set_field(self.field * scale)
+
+    def convolve(self, other: Array, method: str = "auto") -> BaseField:
+        """Convolve the sampled field with an input array."""
+        field = convolve(self.field, other, mode="same", method=method)
+        return self.set_field(field)
+
+    def _magic_unified_op(self, other, op: str) -> BaseField:
+        """Apply arithmetic to another compatible sampled field or array."""
+        if other is None:
+            return self
+        if isinstance(other, BaseField):
+            other = other.field
+        if not isinstance(other, (Array, float, int, complex)):
+            raise TypeError(
+                f"Unsupported type for {op}: {type(other)}. Must be an array, "
+                "field, or None."
+            )
+        return self._apply_field_op(other, op)
+
+    def resize(self, npixels: int) -> BaseField:
+        """Resize spatial axes by centered zero-padding or cropping."""
+        fill = 0j if np.iscomplexobj(self.field) else 0.0
+        field = dlu.resize(self.field, npixels, fill)
+        n = (int(npixels),) * 2
+        return self.set_field(field).set(spec=self.spec.set(n=n))
+
+    def downsample(self, n: int, mean: bool | None = None) -> BaseField:
+        """Downsample spatial axes and update their sampling."""
+        if mean is None:
+            mean = bool(np.iscomplexobj(self.field))
+        field = dlu.downsample(self.field, n, mean)
+        size = tuple(value // n for value in self.n)
+        spec = self.spec.set(n=size, d=self.d * n)
+        return self.set_field(field).set(spec=spec)
+
+    def flip(self, axis: tuple[int, ...] | int) -> BaseField:
+        """Flip the sampled array about one or more array axes."""
+        return self.set_field(np.flip(self.field, axis))
+
+    def __add__(self, other) -> BaseField:
+        return self._magic_unified_op(other, "add")
+
+    def __sub__(self, other) -> BaseField:
+        return self._magic_unified_op(other, "subtract")
+
+    def __mul__(self, other) -> BaseField:
+        return self._magic_unified_op(other, "multiply")
+
+    def __truediv__(self, other) -> BaseField:
+        return self._magic_unified_op(other, "divide")
+
+    def __iadd__(self, other) -> BaseField:
+        return self.__add__(other)
+
+    def __isub__(self, other) -> BaseField:
+        return self.__sub__(other)
+
+    def __imul__(self, other) -> BaseField:
+        return self.__mul__(other)
+
+    def __itruediv__(self, other) -> BaseField:
+        return self.__truediv__(other)
+
+
+class ContinuousField(BaseField):
+    """Base class for fields representing a continuously sampled quantity."""
+
     def scale_to(
         self,
         npixels: int,
         pixel_scale: float | Array,
         method: str = "linear",
         complex: bool = True,
-    ) -> BaseSpatial:
+    ) -> ContinuousField:
         """Interpolate to a square size and physical pixel scale.
 
         ``complex`` selects Cartesian or polar decomposition for complex fields and
@@ -136,7 +223,7 @@ class BaseSpatial(zdx.Base):
         method: str = "linear",
         complex: bool = True,
         fill: float = 0.0,
-    ) -> BaseSpatial:
+    ) -> ContinuousField:
         """Interpolate through a coordinate transformation.
 
         ``complex`` has no effect when the stored sampled array is real.
@@ -156,7 +243,7 @@ class BaseSpatial(zdx.Base):
         angle: float | Array,
         method: str = "linear",
         complex: bool = True,
-    ) -> BaseSpatial:
+    ) -> ContinuousField:
         """Rotate the sampled array clockwise through interpolation.
 
         ``complex`` has no effect when the stored sampled array is real.
@@ -167,52 +254,69 @@ class BaseSpatial(zdx.Base):
         )
         return self.set_field(rotate(self.field, angle))
 
-    def resize(self, npixels: int) -> BaseSpatial:
-        """Resize spatial axes by centered zero-padding or cropping."""
-        fill = 0j if np.iscomplexobj(self.field) else 0.0
-        field = dlu.resize(self.field, npixels, fill)
-        n = (int(npixels),) * 2
-        return self.set_field(field).set(spec=self.spec.set(n=n))
 
-    def downsample(self, n: int, mean: bool | None = None) -> BaseSpatial:
-        """Downsample spatial axes and update their sampling."""
-        if mean is None:
-            mean = bool(np.iscomplexobj(self.field))
-        field = dlu.downsample(self.field, n, mean)
-        size = tuple(value // n for value in self.n)
-        spec = self.spec.set(n=size, d=self.d * n)
-        return self.set_field(field).set(spec=spec)
+class DiscreteField(BaseField):
+    """Base class for discrete detector-sampled fields."""
 
-    def flip(self, axis: tuple[int, ...] | int) -> BaseSpatial:
-        """Flip the sampled array about one or more array axes."""
-        return self.set_field(np.flip(self.field, axis))
+    variance: Array | None
+    read_noise: Array
 
-    def __add__(self, other) -> BaseSpatial:
-        return self._magic_unified_op(other, "add")
+    @property
+    def error(self) -> Array | None:
+        """Return the standard deviation implied by ``variance``."""
+        return None if self.variance is None else np.sqrt(self.variance)
 
-    def __sub__(self, other) -> BaseSpatial:
-        return self._magic_unified_op(other, "subtract")
+    def add_poisson_noise(self, key: Array) -> DiscreteField:
+        """Add a Poisson realization and its expected variance."""
+        expectation = self.field
+        data = jr.poisson(key, expectation).astype(self.field.dtype)
+        variance = expectation
+        if self.variance is not None:
+            variance = variance + self.variance
+        return self.set_field(data).set(variance=variance)
 
-    def __mul__(self, other) -> BaseSpatial:
-        return self._magic_unified_op(other, "multiply")
+    def add_read_noise(self, key: Array, sigma: float | Array) -> DiscreteField:
+        """Add zero-mean Gaussian read noise and update its variance."""
+        sigma = np.asarray(sigma, dtype=self.field.dtype)
+        noise = jr.normal(key, self.field.shape, self.field.dtype) * sigma
+        variance = sigma**2
+        if self.variance is not None:
+            variance = variance + self.variance
+        read_noise = np.sqrt(self.read_noise**2 + sigma**2)
+        return self.set_field(self.field + noise).set(
+            variance=np.broadcast_to(variance, self.field.shape),
+            read_noise=read_noise,
+        )
 
-    def __truediv__(self, other) -> BaseSpatial:
-        return self._magic_unified_op(other, "divide")
+    def log_likelihood(
+        self,
+        model: BaseField | Array,
+        distribution: str = "gaussian",
+    ) -> Array:
+        """Return a summed Gaussian or Poisson log likelihood.
 
-    def __iadd__(self, other) -> BaseSpatial:
-        return self.__add__(other)
+        The Gaussian likelihood uses the stored ``variance``. The Poisson
+        likelihood is exact for count data without additive read noise.
+        """
+        model = model.field if isinstance(model, BaseField) else np.asarray(model)
+        if model.shape != self.field.shape:
+            raise ValueError("model and data must have matching shapes.")
+        if distribution == "gaussian":
+            if self.variance is None:
+                raise ValueError("variance is required for a Gaussian likelihood.")
+            residual = self.field - model
+            terms = residual**2 / self.variance + np.log(2 * np.pi * self.variance)
+            return -0.5 * terms.sum()
+        if distribution == "poisson":
+            return (
+                jsp.special.xlogy(self.field, model)
+                - model
+                - jsp.special.gammaln(self.field + 1)
+            ).sum()
+        raise ValueError("distribution must be 'gaussian' or 'poisson'.")
 
-    def __isub__(self, other) -> BaseSpatial:
-        return self.__sub__(other)
 
-    def __imul__(self, other) -> BaseSpatial:
-        return self.__mul__(other)
-
-    def __itruediv__(self, other) -> BaseSpatial:
-        return self.__truediv__(other)
-
-
-class Wavefront(BaseSpatial):
+class Wavefront(ContinuousField):
     """
     Holds the state of a wavefront as it is transformed and propagated through an
     optical system. The final two phasor axes are the square spatial wavefront; any
@@ -259,7 +363,7 @@ class Wavefront(BaseSpatial):
         Derived property from `wavelength`; whether wavelength is vector-valued.
     power : Array, property
         Derived property from `amplitude`; total wavefront power.
-    spec : CoordSpec, property
+    spec : GridSpec, property
         Derived coordinate specification for the current wavefront sampling.
     xs : Array, property
         Derived pixel-centre coordinates along one axis, in metres.
@@ -275,7 +379,7 @@ class Wavefront(BaseSpatial):
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
-        spec: CoordSpec,
+        spec: GridSpec,
         phasor: Array | None = None,
     ):
         """
@@ -301,7 +405,7 @@ class Wavefront(BaseSpatial):
             if spec.n is None:
                 raise ValueError("spec.n is required when phasor is not provided.")
             if spec.ndim != 2:
-                raise ValueError("Wavefront requires a two-dimensional CoordSpec.")
+                raise ValueError("Wavefront requires a two-dimensional GridSpec.")
             shape = self.wavelength.shape + spec.shape
             self.phasor = np.ones(shape, dtype=complex) / prod(spec.n)
         else:
@@ -314,18 +418,18 @@ class Wavefront(BaseSpatial):
             elif spec.n != inferred_n:
                 raise ValueError("phasor spatial shape must match spec.n.")
             if spec.ndim != 2:
-                raise ValueError("Wavefront requires a two-dimensional CoordSpec.")
+                raise ValueError("Wavefront requires a two-dimensional GridSpec.")
             if phasor.ndim == 2 and self.wavelength.ndim > 0:
                 phasor = phasor * np.ones(self.wavelength.shape + (1, 1))
             self.phasor = phasor
-        BaseSpatial.__init__(self, spec)
+        BaseField.__init__(self, spec)
 
     @classmethod
     def from_phasor(
         cls,
         phasor: Array[complex],
         wavelength: float | Array,
-        spec: CoordSpec,
+        spec: GridSpec,
     ) -> Wavefront:
         """
         Create a Wavefront from an existing phasor array.
@@ -478,6 +582,11 @@ class Wavefront(BaseSpatial):
             True if the wavefront wavelength is vectorised.
         """
         return self.wavelength.ndim > 0
+
+    @property
+    def is_polarised(self: Wavefront) -> bool:
+        """Return whether this wavefront carries Jones-matrix axes."""
+        return False
 
     @property
     def _mapped_axis(self: Wavefront) -> Wavefront | None:
@@ -789,8 +898,8 @@ class Wavefront(BaseSpatial):
                 "same wavelength shape."
             )
 
-        self_polarised = isinstance(self, PolarisedWavefront)
-        other_polarised = isinstance(other, PolarisedWavefront)
+        self_polarised = self.is_polarised
+        other_polarised = other.is_polarised
 
         # Matching polarisation types already have compatible intrinsic dimensions.
         if self_polarised == other_polarised:
@@ -874,12 +983,12 @@ class Wavefront(BaseSpatial):
             )
 
         layout = matches[0]
-        if "j0" in layout and not isinstance(self, PolarisedWavefront):
+        if "j0" in layout and not self.is_polarised:
             self = self._promote_for_arithmetic()
 
         # Insert singleton dimensions for semantic axes absent from the operand.
         axes = ("w",) if self.is_chromatic else ()
-        if isinstance(self, PolarisedWavefront):
+        if self.is_polarised:
             axes += ("j0", "j1")
         axes += ("x", "y")
         shape = tuple(
@@ -918,10 +1027,15 @@ class PolarisedWavefront(Wavefront):
     If, for whatever reason, you need a strictly polarised wavefront, add a PR.
     """
 
+    @property
+    def is_polarised(self: PolarisedWavefront) -> bool:
+        """Return whether this wavefront carries Jones-matrix axes."""
+        return True
+
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
-        spec: CoordSpec,
+        spec: GridSpec,
         phasor: Array | None = None,
     ):
         if phasor is None:
@@ -962,7 +1076,7 @@ class PolarisedWavefront(Wavefront):
         cls,
         phasor: Array[complex],
         wavelength: float | Array,
-        spec: CoordSpec,
+        spec: GridSpec,
     ) -> PolarisedWavefront:
         """
         Create a PolarisedWavefront from a regular or Jones phasor.
@@ -1060,29 +1174,29 @@ class PolarisedWavefront(Wavefront):
         return self.set(phasor=np.moveaxis(phasor, (0, 1), (-4, -3)))
 
 
-class PSF(BaseSpatial):
+class PSF(ContinuousField):
     """A real-valued point-spread function sampled on a coordinate grid."""
 
     data: Array
-    spec: CoordSpec
+    spec: GridSpec
 
     @property
     def _field_name(self) -> str:
         return "data"
 
-    def __init__(self: PSF, data: Array, spec: CoordSpec):
+    def __init__(self: PSF, data: Array, spec: GridSpec):
         self.data = np.asarray(data, dtype=float)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        if not isinstance(spec, CoordSpec):
-            raise TypeError("spec must be a CoordSpec.")
+        if not isinstance(spec, GridSpec):
+            raise TypeError("spec must be a GridSpec.")
         spec = spec.broadcast(2)
         inferred_n = self.data.shape[-2:][::-1]
         if spec.n is None:
             spec = spec.set(n=inferred_n)
         elif spec.n != inferred_n:
             raise ValueError("data spatial shape must match spec.n.")
-        BaseSpatial.__init__(self, spec)
+        BaseField.__init__(self, spec)
 
     @classmethod
     def from_wavefront(cls, wavefront) -> PSF:
@@ -1094,28 +1208,52 @@ class PSF(BaseSpatial):
         """Return the number of leading vectorisation dimensions."""
         return self.data.ndim - 2
 
-    def normalise(self: PSF, mode: str = "power", value: float = 1.0) -> PSF:
-        """Return a PSF normalised by total power or peak value."""
-        if mode == "power":
-            scale = value / self.data.sum()
-        elif mode == "peak":
-            scale = value / self.data.max()
-        else:
-            raise ValueError("mode must be 'power' or 'peak'")
-        return self.multiply("data", scale)
 
-    def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
-        """Convolve this PSF with an input array."""
-        return self.set(data=convolve(self.data, other, mode="same", method=method))
+class Image(DiscreteField):
+    """A discrete detector image and its uncertainty metadata.
 
-    def _magic_unified_op(self: PSF, other: Array | PSF | None, op: str) -> PSF:
-        if other is None:
-            return self
-        if not isinstance(other, (PSF, Array, float, int, complex)):
-            raise TypeError(
-                f"Unsupported type for {op}: {type(other)}. Must be an array, "
-                "PSF, or None."
-            )
-        if isinstance(other, PSF):
-            other = other.data
-        return self._apply_field_op(other, op)
+    Parameters
+    ----------
+    data : Array
+        Detector-sampled image data.
+    spec : GridSpec
+        Coordinate specification tracking the detector pixel grid.
+    variance : Array or None
+        Known variance of the observed data. This is populated by the noise
+        simulation methods and may also be supplied directly.
+    read_noise : float or Array
+        Gaussian read-noise standard deviation associated with the image.
+    """
+
+    data: Array
+    variance: Array | None
+    read_noise: Array
+
+    @property
+    def _field_name(self) -> str:
+        return "data"
+
+    def __init__(
+        self,
+        data: Array,
+        spec: GridSpec,
+        variance: Array | None = None,
+        read_noise: float | Array = 0.0,
+    ):
+        data = np.asarray(data, dtype=float)
+        if data.ndim < 2:
+            raise ValueError("data must have at least two spatial dimensions.")
+        if not isinstance(spec, GridSpec):
+            raise TypeError("spec must be a GridSpec.")
+        spec = spec.broadcast(2)
+        inferred_n = data.shape[-2:][::-1]
+        if spec.n is None:
+            spec = spec.set(n=inferred_n)
+        elif spec.n != inferred_n:
+            raise ValueError("data spatial shape must match spec.n.")
+        if variance is not None:
+            variance = np.broadcast_to(np.asarray(variance, dtype=float), data.shape)
+        self.data = data
+        self.variance = variance
+        self.read_noise = np.asarray(read_noise, dtype=float)
+        BaseField.__init__(self, spec)

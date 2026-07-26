@@ -16,6 +16,19 @@ __all__ = [
 ]
 
 
+def reexport(modules: tuple[object, ...], namespace: dict[str, object]) -> list[str]:
+    """Re-export the public symbols from a collection of modules."""
+    exported = []
+    seen = set()
+    for module in modules:
+        for name in getattr(module, "__all__", ()):
+            namespace[name] = getattr(module, name)
+            if name not in seen:
+                exported.append(name)
+                seen.add(name)
+    return exported
+
+
 def inherit_docstrings(cls, method_names=None):
     """
     Inherit docstrings and annotations from parent classes for specified methods.

@@ -1,6 +1,6 @@
 """Public utility functions used across dLux modules."""
 
-from .._exports import reexport
+from .helpers import reexport
 
 # Import as modules
 from . import (
