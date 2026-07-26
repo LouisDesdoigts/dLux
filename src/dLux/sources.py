@@ -10,7 +10,7 @@ import jax.scipy as jsp
 from jax import Array
 
 import dLux.utils as dlu
-from .parametric import Parametric, ParametricHolder, resolve
+from .parametric import Parametric, ParametricHolder, resolve, to_param
 
 __all__ = ["BaseSource", "Spectrum", "Source", "BinarySource"]
 
@@ -20,12 +20,6 @@ _DEFAULT_UNITS = {
     "flux": "photon",
     "distribution": "linear",
 }
-
-
-def _as_parameter(value):
-    if value is None or isinstance(value, Parametric):
-        return value
-    return np.asarray(value, dtype=float)
 
 
 def _merge_units(units=None):
@@ -60,8 +54,8 @@ class BaseSource(ParametricHolder):
     units: dict
 
     def __init__(self, flux=None, distribution=None, units=None):
-        self.flux = _as_parameter(flux)
-        self.distribution = _as_parameter(distribution)
+        self.flux = to_param(flux)
+        self.distribution = to_param(distribution)
         self.units = _merge_units(units)
 
     def source_params(self, nsource=None, **context):
@@ -177,14 +171,14 @@ class Spectrum(ParametricHolder):
     units: dict
 
     def __init__(self, wavelengths, weights=None, units=None):
-        self.wavelengths = _as_parameter(wavelengths)
+        self.wavelengths = to_param(wavelengths)
         if weights is None:
             if isinstance(self.wavelengths, Parametric):
                 raise ValueError(
                     "weights are required when wavelengths are parametric."
                 )
             weights = np.ones_like(self.wavelengths)
-        self.weights = _as_parameter(weights)
+        self.weights = to_param(weights)
         self.units = _merge_units(units)
 
     def spectrum_params(self, **context: Any) -> tuple[Array, Array]:
@@ -233,7 +227,7 @@ class Source(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        self.position = _as_parameter(position)
+        self.position = to_param(position)
         BaseSource.__init__(self, flux, distribution, units)
         Spectrum.__init__(self, wavelengths, weights, self.units)
 
@@ -282,10 +276,10 @@ class BinarySource(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        self.centre = _as_parameter(centre)
-        self.separation = _as_parameter(separation)
-        self.position_angle = _as_parameter(position_angle)
-        self.contrast = _as_parameter(contrast)
+        self.centre = to_param(centre)
+        self.separation = to_param(separation)
+        self.position_angle = to_param(position_angle)
+        self.contrast = to_param(contrast)
         BaseSource.__init__(self, flux, distribution, units)
         Spectrum.__init__(self, wavelengths, weights, self.units)
 
