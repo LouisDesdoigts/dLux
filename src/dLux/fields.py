@@ -158,11 +158,11 @@ class BaseField(zdx.Base):
             return self, other.field
         return self, other
 
-    def resize(self, npixels: int) -> BaseField:
+    def resize(self, npixels: int | tuple[int, int]) -> BaseField:
         """Resize spatial axes by centered zero-padding or cropping."""
         fill = 0j if np.iscomplexobj(self.field) else 0.0
         field = dlu.resize(self.field, npixels, fill)
-        n = (int(npixels),) * 2
+        n = dlu.as_size(npixels, 2, "npixels")
         return self.set_field(field).set(spec=self.spec.set(n=n))
 
     def downsample(self, n: int, mean: bool | None = None) -> BaseField:
@@ -227,8 +227,8 @@ class ContinuousField(BaseField):
             signature="(n,n),()->(m,m)",
         )
         field = scale(self.field, ratio)
-        spacing = np.broadcast_to(pixel_scale / self.spec.scale, (2,))
-        n = (int(npixels),) * 2
+        spacing = dlu.as_axis(pixel_scale / self.spec.scale, 2, "pixel_scale")
+        n = dlu.as_size(npixels, 2, "npixels")
         return self.set_field(field).set(spec=self.spec.set(n=n, d=spacing))
 
     def interpolate(

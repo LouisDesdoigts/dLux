@@ -47,10 +47,8 @@ def _poly_coordinates(coordinates, ndim):
             raise ValueError(
                 "GridSpec dimensionality must be greater than or equal to ndim."
             )
-        if coordinates.d is None:
-            if coordinates.n is None:
-                raise ValueError("GridSpec must define n when d is not provided.")
-            coordinates = coordinates.set(d=2 / np.asarray(coordinates.n, dtype=float))
+        if coordinates.n is None or coordinates.d is None:
+            raise ValueError("GridSpec must define n and d.")
         coordinates = coordinates.coordinates
     else:
         coordinates = np.asarray(coordinates, dtype=float)

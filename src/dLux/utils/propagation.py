@@ -1,7 +1,5 @@
 """High-level optical propagation wrappers around abcdLux."""
 
-from numbers import Integral
-
 import jax.numpy as np
 from abcdLux import asm, fraunhofer, lct
 from abcdLux.coords import unpack_coord_spec
@@ -29,7 +27,7 @@ def _resolve_pad(spec_in, pad=None, pad_to=None):
         raise ValueError("Provide only one of pad or pad_to.")
     x_in, y_in = unpack_coord_spec(spec_in)
     if pad is not None:
-        pad = (int(pad),) * 2 if isinstance(pad, Integral) else tuple(pad)
+        pad = dlu.as_size(pad, 2, "pad")
         pad_to = (x_in.size * pad[0], y_in.size * pad[1])
     return (x_in, y_in), pad_to
 
@@ -77,7 +75,7 @@ def FFT_shift(
     if output_center is None:
         return (x_out, y_out), None
     native_center = np.asarray(((x_out[-1] + x_out[0]) / 2, (y_out[-1] + y_out[0]) / 2))
-    output_center = np.broadcast_to(np.asarray(output_center, float), (2,))
+    output_center = dlu.as_axis(output_center, 2, "output_center")
     shift = output_center - native_center
     return (x_out + shift[0], y_out + shift[1]), shift
 

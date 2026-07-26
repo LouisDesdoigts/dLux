@@ -3,8 +3,6 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from .helpers import _cast_tuple, _cast_scalar, _input_len
-
 __all__ = [
     "cart2polar",
     "polar2cart",
@@ -232,14 +230,12 @@ def nd_axes(
     offsets: float | tuple[float, ...] = 0.0,
 ) -> tuple[Array, ...]:
     """Return one regularly sampled coordinate vector per physical axis."""
-    npixels = _cast_tuple(npixels, "npixels")
-    ndim = max(
-        len(npixels), _input_len(pixel_scales, "mean"), _input_len(offsets, "std")
-    )
-    pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
-    offsets = _cast_scalar(offsets, ndim, "offsets")
-    if len(npixels) != ndim:
-        npixels *= ndim
+    npixels = dlu.as_size(npixels, name="npixels")
+    pixel_scales, offsets = dlu.as_axis(pixel_scales), dlu.as_axis(offsets)
+    ndim = max(len(npixels), pixel_scales.shape[-1], offsets.shape[-1])
+    npixels = dlu.as_size(npixels, ndim, "npixels")
+    pixel_scales = dlu.as_axis(pixel_scales, ndim, "pixel_scales")
+    offsets = dlu.as_axis(offsets, ndim, "offsets")
 
     def axis(n, offset, scale):
         start = -(n - 1) / 2 * scale - offset

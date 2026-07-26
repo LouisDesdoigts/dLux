@@ -230,12 +230,8 @@ class SplineBasis(ImplicitBasis):
     method: str = eqx.field(static=True)
 
     def __init__(self, npix, n_knots, coefficients=None, method="cubic"):
-        npix = (npix, npix) if isinstance(npix, int) else tuple(npix)
-        n_knots = (n_knots, n_knots) if isinstance(n_knots, int) else tuple(n_knots)
-        if len(npix) != 2 or len(n_knots) != 2:
-            raise ValueError("npix and n_knots must be integers or length-two tuples.")
-        if any(n < 1 for n in npix):
-            raise ValueError("npix must contain positive integers.")
+        npix = dlu.as_size(npix, 2, "npix")
+        n_knots = dlu.as_size(n_knots, 2, "n_knots")
         if any(n < 2 for n in n_knots):
             raise ValueError("n_knots must contain values greater than one.")
         knot_axes = [np.linspace(-1.0, 1.0, n) for n in n_knots]
