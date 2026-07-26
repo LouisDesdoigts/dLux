@@ -7,7 +7,7 @@ import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
-from ..coordinates import CoordSpec
+from ..grids import GridSpec
 from .bases import CoordBasis, ExplicitBasis, ParametricBasis
 from .parametrics import resolve_parametric
 
@@ -192,24 +192,24 @@ class ExplicitPolynomial(ExplicitBasis):
 
     def __init__(
         self,
-        coordinates: Array | CoordSpec,
+        coordinates: Array | GridSpec,
         degree,
         coefficients=None,
         ndim=None,
         powers=None,
     ):
-        if isinstance(coordinates, CoordSpec):
+        if isinstance(coordinates, GridSpec):
             if ndim is None:
                 ndim = coordinates.ndim
             if coordinates.ndim == 1 and ndim > 1:
                 coordinates = coordinates.broadcast(ndim)
             if coordinates.ndim < ndim:
                 raise ValueError(
-                    "CoordSpec dimensionality must be greater than or equal to ndim."
+                    "GridSpec dimensionality must be greater than or equal to ndim."
                 )
             if coordinates.d is None:
                 if coordinates.n is None:
-                    raise ValueError("CoordSpec must define n when d is not provided.")
+                    raise ValueError("GridSpec must define n when d is not provided.")
                 coordinates = coordinates.set(
                     d=2 / np.asarray(coordinates.n, dtype=float)
                 )

@@ -7,8 +7,8 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..coordinates import CoordTransform
-from .parametrics import BaseParametric
+from ..grids import CoordTransform
+from .parametrics import Parametric
 
 __all__ = [
     "Shape",
@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-class Shape(BaseParametric):
+class Shape(Parametric):
     """Base geometry that evaluates to a transmission array."""
 
     @property

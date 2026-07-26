@@ -1,6 +1,6 @@
 """Parametric bases, shapes, polynomials, and physical-property models."""
 
-from .._exports import reexport
+from ..utils.helpers import reexport
 from . import bases, parametrics, polynomials, shapes, refractive
 
 _modules = (parametrics, bases, polynomials, shapes, refractive)

@@ -7,17 +7,16 @@ from typing import Any
 import equinox as eqx
 import jax.numpy as np
 import jax.scipy as jsp
-import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
-from .parametric import BaseParametric, resolve_parametric
-from .states import PSF
+from .parametric import Parametric, ParametricHolder, resolve_parametric
+from .fields import PSF
 
 __all__ = [
-    "Source",
+    "BaseSource",
     "Spectrum",
-    "PointSource",
+    "Source",
     "BinarySource",
 ]
 
@@ -30,7 +29,7 @@ _DEFAULT_UNITS = {
 
 
 def _as_parameter(value):
-    if value is None or isinstance(value, BaseParametric):
+    if value is None or isinstance(value, Parametric):
         return value
     return np.asarray(value, dtype=float)
 
@@ -59,11 +58,11 @@ def _convert_distribution(distribution, unit):
     return _convert_flux(distribution, unit)
 
 
-class Source(zdx.Base):
+class BaseSource(ParametricHolder):
     """Source brightness and optional resolved distribution."""
 
-    flux: Array | BaseParametric | None
-    distribution: Array | BaseParametric | None
+    flux: Array | Parametric | None
+    distribution: Array | Parametric | None
     units: dict
 
     def source_params(self, nsource=None, **context):
@@ -149,24 +148,16 @@ class Source(zdx.Base):
                     "Single-component source weights must be one-dimensional."
                 )
             result = optics.propagate(
-                wavelengths,
-                position,
-                weights * flux,
-                return_all=return_all or distribution is not None,
+                wavelengths, position, weights * flux, return_all=True
             )
             if distribution is None:
-                return result
+                return result if return_all else result["PSF"]
             psf = PSF(
-                self._convolve(result["PSF"].data, distribution),
-                result["PSF"].spec,
+                self._convolve(result["PSF"].data, distribution), result["PSF"].spec
             )
             if return_all:
-                return {
-                    "Wavefront": result["Wavefront"],
-                    "PSF": psf,
-                    "psf": psf.data,
-                }
-            return psf.data
+                return {"Wavefront": result["Wavefront"], "PSF": psf}
+            return psf
 
         if weights.ndim == 1:
             weights = np.broadcast_to(weights, position.shape[:-1] + weights.shape)
@@ -187,33 +178,31 @@ class Source(zdx.Base):
         wavefronts = results["Wavefront"]
         psf = results["PSF"]
         if distribution is not None:
-            psf = psf.set(
-                data=self._convolve(psf.data, distribution),
-            )
+            psf = psf.set(data=self._convolve(psf.data, distribution))
         if return_all:
-            return {"Wavefront": wavefronts, "PSF": psf, "psf": psf.data}
-        return psf.data
+            return {"Wavefront": wavefronts, "PSF": psf}
+        return psf
 
 
-class Spectrum(zdx.Base):
+class Spectrum(ParametricHolder):
     """Wavelength samples and their corresponding spectral weights."""
 
-    wavelengths: Array | BaseParametric
-    weights: Array | BaseParametric
+    wavelengths: Array | Parametric
+    weights: Array | Parametric
     units: dict
 
     def __init__(self, wavelengths, weights=None, units=None):
         self.wavelengths = _as_parameter(wavelengths)
         if weights is None:
-            if isinstance(self.wavelengths, BaseParametric):
+            if isinstance(self.wavelengths, Parametric):
                 raise ValueError(
                     "weights are required when wavelengths are parametric."
                 )
             weights = np.ones_like(self.wavelengths)
         self.weights = _as_parameter(weights)
         self.units = _merge_units(units)
-        if not isinstance(self.wavelengths, BaseParametric) and not isinstance(
-            self.weights, BaseParametric
+        if not isinstance(self.wavelengths, Parametric) and not isinstance(
+            self.weights, Parametric
         ):
             self.spectrum_params()
 
@@ -244,17 +233,15 @@ class Spectrum(zdx.Base):
 
     def model(self, optics, return_all=False):
         """Model this spectrum as an on-axis, unit-flux point source."""
-        return PointSource(
-            self.wavelengths,
-            weights=self.weights,
-            units=self.units,
-        ).model(optics, return_all)
+        return Source(self.wavelengths, weights=self.weights, units=self.units).model(
+            optics, return_all
+        )
 
 
-class PointSource(Source, Spectrum):
+class Source(BaseSource, Spectrum):
     """A point source combining spatial and spectral source properties."""
 
-    position: Array | BaseParametric | None
+    position: Array | Parametric | None
 
     def __init__(
         self,
@@ -267,7 +254,7 @@ class PointSource(Source, Spectrum):
     ):
         self.wavelengths = _as_parameter(wavelengths)
         if weights is None:
-            if isinstance(self.wavelengths, BaseParametric):
+            if isinstance(self.wavelengths, Parametric):
                 raise ValueError(
                     "weights are required when wavelengths are parametric."
                 )
@@ -278,7 +265,7 @@ class PointSource(Source, Spectrum):
         self.distribution = _as_parameter(distribution)
         self.units = _merge_units(units)
         if not any(
-            isinstance(value, BaseParametric)
+            isinstance(value, Parametric)
             for value in (
                 self.wavelengths,
                 self.weights,
@@ -308,20 +295,16 @@ class PointSource(Source, Spectrum):
 
     def model(self, optics, return_all=False):
         """Model this point source through an optical system."""
-        return self._model_components(
-            optics,
-            *self.params(),
-            return_all,
-        )
+        return self._model_components(optics, *self.params(), return_all)
 
 
-class BinarySource(Source, Spectrum):
+class BinarySource(BaseSource, Spectrum):
     """A binary source parameterised by centre, separation, and contrast."""
 
-    centre: Array | BaseParametric | None
-    separation: Array | BaseParametric
-    position_angle: Array | BaseParametric
-    contrast: Array | BaseParametric
+    centre: Array | Parametric | None
+    separation: Array | Parametric
+    position_angle: Array | Parametric
+    contrast: Array | Parametric
 
     def __init__(
         self,
@@ -337,7 +320,7 @@ class BinarySource(Source, Spectrum):
     ):
         self.wavelengths = _as_parameter(wavelengths)
         if weights is None:
-            if isinstance(self.wavelengths, BaseParametric):
+            if isinstance(self.wavelengths, Parametric):
                 raise ValueError(
                     "weights are required when wavelengths are parametric."
                 )
@@ -351,7 +334,7 @@ class BinarySource(Source, Spectrum):
         self.distribution = _as_parameter(distribution)
         self.units = _merge_units(units)
         if not any(
-            isinstance(value, BaseParametric)
+            isinstance(value, Parametric)
             for value in (
                 self.wavelengths,
                 self.weights,
@@ -397,8 +380,4 @@ class BinarySource(Source, Spectrum):
 
     def model(self, optics, return_all=False):
         """Model both binary components through an optical system."""
-        return self._model_components(
-            optics,
-            *self.params(),
-            return_all,
-        )
+        return self._model_components(optics, *self.params(), return_all)

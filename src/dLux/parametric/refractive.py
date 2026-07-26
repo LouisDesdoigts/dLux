@@ -7,13 +7,15 @@ import interpax as ipx
 import jax.numpy as np
 from jax import Array
 
-from ..states import Wavefront
-from .parametrics import BaseParametric
+from ..fields import Wavefront
+from .parametrics import Parametric
 
 __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 
+# TODO: This can probably all be in refractive_layers.py
 
-class CauchyIndex(BaseParametric):
+
+class CauchyIndex(Parametric):
     """A refractive index represented by a Cauchy dispersion relation.
 
     ??? abstract "UML"
@@ -40,7 +42,7 @@ class CauchyIndex(BaseParametric):
         return np.sum(self.coefficients / x[..., None] ** powers, axis=-1)
 
 
-class PolynomialIndex(BaseParametric):
+class PolynomialIndex(Parametric):
     """A refractive index polynomial in normalised wavelength."""
 
     coefficients: Array
@@ -62,7 +64,7 @@ class PolynomialIndex(BaseParametric):
         return np.sum(self.coefficients * x[..., None] ** powers, axis=-1)
 
 
-class InterpolatedIndex(BaseParametric):
+class InterpolatedIndex(Parametric):
     """A refractive index interpolated from wavelength-index samples.
 
     ??? abstract "UML"

@@ -3,34 +3,99 @@
 from __future__ import annotations
 
 import jax.numpy as np
+import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
-from ..abcd import BaseABCDElement
-from ..coordinates import BaseSpec, CoordSpec, PadSpec, ResizeSpec
+from ..grids import BaseGridSpec, GridSpec, ResizeSpec
 from .optical_layers import OpticalLayer
 
 __all__ = [
+    "ABCDElement",
+    "ABCDFreeSpace",
+    "ABCDLens",
+    "ABCDMirror",
+    "ABCDFraunhofer",
     "Propagator",
     "FocalPropagator",
     "ABCDPropagator",
-    "ASM",
+    "FreeSpace",
     "Fraunhofer",
     "Fresnel",
 ]
 
 
+class ABCDElement(zdx.Base):
+    """Base class for elements represented by an ABCD matrix."""
+
+
+class ABCDFreeSpace(ABCDElement):
+    """A free-space propagation element represented by an ABCD matrix."""
+
+    distance: float
+
+    def __init__(self, distance):
+        self.distance = np.asarray(distance, float)
+
+    @property
+    def abcd(self):
+        """Return the analytic ABCD matrix for free-space propagation."""
+        return dlu.abcd_free_space(self.distance)
+
+
+class ABCDLens(ABCDElement):
+    """A thin lens represented by an ABCD matrix."""
+
+    focal_length: float
+
+    def __init__(self, focal_length):
+        self.focal_length = np.asarray(focal_length, float)
+
+    @property
+    def abcd(self):
+        """Return the analytic ABCD matrix for the lens."""
+        return dlu.abcd_lens(self.focal_length)
+
+
+class ABCDMirror(ABCDElement):
+    """A curved mirror represented by an ABCD matrix."""
+
+    radius: float
+
+    def __init__(self, radius):
+        self.radius = np.asarray(radius, float)
+
+    @property
+    def abcd(self):
+        """Return the analytic ABCD matrix for the mirror."""
+        return dlu.abcd_mirror(self.radius)
+
+
+class ABCDFraunhofer(ABCDElement):
+    """A far-field transform represented by an ABCD matrix."""
+
+    focal_length: float
+
+    def __init__(self, focal_length):
+        self.focal_length = np.asarray(focal_length, float)
+
+    @property
+    def abcd(self):
+        """Return the analytic ABCD matrix for far-field propagation."""
+        return dlu.abcd_fraunhofer(self.focal_length)
+
+
 class Propagator(OpticalLayer):
     """Base propagation layer holding an output sampling specification."""
 
-    spec: BaseSpec
+    spec: BaseGridSpec
 
     def __init__(self, spec):
-        if not isinstance(spec, (CoordSpec, PadSpec, ResizeSpec)):
-            raise TypeError("spec must be a CoordSpec, PadSpec, or ResizeSpec.")
+        if not isinstance(spec, (GridSpec, ResizeSpec)):
+            raise TypeError("spec must be a GridSpec or ResizeSpec.")
         self.spec = (
-            spec.broadcast(2) if isinstance(spec, (CoordSpec, ResizeSpec)) else spec
+            spec.broadcast(2) if isinstance(spec, (GridSpec, ResizeSpec)) else spec
         )
 
     def validate(self, wavefront):
@@ -77,11 +142,7 @@ class Propagator(OpticalLayer):
 
     def propagate_fft(self, wavefront, unit, ABCD=None, **kwargs):
         """Propagate at native FFT sampling."""
-        padding = (
-            {"pad": self.spec.pad}
-            if isinstance(self.spec, PadSpec)
-            else {"pad_to": self.spec.n}
-        )
+        padding = self.spec.padding
         output_center = (
             None
             if self.spec.c is None
@@ -110,8 +171,8 @@ class Propagator(OpticalLayer):
             wavefront.wavelength,
             *wavefront.axes,
         )
-        if isinstance(self.spec, PadSpec) and self.spec.crop > 1:
-            ny, nx = (size // self.spec.crop for size in field.shape[-2:])
+        if any(factor > 1 for factor in self.spec.crop_factor):
+            nx, ny = self.spec.crop_size(field.shape)
             sy = (field.shape[-2] - ny) // 2
             sx = (field.shape[-1] - nx) // 2
             field = field[..., sy : sy + ny, sx : sx + nx]
@@ -149,10 +210,10 @@ class FocalPropagator(Propagator):
     def validate(self, wavefront):
         """Validate the input and explicitly requested output coordinates."""
         super().validate(wavefront)
-        if isinstance(self.spec, (PadSpec, ResizeSpec)):
+        if isinstance(self.spec, ResizeSpec):
             return
         if self.spec.n is None or self.spec.d is None or self.spec.unit is None:
-            raise ValueError("The output CoordSpec requires n, d, and unit.")
+            raise ValueError("The output GridSpec requires n, d, and unit.")
         if self.spec.ndim != wavefront.spec.ndim:
             raise ValueError("Input and output coordinate dimensionality must match.")
         try:
@@ -179,10 +240,10 @@ class Fraunhofer(FocalPropagator):
         method = str(method).lower()
         if method not in ("mft", "fft"):
             raise ValueError("method must be 'mft' or 'fft'.")
-        if method == "mft" and not isinstance(spec, CoordSpec):
-            raise TypeError("MFT propagation requires a CoordSpec.")
-        if method == "fft" and not isinstance(spec, (PadSpec, ResizeSpec)):
-            raise TypeError("FFT propagation requires a PadSpec or ResizeSpec.")
+        if method == "mft" and not isinstance(spec, GridSpec):
+            raise TypeError("MFT propagation requires a GridSpec.")
+        if method == "fft" and not isinstance(spec, ResizeSpec):
+            raise TypeError("FFT propagation requires a ResizeSpec.")
         super().__init__(spec, focal_length)
         self.method = method
 
@@ -211,10 +272,10 @@ class Fresnel(FocalPropagator):
         method = str(method).lower()
         if method not in ("fft", "mft", "lct"):
             raise ValueError("method must be 'fft', 'mft', or 'lct'.")
-        if method in ("mft", "lct") and not isinstance(spec, CoordSpec):
-            raise TypeError("MFT and LCT propagation require a CoordSpec.")
-        if method == "fft" and not isinstance(spec, (PadSpec, ResizeSpec)):
-            raise TypeError("FFT propagation requires a PadSpec or ResizeSpec.")
+        if method in ("mft", "lct") and not isinstance(spec, GridSpec):
+            raise TypeError("MFT and LCT propagation require a GridSpec.")
+        if method == "fft" and not isinstance(spec, ResizeSpec):
+            raise TypeError("FFT propagation requires a ResizeSpec.")
         super().__init__(spec, focal_length)
         self.method = method
         self.defocus = np.asarray(defocus, dtype=float)
@@ -239,6 +300,7 @@ class Fresnel(FocalPropagator):
 class ABCDPropagator(Propagator):
     """Propagate through an ordered ABCD system using an LCT or FFT."""
 
+    spec: BaseGridSpec
     ABCDs: dict
     method: str
 
@@ -247,16 +309,16 @@ class ABCDPropagator(Propagator):
         method = str(method).lower()
         if method not in ("lct", "fft"):
             raise ValueError("method must be 'lct' or 'fft'.")
-        if method == "fft" and not isinstance(self.spec, (PadSpec, ResizeSpec)):
-            raise TypeError("FFT propagation requires a PadSpec or ResizeSpec.")
-        if method == "lct" and not isinstance(self.spec, CoordSpec):
-            raise TypeError("LCT propagation requires a CoordSpec.")
+        if method == "fft" and not isinstance(self.spec, ResizeSpec):
+            raise TypeError("FFT propagation requires a ResizeSpec.")
+        if method == "lct" and not isinstance(self.spec, GridSpec):
+            raise TypeError("LCT propagation requires a GridSpec.")
 
         elements = list(ABCDs.items()) if isinstance(ABCDs, dict) else ABCDs
         self.ABCDs = dlu.list2dictionary(
             elements,
             ordered=True,
-            allowed_types=(BaseABCDElement,),
+            allowed_types=(ABCDElement,),
         )
         if not self.ABCDs:
             raise ValueError("ABCDs must contain at least one element.")
@@ -270,10 +332,10 @@ class ABCDPropagator(Propagator):
     def validate(self, wavefront):
         """Validate physical ABCD input and output coordinates."""
         Propagator.validate(self, wavefront)
-        if isinstance(self.spec, (PadSpec, ResizeSpec)):
+        if isinstance(self.spec, ResizeSpec):
             return
         if self.spec.n is None or self.spec.d is None or self.spec.unit is None:
-            raise ValueError("The output CoordSpec requires n, d, and unit.")
+            raise ValueError("The output GridSpec requires n, d, and unit.")
         if self.spec.ndim != wavefront.spec.ndim:
             raise ValueError("Input and output coordinate dimensionality must match.")
         try:
@@ -293,7 +355,7 @@ class ABCDPropagator(Propagator):
         return self.propagate_mft(wavefront, ABCD=self.abcd)
 
 
-class ASM(Propagator):
+class FreeSpace(Propagator):
     """Paraxial angular-spectrum propagation over a free-space distance."""
 
     distance: Array
@@ -301,9 +363,9 @@ class ASM(Propagator):
 
     def __init__(self, distance, spec=None, crop=True):
         if spec is None:
-            spec = PadSpec()
-        if not isinstance(spec, (PadSpec, ResizeSpec)):
-            raise TypeError("ASM spec must be a PadSpec or ResizeSpec.")
+            spec = ResizeSpec()
+        if not isinstance(spec, ResizeSpec):
+            raise TypeError("FreeSpace spec must be a ResizeSpec.")
         super().__init__(spec)
         self.distance = np.asarray(distance, dtype=float)
         self.crop = bool(crop)
@@ -313,11 +375,7 @@ class ASM(Propagator):
         wavelength = np.asarray(wavefront.wavelength)
         extra = wavefront.phasor.ndim - wavelength.ndim - 2
         wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
-        padding = (
-            {"pad": self.spec.pad}
-            if isinstance(self.spec, PadSpec)
-            else {"pad_to": self.spec.n}
-        )
+        padding = self.spec.padding
         x, y = wavefront.axes
         propagate = np.vectorize(
             lambda field, lam, x, y: dlu.ASM(
