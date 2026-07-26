@@ -63,7 +63,7 @@ optics = dl.LayeredOpticalSystem(
     diameter=diam,
     layers=[
         ("aper", dl.TransmissiveLayer(grating, normalise=True)),
-        ("asm", dl.ASMPropagator(distance=1.0, spec=dl.PadSpec(pad=20, crop=2))),
+        ("asm", dl.ASMPropagator(distance=1.0, spec=dl.ResizeSpec(pad=20, crop=2))),
     ],
 )
 
