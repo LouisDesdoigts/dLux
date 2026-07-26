@@ -103,18 +103,45 @@ class OpticalSystem(LayeredSystem):
             raise ValueError("offset must have shape (2,).")
         return Wavefront(wavelength, self.spec).tilt(offset)
 
-    def propagate_mono(self, wavelength, offset=None, return_all=False, stokes=None):
-        """Propagate a monochromatic point source through the system."""
+    def propagate_mono(
+        self,
+        wavelength,
+        offset=None,
+        return_wf=False,
+        return_all=False,
+        stokes=None,
+    ):
+        """Propagate a monochromatic point source through the system.
+
+        Returns the sampled PSF array by default, or the final wavefront when
+        ``return_wf`` is true. ``return_all`` returns all output containers.
+        """
+        if return_wf and return_all:
+            raise ValueError("return_wf and return_all are mutually exclusive.")
         wavefront = self(self.initialise_wavefront(wavelength, offset))
         psf = self._to_psf(wavefront, stokes)
         if return_all:
             return {"Wavefront": wavefront, "PSF": psf, "psf": psf.data}
+        if return_wf:
+            return wavefront
         return psf.data
 
     def propagate(
-        self, wavelengths, offset=None, weights=None, return_all=False, stokes=None
+        self,
+        wavelengths,
+        offset=None,
+        weights=None,
+        return_wf=False,
+        return_all=False,
+        stokes=None,
     ):
-        """Propagate a weighted polychromatic point source through the system."""
+        """Propagate a weighted polychromatic point source through the system.
+
+        Returns the sampled PSF array by default, or the final wavefront when
+        ``return_wf`` is true. ``return_all`` returns all output containers.
+        """
+        if return_wf and return_all:
+            raise ValueError("return_wf and return_all are mutually exclusive.")
         wavelengths = np.atleast_1d(wavelengths)
         weights = (
             np.ones_like(wavelengths) / wavelengths.size
@@ -131,6 +158,8 @@ class OpticalSystem(LayeredSystem):
         psf = self._to_psf(wavefront, stokes)
         if return_all:
             return {"Wavefront": wavefront, "PSF": psf}
+        if return_wf:
+            return wavefront
         return psf.data
 
     def model(

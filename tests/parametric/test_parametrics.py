@@ -8,7 +8,7 @@ import dLux as dl
 from tests.helpers import assert_differentiable, assert_jittable
 
 
-class CoordinateValue(dl.BaseParametric):
+class CoordinateValue(dl.Parametric):
     """Small concrete parametric used to exercise composition."""
 
     def evaluate(self, *, coordinates, **kwargs):
@@ -53,6 +53,30 @@ def test_value_transform_contract(coordinates):
     assert np.allclose(output, coordinates[0] ** 2)
 
 
+def test_interpolation_evaluation_and_integration():
+    interpolation = dl.Interpolation(
+        knots=np.asarray([0.0, 1.0, 2.0]),
+        values=np.asarray([0.0, 1.0, 0.0]),
+    )
+    variables = np.asarray([0.5, 1.5])
+
+    values = assert_jittable(
+        lambda model: model.evaluate(variables=variables),
+        interpolation,
+    )
+    integral = assert_jittable(
+        lambda model: model.integrate(0.0, 2.0),
+        interpolation,
+    )
+
+    assert np.allclose(values, 0.5)
+    assert np.allclose(integral, 1.0)
+    assert_differentiable(
+        lambda samples: interpolation.set(values=samples).integrate(0.25, 1.75),
+        interpolation.values,
+    )
+
+
 @pytest.mark.parametrize(
     "operation",
     ["sum", "product", "union", "intersection"],
@@ -87,6 +111,8 @@ def test_combination_contract(operation, coordinates):
         lambda: dl.DynamicParametric(CoordinateValue(), np.eye(2)),
         lambda: dl.Combination([CoordinateValue()], "invalid"),
         lambda: dl.Combination([np.ones(2)]),
+        lambda: dl.Interpolation([0.0], [1.0]),
+        lambda: dl.Interpolation([0.0, 1.0], [1.0]),
     ],
 )
 def test_validation(constructor):

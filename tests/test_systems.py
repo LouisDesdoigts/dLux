@@ -10,12 +10,12 @@ from tests.helpers import assert_differentiable, assert_jittable
 
 @pytest.fixture
 def input_spec():
-    return dl.CoordSpec(n=(8, 8), d=(0.125, 0.125), unit="m")
+    return dl.GridSpec(n=(8, 8), d=(0.125, 0.125), unit="m")
 
 
 @pytest.fixture
 def focal_spec():
-    return dl.CoordSpec(n=(6, 8), d=(2e-7, 3e-7), unit="rad")
+    return dl.GridSpec(n=(6, 8), d=(2e-7, 3e-7), unit="rad")
 
 
 @pytest.fixture
@@ -93,16 +93,20 @@ def test_propagation_interfaces(system):
     )
     results = system.propagate(wavelengths, weights=weights, return_all=True)
     array = system.propagate(wavelengths, weights=weights)
+    mono_wavefront = system.propagate_mono(1e-6, return_wf=True)
+    wavefront = system.propagate(wavelengths, weights=weights, return_wf=True)
 
     assert isinstance(mono["Wavefront"], dl.Wavefront)
+    assert isinstance(mono_wavefront, dl.Wavefront)
+    assert isinstance(wavefront, dl.Wavefront)
     assert chromatic["Wavefront"].wavelength.shape == wavelengths.shape
     assert isinstance(results["PSF"], dl.PSF)
     assert array.shape == results["PSF"].data.shape
-    assert np.allclose(array, results["psf"])
+    assert np.allclose(array, results["PSF"].data)
 
 
 def test_detector_uses_common_system_contract(make_psf):
-    detector = dl.Detector(
+    detector = dl.DetectorSystem(
         [
             dl.ApplyPixelResponse(np.ones((8, 8))),
             dl.AddConstant(1),
@@ -111,15 +115,16 @@ def test_detector_uses_common_system_contract(make_psf):
     )
     psf = make_psf()
 
-    array = assert_jittable(detector, psf)
-    output = assert_jittable(
-        lambda value: detector(value, return_all=True),
-        psf,
-    )
+    transformed = assert_jittable(detector, psf)
+    image = assert_jittable(detector.model, psf)
+    output = assert_jittable(lambda value: detector.model(value, return_all=True), psf)
 
     assert isinstance(detector, dl.LayeredSystem)
+    assert isinstance(transformed, dl.PSF)
+    assert isinstance(image, dl.Image)
     assert isinstance(output["PSF"], dl.PSF)
-    assert np.allclose(array, output["psf"])
+    assert isinstance(output["Image"], dl.Image)
+    assert np.allclose(image.data, output["Image"].data)
 
 
 def test_chromatic_and_polarised_execution(system):
@@ -183,7 +188,7 @@ def test_layer_management_and_debugging(system):
 
 def test_model_interface(system):
     spectrum = dl.Spectrum([0.9e-6, 1.1e-6], [0.25, 0.75])
-    source = dl.PointSource(
+    source = dl.Source(
         spectrum.wavelengths,
         position=[0.1, -0.2],
         weights=spectrum.weights,
@@ -195,7 +200,7 @@ def test_model_interface(system):
         weights=spectrum.weights,
     )
 
-    assert isinstance(system.model(spectrum), np.ndarray)
+    assert isinstance(system.model(spectrum), dl.PSF)
     results = system.model(spectrum, return_all=True)
     assert isinstance(results["Wavefront"], dl.Wavefront)
     assert isinstance(results["PSF"], dl.PSF)
@@ -215,16 +220,18 @@ def test_model_interface(system):
         lambda system: system.propagate([1e-6], offset=[0.0]),
         lambda system: system.not_an_attribute,
         lambda system: dl.OpticalSystem([], np.ones(2)),
-        lambda system: dl.OpticalSystem([], dl.CoordSpec(n=8, unit="m")),
-        lambda system: dl.OpticalSystem([], dl.CoordSpec(n=8, d=0.1, unit="rad")),
-        lambda system: dl.Detector([dl.Optic()]),
-        lambda system: dl.Detector([])(np.ones((8, 8))),
+        lambda system: dl.OpticalSystem([], dl.GridSpec(n=8, unit="m")),
+        lambda system: dl.OpticalSystem([], dl.GridSpec(n=8, d=0.1, unit="rad")),
+        lambda system: dl.DetectorSystem([dl.Optic()]),
+        lambda system: dl.DetectorSystem([])(np.ones((8, 8))),
         lambda system: dl.OpticalSystem([dl.AddConstant(1)], system.spec),
         lambda system: system.insert_layer(dl.AddConstant(1), 0, dl.BaseOpticalLayer),
-        lambda system: dl.Detector([]).insert_layer(
+        lambda system: dl.DetectorSystem([]).insert_layer(
             dl.Optic(), 0, dl.BaseDetectorLayer
         ),
         lambda system: system.model(np.ones(2)),
+        lambda system: system.propagate_mono(1e-6, return_wf=True, return_all=True),
+        lambda system: system.propagate([1e-6], return_wf=True, return_all=True),
     ],
 )
 def test_validation(system, operation):

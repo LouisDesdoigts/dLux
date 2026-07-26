@@ -37,6 +37,9 @@ def test_parametric_spectrum_contract():
         ).spectrum_params()[1],
         weights.coefficients,
     )
+    resolved = spectrum.resolve(variables=wavelengths)
+    assert isinstance(resolved, dl.Spectrum)
+    assert not isinstance(resolved.weights, dl.Parametric)
 
 
 def test_basis_weight_spectrum():
@@ -51,9 +54,9 @@ def test_basis_weight_spectrum():
     assert weights.shape == wavelengths.shape
 
 
-def test_spectrum_and_point_source_parameters():
+def test_spectrum_and_source_parameters():
     spectrum = dl.Spectrum([900, 1100], units={"wavelengths": "nm"})
-    source = dl.PointSource(
+    source = dl.Source(
         [900, 1100],
         position=[1, -2],
         flux=2,
@@ -73,8 +76,8 @@ def test_spectrum_and_point_source_parameters():
     assert parameters[4] is None
 
 
-def test_default_point_source():
-    source = dl.PointSource([1e-6])
+def test_default_source():
+    source = dl.Source([1e-6])
     _, _, position, flux, distribution = source.params()
 
     assert np.allclose(position, np.zeros(2))
@@ -119,7 +122,7 @@ def test_parametric_distribution():
 
 
 def test_log_flux_units():
-    source = dl.PointSource(
+    source = dl.Source(
         [1e-6],
         flux=np.log(1000),
         distribution=np.log(np.full((3, 3), 2.0)),
@@ -137,9 +140,9 @@ def test_log_flux_units():
         lambda: dl.Spectrum(dl.Polynomial(0, [1])),
         lambda: dl.Spectrum([1, 2], np.ones((2, 2, 2))),
         lambda: dl.Spectrum([1e-6], units={"unknown": "m"}),
-        lambda: dl.PointSource([1e-6], position=np.zeros(3)),
-        lambda: dl.PointSource([1e-6], flux=np.ones(2)),
-        lambda: dl.PointSource([1e-6], distribution=np.ones(3)),
+        lambda: dl.Source([1e-6], position=np.zeros(3)),
+        lambda: dl.Source([1e-6], flux=np.ones(2)),
+        lambda: dl.Source([1e-6], distribution=np.ones(3)),
         lambda: dl.BinarySource([1e-6], centre=np.zeros(3)),
     ],
 )

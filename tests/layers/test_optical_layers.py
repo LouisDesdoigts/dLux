@@ -58,14 +58,11 @@ def test_aberrated_layer_contract(wavefront):
 
 def test_optic_phasor_contract(wavefront):
     optic = dl.Optic(transmission=0.5, opd=1e-7, phase=0.2)
-    params = optic.params(wavefront)
+    resolved = optic.resolve(wavefront=wavefront)
 
     assert optic.context(wavefront) == {"wavefront": wavefront}
     assert optic.phasor(wavefront).shape == (1, 1)
-    assert np.allclose(
-        optic.phasor(wavefront),
-        optic.phasor(wavefront, params),
-    )
+    assert np.allclose(optic.phasor(wavefront), resolved.phasor(wavefront))
 
 
 @pytest.mark.parametrize(
@@ -103,6 +100,10 @@ def test_parametric_optic(wavefront):
         ),
     )
 
+    resolved = optic.resolve(wavefront=wavefront)
+    assert isinstance(resolved, dl.Optic)
+    assert isinstance(optic.opd, dl.Parametric)
+    assert not isinstance(resolved.opd, dl.Parametric)
     assert_jittable(optic, wavefront)
     assert_differentiable(
         lambda coefficients: np.real(
@@ -113,6 +114,47 @@ def test_parametric_optic(wavefront):
         ),
         optic.opd.coefficients,
     )
+
+
+def test_filter_point_and_bin_integration(make_wavefront):
+    wavelengths = np.asarray([0.0, 1.0, 2.0])
+    throughput = np.asarray([0.0, 1.0, 0.0])
+    wavefront = make_wavefront(wavelength=1.0)
+    point = dl.Filter(throughput, wavelengths)(wavefront)
+    integrated_filter = dl.Filter(
+        throughput,
+        wavelengths,
+        bin_width=2.0,
+    )
+    integrated = assert_jittable(integrated_filter, wavefront)
+
+    assert np.allclose(point.power, wavefront.power)
+    assert np.allclose(integrated.power, 0.5 * wavefront.power)
+    assert_differentiable(
+        lambda values: integrated_filter.set(
+            "throughput.values",
+            values,
+        )(wavefront),
+        integrated_filter.throughput.values,
+    )
+
+
+@pytest.mark.parametrize(
+    "constructor",
+    [
+        lambda: dl.Filter([0.0, 1.0]),
+        lambda: dl.Filter([0.0, 1.0], [0.0, 1.0], bin_width=0.0),
+        lambda: dl.Filter(
+            [0.0, 1.0],
+            [0.0, 1.0],
+            bin_width=0.1,
+            method="cubic",
+        ),
+    ],
+)
+def test_filter_validation(constructor):
+    with pytest.raises((TypeError, ValueError)):
+        constructor()
 
 
 def test_tilt_validation():

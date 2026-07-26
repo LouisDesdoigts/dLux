@@ -8,7 +8,7 @@ import dLux as dl
 from tests.helpers import assert_differentiable, assert_jittable
 
 
-class CoordinateValue(dl.BaseParametric):
+class CoordinateValue(dl.Parametric):
     """Return one component from the dynamic coordinate context."""
 
     def evaluate(self, *, coordinates, **kwargs):
@@ -43,7 +43,7 @@ def test_coordinate_sources(wavefront, make_spec):
     coordinates = spec.coordinates
     transformations = [
         dl.Affine(translation=[0.1, 0.0]),
-        dl.Affine(translation=[0.1, 0.0], coordinates=spec),
+        dl.Affine(translation=[0.1, 0.0]),
     ]
     layers = [
         dl.DynamicTransmissiveLayer(CoordinateValue()),
@@ -64,11 +64,11 @@ def test_coordinate_sources(wavefront, make_spec):
         assert context["coordinates"].shape == wavefront.coordinates.shape
         assert_jittable(layer, wavefront)
 
-    assert np.allclose(layers[2].context(wavefront)["pixel_scale"], spec.d)
-    assert np.allclose(
-        layers[-1].context(wavefront)["coordinates"],
-        transformations[-1](),
-    )
+        assert np.allclose(layers[2].context(wavefront)["pixel_scale"], spec.d)
+        assert np.allclose(
+            layers[-1].context(wavefront)["coordinates"],
+            transformations[-1](wavefront.coordinates),
+        )
 
 
 @pytest.mark.parametrize(
