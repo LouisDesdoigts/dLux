@@ -50,6 +50,17 @@ def test_system_composition_contract(system):
     assert np.allclose(system.apply(wavefront).phasor, output.phasor)
 
 
+def test_nested_optical_system(input_spec):
+    subsystem = dl.OpticalSystem([dl.Optic(transmission=0.5)], input_spec)
+    system = dl.OpticalSystem([subsystem, dl.Optic(transmission=0.5)], input_spec)
+    wavefront = system.initialise_wavefront(1e-6)
+
+    output = assert_jittable(system, wavefront)
+
+    assert isinstance(subsystem, dl.BaseOpticalLayer)
+    assert np.allclose(output.phasor, 0.25 * wavefront.phasor)
+
+
 def test_layered_system_contract(make_psf):
     system = dl.LayeredSystem(
         [

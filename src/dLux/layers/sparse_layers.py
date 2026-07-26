@@ -6,8 +6,8 @@ import jax.numpy as np
 import jax.tree as jtu
 from jax import Array, vmap
 
-from ..grids import AffineMap, DistortCoords, GridSpec
-from ..parametric import ParametricBasis
+from ..grids import AffineMap, CoordTransform, DistortCoords, GridSpec
+from ..parametric import Parametric, ParametricBasis
 from ..fields import Wavefront
 from .dynamic_layers import BaseDynamicLayer
 from .optical_layers import Optic
@@ -23,6 +23,10 @@ class SparseOptic(Optic):
     coefficients. The same convention applies to polynomial distortion arrays.
     """
 
+    transmission: Array | Parametric | None
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
+    normalise: bool
     positions: Array
 
     def __init__(
@@ -165,3 +169,11 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
             "coordinates": coordinates,
             "pixel_scale": pixel_scale,
         }
+
+    coordinates: Array | GridSpec | None
+    transformation: CoordTransform | None
+    transmission: Array | Parametric | None
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
+    normalise: bool
+    positions: Array

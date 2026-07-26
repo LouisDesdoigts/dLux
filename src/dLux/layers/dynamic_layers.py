@@ -66,6 +66,11 @@ class BaseDynamicLayer(BaseOpticalLayer):
 class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
     """Apply a static or coordinate-dependent transmission."""
 
+    coordinates: Array | GridSpec | None
+    transformation: CoordTransform | None
+    transmission: Array | Parametric | None
+    normalise: bool
+
     def __init__(
         self,
         transmission=None,
@@ -89,6 +94,11 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
 class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
     """Apply static or coordinate-dependent OPD and phase aberrations."""
 
+    coordinates: Array | GridSpec | None
+    transformation: CoordTransform | None
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
+
     def __init__(
         self,
         opd=None,
@@ -107,6 +117,8 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
 class DynamicOptic(BaseDynamicLayer, Optic):
     """A scalar optic with independently static or coordinate-dependent leaves."""
 
+    coordinates: Array | GridSpec | None
+    transformation: CoordTransform | None
     transmission: Array | Parametric | None
     opd: Array | Parametric | None
     phase: Array | Parametric | None

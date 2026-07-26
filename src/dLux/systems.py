@@ -61,9 +61,10 @@ class LayeredSystem(zdx.Base):
         return self.set("layers", dlu.remove_layer(self.layers, key))
 
 
-class OpticalSystem(LayeredSystem):
+class OpticalSystem(LayeredSystem, BaseOpticalLayer):
     """Model an optical train from an input coordinate specification."""
 
+    layers: OrderedDict
     spec: GridSpec
 
     def __init__(self, layers, spec: GridSpec):
@@ -185,6 +186,8 @@ class OpticalSystem(LayeredSystem):
 
 class DetectorSystem(LayeredSystem):
     """Transform a PSF through detector layers and produce an Image."""
+
+    layers: OrderedDict
 
     def __init__(self, layers):
         super().__init__(layers, BaseDetectorLayer)

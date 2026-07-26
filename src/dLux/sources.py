@@ -241,7 +241,12 @@ class Spectrum(ParametricHolder):
 class Source(BaseSource, Spectrum):
     """A point source combining spatial and spectral source properties."""
 
+    wavelengths: Array | Parametric
+    weights: Array | Parametric
     position: Array | Parametric | None
+    flux: Array | Parametric | None
+    distribution: Array | Parametric | None
+    units: dict
 
     def __init__(
         self,
@@ -301,10 +306,15 @@ class Source(BaseSource, Spectrum):
 class BinarySource(BaseSource, Spectrum):
     """A binary source parameterised by centre, separation, and contrast."""
 
+    wavelengths: Array | Parametric
+    weights: Array | Parametric
     centre: Array | Parametric | None
     separation: Array | Parametric
     position_angle: Array | Parametric
     contrast: Array | Parametric
+    flux: Array | Parametric | None
+    distribution: Array | Parametric | None
+    units: dict
 
     def __init__(
         self,
