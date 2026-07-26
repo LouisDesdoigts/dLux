@@ -53,7 +53,11 @@ class ParametricBasis(Parametric):
     ) -> None:
         coefficients = np.asarray(coefficients, dtype=float)
         coefficient_shape = tuple(coefficient_shape)
-        if coefficients.shape[-len(coefficient_shape) :] != coefficient_shape:
+        compact = coefficient_shape == (1,) and coefficients.ndim == 1
+        if (
+            not compact
+            and coefficients.shape[-len(coefficient_shape) :] != coefficient_shape
+        ):
             raise ValueError(
                 "Coefficient shape trailing dimensions must match the basis "
                 "dimensions. "
@@ -64,8 +68,11 @@ class ParametricBasis(Parametric):
 
     def evaluate_basis(self, basis: Array) -> Array:
         """Apply global or leading-axis-vectorised coefficients to a basis."""
-        if self.coefficients.ndim == len(self.basis_shape):
+        if self.coefficients.shape == self.basis_shape:
             return dlu.eval_basis(basis, self.coefficients)
+        if self.basis_shape == (1,) and self.coefficients.ndim == 1:
+            evaluate = lambda coefficient: dlu.eval_basis(basis, coefficient[None])
+            return jax.vmap(evaluate)(self.coefficients)
         if self.coefficients.ndim != len(self.basis_shape) + 1:
             raise ValueError("Only one leading coefficient axis is supported.")
         axis = len(self.basis_shape)

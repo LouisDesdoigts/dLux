@@ -395,10 +395,10 @@ class AffineMap(CoordTransform):
     def __init__(self, matrix=None, offset=None):
         matrix = np.eye(2) if matrix is None else np.asarray(matrix, dtype=float)
         offset = np.zeros(2) if offset is None else np.asarray(offset, dtype=float)
-        if matrix.shape != (2, 2):
-            raise ValueError("matrix must have shape (2, 2).")
-        if offset.shape != (2,):
-            raise ValueError("offset must have shape (2,).")
+        if matrix.shape[-2:] != (2, 2):
+            raise ValueError("matrix must have trailing shape (2, 2).")
+        if offset.shape[-1:] != (2,):
+            raise ValueError("offset must have trailing shape (2,).")
         self.matrix = matrix
         self.offset = offset
 
@@ -431,8 +431,8 @@ class Affine(CoordTransform):
     ):
         self.translation = self._vector(translation, "translation")
         self.rotation = None if rotation is None else np.asarray(rotation, dtype=float)
-        if self.rotation is not None and self.rotation.shape != ():
-            raise ValueError("rotation must be scalar.")
+        if self.rotation is not None and self.rotation.ndim > 1:
+            raise ValueError("rotation must be scalar or one-dimensional.")
         self.scale = None
         if scale is not None:
             self.scale = dlu.as_axis(scale, 2, "scale")
@@ -450,8 +450,8 @@ class Affine(CoordTransform):
         if value is None:
             return None
         value = np.asarray(value, dtype=float)
-        if value.shape != (2,):
-            raise ValueError(f"{name} must have shape (2,).")
+        if value.shape[-1:] != (2,):
+            raise ValueError(f"{name} must have trailing shape (2,).")
         return value
 
     def _matrices(self) -> Array:
