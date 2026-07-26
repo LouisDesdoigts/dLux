@@ -1,6 +1,7 @@
-"""Tests for dLux.states."""
+"""Tests for dLux.fields."""
 
 import jax.numpy as np
+import jax.random as jr
 import pytest
 
 import dLux as dl
@@ -202,3 +203,75 @@ class TestPSF:
             psf.interpolate("invalid")
         with pytest.raises(TypeError, match="Unsupported type"):
             psf + "invalid"
+
+
+class TestImage:
+    def test_discrete_field_contract(self, make_spec):
+        image = dl.Image(np.full((8, 8), 10.0), make_spec())
+        poisson = assert_jittable(
+            lambda value: value.add_poisson_noise(jr.key(0)),
+            image,
+        )
+        noisy = assert_jittable(
+            lambda value: value.add_read_noise(jr.key(1), 2.0),
+            poisson,
+        )
+
+        assert isinstance(image, dl.DiscreteField)
+        assert not isinstance(image, dl.ContinuousField)
+        assert poisson.variance.shape == image.data.shape
+        assert noisy.error.shape == image.data.shape
+        assert np.allclose(noisy.read_noise, 2.0)
+
+    def test_fourier_spectra(self, make_spec):
+        image = dl.Image(np.eye(8), make_spec())
+
+        transformed = image.fourier_transform
+        amplitude = image.amplitude_spectrum
+        power = image.power_spectrum
+
+        assert transformed.shape == image.data.shape
+        assert np.allclose(amplitude, np.abs(transformed))
+        assert np.allclose(power, amplitude**2)
+
+    def test_likelihood_contract(self, make_spec):
+        model = dl.PSF(np.full((8, 8), 10.0), make_spec())
+        image = dl.Image(
+            model.data,
+            model.spec,
+            variance=np.full((8, 8), 4.0),
+            read_noise=2.0,
+        )
+
+        gaussian = assert_jittable(
+            lambda value: value.log_likelihood(model, "gaussian"),
+            image,
+        )
+        poisson = assert_jittable(
+            lambda value: value.log_likelihood(model, "poisson"),
+            image,
+        )
+
+        assert np.isfinite(gaussian)
+        assert np.isfinite(poisson)
+
+    @pytest.mark.parametrize(
+        "operation",
+        [
+            lambda spec: dl.Image(np.ones(8), spec),
+            lambda spec: dl.Image(np.ones((4, 4)), spec),
+            lambda spec: dl.Image(np.ones((8, 8)), "invalid"),
+            lambda spec: dl.Image(np.ones((8, 8)), spec).log_likelihood(
+                np.ones((4, 4))
+            ),
+            lambda spec: dl.Image(np.ones((8, 8)), spec).log_likelihood(
+                np.ones((8, 8)), "gaussian"
+            ),
+            lambda spec: dl.Image(np.ones((8, 8)), spec, variance=1.0).log_likelihood(
+                np.ones((8, 8)), "invalid"
+            ),
+        ],
+    )
+    def test_validation(self, operation, make_spec):
+        with pytest.raises((TypeError, ValueError)):
+            operation(make_spec())

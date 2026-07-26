@@ -266,6 +266,22 @@ class DiscreteField(BaseField):
         """Return the standard deviation implied by ``variance``."""
         return None if self.variance is None else np.sqrt(self.variance)
 
+    @property
+    def fourier_transform(self) -> Array:
+        """Return the centered two-dimensional Fourier transform."""
+        transformed = np.fft.fft2(self.field, axes=(-2, -1))
+        return np.fft.fftshift(transformed, axes=(-2, -1))
+
+    @property
+    def amplitude_spectrum(self) -> Array:
+        """Return the amplitude of the centered Fourier transform."""
+        return np.abs(self.fourier_transform)
+
+    @property
+    def power_spectrum(self) -> Array:
+        """Return the squared amplitude of the centered Fourier transform."""
+        return self.amplitude_spectrum**2
+
     def add_poisson_noise(self, key: Array) -> DiscreteField:
         """Add a Poisson realization and its expected variance."""
         expectation = self.field

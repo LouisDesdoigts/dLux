@@ -62,7 +62,7 @@ def test_shared_and_local_coefficients(positions, wavefront):
 
 
 def test_shared_and_local_distortions(positions, wavefront):
-    shared = dl.DistortedCoords(order=2, shift_invariant=True)
+    shared = dl.DistortCoords(order=2, shift_invariant=True)
     local = shared.set(
         distortion=np.stack(
             [

@@ -43,7 +43,7 @@ def test_multivariate_polynomial(coordinates):
 @pytest.mark.parametrize("coordinate_source", ["array", "spec"])
 def test_explicit_polynomial_contract(coordinate_source, coordinates):
     if coordinate_source == "spec":
-        coordinate_source = dl.CoordSpec(n=10, d=0.2, unit="m").broadcast(2)
+        coordinate_source = dl.GridSpec(n=10, d=0.2, unit="m").broadcast(2)
     else:
         coordinate_source = coordinates
     polynomial = dl.ExplicitPolynomial(

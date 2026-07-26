@@ -1,4 +1,4 @@
-"""Tests for dLux.coordinates."""
+"""Tests for dLux.grids."""
 
 import jax.numpy as np
 import pytest
@@ -11,7 +11,7 @@ from .helpers import assert_differentiable, assert_jittable
 
 class TestSpecifications:
     def test_coordinate_interface(self):
-        spec = dl.CoordSpec(n=(6, 4), d=(0.2, 0.3), c=(0.1, -0.2), unit="m")
+        spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), c=(0.1, -0.2), unit="m")
 
         output = assert_jittable(
             lambda value: (
@@ -29,7 +29,7 @@ class TestSpecifications:
         assert spec.ndim == 2
 
     def test_broadcast_and_mapped_centres(self):
-        base = dl.CoordSpec(n=4, d=0.1, c=0.0, unit="m").broadcast(2)
+        base = dl.GridSpec(n=4, d=0.1, c=0.0, unit="m").broadcast(2)
         mapped = base.set(c=np.asarray([[0.0, 0.0], [0.1, -0.1]]))
 
         assert base.coordinates.shape == (2, 4, 4)
@@ -37,15 +37,21 @@ class TestSpecifications:
         assert mapped.coordinates.shape == (2, 2, 4, 4)
 
     def test_sampling_spec_contracts(self):
-        pad = dl.PadSpec(pad=2, crop=3, c=(0.1, -0.1))
+        pad = dl.ResizeSpec(pad=2, crop=3, c=(0.1, -0.1))
         resize = dl.ResizeSpec((8, 6), c=0.0).broadcast(2)
 
-        assert pad.pad == 2 and pad.crop == 3
+        assert pad.pad_factor == (2,) and pad.crop_factor == (3,)
         assert resize.n == (8, 6)
         assert resize.c.shape == ()
+        array = np.ones((6, 6))
+        assert pad.pad(array).shape == (12, 12)
+        assert pad.crop(array).shape == (2, 2)
+        assert pad.resize(array).shape == (4, 4)
+        assert pad.crop_size((12, 12)) == (4, 4)
+        assert resize.resize(array).shape == (6, 8)
 
     def test_units_and_differentiation(self):
-        spec = dl.CoordSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
+        spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
 
         assert np.max(np.abs(spec.coordinates)) < 0.01
         assert_differentiable(lambda value: value.coordinates, spec)
@@ -62,10 +68,10 @@ class TestSpecifications:
     )
     def test_validation(self, kwargs, error):
         with pytest.raises(error):
-            dl.CoordSpec(**kwargs)
+            dl.GridSpec(**kwargs)
 
         with pytest.raises(ValueError):
-            dl.PadSpec(pad=0)
+            dl.ResizeSpec(pad=0)
 
 
 class TestTransforms:
@@ -83,11 +89,11 @@ class TestTransforms:
                 scale=[0.9, 1.1],
                 shear=[0.1, -0.05],
             ),
-            dl.DistortedCoords(order=2),
+            dl.DistortCoords(order=2),
             dl.TransformChain(
                 [
                     dl.Affine(translation=[0.1, 0.0]),
-                    dl.DistortedCoords(order=2),
+                    dl.DistortCoords(order=2),
                 ]
             ),
         ],
@@ -108,22 +114,24 @@ class TestTransforms:
             affine.rotation,
         )
 
-        distorted = dl.DistortedCoords(order=2)
+        distorted = dl.DistortCoords(order=2)
         assert_differentiable(
             lambda distortion: distorted.set(distortion=distortion)(coordinates),
             distorted.distortion,
         )
 
-    def test_coordinate_sources_and_aliases(self, coordinates):
-        transform = dl.Affine(translation=[0.1, 0.0], coordinates=coordinates)
+    def test_transform_requires_external_grid(self, coordinates):
+        transform = dl.Affine(translation=[0.1, 0.0])
 
-        assert np.allclose(transform(), transform.apply(coordinates))
-        assert np.allclose(transform.calculate(6, 1.0), transform(coordinates))
-        with pytest.raises(ValueError, match="Provide coordinates"):
+        assert np.allclose(transform(coordinates), transform.apply(coordinates))
+        spec = dl.GridSpec(n=6, d=1 / 6, unit="m").broadcast(2)
+        with pytest.raises((TypeError, ValueError)):
+            transform(spec)
+        with pytest.raises((TypeError, ValueError)):
             dl.Affine()()
 
     def test_vectorised_distortion(self, coordinates):
-        transform = dl.DistortedCoords(order=2, distortion=np.zeros((3, 2, 5)))
+        transform = dl.DistortCoords(order=2, distortion=np.zeros((3, 2, 5)))
 
         output = assert_jittable(lambda value: value(coordinates), transform)
         assert output.shape == (3,) + coordinates.shape
@@ -135,8 +143,8 @@ class TestTransforms:
             lambda: dl.Affine(scale=0.0),
             lambda: dl.Affine(order=("rotation", "rotation")),
             lambda: dl.AffineMap(matrix=np.ones((3, 3))),
-            lambda: dl.DistortedCoords(powers=np.ones((3, 2))),
-            lambda: dl.DistortedCoords(order=2, orders=[2]),
+            lambda: dl.DistortCoords(powers=np.ones((3, 2))),
+            lambda: dl.DistortCoords(order=2, orders=[2]),
         ],
     )
     def test_validation(self, constructor):

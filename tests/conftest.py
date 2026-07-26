@@ -11,7 +11,7 @@ def make_spec():
     """Return a factory for small two-dimensional coordinate specifications."""
 
     def factory(n=8, d=0.1, c=0.0, unit="m"):
-        return dl.CoordSpec(n=n, d=d, c=c, unit=unit).broadcast(2)
+        return dl.GridSpec(n=n, d=d, c=c, unit=unit).broadcast(2)
 
     return factory
 
