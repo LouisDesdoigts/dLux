@@ -91,10 +91,7 @@ class TestTransforms:
             ),
             dl.DistortCoords(order=2),
             dl.TransformChain(
-                [
-                    dl.Affine(translation=[0.1, 0.0]),
-                    dl.DistortCoords(order=2),
-                ]
+                [dl.Affine(translation=[0.1, 0.0]), dl.DistortCoords(order=2)]
             ),
         ],
     )
@@ -104,14 +101,12 @@ class TestTransforms:
     def test_transform_gradients(self, coordinates):
         affine_map = dl.AffineMap()
         assert_differentiable(
-            lambda matrix: affine_map.set(matrix=matrix)(coordinates),
-            affine_map.matrix,
+            lambda matrix: affine_map.set(matrix=matrix)(coordinates), affine_map.matrix
         )
 
         affine = dl.Affine(rotation=0.2)
         assert_differentiable(
-            lambda rotation: affine.set(rotation=rotation)(coordinates),
-            affine.rotation,
+            lambda rotation: affine.set(rotation=rotation)(coordinates), affine.rotation
         )
 
         distorted = dl.DistortCoords(order=2)
@@ -139,7 +134,7 @@ class TestTransforms:
     @pytest.mark.parametrize(
         "constructor",
         [
-            lambda: dl.Affine(rotation=[1.0]),
+            lambda: dl.Affine(rotation=[[1.0]]),
             lambda: dl.Affine(scale=0.0),
             lambda: dl.Affine(order=("rotation", "rotation")),
             lambda: dl.AffineMap(matrix=np.ones((3, 3))),

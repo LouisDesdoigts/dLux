@@ -9,7 +9,7 @@ from tests.helpers import assert_differentiable, assert_jittable
 
 
 @pytest.fixture
-def positions():
+def centers():
     return np.array([[-0.2, 0.0], [0.2, 0.0]])
 
 
@@ -19,19 +19,19 @@ def wavefront(make_wavefront, make_spec):
 
 
 @pytest.mark.parametrize("dynamic", [False, True])
-def test_sparse_optic_contract(dynamic, positions, wavefront):
+def test_sparse_optic_contract(dynamic, centers, wavefront):
     optic_type = dl.SparseDynamicOptic if dynamic else dl.SparseOptic
-    optic = optic_type(positions, transmission=dl.Circle(0.2, softening=0.01))
+    optic = optic_type(centers, transmission=dl.Circle(0.2, softening=0.01))
 
     output = assert_jittable(optic, wavefront)
     local = assert_jittable(optic.wavefronts, wavefront)
-    assert optic.n_apertures == len(positions)
+    assert optic.n_apertures == len(centers)
     assert output.phasor.shape == wavefront.phasor.shape
     assert local.phasor.shape[0] == optic.n_apertures
 
 
-def test_interfere(positions, wavefront):
-    optic = dl.SparseOptic(positions, transmission=dl.Circle(0.2, softening=0.01))
+def test_interfere(centers, wavefront):
+    optic = dl.SparseOptic(centers, transmission=dl.Circle(0.2, softening=0.01))
     local = optic.wavefronts(wavefront)
     output = assert_jittable(dl.Interfere(), local)
 
@@ -40,10 +40,12 @@ def test_interfere(positions, wavefront):
     assert output.spec.c.shape == wavefront.spec.c.shape
 
 
-def test_shared_and_local_coefficients(positions, wavefront):
+def test_shared_and_local_coefficients(centers, wavefront):
     shared = dl.DynamicZernikeBasis(js=[4], coefficients=[1e-7], diameter=0.2)
-    local = shared.set(coefficients=np.array([[1e-7], [2e-7]]))
-    common = {"positions": positions, "transmission": dl.Circle(0.2, softening=0.01)}
+    local = dl.DynamicZernikeBasis(
+        js=[4], coefficients=np.array([1e-7, 2e-7]), diameter=0.2
+    )
+    common = {"centers": centers, "transmission": dl.Circle(0.2, softening=0.01)}
     shared_optic = dl.SparseDynamicOptic(opd=shared, **common)
     local_optic = dl.SparseDynamicOptic(opd=local, **common)
 
@@ -60,27 +62,36 @@ def test_shared_and_local_coefficients(positions, wavefront):
     )
 
 
-def test_shared_and_local_distortions(positions, wavefront):
+def test_shared_and_local_distortions(centers, wavefront):
     shared = dl.DistortCoords(order=2, shift_invariant=True)
     local = shared.set(
         distortion=np.stack([shared.distortion, shared.distortion.at[0, 0].set(0.01)])
     )
-    common = {"positions": positions, "transmission": dl.Circle(0.2, softening=0.01)}
+    common = {"centers": centers, "transmission": dl.Circle(0.2, softening=0.01)}
 
     assert_jittable(dl.SparseDynamicOptic(transformation=shared, **common), wavefront)
     assert_jittable(dl.SparseDynamicOptic(transformation=local, **common), wavefront)
 
 
-def test_position_gradients(positions, wavefront):
-    optic = dl.SparseDynamicOptic(
-        positions, transmission=dl.Circle(0.2, softening=0.01)
+def test_local_affine_and_mismatched_transform(centers, wavefront):
+    common = {"centers": centers, "transmission": dl.Circle(0.2, softening=0.01)}
+    affine = dl.Affine(translation=np.array([[0.0, 0.0], [0.01, -0.01]]))
+    assert_jittable(dl.SparseDynamicOptic(transformation=affine, **common), wavefront)
+
+    distortion = dl.DistortCoords(order=2)
+    distortion = distortion.set(
+        distortion=np.stack([distortion.distortion] * (len(centers) + 1))
     )
-
-    assert_differentiable(
-        lambda value: optic.set(positions=value)(wavefront), positions
-    )
+    with pytest.raises(ValueError, match="distortion"):
+        dl.SparseDynamicOptic(transformation=distortion, **common)(wavefront)
 
 
-def test_position_validation():
-    with pytest.raises(ValueError, match="positions"):
+def test_center_gradients(centers, wavefront):
+    optic = dl.SparseDynamicOptic(centers, transmission=dl.Circle(0.2, softening=0.01))
+
+    assert_differentiable(lambda value: optic.set(centers=value)(wavefront), centers)
+
+
+def test_center_validation():
+    with pytest.raises(ValueError, match="centers"):
         dl.SparseOptic([0.0, 1.0])
