@@ -115,10 +115,7 @@ class Rectangle(SoftShape):
 
     def evaluate(self, *, coordinates, pixel_scale, **kwargs) -> Array:
         return dlu.soft_rectangle(
-            coordinates,
-            self.width,
-            self.height,
-            self.clip(pixel_scale),
+            coordinates, self.width, self.height, self.clip(pixel_scale)
         )
 
 
@@ -137,10 +134,7 @@ class RegularPolygon(RadialShape):
 
     def evaluate(self, *, coordinates, pixel_scale, **kwargs) -> Array:
         return dlu.soft_reg_polygon(
-            coordinates,
-            self.diameter,
-            self.nsides,
-            self.clip(pixel_scale),
+            coordinates, self.diameter, self.nsides, self.clip(pixel_scale)
         )
 
 
@@ -162,11 +156,7 @@ class Spider(SoftShape):
 
     def evaluate(self, *, coordinates, pixel_scale, **kwargs) -> Array:
         return dlu.soft_spider(
-            coordinates,
-            self.width,
-            self.angles,
-            self.clip(pixel_scale),
-            invert=True,
+            coordinates, self.width, self.angles, self.clip(pixel_scale), invert=True
         )
 
 

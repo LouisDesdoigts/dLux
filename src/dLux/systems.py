@@ -93,10 +93,6 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
             raise TypeError("wavefront must be a Wavefront instance.")
         return LayeredSystem.__call__(self, wavefront)
 
-    def apply(self, wavefront: Wavefront) -> Wavefront:
-        """Apply the optical layers using the supplied wavefront specification."""
-        return self(wavefront)
-
     def initialise_wavefront(self, wavelength, offset=None) -> Wavefront:
         """Construct an input Wavefront and apply an optional angular offset."""
         offset = np.zeros(2) if offset is None else np.asarray(offset)
@@ -105,12 +101,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         return Wavefront(wavelength, self.spec).tilt(offset)
 
     def propagate_mono(
-        self,
-        wavelength,
-        offset=None,
-        return_wf=False,
-        return_all=False,
-        stokes=None,
+        self, wavelength, offset=None, return_wf=False, return_all=False, stokes=None
     ):
         """Propagate a monochromatic point source through the system.
 
@@ -163,11 +154,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
             return wavefront
         return psf.data
 
-    def model(
-        self,
-        source,
-        return_all=False,
-    ):
+    def model(self, source, return_all=False):
         """Model a spectral source, returning its PSF by default."""
         if not isinstance(source, Spectrum):
             raise TypeError("source must be a Spectrum.")
@@ -196,10 +183,6 @@ class DetectorSystem(LayeredSystem):
         if not isinstance(psf, PSF):
             raise TypeError("psf must be a PSF instance.")
         return super().__call__(psf)
-
-    def apply(self, psf: PSF) -> PSF:
-        """Apply the detector layers while retaining the PSF container."""
-        return self(psf)
 
     def model(self, psf: PSF, return_all=False):
         """Apply the detector model and return an Image."""

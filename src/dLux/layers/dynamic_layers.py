@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
+import equinox as eqx
 import jax.numpy as np
 from jax import Array
 
 from ..grids import CoordTransform, GridSpec
-from ..parametric import Parametric
+from ..parametric import Parametric, to_param
 from ..fields import Wavefront
 from .optical_layers import AberratedLayer, BaseOpticalLayer, Optic, TransmissiveLayer
 
@@ -38,29 +39,18 @@ class BaseDynamicLayer(BaseOpticalLayer):
         self.coordinates = coordinates
         self.transformation = transformation
 
-    @staticmethod
-    def _from_spec(spec: GridSpec) -> Array:
-        return spec.coordinates
-
     def context(self, wavefront: Wavefront) -> dict[str, Any]:
         """Return the coordinate context used to resolve parametric leaves."""
         if self.coordinates is None:
-            coordinates = wavefront.coordinates
-            pixel_scale = wavefront.pixel_scale
+            coords, d = wavefront.coordinates, wavefront.pixel_scale
         elif isinstance(self.coordinates, GridSpec):
-            coordinates = self._from_spec(self.coordinates)
-            pixel_scale = self.coordinates.d
+            coords, d = self.coordinates.coordinates, self.coordinates.d
         else:
-            coordinates = self.coordinates
-            pixel_scale = wavefront.pixel_scale
+            coords, d = self.coordinates, wavefront.pixel_scale
 
         if self.transformation is not None:
-            coordinates = self.transformation(coordinates)
-        return {
-            "wavefront": wavefront,
-            "coordinates": coordinates,
-            "pixel_scale": pixel_scale,
-        }
+            coords = self.transformation(coords)
+        return {"wavefront": wavefront, "coordinates": coords, "pixel_scale": d}
 
 
 class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
@@ -68,27 +58,14 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    transmission: Array | Parametric | None
+    transmission: Array | Parametric | None = eqx.field(converter=to_param)
     normalise: bool
 
     def __init__(
-        self,
-        transmission=None,
-        coordinates=None,
-        transformation=None,
-        normalise=False,
+        self, transmission=None, coordinates=None, transformation=None, normalise=False
     ):
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         TransmissiveLayer.__init__(self, transmission, normalise)
-
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        self = self.resolve(**self.context(wavefront))
-        if self.transmission is not None:
-            transmission = wavefront._to_phasor_shape(self.transmission)
-            wavefront = wavefront.set(phasor=wavefront.phasor * transmission)
-        if self.normalise:
-            wavefront = wavefront.normalise()
-        return wavefront
 
 
 class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
@@ -96,22 +73,12 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    opd: Array | Parametric | None = eqx.field(converter=to_param)
+    phase: Array | Parametric | None = eqx.field(converter=to_param)
 
-    def __init__(
-        self,
-        opd=None,
-        phase=None,
-        coordinates=None,
-        transformation=None,
-    ):
+    def __init__(self, opd=None, phase=None, coordinates=None, transformation=None):
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         AberratedLayer.__init__(self, opd, phase)
-
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        self = self.resolve(**self.context(wavefront))
-        return wavefront.add_opd(self.opd).add_phase(self.phase)
 
 
 class DynamicOptic(BaseDynamicLayer, Optic):
@@ -119,9 +86,9 @@ class DynamicOptic(BaseDynamicLayer, Optic):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    transmission: Array | Parametric | None = eqx.field(converter=to_param)
+    opd: Array | Parametric | None = eqx.field(converter=to_param)
+    phase: Array | Parametric | None = eqx.field(converter=to_param)
     normalise: bool
 
     def __init__(
@@ -135,11 +102,3 @@ class DynamicOptic(BaseDynamicLayer, Optic):
     ):
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         Optic.__init__(self, transmission, opd, phase, normalise)
-
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        self = self.resolve(**self.context(wavefront))
-        if self.transmission is not None:
-            transmission = wavefront._to_phasor_shape(self.transmission)
-            wavefront = wavefront.set(phasor=wavefront.phasor * transmission)
-        wavefront = wavefront.add_opd(self.opd).add_phase(self.phase)
-        return wavefront.normalise() if self.normalise else wavefront

@@ -1,10 +1,7 @@
 import jax.numpy as np
 from jax import Array
 
-__all__ = [
-    "fluxes_from_contrast",
-    "positions_from_sep",
-]
+__all__ = ["fluxes_from_contrast", "positions_from_sep"]
 
 
 def fluxes_from_contrast(mean_flux: float, contrast: float) -> Array:

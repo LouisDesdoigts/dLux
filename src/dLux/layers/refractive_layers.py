@@ -2,25 +2,26 @@
 
 from __future__ import annotations
 
+import equinox as eqx
 import jax.numpy as np
 from jax import Array
 
-from ..parametric import Parametric
+from ..parametric import Parametric, to_param
 from ..fields import Wavefront
 from .optical_layers import OpticalLayer
 
-__all__ = ["Lens", "Wedge"]
+__all__ = ["RefractiveOptic", "Wedge"]
 
 
-class Lens(OpticalLayer):
-    """Apply residual refractive thickness as optical path difference."""
+class RefractiveOptic(OpticalLayer):
+    """Apply a refractive thickness profile as optical path difference."""
 
-    thickness: Array | Parametric
-    n: Array | Parametric
+    thickness: Array | Parametric = eqx.field(converter=to_param)
+    n: Array | Parametric = eqx.field(converter=to_param)
 
     def __init__(self, thickness, n):
-        self.thickness = self.as_parametric(thickness)
-        self.n = self.as_parametric(n)
+        self.thickness = thickness
+        self.n = n
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         self = self.resolve(wavefront=wavefront)
@@ -31,35 +32,23 @@ class Lens(OpticalLayer):
 
 
 class Wedge(OpticalLayer):
-    """Apply the residual optical path of a thin refractive wedge."""
+    """Apply the optical path of a thin refractive wedge."""
 
     angle: Array
-    n: Array | Parametric
-    reference_wavelength: Array | None
+    n: Array | Parametric = eqx.field(converter=to_param)
 
-    def __init__(self, angle, n, reference_wavelength=None):
+    def __init__(self, angle, n):
         self.angle = np.asarray(angle, dtype=float)
         if self.angle.shape != (2,):
             raise ValueError("angle must have shape (2,).")
-        self.n = self.as_parametric(n)
-        self.reference_wavelength = (
-            None
-            if reference_wavelength is None
-            else np.asarray(reference_wavelength, dtype=float)
-        )
+        self.n = n
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
-        resolved = self.resolve(wavefront=wavefront)
-        n = resolved.n
-        index_difference = n - 1
-        if self.reference_wavelength is not None:
-            reference = wavefront.set(wavelength=self.reference_wavelength)
-            index_difference = n - self.resolve(wavefront=reference).n
-
+        self = self.resolve(wavefront=wavefront)
         coordinates = wavefront.coordinates
         x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
         thickness = x * np.tan(self.angle[0]) + y * np.tan(self.angle[1])
-        index_difference = np.asarray(index_difference)
-        if index_difference.ndim:
-            index_difference = index_difference[..., None, None]
-        return wavefront.add_opd(index_difference * thickness)
+        n = np.asarray(self.n - 1)
+        if n.ndim:
+            n = n[..., None, None]
+        return wavefront.add_opd(n * thickness)

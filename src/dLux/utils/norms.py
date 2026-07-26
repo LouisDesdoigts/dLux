@@ -1,13 +1,7 @@
 import jax.numpy as np
 from jax import Array
 
-__all__ = [
-    "l1_norm",
-    "l2_norm",
-    "max_norm",
-    "rms_norm",
-    "p2v_norm",
-]
+__all__ = ["l1_norm", "l2_norm", "max_norm", "rms_norm", "p2v_norm"]
 
 
 def _resolve_mask(array, mask):
@@ -58,9 +52,7 @@ def l1_norm(
         The L1 norm of the array, optionally masked.
     """
     return np.nansum(
-        _resolve_mask(array, mask) * np.abs(array),
-        axis=axis,
-        keepdims=keepdims,
+        _resolve_mask(array, mask) * np.abs(array), axis=axis, keepdims=keepdims
     )
 
 

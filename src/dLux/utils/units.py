@@ -29,14 +29,9 @@ _BASE_TO_RAD = {
     "arcsec": np.pi / (180.0 * 3600.0),
 }
 
-_BASE_TO_METRE = {
-    "m": 1.0,
-    "angstrom": 1e-10,
-}
+_BASE_TO_METRE = {"m": 1.0, "angstrom": 1e-10}
 
-_BASE_TO_PHOTON = {
-    "photon": 1.0,
-}
+_BASE_TO_PHOTON = {"photon": 1.0}
 
 # ---- aliases (lowercase lookup only) ----
 _ALIASES = {
@@ -64,15 +59,7 @@ _ALIASES = {
 }
 
 # ---- SI-like prefixes ----
-_PREFIX = {
-    "G": 1e9,
-    "M": 1e6,
-    "k": 1e3,
-    "": 1.0,
-    "m": 1e-3,
-    "u": 1e-6,
-    "n": 1e-9,
-}
+_PREFIX = {"G": 1e9, "M": 1e6, "k": 1e3, "": 1.0, "m": 1e-3, "u": 1e-6, "n": 1e-9}
 
 
 def _canon(unit: str) -> str:

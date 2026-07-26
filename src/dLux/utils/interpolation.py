@@ -3,11 +3,7 @@ from jax import Array, vmap
 import interpax as ipx
 import dLux.utils as dlu
 
-__all__ = [
-    "interp",
-    "scale",
-    "rotate",
-]
+__all__ = ["interp", "scale", "rotate"]
 
 
 def interp(

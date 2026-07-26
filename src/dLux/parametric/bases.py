@@ -49,9 +49,7 @@ class ParametricBasis(Parametric):
         return self.coefficients.shape
 
     def _set_coefficients(
-        self: ParametricBasis,
-        coefficients: Array,
-        coefficient_shape: tuple[int, ...],
+        self: ParametricBasis, coefficients: Array, coefficient_shape: tuple[int, ...]
     ) -> None:
         coefficients = np.asarray(coefficients, dtype=float)
         coefficient_shape = tuple(coefficient_shape)
@@ -260,8 +258,5 @@ class SplineBasis(ImplicitBasis):
 
     def evaluate(self, **kwargs: Any) -> Array:
         return dlu.interp(
-            self.coefficients,
-            self.knot_coords,
-            self.sample_coords,
-            method=self.method,
+            self.coefficients, self.knot_coords, self.sample_coords, method=self.method
         )

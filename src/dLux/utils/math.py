@@ -53,10 +53,7 @@ def gaussian(
         npixels *= ndim
 
     # Generate per-axis coordinates and corresponding 1D Gaussians
-    linspaces = jtu.map(
-        lambda n: np.linspace(-extent, extent, n),
-        npixels,
-    )
+    linspaces = jtu.map(lambda n: np.linspace(-extent, extent, n), npixels)
     one_d_gauss = jtu.map(
         lambda axis, m, s: jsp.stats.norm.pdf(axis, loc=m, scale=s),
         linspaces,
@@ -70,10 +67,7 @@ def gaussian(
 
 
 def mv_gaussian(
-    mean: Array,
-    cov: Array,
-    npix: int | Array = 64,
-    extent: float = 5.0,
+    mean: Array, cov: Array, npix: int | Array = 64, extent: float = 5.0
 ) -> Array:
     """
     Generates a normalized multivariate Gaussian function.
@@ -111,9 +105,7 @@ def mv_gaussian(
     # Create linspace function
     def make_axis(i):
         return np.linspace(
-            mean[i] - extent * stds[i],
-            mean[i] + extent * stds[i],
-            npix_arr[i],
+            mean[i] - extent * stds[i], mean[i] + extent * stds[i], npix_arr[i]
         )
 
     # Generate coordinate arrays for each dimension

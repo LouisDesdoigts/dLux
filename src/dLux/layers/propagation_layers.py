@@ -26,6 +26,104 @@ __all__ = [
 ]
 
 
+def _propagate_mft(wf, spec, ABCD=None, **kwargs):
+    """Propagate every field to an explicit output grid."""
+    wavelength = np.asarray(wf.wavelength)
+    extra = wf.phasor.ndim - wavelength.ndim - 2
+    wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
+    x, y = wf.axes
+    axes_out = spec.axes
+
+    def propagate(field, lam, x, y):
+        if ABCD is None:
+            return dlu.MFT(field, lam, (x, y), axes_out, **kwargs)
+        return dlu.ABCD_MFT(field, lam, (x, y), axes_out, ABCD)
+
+    propagate = np.vectorize(propagate, signature="(n,m),(),(m),(n)->(p,q)")
+    return wf.set(phasor=propagate(wf.phasor, wavelength, x, y), spec=spec)
+
+
+def _propagate_fft(wf, spec, unit, ABCD=None, **kwargs):
+    """Propagate every field at native FFT sampling."""
+    center = None if spec.c is None else np.broadcast_to(spec.c, (2,))
+    center = None if center is None else center * dlu.unit_factor(unit)
+    padding = spec.padding
+
+    def propagate(field, wavelength, x, y):
+        fn = dlu.FFT if ABCD is None else dlu.ABCD_FFT
+        inputs = kwargs if ABCD is None else {"ABCD": ABCD}
+        field, axes = fn(
+            field, wavelength, (x, y), output_center=center, **padding, **inputs
+        )
+        return field, *axes
+
+    propagate = np.vectorize(propagate, signature="(n,m),(),(m),(n)->(p,q),(q),(p)")
+    field, x, y = propagate(wf.phasor, wf.wavelength, *wf.axes)
+
+    if any(f > 1 for f in spec.crop_factor):
+        nx, ny = spec.crop_size(field.shape)
+        sy, sx = (field.shape[-2] - ny) // 2, (field.shape[-1] - nx) // 2
+        field, x, y = (
+            field[..., sy : sy + ny, sx : sx + nx],
+            x[..., sx : sx + nx],
+            y[..., sy : sy + ny],
+        )
+
+    scale = dlu.unit_factor(unit)
+    d = np.stack((x[..., 1] - x[..., 0], y[..., 1] - y[..., 0]), -1) / scale
+    c = np.stack(((x[..., -1] + x[..., 0]) / 2, (y[..., -1] + y[..., 0]) / 2), -1)
+    spec = wf.spec.set(n=field.shape[-2:][::-1], d=d, c=c / scale, unit=unit)
+    return wf.set(phasor=field, spec=spec)
+
+
+def _propagate_free_space(wf, spec, distance, crop):
+    """Propagate every field over a free-space distance."""
+    wavelength = np.asarray(wf.wavelength)
+    extra = wf.phasor.ndim - wavelength.ndim - 2
+    wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
+    x, y = wf.axes
+    padding = spec.padding
+    propagate = np.vectorize(
+        lambda field, lam, x, y: dlu.ASM(
+            field, lam, (x, y), distance, crop=crop, **padding
+        ),
+        signature="(n,m),(),(m),(n)->(n,m)" if crop else "(n,m),(),(m),(n)->(p,q)",
+    )
+    field = propagate(wf.phasor, wavelength, x, y)
+    spec = wf.spec if crop else wf.spec.set(n=field.shape[-2:][::-1])
+    return wf.set(phasor=field, spec=spec)
+
+
+def _validate_grid(spec, name, ndim=2, angular=None):
+    """Validate a complete propagation grid and its coordinate unit."""
+    if spec.n is None or spec.d is None or spec.unit is None:
+        raise ValueError(f"The {name} GridSpec requires n, d, and unit.")
+    if spec.ndim != ndim:
+        raise ValueError(f"The {name} GridSpec must have {ndim} dimensions.")
+    try:
+        dlu.unit_factor_to_rad(spec.unit)
+        is_angular = True
+    except ValueError:
+        is_angular = False
+    if angular is not None and is_angular != angular:
+        unit_type = "angular" if angular else "physical"
+        raise ValueError(f"The {name} GridSpec must use {unit_type} units.")
+    return is_angular
+
+
+def _validate_method(method, spec, types):
+    """Validate a propagation method and its required specification type."""
+    method = str(method).lower()
+    if method not in types:
+        methods = "', '".join(types)
+        raise ValueError(f"method must be '{methods}'.")
+    if not isinstance(spec, types[method]):
+        raise TypeError(
+            f"{method.upper()} propagation requires a {types[method].__name__}."
+        )
+    return method
+
+
 class ABCDElement(zdx.Base):
     """Base class for elements represented by an ABCD matrix."""
 
@@ -94,106 +192,11 @@ class Propagator(OpticalLayer):
     def __init__(self, spec):
         if not isinstance(spec, (GridSpec, ResizeSpec)):
             raise TypeError("spec must be a GridSpec or ResizeSpec.")
-        self.spec = (
-            spec.broadcast(2) if isinstance(spec, (GridSpec, ResizeSpec)) else spec
-        )
+        self.spec = spec.broadcast(2)
 
     def validate(self, wavefront):
         """Validate the input coordinate specification."""
-        spec = wavefront.spec
-        if spec.n is None or spec.d is None or spec.unit is None:
-            raise ValueError("The input Wavefront requires n, d, and unit.")
-        if spec.ndim != 2:
-            raise ValueError("Propagation requires two-dimensional coordinates.")
-        try:
-            dlu.unit_factor_to_rad(spec.unit)
-        except ValueError:
-            return
-        raise ValueError("Input Wavefront coordinates must use physical units.")
-
-    def propagate_mft(self, wavefront, ABCD=None, **kwargs):
-        """Propagate to an explicit output grid using an MFT."""
-        wavelength = np.asarray(wavefront.wavelength)
-        extra = wavefront.phasor.ndim - wavelength.ndim - 2
-        wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
-        x, y = wavefront.axes
-        propagate = np.vectorize(
-            lambda field, lam, x, y: (
-                dlu.MFT(
-                    phasor=field,
-                    wavelength=lam,
-                    spec_in=(x, y),
-                    spec_out=self.spec.axes,
-                    **kwargs,
-                )
-                if ABCD is None
-                else dlu.ABCD_MFT(
-                    phasor=field,
-                    wavelength=lam,
-                    spec_in=(x, y),
-                    spec_out=self.spec.axes,
-                    ABCD=ABCD,
-                )
-            ),
-            signature="(n,m),(),(m),(n)->(p,q)",
-        )
-        field = propagate(wavefront.phasor, wavelength, x, y)
-        return wavefront.set(phasor=field, spec=self.spec)
-
-    def propagate_fft(self, wavefront, unit, ABCD=None, **kwargs):
-        """Propagate at native FFT sampling."""
-        padding = self.spec.padding
-        output_center = (
-            None
-            if self.spec.c is None
-            else np.broadcast_to(self.spec.c, (2,)) * dlu.unit_factor(unit)
-        )
-
-        def propagate(field, wavelength, x, y):
-            propagate = dlu.FFT if ABCD is None else dlu.ABCD_FFT
-            inputs = kwargs if ABCD is None else {"ABCD": ABCD}
-            output, spec_out = propagate(
-                phasor=field,
-                wavelength=wavelength,
-                spec_in=(x, y),
-                output_center=output_center,
-                **padding,
-                **inputs,
-            )
-            return output, spec_out[0], spec_out[1]
-
-        propagate = np.vectorize(
-            propagate,
-            signature="(n,m),(),(m),(n)->(p,q),(q),(p)",
-        )
-        field, x, y = propagate(
-            wavefront.phasor,
-            wavefront.wavelength,
-            *wavefront.axes,
-        )
-        if any(factor > 1 for factor in self.spec.crop_factor):
-            nx, ny = self.spec.crop_size(field.shape)
-            sy = (field.shape[-2] - ny) // 2
-            sx = (field.shape[-1] - nx) // 2
-            field = field[..., sy : sy + ny, sx : sx + nx]
-            x = x[..., sx : sx + nx]
-            y = y[..., sy : sy + ny]
-        d = np.stack((x[..., 1] - x[..., 0], y[..., 1] - y[..., 0]), axis=-1)
-        c = np.stack(
-            (
-                (x[..., -1] + x[..., 0]) / 2,
-                (y[..., -1] + y[..., 0]) / 2,
-            ),
-            axis=-1,
-        )
-        scale = dlu.unit_factor(unit)
-        spec = wavefront.spec.set(
-            n=field.shape[-2:][::-1],
-            d=d / scale,
-            c=c / scale,
-            unit=unit,
-        )
-        return wavefront.set(phasor=field, spec=spec)
+        _validate_grid(wavefront.spec, "input", angular=False)
 
 
 class FocalPropagator(Propagator):
@@ -213,15 +216,7 @@ class FocalPropagator(Propagator):
         super().validate(wavefront)
         if isinstance(self.spec, ResizeSpec):
             return
-        if self.spec.n is None or self.spec.d is None or self.spec.unit is None:
-            raise ValueError("The output GridSpec requires n, d, and unit.")
-        if self.spec.ndim != wavefront.spec.ndim:
-            raise ValueError("Input and output coordinate dimensionality must match.")
-        try:
-            dlu.unit_factor_to_rad(self.spec.unit)
-            angular = True
-        except ValueError:
-            angular = False
+        angular = _validate_grid(self.spec, "output", wavefront.spec.ndim)
         if self.focal_length is None and not angular:
             raise ValueError(
                 "Propagation without a focal length requires angular output units."
@@ -240,13 +235,7 @@ class Fraunhofer(FocalPropagator):
     method: str
 
     def __init__(self, spec, focal_length=None, method="mft"):
-        method = str(method).lower()
-        if method not in ("mft", "fft"):
-            raise ValueError("method must be 'mft' or 'fft'.")
-        if method == "mft" and not isinstance(spec, GridSpec):
-            raise TypeError("MFT propagation requires a GridSpec.")
-        if method == "fft" and not isinstance(spec, ResizeSpec):
-            raise TypeError("FFT propagation requires a ResizeSpec.")
+        method = _validate_method(method, spec, {"mft": GridSpec, "fft": ResizeSpec})
         super().__init__(spec, focal_length)
         self.method = method
 
@@ -254,15 +243,10 @@ class Fraunhofer(FocalPropagator):
         self.validate(wavefront)
         if self.method == "fft":
             unit = "rad" if self.focal_length is None else wavefront.spec.unit
-            return self.propagate_fft(
-                wavefront,
-                unit,
-                focal_length=self.focal_length,
+            return _propagate_fft(
+                wavefront, self.spec, unit, focal_length=self.focal_length
             )
-        return self.propagate_mft(
-            wavefront,
-            focal_length=self.focal_length,
-        )
+        return _propagate_mft(wavefront, self.spec, focal_length=self.focal_length)
 
 
 class Fresnel(FocalPropagator):
@@ -274,13 +258,8 @@ class Fresnel(FocalPropagator):
     method: str
 
     def __init__(self, spec, defocus=0.0, focal_length=None, method="lct"):
-        method = str(method).lower()
-        if method not in ("fft", "mft", "lct"):
-            raise ValueError("method must be 'fft', 'mft', or 'lct'.")
-        if method in ("mft", "lct") and not isinstance(spec, GridSpec):
-            raise TypeError("MFT and LCT propagation require a GridSpec.")
-        if method == "fft" and not isinstance(spec, ResizeSpec):
-            raise TypeError("FFT propagation requires a ResizeSpec.")
+        types = {"fft": ResizeSpec, "mft": GridSpec, "lct": GridSpec}
+        method = _validate_method(method, spec, types)
         super().__init__(spec, focal_length)
         self.method = method
         self.defocus = np.asarray(defocus, dtype=float)
@@ -289,16 +268,10 @@ class Fresnel(FocalPropagator):
         self.validate(wavefront)
         if self.method == "fft":
             unit = "rad" if self.focal_length is None else wavefront.spec.unit
-            return self.propagate_fft(
-                wavefront,
-                unit,
-                focal_length=self.focal_length,
-                defocus=self.defocus,
-            )
-        return self.propagate_mft(
-            wavefront,
-            focal_length=self.focal_length,
-            defocus=self.defocus,
+            kwargs = {"focal_length": self.focal_length, "defocus": self.defocus}
+            return _propagate_fft(wavefront, self.spec, unit, **kwargs)
+        return _propagate_mft(
+            wavefront, self.spec, focal_length=self.focal_length, defocus=self.defocus
         )
 
 
@@ -311,19 +284,13 @@ class ABCDPropagator(Propagator):
 
     def __init__(self, ABCDs, spec, method="lct"):
         super().__init__(spec)
-        method = str(method).lower()
-        if method not in ("lct", "fft"):
-            raise ValueError("method must be 'lct' or 'fft'.")
-        if method == "fft" and not isinstance(self.spec, ResizeSpec):
-            raise TypeError("FFT propagation requires a ResizeSpec.")
-        if method == "lct" and not isinstance(self.spec, GridSpec):
-            raise TypeError("LCT propagation requires a GridSpec.")
+        method = _validate_method(
+            method, self.spec, {"lct": GridSpec, "fft": ResizeSpec}
+        )
 
         elements = list(ABCDs.items()) if isinstance(ABCDs, dict) else ABCDs
         self.ABCDs = dlu.list2dictionary(
-            elements,
-            ordered=True,
-            allowed_types=(ABCDElement,),
+            elements, ordered=True, allowed_types=(ABCDElement,)
         )
         if not self.ABCDs:
             raise ValueError("ABCDs must contain at least one element.")
@@ -339,25 +306,15 @@ class ABCDPropagator(Propagator):
         Propagator.validate(self, wavefront)
         if isinstance(self.spec, ResizeSpec):
             return
-        if self.spec.n is None or self.spec.d is None or self.spec.unit is None:
-            raise ValueError("The output GridSpec requires n, d, and unit.")
-        if self.spec.ndim != wavefront.spec.ndim:
-            raise ValueError("Input and output coordinate dimensionality must match.")
-        try:
-            dlu.unit_factor_to_rad(self.spec.unit)
-        except ValueError:
-            return
-        raise ValueError("ABCD output coordinates must use physical units.")
+        _validate_grid(self.spec, "output", wavefront.spec.ndim, angular=False)
 
     def __call__(self, wavefront):
         self.validate(wavefront)
         if self.method == "fft":
-            return self.propagate_fft(
-                wavefront,
-                unit=wavefront.spec.unit,
-                ABCD=self.abcd,
+            return _propagate_fft(
+                wavefront, self.spec, unit=wavefront.spec.unit, ABCD=self.abcd
             )
-        return self.propagate_mft(wavefront, ABCD=self.abcd)
+        return _propagate_mft(wavefront, self.spec, ABCD=self.abcd)
 
 
 class FreeSpace(Propagator):
@@ -378,28 +335,4 @@ class FreeSpace(Propagator):
 
     def __call__(self, wavefront):
         self.validate(wavefront)
-        wavelength = np.asarray(wavefront.wavelength)
-        extra = wavefront.phasor.ndim - wavelength.ndim - 2
-        wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
-        padding = self.spec.padding
-        x, y = wavefront.axes
-        propagate = np.vectorize(
-            lambda field, lam, x, y: dlu.ASM(
-                phasor=field,
-                wavelength=lam,
-                spec_in=(x, y),
-                distance=self.distance,
-                crop=self.crop,
-                **padding,
-            ),
-            signature=(
-                "(n,m),(),(m),(n)->(n,m)" if self.crop else "(n,m),(),(m),(n)->(p,q)"
-            ),
-        )
-        field = propagate(wavefront.phasor, wavelength, x, y)
-        if self.crop:
-            return wavefront.set(phasor=field)
-        return wavefront.set(
-            phasor=field,
-            spec=wavefront.spec.set(n=field.shape[-2:][::-1]),
-        )
+        return _propagate_free_space(wavefront, self.spec, self.distance, self.crop)

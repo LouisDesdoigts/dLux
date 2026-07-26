@@ -1,12 +1,13 @@
 """Polarised optical layers and parameterised polarisation fields."""
 
 from __future__ import annotations
+import equinox as eqx
 import jax.numpy as np
 import dLux.utils as dlu
 from jax import Array
 
 
-from ..parametric import Parametric
+from ..parametric import Parametric, to_param
 from ..fields import Wavefront
 from .optical_layers import OpticalLayer
 
@@ -63,24 +64,11 @@ class PolarisationLayer(OpticalLayer):
         )
         self.polarisation = dlu.list2dictionary(items, True, BasePolarisingOptic)
 
-    def evaluate_jones(self, wavefront: Wavefront) -> Array | None:
-        """Evaluate and compose the stored optics in physical order."""
-        if self.polarisation is None:
-            return None
-        matrix = np.eye(2, dtype=complex)
-        for optic in self.polarisation.values():
-            if hasattr(optic, "evaluate_jones"):
-                jones = optic.evaluate_jones(wavefront)
-            elif hasattr(optic, "orientation"):
-                jones = dlu.rotate_jones(optic.jones, optic.orientation)
-            else:
-                jones = optic.jones
-            matrix = np.einsum("ij...,jk...->ik...", jones, matrix)
-        return matrix
-
     def __call__(self, wavefront: Wavefront) -> Wavefront:
-        matrix = self.evaluate_jones(wavefront)
-        return wavefront if matrix is None else wavefront.apply_jones(matrix)
+        if self.polarisation is not None:
+            for optic in self.polarisation.values():
+                wavefront = optic(wavefront)
+        return wavefront
 
 
 class PolarisingOptic(BasePolarisingOptic):
@@ -124,9 +112,7 @@ class UniformPolarisingOptic(PolarisingOptic):
     orientation: Array | None
 
     def __init__(
-        self: UniformPolarisingOptic,
-        jones: Array,
-        orientation: Array | None = None,
+        self: UniformPolarisingOptic, jones: Array, orientation: Array | None = None
     ):
         """
         Parameters
@@ -174,36 +160,26 @@ class LinearPolariser(BasePolarisingOptic):
         Transmission-axis angle in radians.
     """
 
-    angle: Array | Parametric
+    angle: Array | Parametric = eqx.field(converter=to_param)
 
-    def __init__(
-        self: LinearPolariser,
-        angle: Array | Parametric = 0.0,
-    ):
+    def __init__(self: LinearPolariser, angle: Array | Parametric = 0.0):
         """
         Parameters
         ----------
         angle : Array or Parametric = 0.0
             Transmission-axis angle in radians.
         """
-        self.angle = self.as_parametric(angle)
-
-    def evaluate_angle(self: LinearPolariser, wavefront: Wavefront = None) -> Array:
-        """Returns the transmission-axis angle evaluated in context."""
-        return self.resolve(wavefront=wavefront).angle
-
-    def evaluate_jones(self: LinearPolariser, wavefront: Wavefront = None) -> Array:
-        """Returns the Jones matrix evaluated in context."""
-        return dlu.linear_polariser(self.evaluate_angle(wavefront))
+        self.angle = angle
 
     @property
     def jones(self: LinearPolariser) -> Array:
         """Returns the Jones matrix for context-independent angles."""
-        return self.evaluate_jones()
+        return dlu.linear_polariser(self.angle)
 
     def __call__(self: LinearPolariser, wavefront: Wavefront) -> Wavefront:
         """Applies the linear polariser to the input wavefront."""
-        return wavefront.apply_jones(self.evaluate_jones(wavefront))
+        self = self.resolve(wavefront=wavefront)
+        return wavefront.apply_jones(dlu.linear_polariser(self.angle))
 
 
 class Retarder(BasePolarisingOptic):
@@ -223,13 +199,11 @@ class Retarder(BasePolarisingOptic):
         Fast-axis angle in radians.
     """
 
-    retardance: Array | Parametric
-    angle: Array | Parametric
+    retardance: Array | Parametric = eqx.field(converter=to_param)
+    angle: Array | Parametric = eqx.field(converter=to_param)
 
     def __init__(
-        self: Retarder,
-        retardance: Array | Parametric,
-        angle: Array | Parametric = 0.0,
+        self: Retarder, retardance: Array | Parametric, angle: Array | Parametric = 0.0
     ):
         """
         Parameters
@@ -239,27 +213,15 @@ class Retarder(BasePolarisingOptic):
         angle : Array or Parametric = 0.0
             Fast-axis angle in radians.
         """
-        self.retardance = self.as_parametric(retardance)
-        self.angle = self.as_parametric(angle)
-
-    def evaluate_retardance(self: Retarder, wavefront: Wavefront = None) -> Array:
-        """Returns the retardance evaluated in context."""
-        return self.resolve(wavefront=wavefront).retardance
-
-    def evaluate_angle(self: Retarder, wavefront: Wavefront = None) -> Array:
-        """Returns the fast-axis angle evaluated in context."""
-        return self.resolve(wavefront=wavefront).angle
-
-    def evaluate_jones(self: Retarder, wavefront: Wavefront = None) -> Array:
-        """Returns the Jones matrix evaluated in context."""
-        resolved = self.resolve(wavefront=wavefront)
-        return dlu.retarder(resolved.retardance, resolved.angle)
+        self.retardance = retardance
+        self.angle = angle
 
     @property
     def jones(self: Retarder) -> Array:
         """Returns the Jones matrix for context-independent parameters."""
-        return self.evaluate_jones()
+        return dlu.retarder(self.retardance, self.angle)
 
     def __call__(self: Retarder, wavefront: Wavefront) -> Wavefront:
         """Applies the retarder to the input wavefront."""
-        return wavefront.apply_jones(self.evaluate_jones(wavefront))
+        self = self.resolve(wavefront=wavefront)
+        return wavefront.apply_jones(dlu.retarder(self.retardance, self.angle))

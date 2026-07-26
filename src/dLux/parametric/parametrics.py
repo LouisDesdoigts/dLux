@@ -18,7 +18,8 @@ from ..grids import CoordTransform
 __all__ = [
     "Parametric",
     "ParametricHolder",
-    "resolve_parametric",
+    "to_param",
+    "resolve",
     "Transform",
     "Interpolation",
     "DynamicParametric",
@@ -26,27 +27,20 @@ __all__ = [
 ]
 
 
+def to_param(value: Any, dtype: Any = float) -> Any:
+    """Preserve parameterisations and cast ordinary values to arrays."""
+    if value is None or isinstance(value, Parametric):
+        return value
+    return np.asarray(value, dtype=dtype)
+
+
 class ParametricHolder(zdx.Base):
     """Base class for objects containing context-dependent parameters."""
-
-    @staticmethod
-    def as_parametric(value: Any, dtype: Any = float) -> Any:
-        """Preserve parameterisations and cast ordinary values to arrays."""
-        if value is None or isinstance(value, Parametric):
-            return value
-        return np.asarray(value, dtype=dtype)
-
-    @staticmethod
-    def resolve_parametric(value: Any, **context: Any) -> Any:
-        """Evaluate a parametric value or return an ordinary value unchanged."""
-        if isinstance(value, Parametric):
-            return value.evaluate(**context)
-        return value
 
     def resolve(self, **context):
         """Return a copy with every parametric leaf evaluated in ``context``."""
         is_parametric = lambda value: isinstance(value, Parametric)
-        evaluate = lambda value: self.resolve_parametric(value, **context)
+        evaluate = lambda value: resolve(value, **context)
         return jtu.map(evaluate, self, is_leaf=is_parametric)
 
 
@@ -68,9 +62,10 @@ class Parametric(zdx.Base):
         )
 
 
-def resolve_parametric(value: Any, **context: Any) -> Any:
-    """Evaluate a parametric value or return an ordinary value unchanged."""
-    return ParametricHolder.resolve_parametric(value, **context)
+def resolve(value: Any, dtype: Any = None, **context: Any) -> Any:
+    """Evaluate a parameterisation and optionally cast the result."""
+    value = value.evaluate(**context) if isinstance(value, Parametric) else value
+    return value if value is None or dtype is None else np.asarray(value, dtype)
 
 
 class Transform(Parametric):
@@ -99,13 +94,7 @@ class Interpolation(Parametric):
     method: str = eqx.field(static=True)
     extrapolate: bool | float = eqx.field(static=True)
 
-    def __init__(
-        self,
-        knots,
-        values,
-        method="linear",
-        extrapolate=0.0,
-    ):
+    def __init__(self, knots, values, method="linear", extrapolate=0.0):
         knots = np.asarray(knots, dtype=float)
         values = np.asarray(values, dtype=float)
         if knots.ndim != 1:
@@ -147,8 +136,7 @@ class Interpolation(Parametric):
             )
 
         lower, upper = np.broadcast_arrays(
-            np.asarray(lower, dtype=float),
-            np.asarray(upper, dtype=float),
+            np.asarray(lower, dtype=float), np.asarray(upper, dtype=float)
         )
         x0, x1 = self.knots[:-1], self.knots[1:]
         y0, y1 = self.values[:-1], self.values[1:]
