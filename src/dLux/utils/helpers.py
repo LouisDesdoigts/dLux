@@ -38,11 +38,13 @@ def as_size(value, ndim=None, name="size"):
     raise ValueError(f"{name} cannot be broadcast to {ndim} dimensions.")
 
 
-def as_axis(value, ndim, name="axis"):
+def as_axis(value, ndim=None, name="axis"):
     """Return scalar or per-axis values with an explicit trailing axis."""
     if value is None:
         return None
-    value, ndim = np.asarray(value, dtype=float), max(int(ndim), 1)
+    value = np.asarray(value, dtype=float)
+    size = 1 if value.ndim == 0 else value.shape[-1]
+    ndim = size if ndim is None else max(int(ndim), 1)
     if value.ndim == 0:
         return np.broadcast_to(value, (ndim,))
     if value.shape[-1] == ndim:
@@ -231,110 +233,6 @@ def missing_attribute_error(
     if hint:
         message += f" {hint}"
     return AttributeError(message)
-
-
-def _cast_tuple(x, name):
-    """
-    Validate and cast an integer or tuple input to a tuple of integers.
-
-    Parameters
-    ----------
-    x : int | tuple[int, ...]
-        Input value to validate and cast.
-    name : str
-        Parameter name used in error messages.
-
-    Returns
-    -------
-    x : tuple[int, ...]
-        Validated tuple of integers.
-    """
-
-    # Validate npixels and ensure tuple
-    if isinstance(x, int):
-        x = (x,)
-    elif isinstance(x, tuple):
-        for n in x:
-            if not isinstance(n, int):
-                raise ValueError(f"All {name} must be integers.")
-    else:
-        raise ValueError(f"{name} must be an int or a tuple of ints.")
-
-    return x
-
-
-def _cast_scalar(x, ndim, name):
-    """
-    Validate and cast scalar-like input to an `ndim`-length tuple.
-
-    Parameters
-    ----------
-    x : int | float | Array | tuple
-        Input scalar-like value(s).
-    ndim : int
-        Target dimensionality.
-    name : str
-        Parameter name used in error messages.
-
-    Returns
-    -------
-    x : tuple
-        Tuple of scalar-like values with length `ndim`.
-    """
-
-    is_scalar = lambda x: (
-        isinstance(x, (int, float)) or (isinstance(x, Array) and x.ndim == 0)
-    )
-
-    if is_scalar(x):
-        x = (x,) * ndim
-    elif isinstance(x, Array):
-        if x.ndim != 1 or x.shape[0] != ndim:
-            raise ValueError(f"Length of {name} array must match number of dimensions.")
-        x = tuple(x)
-    elif isinstance(x, tuple):
-        if len(x) != ndim:
-            raise ValueError(f"Length of {name} must match number of dimensions.")
-        if not all(map(is_scalar, x)):
-            raise ValueError(
-                f"All {name} must be scalars (int, float, or scalar Array)."
-            )
-    else:
-        raise ValueError(
-            f"{name} must be a scalar (int, float, or scalar Array) or "
-            f"a tuple of scalars."
-        )
-
-    return x
-
-
-def _input_len(x, name):
-    """
-    Infer the logical length of scalar/tuple/1D-array input.
-
-    Parameters
-    ----------
-    x : Any
-        Input value to inspect.
-    name : str
-        Parameter name used in error messages.
-
-    Returns
-    -------
-    length : int
-        Inferred length of the input.
-    """
-    if isinstance(x, tuple):
-        return len(x)
-    if isinstance(x, Array):
-        if x.ndim == 0:
-            return 1
-        if x.ndim == 1:
-            return x.shape[0]
-        raise ValueError(
-            f"{name} must be a scalar, tuple, or 1D array; got ndim={x.ndim}."
-        )
-    return 1
 
 
 def from_complex(array: Array, complex: bool = True) -> Array:

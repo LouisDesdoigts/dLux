@@ -45,7 +45,7 @@ def _propagate_mft(wf, spec, ABCD=None, **kwargs):
 
 def _propagate_fft(wf, spec, unit, ABCD=None, **kwargs):
     """Propagate every field at native FFT sampling."""
-    center = None if spec.c is None else np.broadcast_to(spec.c, (2,))
+    center = dlu.as_axis(spec.c, 2, "c")
     center = None if center is None else center * dlu.unit_factor(unit)
     padding = spec.padding
 

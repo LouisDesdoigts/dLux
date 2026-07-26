@@ -11,9 +11,24 @@ from ..grids import AffineMap, CoordTransform, DistortCoords, GridSpec
 from ..parametric import Parametric, ParametricBasis, to_param
 from ..fields import Wavefront
 from .dynamic_layers import BaseDynamicLayer
-from .optical_layers import Optic, _optic_phasor
+from .optical_layers import OpticalLayer, Optic, _optic_phasor
 
-__all__ = ["SparseOptic", "SparseDynamicOptic"]
+__all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
+
+
+class Interfere(OpticalLayer):
+    """Coherently sum the leading positional axis of a Wavefront."""
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        size = wavefront.phasor.shape[0]
+        collapse = lambda value: (
+            value[0]
+            if value is not None and value.ndim > 1 and value.shape[0] == size
+            else value
+        )
+        spec = wavefront.spec
+        spec = spec.set(d=collapse(spec.d), c=collapse(spec.c))
+        return wavefront.set(phasor=wavefront.phasor.sum(0), spec=spec)
 
 
 class SparseOptic(Optic):

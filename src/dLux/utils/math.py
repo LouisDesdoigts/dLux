@@ -4,7 +4,7 @@ import jax.scipy as jsp
 import jax.tree as jtu
 from typing import Any
 
-from .helpers import _cast_scalar, _cast_tuple, _input_len
+import dLux.utils as dlu
 
 __all__ = [
     "gaussian",
@@ -42,23 +42,20 @@ def gaussian(
     kernel : Array
         The normalized n-dimensional Gaussian kernel.
     """
-    # Check inputs and cast to tuples
-    npixels = _cast_tuple(npixels, "npixels")
-    ndim = max(len(npixels), _input_len(mean, "mean"), _input_len(std, "std"))
-    mean = _cast_scalar(mean, ndim, "mean")
-    std = _cast_scalar(std, ndim, "std")
-
-    # Make sure npix is the right dimensionality
-    if len(npixels) != ndim:
-        npixels *= ndim
+    # Resolve dimensionality and broadcast each axis input
+    npixels = dlu.as_size(npixels, name="npixels")
+    mean, std = dlu.as_axis(mean), dlu.as_axis(std)
+    ndim = max(len(npixels), mean.shape[-1], std.shape[-1])
+    npixels = dlu.as_size(npixels, ndim, "npixels")
+    mean, std = dlu.as_axis(mean, ndim, "mean"), dlu.as_axis(std, ndim, "std")
 
     # Generate per-axis coordinates and corresponding 1D Gaussians
     linspaces = jtu.map(lambda n: np.linspace(-extent, extent, n), npixels)
     one_d_gauss = jtu.map(
         lambda axis, m, s: jsp.stats.norm.pdf(axis, loc=m, scale=s),
         linspaces,
-        mean,
-        std,
+        tuple(mean),
+        tuple(std),
     )
 
     # Construct nD separable Gaussian kernel from 1D marginals

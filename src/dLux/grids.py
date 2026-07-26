@@ -120,8 +120,13 @@ class GridSpec(BaseGridSpec):
     c: Array | None
     unit: str | None
 
-    def __init__(self, n=None, d=None, c=None, unit=None):
-        values = [value for value in (n, d, c) if value is not None]
+    def __init__(self, n=None, d=None, c=None, unit=None, diam=None):
+        if d is not None and diam is not None:
+            raise ValueError("Provide only one of d or diam.")
+        if diam is not None and n is None:
+            raise ValueError("n must be provided with diam.")
+
+        values = [value for value in (n, d, c, diam) if value is not None]
         lengths = [
             np.asarray(value).shape[-1]
             for value in values
@@ -130,6 +135,9 @@ class GridSpec(BaseGridSpec):
         ndim = max(lengths, default=1 if values else 0)
 
         self.n = None if n is None else dlu.as_size(n, ndim, "n")
+        if diam is not None:
+            diam = dlu.as_axis(diam, ndim, "diam")
+            d = diam / np.asarray(self.n)
         self.d = dlu.as_axis(d, ndim, "d")
         self.c = dlu.as_axis(c, ndim, "c")
         if (
@@ -427,7 +435,7 @@ class Affine(CoordTransform):
             raise ValueError("rotation must be scalar.")
         self.scale = None
         if scale is not None:
-            self.scale = np.broadcast_to(np.asarray(scale, dtype=float), (2,))
+            self.scale = dlu.as_axis(scale, 2, "scale")
             if np.any(self.scale == 0):
                 raise ValueError("scale values must be non-zero.")
         self.shear = self._vector(shear, "shear")
