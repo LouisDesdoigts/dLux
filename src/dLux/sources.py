@@ -10,15 +10,10 @@ import jax.scipy as jsp
 from jax import Array
 
 import dLux.utils as dlu
-from .parametric import Parametric, ParametricHolder, resolve_parametric
+from .parametric import Parametric, ParametricHolder, resolve
 from .fields import PSF
 
-__all__ = [
-    "BaseSource",
-    "Spectrum",
-    "Source",
-    "BinarySource",
-]
+__all__ = ["BaseSource", "Spectrum", "Source", "BinarySource"]
 
 _DEFAULT_UNITS = {
     "wavelengths": "m",
@@ -67,7 +62,7 @@ class BaseSource(ParametricHolder):
 
     def source_params(self, nsource=None, **context):
         """Resolve flux and distribution in canonical source units."""
-        flux = resolve_parametric(self.flux, source=self, **context)
+        flux = resolve(self.flux, float, source=self, **context)
         flux = np.asarray(1.0 if flux is None else flux, dtype=float)
         if nsource is None:
             if flux.ndim != 0:
@@ -83,11 +78,7 @@ class BaseSource(ParametricHolder):
 
     def distribution_params(self, nsource, **context):
         """Resolve and validate optional per-source spatial distributions."""
-        distribution = resolve_parametric(
-            self.distribution,
-            source=self,
-            **context,
-        )
+        distribution = resolve(self.distribution, float, source=self, **context)
         if distribution is None:
             return None
         distribution = np.asarray(distribution, dtype=float)
@@ -106,26 +97,18 @@ class BaseSource(ParametricHolder):
             return jsp.signal.convolve(data, distribution, mode="same")
         leading = data.shape[:-2]
         if distribution.ndim == 2:
-            distribution = np.broadcast_to(
-                distribution,
-                leading + distribution.shape,
-            )
+            distribution = np.broadcast_to(distribution, leading + distribution.shape)
         else:
             extra = len(leading) - 1
             distribution = distribution.reshape(
                 (distribution.shape[0],) + (1,) * extra + distribution.shape[-2:]
             )
             distribution = np.broadcast_to(
-                distribution,
-                leading + distribution.shape[-2:],
+                distribution, leading + distribution.shape[-2:]
             )
         shape = data.shape
         convolved = eqx.filter_vmap(
-            lambda image, kernel: jsp.signal.convolve(
-                image,
-                kernel,
-                mode="same",
-            )
+            lambda image, kernel: jsp.signal.convolve(image, kernel, mode="same")
         )(
             data.reshape((-1,) + shape[-2:]),
             distribution.reshape((-1,) + distribution.shape[-2:]),
@@ -133,14 +116,7 @@ class BaseSource(ParametricHolder):
         return convolved.reshape(shape)
 
     def _model_components(
-        self,
-        optics,
-        wavelengths,
-        weights,
-        position,
-        flux,
-        distribution,
-        return_all,
+        self, optics, wavelengths, weights, position, flux, distribution, return_all
     ):
         if position.ndim == 1:
             if weights.ndim != 1:
@@ -208,19 +184,14 @@ class Spectrum(ParametricHolder):
 
     def spectrum_params(self, **context: Any) -> tuple[Array, Array]:
         """Resolve wavelengths and weights in canonical wavelength units."""
-        wavelengths = np.asarray(
-            resolve_parametric(self.wavelengths, spectrum=self, **context),
-            dtype=float,
-        )
-        weights = np.asarray(
-            resolve_parametric(
-                self.weights,
-                spectrum=self,
-                wavelengths=wavelengths,
-                variables=wavelengths,
-                **context,
-            ),
-            dtype=float,
+        wavelengths = resolve(self.wavelengths, float, spectrum=self, **context)
+        weights = resolve(
+            self.weights,
+            float,
+            spectrum=self,
+            wavelengths=wavelengths,
+            variables=wavelengths,
+            **context,
         )
         if wavelengths.ndim != 1:
             raise ValueError("wavelengths must be a 1d array.")
@@ -284,11 +255,7 @@ class Source(BaseSource, Spectrum):
     def params(self):
         """Resolve all point-source parameters in canonical units."""
         wavelengths, weights = self.spectrum_params()
-        position = resolve_parametric(
-            self.position,
-            source=self,
-            wavelengths=wavelengths,
-        )
+        position = resolve(self.position, float, source=self, wavelengths=wavelengths)
         position = (
             np.zeros(2) if position is None else np.asarray(position, dtype=float)
         )
@@ -361,27 +328,16 @@ class BinarySource(BaseSource, Spectrum):
     def params(self):
         """Resolve all binary parameters in canonical units."""
         wavelengths, weights = self.spectrum_params()
-        centre = resolve_parametric(self.centre, source=self)
+        centre = resolve(self.centre, float, source=self)
         centre = np.zeros(2) if centre is None else np.asarray(centre, dtype=float)
         if centre.shape != (2,):
             raise ValueError("centre must have shape (2,).")
-        separation = np.asarray(
-            resolve_parametric(self.separation, source=self),
-            dtype=float,
-        )
-        position_angle = np.asarray(
-            resolve_parametric(self.position_angle, source=self),
-            dtype=float,
-        )
-        contrast = np.asarray(
-            resolve_parametric(self.contrast, source=self),
-            dtype=float,
-        )
+        separation = resolve(self.separation, float, source=self)
+        position_angle = resolve(self.position_angle, float, source=self)
+        contrast = resolve(self.contrast, float, source=self)
         factor = dlu.unit_factor(self.units["position"])
         position = dlu.positions_from_sep(
-            centre * factor,
-            separation * factor,
-            position_angle,
+            centre * factor, separation * factor, position_angle
         )
         mean_flux, _ = self.source_params(wavelengths=wavelengths)
         distribution = self.distribution_params(2, wavelengths=wavelengths)

@@ -1,4 +1,5 @@
-from collections import OrderedDict
+from collections import Counter, defaultdict, OrderedDict
+from numbers import Integral
 from typing import Any, Callable
 import jax.numpy as np
 import jax.tree as jtu
@@ -10,10 +11,45 @@ __all__ = [
     "insert_layer",
     "remove_layer",
     "imshow_extent",
-    "inherit_docstrings",
     "missing_attribute_error",
     "from_complex",
+    "as_size",
+    "as_axis",
 ]
+
+
+def as_size(value, ndim=None, name="size"):
+    """Return positive integer sizes as a static tuple."""
+    if isinstance(value, Integral):
+        values = (int(value),)
+    elif isinstance(value, (tuple, list)) and value:
+        values = tuple(value)
+    else:
+        raise TypeError(f"{name} must be an integer or non-empty tuple.")
+    if not all(isinstance(item, Integral) for item in values):
+        raise TypeError(f"{name} must contain integers.")
+    if any(item < 1 for item in values):
+        raise ValueError(f"{name} must contain positive values.")
+    values = tuple(map(int, values))
+    if ndim is None or len(values) == ndim:
+        return values
+    if len(values) == 1:
+        return values * ndim
+    raise ValueError(f"{name} cannot be broadcast to {ndim} dimensions.")
+
+
+def as_axis(value, ndim, name="axis"):
+    """Return scalar or per-axis values with an explicit trailing axis."""
+    if value is None:
+        return None
+    value, ndim = np.asarray(value, dtype=float), max(int(ndim), 1)
+    if value.ndim == 0:
+        return np.broadcast_to(value, (ndim,))
+    if value.shape[-1] == ndim:
+        return value
+    if value.shape[-1] == 1:
+        return np.broadcast_to(value, value.shape[:-1] + (ndim,))
+    raise ValueError(f"{name} must be scalar or have one value per axis.")
 
 
 def reexport(modules: tuple[object, ...], namespace: dict[str, object]) -> list[str]:
@@ -27,56 +63,6 @@ def reexport(modules: tuple[object, ...], namespace: dict[str, object]) -> list[
                 exported.append(name)
                 seen.add(name)
     return exported
-
-
-def inherit_docstrings(cls, method_names=None):
-    """
-    Inherit docstrings and annotations from parent classes for specified methods.
-
-    This function walks the MRO to find the first parent class with a docstring
-    or annotations for each method, and copies them to the child class if missing.
-
-    Parameters
-    ----------
-    cls : type
-        The class being created via __init_subclass__.
-    method_names : list[str] | None
-        List of method names to inherit docstrings/annotations for.
-        If None, only '__call__' is checked.
-
-    Returns
-    -------
-    None
-        Modifies cls in place.
-    """
-    if method_names is None:
-        method_names = ["__call__"]
-
-    for method_name in method_names:
-        # Only process if method is defined in this class
-        if method_name in cls.__dict__:
-            method = cls.__dict__[method_name]
-
-            # Inherit docstring if missing
-            if method.__doc__ is None:
-                for base in cls.__mro__[1:]:
-                    if (
-                        hasattr(base, method_name)
-                        and getattr(base, method_name).__doc__ is not None
-                    ):
-                        method.__doc__ = getattr(base, method_name).__doc__
-                        break
-
-            # Inherit annotations if missing
-            if not hasattr(method, "__annotations__") or not method.__annotations__:
-                for base in cls.__mro__[1:]:
-                    if method_name in base.__dict__ and hasattr(
-                        base.__dict__[method_name], "__annotations__"
-                    ):
-                        method.__annotations__ = base.__dict__[
-                            method_name
-                        ].__annotations__
-                        break
 
 
 def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
@@ -100,8 +86,7 @@ def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
     """
     if leaf_fn is not None:
         return np.array(jtu.flatten(jtu.map(fn, tree, is_leaf=leaf_fn))[0])
-    else:
-        return np.array(jtu.flatten(jtu.map(fn, tree))[0])
+    return np.array(jtu.flatten(jtu.map(fn, tree))[0])
 
 
 def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> dict:
@@ -128,60 +113,26 @@ def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> 
     dictionary : dict
         The equivalent dictionary or ordered dictionary.
     """
-    # Construct names list and identify repeats
-    names, repeats = [], []
-    for item in list_in:
-        # Check for specified names
-        if isinstance(item, tuple):
-            # item, name = item
-            name, item = item
-        else:
-            name = item.__class__.__name__
+    entries = [
+        item if isinstance(item, tuple) else (type(item).__name__, item)
+        for item in list_in
+    ]
+    for name, item in entries:
+        if allowed_types and not isinstance(item, allowed_types):
+            raise TypeError(f"Item {name} is not an allowed type, got {type(item)}")
+        if " " in name:
+            raise ValueError(f"Names cannot contain spaces, got {name}")
 
-        # Check input types
-        if allowed_types != () and not isinstance(item, allowed_types):
-            raise TypeError(f"Item {name} is not an allowed type, got " f"{type(item)}")
-
-        # Check for Repeats
-        if name in names:
-            repeats.append(name)
-        names.append(name)
-
-    # Get list of unique repeats
-    repeats = list(set(repeats))
-
-    # Iterate over repeat names
-    for i in range(len(repeats)):
-        # Iterate over names list and append index value to name
-        idx = 0
-        for j in range(len(names)):
-            if repeats[i] == names[j]:
-                names[j] = names[j] + "_{}".format(idx)
-                idx += 1
-
-    # Turn list into Dictionary
+    counts, seen = Counter(name for name, _ in entries), defaultdict(int)
     dict_out = OrderedDict() if ordered else {}
-    for i in range(len(names)):
-        # Check for spaces in names
-        if " " in names[i]:
-            raise ValueError(f"Names cannot contain spaces, got {names[i]}")
-
-        # Add to dict
-        if isinstance(list_in[i], tuple):
-            # item = list_in[i][0]
-            item = list_in[i][1]
-        else:
-            item = list_in[i]
-        dict_out[names[i]] = item
+    for name, item in entries:
+        key = f"{name}_{seen[name]}" if counts[name] > 1 else name
+        seen[name] += 1
+        dict_out[key] = item
     return dict_out
 
 
-def insert_layer(
-    layers: dict,
-    layer: Any,
-    index: int,
-    allowed_type: Any,
-) -> dict:
+def insert_layer(layers: dict, layer: Any, index: int, allowed_type: Any) -> dict:
     """
     Inserts a layer into a dictionary of layers at a specified index. This function
     calls the list2dictionary function to ensure all keys remain unique. Note that this
@@ -250,10 +201,7 @@ def imshow_extent(size: float) -> Array:
 
 
 def missing_attribute_error(
-    owner: Any,
-    key: str,
-    valid_attrs: list[str] = None,
-    hint: str = None,
+    owner: Any, key: str, valid_attrs: list[str] = None, hint: str = None
 ) -> AttributeError:
     """
     Builds a consistent AttributeError message for missing attributes.
@@ -334,11 +282,11 @@ def _cast_scalar(x, ndim, name):
         Tuple of scalar-like values with length `ndim`.
     """
 
-    _is_numeric = lambda x: isinstance(x, (int, float))
-    _is_scalar_array = lambda x: isinstance(x, Array) and x.ndim == 0
-    _is_scalar = lambda x: _is_numeric(x) or _is_scalar_array(x)
+    is_scalar = lambda x: (
+        isinstance(x, (int, float)) or (isinstance(x, Array) and x.ndim == 0)
+    )
 
-    if _is_scalar(x):
+    if is_scalar(x):
         x = (x,) * ndim
     elif isinstance(x, Array):
         if x.ndim != 1 or x.shape[0] != ndim:
@@ -347,11 +295,10 @@ def _cast_scalar(x, ndim, name):
     elif isinstance(x, tuple):
         if len(x) != ndim:
             raise ValueError(f"Length of {name} must match number of dimensions.")
-        for z in x:
-            if not _is_scalar(z):
-                raise ValueError(
-                    f"All {name} must be scalars (int, float, or scalar Array)."
-                )
+        if not all(map(is_scalar, x)):
+            raise ValueError(
+                f"All {name} must be scalars (int, float, or scalar Array)."
+            )
     else:
         raise ValueError(
             f"{name} must be a scalar (int, float, or scalar Array) or "

@@ -17,11 +17,7 @@ __all__ = [
 ]
 
 
-def combine(
-    arrays: Array,
-    oversample: int = 1,
-    use_sum: bool = False,
-) -> Array:
+def combine(arrays: Array, oversample: int = 1, use_sum: bool = False) -> Array:
     """
     Combines multiple arrays by multiplying them together, and downsampling the output.
 

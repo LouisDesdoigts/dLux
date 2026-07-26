@@ -49,10 +49,7 @@ def polynomial_basis(variables: Array, powers: Array) -> Array:
     variables = np.asarray(variables)
     powers = np.asarray(powers)
     shape = powers.shape + (1,) * (variables.ndim - 1)
-    return np.prod(
-        variables[:, None] ** powers.reshape(shape),
-        axis=0,
-    )
+    return np.prod(variables[:, None] ** powers.reshape(shape), axis=0)
 
 
 zernike_names = {
@@ -291,12 +288,7 @@ def zernike(j: int, coordinates: Array, diameter: float = 2) -> Array:
 
 
 def zernike_fast(
-    n: int,
-    m: int,
-    c: Array,
-    k: Array,
-    coordinates: Array,
-    diameter: float = 2,
+    n: int, m: int, c: Array, k: Array, coordinates: Array, diameter: float = 2
 ) -> Array:
     """
     Calculates the Zernike polynomial using the pre-calculated c and k parameters, such

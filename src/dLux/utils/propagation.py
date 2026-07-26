@@ -55,41 +55,28 @@ def FFT_pad(
         return phasor, spec_in
     _, spacings, centers = _spec_parameters(spec_in)
     spec_in = dlu.nd_axes(
-        pad_to,
-        spacings,
-        offsets=tuple(-center for center in centers),
+        pad_to, spacings, offsets=tuple(-center for center in centers)
     )
     return dlu.pad_to(phasor, pad_to), spec_in
 
 
 def FFT_spec(
-    spec_in: Array | tuple,
-    wavelength: float,
-    ABCD: Array,
+    spec_in: Array | tuple, wavelength: float, ABCD: Array
 ) -> tuple[Array, Array]:
     """Return the native FFT output coordinate axes."""
     return lct.lct_fft_output_spec(
-        spec_in=spec_in,
-        lam=wavelength,
-        ABCD=ABCD,
-        npad=None,
+        spec_in=spec_in, lam=wavelength, ABCD=ABCD, npad=None
     )
 
 
 def FFT_shift(
-    spec_out: Array | tuple,
-    output_center: Array | None = None,
+    spec_out: Array | tuple, output_center: Array | None = None
 ) -> tuple[tuple[Array, Array], Array | None]:
     """Shift FFT output axes to a requested physical centre."""
     x_out, y_out = unpack_coord_spec(spec_out)
     if output_center is None:
         return (x_out, y_out), None
-    native_center = np.asarray(
-        (
-            (x_out[-1] + x_out[0]) / 2,
-            (y_out[-1] + y_out[0]) / 2,
-        )
-    )
+    native_center = np.asarray(((x_out[-1] + x_out[0]) / 2, (y_out[-1] + y_out[0]) / 2))
     output_center = np.broadcast_to(np.asarray(output_center, float), (2,))
     shift = output_center - native_center
     return (x_out + shift[0], y_out + shift[1]), shift
@@ -169,23 +156,14 @@ def ABCD_FFT(
         apply_out_curv=apply_out_curv,
     )
     if apply_out_curv:
-        field *= dlu.FFT_ramp(
-            wavelength,
-            spec_native,
-            ABCD,
-            shift,
-            plane="output",
-        )
+        field *= dlu.FFT_ramp(wavelength, spec_native, ABCD, shift, plane="output")
     return field, spec_out
 
 
 def _fraunhofer_abcd(focal_length, defocus):
     """Build the ABCD matrix for a defocused focal propagation."""
     return dlu.compose_abcd(
-        [
-            dlu.abcd_fraunhofer(focal_length),
-            dlu.abcd_free_space(defocus),
-        ]
+        [dlu.abcd_fraunhofer(focal_length), dlu.abcd_free_space(defocus)]
     )
 
 
@@ -201,19 +179,13 @@ def _fraunhofer_fft(
     spec_out = dlu.FFT_spec(spec_in, wavelength, ABCD)
     _, spacings, centers = _spec_parameters(spec_out)
     coordinates = dlu.nd_coords(
-        phasor.shape[-2:][::-1],
-        spacings,
-        offsets=tuple(-center for center in centers),
+        phasor.shape[-2:][::-1], spacings, offsets=tuple(-center for center in centers)
     )
     sizes_in, spacings_in, centers_in = _spec_parameters(spec_in)
     input_origin = np.asarray(
         tuple(
             center + (0.5 * spacing if size % 2 == 0 else 0.0)
-            for size, spacing, center in zip(
-                sizes_in,
-                spacings_in,
-                centers_in,
-            )
+            for size, spacing, center in zip(sizes_in, spacings_in, centers_in)
         )
     )
     norm = np.sqrt(phasor.shape[-2] * phasor.shape[-1])
@@ -224,12 +196,7 @@ def _fraunhofer_fft(
         field = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(phasor)))
         field /= norm
     sign = 1 if inverse else -1
-    field = dlu.tilt(
-        field,
-        coordinates,
-        sign * input_origin / focal_length,
-        wavelength,
-    )
+    field = dlu.tilt(field, coordinates, sign * input_origin / focal_length, wavelength)
     return field, spec_out
 
 
@@ -254,17 +221,10 @@ def MFT(
     if defocus is None:
         if inverse:
             scale, kernel_x, kernel_y = fraunhofer.fraunhofer_kernels(
-                spec_in=spec_in,
-                spec_out=spec_out,
-                lam=wavelength,
-                f=focal_length,
+                spec_in=spec_in, spec_out=spec_out, lam=wavelength, f=focal_length
             )
             return scale * _mft(
-                phasor,
-                kernel_x,
-                kernel_y,
-                left_conj=True,
-                right_conj=True,
+                phasor, kernel_x, kernel_y, left_conj=True, right_conj=True
             )
         return fraunhofer.fraunhofer_prop(
             u_pupil=phasor,
@@ -338,16 +298,7 @@ def ASM(
     shape = phasor.shape[-2:]
     phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
     kernel, nx, ny = asm.asm_kernels(
-        spec_in=spec_in,
-        lam=wavelength,
-        z=distance,
-        npad=None,
+        spec_in=spec_in, lam=wavelength, z=distance, npad=None
     )
-    field = asm.asm_kernel_prop(
-        u_pad=phasor,
-        H=kernel,
-        Nx_in=nx,
-        Ny_in=ny,
-        crop=False,
-    )
+    field = asm.asm_kernel_prop(u_pad=phasor, H=kernel, Nx_in=nx, Ny_in=ny, crop=False)
     return dlu.crop_to(field, shape[::-1]) if crop else field

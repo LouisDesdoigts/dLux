@@ -9,7 +9,7 @@ from jax import Array
 import dLux.utils as dlu
 from ..grids import GridSpec
 from .bases import CoordBasis, ExplicitBasis, ParametricBasis
-from .parametrics import resolve_parametric
+from .parametrics import resolve
 
 __all__ = [
     "DynamicZernike",
@@ -19,6 +19,49 @@ __all__ = [
     "ExplicitPolynomial",
     "CoordinatePolynomial",
 ]
+
+
+def _poly_params(degree, coefficients, ndim, powers):
+    """Validate polynomial powers and coefficients."""
+    powers = dlu.polynomial_powers(degree, ndim) if powers is None else powers
+    powers = np.asarray(powers, dtype=int)
+    powers = powers[None, :] if powers.ndim == 1 else powers
+    if powers.ndim != 2:
+        raise ValueError("powers must have shape (n_variables, n_terms).")
+    if np.any(powers < 0):
+        raise ValueError("powers must be non-negative.")
+    coefficients = np.zeros(powers.shape[1]) if coefficients is None else coefficients
+    coefficients = np.asarray(coefficients, dtype=float)
+    if coefficients.ndim != 1 or coefficients.shape[0] != powers.shape[1]:
+        raise ValueError("coefficients must have shape (n_terms,).")
+    return powers, coefficients
+
+
+def _poly_coordinates(coordinates, ndim):
+    """Resolve explicit polynomial coordinates and dimensionality."""
+    if isinstance(coordinates, GridSpec):
+        ndim = coordinates.ndim if ndim is None else int(ndim)
+        if coordinates.ndim == 1 and ndim > 1:
+            coordinates = coordinates.broadcast(ndim)
+        if coordinates.ndim < ndim:
+            raise ValueError(
+                "GridSpec dimensionality must be greater than or equal to ndim."
+            )
+        if coordinates.d is None:
+            if coordinates.n is None:
+                raise ValueError("GridSpec must define n when d is not provided.")
+            coordinates = coordinates.set(d=2 / np.asarray(coordinates.n, dtype=float))
+        coordinates = coordinates.coordinates
+    else:
+        coordinates = np.asarray(coordinates, dtype=float)
+        ndim = 1 if ndim is None and coordinates.ndim == 1 else ndim
+        ndim = coordinates.shape[0] if ndim is None else int(ndim)
+    if ndim < 1:
+        raise ValueError("ndim must be positive.")
+    coordinates = coordinates[None, :] if coordinates.ndim == 1 else coordinates
+    if coordinates.shape[0] < ndim:
+        raise ValueError("coordinates must contain at least ndim coordinate arrays.")
+    return coordinates[:ndim], ndim
 
 
 class DynamicZernike(zdx.Base):
@@ -92,12 +135,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     diameter: Array | None
 
     def __init__(
-        self,
-        js=None,
-        radial_orders=None,
-        coefficients=None,
-        nsides=0,
-        diameter=None,
+        self, js=None, radial_orders=None, coefficients=None, nsides=0, diameter=None
     ):
         js = self.get_indices(js, radial_orders)
         self.zernikes = [DynamicZernike(j) for j in js]
@@ -134,30 +172,14 @@ class Polynomial(ParametricBasis):
     powers: Array
 
     def __init__(self, degree, coefficients=None, ndim=1, powers=None):
-        if powers is None:
-            powers = dlu.polynomial_powers(degree, ndim)
-        else:
-            powers = np.asarray(powers, dtype=int)
-            if powers.ndim == 1:
-                powers = powers[None, :]
-        if powers.ndim != 2:
-            raise ValueError("powers must have shape (n_variables, n_terms).")
-        if np.any(powers < 0):
-            raise ValueError("powers must be non-negative.")
-        coefficients = (
-            np.zeros(powers.shape[1]) if coefficients is None else coefficients
-        )
-        coefficients = np.asarray(coefficients, dtype=float)
-        if coefficients.ndim != 1 or coefficients.shape[0] != powers.shape[1]:
-            raise ValueError("coefficients must have shape (n_terms,).")
+        powers, coefficients = _poly_params(degree, coefficients, ndim, powers)
         self.powers = powers
         self._set_coefficients(coefficients, (coefficients.size,))
 
     def calculate_basis(self, *, variables=None, **context):
         if variables is None:
             raise ValueError("variables must be provided.")
-        variables = resolve_parametric(variables, **context)
-        variables = np.asarray(variables, dtype=float)
+        variables = resolve(variables, float, **context)
         if self.powers.shape[0] == 1 and variables.ndim == 1:
             variables = variables[None, :]
         if variables.shape[0] != self.powers.shape[0]:
@@ -197,51 +219,8 @@ class ExplicitPolynomial(ExplicitBasis):
         ndim=None,
         powers=None,
     ):
-        if isinstance(coordinates, GridSpec):
-            if ndim is None:
-                ndim = coordinates.ndim
-            if coordinates.ndim == 1 and ndim > 1:
-                coordinates = coordinates.broadcast(ndim)
-            if coordinates.ndim < ndim:
-                raise ValueError(
-                    "GridSpec dimensionality must be greater than or equal to ndim."
-                )
-            if coordinates.d is None:
-                if coordinates.n is None:
-                    raise ValueError("GridSpec must define n when d is not provided.")
-                coordinates = coordinates.set(
-                    d=2 / np.asarray(coordinates.n, dtype=float)
-                )
-            coordinates = coordinates.coordinates
-        else:
-            coordinates = np.asarray(coordinates, dtype=float)
-
-        if ndim is None:
-            ndim = 1 if coordinates.ndim == 1 else coordinates.shape[0]
-        ndim = int(ndim)
-        if ndim < 1:
-            raise ValueError("ndim must be positive.")
-        if coordinates.ndim == 1:
-            coordinates = coordinates[None, :]
-        if coordinates.shape[0] < ndim:
-            raise ValueError(
-                "coordinates must contain at least ndim coordinate arrays."
-            )
-        coordinates = coordinates[:ndim]
-
-        if powers is None:
-            powers = dlu.polynomial_powers(degree, ndim)
-        powers = np.asarray(powers, dtype=int)
-        if powers.ndim == 1:
-            powers = powers[None, :]
-        if powers.ndim != 2:
-            raise ValueError("powers must have shape (n_variables, n_terms).")
-        coefficients = (
-            np.zeros(powers.shape[1]) if coefficients is None else coefficients
-        )
-        coefficients = np.asarray(coefficients, dtype=float)
-        if coefficients.ndim != 1 or coefficients.shape[0] != powers.shape[1]:
-            raise ValueError("coefficients must have shape (n_terms,).")
+        coordinates, ndim = _poly_coordinates(coordinates, ndim)
+        powers, coefficients = _poly_params(degree, coefficients, ndim, powers)
         if coordinates.shape[0] != powers.shape[0]:
             raise ValueError(
                 "coordinate dimensionality must match the polynomial powers."

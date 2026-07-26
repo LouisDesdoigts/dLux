@@ -6,10 +6,11 @@ from abc import abstractmethod
 from typing import Any
 
 import jax.numpy as np
+import equinox as eqx
 from jax import Array
 
 import dLux.utils as dlu
-from ..parametric import Interpolation, Parametric, ParametricHolder
+from ..parametric import Interpolation, Parametric, ParametricHolder, to_param
 from ..fields import Wavefront
 
 __all__ = [
@@ -24,13 +25,20 @@ __all__ = [
 ]
 
 
+def _optic_phasor(optic, wavefront):
+    """Combine a resolved optic into one scalar complex field."""
+    transmission = 1.0 if optic.transmission is None else optic.transmission
+    opd = 0.0 if optic.opd is None else optic.opd
+    phase = 0.0 if optic.phase is None else optic.phase
+    wavenumber = wavefront._to_phasor_shape(wavefront.wavenumber)
+    transmission = wavefront._to_phasor_shape(transmission)
+    opd = wavefront._to_phasor_shape(opd)
+    phase = wavefront._to_phasor_shape(phase)
+    return transmission * np.exp(1j * (wavenumber * opd + phase))
+
+
 class BaseLayer(ParametricHolder):
     """Base class for callable transformations of dLux objects."""
-
-    def __init_subclass__(cls, **kwargs):
-        """Inherit callable documentation for concrete layer implementations."""
-        super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls, ["__call__"])
 
     @abstractmethod
     def __call__(self, target: Any) -> Any:  # pragma: no cover
@@ -52,19 +60,24 @@ class BaseOpticalLayer(BaseLayer):
 class OpticalLayer(BaseOpticalLayer):
     """Public contract for layers that transform wavefronts."""
 
+    @staticmethod
+    def context(wavefront: Wavefront) -> dict[str, Any]:
+        """Return the context used to resolve parametric attributes."""
+        return {"wavefront": wavefront}
+
 
 class TransmissiveLayer(OpticalLayer):
     """Apply a transmission, with optional output normalisation."""
 
-    transmission: Array | Parametric | None
+    transmission: Array | Parametric | None = eqx.field(converter=to_param)
     normalise: bool
 
     def __init__(self, transmission=None, normalise=False):
-        self.transmission = self.as_parametric(transmission)
+        self.transmission = transmission
         self.normalise = bool(normalise)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
-        self = self.resolve(wavefront=wavefront)
+        self = self.resolve(**self.context(wavefront))
         if self.transmission is not None:
             transmission = wavefront._to_phasor_shape(self.transmission)
             wavefront = wavefront.set(phasor=wavefront.phasor * transmission)
@@ -76,15 +89,15 @@ class TransmissiveLayer(OpticalLayer):
 class AberratedLayer(OpticalLayer):
     """Apply optical-path and phase aberrations to a wavefront."""
 
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    opd: Array | Parametric | None = eqx.field(converter=to_param)
+    phase: Array | Parametric | None = eqx.field(converter=to_param)
 
     def __init__(self, opd=None, phase=None):
-        self.opd = self.as_parametric(opd)
-        self.phase = self.as_parametric(phase)
+        self.opd = opd
+        self.phase = phase
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
-        self = self.resolve(wavefront=wavefront)
+        self = self.resolve(**self.context(wavefront))
         wavefront = wavefront.add_opd(self.opd)
         return wavefront.add_phase(self.phase)
 
@@ -92,41 +105,19 @@ class AberratedLayer(OpticalLayer):
 class Optic(TransmissiveLayer, AberratedLayer):
     """A scalar physical optic evaluated at one plane."""
 
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    transmission: Array | Parametric | None = eqx.field(converter=to_param)
+    opd: Array | Parametric | None = eqx.field(converter=to_param)
+    phase: Array | Parametric | None = eqx.field(converter=to_param)
     normalise: bool
 
-    def __init__(
-        self,
-        transmission=None,
-        opd=None,
-        phase=None,
-        normalise=False,
-    ):
+    def __init__(self, transmission=None, opd=None, phase=None, normalise=False):
         TransmissiveLayer.__init__(self, transmission, normalise)
         AberratedLayer.__init__(self, opd, phase)
-
-    def context(self, wavefront: Wavefront) -> dict[str, Any]:
-        """Return the parameter context shared by this optic's properties."""
-        return {"wavefront": wavefront}
 
     def phasor(self, wavefront: Wavefront) -> Array:
         """Return the cumulative complex scalar field for this optical plane."""
         self = self.resolve(**self.context(wavefront))
-        transmission = self.transmission
-        opd = self.opd
-        phase = self.phase
-
-        transmission = 1.0 if transmission is None else transmission
-        opd = 0.0 if opd is None else opd
-        phase = 0.0 if phase is None else phase
-
-        wavenumber = wavefront._to_phasor_shape(wavefront.wavenumber)
-        opd = wavefront._to_phasor_shape(opd)
-        phase = wavefront._to_phasor_shape(phase)
-        transmission = wavefront._to_phasor_shape(transmission)
-        return transmission * np.exp(1j * (wavenumber * opd + phase))
+        return _optic_phasor(self, wavefront)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         phasor = wavefront.phasor * self.phasor(wavefront)
@@ -163,12 +154,7 @@ class Filter(OpticalLayer):
     bin_width: Array | None
 
     def __init__(
-        self,
-        throughput,
-        wavelengths=None,
-        unit="m",
-        method="linear",
-        bin_width=None,
+        self, throughput, wavelengths=None, unit="m", method="linear", bin_width=None
     ):
         scale = dlu.unit_factor(unit)
         self.bin_width = (
@@ -203,7 +189,7 @@ class Filter(OpticalLayer):
             "wavefront": wavefront,
         }
         if self.bin_width is None:
-            throughput = self.resolve_parametric(self.throughput, **context)
+            throughput = self.throughput.evaluate(**context)
         else:
             lower = wavelength - self.bin_width / 2
             upper = wavelength + self.bin_width / 2

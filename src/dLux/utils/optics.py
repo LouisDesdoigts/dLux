@@ -3,14 +3,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-__all__ = [
-    "wavenumber",
-    "opd2phase",
-    "phase2opd",
-    "fringe_size",
-    "tilt_opd",
-    "tilt",
-]
+__all__ = ["wavenumber", "opd2phase", "phase2opd", "fringe_size", "tilt_opd", "tilt"]
 
 
 def wavenumber(wavelength: float) -> float:

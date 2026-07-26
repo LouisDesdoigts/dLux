@@ -129,10 +129,7 @@ def retarder(retardance: Array, angle: Array) -> Array:
     """
     phase = np.exp(1j * retardance)
     jones = np.array(
-        [
-            [np.ones_like(phase), np.zeros_like(phase)],
-            [np.zeros_like(phase), phase],
-        ]
+        [[np.ones_like(phase), np.zeros_like(phase)], [np.zeros_like(phase), phase]]
     )
     return rotate_jones(jones, angle)
 

@@ -1,28 +1,15 @@
 import jax.numpy as np
 from jax import Array
-from numbers import Integral
 
-__all__ = [
-    "pad_to",
-    "crop_to",
-    "resize",
-    "downsample",
-]
+import dLux.utils as dlu
+
+__all__ = ["pad_to", "crop_to", "resize", "downsample"]
 
 
 def _size(npixels: int | tuple[int, ...]) -> tuple[int, ...]:
     """Cast a scalar or tuple to a physical-axis size tuple."""
-    if isinstance(npixels, Integral):
-        if npixels < 1:
-            raise ValueError("npixels must be positive.")
-        return (int(npixels),) * 2
-    if not isinstance(npixels, (tuple, list)) or not npixels:
-        raise TypeError("npixels must be an integer or a non-empty tuple of integers.")
-    if not all(isinstance(value, Integral) for value in npixels):
-        raise TypeError("npixels must contain only integers.")
-    if any(value < 1 for value in npixels):
-        raise ValueError("npixels must contain only positive values.")
-    return tuple(int(value) for value in npixels)
+    ndim = None if isinstance(npixels, (tuple, list)) else 2
+    return dlu.as_size(npixels, ndim, "npixels")
 
 
 def _spatial_sizes(array: Array, npixels) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -47,11 +34,7 @@ def _check_parity(sizes_in, sizes_out, operation):
             )
 
 
-def pad_to(
-    array: Array,
-    npixels: int | tuple[int, ...],
-    fill: float = 0.0,
-) -> Array:
+def pad_to(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> Array:
     """
     Centrally pad the final spatial axes to a target size.
 
@@ -116,11 +99,7 @@ def crop_to(array: Array, npixels: int | tuple[int, ...]) -> Array:
     return array[leading + spatial]
 
 
-def resize(
-    array: Array,
-    npixels: int | tuple[int, ...],
-    fill: float = 0.0,
-) -> Array:
+def resize(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> Array:
     """
     Centrally resize the final spatial axes using cropping and padding.
 
@@ -148,11 +127,7 @@ def resize(
     return array
 
 
-def downsample(
-    array: Array,
-    n: int | tuple[int, ...],
-    mean: bool = True,
-) -> Array:
+def downsample(array: Array, n: int | tuple[int, ...], mean: bool = True) -> Array:
     """
     Downsample the final spatial axes by integer factors.
 

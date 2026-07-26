@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from numbers import Integral
-
 import jax.numpy as np
 import zodiax as zdx
 from jax import Array, core, lax, vmap
@@ -37,43 +35,21 @@ class ResizeSpec(BaseGridSpec):
     def __init__(self, n=None, pad=1, crop=1, c=None):
         if n is not None and (pad != 1 or crop != 1):
             raise ValueError("Specify either n or pad/crop factors, not both.")
-        self.n = None if n is None else self._values(n, "n")
-        self.pad_factor = self._values(pad, "pad")
-        self.crop_factor = self._values(crop, "crop")
+        self.n = None if n is None else dlu.as_size(n, name="n")
+        self.pad_factor = dlu.as_size(pad, name="pad")
+        self.crop_factor = dlu.as_size(crop, name="crop")
         self.c = None if c is None else np.asarray(c, float)
-
-    @staticmethod
-    def _values(value, name):
-        if isinstance(value, Integral):
-            values = (int(value),)
-        elif isinstance(value, (tuple, list)) and value:
-            values = tuple(value)
-        else:
-            raise TypeError(f"{name} must be an integer or non-empty tuple.")
-        if not all(isinstance(item, Integral) for item in values):
-            raise TypeError(f"{name} must contain integers.")
-        if any(item < 1 for item in values):
-            raise ValueError(f"{name} must contain positive values.")
-        return tuple(int(item) for item in values)
-
-    @staticmethod
-    def _broadcast(values, ndim, name):
-        if len(values) == ndim:
-            return values
-        if len(values) == 1:
-            return values * ndim
-        raise ValueError(f"{name} cannot be broadcast to {ndim} dimensions.")
 
     def broadcast(self, ndim: int) -> BaseGridSpec:
         """Broadcast sizes and factors to ``ndim`` dimensions."""
         ndim = int(ndim)
         if ndim < 1:
             raise ValueError("ndim must be a positive integer.")
-        n = None if self.n is None else self._broadcast(self.n, ndim, "n")
+        n = None if self.n is None else dlu.as_size(self.n, ndim, "n")
         return self.set(
             n=n,
-            pad_factor=self._broadcast(self.pad_factor, ndim, "pad"),
-            crop_factor=self._broadcast(self.crop_factor, ndim, "crop"),
+            pad_factor=dlu.as_size(self.pad_factor, ndim, "pad"),
+            crop_factor=dlu.as_size(self.crop_factor, ndim, "crop"),
         )
 
     @property
@@ -86,15 +62,15 @@ class ResizeSpec(BaseGridSpec):
         """Return keyword arguments for FFT propagation utilities."""
         if self.explicit:
             return {"pad_to": self.n}
-        return {"pad": self._broadcast(self.pad_factor, 2, "pad")}
+        return {"pad": dlu.as_size(self.pad_factor, 2, "pad")}
 
     def output_size(self, shape) -> tuple[int, ...]:
         """Return the requested physical-axis size for an input array shape."""
         if self.explicit:
             return self.n
         ndim = max(len(self.pad_factor), len(self.crop_factor), 2)
-        pad_factor = self._broadcast(self.pad_factor, ndim, "pad")
-        crop_factor = self._broadcast(self.crop_factor, ndim, "crop")
+        pad_factor = dlu.as_size(self.pad_factor, ndim, "pad")
+        crop_factor = dlu.as_size(self.crop_factor, ndim, "crop")
         sizes = tuple(shape[-ndim:][::-1])
         return tuple(
             size * pad // crop
@@ -106,7 +82,7 @@ class ResizeSpec(BaseGridSpec):
         if self.explicit:
             return self.n
         ndim = max(len(self.crop_factor), 2)
-        factors = self._broadcast(self.crop_factor, ndim, "crop")
+        factors = dlu.as_size(self.crop_factor, ndim, "crop")
         sizes = tuple(shape[-ndim:][::-1])
         return tuple(size // factor for size, factor in zip(sizes, factors))
 
@@ -115,7 +91,7 @@ class ResizeSpec(BaseGridSpec):
         if self.explicit:
             return dlu.pad_to(array, self.n, fill)
         ndim = max(len(self.pad_factor), 2)
-        factors = self._broadcast(self.pad_factor, ndim, "pad")
+        factors = dlu.as_size(self.pad_factor, ndim, "pad")
         sizes = tuple(array.shape[-ndim:][::-1])
         target = tuple(size * factor for size, factor in zip(sizes, factors))
         return dlu.pad_to(array, target, fill)
@@ -153,9 +129,9 @@ class GridSpec(BaseGridSpec):
         ]
         ndim = max(lengths, default=1 if values else 0)
 
-        self.n = self._as_n(n, ndim)
-        self.d = self._as_axes(d, ndim, float, "d")
-        self.c = self._as_centers(c, ndim)
+        self.n = None if n is None else dlu.as_size(n, ndim, "n")
+        self.d = dlu.as_axis(d, ndim, "d")
+        self.c = dlu.as_axis(c, ndim, "c")
         if (
             self.d is not None
             and not isinstance(self.d, core.Tracer)
@@ -163,65 +139,6 @@ class GridSpec(BaseGridSpec):
         ):
             raise ValueError("d must contain positive values.")
         self.unit = None if unit is None else self._validate_unit(unit)
-
-    @staticmethod
-    def _as_n(value, ndim):
-        if value is None:
-            return None
-        if isinstance(value, Integral):
-            value = (int(value),)
-        elif isinstance(value, (tuple, list)):
-            if not all(isinstance(item, Integral) for item in value):
-                raise TypeError("n must contain integers.")
-            value = tuple(int(item) for item in value)
-        else:
-            value = np.asarray(value)
-            if value.ndim > 1:
-                raise ValueError("n must be scalar or one-dimensional.")
-            if not np.issubdtype(value.dtype, np.integer):
-                raise TypeError("n must contain integers.")
-            value = tuple(int(item) for item in np.atleast_1d(value))
-        if ndim == 0:
-            ndim = 1
-        if len(value) == 1:
-            n = value * ndim
-        elif len(value) == ndim:
-            n = value
-        else:
-            raise ValueError("n must be scalar or have one value per axis.")
-        if any(item < 1 for item in n):
-            raise ValueError("n must contain positive integers.")
-        return n
-
-    @staticmethod
-    def _as_axes(value, ndim, dtype, name):
-        if value is None:
-            return None
-        value = np.asarray(value, dtype=dtype)
-        if ndim == 0:
-            ndim = 1
-        if value.ndim == 0:
-            return np.broadcast_to(value, (ndim,))
-        if value.shape[-1] == ndim:
-            return value
-        if value.shape[-1] == 1:
-            return np.broadcast_to(value, value.shape[:-1] + (ndim,))
-        raise ValueError(f"{name} must be scalar or have one value per axis.")
-
-    @staticmethod
-    def _as_centers(value, ndim):
-        if value is None:
-            return None
-        value = np.asarray(value, dtype=float)
-        if ndim == 0:
-            ndim = 1
-        if value.ndim == 0:
-            return np.broadcast_to(value, (ndim,))
-        if value.shape[-1] == ndim:
-            return value
-        if value.shape[-1] == 1:
-            return np.broadcast_to(value, value.shape[:-1] + (ndim,))
-        raise ValueError("c must be scalar or have one value per spatial axis.")
 
     @staticmethod
     def _validate_unit(unit):
@@ -246,23 +163,10 @@ class GridSpec(BaseGridSpec):
         ndim = int(ndim)
         if ndim < 1:
             raise ValueError("ndim must be a positive integer.")
-
-        def expand(value, name):
-            if value is None:
-                return None
-            shape = (len(value),) if isinstance(value, tuple) else value.shape
-            if shape[-1:] == (ndim,):
-                return value
-            if shape[-1:] == (1,):
-                if isinstance(value, tuple):
-                    return value * ndim
-                return np.broadcast_to(value, shape[:-1] + (ndim,))
-            raise ValueError(f"{name} cannot be broadcast to {ndim} dimensions.")
-
         return self.set(
-            n=expand(self.n, "n"),
-            d=expand(self.d, "d"),
-            c=expand(self.c, "c"),
+            n=None if self.n is None else dlu.as_size(self.n, ndim, "n"),
+            d=dlu.as_axis(self.d, ndim, "d"),
+            c=dlu.as_axis(self.c, ndim, "c"),
         )
 
     @property
@@ -370,11 +274,6 @@ class GridSpec(BaseGridSpec):
 class CoordTransform(zdx.Base):
     """Base class for transformations applied to coordinate fields."""
 
-    def __init_subclass__(cls, **kwargs):
-        """Inherit the coordinate transformation interface documentation."""
-        super().__init_subclass__(**kwargs)
-        dlu.helpers.inherit_docstrings(cls, ["__call__"])
-
     @staticmethod
     def get_coordinates(coordinates) -> Array:
         """Validate and return a Cartesian coordinate array."""
@@ -415,6 +314,33 @@ class TransformChain(CoordTransform):
         return coords
 
 
+def _distortion_powers(order, orders, powers, shift_invariant):
+    """Resolve the polynomial powers used by a coordinate distortion."""
+    if sum(value is not None for value in (order, orders, powers)) > 1:
+        raise ValueError("Provide only one of order, orders, or powers.")
+    if powers is not None:
+        powers = np.asarray(powers, dtype=float)
+        if powers.ndim != 2 or powers.shape[0] != 2:
+            raise ValueError("powers must have shape (2, n_terms).")
+    else:
+        if orders is None:
+            order = 1 if order is None else int(order)
+            orders = tuple(range(1, order + 1))
+        else:
+            orders = tuple(map(int, orders))
+        if not orders or any(order < 1 for order in orders):
+            raise ValueError("orders must contain positive integers.")
+        powers = dlu.polynomial_powers(max(orders), 2)[:, 1:]
+        powers = powers[:, np.isin(powers.sum(0), np.asarray(orders))]
+    if shift_invariant:
+        linear = np.logical_or(
+            np.all(powers == np.array([[1], [0]]), axis=0),
+            np.all(powers == np.array([[0], [1]]), axis=0),
+        )
+        powers = powers[:, ~linear]
+    return powers
+
+
 class DistortCoords(CoordTransform):
     """Polynomially distorted Cartesian coordinates."""
 
@@ -431,33 +357,8 @@ class DistortCoords(CoordTransform):
         powers: Array | None = None,
         shift_invariant: bool = False,
     ):
-        supplied = sum(value is not None for value in (order, orders, powers))
-        if supplied > 1:
-            raise ValueError("Provide only one of order, orders, or powers.")
-
-        if powers is not None:
-            powers = np.asarray(powers, dtype=float)
-            if powers.ndim != 2 or powers.shape[0] != 2:
-                raise ValueError("powers must have shape (2, n_terms).")
-        else:
-            if orders is None:
-                order = 1 if order is None else int(order)
-                orders = tuple(range(1, order + 1))
-            else:
-                orders = tuple(int(value) for value in orders)
-            if not orders or any(value < 1 for value in orders):
-                raise ValueError("orders must contain positive integers.")
-            powers = dlu.polynomial_powers(max(orders), 2)[:, 1:]
-            powers = powers[:, np.isin(powers.sum(0), np.asarray(orders))]
-
         self.shift_invariant = bool(shift_invariant)
-        if self.shift_invariant:
-            linear = np.logical_or(
-                np.all(powers == np.array([[1], [0]]), axis=0),
-                np.all(powers == np.array([[0], [1]]), axis=0),
-            )
-            powers = powers[:, ~linear]
-        self.powers = powers
+        self.powers = _distortion_powers(order, orders, powers, self.shift_invariant)
         if distortion is None:
             distortion = np.zeros_like(self.powers)
         distortion = np.asarray(distortion, dtype=float)

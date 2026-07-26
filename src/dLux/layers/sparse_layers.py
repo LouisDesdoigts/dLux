@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+import equinox as eqx
 import jax.numpy as np
 import jax.tree as jtu
 from jax import Array, vmap
 
 from ..grids import AffineMap, CoordTransform, DistortCoords, GridSpec
-from ..parametric import Parametric, ParametricBasis
+from ..parametric import Parametric, ParametricBasis, to_param
 from ..fields import Wavefront
 from .dynamic_layers import BaseDynamicLayer
-from .optical_layers import Optic
+from .optical_layers import Optic, _optic_phasor
 
 __all__ = ["SparseOptic", "SparseDynamicOptic"]
 
@@ -23,19 +24,14 @@ class SparseOptic(Optic):
     coefficients. The same convention applies to polynomial distortion arrays.
     """
 
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    transmission: Array | Parametric | None = eqx.field(converter=to_param)
+    opd: Array | Parametric | None = eqx.field(converter=to_param)
+    phase: Array | Parametric | None = eqx.field(converter=to_param)
     normalise: bool
     positions: Array
 
     def __init__(
-        self,
-        positions,
-        transmission=None,
-        opd=None,
-        phase=None,
-        normalise=False,
+        self, positions, transmission=None, opd=None, phase=None, normalise=False
     ):
         positions = np.asarray(positions, dtype=float)
         if positions.ndim != 2 or positions.shape[-1] != 2:
@@ -68,10 +64,7 @@ class SparseOptic(Optic):
         return jtu.map(select, self, is_leaf=is_leaf)
 
     def _context_at(
-        self,
-        wavefront: Wavefront,
-        position: Array,
-        optic: SparseOptic,
+        self, wavefront: Wavefront, position: Array, optic: SparseOptic
     ) -> dict:
         coordinates = AffineMap(offset=-position)(wavefront.coordinates)
         return {
@@ -84,7 +77,7 @@ class SparseOptic(Optic):
         optic = self._slice_local(index)
         context = self._context_at(wavefront, position, optic)
         optic = optic.resolve(**context)
-        return Optic.phasor(optic, wavefront)
+        return _optic_phasor(optic, wavefront)
 
     def phasor(self, wavefront: Wavefront, params: dict = None) -> Array:
         """Return the coherent sum of every positioned optic phasor."""
@@ -133,14 +126,7 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
         normalise=False,
     ):
         BaseDynamicLayer.__init__(self, coordinates, transformation)
-        SparseOptic.__init__(
-            self,
-            positions,
-            transmission,
-            opd,
-            phase,
-            normalise,
-        )
+        SparseOptic.__init__(self, positions, transmission, opd, phase, normalise)
 
     def _context_at(self, wavefront, position, optic):
         coordinate_source = optic.coordinates
@@ -148,7 +134,7 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
             coordinates = wavefront.coordinates
             pixel_scale = wavefront.pixel_scale
         elif isinstance(coordinate_source, GridSpec):
-            coordinates = optic._from_spec(coordinate_source)
+            coordinates = coordinate_source.coordinates
             pixel_scale = coordinate_source.d
         else:
             coordinates = coordinate_source
@@ -172,8 +158,8 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    transmission: Array | Parametric | None = eqx.field(converter=to_param)
+    opd: Array | Parametric | None = eqx.field(converter=to_param)
+    phase: Array | Parametric | None = eqx.field(converter=to_param)
     normalise: bool
     positions: Array

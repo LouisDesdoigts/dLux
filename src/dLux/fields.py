@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from math import prod
+import operator
 
 import jax.numpy as np
 import jax.random as jr
@@ -24,6 +25,26 @@ __all__ = [
     "PSF",
     "Image",
 ]
+
+_ops = {
+    "add": operator.add,
+    "subtract": operator.sub,
+    "multiply": operator.mul,
+    "divide": operator.truediv,
+}
+
+
+def _field_spec(spec, shape):
+    """Validate a field specification against its two spatial axes."""
+    if not isinstance(spec, GridSpec):
+        raise TypeError("spec must be a GridSpec.")
+    spec = spec.broadcast(2)
+    n = shape[-2:][::-1]
+    if spec.n is None:
+        return spec.set(n=n)
+    if spec.n != n:
+        raise ValueError("Field spatial shape must match spec.n.")
+    return spec
 
 
 class BaseField(zdx.Base):
@@ -61,20 +82,6 @@ class BaseField(zdx.Base):
     def set_field(self, field: Array) -> BaseField:
         """Return a copy with an updated sampled array."""
         return self.set(**{self._field_name: field})
-
-    def _apply_field_op(self, other, op: str) -> BaseField:
-        """Apply one arithmetic operation to the stored sampled array."""
-        if op == "add":
-            field = self.field + other
-        elif op == "subtract":
-            field = self.field - other
-        elif op == "multiply":
-            field = self.field * other
-        elif op == "divide":
-            field = self.field / other
-        else:
-            raise ValueError(f"Unsupported operation '{op}'.")
-        return self.set_field(field)
 
     @property
     def spatial_shape(self) -> tuple[int, ...]:
@@ -133,18 +140,23 @@ class BaseField(zdx.Base):
         field = convolve(self.field, other, mode="same", method=method)
         return self.set_field(field)
 
-    def _magic_unified_op(self, other, op: str) -> BaseField:
+    def _binary_op(self, other, op: str) -> BaseField:
         """Apply arithmetic to another compatible sampled field or array."""
         if other is None:
             return self
-        if isinstance(other, BaseField):
-            other = other.field
-        if not isinstance(other, (Array, float, int, complex)):
+        if not isinstance(other, (BaseField, Array, float, int, complex)):
             raise TypeError(
                 f"Unsupported type for {op}: {type(other)}. Must be an array, "
                 "field, or None."
             )
-        return self._apply_field_op(other, op)
+        self, other = self._prepare_operand(other)
+        return self.set_field(_ops[op](self.field, other))
+
+    def _prepare_operand(self, other) -> tuple[BaseField, Array]:
+        """Return the field and array used for arithmetic."""
+        if isinstance(other, BaseField):
+            return self, other.field
+        return self, other
 
     def resize(self, npixels: int) -> BaseField:
         """Resize spatial axes by centered zero-padding or cropping."""
@@ -167,28 +179,28 @@ class BaseField(zdx.Base):
         return self.set_field(np.flip(self.field, axis))
 
     def __add__(self, other) -> BaseField:
-        return self._magic_unified_op(other, "add")
+        return self._binary_op(other, "add")
 
     def __sub__(self, other) -> BaseField:
-        return self._magic_unified_op(other, "subtract")
+        return self._binary_op(other, "subtract")
 
     def __mul__(self, other) -> BaseField:
-        return self._magic_unified_op(other, "multiply")
+        return self._binary_op(other, "multiply")
 
     def __truediv__(self, other) -> BaseField:
-        return self._magic_unified_op(other, "divide")
+        return self._binary_op(other, "divide")
 
     def __iadd__(self, other) -> BaseField:
-        return self.__add__(other)
+        return self._binary_op(other, "add")
 
     def __isub__(self, other) -> BaseField:
-        return self.__sub__(other)
+        return self._binary_op(other, "subtract")
 
     def __imul__(self, other) -> BaseField:
-        return self.__mul__(other)
+        return self._binary_op(other, "multiply")
 
     def __itruediv__(self, other) -> BaseField:
-        return self.__truediv__(other)
+        return self._binary_op(other, "divide")
 
 
 class ContinuousField(BaseField):
@@ -226,25 +238,29 @@ class ContinuousField(BaseField):
         complex: bool = True,
         fill: float = 0.0,
     ) -> ContinuousField:
-        """Interpolate through a coordinate transformation.
-
-        ``complex`` has no effect when the stored sampled array is real.
-        """
+        """Interpolate every sampled field through a coordinate transformation."""
         if not isinstance(transformation, CoordTransform):
             raise TypeError("transformation must be a CoordTransform.")
         knots = self.coordinates
-        samples = transformation(knots)
+        transform = np.vectorize(transformation, signature="(c,n,m)->(c,n,m)")
+        samples = transform(knots)
+
+        # Coordinate batch axes precede intrinsic field axes such as Jones matrices.
+        n_batch = self.field.ndim - 2
+        c_batch = knots.ndim - 3
+        if c_batch > n_batch:
+            raise ValueError("Coordinate batch dimensions exceed field dimensions.")
+        shape = knots.shape[:c_batch] + (1,) * (n_batch - c_batch) + knots.shape[-3:]
+        knots, samples = knots.reshape(shape), samples.reshape(shape)
+
         interpolate = np.vectorize(
-            lambda field: dlu.interp(field, knots, samples, method, fill, complex),
-            signature="(n,m)->(n,m)",
+            lambda field, x, y: dlu.interp(field, x, y, method, fill, complex),
+            signature="(n,m),(c,n,m),(c,p,q)->(p,q)",
         )
-        return self.set_field(interpolate(self.field))
+        return self.set_field(interpolate(self.field, knots, samples))
 
     def rotate(
-        self,
-        angle: float | Array,
-        method: str = "linear",
-        complex: bool = True,
+        self, angle: float | Array, method: str = "linear", complex: bool = True
     ) -> ContinuousField:
         """Rotate the sampled array clockwise through interpolation.
 
@@ -303,14 +319,11 @@ class DiscreteField(BaseField):
             variance = variance + self.variance
         read_noise = np.sqrt(self.read_noise**2 + sigma**2)
         return self.set_field(self.field + noise).set(
-            variance=np.broadcast_to(variance, self.field.shape),
-            read_noise=read_noise,
+            variance=np.broadcast_to(variance, self.field.shape), read_noise=read_noise
         )
 
     def log_likelihood(
-        self,
-        model: BaseField | Array,
-        distribution: str = "gaussian",
+        self, model: BaseField | Array, distribution: str = "gaussian"
     ) -> Array:
         """Return a summed Gaussian or Poisson log likelihood.
 
@@ -411,26 +424,20 @@ class Wavefront(ContinuousField):
             Optional complex electric field. If omitted, a uniform field is generated
             from ``spec.n``.
         """
-        spec = spec.broadcast(2)
         self.wavelength = np.asarray(wavelength, float)
         if phasor is None:
+            if not isinstance(spec, GridSpec):
+                raise TypeError("spec must be a GridSpec.")
+            spec = spec.broadcast(2)
             if spec.n is None:
                 raise ValueError("spec.n is required when phasor is not provided.")
-            if spec.ndim != 2:
-                raise ValueError("Wavefront requires a two-dimensional GridSpec.")
             shape = self.wavelength.shape + spec.shape
             self.phasor = np.ones(shape, dtype=complex) / prod(spec.n)
         else:
             phasor = np.asarray(phasor, complex)
             if phasor.ndim < 2:
                 raise ValueError("phasor must have at least two spatial dimensions.")
-            inferred_n = phasor.shape[-2:][::-1]
-            if spec.n is None:
-                spec = spec.set(n=inferred_n)
-            elif spec.n != inferred_n:
-                raise ValueError("phasor spatial shape must match spec.n.")
-            if spec.ndim != 2:
-                raise ValueError("Wavefront requires a two-dimensional GridSpec.")
+            spec = _field_spec(spec, phasor.shape)
             if phasor.ndim == 2 and self.wavelength.ndim > 0:
                 phasor = phasor * np.ones(self.wavelength.shape + (1, 1))
             self.phasor = phasor
@@ -438,10 +445,7 @@ class Wavefront(ContinuousField):
 
     @classmethod
     def from_phasor(
-        cls,
-        phasor: Array[complex],
-        wavelength: float | Array,
-        spec: GridSpec,
+        cls, phasor: Array[complex], wavelength: float | Array, spec: GridSpec
     ) -> Wavefront:
         """
         Create a Wavefront from an existing phasor array.
@@ -614,9 +618,7 @@ class Wavefront(ContinuousField):
 
         # get_axis = lambda array: 0 if array.ndim > 0 else None
         return self.set(
-            phasor=0 if self.batch_ndim > 0 else None,
-            wavelength=0,
-            spec=None,
+            phasor=0 if self.batch_ndim > 0 else None, wavelength=0, spec=None
         )
 
     @property
@@ -718,9 +720,7 @@ class Wavefront(ContinuousField):
         return self.add_opd(dlu.tilt_opd(self.coordinates, angles, unit))
 
     def normalise(
-        self: Wavefront,
-        mode: str = "power",
-        value: float = 1.0,
+        self: Wavefront, mode: str = "power", value: float = 1.0
     ) -> Wavefront:
         """
         Normalise the wavefront.
@@ -746,119 +746,28 @@ class Wavefront(ContinuousField):
             raise ValueError("mode must be 'power' or 'peak'")
         return self.multiply("phasor", scale)
 
-    def interpolate(
-        self: Wavefront,
-        transformation: CoordTransform,
-        method: str = "linear",
-        complex: bool = True,
-        fill: float = 0.0,
-    ) -> Wavefront:
-        """Interpolate through a coordinate transformation.
-
-        Leading phasor dimensions, including wavelength and Jones matrix axes, are
-        vectorised over directly.
-
-        Parameters
-        ----------
-        transformation : CoordTransform
-            Transformation applied to the wavefront sampling coordinates.
-        method : str = "linear"
-            Interpolation method passed to ``interpax``.
-        complex : bool = True
-            If True, interpolate the real and imaginary components. If False,
-            interpolate the amplitude and phase components.
-        fill : float = 0.0
-            Value used when sampling outside the input grid.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The interpolated wavefront.
-        """
-        if not isinstance(transformation, CoordTransform):
-            raise TypeError("transformation must be a CoordTransform.")
-        knot_coords = self.coordinates
-        transform = np.vectorize(
-            transformation,
-            signature="(c,n,n)->(c,n,n)",
-        )
-        sample_coords = transform(knot_coords)
-
-        # Per-wavelength coordinate grids need singleton axes inserted for intrinsic
-        # leading dimensions such as the Jones matrix axes of PolarisedWavefront.
-        chromatic_ndim = self.wavelength.ndim
-        extra_ndim = self.phasor.ndim - chromatic_ndim - 2
-        if knot_coords.ndim == chromatic_ndim + 3:
-            shape = (
-                knot_coords.shape[:chromatic_ndim]
-                + (1,) * extra_ndim
-                + knot_coords.shape[-3:]
-            )
-            knot_coords = knot_coords.reshape(shape)
-            sample_coords = sample_coords.reshape(shape)
-
-        interp = np.vectorize(
-            lambda phasor, knots, samples: dlu.interp(
-                phasor, knots, samples, method, fill, complex
-            ),
-            signature="(n,n),(c,n,n),(c,m,m)->(m,m)",
-        )
-        return self.set(phasor=interp(self.phasor, knot_coords, sample_coords))
-
-    def _magic_unified_op(
+    def _binary_op(
         self: Wavefront, other: Wavefront | Array | None, op: str
     ) -> Wavefront:
-        """
-        Internal helper function to unify the logic of the magic methods for addition,
-        subtraction, multiplication and division.
-
-        Parameters
-        ----------
-        other : Wavefront | Array | None
-            The object to operate with. Can be a complex array, a Wavefront, or None.
-        op : str
-            The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The resulting wavefront after applying the operation.
-        """
-        # Nones always return unchanged
-        if other is None:
-            return self
-
-        # Check for supported types
-        if not isinstance(other, (Wavefront, Array, float, int, complex)):
-            raise TypeError(
-                f"Unsupported type for {op}: {type(other)}. Must be an array, "
-                "Wavefront, or None."
-            )
-
-        if op not in ("add", "subtract", "multiply", "divide"):
-            raise ValueError(f"Unsupported operation '{op}'.")
-
-        # Division between two wavefront states has no well-defined optical meaning.
+        """Apply arithmetic after aligning wavelength and Jones axes."""
         if op == "divide" and isinstance(other, Wavefront):
             raise TypeError(
                 "dLux has detected an attempt to perform dark optics. Your wavefront "
                 "privileges have been temporarily suspended and the authorities have "
                 "been notified."
             )
-
-        # Align the operand for chromatic and polarisation broadcasting.
-        self, other = self._prepare_operand(other)
-
-        return self._apply_field_op(other, op)
+        return super()._binary_op(other, op)
 
     def _prepare_operand(
         self: Wavefront, other: Wavefront | Array | float | int | complex
     ) -> tuple[Wavefront, Array | float | int | complex]:
-        """Dispatches operand preparation according to the operand type."""
+        """Align wavelength and Jones axes for wavefront arithmetic."""
         if isinstance(other, Wavefront):
             return self._prepare_wavefront_operand(other)
         if isinstance(other, Array):
             return self._prepare_array_operand(other)
+        if isinstance(other, BaseField):
+            raise TypeError("Wavefront arithmetic requires another Wavefront or array.")
         return self, other
 
     def _promote_for_arithmetic(self: Wavefront) -> PolarisedWavefront:
@@ -920,86 +829,18 @@ class Wavefront(ContinuousField):
     def _prepare_array_operand(
         self: Wavefront, other: Array
     ) -> tuple[Wavefront, Array]:
-        """
-        Classifies and aligns an array operand by its semantic dimensions.
-
-        Supported array layouts are scalar, spectral, spatial, spectral-spatial,
-        Jones, spectral-Jones, Jones-spatial, and spectral-Jones-spatial. Ambiguous
-        layouts are rejected rather than assigned an implicit interpretation.
-
-        Parameters
-        ----------
-        other : Array
-            The array operand to align with the base wavefront.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The base wavefront, promoted to `PolarisedWavefront` if required.
-        operand : Array
-            The operand reshaped for elementwise arithmetic.
-        """
-        # Layouts use the canonical wavelength, Jones, then spatial axis order.
-        layouts = (
-            (),
-            ("w",),
-            ("x", "y"),
-            ("w", "x", "y"),
-            ("j0", "j1"),
-            ("w", "j0", "j1"),
-            ("j0", "j1", "x", "y"),
-            ("w", "j0", "j1", "x", "y"),
-        )
-
-        def matches(layout):
-            """Checks whether the operand shape matches a semantic layout."""
-            if len(layout) != other.ndim or ("w" in layout and not self.is_chromatic):
-                return False
-
-            axes = dict(zip(layout, other.shape))
-            wavelength_matches = (
-                axes.get("w", self.wavelength.size) == self.wavelength.size
-            )
-            jones_matches = all(axes.get(axis, 2) == 2 for axis in ("j0", "j1"))
-            spatial_matches = axes.get("x") == axes.get("y")
-
-            # A two-pixel spatial axis is only spatial when the base agrees. This
-            # leaves (2, 2) arrays unambiguously Jones-valued for larger wavefronts.
-            if "x" in axes and axes["x"] == 2 and self.spatial_shape[-1] != 2:
-                spatial_matches = False
-            return wavelength_matches and jones_matches and spatial_matches
-
-        matches = [layout for layout in layouts if matches(layout)]
-        if len(matches) > 1:
-            if other.ndim == 2:
-                raise ValueError("Array shape (2, 2) is ambiguous for npixels=2.")
+        """Align standard field modulation and otherwise use JAX broadcasting."""
+        other = self._to_phasor_shape(other)
+        try:
+            shape = np.broadcast_shapes(self.phasor.shape, other.shape)
+        except ValueError as error:
             raise ValueError(
-                "Array shape is ambiguous between spectral-spatial and "
-                "spectral-Jones layouts."
-            )
-        if not matches:
-            if other.ndim == 1:
-                raise ValueError(
-                    "A vector operand must match the base wavelength shape."
-                )
-            raise ValueError(
-                f"Unsupported array shape {other.shape} for a Wavefront with phasor "
-                f"shape {self.phasor.shape}."
-            )
-
-        layout = matches[0]
-        if "j0" in layout and not self.is_polarised:
-            self = self._promote_for_arithmetic()
-
-        # Insert singleton dimensions for semantic axes absent from the operand.
-        axes = ("w",) if self.is_chromatic else ()
-        if self.is_polarised:
-            axes += ("j0", "j1")
-        axes += ("x", "y")
-        shape = tuple(
-            other.shape[layout.index(axis)] if axis in layout else 1 for axis in axes
-        )
-        return self, other.reshape(shape)
+                f"Array shape {other.shape} cannot broadcast to phasor shape "
+                f"{self.phasor.shape}."
+            ) from error
+        if shape != self.phasor.shape:
+            raise ValueError("Array operands cannot add dimensions to a Wavefront.")
+        return self, other
 
     def apply_jones(self, jones):
         """
@@ -1082,10 +923,7 @@ class PolarisedWavefront(Wavefront):
 
     @classmethod
     def from_phasor(
-        cls,
-        phasor: Array[complex],
-        wavelength: float | Array,
-        spec: GridSpec,
+        cls, phasor: Array[complex], wavelength: float | Array, spec: GridSpec
     ) -> PolarisedWavefront:
         """
         Create a PolarisedWavefront from a regular or Jones phasor.
@@ -1191,15 +1029,7 @@ class PSF(ContinuousField):
         self.data = np.asarray(data, dtype=float)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        if not isinstance(spec, GridSpec):
-            raise TypeError("spec must be a GridSpec.")
-        spec = spec.broadcast(2)
-        inferred_n = self.data.shape[-2:][::-1]
-        if spec.n is None:
-            spec = spec.set(n=inferred_n)
-        elif spec.n != inferred_n:
-            raise ValueError("data spatial shape must match spec.n.")
-        BaseField.__init__(self, spec)
+        BaseField.__init__(self, _field_spec(spec, self.data.shape))
 
     @classmethod
     def from_wavefront(cls, wavefront) -> PSF:
@@ -1247,14 +1077,7 @@ class Image(DiscreteField):
         data = np.asarray(data, dtype=float)
         if data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        if not isinstance(spec, GridSpec):
-            raise TypeError("spec must be a GridSpec.")
-        spec = spec.broadcast(2)
-        inferred_n = data.shape[-2:][::-1]
-        if spec.n is None:
-            spec = spec.set(n=inferred_n)
-        elif spec.n != inferred_n:
-            raise ValueError("data spatial shape must match spec.n.")
+        spec = _field_spec(spec, data.shape)
         if variance is not None:
             variance = np.broadcast_to(np.asarray(variance, dtype=float), data.shape)
         self.data = data

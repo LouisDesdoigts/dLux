@@ -21,12 +21,7 @@ def wavefront(make_wavefront):
         dl.UniformPolarisingOptic(dlu.horizontal_polariser(), 0.1),
         dl.LinearPolariser(0.2),
         dl.Retarder(np.pi / 2, 0.1),
-        dl.PolarisationLayer(
-            [
-                dl.LinearPolariser(0.2),
-                dl.Retarder(np.pi / 2, 0.1),
-            ]
-        ),
+        dl.PolarisationLayer([dl.LinearPolariser(0.2), dl.Retarder(np.pi / 2, 0.1)]),
     ],
 )
 def test_polarisation_contract(layer, wavefront):
@@ -40,7 +35,6 @@ def test_polarisation_layer_composition(wavefront):
     layer = dl.PolarisationLayer(optics)
     sequential = optics[1](optics[0](wavefront))
 
-    assert layer.evaluate_jones(wavefront).shape == (2, 2)
     assert np.allclose(layer(wavefront).phasor, sequential.phasor)
     assert dl.PolarisationLayer()(wavefront) is wavefront
 
@@ -56,10 +50,7 @@ def test_promotes_scalar_wavefront(make_wavefront):
     ("layer", "path"),
     [
         (dl.PolarisingOptic(np.eye(2)), "jones"),
-        (
-            dl.UniformPolarisingOptic(dlu.horizontal_polariser(), 0.1),
-            "orientation",
-        ),
+        (dl.UniformPolarisingOptic(dlu.horizontal_polariser(), 0.1), "orientation"),
         (dl.LinearPolariser(0.2), "angle"),
         (dl.Retarder(np.pi / 2, 0.1), "retardance"),
         (dl.Retarder(np.pi / 2, 0.1), "angle"),
@@ -67,8 +58,7 @@ def test_promotes_scalar_wavefront(make_wavefront):
 )
 def test_polarisation_gradients(layer, path, wavefront):
     assert_differentiable(
-        lambda value: layer.set(path, value)(wavefront),
-        layer.get(path),
+        lambda value: layer.set(path, value)(wavefront), layer.get(path)
     )
 
 

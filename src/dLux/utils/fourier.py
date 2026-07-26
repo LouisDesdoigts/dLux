@@ -2,11 +2,7 @@ from jax import Array
 import jax.numpy as np
 from abcdLux.mft import mft_kernels
 
-__all__ = [
-    "fourier_kernel_1d",
-    "fourier_kernels",
-    "eval_fourier_basis",
-]
+__all__ = ["fourier_kernel_1d", "fourier_kernels", "eval_fourier_basis"]
 
 
 def _to_xy(value: int | tuple[int], name: str) -> tuple[int]:
@@ -154,9 +150,7 @@ def fourier_kernel_1d(n_modes: int, npix: int, scale: float = 1.0) -> Array:
 
 
 def fourier_kernels(
-    n_modes: int | tuple[int],
-    npix: int | tuple[int],
-    scale: float = 1.0,
+    n_modes: int | tuple[int], npix: int | tuple[int], scale: float = 1.0
 ) -> tuple[Array, Array]:
     """
     Calculates the cached 2D Fourier basis evaluation kernels.
