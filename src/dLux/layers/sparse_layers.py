@@ -16,71 +16,39 @@ from .optical_layers import OpticalLayer, Optic, _optic_phasor
 __all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
 
 
-def _slice_array(value, shape, index, size, name):
-    """Select a shared or centre-vectorised array."""
-    if value is None or value.shape == shape:
-        return value, False
-    if value.shape[1:] != shape or value.shape[0] != size:
-        raise ValueError(f"{name} must have shape {shape} or ({size},) + {shape}.")
-    return value[index], True
-
-
-def _slice_basis(basis, index, size):
-    """Select shared or centre-vectorised basis coefficients."""
-    coefficients = basis.coefficients
-    if coefficients.shape == basis.basis_shape:
-        return basis
-    if basis.basis_shape == (1,) and coefficients.ndim == 1:
-        if coefficients.shape != (size,):
-            raise ValueError(f"coefficients leading axis must match {size} centers.")
-        return basis.set(coefficients=coefficients[index, None])
-    coefficients, _ = _slice_array(
-        coefficients, basis.basis_shape, index, size, "coefficients"
-    )
-    return basis.set(coefficients=coefficients)
-
-
-def _slice_transform(transform, index, size):
-    """Select shared or centre-vectorised transformation parameters."""
-    values = {
-        name: _slice_array(value, shape, index, size, name)[0]
-        for name, value, shape in _transform_params(transform)
-    }
-    return transform.set(**values)
-
-
-def _transform_params(transform):
-    """Return transformation array names, values, and native shapes."""
-    if isinstance(transform, DistortCoords):
-        return (("distortion", transform.distortion, transform.powers.shape),)
-    if isinstance(transform, AffineMap):
-        return (
-            ("matrix", transform.matrix, (2, 2)),
-            ("offset", transform.offset, (2,)),
-        )
-    return tuple(
-        (name, getattr(transform, name), shape)
-        for name, shape in (
+def _slice(obj, index, size):
+    """Select one centre from a shared or centre-vectorised object."""
+    if isinstance(obj, ParametricBasis):
+        params = (("coefficients", obj.basis_shape),)
+    elif isinstance(obj, DistortCoords):
+        params = (("distortion", obj.powers.shape),)
+    elif isinstance(obj, AffineMap):
+        params = (("matrix", (2, 2)), ("offset", (2,)))
+    else:
+        params = (
             ("translation", (2,)),
             ("rotation", ()),
             ("scale", (2,)),
             ("shear", (2,)),
         )
-    )
 
-
-def _transform_is_local(transform, size):
-    """Whether any transformation parameter has a matching centre axis."""
-    if transform is None:
-        return False
-    types = (DistortCoords, AffineMap, Affine)
-    leaves = jtu.leaves(transform, is_leaf=lambda leaf: isinstance(leaf, types))
-    return any(
-        _slice_array(value, shape, 0, size, name)[1]
-        for leaf in leaves
-        if isinstance(leaf, types)
-        for name, value, shape in _transform_params(leaf)
-    )
+    values, local = {}, False
+    for name, shape in params:
+        value = getattr(obj, name)
+        if value is None or value.shape == shape:
+            values[name] = value
+            continue
+        if (
+            isinstance(obj, ParametricBasis)
+            and shape == (1,)
+            and value.shape == (size,)
+        ):
+            values[name], local = value[index, None], True
+            continue
+        if value.shape[1:] != shape or value.shape[0] != size:
+            raise ValueError(f"{name} must have shape {shape} or ({size},) + {shape}.")
+        values[name], local = value[index], True
+    return obj.set(**values), local
 
 
 class Interfere(OpticalLayer):
@@ -130,18 +98,20 @@ class SparseOptic(Optic):
         """Select parameters with a leading center axis for one aperture."""
         types = (ParametricBasis, DistortCoords, AffineMap, Affine)
         is_leaf = lambda leaf: isinstance(leaf, types)
+        local_transform = False
 
         def select(leaf):
-            if isinstance(leaf, ParametricBasis):
-                return _slice_basis(leaf, index, self.n_apertures)
-            if isinstance(leaf, (DistortCoords, AffineMap, Affine)):
-                return _slice_transform(leaf, index, self.n_apertures)
+            nonlocal local_transform
+            if not isinstance(leaf, types):
+                return leaf
+            leaf, local = _slice(leaf, index, self.n_apertures)
+            local_transform |= local and isinstance(leaf, CoordTransform)
             return leaf
 
-        return jtu.map(select, self, is_leaf=is_leaf)
+        return jtu.map(select, self, is_leaf=is_leaf), local_transform
 
     def _context_at(
-        self, wavefront: Wavefront, center: Array, optic: SparseOptic
+        self, wavefront: Wavefront, center: Array, optic: SparseOptic, local=False
     ) -> dict:
         coordinates = AffineMap(offset=-center)(wavefront.coordinates)
         return {
@@ -151,8 +121,8 @@ class SparseOptic(Optic):
         }
 
     def _phasor_at(self, index, center, wavefront):
-        optic = self._slice_local(index)
-        context = self._context_at(wavefront, center, optic)
+        optic, local = self._slice_local(index)
+        context = self._context_at(wavefront, center, optic, local)
         optic = optic.resolve(**context)
         return _optic_phasor(optic, wavefront)
 
@@ -205,7 +175,7 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         SparseOptic.__init__(self, centers, transmission, opd, phase, normalise)
 
-    def _context_at(self, wavefront, center, optic):
+    def _context_at(self, wavefront, center, optic, local=False):
         coordinate_source = optic.coordinates
         if coordinate_source is None:
             coordinates = wavefront.coordinates
@@ -217,13 +187,10 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
             coordinates = coordinate_source
             pixel_scale = wavefront.pixel_scale
 
-        local_transformation = _transform_is_local(
-            self.transformation, self.n_apertures
-        )
-        if optic.transformation is not None and not local_transformation:
+        if optic.transformation is not None and not local:
             coordinates = optic.transformation(coordinates)
         coordinates = AffineMap(offset=-center)(coordinates)
-        if optic.transformation is not None and local_transformation:
+        if optic.transformation is not None and local:
             coordinates = optic.transformation(coordinates)
         return {
             "wavefront": wavefront,

@@ -32,6 +32,7 @@ _BASE_TO_RAD = {
 _BASE_TO_METRE = {"m": 1.0, "angstrom": 1e-10}
 
 _BASE_TO_PHOTON = {"photon": 1.0}
+_BASE_UNITS = {**_BASE_TO_RAD, **_BASE_TO_METRE, **_BASE_TO_PHOTON}
 
 # ---- aliases (lowercase lookup only) ----
 _ALIASES = {
@@ -102,21 +103,13 @@ def unit_factor(unit: str):
     Angular units convert to radians and length units convert to metres.
     """
     u = _canon(unit)
-    if u in _BASE_TO_RAD:
-        return _BASE_TO_RAD[u]
-    if u in _BASE_TO_METRE:
-        return _BASE_TO_METRE[u]
-    if u in _BASE_TO_PHOTON:
-        return _BASE_TO_PHOTON[u]
+    if u in _BASE_UNITS:
+        return _BASE_UNITS[u]
 
     prefix = u[0]
     base = u[1:]
-    if prefix in _PREFIX and base in _BASE_TO_RAD:
-        return _PREFIX[prefix] * _BASE_TO_RAD[base]
-    if prefix in _PREFIX and base in _BASE_TO_METRE:
-        return _PREFIX[prefix] * _BASE_TO_METRE[base]
-    if prefix in _PREFIX and base in _BASE_TO_PHOTON:
-        return _PREFIX[prefix] * _BASE_TO_PHOTON[base]
+    if prefix in _PREFIX and base in _BASE_UNITS:
+        return _PREFIX[prefix] * _BASE_UNITS[base]
     raise ValueError(f"Unknown unit '{unit}'.")
 
 
