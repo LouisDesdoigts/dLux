@@ -12,8 +12,6 @@ from .parametrics import Parametric
 
 __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 
-# TODO: This can probably all be in refractive_layers.py
-
 
 class CauchyIndex(Parametric):
     """A refractive index represented by a Cauchy dispersion relation."""
