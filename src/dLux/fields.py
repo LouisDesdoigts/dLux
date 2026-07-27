@@ -1,6 +1,7 @@
 """Regularly sampled optical fields and operations."""
 
 from __future__ import annotations
+from abc import abstractmethod
 from math import prod
 import operator
 
@@ -59,9 +60,10 @@ class BaseField(zdx.Base):
         raise AttributeError(f"{type(self).__name__} has no attribute {key!r}.")
 
     @property
+    @abstractmethod
     def field(self) -> Array:
         """Return the stored sampled array."""
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def spatial_shape(self) -> tuple[int, ...]:
