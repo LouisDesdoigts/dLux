@@ -56,23 +56,23 @@ def interp(
 
 def scale(
     array: Array,
-    npixels: int,
-    ratio: float,
+    npixels: int | tuple[int, int],
+    ratio: float | Array,
     method: str = "linear",
     complex: bool = True,
 ) -> Array:
     """
-    Paraxially interpolate a square array using a sampling ratio.
+    Paraxially interpolate a 2D array using per-axis sampling ratios.
 
     Parameters
     ----------
     array : Array
         The input field to interpolate, either in amplitude and phase, or real
         and imaginary.
-    npixels : int
-        The number of pixels in the output array.
-    ratio : float
-        The sampling scale of the input relative to the output.
+    npixels : int | tuple[int, int]
+        Output size in physical ``(x, y)`` axis order.
+    ratio : float | Array
+        Output sampling relative to the input along each physical axis.
     method : str = "linear"
         The interpolation method.
     complex : bool = True
@@ -85,10 +85,13 @@ def scale(
         The interpolated array.
     """
     # Get coords arrays
-    npixels_in = array.shape[-1]
-    coords_in = dlu.pixel_coords(npixels_in, 1)
+    size_in = array.shape[-2:][::-1]
+    size_out = dlu.as_size(npixels, 2, "npixels")
+    ratio = dlu.as_axis(ratio, 2, "ratio")
+    coords_in = dlu.nd_coords(size_in, 1 / np.asarray(size_in))
+    coords_out = dlu.nd_coords(size_out, 1 / np.asarray(size_out))
     coords_out = dlu.compress_coords(
-        dlu.pixel_coords(npixels, 1), np.array([ratio, ratio]) * npixels / npixels_in
+        coords_out, ratio * np.asarray(size_out) / np.asarray(size_in)
     )
 
     # Interpolate
@@ -99,7 +102,7 @@ def rotate(
     array: Array, angle: Array, method: str = "linear", complex: bool = True
 ) -> Array:
     """
-    Rotates a square array by the angle, using interpolation.
+    Rotates a 2D array by the angle, retaining its input shape.
 
     Parameters
     ----------
@@ -119,8 +122,7 @@ def rotate(
         The rotated array.
     """
     # Get coordinates
-    npixels = array.shape[0]
-    coords_in = dlu.nd_coords((npixels, npixels))
+    coords_in = dlu.nd_coords(array.shape[-2:][::-1])
     coords_out = dlu.rotate_coords(coords_in, angle)
 
     # Interpolate

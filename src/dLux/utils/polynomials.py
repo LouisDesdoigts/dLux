@@ -254,6 +254,9 @@ def scale_coords(coords: Array, rmax: float) -> Array:
     coords : Array
         The scaled coordinates.
     """
+    rmax = np.asarray(rmax)
+    if rmax.ndim and rmax.shape[-1] == coords.shape[-3]:
+        rmax = rmax.reshape(rmax.shape + (1,) * (coords.ndim - rmax.ndim))
     return coords / rmax
 
 

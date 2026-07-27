@@ -8,7 +8,7 @@ import jax.numpy as np
 import jax.random as jr
 import jax.scipy as jsp
 import zodiax as zdx
-from jax import Array
+from jax import Array, vmap
 from jax.scipy.signal import convolve
 
 import dLux.utils as dlu
@@ -52,36 +52,16 @@ class BaseField(zdx.Base):
 
     spec: GridSpec
 
-    def __init__(self, spec: GridSpec):
-        if not isinstance(spec, GridSpec):
-            raise TypeError("spec must be a GridSpec.")
-        self.spec = spec
-
     def __getattr__(self, key):
-        """Forward coordinate attributes to the stored specification."""
-        if key == "spec":
-            raise AttributeError(key)
-        try:
-            spec = object.__getattribute__(self, "spec")
-        except AttributeError:
-            raise AttributeError(key) from None
-        if hasattr(spec, key):
-            return getattr(spec, key)
-        raise AttributeError(f"{type(self).__name__!s} has no attribute {key!r}.")
-
-    @property
-    def _field_name(self) -> str:
-        """Return the name of the stored sampled array."""
-        raise NotImplementedError()
+        """Forward unknown attributes to the coordinate specification."""
+        if hasattr(self.spec, key):
+            return getattr(self.spec, key)
+        raise AttributeError(f"{type(self).__name__} has no attribute {key!r}.")
 
     @property
     def field(self) -> Array:
         """Return the stored sampled array."""
-        return getattr(self, self._field_name)
-
-    def set_field(self, field: Array) -> BaseField:
-        """Return a copy with an updated sampled array."""
-        return self.set(**{self._field_name: field})
+        raise NotImplementedError()
 
     @property
     def spatial_shape(self) -> tuple[int, ...]:
@@ -91,7 +71,7 @@ class BaseField(zdx.Base):
     @property
     def axes(self) -> tuple[Array, ...]:
         """Return coordinate axes using the field's static spatial shape."""
-        return self.spec.axes_for(self.spatial_shape[::-1])
+        return self.xs
 
     @property
     def coordinates(self) -> Array:
@@ -99,8 +79,8 @@ class BaseField(zdx.Base):
         return self.spec.coordinates_for(self.spatial_shape[::-1])
 
     @property
-    def xs(self) -> Array:
-        """Return stacked coordinate axes using the field's static spatial shape."""
+    def xs(self) -> tuple[Array, ...]:
+        """Return coordinate axes using the field's static spatial shape."""
         return self.spec.xs_for(self.spatial_shape[::-1])
 
     @property
@@ -110,20 +90,20 @@ class BaseField(zdx.Base):
 
     @property
     def pixel_scale(self) -> Array:
-        """Return x-axis sampling in canonical SI units."""
+        """Return per-axis sampling in canonical SI units."""
         if self.d is None:
             raise ValueError("spec.d is not defined.")
-        return self.d[..., 0] * self.scale
+        return self.d * self.scale
 
     @property
     def center(self) -> Array:
-        """Return the x-axis grid center in canonical SI units."""
-        return 0.0 if self.c is None else self.c[..., 0] * self.scale
+        """Return the per-axis grid centre in canonical SI units."""
+        return np.zeros(len(self.n)) if self.c is None else self.c * self.scale
 
     @property
     def diameter(self) -> Array:
-        """Return the x-axis field width for square-grid compatibility."""
-        return self.fov[..., 0]
+        """Return the physical field width along every axis."""
+        return self.fov
 
     def normalise(self, mode: str = "power", value: float = 1.0) -> BaseField:
         """Return a field normalised by total power or peak value."""
@@ -133,12 +113,23 @@ class BaseField(zdx.Base):
             scale = value / self.field.max()
         else:
             raise ValueError("mode must be 'power' or 'peak'")
-        return self.set_field(self.field * scale)
+        return self.set(field=self.field * scale)
 
-    def convolve(self, other: Array, method: str = "auto") -> BaseField:
+    def convolve(
+        self, other: Array, mode: str = "same", method: str = "auto"
+    ) -> BaseField:
         """Convolve the sampled field with an input array."""
-        field = convolve(self.field, other, mode="same", method=method)
-        return self.set_field(field)
+        other = np.asarray(other)
+        batch = np.broadcast_shapes(self.field.shape[:-2], other.shape[:-2])
+        field = np.broadcast_to(self.field, batch + self.field.shape[-2:])
+        kernel = np.broadcast_to(other, batch + other.shape[-2:])
+        apply = lambda x, y: convolve(x, y, mode=mode, method=method)
+        field = vmap(apply)(
+            field.reshape((-1,) + field.shape[-2:]),
+            kernel.reshape((-1,) + kernel.shape[-2:]),
+        )
+        field = field.reshape(batch + field.shape[-2:])
+        return self.set(field=field, spec=self.spec.resize(field.shape[-2:][::-1]))
 
     def _binary_op(self, other, op: str) -> BaseField:
         """Apply arithmetic to another compatible sampled field or array."""
@@ -150,7 +141,7 @@ class BaseField(zdx.Base):
                 "field, or None."
             )
         self, other = self._prepare_operand(other)
-        return self.set_field(_ops[op](self.field, other))
+        return self.set(field=_ops[op](self.field, other))
 
     def _prepare_operand(self, other) -> tuple[BaseField, Array]:
         """Return the field and array used for arithmetic."""
@@ -162,21 +153,20 @@ class BaseField(zdx.Base):
         """Resize spatial axes by centered zero-padding or cropping."""
         fill = 0j if np.iscomplexobj(self.field) else 0.0
         field = dlu.resize(self.field, npixels, fill)
-        n = dlu.as_size(npixels, 2, "npixels")
-        return self.set_field(field).set(spec=self.spec.set(n=n))
+        return self.set(field=field, spec=self.spec.resize(npixels))
 
-    def downsample(self, n: int, mean: bool | None = None) -> BaseField:
+    def downsample(
+        self, n: int | tuple[int, int], mean: bool | None = None
+    ) -> BaseField:
         """Downsample spatial axes and update their sampling."""
         if mean is None:
             mean = bool(np.iscomplexobj(self.field))
         field = dlu.downsample(self.field, n, mean)
-        size = tuple(value // n for value in self.n)
-        spec = self.spec.set(n=size, d=self.d * n)
-        return self.set_field(field).set(spec=spec)
+        return self.set(field=field, spec=self.spec.downsample(n))
 
     def flip(self, axis: tuple[int, ...] | int) -> BaseField:
         """Flip the sampled array about one or more array axes."""
-        return self.set_field(np.flip(self.field, axis))
+        return self.set(field=np.flip(self.field, axis))
 
     def __add__(self, other) -> BaseField:
         return self._binary_op(other, "add")
@@ -210,26 +200,25 @@ class ContinuousField(BaseField):
 
     def scale_to(
         self,
-        npixels: int,
+        npixels: int | tuple[int, int],
         pixel_scale: float | Array,
         method: str = "linear",
         complex: bool = True,
     ) -> ContinuousField:
-        """Interpolate to a square size and physical pixel scale.
+        """Interpolate to a size and physical per-axis pixel scale.
 
         ``complex`` selects Cartesian or polar decomposition for complex fields and
         has no effect on real fields such as PSFs.
         """
-        pixel_scale = np.asarray(pixel_scale, float)
-        ratio = pixel_scale / self.pixel_scale
+        n = dlu.as_size(npixels, 2, "npixels")
+        spacing = dlu.as_axis(pixel_scale, 2, "pixel_scale") / self.spec.scale
+        ratio = spacing / self.d
         scale = np.vectorize(
             lambda field, value: dlu.scale(field, npixels, value, method, complex),
-            signature="(n,n),()->(m,m)",
+            signature="(n,m),(c)->(p,q)",
         )
         field = scale(self.field, ratio)
-        spacing = dlu.as_axis(pixel_scale / self.spec.scale, 2, "pixel_scale")
-        n = dlu.as_size(npixels, 2, "npixels")
-        return self.set_field(field).set(spec=self.spec.set(n=n, d=spacing))
+        return self.set(field=field, spec=self.spec.resample(n, spacing))
 
     def interpolate(
         self,
@@ -257,7 +246,7 @@ class ContinuousField(BaseField):
             lambda field, x, y: dlu.interp(field, x, y, method, fill, complex),
             signature="(n,m),(c,n,m),(c,p,q)->(p,q)",
         )
-        return self.set_field(interpolate(self.field, knots, samples))
+        return self.set(field=interpolate(self.field, knots, samples))
 
     def rotate(
         self, angle: float | Array, method: str = "linear", complex: bool = True
@@ -268,9 +257,9 @@ class ContinuousField(BaseField):
         """
         rotate = np.vectorize(
             lambda field, value: dlu.rotate(field, value, method, complex),
-            signature="(n,n),()->(n,n)",
+            signature="(n,m),()->(n,m)",
         )
-        return self.set_field(rotate(self.field, angle))
+        return self.set(field=rotate(self.field, angle))
 
 
 class DiscreteField(BaseField):
@@ -308,7 +297,7 @@ class DiscreteField(BaseField):
         variance = expectation
         if self.variance is not None:
             variance = variance + self.variance
-        return self.set_field(data).set(variance=variance)
+        return self.set(field=data, variance=variance)
 
     def add_read_noise(self, key: Array, sigma: float | Array) -> DiscreteField:
         """Add zero-mean Gaussian read noise and update its variance."""
@@ -318,7 +307,7 @@ class DiscreteField(BaseField):
         if self.variance is not None:
             variance = variance + self.variance
         read_noise = np.sqrt(self.read_noise**2 + sigma**2)
-        return self.set_field(self.field + noise).set(
+        return self.set(field=self.field + noise).set(
             variance=np.broadcast_to(variance, self.field.shape), read_noise=read_noise
         )
 
@@ -403,8 +392,9 @@ class Wavefront(ContinuousField):
     wavelength: Array
 
     @property
-    def _field_name(self) -> str:
-        return "phasor"
+    def field(self) -> Array:
+        """Return the complex phasor."""
+        return self.phasor
 
     def __init__(
         self: Wavefront,
@@ -441,7 +431,7 @@ class Wavefront(ContinuousField):
             if phasor.ndim == 2 and self.wavelength.ndim > 0:
                 phasor = phasor * np.ones(self.wavelength.shape + (1, 1))
             self.phasor = phasor
-        BaseField.__init__(self, spec)
+        self.spec = spec
 
     @classmethod
     def from_phasor(
@@ -1022,14 +1012,15 @@ class PSF(ContinuousField):
     spec: GridSpec
 
     @property
-    def _field_name(self) -> str:
-        return "data"
+    def field(self) -> Array:
+        """Return the sampled intensity."""
+        return self.data
 
     def __init__(self: PSF, data: Array, spec: GridSpec):
         self.data = np.asarray(data, dtype=float)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        BaseField.__init__(self, _field_spec(spec, self.data.shape))
+        self.spec = _field_spec(spec, self.data.shape)
 
     @classmethod
     def from_wavefront(cls, wavefront) -> PSF:
@@ -1064,8 +1055,9 @@ class Image(DiscreteField):
     read_noise: Array
 
     @property
-    def _field_name(self) -> str:
-        return "data"
+    def field(self) -> Array:
+        """Return the detector data."""
+        return self.data
 
     def __init__(
         self,
@@ -1083,4 +1075,4 @@ class Image(DiscreteField):
         self.data = data
         self.variance = variance
         self.read_noise = np.asarray(read_noise, dtype=float)
-        BaseField.__init__(self, spec)
+        self.spec = spec

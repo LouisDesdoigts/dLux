@@ -177,6 +177,23 @@ class GridSpec(BaseGridSpec):
             c=dlu.as_axis(self.c, ndim, "c"),
         )
 
+    def resize(self, n) -> GridSpec:
+        """Change the grid size while retaining its sampling."""
+        return self.set(n=dlu.as_size(n, self.ndim, "n"))
+
+    def downsample(self, factors) -> GridSpec:
+        """Update sampling metadata after downsampling by integer factors."""
+        if self.n is None or self.d is None:
+            raise ValueError("n and d are required to downsample a GridSpec.")
+        factors = dlu.as_size(factors, self.ndim, "factors")
+        n = tuple(n // factor for n, factor in zip(self.n, factors))
+        return self.set(n=n, d=self.d * np.asarray(factors))
+
+    def resample(self, n, d) -> GridSpec:
+        """Set a new grid size and per-axis sampling."""
+        n = dlu.as_size(n, self.ndim, "n")
+        return self.set(n=n, d=dlu.as_axis(d, self.ndim, "d"))
+
     @property
     def shape(self) -> tuple[int, ...]:
         """Return the array shape associated with this coordinate grid."""
@@ -191,15 +208,24 @@ class GridSpec(BaseGridSpec):
 
     @property
     def axes(self) -> tuple[Array, ...]:
+        """Alias for the one-dimensional coordinate axes."""
+        return self.xs
+
+    @property
+    def xs(self) -> tuple[Array, ...]:
         """Return one pixel-centre coordinate vector per physical axis."""
         if self.n is None:
-            raise ValueError("n must be specified to calculate axes.")
-        return self.axes_for(self.n)
+            raise ValueError("n must be specified to calculate xs.")
+        return self.xs_for(self.n)
 
     def axes_for(self, n: tuple[int, ...]) -> tuple[Array, ...]:
+        """Alias for coordinate axes at concrete physical-axis pixel counts."""
+        return self.xs_for(n)
+
+    def xs_for(self, n: tuple[int, ...]) -> tuple[Array, ...]:
         """Return coordinate axes for concrete physical-axis pixel counts."""
         if self.d is None:
-            raise ValueError("d must be specified to calculate axes.")
+            raise ValueError("d must be specified to calculate xs.")
         if len(n) != self.ndim:
             raise ValueError("n dimensionality must match the coordinate spec.")
         batch = self.d.shape[:-1]
@@ -249,22 +275,6 @@ class GridSpec(BaseGridSpec):
         return (coordinates + center) * self.scale
 
     @property
-    def xs(self):
-        """Return all one-dimensional coordinate axes in one array."""
-        if self.n is None:
-            raise ValueError("n must be specified to calculate xs.")
-        return self.xs_for(self.n)
-
-    def xs_for(self, n: tuple[int, ...]):
-        """Return stacked axes for concrete physical-axis pixel counts."""
-        try:
-            return np.stack(self.axes_for(n), axis=-2)
-        except ValueError as error:
-            raise ValueError(
-                "xs requires equal axis lengths; use axes for a rectangular grid."
-            ) from error
-
-    @property
     def fov(self):
         """Return the field of view along every physical axis."""
         if self.n is None or self.d is None:
@@ -273,10 +283,12 @@ class GridSpec(BaseGridSpec):
 
     @property
     def extent(self):
-        """Return lower and upper grid-edge coordinates for every axis."""
+        """Return plot-ready lower and upper grid edges in physical-axis order."""
         half_width = self.fov / 2
         center = np.zeros(self.ndim) if self.c is None else self.c * self.scale
-        return center - half_width, center + half_width
+        return np.stack((center - half_width, center + half_width), axis=-1).reshape(
+            center.shape[:-1] + (2 * self.ndim,)
+        )
 
 
 class CoordTransform(zdx.Base):
@@ -404,8 +416,8 @@ class AffineMap(CoordTransform):
 
     def __call__(self, coords: Array) -> Array:
         coords = self.get_coordinates(coords)
-        shift = self.offset.reshape((2,) + (1,) * (coords.ndim - 1))
-        return np.einsum("ij,j...->i...", self.matrix, coords) + shift
+        shift = self.offset[..., :, None, None]
+        return np.einsum("...ij,...jxy->...ixy", self.matrix, coords) + shift
 
 
 class Affine(CoordTransform):

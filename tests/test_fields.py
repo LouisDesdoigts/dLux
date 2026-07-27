@@ -132,10 +132,12 @@ class TestWavefront:
             lambda wavefront: wavefront.interpolate("invalid"),
             lambda wavefront: wavefront * "invalid",
             lambda wavefront: wavefront / wavefront,
-            lambda wavefront: wavefront
-            + dl.Wavefront(1e-6, wavefront.spec.set(n=(6, 6))),
-            lambda wavefront: wavefront
-            + dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.spec),
+            lambda wavefront: (
+                wavefront + dl.Wavefront(1e-6, wavefront.spec.set(n=(6, 6)))
+            ),
+            lambda wavefront: (
+                wavefront + dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.spec)
+            ),
             lambda wavefront: wavefront + np.ones((2, 3, 8, 8)),
         ],
     )
@@ -188,9 +190,9 @@ class TestPSF:
         assert len(psf.axes) == 2
         assert psf.coordinates.shape == (2, 8, 8)
         assert np.allclose(psf.xs[0].mean(), 0.3)
-        assert np.allclose(psf.pixel_scale, 0.1)
-        assert np.allclose(psf.center, 0.3)
-        assert np.allclose(psf.diameter, 0.8)
+        assert np.allclose(psf.pixel_scale, np.asarray((0.1, 0.2)))
+        assert np.allclose(psf.center, np.asarray((0.3, -0.4)))
+        assert np.allclose(psf.diameter, np.asarray((0.8, 1.6)))
 
     @pytest.mark.parametrize(
         "operation",
@@ -245,6 +247,38 @@ class TestPSF:
 
         assert psf.spec.n == (4, 4)
         assert np.allclose(psf.spec.d, 0.2)
+
+    def test_rectangular_sampling_operations(self):
+        spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
+        psf = dl.PSF(np.arange(48.0).reshape(6, 8) + 1, spec)
+
+        downsampled = assert_jittable(lambda value: value.downsample((2, 3)), psf)
+        scaled = assert_jittable(
+            lambda value: value.scale_to((10, 12), (0.08, 0.15)), psf
+        )
+        rotated = assert_jittable(lambda value: value.rotate(0.1), psf)
+
+        assert downsampled.data.shape == (2, 4)
+        assert downsampled.spec.n == (4, 2)
+        assert np.allclose(downsampled.spec.d, np.asarray((0.2, 0.6)))
+        assert scaled.data.shape == (12, 10)
+        assert scaled.spec.n == (10, 12)
+        assert np.allclose(scaled.spec.d, np.asarray((0.08, 0.15)))
+        assert rotated.data.shape == psf.data.shape
+
+    def test_batched_convolution(self):
+        spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
+        data = np.arange(96.0).reshape(2, 6, 8)
+        psf = dl.PSF(data, spec)
+        kernel = np.ones((3, 3)) / 9
+
+        output = assert_jittable(lambda value: value.convolve(kernel), psf)
+        expected = np.stack(
+            tuple(dl.PSF(image, spec).convolve(kernel).data for image in data)
+        )
+
+        assert output.data.shape == data.shape
+        assert np.allclose(output.data, expected)
 
     @pytest.mark.parametrize(
         "constructor",
