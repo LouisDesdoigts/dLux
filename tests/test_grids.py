@@ -75,6 +75,24 @@ class TestSpecifications:
         assert resampled.n == (12, 10)
         assert np.allclose(resampled.d, np.asarray((0.05, 0.08)))
 
+    def test_batched_metadata_sampling_transforms(self):
+        d = np.asarray(((0.1, 0.2), (0.3, 0.4)))
+        c = np.asarray(((0.0, 0.1), (-0.1, 0.2)))
+        spec = dl.GridSpec(n=(8, 6), d=d, c=c, unit="m")
+
+        resized = spec.resize((10, 8))
+        downsampled = spec.downsample((2, 3))
+        resampled = spec.resample((12, 10), d / 2)
+
+        assert resized.n == (10, 8)
+        assert resized.d.shape == resized.c.shape == (2, 2)
+        assert downsampled.n == (4, 2)
+        assert np.allclose(downsampled.d, d * np.asarray((2, 3)))
+        assert np.allclose(downsampled.c, c)
+        assert resampled.n == (12, 10)
+        assert np.allclose(resampled.d, d / 2)
+        assert np.allclose(resampled.c, c)
+
     def test_units_and_differentiation(self):
         spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
 

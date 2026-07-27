@@ -106,6 +106,26 @@ def test_parametric_optic(wavefront):
     )
 
 
+@pytest.mark.parametrize(
+    "layer",
+    [
+        dl.TransmissiveLayer(np.linspace(0.5, 1.0, 64).reshape(8, 8)),
+        dl.AberratedLayer(opd=np.ones((8, 8)) * 1e-7, phase=0.2),
+        dl.Optic(transmission=0.5, opd=1e-7, phase=0.2),
+        dl.Tilt([0.1, -0.2], unit="arcsec"),
+        dl.RefractiveOptic(np.ones((8, 8)) * 1e-3, 1.5),
+        dl.Wedge([1e-6, -2e-6], 1.5),
+    ],
+)
+def test_optical_layers_preserve_leading_axes(layer, make_spec):
+    spec = make_spec(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
+    wavefront = dl.Wavefront(1e-6, spec, np.ones((2, 3, 8, 8), complex))
+    output = assert_jittable(layer, wavefront)
+
+    assert output.phasor.shape == wavefront.phasor.shape
+    assert output.spec == wavefront.spec
+
+
 def test_tilt_validation():
     with pytest.raises(ValueError, match="shape"):
         dl.Tilt([1])
