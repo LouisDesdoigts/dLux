@@ -117,6 +117,21 @@ def test_shifted_fft_matches_mft(center):
     _assert_field_close(actual, expected)
 
 
+def test_integer_fft_shift_matches_roll_interior():
+    spec = dlu.nd_axes((8, 6), (0.1, 0.13), offsets=(-0.07, 0.04))
+    phasor = _field(spec)
+    native, spec_out = dlu.FFT(phasor, 0.5, spec, pad=(3, 5), output_center=np.zeros(2))
+    dx, dy = (axis[1] - axis[0] for axis in spec_out)
+    shifted = dlu.FFT(
+        phasor, 0.5, spec, pad=(3, 5), output_center=np.asarray((2 * dx, -dy))
+    )[0]
+    rolled = np.roll(native, (1, -2), axis=(-2, -1))
+
+    shifted = np.abs(shifted[1:, :-2]) ** 2
+    rolled = np.abs(rolled[1:, :-2]) ** 2
+    _assert_field_close(shifted, rolled)
+
+
 def test_shifted_abcd_fft_matches_mft():
     spec_in = dlu.nd_axes((8, 6), (0.1, 0.13), offsets=(-0.07, 0.04))
     phasor = _field(spec_in)
@@ -143,6 +158,33 @@ def test_fraunhofer_matches_abcd():
     _assert_field_close(direct, abcd)
     _assert_field_close(direct_fft, abcd_fft)
     assert all(np.allclose(a, b) for a, b in zip(fft_spec, abcd_spec))
+
+
+def test_fresnel_fft_mft_abcd_agree():
+    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
+    phasor = _field(spec)
+    padded, padded_spec = dlu.FFT_pad(phasor, spec, pad=(2, 3))
+    kwargs = {"focal_length": 2.0, "defocus": 0.1}
+
+    fft, spec_out = dlu.FFT(phasor, 0.5, spec, pad=(2, 3), **kwargs)
+    mft = dlu.MFT(padded, 0.5, padded_spec, spec_out, **kwargs)
+    ABCD = dlu.compose_abcd((dlu.abcd_fraunhofer(2.0), dlu.abcd_free_space(0.1)))
+    abcd = dlu.ABCD_MFT(padded, 0.5, padded_spec, spec_out, ABCD)
+
+    _assert_field_close(fft, mft)
+    _assert_field_close(mft, abcd)
+
+
+@pytest.mark.parametrize("padding", [1, (2, 3)])
+def test_asm_roundtrip(padding):
+    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
+    phasor = _field(spec)
+
+    forward = dlu.ASM(phasor, 0.5, spec, 0.02, pad=padding, crop=False)
+    padded, padded_spec = dlu.FFT_pad(phasor, spec, pad=padding)
+    recovered = dlu.ASM(forward, 0.5, padded_spec, -0.02, crop=False)
+
+    _assert_field_close(recovered, padded)
 
 
 @pytest.mark.parametrize("propagate", [dlu.FFT, dlu.MFT])
