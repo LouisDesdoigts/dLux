@@ -26,12 +26,20 @@ __all__ = [
 ]
 
 
-def _propagate_mft(wf, spec, ABCD=None, **kwargs):
-    """Propagate every field to an explicit output grid."""
+def _propagation_inputs(wf):
+    """Broadcast wavelength and coordinate axes over non-spatial field dimensions."""
     wavelength = np.asarray(wf.wavelength)
     extra = wf.phasor.ndim - wavelength.ndim - 2
     wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
     x, y = wf.axes
+    if wf.is_polarised:
+        x, y = x[..., None, None, :], y[..., None, None, :]
+    return wavelength, x, y
+
+
+def _propagate_mft(wf, spec, ABCD=None, **kwargs):
+    """Propagate every field to an explicit output grid."""
+    wavelength, x, y = _propagation_inputs(wf)
     axes_out = spec.axes
 
     def propagate(field, lam, x, y):
@@ -58,7 +66,10 @@ def _propagate_fft(wf, spec, unit, ABCD=None, **kwargs):
         return field, *axes
 
     propagate = np.vectorize(propagate, signature="(n,m),(),(m),(n)->(p,q),(q),(p)")
-    field, x, y = propagate(wf.phasor, wf.wavelength, *wf.axes)
+    wavelength, x, y = _propagation_inputs(wf)
+    field, x, y = propagate(wf.phasor, wavelength, x, y)
+    if wf.is_polarised:
+        x, y = x[..., 0, 0, :], y[..., 0, 0, :]
 
     if any(f > 1 for f in spec.crop_factor):
         nx, ny = spec.crop_size(field.shape)
@@ -78,10 +89,7 @@ def _propagate_fft(wf, spec, unit, ABCD=None, **kwargs):
 
 def _propagate_free_space(wf, spec, distance, crop):
     """Propagate every field over a free-space distance."""
-    wavelength = np.asarray(wf.wavelength)
-    extra = wf.phasor.ndim - wavelength.ndim - 2
-    wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
-    x, y = wf.axes
+    wavelength, x, y = _propagation_inputs(wf)
     padding = spec.padding
     propagate = np.vectorize(
         lambda field, lam, x, y: dlu.ASM(
