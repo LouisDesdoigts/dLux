@@ -13,7 +13,7 @@ classDiagram
     class dLux_parametric_bases_SplineBasis["SplineBasis"]
     class dLux_parametric_parametrics_Parametric["Parametric"]
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_ParametricBasis
-    click dLux_parametric_bases_ParametricBasis href "#dLux.parametric.bases.ParametricBasis" "Attributes: coefficients, basis_shape · Methods: coeffs(), c(), alpha(), coefficient_shape(), evaluate_basis(), solve_basis()"
+    click dLux_parametric_bases_ParametricBasis href "#dLux.parametric.bases.ParametricBasis" "Attributes: coefficients, basis_shape · Properties: coeffs, c, alpha, coefficient_shape · Methods: evaluate_basis(), solve_basis()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ExplicitBasis
     click dLux_parametric_bases_ExplicitBasis href "#dLux.parametric.bases.ExplicitBasis" "Attributes: coefficients, basis_shape, basis · Methods: evaluate(), solve_basis()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ImplicitBasis

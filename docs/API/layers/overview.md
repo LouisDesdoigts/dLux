@@ -56,7 +56,7 @@ classDiagram
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_ApplyPixelResponse
     click dLux_layers_detector_layers_ApplyPixelResponse href "../detector_layers/#dLux.layers.detector_layers.ApplyPixelResponse" "Attributes: pixel_response"
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_ApplyJitter
-    click dLux_layers_detector_layers_ApplyJitter href "../detector_layers/#dLux.layers.detector_layers.ApplyJitter" "Attributes: sigma, kernel_size, oversample · Methods: kernel()"
+    click dLux_layers_detector_layers_ApplyJitter href "../detector_layers/#dLux.layers.detector_layers.ApplyJitter" "Attributes: sigma, kernel_size, oversample · Properties: kernel"
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_ApplySaturation
     click dLux_layers_detector_layers_ApplySaturation href "../detector_layers/#dLux.layers.detector_layers.ApplySaturation" "Attributes: threshold"
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_AddConstant
@@ -91,23 +91,23 @@ classDiagram
     click dLux_layers_polarised_layers_PolarisingOptic href "../polarised_layers/#dLux.layers.polarised_layers.PolarisingOptic" "Attributes: jones"
     dLux_layers_polarised_layers_PolarisingOptic <|-- dLux_layers_polarised_layers_UniformPolarisingOptic
     click dLux_layers_polarised_layers_UniformPolarisingOptic href "../polarised_layers/#dLux.layers.polarised_layers.UniformPolarisingOptic" "Attributes: jones, orientation"
-    click dLux_layers_polarised_layers_LinearPolariser href "../polarised_layers/#dLux.layers.polarised_layers.LinearPolariser" "Attributes: angle · Methods: jones()"
-    click dLux_layers_polarised_layers_Retarder href "../polarised_layers/#dLux.layers.polarised_layers.Retarder" "Attributes: retardance, angle · Methods: jones()"
+    click dLux_layers_polarised_layers_LinearPolariser href "../polarised_layers/#dLux.layers.polarised_layers.LinearPolariser" "Attributes: angle · Properties: jones"
+    click dLux_layers_polarised_layers_Retarder href "../polarised_layers/#dLux.layers.polarised_layers.Retarder" "Attributes: retardance, angle · Properties: jones"
     click dLux_layers_propagation_layers_ABCDElement href "../propagation_layers/#dLux.layers.propagation_layers.ABCDElement" "No direct public attributes or methods"
     dLux_layers_propagation_layers_ABCDElement <|-- dLux_layers_propagation_layers_ABCDFreeSpace
-    click dLux_layers_propagation_layers_ABCDFreeSpace href "../propagation_layers/#dLux.layers.propagation_layers.ABCDFreeSpace" "Attributes: distance · Methods: abcd()"
+    click dLux_layers_propagation_layers_ABCDFreeSpace href "../propagation_layers/#dLux.layers.propagation_layers.ABCDFreeSpace" "Attributes: distance · Properties: abcd"
     dLux_layers_propagation_layers_ABCDElement <|-- dLux_layers_propagation_layers_ABCDLens
-    click dLux_layers_propagation_layers_ABCDLens href "../propagation_layers/#dLux.layers.propagation_layers.ABCDLens" "Attributes: focal_length · Methods: abcd()"
+    click dLux_layers_propagation_layers_ABCDLens href "../propagation_layers/#dLux.layers.propagation_layers.ABCDLens" "Attributes: focal_length · Properties: abcd"
     dLux_layers_propagation_layers_ABCDElement <|-- dLux_layers_propagation_layers_ABCDMirror
-    click dLux_layers_propagation_layers_ABCDMirror href "../propagation_layers/#dLux.layers.propagation_layers.ABCDMirror" "Attributes: radius · Methods: abcd()"
+    click dLux_layers_propagation_layers_ABCDMirror href "../propagation_layers/#dLux.layers.propagation_layers.ABCDMirror" "Attributes: radius · Properties: abcd"
     dLux_layers_propagation_layers_ABCDElement <|-- dLux_layers_propagation_layers_ABCDFraunhofer
-    click dLux_layers_propagation_layers_ABCDFraunhofer href "../propagation_layers/#dLux.layers.propagation_layers.ABCDFraunhofer" "Attributes: focal_length · Methods: abcd()"
+    click dLux_layers_propagation_layers_ABCDFraunhofer href "../propagation_layers/#dLux.layers.propagation_layers.ABCDFraunhofer" "Attributes: focal_length · Properties: abcd"
     dLux_layers_optical_layers_OpticalLayer <|-- dLux_layers_propagation_layers_Propagator
     click dLux_layers_propagation_layers_Propagator href "../propagation_layers/#dLux.layers.propagation_layers.Propagator" "Attributes: spec · Methods: validate()"
     dLux_layers_propagation_layers_Propagator <|-- dLux_layers_propagation_layers_FocalPropagator
     click dLux_layers_propagation_layers_FocalPropagator href "../propagation_layers/#dLux.layers.propagation_layers.FocalPropagator" "Attributes: spec, focal_length · Methods: validate()"
     dLux_layers_propagation_layers_Propagator <|-- dLux_layers_propagation_layers_ABCDPropagator
-    click dLux_layers_propagation_layers_ABCDPropagator href "../propagation_layers/#dLux.layers.propagation_layers.ABCDPropagator" "Attributes: spec, ABCDs, method · Methods: abcd(), validate()"
+    click dLux_layers_propagation_layers_ABCDPropagator href "../propagation_layers/#dLux.layers.propagation_layers.ABCDPropagator" "Attributes: spec, ABCDs, method · Properties: abcd · Methods: validate()"
     dLux_layers_propagation_layers_Propagator <|-- dLux_layers_propagation_layers_FreeSpace
     click dLux_layers_propagation_layers_FreeSpace href "../propagation_layers/#dLux.layers.propagation_layers.FreeSpace" "Attributes: spec, distance, crop"
     dLux_layers_propagation_layers_FocalPropagator <|-- dLux_layers_propagation_layers_Fraunhofer
@@ -121,7 +121,7 @@ classDiagram
     dLux_layers_optical_layers_OpticalLayer <|-- dLux_layers_sparse_layers_Interfere
     click dLux_layers_sparse_layers_Interfere href "../sparse_layers/#dLux.layers.sparse_layers.Interfere" "No direct public attributes or methods"
     dLux_layers_optical_layers_Optic <|-- dLux_layers_sparse_layers_SparseOptic
-    click dLux_layers_sparse_layers_SparseOptic href "../sparse_layers/#dLux.layers.sparse_layers.SparseOptic" "Attributes: transmission, opd, phase, normalise, centers · Methods: n_apertures(), phasor(), wavefronts()"
+    click dLux_layers_sparse_layers_SparseOptic href "../sparse_layers/#dLux.layers.sparse_layers.SparseOptic" "Attributes: transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise()"
     dLux_layers_dynamic_layers_BaseDynamicLayer <|-- dLux_layers_sparse_layers_SparseDynamicOptic
     dLux_layers_sparse_layers_SparseOptic <|-- dLux_layers_sparse_layers_SparseDynamicOptic
     click dLux_layers_sparse_layers_SparseDynamicOptic href "../sparse_layers/#dLux.layers.sparse_layers.SparseDynamicOptic" "Attributes: coordinates, transformation, transmission, opd, phase, normalise, centers"

@@ -18,9 +18,9 @@ classDiagram
     dLux_layers_polarised_layers_PolarisingOptic <|-- dLux_layers_polarised_layers_UniformPolarisingOptic
     click dLux_layers_polarised_layers_UniformPolarisingOptic href "#dLux.layers.polarised_layers.UniformPolarisingOptic" "Attributes: jones, orientation"
     dLux_layers_polarised_layers_BasePolarisingOptic <|-- dLux_layers_polarised_layers_LinearPolariser
-    click dLux_layers_polarised_layers_LinearPolariser href "#dLux.layers.polarised_layers.LinearPolariser" "Attributes: angle · Methods: jones()"
+    click dLux_layers_polarised_layers_LinearPolariser href "#dLux.layers.polarised_layers.LinearPolariser" "Attributes: angle · Properties: jones"
     dLux_layers_polarised_layers_BasePolarisingOptic <|-- dLux_layers_polarised_layers_Retarder
-    click dLux_layers_polarised_layers_Retarder href "#dLux.layers.polarised_layers.Retarder" "Attributes: retardance, angle · Methods: jones()"
+    click dLux_layers_polarised_layers_Retarder href "#dLux.layers.polarised_layers.Retarder" "Attributes: retardance, angle · Properties: jones"
 ```
 
 ???+ info "PolarisationLayer"

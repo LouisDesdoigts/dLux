@@ -8,10 +8,10 @@ classDiagram
     class dLux_layers_dynamic_layers_DynamicTransmissiveLayer["DynamicTransmissiveLayer"]
     class dLux_layers_dynamic_layers_DynamicAberratedLayer["DynamicAberratedLayer"]
     class dLux_layers_dynamic_layers_DynamicOptic["DynamicOptic"]
-    class dLux_layers_optical_layers_Optic["Optic"]
     class dLux_layers_optical_layers_AberratedLayer["AberratedLayer"]
-    class dLux_layers_optical_layers_BaseOpticalLayer["BaseOpticalLayer"]
+    class dLux_layers_optical_layers_Optic["Optic"]
     class dLux_layers_optical_layers_TransmissiveLayer["TransmissiveLayer"]
+    class dLux_layers_optical_layers_BaseOpticalLayer["BaseOpticalLayer"]
     dLux_layers_optical_layers_BaseOpticalLayer <|-- dLux_layers_dynamic_layers_BaseDynamicLayer
     click dLux_layers_dynamic_layers_BaseDynamicLayer href "#dLux.layers.dynamic_layers.BaseDynamicLayer" "Attributes: coordinates, transformation · Methods: context()"
     dLux_layers_dynamic_layers_BaseDynamicLayer <|-- dLux_layers_dynamic_layers_DynamicTransmissiveLayer

@@ -7,8 +7,8 @@ classDiagram
     class dLux_systems_LayeredSystem["LayeredSystem"]
     class dLux_systems_OpticalSystem["OpticalSystem"]
     class dLux_systems_DetectorSystem["DetectorSystem"]
-    class dLux_layers_optical_layers_BaseOpticalLayer["BaseOpticalLayer"]
     class zodiax_base_Base["Base"]
+    class dLux_layers_optical_layers_BaseOpticalLayer["BaseOpticalLayer"]
     zodiax_base_Base <|-- dLux_systems_LayeredSystem
     click dLux_systems_LayeredSystem href "#dLux.systems.LayeredSystem" "Attributes: layers · Methods: apply(), debug(), insert_layer(), remove_layer()"
     dLux_systems_LayeredSystem <|-- dLux_systems_OpticalSystem

@@ -10,7 +10,7 @@ classDiagram
     class dLux_sources_BinarySource["BinarySource"]
     class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
     dLux_parametric_parametrics_ParametricHolder <|-- dLux_sources_BaseSource
-    click dLux_sources_BaseSource href "#dLux.sources.BaseSource" "Attributes: flux, distribution, units · Methods: source_params(), distribution_params(), model()"
+    click dLux_sources_BaseSource href "#dLux.sources.BaseSource" "Attributes: flux, distribution, units · Methods: source_params(), flux_params(), distribution_params(), model()"
     dLux_parametric_parametrics_ParametricHolder <|-- dLux_sources_Spectrum
     click dLux_sources_Spectrum href "#dLux.sources.Spectrum" "Attributes: wavelengths, weights, units · Methods: spectrum_params(), model()"
     dLux_sources_BaseSource <|-- dLux_sources_Source
