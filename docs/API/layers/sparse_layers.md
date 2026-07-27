@@ -7,8 +7,8 @@ classDiagram
     class dLux_layers_sparse_layers_Interfere["Interfere"]
     class dLux_layers_sparse_layers_SparseOptic["SparseOptic"]
     class dLux_layers_sparse_layers_SparseDynamicOptic["SparseDynamicOptic"]
-    class dLux_layers_optical_layers_Optic["Optic"]
     class dLux_layers_dynamic_layers_BaseDynamicLayer["BaseDynamicLayer"]
+    class dLux_layers_optical_layers_Optic["Optic"]
     class dLux_layers_optical_layers_OpticalLayer["OpticalLayer"]
     dLux_layers_optical_layers_OpticalLayer <|-- dLux_layers_sparse_layers_Interfere
     click dLux_layers_sparse_layers_Interfere href "#dLux.layers.sparse_layers.Interfere" "No direct public attributes or methods"

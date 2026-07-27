@@ -9,8 +9,8 @@ classDiagram
     class dLux_layers_polarised_layers_UniformPolarisingOptic["UniformPolarisingOptic"]
     class dLux_layers_polarised_layers_LinearPolariser["LinearPolariser"]
     class dLux_layers_polarised_layers_Retarder["Retarder"]
-    class dLux_layers_polarised_layers_BasePolarisingOptic["BasePolarisingOptic"]
     class dLux_layers_optical_layers_OpticalLayer["OpticalLayer"]
+    class dLux_layers_polarised_layers_BasePolarisingOptic["BasePolarisingOptic"]
     dLux_layers_optical_layers_OpticalLayer <|-- dLux_layers_polarised_layers_PolarisationLayer
     click dLux_layers_polarised_layers_PolarisationLayer href "#dLux.layers.polarised_layers.PolarisationLayer" "Attributes: polarisation"
     dLux_layers_polarised_layers_BasePolarisingOptic <|-- dLux_layers_polarised_layers_PolarisingOptic

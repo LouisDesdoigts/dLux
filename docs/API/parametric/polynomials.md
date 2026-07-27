@@ -10,11 +10,11 @@ classDiagram
     class dLux_parametric_polynomials_Polynomial["Polynomial"]
     class dLux_parametric_polynomials_ExplicitPolynomial["ExplicitPolynomial"]
     class dLux_parametric_polynomials_CoordinatePolynomial["CoordinatePolynomial"]
-    class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
     class dLux_parametric_bases_CoordBasis["CoordBasis"]
-    class zodiax_base_Base["Base"]
-    class dLux_parametric_polynomials__ZernikeBasis["_ZernikeBasis"]
     class dLux_parametric_bases_ExplicitBasis["ExplicitBasis"]
+    class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
+    class dLux_parametric_polynomials__ZernikeBasis["_ZernikeBasis"]
+    class zodiax_base_Base["Base"]
     zodiax_base_Base <|-- dLux_parametric_polynomials_DynamicZernike
     click dLux_parametric_polynomials_DynamicZernike href "#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name, _c, _k · Methods: calculate()"
     dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_ZernikeBasis

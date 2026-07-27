@@ -177,7 +177,7 @@ def mermaid_classes(
                 base.__name__,
                 re.sub(r"\W", "_", f"{base.__module__}_{base.__name__}"),
             )
-            for base in external
+            for base in sorted(external, key=lambda cls: (cls.__module__, cls.__name__))
         ]
         if include_external_bases
         else []
