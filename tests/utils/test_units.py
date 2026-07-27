@@ -44,6 +44,10 @@ def test_milliarcsecond_alias():
     assert np.isclose(dlu.unit_factor("mas"), np.pi / (180 * 3600 * 1000))
 
 
+def test_prefixed_angular_factor():
+    assert np.isclose(dlu.unit_factor_to_rad("mrad"), 1e-3)
+
+
 def test_convert_roundtrip():
     value = np.asarray((1.0, 2.0))
     converted = dlu.convert(value, "arcsec", "rad")

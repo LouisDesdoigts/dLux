@@ -121,6 +121,14 @@ def test_log_flux_units():
     assert np.allclose(source.params()["distribution"], 2)
 
 
+def test_distribution_flux_units():
+    source = dl.Source(
+        [1e-6], distribution=np.full((3, 3), 2.0), units={"distribution": "kphoton"}
+    )
+
+    assert np.allclose(source.params()["distribution"], 2000)
+
+
 @pytest.mark.parametrize(
     "operation",
     [

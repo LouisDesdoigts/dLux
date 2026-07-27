@@ -124,6 +124,14 @@ class TestWavefront:
             wavefront.psf_from_stokes(np.asarray((2.0, 0, 0, 0))), 2 * wavefront.psf
         )
 
+    def test_polarised_from_phasor(self, make_wavefront):
+        wavefront = make_wavefront()
+        polarised = dl.PolarisedWavefront.from_phasor(
+            wavefront.phasor, wavefront.wavelength, wavefront.spec
+        )
+
+        assert polarised.phasor.shape == (2, 2) + wavefront.phasor.shape
+
     @pytest.mark.parametrize(
         "operation",
         [
@@ -144,6 +152,20 @@ class TestWavefront:
     def test_validation(self, operation, make_wavefront):
         with pytest.raises((TypeError, ValueError)):
             operation(make_wavefront())
+
+    @pytest.mark.parametrize(
+        "operation",
+        [
+            lambda spec: dl.Wavefront(1e-6, "invalid"),
+            lambda spec: dl.Wavefront(1e-6, dl.GridSpec(d=0.1, unit="m")),
+            lambda spec: dl.Wavefront(1e-6, spec, np.ones(8)),
+            lambda spec: dl.Wavefront(1e-6, spec) + dl.PSF(np.ones((8, 8)), spec),
+            lambda spec: dl.Wavefront(np.ones(2), spec) + np.ones((3, 8, 8)),
+        ],
+    )
+    def test_construction_and_operand_validation(self, operation, make_spec):
+        with pytest.raises((TypeError, ValueError)):
+            operation(make_spec())
 
 
 class TestPolarisedWavefront:
@@ -225,6 +247,30 @@ class TestPSF:
     )
     def test_arithmetic_contract(self, operation, make_psf):
         assert_jittable(operation, make_psf())
+
+    def test_inplace_and_none_arithmetic(self, make_psf):
+        psf = make_psf()
+
+        assert psf + None is psf
+        assert np.allclose(psf.__iadd__(1).data, psf.data + 1)
+        assert np.allclose(psf.__isub__(1).data, psf.data - 1)
+        assert np.allclose(psf.__imul__(2).data, psf.data * 2)
+        assert np.allclose(psf.__itruediv__(2).data, psf.data / 2)
+
+    def test_forwarded_attribute_validation(self, make_psf):
+        with pytest.raises(AttributeError, match="not_an_attribute"):
+            _ = make_psf().not_an_attribute
+
+        psf = dl.PSF(np.ones((8, 8)), dl.GridSpec(n=8).broadcast(2))
+        with pytest.raises(ValueError, match="spec.d"):
+            _ = psf.pixel_scale
+
+    def test_coordinate_batch_validation(self):
+        spec = dl.GridSpec(n=8, d=0.1, c=np.zeros((2, 2)), unit="m").broadcast(2)
+        psf = dl.PSF(np.ones((8, 8)), spec)
+
+        with pytest.raises(ValueError, match="Coordinate batch"):
+            psf.interpolate(dl.Affine())
 
     @pytest.mark.parametrize(
         "operation",

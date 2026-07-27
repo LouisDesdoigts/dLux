@@ -24,12 +24,7 @@ def test_constant_polarisers(constructor):
 
 
 @pytest.mark.parametrize(
-    "constructor",
-    [
-        dlu.linear_polariser,
-        dlu.quarter_wave_plate,
-        dlu.half_wave_plate,
-    ],
+    "constructor", [dlu.linear_polariser, dlu.quarter_wave_plate, dlu.half_wave_plate]
 )
 @pytest.mark.parametrize("shape", [(), (3,), (3, 4)])
 def test_angular_jones_contract(constructor, shape):
@@ -49,11 +44,7 @@ def test_retarder_contract():
 
 def test_jones_application():
     phasor = np.ones((2, 2, 4, 6), dtype=complex)
-    output = assert_jittable(
-        dlu.apply_jones,
-        dlu.horizontal_polariser(),
-        phasor,
-    )
+    output = assert_jittable(dlu.apply_jones, dlu.horizontal_polariser(), phasor)
 
     assert np.allclose(output[0], phasor[0])
     assert np.allclose(output[1], 0)
@@ -66,3 +57,9 @@ def test_jones_rotation_and_stokes():
 
     assert np.allclose(vertical, dlu.vertical_polariser(), atol=1e-6)
     assert np.allclose(stokes, np.asarray((0.5, -0.5, 0.0, 0.0)), atol=1e-6)
+
+
+def test_unrotated_jones_identity():
+    jones = dlu.horizontal_polariser()
+
+    assert dlu.rotate_jones(jones, None) is jones
