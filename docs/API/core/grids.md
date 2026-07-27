@@ -11,12 +11,12 @@ classDiagram
     class dLux_grids_AffineMap["AffineMap"]
     class dLux_grids_TransformChain["TransformChain"]
     class dLux_grids_DistortCoords["DistortCoords"]
-    class zodiax_base_Base["Base"]
     class dLux_grids_BaseGridSpec["BaseGridSpec"]
+    class zodiax_base_Base["Base"]
     dLux_grids_BaseGridSpec <|-- dLux_grids_GridSpec
-    click dLux_grids_GridSpec href "#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Methods: ndim(), broadcast(), shape(), scale(), axes(), axes_for(), coordinates(), coordinates_for(), xs(), xs_for(), fov(), extent()"
+    click dLux_grids_GridSpec href "#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov, extent · Methods: broadcast(), resize(), downsample(), resample(), axes_for(), xs_for(), coordinates_for()"
     dLux_grids_BaseGridSpec <|-- dLux_grids_ResizeSpec
-    click dLux_grids_ResizeSpec href "#dLux.grids.ResizeSpec" "Attributes: n, pad_factor, crop_factor, c · Methods: broadcast(), explicit(), padding(), output_size(), crop_size(), pad(), crop(), resize()"
+    click dLux_grids_ResizeSpec href "#dLux.grids.ResizeSpec" "Attributes: n, pad_factor, crop_factor, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad(), crop(), resize()"
     zodiax_base_Base <|-- dLux_grids_CoordTransform
     click dLux_grids_CoordTransform href "#dLux.grids.CoordTransform" "Methods: get_coordinates(), apply()"
     dLux_grids_CoordTransform <|-- dLux_grids_Affine

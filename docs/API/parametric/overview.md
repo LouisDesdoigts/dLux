@@ -37,7 +37,7 @@ classDiagram
     class dLux_parametric_shapes_Complement["Complement"]
     class dLux_parametric_shapes_TransformedShape["TransformedShape"]
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_ParametricBasis
-    click dLux_parametric_bases_ParametricBasis href "../bases/#dLux.parametric.bases.ParametricBasis" "Attributes: coefficients, basis_shape · Methods: coeffs(), c(), alpha(), coefficient_shape(), evaluate_basis(), solve_basis()"
+    click dLux_parametric_bases_ParametricBasis href "../bases/#dLux.parametric.bases.ParametricBasis" "Attributes: coefficients, basis_shape · Properties: coeffs, c, alpha, coefficient_shape · Methods: evaluate_basis(), solve_basis()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ExplicitBasis
     click dLux_parametric_bases_ExplicitBasis href "../bases/#dLux.parametric.bases.ExplicitBasis" "Attributes: coefficients, basis_shape, basis · Methods: evaluate(), solve_basis()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ImplicitBasis
@@ -78,23 +78,23 @@ classDiagram
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_InterpolatedIndex
     click dLux_parametric_refractive_InterpolatedIndex href "../refractive/#dLux.parametric.refractive.InterpolatedIndex" "Attributes: wavelengths, indices, method, extrapolate · Methods: evaluate()"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_shapes_Shape
-    click dLux_parametric_shapes_Shape href "../shapes/#dLux.parametric.shapes.Shape" "Methods: extent()"
+    click dLux_parametric_shapes_Shape href "../shapes/#dLux.parametric.shapes.Shape" "Properties: extent"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_SoftShape
     click dLux_parametric_shapes_SoftShape href "../shapes/#dLux.parametric.shapes.SoftShape" "Attributes: softening · Methods: clip()"
     dLux_parametric_shapes_SoftShape <|-- dLux_parametric_shapes_RadialShape
-    click dLux_parametric_shapes_RadialShape href "../shapes/#dLux.parametric.shapes.RadialShape" "Attributes: softening, diameter · Methods: extent()"
+    click dLux_parametric_shapes_RadialShape href "../shapes/#dLux.parametric.shapes.RadialShape" "Attributes: softening, diameter · Properties: extent"
     dLux_parametric_shapes_RadialShape <|-- dLux_parametric_shapes_Circle
     click dLux_parametric_shapes_Circle href "../shapes/#dLux.parametric.shapes.Circle" "Attributes: softening, diameter · Methods: evaluate()"
     dLux_parametric_shapes_SoftShape <|-- dLux_parametric_shapes_Square
-    click dLux_parametric_shapes_Square href "../shapes/#dLux.parametric.shapes.Square" "Attributes: softening, width · Methods: extent(), evaluate()"
+    click dLux_parametric_shapes_Square href "../shapes/#dLux.parametric.shapes.Square" "Attributes: softening, width · Properties: extent · Methods: evaluate()"
     dLux_parametric_shapes_SoftShape <|-- dLux_parametric_shapes_Rectangle
-    click dLux_parametric_shapes_Rectangle href "../shapes/#dLux.parametric.shapes.Rectangle" "Attributes: softening, width, height · Methods: extent(), evaluate()"
+    click dLux_parametric_shapes_Rectangle href "../shapes/#dLux.parametric.shapes.Rectangle" "Attributes: softening, width, height · Properties: extent · Methods: evaluate()"
     dLux_parametric_shapes_RadialShape <|-- dLux_parametric_shapes_RegularPolygon
     click dLux_parametric_shapes_RegularPolygon href "../shapes/#dLux.parametric.shapes.RegularPolygon" "Attributes: softening, diameter, nsides · Methods: evaluate()"
     dLux_parametric_shapes_SoftShape <|-- dLux_parametric_shapes_Spider
     click dLux_parametric_shapes_Spider href "../shapes/#dLux.parametric.shapes.Spider" "Attributes: softening, width, angles · Methods: evaluate()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_Complement
-    click dLux_parametric_shapes_Complement href "../shapes/#dLux.parametric.shapes.Complement" "Attributes: shape · Methods: extent(), evaluate()"
+    click dLux_parametric_shapes_Complement href "../shapes/#dLux.parametric.shapes.Complement" "Attributes: shape · Properties: extent · Methods: evaluate()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_TransformedShape
-    click dLux_parametric_shapes_TransformedShape href "../shapes/#dLux.parametric.shapes.TransformedShape" "Attributes: shape, transformation · Methods: extent(), evaluate()"
+    click dLux_parametric_shapes_TransformedShape href "../shapes/#dLux.parametric.shapes.TransformedShape" "Attributes: shape, transformation · Properties: extent · Methods: evaluate()"
 ```

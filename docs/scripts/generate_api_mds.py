@@ -138,14 +138,20 @@ def class_info(module_name: str, names: list[str]) -> list[ClassInfo]:
 
 def class_summary(cls: type) -> str:
     attrs = list(getattr(cls, "__annotations__", {}))
+    properties = [
+        name for name, value in cls.__dict__.items() if isinstance(value, property)
+    ]
     methods = [
         name
         for name, value in cls.__dict__.items()
-        if not name.startswith("_") and (callable(value) or isinstance(value, property))
+        if not name.startswith("_")
+        and (callable(value) or isinstance(value, (classmethod, staticmethod)))
     ]
     parts = []
     if attrs:
         parts.append(f"Attributes: {', '.join(attrs)}")
+    if properties:
+        parts.append(f"Properties: {', '.join(properties)}")
     if methods:
         parts.append(f"Methods: {', '.join(f'{name}()' for name in methods)}")
     return " · ".join(parts) or "No direct public attributes or methods"
@@ -254,7 +260,7 @@ def render_package_overview(modules: dict[str, list[tuple[str, str]]]) -> str:
             or "Public functions"
         )
         lines.append(
-            f'    click {ids[module]} href "{section_path(module)}" "{tooltip}"'
+            f'    click {ids[module]} href "../{section_path(module)}" "{tooltip}"'
         )
     lines.extend(
         f"    {ids[parent]} <|-- {ids[child]}" for parent, child in sorted(edges)

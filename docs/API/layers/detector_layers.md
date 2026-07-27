@@ -18,7 +18,7 @@ classDiagram
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_ApplyPixelResponse
     click dLux_layers_detector_layers_ApplyPixelResponse href "#dLux.layers.detector_layers.ApplyPixelResponse" "Attributes: pixel_response"
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_ApplyJitter
-    click dLux_layers_detector_layers_ApplyJitter href "#dLux.layers.detector_layers.ApplyJitter" "Attributes: sigma, kernel_size, oversample · Methods: kernel()"
+    click dLux_layers_detector_layers_ApplyJitter href "#dLux.layers.detector_layers.ApplyJitter" "Attributes: sigma, kernel_size, oversample · Properties: kernel"
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_ApplySaturation
     click dLux_layers_detector_layers_ApplySaturation href "#dLux.layers.detector_layers.ApplySaturation" "Attributes: threshold"
     dLux_layers_detector_layers_DetectorLayer <|-- dLux_layers_detector_layers_AddConstant
