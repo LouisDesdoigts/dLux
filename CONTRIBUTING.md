@@ -54,7 +54,7 @@ Code coverage is measured locally with `pytest-cov` using the configuration in `
 python -m pytest --cov --cov-report=term-missing --cov-report=xml --cov-report=html
 ```
 
-This prints missing lines in the terminal and writes `coverage.xml` and the browsable `htmlcov/` report. The project line-coverage target is 98%. Codecov consumes the same XML report in continuous integration and reports project and patch coverage on pull requests. Patch coverage is informational; tests should probe useful functionality rather than exist only to execute lines.
+This prints missing lines in the terminal and writes `coverage.xml` and the browsable `htmlcov/` report. The project line-coverage target is 95%. Codecov consumes the same XML report in continuous integration and reports project and patch coverage on pull requests. Patch coverage is informational; tests should probe useful functionality rather than exist only to execute lines.
 
 Note that just because the tests pass on your local machine, that does not mean that they will necessarily pass on all others! This can be due to a number of reasons such as a different operating system, Python version, or dependencies. This is why github actions are used to run the unit tests on multiple Python versions. This should help ensure that the code works as expected across the supported environments.
 

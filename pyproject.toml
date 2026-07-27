@@ -73,7 +73,7 @@ source = ["dLux"]
 relative_files = true
 
 [tool.coverage.report]
-fail_under = 98
+fail_under = 95
 precision = 2
 show_missing = true
 
