@@ -110,6 +110,11 @@ def FFT_ramp(
     return piston * ramp
 
 
+def _collins_phase(inverse):
+    """Return the Collins global phase for a forward or inverse Fourier step."""
+    return 1j if inverse else -1j
+
+
 def ABCD_MFT(
     phasor: Array,
     wavelength: float,
@@ -195,7 +200,7 @@ def _fraunhofer_fft(
         field /= norm
     sign = 1 if inverse else -1
     field = dlu.tilt(field, coordinates, sign * input_origin / focal_length, wavelength)
-    return field, spec_out
+    return field * _collins_phase(inverse), spec_out
 
 
 def MFT(
@@ -221,10 +226,12 @@ def MFT(
             scale, kernel_x, kernel_y = fraunhofer.fraunhofer_kernels(
                 spec_in=spec_in, spec_out=spec_out, lam=wavelength, f=focal_length
             )
-            return scale * _mft(
-                phasor, kernel_x, kernel_y, left_conj=True, right_conj=True
+            return (
+                _collins_phase(inverse)
+                * scale
+                * _mft(phasor, kernel_x, kernel_y, left_conj=True, right_conj=True)
             )
-        return fraunhofer.fraunhofer_prop(
+        return _collins_phase(inverse) * fraunhofer.fraunhofer_prop(
             u_pupil=phasor,
             spec_in=spec_in,
             spec_out=spec_out,
