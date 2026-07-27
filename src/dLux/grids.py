@@ -28,16 +28,16 @@ class ResizeSpec(BaseGridSpec):
     """Array sampling defined by an explicit size or pad/crop factors."""
 
     n: tuple[int, ...] | None
-    pad_factor: tuple[int, ...]
-    crop_factor: tuple[int, ...]
+    pad: tuple[int, ...]
+    crop: tuple[int, ...]
     c: Array | None
 
     def __init__(self, n=None, pad=1, crop=1, c=None):
         if n is not None and (pad != 1 or crop != 1):
             raise ValueError("Specify either n or pad/crop factors, not both.")
         self.n = None if n is None else dlu.as_size(n, name="n")
-        self.pad_factor = dlu.as_size(pad, name="pad")
-        self.crop_factor = dlu.as_size(crop, name="crop")
+        self.pad = dlu.as_size(pad, name="pad")
+        self.crop = dlu.as_size(crop, name="crop")
         self.c = None if c is None else np.asarray(c, float)
 
     def broadcast(self, ndim: int) -> BaseGridSpec:
@@ -48,8 +48,8 @@ class ResizeSpec(BaseGridSpec):
         n = None if self.n is None else dlu.as_size(self.n, ndim, "n")
         return self.set(
             n=n,
-            pad_factor=dlu.as_size(self.pad_factor, ndim, "pad"),
-            crop_factor=dlu.as_size(self.crop_factor, ndim, "crop"),
+            pad=dlu.as_size(self.pad, ndim, "pad"),
+            crop=dlu.as_size(self.crop, ndim, "crop"),
         )
 
     @property
@@ -62,41 +62,38 @@ class ResizeSpec(BaseGridSpec):
         """Return keyword arguments for FFT propagation utilities."""
         if self.explicit:
             return {"pad_to": self.n}
-        return {"pad": dlu.as_size(self.pad_factor, 2, "pad")}
+        return {"pad": dlu.as_size(self.pad, 2, "pad")}
 
     def output_size(self, shape) -> tuple[int, ...]:
         """Return the requested physical-axis size for an input array shape."""
         if self.explicit:
             return self.n
-        ndim = max(len(self.pad_factor), len(self.crop_factor), 2)
-        pad_factor = dlu.as_size(self.pad_factor, ndim, "pad")
-        crop_factor = dlu.as_size(self.crop_factor, ndim, "crop")
+        ndim = max(len(self.pad), len(self.crop), 2)
+        pad = dlu.as_size(self.pad, ndim, "pad")
+        crop = dlu.as_size(self.crop, ndim, "crop")
         sizes = tuple(shape[-ndim:][::-1])
-        return tuple(
-            size * pad // crop
-            for size, pad, crop in zip(sizes, pad_factor, crop_factor)
-        )
+        return tuple(size * pad // crop for size, pad, crop in zip(sizes, pad, crop))
 
     def crop_size(self, shape) -> tuple[int, ...]:
         """Return the size after applying only the crop factors."""
         if self.explicit:
             return self.n
-        ndim = max(len(self.crop_factor), 2)
-        factors = dlu.as_size(self.crop_factor, ndim, "crop")
+        ndim = max(len(self.crop), 2)
+        factors = dlu.as_size(self.crop, ndim, "crop")
         sizes = tuple(shape[-ndim:][::-1])
         return tuple(size // factor for size, factor in zip(sizes, factors))
 
-    def pad(self, array: Array, fill: float = 0.0) -> Array:
+    def pad_array(self, array: Array, fill: float = 0.0) -> Array:
         """Pad an array using this specification."""
         if self.explicit:
             return dlu.pad_to(array, self.n, fill)
-        ndim = max(len(self.pad_factor), 2)
-        factors = dlu.as_size(self.pad_factor, ndim, "pad")
+        ndim = max(len(self.pad), 2)
+        factors = dlu.as_size(self.pad, ndim, "pad")
         sizes = tuple(array.shape[-ndim:][::-1])
         target = tuple(size * factor for size, factor in zip(sizes, factors))
         return dlu.pad_to(array, target, fill)
 
-    def crop(self, array: Array) -> Array:
+    def crop_array(self, array: Array) -> Array:
         """Crop an array using this specification."""
         if self.explicit:
             return dlu.crop_to(array, self.n)

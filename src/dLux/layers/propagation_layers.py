@@ -71,7 +71,7 @@ def _propagate_fft(wf, spec, unit, ABCD=None, **kwargs):
     if wf.is_polarised:
         x, y = x[..., 0, 0, :], y[..., 0, 0, :]
 
-    if any(f > 1 for f in spec.crop_factor):
+    if any(f > 1 for f in spec.crop):
         nx, ny = spec.crop_size(field.shape)
         sy, sx = (field.shape[-2] - ny) // 2, (field.shape[-1] - nx) // 2
         field, x, y = (

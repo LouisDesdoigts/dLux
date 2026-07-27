@@ -40,12 +40,12 @@ class TestSpecifications:
         pad = dl.ResizeSpec(pad=2, crop=3, c=(0.1, -0.1))
         resize = dl.ResizeSpec((8, 6), c=0.0).broadcast(2)
 
-        assert pad.pad_factor == (2,) and pad.crop_factor == (3,)
+        assert pad.pad == (2,) and pad.crop == (3,)
         assert resize.n == (8, 6)
         assert resize.c.shape == ()
         array = np.ones((6, 6))
-        assert pad.pad(array).shape == (12, 12)
-        assert pad.crop(array).shape == (2, 2)
+        assert pad.pad_array(array).shape == (12, 12)
+        assert pad.crop_array(array).shape == (2, 2)
         assert pad.resize(array).shape == (4, 4)
         assert pad.crop_size((12, 12)) == (4, 4)
         assert resize.resize(array).shape == (6, 8)
@@ -58,8 +58,8 @@ class TestSpecifications:
         assert spec.padding == {"pad_to": (8, 6)}
         assert spec.output_size(array.shape) == (8, 6)
         assert spec.crop_size(array.shape) == (8, 6)
-        assert spec.pad(array).shape == (6, 8)
-        assert spec.crop(np.ones((10, 10))).shape == (6, 8)
+        assert spec.pad_array(array).shape == (6, 8)
+        assert spec.crop_array(np.ones((10, 10))).shape == (6, 8)
 
     def test_grid_sampling_transforms(self):
         spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")

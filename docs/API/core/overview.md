@@ -39,7 +39,7 @@ classDiagram
     dLux_fields_DiscreteField <|-- dLux_fields_Image
     click dLux_fields_Image href "../fields/#dLux.fields.Image" "Attributes: data, spec, variance, read_noise · Properties: field"
     click dLux_grids_GridSpec href "../grids/#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov, extent · Methods: broadcast(), resize(), downsample(), resample(), axes_for(), xs_for(), coordinates_for()"
-    click dLux_grids_ResizeSpec href "../grids/#dLux.grids.ResizeSpec" "Attributes: n, pad_factor, crop_factor, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad(), crop(), resize()"
+    click dLux_grids_ResizeSpec href "../grids/#dLux.grids.ResizeSpec" "Attributes: n, pad, crop, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad_array(), crop_array(), resize()"
     click dLux_grids_CoordTransform href "../grids/#dLux.grids.CoordTransform" "Methods: get_coordinates(), apply()"
     dLux_grids_CoordTransform <|-- dLux_grids_Affine
     click dLux_grids_Affine href "../grids/#dLux.grids.Affine" "Attributes: translation, rotation, scale, shear, order · Methods: coefficients()"
