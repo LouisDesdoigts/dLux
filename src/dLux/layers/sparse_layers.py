@@ -55,19 +55,22 @@ class Interfere(OpticalLayer):
     """Coherently sum the leading sub-aperture axis of a Wavefront."""
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
-        size = wavefront.phasor.shape[0]
-        collapse = lambda value: (
-            value[0]
-            if value is not None and value.ndim > 1 and value.shape[0] == size
-            else value
-        )
+        axis = wavefront.batch_ndim - 1
+        size = wavefront.phasor.shape[axis]
+
+        def collapse(value):
+            if value is None or value.ndim <= 1:
+                return value
+            axes = [i for i, n in enumerate(value.shape[:-1]) if n == size]
+            return np.take(value, 0, axis=axes[-1]) if axes else value
+
         spec = wavefront.spec
         spec = spec.set(d=collapse(spec.d), c=collapse(spec.c))
-        return wavefront.set(phasor=wavefront.phasor.sum(0), spec=spec)
+        return wavefront.set(phasor=wavefront.phasor.sum(axis), spec=spec)
 
 
 class SparseOptic(Optic):
-    """Replicate one optic over a set of sub-aperture centers.
+    """Generate locally sampled wavefronts over a set of sub-aperture centers.
 
     Parameter coefficients are shared when they retain their native shape. A leading
     axis matching the number of centers gives each sub-aperture independent
@@ -134,8 +137,8 @@ class SparseOptic(Optic):
         )
         return phasors.sum(0)
 
-    def wavefronts(self, wavefront: Wavefront) -> Wavefront:
-        """Return one locally sampled Wavefront per aperture center."""
+    def localise(self, wavefront: Wavefront) -> Wavefront:
+        """Evaluate the optic on one locally centred field per sub-aperture."""
         indices = np.arange(self.n_apertures)
 
         def make_wavefront(index, center):
@@ -145,12 +148,13 @@ class SparseOptic(Optic):
             return phasor
 
         phasor = vmap(make_wavefront)(indices, self.centers)
+        phasor = np.moveaxis(phasor, 0, wavefront.batch_ndim)
         spec = wavefront.spec.set(c=self.centers / wavefront.spec.scale)
         return wavefront.set(phasor=phasor, spec=spec)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
-        phasor = wavefront.phasor * self.phasor(wavefront)
-        wavefront = wavefront.set(phasor=phasor)
+        """Apply the optic and append its sub-aperture axis to the wavefront."""
+        wavefront = self.localise(wavefront)
         return wavefront.normalise() if self.normalise else wavefront
 
 

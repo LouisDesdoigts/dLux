@@ -214,6 +214,31 @@ def test_fft_vectorises_over_fields():
     assert np.allclose(mapped, expected)
 
 
+@pytest.mark.parametrize("method", ["fft", "mft", "abcd_fft", "abcd_mft", "asm"])
+def test_native_leading_dimensions(method):
+    spec = dlu.nd_axes((7, 5), (0.1, 0.13))
+    phasor = _field(spec)
+    fields = np.broadcast_to(phasor, (2, 3) + phasor.shape)
+    ABCD = dlu.abcd_fraunhofer(2.0)
+    spec_out = dlu.FFT_spec(spec, 0.5, ABCD)
+
+    if method == "fft":
+        propagate = lambda field: dlu.FFT(field, 0.5, spec, focal_length=2.0)[0]
+    elif method == "mft":
+        propagate = lambda field: dlu.MFT(field, 0.5, spec, spec_out, focal_length=2.0)
+    elif method == "abcd_fft":
+        propagate = lambda field: dlu.ABCD_FFT(field, 0.5, spec, ABCD)[0]
+    elif method == "abcd_mft":
+        propagate = lambda field: dlu.ABCD_MFT(field, 0.5, spec, spec_out, ABCD)
+    else:
+        propagate = lambda field: dlu.ASM(field, 0.5, spec, 0.02)
+
+    actual = propagate(fields)
+    expected = jax.vmap(jax.vmap(propagate))(fields)
+
+    _assert_field_close(actual, expected)
+
+
 @pytest.mark.parametrize("propagate", [dlu.FFT, dlu.MFT])
 def test_inverse_defocus_requires_reverse_system(propagate):
     spec = dlu.nd_axes((8, 6), (0.1, 0.13))
