@@ -96,11 +96,13 @@ def test_propagation_interfaces(system):
     results = system.propagate(wavelengths, weights=weights, return_all=True)
     array = system.propagate(wavelengths, weights=weights)
     mono_wavefront = system.propagate_mono(1e-6, return_wf=True)
+    mono_array = system.propagate_mono(1e-6)
     wavefront = system.propagate(wavelengths, weights=weights, return_wf=True)
 
     assert isinstance(mono["Wavefront"], dl.Wavefront)
     assert isinstance(mono_wavefront, dl.Wavefront)
     assert isinstance(wavefront, dl.Wavefront)
+    assert mono_array.shape == mono["PSF"].data.shape
     assert chromatic["Wavefront"].wavelength.shape == wavelengths.shape
     assert isinstance(results["PSF"], dl.PSF)
     assert array.shape == results["PSF"].data.shape
@@ -208,6 +210,19 @@ def test_resolved_source_model(system):
     )
     assert isinstance(psf, dl.PSF)
     assert psf.data.shape == (8, 6)
+
+
+def test_resolved_point_source_model(system):
+    source = dl.Source(
+        [0.9e-6, 1.1e-6], weights=[0.25, 0.75], flux=2.0, distribution=np.eye(3)
+    )
+
+    psf = assert_jittable(
+        lambda value: value.model(system), source, rtol=1e-5, atol=1e-5
+    )
+
+    assert psf.data.shape == (8, 6)
+    assert np.all(np.isfinite(psf.data))
 
 
 def test_binary_source_component_distributions(system):

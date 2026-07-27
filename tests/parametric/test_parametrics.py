@@ -96,6 +96,22 @@ def test_combination_contract(operation, coordinates):
     )
 
 
+def test_dictionary_combination(coordinates):
+    parametric = dl.Combination(
+        {
+            "direct": CoordinateValue(),
+            "shifted": dl.DynamicParametric(
+                CoordinateValue(), dl.Affine(translation=[0.1, 0.0])
+            ),
+        }
+    )
+
+    output = parametric.evaluate(coordinates=coordinates)
+
+    assert list(parametric.parametrics) == ["direct", "shifted"]
+    assert output.shape == coordinates.shape[-2:]
+
+
 @pytest.mark.parametrize(
     "constructor",
     [

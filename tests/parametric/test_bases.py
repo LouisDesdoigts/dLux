@@ -68,16 +68,47 @@ def test_basis_specific_operations(bases):
     assert resized.evaluate().shape == (5, 7)
 
 
+def test_coefficient_aliases(bases):
+    basis = bases[0]
+
+    assert basis.coeffs is basis.coefficients
+    assert basis.c is basis.coefficients
+    assert basis.alpha is basis.coefficients
+
+
+def test_default_explicit_coefficients():
+    basis = dl.ExplicitBasis(np.ones((2, 3, 4)), coefficient_shape=(2,))
+
+    assert basis.coefficient_shape == (2,)
+    assert np.allclose(basis.coefficients, 0)
+    assert np.allclose(basis.evaluate(), 0)
+
+
+def test_vectorised_basis_coefficients():
+    shared_basis = np.arange(12.0).reshape(1, 3, 4)
+    shared = dl.ExplicitBasis(shared_basis, [1.0, 2.0, 3.0], coefficient_shape=(1,))
+    local_basis = np.arange(48.0).reshape(2, 2, 3, 4)
+    local_coefficients = np.asarray([[1.0, 0.0], [0.0, 1.0]])
+    local = dl.ExplicitBasis(local_basis, local_coefficients, coefficient_shape=(2,))
+
+    shared_output = assert_jittable(lambda value: value.evaluate(), shared)
+    local_output = assert_jittable(lambda value: value.evaluate(), local)
+
+    assert shared_output.shape == (3, 3, 4)
+    assert np.allclose(
+        shared_output, shared.coefficients[:, None, None] * shared_basis[0]
+    )
+    assert local_output.shape == (2, 3, 4)
+    assert np.allclose(local_output[0], local_basis[0, 0])
+    assert np.allclose(local_output[1], local_basis[1, 1])
+
+
 @pytest.mark.parametrize(
     "constructor",
     [
         lambda: dl.ExplicitBasis(np.ones((2, 3, 4))),
         lambda: dl.ExplicitBasis(np.ones((2, 3, 4)), np.ones((3, 2))),
-        lambda: dl.CLIMBBasis(
-            np.ones((4, 6, 6)),
-            np.ones(4),
-            values=(0.0, 0.5, 1.0),
-        ),
+        lambda: dl.CLIMBBasis(np.ones((4, 6, 6)), np.ones(4), values=(0.0, 0.5, 1.0)),
         lambda: dl.CLIMBBasis(np.ones((4, 5, 5)), np.ones(4), oversample=3),
         lambda: dl.FourierBasis(8, 3, np.ones((2, 3))),
         lambda: dl.SplineBasis((8, 10, 12), 2),

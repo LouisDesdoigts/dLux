@@ -47,6 +47,12 @@ def test_aperture_basis_contract():
     assert transmission.shape == support.shape == (16, 16)
     assert basis.shape == (2, 16, 16)
 
+    transmission, basis = dlu.circular_aperture(
+        16, 1.0, oversample=1, zernike_nolls=(1, 4)
+    )
+    assert transmission.shape == (16, 16)
+    assert basis.shape == (2, 16, 16)
+
 
 @pytest.mark.parametrize(
     "factory",
@@ -79,6 +85,55 @@ def test_vectorised_aperture_basis(factory):
     assert support.shape[-2:] == (16, 16)
 
 
+def test_segmented_aperture_options():
+    kwargs = {
+        "npixels": 16,
+        "diameter": 2.0,
+        "nrings": 2,
+        "segment_diameter": 0.5,
+        "oversample": 1,
+        "secondary_diameter": 0.2,
+        "spider_width": 0.02,
+        "spider_angles": (0, 90),
+    }
+    transmission = dlu.segmented_aperture(**kwargs)
+    transmission, basis = dlu.segmented_aperture(**kwargs, zernike_nolls=(1, 4))
+
+    assert transmission.shape == (16, 16)
+    assert basis.shape[-3:] == (2, 16, 16)
+
+
+def test_hexagonal_sparse_aperture_options():
+    kwargs = {
+        "npixels": 16,
+        "diameter": 2.0,
+        "centers": ((-0.4, 0), (0.4, 0)),
+        "hole_diameter": 0.4,
+        "shape": "hex",
+        "oversample": 1,
+    }
+    transmission = dlu.sparse_aperture(**kwargs)
+    transmission, basis = dlu.sparse_aperture(**kwargs, zernike_nolls=(1, 4))
+
+    assert transmission.shape == (16, 16)
+    assert basis.shape == (2, 2, 16, 16)
+
+
+@pytest.mark.parametrize("return_support", [False, True])
+def test_euclid_zernike_options(return_support):
+    output = dlu.euclid_like(
+        16, oversample=1, zernike_nolls=(1, 4), return_support=return_support
+    )
+
+    assert len(output) == (3 if return_support else 2)
+
+
 def test_spider_validation():
     with pytest.raises(ValueError):
         dlu.circular_aperture(8, 1, spider_width=0.1)
+    with pytest.raises(ValueError):
+        dlu.segmented_aperture(
+            8, 2.0, nrings=2, segment_diameter=0.5, spider_width=0.1, oversample=1
+        )
+    with pytest.raises(ValueError):
+        dlu.sparse_aperture(8, 2.0, ((0, 0),), 0.4, shape="invalid")

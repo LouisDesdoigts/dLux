@@ -46,6 +46,15 @@ def test_tree_and_dictionary_helpers():
     assert list(values) == ["int_0", "int_1", "named"]
 
 
+def test_tree_mapping_with_custom_leaves():
+    tree = [(1, 2), (3, 4)]
+    output = dlu.map2array(
+        lambda value: sum(value), tree, leaf_fn=lambda value: isinstance(value, tuple)
+    )
+
+    assert np.array_equal(output, [3, 7])
+
+
 def test_layer_dictionary_edits():
     layers = OrderedDict((("first", 1), ("last", 3)))
     inserted = dlu.insert_layer(layers, ("middle", 2), 1, (int,))

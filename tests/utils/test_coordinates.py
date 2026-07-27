@@ -71,6 +71,15 @@ def test_pixel_coordinates(scale):
     assert output.shape == (2, 8, 8)
 
 
+def test_fft_and_polar_pixel_coordinates():
+    centered = dlu.pixel_coords(8, diameter=1.0)
+    fft_centered = dlu.pixel_coords(8, diameter=1.0, fft_style=True)
+    polar = dlu.pixel_coords(8, diameter=1.0, polar=True)
+
+    assert np.allclose(fft_centered - centered, -1 / 16)
+    assert np.allclose(polar, dlu.cart2polar(centered))
+
+
 @pytest.mark.parametrize(
     "operation",
     [

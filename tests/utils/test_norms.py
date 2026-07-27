@@ -46,6 +46,13 @@ def test_axis_and_keepdims():
     assert output.shape == (2, 1, 1)
 
 
+def test_broadcast_mask():
+    array = np.arange(24.0).reshape(2, 3, 4)
+    mask = np.ones((3, 4), dtype=bool)
+
+    assert np.isclose(dlu.l1_norm(array, mask), dlu.l1_norm(array))
+
+
 def test_invalid_mask():
     with pytest.raises(ValueError):
         dlu.l1_norm(np.ones(2), np.ones((1, 1)))

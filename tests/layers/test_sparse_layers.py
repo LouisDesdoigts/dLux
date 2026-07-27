@@ -87,10 +87,50 @@ def test_local_affine_and_mismatched_transform(centers, wavefront):
         dl.SparseDynamicOptic(transformation=distortion, **common)(wavefront)
 
 
+def test_local_affine_map(centers, wavefront):
+    matrix = np.broadcast_to(np.eye(2), (len(centers), 2, 2))
+    offset = np.asarray(((0.0, 0.0), (0.01, -0.01)))
+    optic = dl.SparseDynamicOptic(
+        centers,
+        transmission=dl.Circle(0.2, softening=0.01),
+        transformation=dl.AffineMap(matrix, offset),
+    )
+
+    output = assert_jittable(optic, wavefront)
+    assert output.phasor.shape[0] == len(centers)
+
+
 def test_center_gradients(centers, wavefront):
     optic = dl.SparseDynamicOptic(centers, transmission=dl.Circle(0.2, softening=0.01))
 
     assert_differentiable(lambda value: optic.set(centers=value)(wavefront), centers)
+
+
+def test_sparse_phasor_and_coordinate_sources(centers, wavefront):
+    transmission = dl.Circle(0.2, softening=0.01)
+    optic = dl.SparseOptic(centers, transmission=transmission)
+    coordinates = wavefront.coordinates
+    spec = wavefront.spec
+    array_optic = dl.SparseDynamicOptic(
+        centers, transmission=transmission, coordinates=coordinates
+    )
+    spec_optic = dl.SparseDynamicOptic(
+        centers, transmission=transmission, coordinates=spec
+    )
+
+    phasor = assert_jittable(optic.phasor, wavefront)
+    array_output = assert_jittable(array_optic, wavefront)
+    spec_output = assert_jittable(spec_optic, wavefront)
+
+    expected = sum(
+        transmission.evaluate(
+            coordinates=wavefront.coordinates - center[:, None, None],
+            pixel_scale=wavefront.pixel_scale,
+        )
+        for center in centers
+    )
+    assert np.allclose(phasor, expected)
+    assert np.allclose(array_output.phasor, spec_output.phasor)
 
 
 @pytest.mark.parametrize("polarised", [False, True])

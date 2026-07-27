@@ -93,6 +93,35 @@ class TestSpecifications:
         assert np.allclose(resampled.d, d / 2)
         assert np.allclose(resampled.c, c)
 
+    def test_incomplete_spec_contracts(self):
+        empty = dl.GridSpec()
+        size_only = dl.GridSpec(n=4)
+        spacing_only = dl.GridSpec(d=0.1)
+
+        assert empty.ndim == 0
+        with pytest.raises(ValueError, match="n and d"):
+            size_only.downsample(2)
+        with pytest.raises(ValueError, match="n must"):
+            _ = spacing_only.shape
+        with pytest.raises(ValueError, match="n must"):
+            _ = spacing_only.xs
+        with pytest.raises(ValueError, match="n must"):
+            _ = spacing_only.coordinates
+        with pytest.raises(ValueError, match="n and d"):
+            _ = size_only.fov
+        with pytest.raises(ValueError, match="d must"):
+            size_only.xs_for((4,))
+
+    def test_axis_aliases(self):
+        spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), unit="m")
+
+        assert all(
+            np.allclose(left, right)
+            for left, right in zip(spec.axes_for((4, 6)), spec.xs_for((4, 6)))
+        )
+        with pytest.raises(ValueError, match="dimensionality"):
+            spec.xs_for((4,))
+
     def test_units_and_differentiation(self):
         spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
 
@@ -123,6 +152,7 @@ class TestSpecifications:
             ({"n": (2, 3), "d": (1, 2, 3)}, ValueError),
             ({"n": 4, "d": 0.1, "diam": 1.0}, ValueError),
             ({"diam": 1.0}, ValueError),
+            ({"unit": 1}, TypeError),
         ],
     )
     def test_validation(self, kwargs, error):
@@ -131,6 +161,13 @@ class TestSpecifications:
 
         with pytest.raises(ValueError):
             dl.ResizeSpec(pad=0)
+
+        with pytest.raises(ValueError):
+            dl.ResizeSpec(n=4, pad=2)
+        with pytest.raises(ValueError):
+            dl.ResizeSpec().broadcast(0)
+        with pytest.raises(ValueError):
+            dl.GridSpec().broadcast(0)
 
 
 class TestTransforms:
@@ -183,6 +220,20 @@ class TestTransforms:
             transform(spec)
         with pytest.raises((TypeError, ValueError)):
             dl.Affine()()
+        with pytest.raises(ValueError, match="Provide coordinates"):
+            dl.Affine()(None)
+        with pytest.raises(ValueError, match="shape"):
+            dl.Affine()(np.ones((2, 6)))
+
+    def test_transform_dictionary(self, coordinates):
+        transforms = {
+            "translate": dl.Affine(translation=[0.1, 0.0]),
+            "rotate": dl.Affine(rotation=0.1),
+        }
+        chain = dl.TransformChain(transforms)
+
+        assert list(chain.transformations) == list(transforms)
+        assert_jittable(chain, coordinates)
 
     def test_vectorised_distortion(self, coordinates):
         transform = dl.DistortCoords(order=2, distortion=np.zeros((3, 2, 5)))
@@ -221,6 +272,8 @@ class TestTransforms:
             lambda: dl.Affine(translation=np.ones(3)),
             lambda: dl.DistortCoords(powers=np.ones((3, 2))),
             lambda: dl.DistortCoords(order=2, orders=[2]),
+            lambda: dl.DistortCoords(orders=[]),
+            lambda: dl.DistortCoords(order=2, distortion=np.ones((2, 2))),
         ],
     )
     def test_validation(self, constructor):

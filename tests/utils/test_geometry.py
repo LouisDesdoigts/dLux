@@ -47,3 +47,13 @@ def test_combine():
     arrays = np.stack((dlu.circle(COORDS, 1), dlu.square(COORDS, 1)))
     assert np.array_equal(dlu.combine(arrays), np.prod(arrays, axis=0))
     assert dlu.combine(arrays, use_sum=True).shape == COORDS.shape[1:]
+
+
+@pytest.mark.parametrize(
+    ("operation", "args"), [(dlu.square, (1.0,)), (dlu.reg_polygon, (1.0, 6))]
+)
+def test_inverted_shapes(operation, args):
+    regular = operation(COORDS, *args)
+    inverted = operation(COORDS, *args, invert=True)
+
+    assert np.array_equal(inverted, 1 - regular)

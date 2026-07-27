@@ -46,6 +46,16 @@ def test_promotes_scalar_wavefront(make_wavefront):
     assert output.phasor.shape[-4:-2] == (2, 2)
 
 
+def test_derived_jones_matrices():
+    polariser = dl.LinearPolariser(0.2)
+    retarder = dl.Retarder(np.pi / 2, 0.1)
+
+    assert np.allclose(polariser.jones, dlu.linear_polariser(polariser.angle))
+    assert np.allclose(
+        retarder.jones, dlu.retarder(retarder.retardance, retarder.angle)
+    )
+
+
 @pytest.mark.parametrize(
     ("layer", "path"),
     [

@@ -9,6 +9,11 @@ import dLux.utils as dlu
 from tests.helpers import assert_differentiable, assert_jittable
 
 
+class UnboundedShape(dl.Shape):
+    def evaluate(self, **context):
+        return np.asarray(1.0)
+
+
 @pytest.fixture
 def context():
     return {"coordinates": dlu.pixel_coords(12, 2.0), "pixel_scale": 2.0 / 12}
@@ -40,10 +45,7 @@ def test_shape_contract(shape, parameter, context):
     "shape",
     [
         dl.Complement(dl.Circle(0.8)),
-        dl.TransformedShape(
-            dl.Circle(0.8),
-            dl.Affine(translation=[0.1, 0.0]),
-        ),
+        dl.TransformedShape(dl.Circle(0.8), dl.Affine(translation=[0.1, 0.0])),
     ],
 )
 def test_composed_shape_contract(shape, context):
@@ -52,10 +54,7 @@ def test_composed_shape_contract(shape, context):
 
 
 def test_transformed_shape_gradient(context):
-    shape = dl.TransformedShape(
-        dl.Circle(0.8),
-        dl.Affine(translation=[0.1, 0.0]),
-    )
+    shape = dl.TransformedShape(dl.Circle(0.8), dl.Affine(translation=[0.1, 0.0]))
 
     assert_differentiable(
         lambda value: shape.set("transformation.translation", value).evaluate(
@@ -63,6 +62,19 @@ def test_transformed_shape_gradient(context):
         ),
         shape.transformation.translation,
     )
+
+
+def test_shape_extents():
+    circle = dl.Circle(0.8)
+    square = dl.Square(0.8)
+    rectangle = dl.Rectangle(0.8, 0.6)
+
+    assert UnboundedShape().extent is None
+    assert np.isclose(circle.extent, 0.4)
+    assert np.isclose(square.extent, 0.8 / np.sqrt(2))
+    assert np.isclose(rectangle.extent, 0.5)
+    assert np.isclose(dl.Complement(circle).extent, circle.extent)
+    assert np.isclose(dl.TransformedShape(circle, dl.Affine()).extent, circle.extent)
 
 
 @pytest.mark.parametrize(
