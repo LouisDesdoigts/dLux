@@ -39,16 +39,30 @@ def test_detector_layer_contract(layer, psf):
     ],
 )
 def test_detector_layer_gradients(layer, path, psf):
-    assert_differentiable(
-        lambda value: layer.set(path, value)(psf),
-        layer.get(path),
-    )
+    assert_differentiable(lambda value: layer.set(path, value)(psf), layer.get(path))
 
 
 def test_jitter_kernel():
     layer = dl.ApplyJitter(0.5, kernel_size=5, oversample=3)
     assert layer.kernel.shape == (5, 5)
     assert np.allclose(layer.kernel.sum(), 1)
+
+
+@pytest.mark.parametrize(
+    "layer",
+    [
+        dl.ApplyPixelResponse(np.linspace(0.5, 1.0, 64).reshape(8, 8)),
+        dl.ApplyJitter(0.5, kernel_size=5),
+        dl.ApplySaturation(32),
+        dl.AddConstant(1),
+    ],
+)
+def test_detector_layers_preserve_leading_axes(layer, make_psf):
+    psf = make_psf(data=np.arange(2 * 3 * 64).reshape(2, 3, 8, 8) + 1)
+    output = assert_jittable(layer, psf)
+
+    assert output.data.shape == psf.data.shape
+    assert output.spec == psf.spec
 
 
 @pytest.mark.parametrize(

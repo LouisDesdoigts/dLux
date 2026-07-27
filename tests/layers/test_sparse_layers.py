@@ -134,6 +134,33 @@ def test_sparse_propagation_gradient(wavefront):
     assert_differentiable(propagate, centers, rtol=1e-5, atol=1e-5)
 
 
+@pytest.mark.parametrize("polarise_input", [False, True])
+def test_sparse_optical_system_contract(polarise_input, centers, make_spec):
+    spec_in = make_spec(n=(8, 6), d=(0.05, 0.06))
+    spec_out = dl.GridSpec(n=(6, 8), d=(2e-7, 3e-7), unit="rad")
+    polarisation = dl.PolarisationLayer(dl.LinearPolariser(0.2))
+    layers = []
+    if polarise_input:
+        layers.append(("InputPolarisation", polarisation))
+    layers += [
+        ("SparseOptic", dl.SparseOptic(centers, transmission=dl.Circle(0.2))),
+        ("OutputPolarisation", polarisation),
+        ("Fraunhofer", dl.Fraunhofer(spec_out)),
+        ("Interfere", dl.Interfere()),
+    ]
+    system = dl.OpticalSystem(layers, spec_in)
+    wavelengths = np.asarray([1e-6, 1.1e-6])
+
+    output = system.propagate(wavelengths, return_wf=True)
+    _, states = system.debug(system.initialise_wavefront(wavelengths))
+
+    assert output.phasor.shape == (2, 2, 2, 8, 6)
+    assert states["SparseOptic"].batch_ndim == 2
+    assert states["SparseOptic"].phasor.shape[:2] == (2, len(centers))
+    assert states["OutputPolarisation"].batch_ndim == 2
+    assert np.allclose(states["Interfere"].phasor, states["Fraunhofer"].phasor.sum(1))
+
+
 def test_center_validation():
     with pytest.raises(ValueError, match="centers"):
         dl.SparseOptic([0.0, 1.0])

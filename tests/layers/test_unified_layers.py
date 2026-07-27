@@ -21,8 +21,7 @@ def targets(make_wavefront, make_psf):
         dl.Flip(0),
         dl.Flip((0, 1)),
         dl.Interpolate(
-            dl.Affine(translation=[0.01, -0.02], rotation=0.1),
-            method="linear",
+            dl.Affine(translation=[0.01, -0.02], rotation=0.1), method="linear"
         ),
         dl.Normalise(),
         dl.Normalise(mode="peak", value=2),
@@ -49,6 +48,35 @@ def test_normalise_modes(targets):
 
     assert np.allclose(dl.Normalise("power", 2)(wavefront).power, 2)
     assert np.allclose(dl.Normalise("peak", 2)(psf).data.max(), 2)
+
+
+@pytest.mark.parametrize(
+    ("layer", "shape", "n", "d"),
+    [
+        (dl.Resize((10, 6)), (2, 3, 6, 10), (10, 6), (0.1, 0.1)),
+        (dl.Downsample((2, 4)), (2, 3, 2, 4), (4, 2), (0.2, 0.4)),
+        (dl.Flip((-2, -1)), (2, 3, 8, 8), (8, 8), (0.1, 0.1)),
+        (
+            dl.Interpolate(dl.Affine(translation=[0.01, -0.02])),
+            (2, 3, 8, 8),
+            (8, 8),
+            (0.1, 0.1),
+        ),
+    ],
+)
+def test_unified_layers_preserve_leading_axes(layer, shape, n, d, make_spec):
+    spec = make_spec(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
+    targets = (
+        dl.Wavefront(1e-6, spec, np.ones((2, 3, 8, 8), complex)),
+        dl.PSF(np.ones((2, 3, 8, 8)), spec),
+    )
+
+    for target in targets:
+        output = assert_jittable(layer, target)
+        assert output.field.shape == shape
+        assert output.n == n
+        assert np.allclose(output.d, np.asarray(d))
+        assert np.allclose(output.c, target.c)
 
 
 @pytest.mark.parametrize(

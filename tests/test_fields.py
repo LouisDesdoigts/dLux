@@ -356,6 +356,21 @@ class TestImage:
         assert np.isfinite(gaussian)
         assert np.isfinite(poisson)
 
+    def test_leading_axis_contract(self, make_spec):
+        data = np.full((2, 3, 8, 8), 10.0)
+        image = dl.Image(data, make_spec(), variance=2.0)
+        poisson = assert_jittable(
+            lambda value: value.add_poisson_noise(jr.key(0)), image
+        )
+        noisy = assert_jittable(
+            lambda value: value.add_read_noise(jr.key(1), 2.0), poisson
+        )
+
+        assert noisy.data.shape == noisy.variance.shape == data.shape
+        assert noisy.fourier_transform.shape == data.shape
+        assert noisy.power_spectrum.shape == data.shape
+        assert np.isfinite(noisy.log_likelihood(image, "gaussian"))
+
     @pytest.mark.parametrize(
         "operation",
         [

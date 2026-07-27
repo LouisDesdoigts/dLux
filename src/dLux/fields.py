@@ -964,7 +964,7 @@ class PolarisedWavefront(Wavefront):
         return PolarisedWavefront(
             wavelength=wavefront.wavelength,
             spec=wavefront.spec,
-            phasor=wavefront.phasor,
+            phasor=PolarisedWavefront._promote_phasor(wavefront.phasor),
         )
 
     @property

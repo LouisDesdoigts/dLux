@@ -5,6 +5,7 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import Array
 
+import dLux.utils as dlu
 from ..grids import CoordTransform
 from ..fields import PSF, Wavefront
 from .detector_layers import DetectorLayer
@@ -28,10 +29,10 @@ class UnifiedLayer(OpticalLayer, DetectorLayer):
 class Resize(UnifiedLayer):
     """Resize a wavefront or PSF by padding or cropping."""
 
-    npixels: int
+    npixels: tuple[int, ...]
 
-    def __init__(self, npixels: int):
-        self.npixels = int(npixels)
+    def __init__(self, npixels: int | tuple[int, ...]):
+        self.npixels = dlu.as_size(npixels, name="npixels")
 
     def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
         return target.resize(self.npixels)
@@ -40,12 +41,10 @@ class Resize(UnifiedLayer):
 class Downsample(UnifiedLayer):
     """Downsample a wavefront or PSF by an integer factor."""
 
-    n: int
+    n: tuple[int, ...]
 
-    def __init__(self, n: int):
-        self.n = int(n)
-        if self.n <= 0:
-            raise ValueError("n must be greater than 0.")
+    def __init__(self, n: int | tuple[int, ...]):
+        self.n = dlu.as_size(n, name="n")
 
     def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
         return target.downsample(self.n)
