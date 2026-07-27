@@ -45,7 +45,10 @@ class SoftShape(Shape):
 
     def clip(self, pixel_scale) -> Array:
         """Return the physical half-width used to soften the boundary."""
-        return np.asarray(pixel_scale) * self.softening / 2
+        pixel_scale = np.asarray(pixel_scale)
+        if pixel_scale.ndim:
+            pixel_scale = pixel_scale.max(-1)
+        return pixel_scale * self.softening / 2
 
 
 class RadialShape(SoftShape):

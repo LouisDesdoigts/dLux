@@ -61,6 +61,20 @@ class TestSpecifications:
         assert spec.pad(array).shape == (6, 8)
         assert spec.crop(np.ones((10, 10))).shape == (6, 8)
 
+    def test_grid_sampling_transforms(self):
+        spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
+
+        resized = spec.resize((10, 8))
+        downsampled = spec.downsample((2, 3))
+        resampled = spec.resample((12, 10), (0.05, 0.08))
+
+        assert resized.n == (10, 8)
+        assert np.allclose(resized.d, spec.d)
+        assert downsampled.n == (4, 2)
+        assert np.allclose(downsampled.d, np.asarray((0.2, 0.6)))
+        assert resampled.n == (12, 10)
+        assert np.allclose(resampled.d, np.asarray((0.05, 0.08)))
+
     def test_units_and_differentiation(self):
         spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
 
@@ -78,8 +92,8 @@ class TestSpecifications:
         spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), unit="m")
 
         assert tuple(axis.shape for axis in spec.axes) == ((6,), (4,))
-        with pytest.raises(ValueError, match="equal axis lengths"):
-            _ = spec.xs
+        assert tuple(x.shape for x in spec.xs) == ((6,), (4,))
+        assert np.allclose(spec.extent, np.asarray((-0.6, 0.6, -0.6, 0.6)))
 
     @pytest.mark.parametrize(
         ("kwargs", "error"),
@@ -166,6 +180,17 @@ class TestTransforms:
 
         output = assert_jittable(lambda value: transform(value), mapped_coordinates)
         assert output.shape == mapped_coordinates.shape
+
+    def test_batched_affine_map(self, coordinates):
+        coordinates = np.stack((coordinates, coordinates + 0.1))
+        matrix = np.stack((np.eye(2), np.asarray(((1.0, 0.1), (0.0, 1.0)))))
+        offset = np.asarray(((0.0, 0.0), (0.1, -0.1)))
+        transform = dl.AffineMap(matrix, offset)
+
+        output = assert_jittable(lambda value: transform(value), coordinates)
+
+        assert output.shape == coordinates.shape
+        assert np.allclose(output[0], coordinates[0])
 
     @pytest.mark.parametrize(
         "constructor",
