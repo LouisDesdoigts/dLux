@@ -42,14 +42,41 @@ def test_aperture_factory_contract(factory):
 
 def test_aperture_basis_contract():
     transmission, basis, support = dlu.circular_aperture(
-        16,
-        1.0,
-        oversample=1,
-        zernike_nolls=(1, 4),
-        return_support=True,
+        16, 1.0, oversample=1, zernike_nolls=(1, 4), return_support=True
     )
     assert transmission.shape == support.shape == (16, 16)
     assert basis.shape == (2, 16, 16)
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        lambda: dlu.segmented_aperture(
+            16,
+            2.0,
+            nrings=2,
+            segment_diameter=0.5,
+            oversample=1,
+            zernike_nolls=(1, 4),
+            return_support=True,
+        ),
+        lambda: dlu.sparse_aperture(
+            16,
+            2.0,
+            ((-0.4, 0), (0.4, 0)),
+            0.4,
+            oversample=1,
+            zernike_nolls=(1, 4),
+            return_support=True,
+        ),
+    ],
+)
+def test_vectorised_aperture_basis(factory):
+    transmission, basis, support = factory()
+
+    assert transmission.shape == (16, 16)
+    assert basis.shape[-3:] == (2, 16, 16)
+    assert support.shape[-2:] == (16, 16)
 
 
 def test_spider_validation():
