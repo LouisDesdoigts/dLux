@@ -57,7 +57,7 @@ class Parametric(zdx.Base):
 
     def integrate(self, lower, upper, **context) -> Array:
         """Integrate the realised parameterisation between two bounds."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: no cover
             f"{type(self).__name__} does not define spectral integration."
         )
 
@@ -123,15 +123,15 @@ class Interpolation(Parametric):
     def integrate(self, lower, upper, **context) -> Array:
         """Exactly integrate a piecewise-linear interpolation."""
         if self.method != "linear":
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: no cover
                 "Exact Interpolation integration currently requires method='linear'."
             )
         if self.values.ndim != 1:
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: no cover
                 "Interpolation integration currently requires scalar values."
             )
         if self.extrapolate not in (False, 0, 0.0):
-            raise NotImplementedError(
+            raise NotImplementedError(  # pragma: no cover
                 "Interpolation integration currently requires zero extrapolation."
             )
 

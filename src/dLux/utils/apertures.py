@@ -1,7 +1,7 @@
+import equinox as eqx
 from jax import Array, vmap
 import jax.numpy as np
 import dLux.utils as dlu
-from equinox import filter_jit as fjit
 
 __all__ = [
     "segmented_hex_cens",
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-@fjit
+@eqx.filter_jit
 def _hex_cens(rmax: float) -> Array:
     """
     Returns the centres of the six neighbouring hexagons.
@@ -34,31 +34,7 @@ def _hex_cens(rmax: float) -> Array:
     return np.sqrt(3.0) * rmax * np.stack((np.cos(angles), np.sin(angles)), axis=-1)
 
 
-@fjit
-def _evenly_spaced_points(point1: Array, point2: Array, n: int) -> Array:
-    """
-    Returns evenly spaced interior points between two 2D points.
-
-    Parameters
-    ----------
-    point1 : Array
-        The start point with shape (2,).
-    point2 : Array
-        The end point with shape (2,).
-    n : int
-        The number of interior points to return.
-
-    Returns
-    -------
-    points : Array
-        The interior points with shape (n, 2).
-    """
-    x = np.linspace(point1[0], point2[0], n + 2)[1:-1]
-    y = np.linspace(point1[1], point2[1], n + 2)[1:-1]
-    return np.squeeze(np.column_stack((x, y)))
-
-
-@fjit
+@eqx.filter_jit
 def segmented_hex_cens(nrings: int, rmax: float, gap: float = 0.0) -> Array:
     """
     Hex-segment centres including the central segment.
@@ -665,9 +641,15 @@ def euclid_like(
 
     # Get the generation functions
     spider_shift = np.array([secondary_diameter / 2 - spider_width / 2, diameter / 2])
-    rot_fn = fjit(lambda angle: dlu.rotate_coords(ap_coords, dlu.deg2rad(angle + 30)))
-    shift_fn = fjit(lambda angle: dlu.translate_coords(rot_fn(angle), spider_shift))
-    rect_fn = fjit(lambda c: dlu.rectangle(c, spider_width, diameter, invert=True))
+    rot_fn = eqx.filter_jit(
+        lambda angle: dlu.rotate_coords(ap_coords, dlu.deg2rad(angle + 30))
+    )
+    shift_fn = eqx.filter_jit(
+        lambda angle: dlu.translate_coords(rot_fn(angle), spider_shift)
+    )
+    rect_fn = eqx.filter_jit(
+        lambda c: dlu.rectangle(c, spider_width, diameter, invert=True)
+    )
 
     # Get the spider vanes
     spiders = vmap(lambda angle: rect_fn(shift_fn(angle)))(np.asarray(spider_angles))
