@@ -93,8 +93,7 @@ nav:
     - ABCD Fresnel:             abcd_fresnel.md
     - ASM Fresnel:              asm.md
     - Sparse Propagation:       sparse_propagation.md
-    - Optical Systems Overview: optical_systems.md
-    - Sources Overview:         sources.md
+    - Systems, Sources & Images: optical_systems.md
 
   - API:
     - Overview: API/overview.md

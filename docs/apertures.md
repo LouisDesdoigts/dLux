@@ -246,7 +246,7 @@ Okay awesome, as we can see its pretty easy to generate a lot of different apert
 
 In many cases the pre-built apertures may not be sufficient to generate the specific aperture you want to model. dLux provides a wide range of low-level tools to create custom apertures (everything from above is done internally within dLux!). In order to get an idea of what these tools are and how to use them, we will go through the process of creating a custom aperture from scratch. We will first create a HST-like aperture and then create an AMI-like aperture. We will also show how these tools can be used to also generate the zernike basis functions over these custom apertures.
 
-Most of the tools to create custom apertures are contained within the `dLux.utils.geometry` module, which provides a number of functions to create basic geometric shapes (circles, hexagons, rectangles, etc.) as well as functions to combine these shapes together to create more complex apertures. These functions are designed to work on the coordinates provides by the `dLux.utils.coordinates` module, which provides a number of functions to create coordinate grids and transform them in various ways. Finally, the code used to generate the Zernike polynomials is contained within the `dLux.utils.zernike` module, which provides a number of functions to generate Zernike polynomials over arbitrary apertures.
+Most of the tools to create custom apertures are contained within the `dLux.utils.geometry` module, which provides a number of functions to create basic geometric shapes (circles, hexagons, rectangles, etc.) as well as functions to combine these shapes together to create more complex apertures. These functions are designed to work on the coordinates provides by the `dLux.utils.coordinates` module, which provides a number of functions to create coordinate grids and transform them in various ways. Finally, the code used to generate the Zernike polynomials is contained within the `dLux.utils.polynomials` module, which provides a number of functions to generate Zernike polynomials over arbitrary apertures.
 
 
 It is worth noting that the pre-built aperture functions can be used as a reference for how to use these low-level tools to create custom apertures, so don't be afraid to dive into the source code for these functions to see how they work and how they use the low-level tools to create the apertures.
@@ -264,7 +264,7 @@ oversample = 5
 coords = dlu.pixel_coords(npixels * oversample, diameter)
 
 # Generate our primary mirror aperture with an octagonal shape
-primary = dlu.reg_polygon(coords, diameter / 2, nsides=8)
+primary = dlu.reg_polygon(coords, diameter, nsides=8)
 
 # Generate our secondary mirror aperture with an inverted square
 secondary_diameter = 0.5  # Diameter of the secondary mirror in meters
@@ -388,10 +388,10 @@ coords = dlu.pixel_coords(npixels, diameter)
 # Define the hexagon function
 rmax = 0.8 / np.sqrt(3)
 softness = 0.5 * diameter / npixels
-hex_fn = lambda coords: dlu.soft_reg_polygon(coords, rmax, 6, clip_dist=softness)
+hex_fn = lambda coords: dlu.soft_reg_polygon(coords, 2 * rmax, 6, clip_dist=softness)
 
 # Coordinate distortion set up
-powers = dlu.gen_powers(3) # Third order polynomial distortion
+powers = dlu.polynomial_powers(3, ndim=2) # Third order polynomial distortion
 coeffs = np.zeros_like(powers) # Coefficients for the polynomial distortion
 
 # Hole generation functions
@@ -480,25 +480,23 @@ print("Gradients for cens:", grads["cens"])
 print("Gradients for coeffs:", grads["coeffs"])
 ```
 
-    Loss: 0.10399954
-    Gradients for cens: [[-0.03483739  0.01555587]
-     [ 0.00139634  0.04428311]
-     [ 0.01616716  0.00632419]
-     [-0.00105111 -0.00074032]
-     [-0.01101966  0.03689023]
-     [-0.03352235  0.02372693]
-     [ 0.01387123  0.02138328]]
-    Gradients for coeffs: [[ 4.8995782e-02 -3.6315620e-04  1.5526479e-01  8.1152119e-02
-      -2.7263498e-02  2.5632763e-01]
-     [-1.4742331e-01  1.3391176e-02 -2.6525241e-01 -5.1730144e-01
-       4.3967422e-02 -4.8298120e-01]]
+    Loss: 0.10911425
+    Gradients for cens: [[-0.01122795 -0.02823308]
+     [-0.01573161  0.01988085]
+     [ 0.03150877 -0.07211092]
+     [ 0.01153985  0.09819378]
+     [-0.0115876   0.05698672]
+     [-0.02315729  0.04021315]
+     [ 0.02652829  0.0054088 ]]
+    Gradients for coeffs: [[-0.00787245 -0.1129624   0.20573245 -0.04118464 -0.13478212  0.01685386
+      -1.0703639   0.54967594 -0.10406796  1.0385187 ]
+     [-0.1203393  -0.15120175 -0.2515904   0.06857429  0.5608253  -0.925603
+      -0.12104491 -0.9354536  -1.5483383  -2.1551201 ]]
 
 
 Awesome, now we have a dynamic version of our aperture! We can easily use this in optimization and inference problems, which is super exciting!
 
-In the new optic architecture, dynamic apertures are built from parametric shapes in
-`dLux.parametric.shapes` and supplied to `dLux.DynamicOptic`. Coordinate transformations and
-shape composition can therefore be reused without defining a dedicated aperture layer.
+In the new optic architecture, dynamic apertures are built from parametric shapes in `dLux.parametric.shapes` and supplied to `dLux.DynamicOptic`. Coordinate transformations and shape composition can therefore be reused without defining a dedicated aperture layer.
 
 It's also worth noting that we can also dynamically and differentiably generate Zernike polynomials over these dynamic apertures with the same API as before, which opens up even more possibilities for calibration and design problems! The syntax is more-or-less the same, so we wont show that here as it would be a lot of just copy-pasting from the previous section, but feel free to try it out yourself!
 

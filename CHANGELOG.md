@@ -27,6 +27,9 @@
 - **Dynamic optics:** added coordinate-aware dynamic optical layers and sparse
   optic foundations that compose shapes, aberrations, positions, and local or
   global transformations.
+- **Sparse optics:** added shared and per-aperture parametric evaluation,
+  position-vectorised wavefront propagation through optical systems, and explicit
+  coherent interference of propagated sub-apertures.
 - **Propagation:** added `Fraunhofer`, `Fresnel`, `FreeSpace`, and
   `ABCDPropagator`, including FFT, MFT, and LCT routes with coordinate-unit
   validation and vectorised chromatic sampling.
@@ -36,8 +39,8 @@
 - **Sources:** added composable `Spectrum`, `Source`, and `BinarySource` models
   with parametric wavelengths, weights, positions, fluxes, and resolved
   distributions.
-- **Optical layers:** added refractive `Lens` and `Wedge` layers and a spectrally
-  integrated `Filter` throughput layer.
+- **Optical layers:** added `RefractiveOptic` and `Wedge` layers for static or
+  parametrically generated thickness and refractive-index profiles.
 - **Polarisation:** added polarised wavefront propagation, Stokes evaluation, and
   uniform or spatially varying parametric polariser and retarder fields.
 - Added shared interpolation methods and layers for complex wavefronts and real
@@ -46,6 +49,7 @@
 ### ⚠️ Breaking Changes
 - Replaced `CoordSpec` and `PadSpec` with `GridSpec` and `ResizeSpec`, and moved
   coordinate specifications and transformations into `dLux.grids`.
+- `ResizeSpec` now uses the concise `pad` and `crop` attribute names.
 - Consolidated wavefronts, PSFs, and detector images into `dLux.fields`; removed
   the former wavefront, PSF, detector, spectrum, and scene module structure.
 - Replaced the separate layered, angular, Cartesian, and parametric optical-system
@@ -66,6 +70,9 @@
 
 ### 🐛 Bug Fixes
 - Corrected FFT coordinate centring and restored explicit final-wavefront returns.
+- Standardised the Collins phase across Fourier propagation routes, with FFT and
+  MFT forward, inverse, centring, and mixed-route behaviour checked against common
+  correctness contracts.
 - Wavefront and PSF interpolation share the established interpolation utility
   while preserving complex and real-valued data requirements.
 - Expanded propagation and array operations to preserve leading vectorisation

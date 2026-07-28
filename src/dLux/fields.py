@@ -590,28 +590,28 @@ class Wavefront(ContinuousField):
         return False
 
     @property
-    def _mapped_axis(self: Wavefront) -> Wavefront | None:
+    def _mapped_axis(self: Wavefront) -> tuple[int | None, ...] | None:
         """
-        Returns the input-axis specification for mapping over wavelength.
+        Returns the input-axis specification for mapping over the leading batch axis.
 
-        Dimensional sampling metadata is mapped over its leading axis, while scalar
-        metadata is shared. The phasor is mapped only when the wavefront carries a
-        vectorisation dimension, ensuring intrinsic axes such as the Jones axes of a
-        `PolarisedWavefront` are never mistaken for a wavelength axis.
+        Vectorised wavelength and sampling metadata are mapped when they share the
+        leading phasor axis; scalar metadata is shared. Intrinsic axes such as the
+        Jones axes of a `PolarisedWavefront` are never mapped.
 
         Returns
         -------
-        mapped_axis : Wavefront | None
-            A Wavefront-shaped pytree containing ``0`` for mapped leaves and ``None``
-            for shared leaves. Returns ``None`` for a monochromatic wavefront.
+        mapped_axis : tuple or None
+            Mapping axes for the phasor, wavelength, spacing, and centre. Returns
+            ``None`` for an unbatched wavefront.
         """
-        if not self.is_chromatic:
+        if self.batch_ndim == 0:
             return None
 
-        # get_axis = lambda array: 0 if array.ndim > 0 else None
-        return self.set(
-            phasor=0 if self.batch_ndim > 0 else None, wavelength=0, spec=None
+        size = self.phasor.shape[0]
+        axis = lambda x, ndim=0: (
+            0 if x is not None and x.ndim > ndim and x.shape[0] == size else None
         )
+        return 0, axis(self.wavelength), axis(self.spec.d, 1), axis(self.spec.c, 1)
 
     @property
     def power(self: Wavefront) -> Array:

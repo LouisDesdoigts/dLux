@@ -78,15 +78,14 @@ psf_pixel_scale = dlu.rad2arcsec(lamd) / 2.5
 psf_npix = 128
 
 # Generate the optical system
-optics = dl.AngularOpticalSystem(
-    wf_npixels=wf_npix,
-    diameter=diam,
-    layers=[
-        ("aper", dl.TransmissiveLayer(aper, normalise=True)),
-        ("wfe", dl.BasisLayer(basis, coeffs)),
+pupil_spec = dl.GridSpec(n=wf_npix, diam=diam, unit="m")
+psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="arcsec")
+optics = dl.OpticalSystem(
+    [
+        ("pupil", dl.Optic(aper, opd=dl.ExplicitBasis(basis, coeffs), normalise=True)),
+        ("propagator", dl.Fraunhofer(psf_spec)),
     ],
-    psf_npixels=psf_npix,
-    psf_pixel_scale=psf_pixel_scale,
+    pupil_spec,
 )
 
 # Propagate the PSF and get the power spectrum
@@ -106,7 +105,7 @@ Now lets take a look at our aperture, PSF, and power spectrum to see what we are
         return np.round(xy / pixel_scale + npix // 2).astype(int)
     
     aper_ext = dlu.imshow_extent(diam)
-    psf_ext = dlu.imshow_extent(optics.fov)
+    psf_ext = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     ps_ext = dlu.imshow_extent(2*diam)
     
     plt.figure(figsize=(15, 4))
@@ -252,7 +251,7 @@ Now we can time each method using `timeit`.
 _ = dense_fn(wavel).block_until_ready()
 ```
 
-    722 ms ± 25.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    668 ms ± 8.17 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
 
 
@@ -261,7 +260,7 @@ _ = dense_fn(wavel).block_until_ready()
 _ = sparse_fn(subap_coeffs).block_until_ready()
 ```
 
-    3.9 ms ± 58.1 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+    3.67 ms ± 25.4 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 
 
 Wow, as we can see the dense propagator take ~700ms and the sparse propagator takes ~4ms, which is a speedup of over 150x! This is a huge speedup and really shows the power of leveraging the sparsity of the aperture to speed up our computations. This is especially important for applications like wavefront sensing and control, where we need to be able to propagate wavefronts very quickly in order to make real-time corrections to the wavefront.

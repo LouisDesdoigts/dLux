@@ -44,7 +44,7 @@ seismic.set_bad("k", 0.5)
 
 ## 1. Building an Optical System
 
-Lets start by taking a look at how to build an optical system in dLux, we will focus on the `AngularOpticalSystem` class as it is the most-common for astronomical problems. As mentioned above, dLux optical systems are built from a series of layers that operate sequentially on a wavefront. Each layer is designed to represent a specific transformation to the wavefront, such as encountering an aperture, phase aberration, or propagating to focus. By combining these layers together, we can build up complex optical systems that can model real-world telescopes and instruments.
+Lets start by taking a look at how to build an optical system in dLux, we will focus on the `OpticalSystem` class as it is the most-common for astronomical problems. As mentioned above, dLux optical systems are built from a series of layers that operate sequentially on a wavefront. Each layer is designed to represent a specific transformation to the wavefront, such as encountering an aperture, phase aberration, or propagating to focus. By combining these layers together, we can build up complex optical systems that can model real-world telescopes and instruments.
 
 Beyond the layers themselves, we also need to define a few other properties of the optical system. In order to construct at wavefront at the aperture of the telescope we need to define its diameter, and the number of pixels used to represent the wavefront. To propagate the wavefront to the focal plane, we also need to define the pixel scale of the PSF, and the number of pixels used to represent the PSF.
 
@@ -77,49 +77,53 @@ basis *= 1e-9
 coeffs = 25 * jr.normal(jr.key(0), basis.shape[0])
 ```
 
-Now that we have the bits we need to define our optical system, lets see how we can actually construct it with our variables and layers. There are two layers we are going to need here, the `TransmissiveLayer` and the `BasisLayer`. These will be used to apply our aperture and our optical aberrations respectively. 
+Now that we have the bits we need to define our optical system, lets see how we can actually construct it with our variables and layers. We use an `Optic` to combine the pupil transmission and aberrations at a single optical plane, followed by a `Fraunhofer` layer to propagate to the focal plane.
 
 We define these layers using a list, ordered in the sequence in which we would like to apply them. While we can pass in the layer directly, its helpful to pass in a tuple pair of `(key, layer)`, as this lets us specify a key that we can use to reference that layer directly, giving us a nicer way to interact with our resutling `OpticalSystem` object.
 
 
 ```python
-# Define our aperture layer - note the normalise tells the optical system to normalise
-# the wavefront at this layer.
-aperture = dl.layers.TransmissiveLayer(transmission=aperture, normalise=True)
+# Define the input and output sampling
+pupil_spec = dl.GridSpec(n=wf_npix, diam=diameter, unit="m")
+psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="arcsec")
 
-# Define our aberrations layer, this will apply our basis as an OPD to the wavefront
-aberrations = dl.layers.BasisLayer(basis=basis, coefficients=coeffs)
+# Combine the aperture and aberrations into a single pupil optic
+pupil = dl.Optic(
+    transmission=aperture, opd=dl.ExplicitBasis(basis, coeffs), normalise=True
+)
 
-# Define the optical layers
+# Define the optical layers in propagation order
 layers = [
-    ("aperture", aperture),
-    ("aberrations", aberrations),
+    ("pupil", pupil),
+    ("propagator", dl.Fraunhofer(psf_spec)),
 ]
 
 # Construct the optics object
-optics = dl.AngularOpticalSystem(
-    wf_npixels=wf_npix, 
-    diameter=diameter, 
-    layers=layers, 
-    psf_npixels=psf_npix, 
-    psf_pixel_scale=psf_pixel_scale
-)
+optics = dl.OpticalSystem(layers, pupil_spec)
 
 # Examine the optics object
 print(optics)
 ```
 
-    AngularOpticalSystem(
-      wf_npixels=256,
-      diameter=1.0,
+    OpticalSystem(
       layers={
-        'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
-        'aberrations':
-        BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False)
+        'pupil':
+        Optic(
+          opd=ExplicitBasis(
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
+          ),
+          phase=None,
+          transmission=f32[256,256],
+          normalise=True
+        ),
+        'propagator':
+        Fraunhofer(
+          spec=GridSpec(n=(64, 64), d=f32[2], c=None, unit='arcsec'),
+          focal_length=None,
+          method='mft'
+        )
       },
-      psf_npixels=64,
-      oversample=1,
-      psf_pixel_scale=0.05
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
@@ -148,12 +152,12 @@ Now lets take a quick look at our aperture, OPD, and PSF to see what we are work
 ??? info "Plotting"
     ```python
     # Get the aperture and OPD for visualisation
-    opd = 1e6 * optics.aberrations.eval_basis()  # Normalise to microns
-    pupil = opd.at[optics.transmission < 0.5].set(np.nan)
+    opd = 1e6 * optics.pupil.opd.evaluate()  # Normalise to microns
+    pupil = opd.at[optics.pupil.transmission < 0.5].set(np.nan)
     
     # Get the extents for visualisation
-    ap_extent = dlu.imshow_extent(optics.diameter)
-    psf_extent = dlu.imshow_extent(optics.fov)
+    ap_extent = dlu.imshow_extent(optics.spec.fov[0])
+    psf_extent = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     # Plot the results
     plt.figure(figsize=(15, 3.75))
@@ -216,7 +220,7 @@ error = images.std(0) / np.sqrt(n_frames)
 Now that we have our PSF and data, lets visualise this system. This will show how we can extract our aperture transmission and our applied OPDs from the optical system for visualisation purposes!
 
 ??? "Accessing Parameters"
-    Note that dLux _raises parameters_ from the layers up to the optical system object - Thats what the layers key is for! This means that we can access the parameters of the layers directly from the optical system rather than referencing all the way through the object. Lets say we wanted to access the aperture transmission array. Normally, we would have to reference it through the entire system like `optics.layers['aperture'].transmission`, but since the parameters are raised, we can just do `optics.aperture.transmission`! This is a small thing, but it makes working with the system much nicer and more intuitive. As we will see soon, this also makes optimising these objects with zodiax much nicer.
+    Note that dLux _raises parameters_ from the layers up to the optical system object - Thats what the layers key is for! This means that we can access the parameters of the layers directly from the optical system rather than referencing all the way through the object. Lets say we wanted to access the pupil transmission array. Normally, we would have to reference it through the entire system like `optics.layers['pupil'].transmission`, but since the parameters are raised, we can just use `optics.pupil.transmission`! This is a small thing, but it makes working with the system much nicer and more intuitive. As we will see soon, this also makes optimising these objects with zodiax much nicer.
 
     dLux will also search through the layers for the attribute that we want, so we can just do `optics.transmission`, however, this can lead to issues if we have multiple layers with the same attribute, so make sure you know where your parameters are coming from if you use this method!
 
@@ -224,12 +228,12 @@ Now that we have our PSF and data, lets visualise this system. This will show ho
 ??? info "Plotting"
     ```python
     # Get the aperture and OPD for visualisation
-    opd = 1e6 * optics.aberrations.eval_basis() # Normalise to microns
-    pupil = opd.at[optics.transmission < 0.5].set(np.nan)
+    opd = 1e6 * optics.pupil.opd.evaluate() # Normalise to microns
+    pupil = opd.at[optics.pupil.transmission < 0.5].set(np.nan)
     
     # Get the extents for visualisation
-    ap_extent = dlu.imshow_extent(optics.diameter)
-    psf_extent = dlu.imshow_extent(optics.fov)
+    ap_extent = dlu.imshow_extent(optics.spec.fov[0])
+    psf_extent = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     # Plot the results
     plt.figure(figsize=(15, 3.75))
@@ -273,7 +277,7 @@ def model_fn(params, optics):
     position = dlu.arcsec2rad(params["position"])
 
     # Update the optical system with the current parameters
-    optics = optics.set(coefficients=params["z-coeffs"])
+    optics = optics.set("pupil.opd.coefficients", params["z-coeffs"])
 
     # Predict the PSF
     return flux * optics.propagate(wavels, position, weights=weights)
@@ -375,7 +379,7 @@ losses = np.array(losses)
 ??? info "Plotting"
     ```python
     # Get the aperture and OPD for visualisation
-    pred_opd = 1e6 * optics.set(coefficients=params["z-coeffs"]).aberrations.eval_basis()
+    pred_opd = 1e6 * optics.set("pupil.opd.coefficients", params["z-coeffs"]).pupil.opd.evaluate()
     pred_pupil = pred_opd.at[optics.transmission < 0.5].set(np.nan)
     pupil_residuals = pred_pupil - pupil
     v = np.nanmax(np.abs(np.array([pupil, pred_pupil])))
