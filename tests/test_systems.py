@@ -107,6 +107,8 @@ def test_propagation_interfaces(system):
     assert isinstance(results["PSF"], dl.PSF)
     assert array.shape == results["PSF"].data.shape
     assert np.allclose(array, results["PSF"].data)
+    assert np.allclose(wavefront.power, weights)
+    assert np.allclose(array.sum(), weights.sum())
 
 
 def test_detector_uses_common_system_contract(make_psf):

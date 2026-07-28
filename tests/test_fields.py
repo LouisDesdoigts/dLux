@@ -30,20 +30,26 @@ class TestWavefront:
     def test_chromatic_contract(self, make_spec):
         wavelengths = np.asarray((0.9e-6, 1.1e-6))
         wavefront = dl.Wavefront(wavelengths, make_spec())
+        normalised = wavefront.normalise()
 
         assert wavefront.phasor.shape == (2, 8, 8)
         assert wavefront.batch_ndim == 1
         assert wavefront.is_chromatic
         assert wavefront._mapped_axis is not None
+        assert normalised.power.shape == wavelengths.shape
+        assert np.allclose(normalised.power, 1)
 
     def test_chromatic_phasor_broadcasting(self, make_spec):
         wavelengths = np.asarray((0.9e-6, 1.1e-6))
         phasor = np.ones((8, 8), dtype=complex)
         wavefront = dl.Wavefront(wavelengths, make_spec(), phasor)
         polarised = dl.PolarisedWavefront(wavelengths, make_spec(), phasor)
+        normalised = polarised.normalise()
 
         assert wavefront.phasor.shape == (2, 8, 8)
         assert polarised.phasor.shape == (2, 2, 2, 8, 8)
+        assert normalised.power.shape == wavelengths.shape
+        assert np.allclose(normalised.power, 1)
 
     def test_chromatic_phase_broadcasting(self, make_spec):
         wavefront = dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), make_spec())
