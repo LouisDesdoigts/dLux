@@ -10,6 +10,7 @@ import jax.scipy as jsp
 from jax import Array
 
 import dLux.utils as dlu
+from .fields import Wavefront
 from .parametric import Parametric, ParametricHolder, resolve, to_param
 
 __all__ = ["BaseSource", "Spectrum", "Source", "BinarySource"]
@@ -148,6 +149,39 @@ class BaseSource(ParametricHolder):
             )
 
         return eqx.filter_vmap(propagate)(position, flux, weights)
+
+    def wavefront(self, spec):
+        """Create flux-weighted point-source wavefronts on an input grid.
+
+        Resolved distributions remain an image-plane operation in ``model``. A
+        vectorised source such as ``BinarySource`` returns one wavefront per component.
+        """
+        params = self.params()
+        wavelengths = params["wavelengths"]
+        position = params["position"]
+        flux = params["flux"]
+        weights = params["weights"]
+
+        def initialise(pos, component_flux, component_weights):
+            wavefront = Wavefront(wavelengths, spec).normalise().tilt(pos)
+            weight = np.sqrt(component_flux * component_weights)
+            scale = wavefront._to_phasor_shape(weight)
+            return wavefront.set(phasor=wavefront.phasor * scale)
+
+        if position.ndim == 1:
+            if weights.ndim != 1:
+                raise ValueError(
+                    "Single-component source weights must be one-dimensional."
+                )
+            return initialise(position, flux, weights)
+
+        if weights.ndim == 1:
+            weights = np.broadcast_to(weights, position.shape[:-1] + weights.shape)
+        elif weights.shape[:-1] != position.shape[:-1]:
+            raise ValueError(
+                "Vectorised weights leading shape must match source positions."
+            )
+        return eqx.filter_vmap(initialise)(position, flux, weights)
 
     def model(self, optics, return_all=False):
         """Model the source through an optical system."""
