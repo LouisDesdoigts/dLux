@@ -54,6 +54,27 @@ class BaseOpticalLayer(BaseLayer):
     def __call__(self, wavefront: Wavefront) -> Wavefront:  # pragma: no cover
         """Transform a wavefront."""
 
+    def apply(self, wavefront: Wavefront) -> Wavefront:
+        """Apply a monochromatic layer over every leading wavefront axis."""
+        if not isinstance(wavefront, Wavefront):
+            return self(wavefront)
+        axes = wavefront._mapped_axis
+        if axes is None:
+            return self(wavefront)
+
+        def apply(phasor, wavelength, d, c):
+            spec = wavefront.spec.set(d=d, c=c)
+            wavefront_i = wavefront.set(phasor=phasor, wavelength=wavelength, spec=spec)
+            return self.apply(wavefront_i)
+
+        output = eqx.filter_vmap(apply, in_axes=axes)(
+            wavefront.phasor, wavefront.wavelength, wavefront.spec.d, wavefront.spec.c
+        )
+        d = output.spec.d[0] if axes[2] is None else output.spec.d
+        c = output.spec.c
+        c = c[0] if c is not None and axes[3] is None else c
+        return output.set(spec=output.spec.set(d=d, c=c))
+
 
 class OpticalLayer(BaseOpticalLayer):
     """Public contract for layers that transform wavefronts."""

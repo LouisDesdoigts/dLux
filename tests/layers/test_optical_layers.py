@@ -39,6 +39,20 @@ def test_layer_alias_and_inheritance(wavefront):
     assert np.allclose(layer.apply(wavefront).phasor, layer(wavefront).phasor)
 
 
+def test_monochromatic_layer_mapping(make_spec):
+    class MonochromaticLayer(dl.OpticalLayer):
+        def __call__(self, wavefront):
+            if wavefront.batch_ndim:
+                raise ValueError("Expected a monochromatic wavefront.")
+            return wavefront.add_phase(wavefront.wavelength / 1e-6)
+
+    wavefront = dl.Wavefront([0.9e-6, 1.1e-6], make_spec())
+    output = MonochromaticLayer().apply(wavefront)
+
+    assert output.phasor.shape == wavefront.phasor.shape
+    assert np.allclose(output.phase[:, 0, 0], np.array([0.9, 1.1]))
+
+
 def test_transmissive_layer_contract(wavefront):
     unchanged = dl.TransmissiveLayer()(wavefront)
     attenuated = dl.TransmissiveLayer(0.5)(wavefront)

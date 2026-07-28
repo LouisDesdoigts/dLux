@@ -47,7 +47,7 @@ seismic.set_bad("k", 0.5)
 
 ## 1. Building an Optical System
 
-Lets start by taking a look at how to build an optical system in dLux, we will focus on the `AngularOpticalSystem` class as it is the most-common for astronomical problems. As mentioned above, dLux optical systems are built from a series of layers that operate sequentially on a wavefront. Each layer is designed to represent a specific transformation to the wavefront, such as encountering an aperture, phase aberration, or propagating to focus. By combining these layers together, we can build up complex optical systems that can model real-world telescopes and instruments.
+Lets start by taking a look at how to build an optical system in dLux, we will focus on the `OpticalSystem` class as it is the most-common for astronomical problems. As mentioned above, dLux optical systems are built from a series of layers that operate sequentially on a wavefront. Each layer is designed to represent a specific transformation to the wavefront, such as encountering an aperture, phase aberration, or propagating to focus. By combining these layers together, we can build up complex optical systems that can model real-world telescopes and instruments.
 
 Beyond the layers themselves, we also need to define a few other properties of the optical system. In order to construct at wavefront at the aperture of the telescope we need to define its diameter, and the number of pixels used to represent the wavefront. To propagate the wavefront to the focal plane, we also need to define the pixel scale of the PSF, and the number of pixels used to represent the PSF.
 
@@ -80,49 +80,53 @@ basis *= 1e-9
 coeffs = 25 * jr.normal(jr.key(0), basis.shape[0])
 ```
 
-Now that we have the bits we need to define our optical system, lets see how we can actually construct it with our variables and layers. There are two layers we are going to need here, the `TransmissiveLayer` and the `BasisLayer`. These will be used to apply our aperture and our optical aberrations respectively. 
+Now that we have the bits we need to define our optical system, lets see how we can actually construct it with our variables and layers. We use an `Optic` to combine the pupil transmission and aberrations at a single optical plane, followed by a `Fraunhofer` layer to propagate to the focal plane.
 
 We define these layers using a list, ordered in the sequence in which we would like to apply them. While we can pass in the layer directly, its helpful to pass in a tuple pair of `(key, layer)`, as this lets us specify a key that we can use to reference that layer directly, giving us a nicer way to interact with our resutling `OpticalSystem` object.
 
 
 ```python
-# Define our aperture layer - note the normalise tells the optical system to normalise
-# the wavefront at this layer.
-aperture = dl.layers.TransmissiveLayer(transmission=aperture, normalise=True)
+# Define the input and output sampling
+pupil_spec = dl.GridSpec(n=wf_npix, diam=diameter, unit="m")
+psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="arcsec")
 
-# Define our aberrations layer, this will apply our basis as an OPD to the wavefront
-aberrations = dl.layers.BasisLayer(basis=basis, coefficients=coeffs)
+# Combine the aperture and aberrations into a single pupil optic
+pupil = dl.Optic(
+    transmission=aperture, opd=dl.ExplicitBasis(basis, coeffs), normalise=True
+)
 
-# Define the optical layers
+# Define the optical layers in propagation order
 layers = [
-    ("aperture", aperture),
-    ("aberrations", aberrations),
+    ("pupil", pupil),
+    ("propagator", dl.Fraunhofer(psf_spec)),
 ]
 
 # Construct the optics object
-optics = dl.AngularOpticalSystem(
-    wf_npixels=wf_npix, 
-    diameter=diameter, 
-    layers=layers, 
-    psf_npixels=psf_npix, 
-    psf_pixel_scale=psf_pixel_scale
-)
+optics = dl.OpticalSystem(layers, pupil_spec)
 
 # Examine the optics object
 print(optics)
 ```
 
-    AngularOpticalSystem(
-      wf_npixels=256,
-      diameter=1.0,
+    OpticalSystem(
       layers={
-        'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
-        'aberrations':
-        BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False)
+        'pupil':
+        Optic(
+          opd=ExplicitBasis(
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
+          ),
+          phase=None,
+          transmission=f32[256,256],
+          normalise=True
+        ),
+        'propagator':
+        Fraunhofer(
+          spec=GridSpec(n=(64, 64), d=f32[2], c=None, unit='arcsec'),
+          focal_length=None,
+          method='mft'
+        )
       },
-      psf_npixels=64,
-      oversample=1,
-      psf_pixel_scale=0.05
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
@@ -151,12 +155,12 @@ Now lets take a quick look at our aperture, OPD, and PSF to see what we are work
 ??? info "Plotting"
     ```python
     # Get the aperture and OPD for visualisation
-    opd = 1e6 * optics.aberrations.eval_basis()  # Normalise to microns
-    pupil = opd.at[optics.transmission < 0.5].set(np.nan)
+    opd = 1e6 * optics.pupil.opd.evaluate()  # Normalise to microns
+    pupil = opd.at[optics.pupil.transmission < 0.5].set(np.nan)
     
     # Get the extents for visualisation
-    ap_extent = dlu.imshow_extent(optics.diameter)
-    psf_extent = dlu.imshow_extent(optics.fov)
+    ap_extent = dlu.imshow_extent(optics.spec.fov[0])
+    psf_extent = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     # Plot the results
     plt.figure(figsize=(15, 3.75))
@@ -219,7 +223,7 @@ error = images.std(0) / np.sqrt(n_frames)
 Now that we have our PSF and data, lets visualise this system. This will show how we can extract our aperture transmission and our applied OPDs from the optical system for visualisation purposes!
 
 !!! Note
-    Note that dLux _raises parameters_ from the layers up to the optical system object - Thats what the layers key is for! This means that we can access the parameters of the layers directly from the optical system rather than referencing all the way through the object. Lets say we wanted to access the aperture transmission array. Normally, we would have to reference it through the entire system like `optics.layers['aperture'].transmission`, but since the parameters are raised, we can just do `optics.aperture.transmission`! This is a small thing, but it makes working with the system much nicer and more intuitive. As we will see soon, this also makes optimising these objects with zodiax much nicer.
+    Note that dLux _raises parameters_ from the layers up to the optical system object - Thats what the layers key is for! This means that we can access the parameters of the layers directly from the optical system rather than referencing all the way through the object. Lets say we wanted to access the pupil transmission array. Normally, we would have to reference it through the entire system like `optics.layers['pupil'].transmission`, but since the parameters are raised, we can just use `optics.pupil.transmission`! This is a small thing, but it makes working with the system much nicer and more intuitive. As we will see soon, this also makes optimising these objects with zodiax much nicer.
 
 dLux will also search through the layers for the attribute that we want, so we can just do `optics.transmission`, however, this can lead to issues if we have multiple layers with the same attribute, so make sure you know where your parameters are coming from if you use this method!
 
@@ -227,12 +231,12 @@ dLux will also search through the layers for the attribute that we want, so we c
 ??? info "Plotting"
     ```python
     # Get the aperture and OPD for visualisation
-    opd = 1e6 * optics.aberrations.eval_basis() # Normalise to microns
-    pupil = opd.at[optics.transmission < 0.5].set(np.nan)
+    opd = 1e6 * optics.pupil.opd.evaluate() # Normalise to microns
+    pupil = opd.at[optics.pupil.transmission < 0.5].set(np.nan)
     
     # Get the extents for visualisation
-    ap_extent = dlu.imshow_extent(optics.diameter)
-    psf_extent = dlu.imshow_extent(optics.fov)
+    ap_extent = dlu.imshow_extent(optics.spec.fov[0])
+    psf_extent = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     # Plot the results
     plt.figure(figsize=(15, 3.75))
@@ -276,7 +280,7 @@ def model_fn(params, optics):
     position = dlu.arcsec2rad(params["position"])
 
     # Update the optical system with the current parameters
-    optics = optics.set(coefficients=params["z-coeffs"])
+    optics = optics.set("pupil.opd.coefficients", params["z-coeffs"])
 
     # Predict the PSF
     return flux * optics.propagate(wavels, position, weights=weights)
@@ -378,7 +382,7 @@ losses = np.array(losses)
 ??? info "Plotting"
     ```python
     # Get the aperture and OPD for visualisation
-    pred_opd = 1e6 * optics.set(coefficients=params["z-coeffs"]).aberrations.eval_basis()
+    pred_opd = 1e6 * optics.set("pupil.opd.coefficients", params["z-coeffs"]).pupil.opd.evaluate()
     pred_pupil = pred_opd.at[optics.transmission < 0.5].set(np.nan)
     pupil_residuals = pred_pupil - pupil
     v = np.nanmax(np.abs(np.array([pupil, pred_pupil])))
@@ -441,7 +445,7 @@ Now we need to create a dLux detector object, which functionally operate in the 
 
 ```python
 # Build our detector with jitter and a random flat field
-detector = dl.LayeredDetector(
+detector = dl.DetectorSystem(
     layers=[
         ("jitter", dl.ApplyJitter(sigma=1, kernel_size=9, oversample=3)),
         ("prf", dl.ApplyPixelResponse(1 + 0.05 * jr.normal(jr.key(0), psf.shape))),
@@ -452,9 +456,9 @@ detector = dl.LayeredDetector(
 print(detector)
 ```
 
-    LayeredDetector(
+    DetectorSystem(
       layers={
-        'jitter': ApplyJitter(sigma=1.0, kernel_size=9, oversample=3),
+        'jitter': ApplyJitter(sigma=f32[], kernel_size=9, oversample=3),
         'prf': ApplyPixelResponse(pixel_response=f32[64,64])
       }
     )
@@ -537,28 +541,36 @@ class WeakLens(dl.OpticalLayer):
 weak_lens = WeakLens(wf_npix, wavels.mean(), n_waves=1)
 
 # Insert the weak lens into our optical system
-optics = optics.insert_layer(("weak_lens", weak_lens), 2)
+optics = optics.insert_layer(("weak_lens", weak_lens), 1)
 
 # Reduce the aberrations to make it easier to see the effect of the weak lens
-optics = optics.multiply(coefficients=0.1)
+optics = optics.multiply("pupil.opd.coefficients", 0.1)
 
 # Examine the optics with the weak lens
 print(optics)
 ```
 
-    AngularOpticalSystem(
-      wf_npixels=256,
-      diameter=1.0,
+    OpticalSystem(
       layers={
-        'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
-        'aberrations':
-        BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+        'pupil':
+        Optic(
+          opd=ExplicitBasis(
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
+          ),
+          phase=None,
+          transmission=f32[256,256],
+          normalise=True
+        ),
         'weak_lens':
-        WeakLens(defocus=f32[256,256], n_waves=1.0, target_wl=8.750000120016921e-07)
+        WeakLens(defocus=f32[256,256], n_waves=1.0, target_wl=8.750000120016921e-07),
+        'propagator':
+        Fraunhofer(
+          spec=GridSpec(n=(64, 64), d=f32[2], c=None, unit='arcsec'),
+          focal_length=None,
+          method='mft'
+        )
       },
-      psf_npixels=64,
-      oversample=1,
-      psf_pixel_scale=0.05
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
@@ -571,7 +583,7 @@ Great, as we can see we now have our new defocusing lens layer in our optical sy
     
     plt.figure(figsize=(25, 4))
     for i in range(len(waves)):
-        psf = optics.set(n_waves=waves[i]).propagate(wavels)
+        psf = optics.set("weak_lens.n_waves", waves[i]).propagate(wavels)
     
         ax = plt.subplot(1, 5, i + 1)
         im = ax.imshow(psf, extent=psf_extent)
@@ -604,8 +616,8 @@ class Model(zdx.Base):
     dithers: np.ndarray
     wavels: np.ndarray
     weights: np.ndarray
-    optics: dl.AngularOpticalSystem
-    detector: dl.LayeredDetector
+    optics: dl.OpticalSystem
+    detector: dl.DetectorSystem
 
     def __init__(self, optics, detector, dithers, wavels, weights):
         self.optics = optics
@@ -617,16 +629,16 @@ class Model(zdx.Base):
     def update_optics(self, params):
         """Updates the optics with the current parameters"""
         if "z-coeffs" in params:
-            return self.optics.set(coefficients=params["z-coeffs"])
+            return self.optics.set("pupil.opd.coefficients", params["z-coeffs"])
         return self.optics
 
     def update_detector(self, params):
         """Updates the detector with the current parameters"""
         detector = self.detector
         if "jitter" in params and "prf" in params:
-            detector = detector.set(sigma=params["jitter"])
+            detector = detector.set("jitter.sigma", params["jitter"])
         if "prf" in params:
-            detector = detector.set(pixel_response=params["prf"])
+            detector = detector.set("prf.pixel_response", params["prf"])
         return detector
 
     def __call__(self, params):
@@ -639,9 +651,12 @@ class Model(zdx.Base):
         weights = 10 ** params["flux"] * self.weights
 
         # Define the modelling function and propagate the dithers
-        model_fn = lambda pos: detector(
-            optics.propagate(self.wavels, pos, weights, return_psf=True)
-        )
+        def model_fn(pos):
+            psf = optics.propagate(
+                self.wavels, pos, weights, return_all=True
+            )["PSF"]
+            return detector(psf).data
+
         return eqx.filter_vmap(model_fn)(positions)
 
     def simulate(self, params, n_frames=100, key=jr.key(0), read_noise=10.0):
@@ -666,7 +681,7 @@ class Model(zdx.Base):
         return data, error
 
 # Define our dithers - a 3x3 grid of dithers across the field of view
-grid = np.arange(-2, 3) * optics.fov / 6
+grid = np.arange(-2, 3) * psf_spec.set(unit=None).fov[0] / 6
 dithers = np.array(np.meshgrid(grid, grid[::-1])).reshape(2, -1).T
 model = Model(optics, detector, dithers, wavels, weights)
 
@@ -678,25 +693,33 @@ print(model)
       dithers=f32[25,2],
       wavels=f32[5],
       weights=f32[5],
-      optics=AngularOpticalSystem(
-        wf_npixels=256,
-        diameter=1.0,
+      optics=OpticalSystem(
         layers={
-          'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
-          'aberrations':
-          BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+          'pupil':
+          Optic(
+            opd=ExplicitBasis(
+              coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
+            ),
+            phase=None,
+            transmission=f32[256,256],
+            normalise=True
+          ),
           'weak_lens':
           WeakLens(
             defocus=f32[256,256], n_waves=1.0, target_wl=8.750000120016921e-07
+          ),
+          'propagator':
+          Fraunhofer(
+            spec=GridSpec(n=(64, 64), d=f32[2], c=None, unit='arcsec'),
+            focal_length=None,
+            method='mft'
           )
         },
-        psf_npixels=64,
-        oversample=1,
-        psf_pixel_scale=0.05
+        spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
       ),
-      detector=LayeredDetector(
+      detector=DetectorSystem(
         layers={
-          'jitter': ApplyJitter(sigma=1.0, kernel_size=9, oversample=3),
+          'jitter': ApplyJitter(sigma=f32[], kernel_size=9, oversample=3),
           'prf': ApplyPixelResponse(pixel_response=f32[64,64])
         }
       )
@@ -832,7 +855,7 @@ losses = np.array(losses)
     ax.plot(values["z-coeffs"])
     ax.set(title="Zernike coefficients", xlabel="Step", ylabel="Delta Zernike Coefficients")
     
-    _coeffs = optics.coefficients
+    _coeffs = optics.pupil.opd.coefficients
     ax = plt.subplot(4, 2, 8)
     ax.scatter(_coeffs, values["z-coeffs"][-1])
     ax.plot([_coeffs.min(), _coeffs.max()], [_coeffs.min(), _coeffs.max()], "k--", label="1:1")

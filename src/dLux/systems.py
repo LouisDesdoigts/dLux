@@ -36,7 +36,7 @@ class LayeredSystem(zdx.Base):
 
     def __call__(self, target):
         for layer in self.layers.values():
-            target = layer(target)
+            target = layer.apply(target)
         return target
 
     def apply(self, target):
@@ -47,7 +47,7 @@ class LayeredSystem(zdx.Base):
         """Apply every layer and return the intermediate states."""
         outputs = {"input": target}
         for name, layer in self.layers.items():
-            target = layer(target)
+            target = layer.apply(target)
             outputs[name] = target
         return target, outputs
 
@@ -144,7 +144,9 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
             raise ValueError("wavelengths and weights must have matching shapes.")
 
         wavefront = self(self.initialise_wavefront(wavelengths, offset))
-        scale = wavefront._to_phasor_shape(np.sqrt(weights))
+        scale = np.sqrt(weights).reshape(
+            weights.shape + (1,) * (wavefront.phasor.ndim - weights.ndim)
+        )
         wavefront = wavefront.set(phasor=wavefront.phasor * scale)
         psf = self._to_psf(wavefront, stokes)
         if return_all:

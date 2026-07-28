@@ -150,33 +150,14 @@ Visualising the pretty basis vectors:
 
 ## 2. Building the Optical Model
 
-This section will cover how we can construct an optical model that uses the CLIMB algorithm to map from the latent basis to a binary phase mask. To do this, we need to create a custom dLux layer that calls the dLux implementation of the CLIMB algorithm. This serves as a good example of how we can easily extend the dLux framework with custom layers that can be used in the same way as any other dLux layer, and can be seamlessly integrated into the rest of the optical model and optimisation procedure, leveraging the structure of existing classes to simplify our code. We will build our optical model to match the Toliman space telescope.
+This section constructs an optical model that uses the CLIMB algorithm to map the latent basis to a binary phase mask. The general `CLIMBBasis` parameterisation implements this mapping directly. We convert its phase at the design wavelength into a physical OPD, combine it with the Zernike OPD, and supply the result to a single `Optic`. This preserves the chromatic phase response of the physical mask. We will build our optical model to match the Toliman space telescope.
 
 
 ```python
-# Build the CLIMB basis layer
-class BasisCLIMB(dl.BasisLayer):
-    """Maps a set of latent basis vectors to a binary phase mask using the CLIMB
-    algorithm implements via the dLux `soft_binarise` function. We extend the
-    `BasisLayer` class in dLux, which stores the basis and coefficients. We only need
-    to implement the `__call__` method to apply the basis as an OPD to the wavefront,
-    define a function to generate the binary mask from the basis using the CLIMB
-    algorithm, and define a target wavelength that the OPD mask will produce a perfect
-    0-π anti-phase."""
-    wavelength: np.ndarray
-
-    def __init__(self, basis, wl, coeffs=None):
-        self.wavelength = wl
-        super().__init__(basis, coeffs)
-
-    @property
-    def binary_mask(self):
-        return 2 * dlu.soft_binarise(self.eval_basis(), 3) - 1
-
-    def __call__(self, wavefront):
-        # Apply the basis as an OPD to the wavefront
-        phase_basis = np.pi * self.binary_mask / 2
-        return wavefront.add_opd(dlu.phase2opd(phase_basis, self.wavelength))
+# Convert a CLIMB phase parameterisation back to its binary mask values
+def binary_mask(optics):
+    phase = optics.pupil.opd.parametrics["mask"].parametric.evaluate()
+    return 2 * phase / np.pi
 ```
 
 Build the optical system
@@ -186,7 +167,7 @@ Build the optical system
 # Observational wavelengths
 wavels = 1e-9 * np.linspace(595, 695, 5)
 
-# build the CLIMB mask layer
+# Build the CLIMB mask coefficients
 coeffs = 100 * jr.normal(jr.PRNGKey(1), (basis.shape[0],))
 
 # Build our Toliman aperture and zernike aberrations
@@ -204,20 +185,27 @@ aperture, z_basis, z_support = dlu.circular_aperture(
     return_support=True,
 )
 
-# Normalise the zernikes to 1nm rms and build the aperture layer
+# Normalise the Zernikes to 1 nm rms
 z_basis /= 1e9 * dlu.rms_norm(z_basis, z_support, axis=(1, 2), keepdims=True)
 
-# Build the optics
-optics = dl.AngularOpticalSystem(
-    wf_npixels=wf_npix,
-    diameter=diameter,
-    layers=[
-        ("aperture", dl.BasisOptic(transmission=aperture, basis=z_basis, normalise=True)),
-        ("pupil", BasisCLIMB(basis, wl=wavels.mean(), coeffs=coeffs)),
-    ],
-    psf_npixels=80,
-    psf_pixel_scale=0.25,
+# Define the pupil and focal-plane sampling
+pupil_spec = dl.GridSpec(n=(wf_npix,) * 2, diam=diameter, unit="m")
+psf_spec = dl.GridSpec(
+    n=(80 * oversample,) * 2, d=0.25 / oversample, unit="arcsec"
 )
+
+# Combine the Zernike and physical CLIMB-mask OPDs
+aberrations = dl.ExplicitBasis(z_basis, np.zeros(z_basis.shape[0]))
+mask = dl.CLIMBBasis(basis, coeffs, values=(-np.pi / 2, np.pi / 2))
+mask_opd = mask.map(lambda phase: dlu.phase2opd(phase, wavels.mean()))
+opd = dl.Combination([("aberrations", aberrations), ("mask", mask_opd)])
+
+# Combine the transmission and both OPD components into one pupil optic
+pupil = dl.Optic(transmission=aperture, opd=opd, normalise=True)
+
+# Build the optical system
+layers = [("pupil", pupil), ("propagator", dl.Fraunhofer(psf_spec))]
+optics = dl.OpticalSystem(layers, pupil_spec)
 ```
 
 Now lets have a look at our optical model and PSF
@@ -226,14 +214,14 @@ Now lets have a look at our optical model and PSF
 ??? info "Plotting code"
     ```python
     # Get the initial PSF and mask
-    aperture = optics.aperture.transmission
+    aperture = optics.pupil.transmission
     nan_aper = lambda x: x.at[~(aperture > 0.0)].set(np.nan)
-    initial_mask = nan_aper(optics.pupil.binary_mask)
+    initial_mask = nan_aper(binary_mask(optics))
     initial_psf = optics.propagate(wavels)
     
     # Image extents
-    aper_ext = dlu.imshow_extent(optics.diameter)
-    psf_ext = dlu.imshow_extent(optics.fov)
+    aper_ext = pupil_spec.extent
+    psf_ext = psf_spec.set(unit=None).extent
     
     # Plot
     plt.figure(figsize=(10, 4))
@@ -278,8 +266,7 @@ def RGE_fn(array):
     return np.sum(positions * grads_vec, axis=0) ** 2
 
 # Build the radial mask
-true_npixels = optics.psf_npixels * optics.oversample
-radii = dlu.pixel_coords(true_npixels, optics.fov, polar=True)[0]
+radii = np.hypot(*psf_spec.set(unit=None).coordinates)
 rmax = 8 * dlu.rad2arcsec(wavels.max() / diameter)
 radial_mask = radii < rmax
 ```
@@ -334,8 +321,9 @@ def loss_fn(params, optics, radial_mask, power=0.45):
     return loss1 + loss2
 
 # Set up the parameters and optimiser
-params = optics.get("pupil.coefficients", as_dict=True)
-optimisers = {"pupil.coefficients": optax.adam(2e1)}
+mask_path = "pupil.opd.parametrics.mask.parametric.coefficients"
+params = optics.get(mask_path, as_dict=True)
+optimisers = {mask_path: optax.adam(2e1)}
 optim, opt_state = zdx.map_optimisers(params, optimisers)
 
 # Run the optimisation loop
@@ -359,8 +347,8 @@ Visualising the results:
 
 ??? info "Plotting code"
     ```python
-    coeffs_out = np.array([p["pupil.coefficients"] for p in params_out])
-    final_mask = nan_aper(optics.set(params).pupil.binary_mask)
+    coeffs_out = np.array([p[mask_path] for p in params_out])
+    final_mask = nan_aper(binary_mask(optics.set(params)))
     final_psf = optics.set(params).propagate(wavels)
     final_ge_coeffs = coeffs_out[-1]
     
@@ -465,8 +453,8 @@ def model_fn(params, optics):
 
     # Update the optics with the relevant parameters
     optics = optics.set(
-        ["aperture.coefficients", "psf_pixel_scale"],
-        [params["aberrations"], params["pix_scale"]],
+        ["pupil.opd.parametrics.aberrations.coefficients", "propagator.spec.d"],
+        [params["aberrations"], np.full(2, params["pix_scale"])],
     )
 
     # Propagate the PSF for each source position
@@ -505,13 +493,10 @@ marginal_params = {
     "aberrations": np.zeros(z_basis.shape[0]),  # initial aberration coefficients
 }
 
-# Tweak our modelling parameters to capture the binary
+# Tweak our output sampling to capture the binary
+model_spec = dl.GridSpec(n=(100,) * 2, d=0.3, unit="arcsec")
 optics = optics.set(
-    {
-        "oversample": 1,
-        "psf_npixels": 100,
-        "pupil.coefficients": coeffs,
-    }
+    ["propagator.spec", mask_path], [model_spec, coeffs]
 )
 
 # Look at the initial PSF
@@ -528,15 +513,15 @@ cramer_rao
 
 
 
-    {'aberrations': Array([0.05299159, 0.04507131, 0.04443987, 0.05261863, 0.05068265,
-            0.05211277, 0.05471021, 0.06244044, 0.05250693, 0.05365947,
+    {'aberrations': Array([0.05299159, 0.04507131, 0.04443987, 0.05261864, 0.05068265,
+            0.05211277, 0.0547102 , 0.06244044, 0.05250693, 0.05365947,
             0.047788  , 0.04849511], dtype=float64),
      'contrast': Array(0.00562126, dtype=float64),
      'flux': Array(0.00018371, dtype=float64),
-     'pix_scale': Array(7.23272209e-05, dtype=float64),
+     'pix_scale': Array(7.23272156e-05, dtype=float64),
      'pos_angle': Array(0.00367735, dtype=float64),
      'separation': Array(0.00250388, dtype=float64),
-     'wavel': Array(0.15074017, dtype=float64)}
+     'wavel': Array(0.15074016, dtype=float64)}
 
 
 
@@ -546,7 +531,7 @@ Lets have a quick look at our initial mask and what our binary star looks like t
 ??? info "Plotting code"
     ```python
     # Get the initial PSF and mask
-    start_mask = nan_aper(optics.pupil.binary_mask)
+    start_mask = nan_aper(binary_mask(optics))
     
     # Plot
     plt.figure(figsize=(10, 4))
@@ -591,8 +576,8 @@ def fisher_loss_fn(mask_params, model_params, optics, n_frames=1, read_noise=2.5
 
 
 # Set up the parameters and optimiser
-params = {"pupil.coefficients": coeffs}
-optimisers = {"pupil.coefficients": optax.adam(2e2)}
+params = {mask_path: coeffs}
+optimisers = {mask_path: optax.adam(2e2)}
 optim, opt_state = zdx.map_optimisers(params, optimisers)
 
 # Run the optimisation loop
@@ -615,15 +600,15 @@ for i in looper:
 ??? info "Plotting code"
     ```python
     # Get the initial and final masks and PSFs
-    initial_mask = nan_aper(optics.set(params_out[0]).binary_mask)
-    final_mask = nan_aper(optics.set(params_out[-1]).binary_mask)
+    initial_mask = nan_aper(binary_mask(optics.set(params_out[0])))
+    final_mask = nan_aper(binary_mask(optics.set(params_out[-1])))
     
     # Get the initial and final PSFs for the binary model
     initial_psf = model_fn(marginal_params, optics.set(params_out[0]))
     final_psf = model_fn(marginal_params, optics.set(params_out[-1]))
     
     # Get the final fisher optimized coefficients
-    final_fisher_coeffs = params_out[-1]["pupil.coefficients"]
+    final_fisher_coeffs = params_out[-1][mask_path]
     
     mosaic = """
             AABB
@@ -642,7 +627,7 @@ for i in looper:
     axes["A"].set_ylabel("Binary Separation CRLB [mas]")
     
     axes["B"].set_title("Coeffs")
-    axes["B"].plot(np.array([p["pupil.coefficients"] for p in params_out]), alpha=0.2)
+    axes["B"].plot(np.array([p[mask_path] for p in params_out]), alpha=0.2)
     
     axes["C"].imshow(initial_mask, cmap=binary)
     axes["C"].set_title("Initial OPD")
@@ -680,10 +665,10 @@ def calc_crlb(optics, n_frames=1, read_noise=2.5):
     return unravel_fn(np.diag(np.linalg.inv(F)) ** 0.5)
 
 # Set up the optical systems with each mask
-airy_optics = optics.set("pupil.coefficients", np.zeros_like(coeffs))
-rand_optics = optics.set("pupil.coefficients", coeffs)
-ge_optics = optics.set("pupil.coefficients", final_ge_coeffs)
-fisher_optics = optics.set("pupil.coefficients", final_fisher_coeffs)
+airy_optics = optics.set(mask_path, np.zeros_like(coeffs))
+rand_optics = optics.set(mask_path, coeffs)
+ge_optics = optics.set(mask_path, final_ge_coeffs)
+fisher_optics = optics.set(mask_path, final_fisher_coeffs)
 
 # Calculate the CRLB for each mask
 crlbs = {
@@ -704,8 +689,8 @@ for label, crlb in crlbs.items():
 
     Airy Separation CRLB: 16.358 mas
     Random Separation CRLB: 2.512 mas
-    GE Optimised Separation CRLB: 2.672 mas
-    Fisher Optimised Separation CRLB: 1.941 mas
+    GE Optimised Separation CRLB: 2.574 mas
+    Fisher Optimised Separation CRLB: 1.997 mas
 
 
 Lets examine our main parameters (i.e. not the aberrations)
@@ -868,9 +853,9 @@ print(f"Fisher optimised mask is {rand / fisher:.1f}x more efficient than the Ra
 print(f"Fisher optimised mask is {ge / fisher:.1f}x more efficient than the GE Optimised mask")
 ```
 
-    Fisher optimised mask is 71.1x more efficient than the Airy mask
-    Fisher optimised mask is 1.7x more efficient than the Random mask
-    Fisher optimised mask is 1.9x more efficient than the GE Optimised mask
+    Fisher optimised mask is 67.1x more efficient than the Airy mask
+    Fisher optimised mask is 1.6x more efficient than the Random mask
+    Fisher optimised mask is 1.7x more efficient than the GE Optimised mask
 
 
 Cool! As we can see we gain almost a 50x improvement in the time required to achieve our desired separation constraint in comparison to the naive best-choice - the Airy disk. We also gain significant factors of improvement compared to our gradient energy optimised mask, which is a nice demonstration of the power of using a rigorous metric that is directly related to our scientific goal, rather than relying on a heuristic metric that may not be directly related to our scientific goal. This is the power of this design method, it allows us to directly optimise for our scientific goal, while accounting for all of the complexities and covariances in our problem, which is exactly what we want to do in this case.

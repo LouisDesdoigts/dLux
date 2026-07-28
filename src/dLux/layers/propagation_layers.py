@@ -197,6 +197,10 @@ class Propagator(OpticalLayer):
 
     spec: BaseGridSpec
 
+    def apply(self, wavefront):
+        """Propagate the complete vectorised wavefront state."""
+        return self(wavefront)
+
     def __init__(self, spec):
         if not isinstance(spec, (GridSpec, ResizeSpec)):
             raise TypeError("spec must be a GridSpec or ResizeSpec.")

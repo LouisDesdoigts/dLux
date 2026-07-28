@@ -54,6 +54,10 @@ def _slice(obj, index, size):
 class Interfere(OpticalLayer):
     """Coherently sum the leading sub-aperture axis of a Wavefront."""
 
+    def apply(self, wavefront: Wavefront) -> Wavefront:
+        """Apply directly because interference consumes a vectorised aperture axis."""
+        return self(wavefront)
+
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         axis = wavefront.batch_ndim - 1
         size = wavefront.phasor.shape[axis]
