@@ -616,14 +616,14 @@ class Wavefront(ContinuousField):
     @property
     def power(self: Wavefront) -> Array:
         """
-        Returns the total power of the wavefront, summed over all phasor entries.
+        Returns the power of each wavefront, summed over intrinsic field axes.
 
         Returns
         -------
         power : Array
-            The total power of the wavefront.
+            The power of each vectorised wavefront.
         """
-        return np.sum(self.psf)
+        return np.sum(self.psf, axis=(-2, -1))
 
     def _to_phasor_shape(self: Wavefront, array: Array) -> Array:
         """
@@ -733,10 +733,10 @@ class Wavefront(ContinuousField):
         if mode == "power":
             scale = np.sqrt(value / self.power)
         elif mode == "peak":
-            scale = np.sqrt(value / self.psf.max())
+            scale = np.sqrt(value / self.psf.max(axis=(-2, -1)))
         else:
             raise ValueError("mode must be 'power' or 'peak'")
-        return self.multiply("phasor", scale)
+        return self.set(phasor=self.phasor * self._to_phasor_shape(scale))
 
     def _binary_op(
         self: Wavefront, other: Wavefront | Array | None, op: str

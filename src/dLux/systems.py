@@ -143,10 +143,9 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         if weights.shape != wavelengths.shape:
             raise ValueError("wavelengths and weights must have matching shapes.")
 
-        wavefront = self.initialise_wavefront(wavelengths, offset)
-        weights = weights.reshape(weights.shape + (1, 1))
-        wavefront = wavefront.set(phasor=wavefront.phasor * np.sqrt(weights))
-        wavefront = self(wavefront)
+        wavefront = self(self.initialise_wavefront(wavelengths, offset))
+        scale = wavefront._to_phasor_shape(np.sqrt(weights))
+        wavefront = wavefront.set(phasor=wavefront.phasor * scale)
         psf = self._to_psf(wavefront, stokes)
         if return_all:
             return {"Wavefront": wavefront, "PSF": psf}
