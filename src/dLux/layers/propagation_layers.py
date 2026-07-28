@@ -90,15 +90,15 @@ def _propagate_fft(wf, spec, unit, ABCD=None, **kwargs):
 def _propagate_free_space(wf, spec, distance, crop):
     """Propagate every field over a free-space distance."""
     wavelength, x, y = _propagation_inputs(wf)
-    padding = spec.padding
     propagate = np.vectorize(
         lambda field, lam, x, y: dlu.ASM(
-            field, lam, (x, y), distance, crop=crop, **padding
+            field, lam, (x, y), distance, crop=False, **spec.padding
         ),
-        signature="(n,m),(),(m),(n)->(n,m)" if crop else "(n,m),(),(m),(n)->(p,q)",
+        signature="(n,m),(),(m),(n)->(p,q)",
     )
     field = propagate(wf.phasor, wavelength, x, y)
-    spec = wf.spec if crop else wf.spec.set(n=field.shape[-2:][::-1])
+    field = spec.crop_array(field) if crop else field
+    spec = wf.spec.resize(field.shape[-2:][::-1])
     return wf.set(phasor=field, spec=spec)
 
 
