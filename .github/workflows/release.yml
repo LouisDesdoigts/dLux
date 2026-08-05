@@ -107,6 +107,71 @@ jobs:
       - name: Publish distributions
         uses: pypa/gh-action-pypi-publish@release/v1
 
+  documentation:
+    name: Publish release documentation
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout tagged commit
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install documentation environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[dev]"
+          python -m pip install git+https://github.com/squidfunk/mike.git
+
+      - name: Verify PyPI release
+        env:
+          EXPECTED_VERSION: ${{ github.ref_name }}
+        run: |
+          EXPECTED_VERSION="${EXPECTED_VERSION#v}" python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.request
+
+          expected = os.environ["EXPECTED_VERSION"]
+          for attempt in range(12):
+              with urllib.request.urlopen("https://pypi.org/pypi/dLux/json") as response:
+                  published = json.load(response)["info"]["version"]
+              if published == expected:
+                  print(f"Verified dLux {published} on PyPI.")
+                  break
+              if attempt == 11:
+                  raise RuntimeError(
+                      f"Expected dLux {expected} on PyPI, found {published}."
+                  )
+              time.sleep(10)
+          PY
+
+      - name: Build documentation
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          python docs/scripts/generate_api_mds.py
+          DLUX_DOCS_SITE_NAME="dLux v${VERSION}" zensical build --strict
+
+      - name: Deploy release documentation
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+          VERSION="${GITHUB_REF_NAME#v}"
+          DLUX_DOCS_SITE_NAME="dLux v${VERSION}" \
+            mike deploy --config-file mkdocs.yml --push \
+              --update-aliases "$VERSION" latest
+          mike set-default --config-file mkdocs.yml --push latest
+
   release:
     name: Create GitHub Release
     needs: publish

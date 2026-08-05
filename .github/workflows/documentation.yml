@@ -4,8 +4,6 @@ on:
     branches:
       - main
       - docs-patch
-    tags:
-      - 'v*'
 
 permissions:
   contents: write
@@ -54,12 +52,3 @@ jobs:
           DLUX_VERSION="$(python -c 'from importlib.metadata import version; print(version("dLux"))')"
           DLUX_DOCS_SITE_NAME="dLux v${DLUX_VERSION}" \
             mike deploy --config-file mkdocs.yml --push dev
-          mike set-default --config-file mkdocs.yml --push dev
-
-      - name: Deploy release documentation
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          DLUX_DOCS_SITE_NAME="dLux v${VERSION}" \
-            mike deploy --config-file mkdocs.yml --push \
-              --update-aliases "$VERSION" latest
