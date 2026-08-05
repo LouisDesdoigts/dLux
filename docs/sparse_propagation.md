@@ -1,4 +1,4 @@
-## Spare Apertures & Propagation
+# Sparse Apertures & Propagation
 
 This tutorial is designed to show some new functionality from (abcdLux)[https://github.com/LouisDesdoigts/abcdLux]. This new library is a more powerful low-level propagator library built for dLux. It has a lot extra functionality and including sparse aperture support, explicit propagation kernel caching, and a fully generalised treatment of Fresnel propagation using Linear Canonical Transforms. In this tutorial we will be examining how we can create a custom propagation function that can leverage the sparsity of an aperture to propagate an PSF much faster than the full aperture!
 
