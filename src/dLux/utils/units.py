@@ -3,6 +3,7 @@ from jax import Array
 from functools import lru_cache
 
 __all__ = [
+    "unit_factor",
     "unit_factor_to_rad",
     "convert",
     "rad2arcsec",
@@ -28,6 +29,11 @@ _BASE_TO_RAD = {
     "arcsec": np.pi / (180.0 * 3600.0),
 }
 
+_BASE_TO_METRE = {"m": 1.0, "angstrom": 1e-10}
+
+_BASE_TO_PHOTON = {"photon": 1.0}
+_BASE_UNITS = {**_BASE_TO_RAD, **_BASE_TO_METRE, **_BASE_TO_PHOTON}
+
 # ---- aliases (lowercase lookup only) ----
 _ALIASES = {
     "radian": "rad",
@@ -42,18 +48,19 @@ _ALIASES = {
     "arcsecs": "arcsec",
     "arcsecond": "arcsec",
     "arcseconds": "arcsec",
+    "metre": "m",
+    "metres": "m",
+    "meter": "m",
+    "meters": "m",
+    "a": "angstrom",
+    "aa": "angstrom",
+    "ångström": "angstrom",
+    "angstroms": "angstrom",
+    "photons": "photon",
 }
 
 # ---- SI-like prefixes ----
-_PREFIX = {
-    "G": 1e9,
-    "M": 1e6,
-    "k": 1e3,
-    "": 1.0,
-    "m": 1e-3,
-    "u": 1e-6,
-    "n": 1e-9,
-}
+_PREFIX = {"G": 1e9, "M": 1e6, "k": 1e3, "": 1.0, "m": 1e-3, "u": 1e-6, "n": 1e-9}
 
 
 def _canon(unit: str) -> str:
@@ -81,12 +88,29 @@ def unit_factor_to_rad(unit: str):
 
     # prefixed unit
     p = u[0]
-    base = u[1:]
+    base = _canon(u[1:])
 
     if p in _PREFIX and base in _BASE_TO_RAD:
         return _PREFIX[p] * _BASE_TO_RAD[base]
 
     raise ValueError(f"Unknown angular unit '{unit}'.")
+
+
+@lru_cache(maxsize=None)
+def unit_factor(unit: str):
+    """Return the factor converting a supported unit to canonical SI units.
+
+    Angular units convert to radians and length units convert to metres.
+    """
+    u = _canon(unit)
+    if u in _BASE_UNITS:
+        return _BASE_UNITS[u]
+
+    prefix = u[0]
+    base = _canon(u[1:])
+    if prefix in _PREFIX and base in _BASE_UNITS:
+        return _PREFIX[prefix] * _BASE_UNITS[base]
+    raise ValueError(f"Unknown unit '{unit}'.")
 
 
 def convert(value, unit_in: str, unit_out: str, scale: float = 1.0):

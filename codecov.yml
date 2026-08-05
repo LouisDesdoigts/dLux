@@ -1,0 +1,22 @@
+coverage:
+  precision: 2
+  round: down
+  range: 95..100
+  status:
+    project:
+      default:
+        target: 95%
+        threshold: 0%
+        paths:
+          - src/dLux
+    patch:
+      default:
+        target: auto
+        informational: true
+        paths:
+          - src/dLux
+
+comment:
+  layout: "diff, files"
+  behavior: default
+  require_changes: true

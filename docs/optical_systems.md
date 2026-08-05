@@ -1,172 +1,169 @@
-# Working with OpticalSystem Objects
+# Optical Systems, Sources, and Detectors
 
-This tutorial is designed to give an overview of the main class in dLux - The `OpticalSystem` class. 
+This tutorial follows a model through the three high-level dLux contracts. An `OpticalSystem` propagates a `Source` into a continuous `PSF`; a `DetectorSystem` samples that PSF into an `Image`. Along the way we will inspect the underlying `Wavefront`, `PSF`, and `Image` objects.
 
 
 ```python
-# Basic imports
 import jax.numpy as np
+import jax.random as jr
 
-# dLux imports
 import dLux as dl
 import dLux.utils as dlu
 
-# Visualisation imports
 import matplotlib.pyplot as plt
+from matplotlib.colors import PowerNorm
 
 %matplotlib inline
-plt.rcParams['image.cmap'] = 'inferno'
+plt.rcParams["image.cmap"] = "inferno"
+plt.rcParams["image.origin"] = "lower"
 plt.rcParams["font.family"] = "serif"
-plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 90
+plt.rcParams["figure.dpi"] = 90
 ```
 
-## Overview
+## Building an optical system
 
-There are three `OpticalSystem`s implemented in dLux:
-
-1. `LayeredOpticalSystem`
-2. `AngularOpticalSystem`
-3. `CartesianOpticalSystem`
-
-All are constructed similarly, and share the the following attributes:
-
-- `wf_npixels`
-- `diameter`
-- `layers`
-
-The `wf_npixls` parameter defines the number of pixels used to initialise the wavefront, `diameter` defines the diameter of the wavefront in meters, and `layers` is a list of `OpticalLayer` objects that define the transformations to that wavefront.
-
-The `AngularOpticalSystem` and `CartesianOpticalSystem` are both subclasses of the `LayeredOpticalSystem` class, extending it to include three extra attributes:
-
-- `psf_npixels`
-- `psf_pixel_scale`
-- `oversample`
-
-These attributes define the size of the PSF, the pixel scale of the PSF, and the oversampling factor used when calculating the PSF. The difference between the two is that the `AngularOpticalSystem` has `psf_pixel_scale` in units of arcseconds, while the `CartesianOpticalSystem` has `psf_pixel_scale` in units of microns. Note that an oversample of 2 will result in an output psf with shape `(2 * psf_npixels, 2 * psf_npixels)`, with the idea that the PSF will be downsampled later to the correct size and pixel scale. 
-
-Beyond this, the `CartesianOpticalSystem` has an extra attribute `focal_length`, with units of meters.
-
-Now lets create a minimal `AnguarOpticalSystem` to demonstrate how to use these classes.
+An `OpticalSystem` is an ordered collection of optical layers plus the `GridSpec` used to initialise its input wavefront. Propagation to another plane is explicit: here the final `Fraunhofer` layer maps the metre-sampled pupil onto an angular focal-plane grid.
 
 
 ```python
-# Define our wavefront properties
-wf_npix = 512  # Number of pixels in the wavefront
-diameter = 1.0  # Diameter of the wavefront, meters
+# Pupil and focal-plane sampling
+wf_npix = 256
+diameter = 1.0
+oversample = 2
+psf_npix = 64
+psf_pixel_scale = 0.05
 
-# Construct a simple circular aperture
-coords = dlu.pixel_coords(wf_npix, diameter)
-aperture = dlu.circle(coords, 0.5 * diameter)
-
-# Define our detector properties
-psf_npix = 64  # Number of pixels in the PSF
-psf_pixel_scale = 50e-3  # 50 mili-arcseconds
-oversample = 3  # Oversampling factor for the PSF
-
-# Define the optical layers
-layers = [('aperture', dl.layers.Optic(aperture, normalise=True))]
-
-# Construct the optics object
-optics = dl.AngularOpticalSystem(
-    wf_npix, diameter, layers, psf_npix, psf_pixel_scale, oversample
+pupil_spec = dl.GridSpec(n=(wf_npix,) * 2, diam=diameter, unit="m")
+psf_spec = dl.GridSpec(
+    n=(psf_npix * oversample,) * 2,
+    d=psf_pixel_scale / oversample,
+    unit="arcsec",
 )
 
-# Get the extents for plotting
-aper_ext = dlu.imshow_extent(optics.diameter)
-psf_ext = dlu.imshow_extent(optics.fov)
+# A simple obscured pupil
+coordinates = pupil_spec.coordinates
+primary = dlu.circle(coordinates, diameter)
+secondary = dlu.circle(coordinates, 0.2 * diameter, invert=True)
+aperture = primary * secondary
 
-# Let examine the optics object! The dLux framework has in-built
-# pretty-printing, so we can just print the object to see what it contains.
+# Optical layers are applied in their listed order
+layers = [
+    ("pupil", dl.Optic(transmission=aperture, normalise=True)),
+    ("propagator", dl.Fraunhofer(psf_spec)),
+]
+optics = dl.OpticalSystem(layers, pupil_spec)
 print(optics)
 ```
 
-    AngularOpticalSystem(
-      wf_npixels=512,
-      diameter=1.0,
+    OpticalSystem(
       layers={
-        'aperture':
-        Optic(opd=None, phase=None, transmission=f32[512,512], normalise=True)
+        'pupil':
+        Optic(opd=None, phase=None, transmission=f32[256,256], normalise=True),
+        'propagator':
+        Fraunhofer(
+          spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+          focal_length=None,
+          method='mft'
+        )
       },
-      psf_npixels=64,
-      oversample=3,
-      psf_pixel_scale=0.05
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
+## Sources and spectra
 
-## Methods
-
-All three of these object are quite similar, and share the same two primary methods:
-
-1. `.propagate_mono`
-2. `.propagate`
-
-Lets look at them one at a time
-
-## `propagate_mono`
-
-`propagate_mono` has the following signature: `optics.propagate_mono(wavelength, offset=np.zeros(2), return_wf=False)`
-
-- `wavelength` is the wavelength of the light to propagate, in meters
-- `offset` is the offset of the source from the center of optical system, in radians
-- `return_wf` is a boolean flag that determines whether the wavefront object should be returned, as opposed to the psf array.
-
-Note that the `propagate_mono` method should generally not be used, as its functionality is superceeded by the `propagate` method, but lets look at how it works anyway.
+A `Spectrum` contains wavelength samples and their pre-integrated weights. A `Source` adds position, flux, and an optional resolved distribution. Units are declared once on the source, so the user-facing values can remain in convenient units. Spectral weights are deliberately not normalised inside the model; if unit total weight is required, normalise them before constructing or updating the source.
 
 
 ```python
-# 1 micron wavelength
-wavelength = 1e-6 
+# A mildly red spectrum sampled in nanometres
+wavelengths = np.linspace(850, 1050, 9)
+weights = np.linspace(0.6, 1.4, wavelengths.size)
+weights /= weights.sum()
 
-# 5-pixel offset in the x-direction
-shift = np.array([5 * psf_pixel_scale, 0])
-offset = dlu.arcsec2rad(shift)
-
-# Propagate a psf
-psf = optics.propagate_mono(wavelength, offset)
-
-# Propagate the Wavefront
-wf = optics.propagate_mono(wavelength, offset, return_wf=True)
-
-# Look at our objects
-print(psf.shape)
-print(wf)
+# A point source 100 mas off axis with 2e5 photons
+source = dl.Source(
+    wavelengths,
+    position=np.array([100.0, 0.0]),
+    flux=2e5,
+    weights=weights,
+    units={"wavelengths": "nm", "position": "mas"},
+)
+print(source)
 ```
 
-    (192, 192)
-    Wavefront(
-      phasor=c64[192,192], wavelength=f32[], pixel_scale=f32[], center=f32[1]
+    Source(
+      wavelengths=f32[9],
+      weights=f32[9],
+      units={
+        'wavelengths': 'nm',
+        'position': 'mas',
+        'flux': 'photon',
+        'distribution': 'linear'
+      },
+      flux=f32[],
+      distribution=None,
+      position=f32[2]
     )
 
 
-Now lets plot our results to see what we get.
+## Wavefront and PSF states
+
+`source.wavefront(spec)` constructs the incident field directly from the source spectrum, flux, and position. It is useful for custom wavefront workflows; any later normalising optical layer will intentionally reset its power. Resolved source distributions remain image-plane operations in `source.model`. `OpticalSystem.model` returns a `PSF` by default, while `return_all=True` also exposes the final chromatic `Wavefront`. The wavefront retains the complex electric field for every wavelength; the PSF contains their weighted intensity sum and its focal-plane sampling.
+
+
+```python
+input_wavefront = source.wavefront(pupil_spec)
+result = optics.model(source, return_all=True)
+wavefront = result["Wavefront"]
+psf = result["PSF"]
+
+print(input_wavefront)
+print(wavefront)
+print(psf)
+print("Wavefront phasor:", wavefront.phasor.shape)
+print("PSF data:", psf.data.shape)
+```
+
+    Wavefront(
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m'),
+      phasor=c64[9,256,256],
+      wavelength=f32[9]
+    )
+    Wavefront(
+      spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+      phasor=c64[9,128,128],
+      wavelength=f32[9]
+    )
+    PSF(
+      spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+      data=f32[128,128]
+    )
+    Wavefront phasor: (9, 128, 128)
+    PSF data: (128, 128)
+
 
 
 ??? info "Plotting code"
     ```python
-    # Plot the results
-    plt.figure(figsize=(20, 4))
-    ax = plt.subplot(1, 4, 1)
-    im = ax.imshow(optics.transmission, extent=aper_ext)
-    plt.colorbar(im, ax=ax, label="Transmission")
-    ax.set(title="Aperture Transmission", xlabel="x (m)", ylabel="y (m)")
+    pupil_extent = pupil_spec.extent
+    psf_extent = psf_spec.set(unit=None).extent
     
-    ax = plt.subplot(1, 4, 2)
-    im = ax.imshow(psf, extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Intensity")
-    ax.set(title="PSF", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
-    ax = plt.subplot(1, 4, 3)
-    im = ax.imshow(wf.amplitude, extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Intensity")
-    ax.set(title="Wavefront Amplitude", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
-    ax = plt.subplot(1, 4, 4)
-    im = ax.imshow(wf.phase, "twilight", extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Radians")
-    ax.set(title="Wavefront Phase", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
+    fig, axes = plt.subplots(1, 4, figsize=(18, 4))
+    images = [
+        axes[0].imshow(aperture, extent=pupil_extent),
+        axes[1].imshow(wavefront.amplitude.mean(0), extent=psf_extent),
+        axes[2].imshow(wavefront.phase[4], cmap="twilight", extent=psf_extent),
+        axes[3].imshow(psf.data, norm=PowerNorm(0.5), extent=psf_extent),
+    ]
+    titles = ["Pupil", "Mean amplitude", "Central-wavelength phase", "PSF"]
+    labels = ["Transmission", "Amplitude", "Phase [rad]", "Intensity"]
+    for ax, image, title, label in zip(axes, images, titles, labels):
+        ax.set_title(title)
+        plt.colorbar(image, ax=ax, label=label)
+    axes[0].set(xlabel="x [m]", ylabel="y [m]")
+    for ax in axes[1:]:
+        ax.set(xlabel="x [arcsec]", ylabel="y [arcsec]")
     plt.tight_layout()
     plt.show()
     ```
@@ -177,134 +174,141 @@ Now lets plot our results to see what we get.
     
 
 
-## `propagate`
-
-`propagate` is the core propagation function of optical systems. It has the following signature: `optics.propagate(wavelengths, offsets=np.zeros(2), weights=None, return_wf=False, return_psf=False)`
-
-
-- `wavelengths` is an array of wavelengths to propagate, in meters
-- `offset` is the offset of the source from the center of optical system, in radians
-- `weights` is an array of weights to apply to each wavelength. If `None`, then all wavelengths are weighted equally.
-- `return_wf` is a boolean flag that determines whether the `Wavefront` object should be returned, as opposed to the psf array.
-- `return_psf` is a boolean flag that determines whether the `PSF` object should be returned, as opposed to the psf array.
-
-Lets see how to ues it.
+A `BinarySource` uses the same spectral contract while generating two positions and their flux ratio. Its weights may be shared by both stars or have a leading two-source axis for distinct component spectra.
 
 
 ```python
-# Wavelengths array - Note we can also pass in a single float value!
-wavelengths = 1e-6 * np.linspace(0.9, 1.1, 10)
-
-# Weights array - Note these are relative weights, the input
-# is automatically normalised
-weights = np.linspace(0.5, 1.5, len(wavelengths))
-
-# 5-pixel offset in the x-direction
-shift = np.array([5 * psf_pixel_scale, 0])
-offset = dlu.arcsec2rad(shift)
-
-# Propagate a psf
-psf = optics.propagate(wavelengths, offset, weights)
-wf = optics.propagate(wavelengths, offset, weights, return_wf=True)
-
-# Look at our objects
-print(psf.shape)
-print(wf)
+binary_weights = np.stack((weights, weights[::-1]))
+binary = dl.BinarySource(
+    wavelengths,
+    centre=np.zeros(2),
+    separation=250.0,
+    position_angle=np.deg2rad(30.0),
+    contrast=4.0,
+    flux=2e5,
+    weights=binary_weights,
+    units={"wavelengths": "nm", "position": "mas"},
+)
+binary_psf = optics.model(binary)
+print(binary)
+print(binary_psf)
 ```
 
-    (192, 192)
-    Wavefront(
-      phasor=c64[10,192,192],
-      wavelength=f32[10],
-      pixel_scale=f32[10],
-      center=f32[10,1]
+    BinarySource(
+      wavelengths=f32[9],
+      weights=f32[2,9],
+      units={
+        'wavelengths': 'nm',
+        'position': 'mas',
+        'flux': 'photon',
+        'distribution': 'linear'
+      },
+      flux=f32[],
+      distribution=None,
+      centre=f32[2],
+      separation=f32[],
+      position_angle=f32[],
+      contrast=f32[]
+    )
+    PSF(
+      spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+      data=f32[128,128]
     )
 
 
-Interesting, as we can see the returned `Wavefront` object in _vectorised_ down its first axis. This is one of the benfits of working within the `Equinox`/`Zodiax` framework, as we can vectorise our objects _directly_ meaning we dont need to updack values into arrays to be vectorised. Note that we plot the _mean_ phase here, but that doesn't really have a physical meaning as the phase is only defined for a monochromatric wavefront, but it gives us an idea of the phase structure of the wavefront.
-
 
 ??? info "Plotting code"
     ```python
-    # Plot the results
-    plt.figure(figsize=(20, 4))
-    ax = plt.subplot(1, 4, 1)
-    im = ax.imshow(optics.transmission, extent=aper_ext)
-    plt.colorbar(im, ax=ax, label="Transmission")
-    ax.set(title="Aperture Transmission", xlabel="x (m)", ylabel="y (m)")
-    
-    ax = plt.subplot(1, 4, 2)
-    im = ax.imshow(psf, extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Intensity")
-    ax.set(title="PSF", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
-    ax = plt.subplot(1, 4, 3)
-    im = ax.imshow(wf.amplitude.mean(0), extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Intensity")
-    ax.set(title="Wavefront Mean Amplitude", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
-    ax = plt.subplot(1, 4, 4)
-    im = ax.imshow(wf.phase.mean(0), "twilight", extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Radians")
-    ax.set(title="Wavefront Mean Phase", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
+    plt.figure(figsize=(6, 5))
+    image = plt.imshow(binary_psf.data, norm=PowerNorm(0.5), extent=psf_extent)
+    plt.colorbar(image, label="Photons")
+    plt.title("Binary-source PSF")
+    plt.xlabel("x [arcsec]")
+    plt.ylabel("y [arcsec]")
     plt.tight_layout()
     plt.show()
     ```
 
 
     
-![png](assets/optical_systems_files/output_12_0.png)
+![png](assets/optical_systems_files/output_11_0.png)
     
 
 
-We can also return the `PSF` object too, allowing us to keep track of the pixel scale and perform operations like downsampling. Lets have a look at that now
+## Detector systems and images
+
+A `DetectorSystem` accepts a `PSF` and returns an `Image`. This cleanly separates continuous optical modelling from detector sampling. Here we downsample the oversampled PSF, apply jitter, and add a constant background. The resulting `Image` can then generate noise realisations and track their variance.
 
 
 ```python
-# Get the PSF object
-PSF = optics.propagate(wavelengths, offset, weights, return_psf=True)
+detector = dl.DetectorSystem(
+    [
+        ("downsample", dl.Downsample(oversample)),
+        ("jitter", dl.ApplyJitter(sigma=0.35)),
+        ("background", dl.AddConstant(5.0)),
+    ]
+)
 
-# Downsample the PSF to the 'true' pixel scale
-true_PSF = PSF.downsample(oversample)
+image = detector.model(psf)
+key_poisson, key_read = jr.split(jr.key(0))
+noisy = image.add_poisson_noise(key_poisson).add_read_noise(key_read, sigma=3.0)
 
-# Lets examine it, and plot it
-print(true_PSF)
+print(detector)
+print(image)
+print(noisy)
 ```
 
-    PSF(data=f32[64,64], pixel_scale=f32[])
+    DetectorSystem(
+      layers={
+        'downsample': Downsample(n=(2,)),
+        'jitter': ApplyJitter(sigma=f32[], kernel_size=9, oversample=3),
+        'background': AddConstant(value=f32[])
+      }
+    )
+    Image(
+      spec=GridSpec(n=(64, 128), d=f32[2], c=None, unit='arcsec'),
+      variance=None,
+      read_noise=f32[],
+      data=f32[128,64]
+    )
+    Image(
+      spec=GridSpec(n=(64, 128), d=f32[2], c=None, unit='arcsec'),
+      variance=f32[128,64],
+      read_noise=f32[],
+      data=f32[128,64]
+    )
 
 
 
 ??? info "Plotting code"
     ```python
-    # Plot
-    plt.figure(figsize=(10, 4))
-    ax = plt.subplot(1, 2, 1)
-    im = ax.imshow(true_PSF.data, extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Intensity")
-    ax.set(title="True PSF", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
-    ax = plt.subplot(1, 2, 2)
-    im = ax.imshow(true_PSF.data**0.5, extent=psf_ext)
-    plt.colorbar(im, ax=ax, label="Intensity")
-    ax.set(title="Sqrt True PSF", xlabel="x (arcseconds)", ylabel="y (arcseconds)")
-    
+    image_extent = image.spec.set(unit=None).extent
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    panels = [
+        (image.data, "Detector expectation", PowerNorm(0.5)),
+        (noisy.data, "Noisy Image", PowerNorm(0.5)),
+        (noisy.error, "Tracked error", None),
+    ]
+    for ax, (data, title, norm) in zip(axes, panels):
+        im = ax.imshow(data, extent=image_extent, norm=norm)
+        plt.colorbar(im, ax=ax)
+        ax.set(title=title, xlabel="x [arcsec]", ylabel="y [arcsec]")
     plt.tight_layout()
     plt.show()
     ```
 
 
     
-![png](assets/optical_systems_files/output_15_0.png)
+![png](assets/optical_systems_files/output_14_0.png)
     
 
 
 ## Summary
 
-Thats all there is to it! These objects are designed to be simple to use, and to be as flexible as possible.
+The class boundaries now mirror the physical modelling flow:
 
+1. `Source` and `Spectrum` define incident light.
+2. `OpticalSystem.model(source)` returns a continuous `PSF`.
+3. `DetectorSystem.model(psf)` returns a detector-sampled `Image`.
 
-```python
-
-```
+Use `return_all=True` when access to the propagated `Wavefront` is also required.

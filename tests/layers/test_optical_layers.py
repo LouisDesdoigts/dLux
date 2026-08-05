@@ -1,104 +1,145 @@
-from jax import numpy as np, config
+"""Tests for dLux.layers.optical_layers."""
 
-config.update("jax_debug_nans", True)
+import jax.numpy as np
 import pytest
-import equinox as eqx
-from dLux.layers import (
-    TransmissiveLayer,
-    AberratedLayer,
-    BasisLayer,
-    Tilt,
-    Normalise,
-    Interpolate,
+
+import dLux as dl
+
+from tests.helpers import assert_differentiable, assert_jittable
+
+
+@pytest.fixture
+def wavefront(make_wavefront):
+    return make_wavefront()
+
+
+@pytest.mark.parametrize(
+    "layer",
+    [
+        dl.TransmissiveLayer(),
+        dl.TransmissiveLayer(0.5),
+        dl.TransmissiveLayer(0.5, normalise=True),
+        dl.AberratedLayer(),
+        dl.AberratedLayer(opd=1e-7, phase=0.2),
+        dl.Optic(transmission=0.5, opd=1e-7, phase=0.2),
+        dl.Optic(transmission=0.5, normalise=True),
+        dl.Tilt([0.1, -0.2], unit="arcsec"),
+    ],
 )
-from dLux import CoordTransform, Wavefront
-
-wf = Wavefront(16, 1, 1e-6)
-
-
-def _test_apply(layer):
-    assert isinstance(layer.apply(wf), Wavefront)
+def test_optical_layer_contract(layer, wavefront):
+    output = assert_jittable(layer, wavefront)
+    assert output.phasor.shape == wavefront.phasor.shape
 
 
-@pytest.mark.parametrize("transmission", [None, np.ones((16, 16))])
-@pytest.mark.parametrize("normalise", [True, False])
-def test_transmissive_layer(transmission, normalise):
-    _test_apply(TransmissiveLayer(transmission, normalise))
+def test_layer_alias_and_inheritance(wavefront):
+    layer = dl.Optic(transmission=0.5, opd=1e-7, phase=0.2)
+
+    assert isinstance(layer, dl.TransmissiveLayer)
+    assert isinstance(layer, dl.AberratedLayer)
+    assert np.allclose(layer.apply(wavefront).phasor, layer(wavefront).phasor)
 
 
-@pytest.mark.parametrize("opd", [None, np.ones((16, 16))])
-@pytest.mark.parametrize("phase", [None, np.ones((16, 16))])
-def test_aberrated_layer(opd, phase):
-    _test_apply(AberratedLayer(opd, phase))
-    with pytest.raises(ValueError):
-        AberratedLayer(np.ones((4, 4)), np.ones((5, 5)))
+def test_monochromatic_layer_mapping(make_spec):
+    class MonochromaticLayer(dl.OpticalLayer):
+        def __call__(self, wavefront):
+            if wavefront.batch_ndim:
+                raise ValueError("Expected a monochromatic wavefront.")
+            return wavefront.add_phase(wavefront.wavelength / 1e-6)
+
+    wavefront = dl.Wavefront([0.9e-6, 1.1e-6], make_spec())
+    output = MonochromaticLayer().apply(wavefront)
+
+    assert output.phasor.shape == wavefront.phasor.shape
+    assert np.allclose(output.phase[:, 0, 0], np.array([0.9, 1.1]))
 
 
-@pytest.mark.parametrize("basis", [np.ones((5, 16, 16))])
-@pytest.mark.parametrize("coefficients", [None, np.ones(5)])
-@pytest.mark.parametrize("effect", ["opd", "phase", "amplitude"])
-def test_basis_layer(basis, coefficients, effect):
-    _test_apply(BasisLayer(basis, coefficients, effect))
-    with pytest.raises(ValueError):
-        BasisLayer(np.ones((5, 16, 16)), np.ones(6))
+def test_transmissive_layer_contract(wavefront):
+    unchanged = dl.TransmissiveLayer()(wavefront)
+    attenuated = dl.TransmissiveLayer(0.5)(wavefront)
+    normalised = dl.TransmissiveLayer(0.5, normalise=True)(wavefront)
+
+    assert np.allclose(unchanged.phasor, wavefront.phasor)
+    assert np.allclose(attenuated.power, 0.25 * wavefront.power)
+    assert np.allclose(normalised.power, 1)
 
 
-def test_basis_layer_errors_and_solve():
-    basis = np.eye(4).reshape(4, 2, 2)
-    coefficients = np.arange(4.0)
-    layer = BasisLayer(basis, coefficients)
+def test_aberrated_layer_contract(wavefront):
+    layer = dl.AberratedLayer(opd=1e-7, phase=0.2)
+    expected = wavefront.add_opd(1e-7).add_phase(0.2)
 
-    assert np.allclose(layer.solve_basis(layer.eval_basis()), coefficients)
-    with pytest.raises(ValueError, match="effect"):
-        BasisLayer(basis, coefficients, effect="invalid")
+    assert np.allclose(layer(wavefront).phasor, expected.phasor)
 
 
-def test_basis_layer_optional_inputs():
-    basis = np.ones((2, 2, 16, 16))
-    layer = BasisLayer(basis, coefficient_shape=(2, 2))
+def test_optic_phasor_contract(wavefront):
+    optic = dl.Optic(transmission=0.5, opd=1e-7, phase=0.2)
+    resolved = optic.resolve(wavefront=wavefront)
 
-    assert layer.coefficients.shape == (2, 2)
-    assert BasisLayer().basis is None
-
-
-def test_amplitude_basis_is_perturbation_from_unity():
-    basis = np.ones((2, 16, 16))
-    layer = BasisLayer(basis, np.zeros(2), effect="amplitude")
-
-    result = layer(wf)
-
-    assert np.allclose(result.amplitude, wf.amplitude)
+    assert optic.context(wavefront) == {"wavefront": wavefront}
+    assert optic.phasor(wavefront).shape == (1, 1)
+    assert np.allclose(optic.phasor(wavefront), resolved.phasor(wavefront))
 
 
-def test_tilt():
-    _test_apply(Tilt(np.array([0.1, 0.2])))
-    with pytest.raises(ValueError):
-        Tilt(np.array([0.1, 0.2, 0.3]))
+@pytest.mark.parametrize(
+    ("layer", "attribute"),
+    [
+        (dl.TransmissiveLayer(0.5), "transmission"),
+        (dl.AberratedLayer(opd=1e-7), "opd"),
+        (dl.AberratedLayer(phase=0.2), "phase"),
+        (dl.Optic(transmission=0.5), "transmission"),
+        (dl.Optic(opd=1e-7), "opd"),
+        (dl.Optic(phase=0.2), "phase"),
+        (dl.Tilt([0.1, -0.2]), "angles"),
+    ],
+)
+def test_optical_layer_gradients(layer, attribute, wavefront):
+    def apply(value):
+        output = layer.set(attribute, value)(wavefront)
+        if attribute in ("opd", "phase", "angles"):
+            return np.real(output.phasor)
+        return output
+
+    assert_differentiable(apply, getattr(layer, attribute))
 
 
-def test_normalise():
-    _test_apply(Normalise())
-
-
-@pytest.mark.parametrize("method", ["nearest", "linear", "cubic"])
-@pytest.mark.parametrize("complex", [True, False])
-def test_interpolate(method, complex):
-    test_wavefront = Wavefront(1e-6, 16, diameter=1.0)
-    layer = Interpolate(
-        CoordTransform(
-            translation=[0.01, -0.02],
-            shear=[0.1, -0.1],
-            compression=[0.9, 1.1],
-            rotation=0.1,
-        ),
-        method=method,
-        complex=complex,
+def test_parametric_optic(wavefront):
+    optic = dl.Optic(
+        transmission=0.5,
+        opd=dl.DynamicZernikeBasis(js=[4], coefficients=[1e-7], diameter=0.5),
     )
-    assert isinstance(layer.apply(test_wavefront), Wavefront)
-    assert isinstance(eqx.filter_jit(layer)(test_wavefront), Wavefront)
-    assert layer.complex is complex
-    assert layer.method == method
-    assert layer.fill.shape == ()
 
-    with pytest.raises(TypeError, match="transformation"):
-        Interpolate(transformation="rotate")
+    resolved = optic.resolve(wavefront=wavefront)
+    assert isinstance(resolved, dl.Optic)
+    assert isinstance(optic.opd, dl.Parametric)
+    assert not isinstance(resolved.opd, dl.Parametric)
+    assert_jittable(optic, wavefront)
+    assert_differentiable(
+        lambda coefficients: np.real(
+            optic.set("opd.coefficients", coefficients)(wavefront).phasor
+        ),
+        optic.opd.coefficients,
+    )
+
+
+@pytest.mark.parametrize(
+    "layer",
+    [
+        dl.TransmissiveLayer(np.linspace(0.5, 1.0, 64).reshape(8, 8)),
+        dl.AberratedLayer(opd=np.ones((8, 8)) * 1e-7, phase=0.2),
+        dl.Optic(transmission=0.5, opd=1e-7, phase=0.2),
+        dl.Tilt([0.1, -0.2], unit="arcsec"),
+        dl.RefractiveOptic(np.ones((8, 8)) * 1e-3, 1.5),
+        dl.Wedge([1e-6, -2e-6], 1.5),
+    ],
+)
+def test_optical_layers_preserve_leading_axes(layer, make_spec):
+    spec = make_spec(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
+    wavefront = dl.Wavefront(1e-6, spec, np.ones((2, 3, 8, 8), complex))
+    output = assert_jittable(layer, wavefront)
+
+    assert output.phasor.shape == wavefront.phasor.shape
+    assert output.spec == wavefront.spec
+
+
+def test_tilt_validation():
+    with pytest.raises(ValueError, match="shape"):
+        dl.Tilt([1])

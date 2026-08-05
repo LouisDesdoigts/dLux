@@ -11,3 +11,9 @@
 
 ???+ info "fringe_size"
     ::: dLux.utils.optics.fringe_size
+
+???+ info "tilt_opd"
+    ::: dLux.utils.optics.tilt_opd
+
+???+ info "tilt"
+    ::: dLux.utils.optics.tilt

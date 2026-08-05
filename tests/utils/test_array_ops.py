@@ -1,127 +1,54 @@
+"""Tests for dLux.utils.array_ops."""
+
+import jax.numpy as np
 import pytest
-from jax import numpy as np, config
 
-config.update("jax_debug_nans", True)
-
-from dLux.utils import array_ops as array_ops_utils
+import dLux.utils as dlu
 
 
-# ============================================================================
-# Tests for pad_to
-# ============================================================================
-class TestPadTo:
-    """Tests for symmetric array padding."""
+@pytest.mark.parametrize(
+    ("shape", "target", "output_shape"),
+    [
+        ((3, 8), (12,), (3, 12)),
+        ((2, 6, 8), (12, 10), (2, 10, 12)),
+        ((4, 6, 8), (12, 10, 8), (8, 10, 12)),
+    ],
+)
+def test_pad_crop_roundtrip(shape, target, output_shape):
+    array = np.arange(np.prod(np.asarray(shape))).reshape(shape)
 
-    @pytest.mark.parametrize(
-        "array, npixels",
-        [
-            (np.ones((10, 10)), 8),
-            (np.ones((11, 11)), 9),
-            (np.ones((10, 10)), 11),
-            (np.ones((11, 11)), 12),
-        ],
-    )
-    def test_invalid(self, array, npixels):
-        """Parity mismatches raise ValueError."""
-        with pytest.raises(ValueError):
-            array_ops_utils.pad_to(array, npixels)
+    padded = dlu.pad_to(array, target)
+    restored = dlu.crop_to(padded, shape[-len(target) :][::-1])
 
-    @pytest.mark.parametrize(
-        "array, npixels",
-        [(np.ones((10, 10)), 12), (np.ones((11, 11)), 13)],
-    )
-    def test_output_shape(self, array, npixels):
-        """Padding returns an array with the requested square shape."""
-        actual = array_ops_utils.pad_to(array, npixels)
-        assert actual.shape == (npixels, npixels)
+    assert padded.shape == output_shape
+    assert np.array_equal(restored, array)
 
 
-# ============================================================================
-# Tests for crop_to
-# ============================================================================
-class TestCropTo:
-    """Tests for central array cropping."""
+def test_resize_mixed_dimensions():
+    array = np.ones((4, 6, 8))
+    output = dlu.resize(array, (4, 10, 8))
 
-    @pytest.mark.parametrize(
-        "array, npixels",
-        [
-            (np.ones((10, 10)), 12),
-            (np.ones((11, 11)), 13),
-            (np.ones((10, 10)), 9),
-            (np.ones((11, 11)), 10),
-        ],
-    )
-    def test_invalid(self, array, npixels):
-        """Invalid crop sizes raise ValueError."""
-        with pytest.raises(ValueError):
-            array_ops_utils.crop_to(array, npixels)
-
-    @pytest.mark.parametrize(
-        "array, npixels",
-        [(np.ones((10, 10)), 8), (np.ones((11, 11)), 9)],
-    )
-    def test_output_shape(self, array, npixels):
-        """Cropping returns an array with the requested square shape."""
-        actual = array_ops_utils.crop_to(array, npixels)
-        assert actual.shape == (npixels, npixels)
+    assert output.shape == (8, 10, 4)
 
 
-# ============================================================================
-# Tests for resize
-# ============================================================================
-class TestResize:
-    """Tests for resize wrapper behavior."""
+@pytest.mark.parametrize("mean", [True, False])
+def test_downsample_nd(mean):
+    array = np.arange(4 * 6 * 8, dtype=float).reshape((4, 6, 8))
+    output = dlu.downsample(array, (2, 3, 2), mean)
 
-    @pytest.mark.parametrize(
-        "array, shape",
-        [
-            (np.ones((10, 10)), 12),
-            (np.ones((10, 10)), 8),
-            (np.ones((11, 11)), 13),
-            (np.ones((11, 11)), 9),
-            (np.ones((10, 10)), 10),
-        ],
-    )
-    def test_output_shape(self, array, shape):
-        """Resize returns the requested square output shape."""
-        actual = array_ops_utils.resize(array, shape)
-        assert actual.shape == (shape, shape)
+    assert output.shape == (2, 2, 4)
+    if not mean:
+        assert np.isclose(output.sum(), array.sum())
 
 
-# ============================================================================
-# Tests for downsample
-# ============================================================================
-class TestDownsample:
-    """Tests for block downsampling."""
-
-    @pytest.mark.parametrize(
-        "array, n, mean",
-        [
-            (np.ones((10, 9)), 2, True),
-            (np.ones((10, 9)), 2, False),
-            (np.ones((10, 10)), 3, True),
-            (np.ones((10, 10)), 3, False),
-        ],
-    )
-    def test_invalid(self, array, n, mean):
-        """Input shapes not divisible by the factor raise ValueError."""
-        with pytest.raises(ValueError):
-            array_ops_utils.downsample(array, n, mean)
-
-    @pytest.mark.parametrize(
-        "array, n, mean",
-        [
-            (np.ones((10, 10)), 2, True),
-            (np.ones((9, 9)), 3, True),
-            (np.ones((10, 10)), 5, True),
-            (np.ones((15, 15)), 3, True),
-            (np.ones((10, 10)), 2, False),
-            (np.ones((9, 9)), 3, False),
-            (np.ones((10, 10)), 5, False),
-            (np.ones((15, 15)), 3, False),
-        ],
-    )
-    def test_output_shape(self, array, n, mean):
-        """Downsampling reduces each axis by the integer factor."""
-        actual = array_ops_utils.downsample(array, n, mean)
-        assert actual.shape == (array.shape[0] // n, array.shape[1] // n)
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda array: dlu.pad_to(array, (9, 10)),
+        lambda array: dlu.crop_to(array, (7, 4)),
+        lambda array: dlu.downsample(array, (3, 2)),
+    ],
+)
+def test_invalid_spatial_sizes(operation):
+    with pytest.raises(ValueError):
+        operation(np.ones((6, 8)))

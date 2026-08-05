@@ -1,0 +1,50 @@
+# Parametrics
+
+## Inheritance
+
+```mermaid
+classDiagram
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
+    class dLux_parametric_parametrics_Transform["Transform"]
+    class dLux_parametric_parametrics_Interpolation["Interpolation"]
+    class dLux_parametric_parametrics_DynamicParametric["DynamicParametric"]
+    class dLux_parametric_parametrics_Combination["Combination"]
+    class zodiax_base_Base["Base"]
+    zodiax_base_Base <|-- dLux_parametric_parametrics_Parametric
+    click dLux_parametric_parametrics_Parametric href "#dLux.parametric.parametrics.Parametric" "Methods: evaluate(), map(), integrate()"
+    zodiax_base_Base <|-- dLux_parametric_parametrics_ParametricHolder
+    click dLux_parametric_parametrics_ParametricHolder href "#dLux.parametric.parametrics.ParametricHolder" "Methods: resolve()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Transform
+    click dLux_parametric_parametrics_Transform href "#dLux.parametric.parametrics.Transform" "Attributes: parametric, transformation · Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Interpolation
+    click dLux_parametric_parametrics_Interpolation href "#dLux.parametric.parametrics.Interpolation" "Attributes: knots, values, method, extrapolate · Methods: evaluate(), integrate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_DynamicParametric
+    click dLux_parametric_parametrics_DynamicParametric href "#dLux.parametric.parametrics.DynamicParametric" "Attributes: parametric, transformation · Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Combination
+    click dLux_parametric_parametrics_Combination href "#dLux.parametric.parametrics.Combination" "Attributes: parametrics, operation · Methods: validate_operation(), combine(), values(), evaluate()"
+```
+
+???+ info "Parametric"
+    ::: dLux.parametric.parametrics.Parametric
+
+???+ info "ParametricHolder"
+    ::: dLux.parametric.parametrics.ParametricHolder
+
+???+ info "to_param"
+    ::: dLux.parametric.parametrics.to_param
+
+???+ info "resolve"
+    ::: dLux.parametric.parametrics.resolve
+
+???+ info "Transform"
+    ::: dLux.parametric.parametrics.Transform
+
+???+ info "Interpolation"
+    ::: dLux.parametric.parametrics.Interpolation
+
+???+ info "DynamicParametric"
+    ::: dLux.parametric.parametrics.DynamicParametric
+
+???+ info "Combination"
+    ::: dLux.parametric.parametrics.Combination

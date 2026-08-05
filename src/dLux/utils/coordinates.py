@@ -1,21 +1,18 @@
 import jax.numpy as np
-import jax.tree as jtu
 from jax import Array
-from .math import triangular_number
 
-from .helpers import _cast_tuple, _cast_scalar, _input_len
+import dLux.utils as dlu
 
 __all__ = [
     "cart2polar",
     "polar2cart",
     "pixel_coords",
+    "nd_axes",
     "nd_coords",
     "translate_coords",
     "compress_coords",
     "shear_coords",
     "rotate_coords",
-    "gen_powers",
-    "polynomial_basis",
     "distort_coords",
 ]
 
@@ -74,8 +71,8 @@ def shear_coords(coords: Array, shear: Array) -> Array:
     coords : Array
         The sheared coordinates.
     """
-    trans_coords = np.transpose(coords, (0, 2, 1))
-    return coords + trans_coords * shear[:, None, None]
+    x, y = coords
+    return np.array((x + shear[0] * y, y + shear[1] * x))
 
 
 def rotate_coords(coords: Array, rotation: float) -> Array:
@@ -101,38 +98,6 @@ def rotate_coords(coords: Array, rotation: float) -> Array:
     return np.array([new_x, new_y])
 
 
-def gen_powers(degree: int):
-    """
-    Generates the powers required for a 2d polynomial
-
-    Parameters
-    ----------
-    degree : int
-        Maximum power to generate
-
-    Returns
-    -------
-    xpows : Array
-        x axis powers
-    ypows : Array
-        y axis powers
-    """
-    n = triangular_number(degree)
-    vals = np.arange(n)
-
-    # Ypows
-    tris = triangular_number(np.arange(degree))
-    ydiffs = np.repeat(tris, np.arange(1, degree + 1))
-    ypows = vals - ydiffs
-
-    # Xpows
-    tris = triangular_number(np.arange(1, degree + 1))
-    xdiffs = np.repeat(n - np.flip(tris), np.arange(degree, 0, -1))
-    xpows = np.flip(vals - xdiffs)
-
-    return np.array([xpows, ypows])
-
-
 def distort_coords(coords: Array, coeffs: Array, pows: Array):
     """
     Apply a 2D polynomial distortion to some coordinates
@@ -151,16 +116,9 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     distorted_coords : Array
         Coords with the distortion applied
     """
-    pow_base = polynomial_basis(coords, pows)
+    pow_base = dlu.polynomial_basis(coords, pows)
     distortion = np.tensordot(coeffs, pow_base, axes=(-1, 0))
     return coords + distortion
-
-
-def polynomial_basis(coords: Array, pows: Array) -> Array:
-    """Evaluate 2D polynomial monomials at Cartesian coordinates."""
-    pows = np.asarray(pows)
-    shape = pows.shape + (1,) * (coords.ndim - 1)
-    return np.prod(coords[:, None] ** pows.reshape(shape), axis=0)
 
 
 def cart2polar(coordinates: Array) -> Array:
@@ -266,6 +224,30 @@ def pixel_coords(
     return coords
 
 
+def nd_axes(
+    npixels: int | tuple[int, ...],
+    pixel_scales: float | tuple[float, ...] = 1.0,
+    offsets: float | tuple[float, ...] = 0.0,
+) -> tuple[Array, ...]:
+    """Return one regularly sampled coordinate vector per physical axis."""
+    npixels = dlu.as_size(npixels, name="npixels")
+    pixel_scales, offsets = dlu.as_axis(pixel_scales), dlu.as_axis(offsets)
+    ndim = max(len(npixels), pixel_scales.shape[-1], offsets.shape[-1])
+    npixels = dlu.as_size(npixels, ndim, "npixels")
+    pixel_scales = dlu.as_axis(pixel_scales, ndim, "pixel_scales")
+    offsets = dlu.as_axis(offsets, ndim, "offsets")
+
+    def axis(n, offset, scale):
+        start = -(n - 1) / 2 * scale - offset
+        end = (n - 1) / 2 * scale - offset
+        return np.linspace(start, end, n)
+
+    return tuple(
+        axis(n, offset, scale)
+        for n, offset, scale in zip(npixels, offsets, pixel_scales)
+    )
+
+
 def nd_coords(
     npixels: int | tuple[int, ...],
     pixel_scales: float | tuple[float, ...] = 1.0,
@@ -311,31 +293,8 @@ def nd_coords(
     if indexing not in ["xy", "ij"]:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
 
-    # Validate npixels and ensure tuple
-    npixels = _cast_tuple(npixels, "npixels")
-
-    # Get the number of dimensions
-    ndim = max(
-        len(npixels), _input_len(pixel_scales, "mean"), _input_len(offsets, "std")
-    )
-
-    # Validate and ensure tuples
-    pixel_scales = _cast_scalar(pixel_scales, ndim, "pixel_scales")
-    offsets = _cast_scalar(offsets, ndim, "offsets")
-
-    if len(npixels) != ndim:
-        npixels *= ndim
-
-    def pixel_fn(n, offset, scale):
-        start = -(n - 1) / 2 * scale - offset
-        end = (n - 1) / 2 * scale - offset
-        return np.linspace(start, end, n)
-
-    # Generate the linear edges of each axes
-    lin_pixels = jtu.map(pixel_fn, npixels, offsets, pixel_scales)
-
-    # Output (x, y) for 2d, else in order.
-    positions = np.array(np.meshgrid(*lin_pixels, indexing=indexing))
+    axes = nd_axes(npixels, pixel_scales, offsets)
+    positions = np.array(np.meshgrid(*axes, indexing=indexing))
 
     # Squeeze the output in case of 1d input
     return np.squeeze(positions)

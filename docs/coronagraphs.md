@@ -75,46 +75,60 @@ basis *= 1e-9
 coeffs = 25 * jr.normal(jr.key(0), basis.shape[0])
 lamd = 1e-6 / diameter
 
+# Define the input and output sampling
+pupil_spec = dl.GridSpec(n=wf_npix, diam=diameter, unit="m")
+psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="arcsec")
+
 # Define the optical layers
 layers = [
-    ("aperture", dl.TransmissiveLayer(aper, normalise=True)),
-    ("aberrations", dl.BasisLayer(basis, coeffs)),
-    ("to_focal", dl.FFT(pad=4)),
+    ("pupil", dl.Optic(aper, opd=dl.ExplicitBasis(basis, coeffs), normalise=True)),
+    ("to_focal", dl.Fraunhofer(dl.ResizeSpec(pad=4), focal_length=1, method="fft")),
     ("fpm", dl.Lambda()),
-    ("from_focal", dl.FFT(crop=4)),
+    ("from_focal", dl.Fraunhofer(dl.ResizeSpec(crop=4), focal_length=1, method="fft")),
     ("lyot", dl.Lambda()),
+    ("propagator", dl.Fraunhofer(psf_spec)),
 ]
 
 # Construct the optics object
-optics = dl.AngularOpticalSystem(
-    wf_npixels=wf_npix,
-    diameter=diameter,
-    layers=layers,
-    psf_npixels=psf_npix,
-    psf_pixel_scale=psf_pixel_scale,
-)
+optics = dl.OpticalSystem(layers, pupil_spec)
 
 # Examine the optics object
 print(optics)
 ```
 
-    AngularOpticalSystem(
-      wf_npixels=256,
-      diameter=1.0,
+    OpticalSystem(
       layers={
-        'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
-        'aberrations':
-        BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+        'pupil':
+        Optic(
+          opd=ExplicitBasis(
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
+          ),
+          phase=None,
+          transmission=f32[256,256],
+          normalise=True
+        ),
         'to_focal':
-        FFT(focal_length=None, inverse=False, pad=4, crop=1, center=True),
+        Fraunhofer(
+          spec=ResizeSpec(n=None, pad=(4, 4), crop=(1, 1), c=None),
+          focal_length=f32[],
+          method='fft'
+        ),
         'fpm': Lambda(),
         'from_focal':
-        FFT(focal_length=None, inverse=False, pad=1, crop=4, center=True),
-        'lyot': Lambda()
+        Fraunhofer(
+          spec=ResizeSpec(n=None, pad=(1, 1), crop=(4, 4), c=None),
+          focal_length=f32[],
+          method='fft'
+        ),
+        'lyot': Lambda(),
+        'propagator':
+        Fraunhofer(
+          spec=GridSpec(n=(64, 64), d=f32[2], c=None, unit='arcsec'),
+          focal_length=None,
+          method='mft'
+        )
       },
-      psf_npixels=64,
-      oversample=1,
-      psf_pixel_scale=0.05
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
@@ -132,7 +146,7 @@ Plot the wavefront at each layer
 ??? info "Plotting code"
     ```python
     plt.figure(figsize=(20, 8))
-    for i, name in enumerate(["aberrations", "to_focal", "from_focal", "final_wavefront"]):
+    for i, name in enumerate(["pupil", "to_focal", "from_focal", "propagator"]):
         # Get the amplitude and phase of the wavefront
         wf = outputs[name]
         amp = np.abs(wf.amplitude)
@@ -144,13 +158,13 @@ Plot the wavefront at each layer
             c = amp.shape[0] // 2
             amp = amp[c - s : c + s, c - s : c + s]
             phase = phase[c - s : c + s, c - s : c + s]
-            diam = dlu.rad2arcsec(wf.pixel_scale * amp.shape[0])
+            diam = dlu.rad2arcsec(wf.pixel_scale[0] * amp.shape[0])
             unit = "arcsec"
-        elif name == "final_wavefront":
-            diam = optics.fov
+        elif name == "propagator":
+            diam = psf_spec.set(unit=None).fov[0]
             unit = "arcsec"
         else:
-            diam = wf.diameter
+            diam = wf.spec.fov[0]
             unit = "m"
         ext = dlu.imshow_extent(diam)
     
@@ -205,14 +219,16 @@ class FocalPlaneMask(dl.OpticalLayer):
         FFT coordinates.
         """
         # Get the wavefront coordinates and shift them
-        fp_coords = wavefront.coordinates()
-        fp_coords = dlu.translate_coords(fp_coords, -self.shift * self.scale)
+        fp_coords = np.moveaxis(wavefront.coordinates, -3, 0)
+        shift = (self.shift * self.scale).reshape((2,) + (1,) * (fp_coords.ndim - 1))
+        fp_coords = fp_coords + shift
 
         # Calculate the focal plane mask with a soft-edge and apply it
-        softness = 0.5 * wavefront.pixel_scale
+        softness = 0.5 * wavefront.pixel_scale[..., 0]
+        softness = softness.reshape(softness.shape + (1, 1))
         radius_phys = self.radius * self.scale
-        fp_mask = dlu.soft_circle(fp_coords, radius_phys, softness, invert=True)
-        wavefront *= fp_mask
+        fp_mask = dlu.soft_circle(fp_coords, 2 * radius_phys, softness, invert=True)
+        wavefront = wavefront.multiply("phasor", fp_mask)
 
         # Return the wavefront with the focal plane mask applied
         return wavefront
@@ -251,14 +267,17 @@ class LyotMask(dl.OpticalLayer):
         """Applies the Lyot stop to the wavefront."""
 
         # Get the wavefront coordinates and shift them,
-        coords = wavefront.coordinates()
-        coords = dlu.translate_coords(coords, -self.shift)
+        coords = np.moveaxis(wavefront.coordinates, -3, 0)
+        shift = self.shift.reshape((2,) + (1,) * (coords.ndim - 1))
+        coords = coords + shift
 
         # Calculate the Lyot mask with a soft-edge and apply it
-        softness = 0.5 * wavefront.pixel_scale
-        radius_phys = wavefront.diameter * self.undersize / 2
-        lyot_stop = dlu.soft_circle(coords, radius_phys, softness)
-        wavefront *= lyot_stop * self.aperture
+        softness = 0.5 * wavefront.pixel_scale[..., 0]
+        softness = softness.reshape(softness.shape + (1, 1))
+        diameter = wavefront.spec.fov[..., 0] * self.undersize
+        diameter = diameter.reshape(diameter.shape + (1, 1))
+        lyot_stop = dlu.soft_circle(coords, diameter, softness)
+        wavefront = wavefront.multiply("phasor", lyot_stop * self.aperture)
 
         # Return the wavefront with the Lyot mask applied
         return wavefront
@@ -287,23 +306,39 @@ coron
 
 
 
-    AngularOpticalSystem(
-      wf_npixels=256,
-      diameter=1.0,
+    OpticalSystem(
       layers={
-        'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
-        'aberrations':
-        BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+        'pupil':
+        Optic(
+          opd=ExplicitBasis(
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
+          ),
+          phase=None,
+          transmission=f32[256,256],
+          normalise=True
+        ),
         'to_focal':
-        FFT(focal_length=None, inverse=False, pad=4, crop=1, center=True),
+        Fraunhofer(
+          spec=ResizeSpec(n=None, pad=(4, 4), crop=(1, 1), c=None),
+          focal_length=f32[],
+          method='fft'
+        ),
         'fpm': FocalPlaneMask(radius=f32[], shift=f32[2], scale=f32[]),
         'from_focal':
-        FFT(focal_length=None, inverse=False, pad=1, crop=4, center=True),
-        'lyot': LyotMask(undersize=f32[], shift=f32[2], aperture=f32[256,256])
+        Fraunhofer(
+          spec=ResizeSpec(n=None, pad=(1, 1), crop=(4, 4), c=None),
+          focal_length=f32[],
+          method='fft'
+        ),
+        'lyot': LyotMask(undersize=f32[], shift=f32[2], aperture=f32[256,256]),
+        'propagator':
+        Fraunhofer(
+          spec=GridSpec(n=(64, 64), d=f32[2], c=None, unit='arcsec'),
+          focal_length=None,
+          method='mft'
+        )
       },
-      psf_npixels=64,
-      oversample=1,
-      psf_pixel_scale=0.05
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
@@ -313,7 +348,7 @@ Great, now we can see we have our new layers in the system! Lets use the debug p
 
 ```python
 # Remove the wavefront error
-coron = coron.multiply(coefficients=0.)
+coron = coron.multiply("pupil.opd.coefficients", 0.)
 
 # Propagate a wavefront through the system and get the intermediate wavefronts
 wf, outputs = coron.debug_propagate_mono(1e-6)
@@ -323,7 +358,7 @@ wf, outputs = coron.debug_propagate_mono(1e-6)
 ??? info "Plotting code"
     ```python
     plt.figure(figsize=(20, 8))
-    for i, name in enumerate(["fpm", "from_focal", "lyot", "final_wavefront"]):
+    for i, name in enumerate(["fpm", "from_focal", "lyot", "propagator"]):
         # Get the amplitude and phase of the wavefront
         wf = outputs[name]
         amp = np.abs(wf.amplitude)
@@ -335,13 +370,13 @@ wf, outputs = coron.debug_propagate_mono(1e-6)
             c = amp.shape[0] // 2
             amp = amp[c - s : c + s, c - s : c + s]
             phase = phase[c - s : c + s, c - s : c + s]
-            diam = dlu.rad2arcsec(wf.pixel_scale * amp.shape[0])
+            diam = dlu.rad2arcsec(wf.pixel_scale[0] * amp.shape[0])
             unit = "arcsec"
-        elif name == "final_wavefront":
-            diam = optics.fov
+        elif name == "propagator":
+            diam = psf_spec.set(unit=None).fov[0]
             unit = "arcsec"
         else:
-            diam = wf.diameter
+            diam = wf.spec.fov[0]
             unit = "m"
         ext = dlu.imshow_extent(diam)
     
@@ -385,7 +420,7 @@ psfs = np.array(psfs)
 
 ??? info "Plotting code"
     ```python
-    ext = dlu.imshow_extent(coron.fov)
+    ext = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     plt.figure(figsize=(25, 4))
     for i in range(5):
@@ -445,7 +480,7 @@ Let set up the annular mask and the companion position and build our oss functio
 
 ```python
 # Focal plane coordinates
-coords = dlu.pixel_coords(5 * optics.psf_npixels, optics.fov)
+coords = dlu.pixel_coords(5 * psf_npix, psf_spec.set(unit=None).fov[0])
 coords_lamd = dlu.arcsec2rad(coords) / lamd
 
 # Annular mask to suppress starlight within
@@ -479,7 +514,7 @@ def loss_fn(params, coron):
 
 ??? info "Plotting code"
     ```python
-    ext_lamd = dlu.imshow_extent(dlu.arcsec2rad(coron.fov) / lamd)
+    ext_lamd = dlu.imshow_extent(dlu.arcsec2rad(psf_spec.set(unit=None).fov[0]) / lamd)
     
     ## COLLAPSE: Plotting code
     positions_lamd = positions / lamd
@@ -585,7 +620,7 @@ psfs = np.array(psfs)
 
 ??? info "Plotting code"
     ```python
-    ext = dlu.imshow_extent(coron.fov)
+    ext = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     plt.figure(figsize=(25, 4))
     for i in range(5):
@@ -671,18 +706,18 @@ class SoummerFPM(dl.OpticalLayer):
 
     def __call__(self, wavefront):
         """Applies the focal plane mask to the wavefront."""
-        # MFT propagate to the focal plane and apply the mask
-        npixels = self.mask.shape[0]
-        fp_wf = wavefront.propagate(npixels, self.pixel_scale)
-        fp_wf = fp_wf.multiply(phasor=1 - self.mask)
+        # MFT propagate the occulted field to focus and back to the pupil
+        fp_axes = dlu.nd_axes((self.npixels,) * 2, (self.pixel_scale,) * 2)
+        pupil_axes = wavefront.axes
 
-        # Inverse MFT propagate back to the pupil plane
-        npixels = wavefront.npixels
-        pixel_scale = wavefront.pixel_scale
-        pup_wf = fp_wf.propagate(npixels, pixel_scale, inverse=True)
+        def apply_mask(field, wavelength):
+            focal = dlu.MFT(field, wavelength, pupil_axes, fp_axes)
+            occulted = focal * (1 - self.mask)
+            blocked = dlu.MFT(occulted, wavelength, fp_axes, pupil_axes, inverse=True)
+            return field - blocked
 
-        # Subtract wavefront from the original the get the applied mask
-        return wavefront - pup_wf
+        apply_mask = np.vectorize(apply_mask, signature="(n,m),()->(n,m)")
+        return wavefront.set(phasor=apply_mask(wavefront.phasor, wavefront.wavelength))
 
 # Construct our Soummer Focal plane mask layer
 fpm = SoummerFPM(npixels=128, pixel_scale=lamd/5, lamd=lamd, sigma=1.)
@@ -700,41 +735,45 @@ Now we can construct our new system using this new layer, rather than the FFTs. 
 ```python
 # Define the optical layers
 layers = [
-    ("aperture", dl.TransmissiveLayer(aper, normalise=True)),
-    ("aberrations", dl.BasisLayer(basis)),
+    ("pupil", dl.Optic(
+        aper, opd=dl.ExplicitBasis(basis, np.zeros(basis.shape[0])), normalise=True
+    )),
     ("fpm", fpm),
     ("lyot", LyotMask(undersize=0.9, aperture=aper)),
+    ("propagator", dl.Fraunhofer(psf_spec)),
 ]
 
 # Construct the optics object
-coron = dl.AngularOpticalSystem(
-    wf_npixels=wf_npix,
-    diameter=diameter,
-    layers=layers,
-    psf_npixels=psf_npix,
-    psf_pixel_scale=psf_pixel_scale,
-)
+coron = dl.OpticalSystem(layers, pupil_spec)
 
 # Examine the optics object again to see the new layers
 print(coron)
 ```
 
-    AngularOpticalSystem(
-      wf_npixels=256,
-      diameter=1.0,
+    OpticalSystem(
       layers={
-        'aperture': TransmissiveLayer(transmission=f32[256,256], normalise=True),
-        'aberrations':
-        BasisLayer(basis=f32[18,256,256], coefficients=f32[18], as_phase=False),
+        'pupil':
+        Optic(
+          opd=ExplicitBasis(
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
+          ),
+          phase=None,
+          transmission=f32[256,256],
+          normalise=True
+        ),
         'fpm':
         SoummerFPM(
           lamd=f32[], sigma=f32[], power=f32[], npixels=128, pixel_scale=f32[]
         ),
-        'lyot': LyotMask(undersize=f32[], shift=f32[2], aperture=f32[256,256])
+        'lyot': LyotMask(undersize=f32[], shift=f32[2], aperture=f32[256,256]),
+        'propagator':
+        Fraunhofer(
+          spec=GridSpec(n=(64, 64), d=f32[2], c=None, unit='arcsec'),
+          focal_length=None,
+          method='mft'
+        )
       },
-      psf_npixels=64,
-      oversample=1,
-      psf_pixel_scale=0.05
+      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
@@ -751,17 +790,17 @@ Examine the wavefronts
 ??? info "Plotting code"
     ```python
     plt.figure(figsize=(20, 8))
-    for i, name in enumerate(["aberrations", "fpm", "lyot", "final_wavefront"]):
+    for i, name in enumerate(["pupil", "fpm", "lyot", "propagator"]):
         # Get the amplitude and phase of the wavefront
         wf = outputs[name]
         amp = np.abs(wf.amplitude)
         phase = wf.phase
     
-        if name == "final_wavefront":
-            diam = coron.fov
+        if name == "propagator":
+            diam = psf_spec.set(unit=None).fov[0]
             unit = "arcsec"
         else:
-            diam = wf.diameter
+            diam = wf.spec.fov[0]
             unit = "m"
         ext = dlu.imshow_extent(diam)
     
@@ -804,7 +843,7 @@ psfs = np.array(psfs)
 
 ??? info "Plotting code"
     ```python
-    ext = dlu.imshow_extent(coron.fov)
+    ext = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     plt.figure(figsize=(25, 4))
     for i in range(5):
@@ -942,7 +981,7 @@ psfs = np.array(psfs)
 
 ??? info "Plotting code"
     ```python
-    ext = dlu.imshow_extent(coron.fov)
+    ext = dlu.imshow_extent(psf_spec.set(unit=None).fov[0])
     
     plt.figure(figsize=(25, 4))
     for i in range(5):

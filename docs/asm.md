@@ -1,201 +1,163 @@
-# Free-Space Fresnel Propagation with `abcdLux`
+# Free-Space Fresnel Propagation
 
-This tutorial is designed as an introduction to the new [`abcdLux`](https://github.com/LouisDesdoigts/abcdLux) backend propagators for dLux. This library is still in development but adds a huge amount of flexibility and functionality to dLux's propagation capabilities. It provides full paraxial Fresnel propagation capabilities through the Angular Spectrum Method (ASM) and the Linear Canonical Transform (LCT), allows optical systems to be described and modelled through a series of abcd matrices, provides explicit propagation kernel caching, and provides a more general set of 2-sided Matrix Fourier Transform (MFT) propagators. dLux provided a number of high-level propagator wrappers for these functionalities, however this module is still considered in-development and is subject to change. 
-
-This tutorial will cover a basic example showing the free-space ASM propagation, to model realistic out-of-plane optical diffraction.
+This tutorial uses dLux's `FreeSpace` layer to model near-field diffraction with the angular spectrum method (ASM). Unlike focal-plane propagation, ASM retains a physically sampled transverse grid while propagating the complex wavefront through a finite distance.
 
 
 ```python
-# Basic imports
+import equinox as eqx
 import jax.numpy as np
-from jax import jit
 
-# dLux imports
 import dLux as dl
 import dLux.utils as dlu
 
-# Visualisation imports
+from numpy import loadtxt
 from tqdm.notebook import tqdm
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+from matplotlib import animation
+from IPython.display import HTML
 
 %matplotlib inline
-plt.rcParams['image.cmap'] = 'inferno'
+plt.rcParams["image.cmap"] = "inferno"
+plt.rcParams["image.origin"] = "lower"
 plt.rcParams["font.family"] = "serif"
-plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 120
-
-# Nan friendly colormapping
-inferno = mpl.colormaps["inferno"]
-seismic = mpl.colormaps["seismic"]
-inferno.set_bad("k", 0.5)
-seismic.set_bad("k", 0.5)
+plt.rcParams["figure.dpi"] = 100
 ```
 
-Construct our diffraction grating
+## Diffraction grating
+
+We begin with a small crossed-slit grating. The aperture is generated on an oversampled grid and then averaged onto the wavefront sampling to retain partially illuminated edge pixels.
 
 
 ```python
-# Define the grating size
-diam = 0.0012  # 1.2 mm diameter 
+diameter = 1.2e-3
 wf_npix = 128
-osamp = 8
-coords = dlu.pixel_coords(wf_npix * osamp, diam)
-cens = np.linspace(-diam / 3, diam / 3, 4)
+oversample = 8
 
-# Construct the grating
+coordinates = dlu.pixel_coords(wf_npix * oversample, diameter)
+centres = np.linspace(-diameter / 3, diameter / 3, 4)
+
 slits = []
-for i in range(len(cens)):
-    loc = coords - np.array([cens[i], 0.])[:, None, None]
-    rect = dlu.rectangle(loc, width=diam / 20, height=diam)
-    slits += [rect, rect.T]
-grating = np.clip(np.sum(np.array(slits), axis=0), 0, 1)
-grating = dlu.downsample(grating, osamp, mean=True)
+for centre in centres:
+    local = coordinates - np.array([centre, 0.0])[:, None, None]
+    slit = dlu.rectangle(local, width=diameter / 20, height=diameter)
+    slits.extend((slit, slit.T))
+
+grating = np.clip(np.stack(slits).sum(0), 0, 1)
+grating = dlu.downsample(grating, oversample, mean=True)
 ```
 
-Build our optical system with a simple ASM free-space propagation, and propagate some optical wavelengths.
+## Free-space optical system
+
+`ResizeSpec(pad=20, crop=2)` first zero-pads the field to suppress periodic wrap-around, then crops the propagated result to ten times the original field of view. The rendered images are downsampled afterwards to control memory without changing their physical extent.
 
 
 ```python
-# Construct the optical system with the ASM propagator
-optics = dl.LayeredOpticalSystem(
-    wf_npixels=wf_npix,
-    diameter=diam,
-    layers=[
-        ("aper", dl.TransmissiveLayer(grating, normalise=True)),
-        ("asm", dl.ASMPropagator(distance=1.0, spec=dl.PadSpec(pad=20, crop=2))),
-    ],
-)
+pupil_spec = dl.GridSpec(n=(wf_npix,) * 2, diam=diameter, unit="m")
+layers = [
+    ("grating", dl.Optic(grating, normalise=True)),
+    ("free_space", dl.FreeSpace(1.0, dl.ResizeSpec(pad=20, crop=2))),
+]
+optics = dl.OpticalSystem(layers, pupil_spec)
 
-# Define the spectral wavelengths and weights
-wavels = 1e-9 * np.linspace(380, 780, 30)
-weights = np.linspace(1, 0.3, len(wavels))
-psf = optics.propagate(wavels, weights=weights, return_wf=True).psf
+# Visible wavelengths with pre-normalised spectral weights
+wavelengths = 1e-9 * np.linspace(380, 780, 30)
+weights = np.linspace(1.0, 0.3, wavelengths.size)
+
+# Propagate one wavelength at a time and downsample only the rendered intensity
+render_downsample = 4
+
+@eqx.filter_jit
+def propagate_mono(distance, wavelength, weight):
+    system = optics.set("free_space.distance", distance)
+    psf = weight * system.propagate_mono(wavelength)
+    return dlu.downsample(psf, render_downsample, mean=True)
+
+def propagate_spectrum(distance):
+    return np.stack([
+        propagate_mono(distance, wavelength, weight)
+        for wavelength, weight in zip(wavelengths, weights)
+    ])
+
+spectral_psfs = propagate_spectrum(1.0)
+print(optics)
+print("Spectral PSFs:", spectral_psfs.shape)
 ```
 
-These cells are just to turn our PSFs into a nice RGB image for display. The RGB conversion function is build from [diffractsim](https://github.com/rafael-fuente/diffractsim) and color-matching function table is also taken from the same source.
+    OpticalSystem(
+      layers={
+        'grating':
+        Optic(opd=None, phase=None, transmission=f32[128,128], normalise=True),
+        'free_space':
+        FreeSpace(
+          spec=ResizeSpec(n=None, pad=(20, 20), crop=(2, 2), c=None),
+          distance=f32[],
+          crop=True
+        )
+      },
+      spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='m')
+    )
+    Spectral PSFs: (30, 320, 320)
+
+
+## Spectral colour rendering
+
+The following helper maps the wavelength-resolved intensities through the CIE colour-matching functions and converts XYZ colour into sRGB. It is adapted from [diffractsim](https://github.com/rafael-fuente/diffractsim).
 
 
 ??? info "RGB conversion function"
     ```python
-    from numpy import loadtxt
-    
-    def rgb_from_psfs(psfs, wavelength, gamma=True):
-        """
-        Convert a stack of spectrally weighted PSFs into an RGB image using the same colour 
-        logic as diffractsim.
-    
-        Parameters
-        ----------
-        psfs : array, shape (nlam, ny, nx)
-            Spectrally weighted intensity images per wavelength.
-        wavelengths : array, shape (nlam,)
-            Wavelengths in meters.
-        gamma : bool
-            Apply the same sRGB gamma correction as diffractsim.
-    
-        Returns
-        -------
-        rgb : array, shape (ny, nx, 3)
-            RGB image in [0, 1].
-        """
+    def rgb_from_psfs(psfs, wavelengths, gamma=True):
+        """Convert wavelength-resolved intensity images into an sRGB image."""
         psfs = np.asarray(psfs, dtype=float)
-        wl = 1e9 * np.asarray(wavelength, dtype=float).reshape(-1)
+        wavelengths = 1e9 * np.asarray(wavelengths, dtype=float)
+        if psfs.shape[0] != wavelengths.size:
+            raise ValueError("The leading PSF axis must match wavelengths.")
     
-        if psfs.shape[0] != wl.shape[0]:
-            raise ValueError(
-                f"psfs.shape[0]={psfs.shape[0]} but len(wavelengths)={len(wl)}"
-            )
+        cmf = loadtxt("files/cie-cmf.txt")
+        matching = np.stack([
+            np.interp(wavelengths, cmf[:, 0], cmf[:, i], left=0.0, right=0.0)
+            for i in range(1, 4)
+        ])
+        scale = np.gradient(wavelengths) * 0.003975 * 683.002
+        xyz = np.einsum("lyx,cl,l->cyx", psfs, matching, scale)
     
-        # CIE colour matching function
-        cmf = loadtxt("cie-cmf.txt")
-        wl_cmf = cmf[:, 0]
-        xbar_tab = cmf[:, 1]
-        ybar_tab = cmf[:, 2]
-        zbar_tab = cmf[:, 3]
+        transform = np.array([
+            [3.2406, -1.5372, -0.4986],
+            [-0.9689, 1.8758, 0.0415],
+            [0.0557, -0.2040, 1.0570],
+        ])
+        rgb = np.einsum("ij,jyx->iyx", transform, xyz)
     
-        # Interpolate CMFs onto your wavelength grid
-        xbar = np.interp(wl, wl_cmf, xbar_tab, left=0.0, right=0.0)
-        ybar = np.interp(wl, wl_cmf, ybar_tab, left=0.0, right=0.0)
-        zbar = np.interp(wl, wl_cmf, zbar_tab, left=0.0, right=0.0)
-    
-        # Use this overall scale in spec_to_XYZ
-        # If your wavelengths are not uniformly spaced, use local spacing.
-        dlam = np.gradient(wl)
-        scale = dlam * 0.003975 * 683.002
-    
-        # Spectrum -> XYZ
-        X = np.sum(psfs * (xbar * scale)[:, None, None], axis=0)
-        Y = np.sum(psfs * (ybar * scale)[:, None, None], axis=0)
-        Z = np.sum(psfs * (zbar * scale)[:, None, None], axis=0)
-    
-        XYZ = np.stack([X, Y, Z], axis=0)  # (3, ny, nx)
-    
-        # XYZ -> linear sRGB, same matrix as diffractsim
-        T = np.array(
-            [
-                [3.2406, -1.5372, -0.4986],
-                [-0.9689, 1.8758, 0.0415],
-                [0.0557, -0.2040, 1.0570],
-            ],
-            dtype=float,
-        )
-    
-        rgb = np.tensordot(T, XYZ, axes=([1], [0]))  # (3, ny, nx)
-    
-        # "add white" clipping for negative values
-        rgb_min = np.amin(rgb, axis=0)
-        rgb_max = np.amax(rgb, axis=0)
-        scaling = np.where(
-            rgb_max > 0.0,
-            rgb_max / (rgb_max - rgb_min + 1e-5),
-            1.0,
-        )
-        rgb = np.where(
-            rgb_min[None, ...] < 0.0,
-            scaling[None, ...] * (rgb - rgb_min[None, ...]),
-            rgb,
-        )
-    
+        low, high = rgb.min(0), rgb.max(0)
+        scale = np.where(high > 0, high / (high - low + 1e-5), 1.0)
+        rgb = np.where(low[None] < 0, scale[None] * (rgb - low[None]), rgb)
         if gamma:
-            # sRGB gamma
             rgb = np.where(
                 rgb <= 0.00304,
                 12.92 * rgb,
-                1.055 * np.power(np.maximum(rgb, 0.0), 1.0 / 2.4) - 0.055,
+                1.055 * np.maximum(rgb, 0) ** (1 / 2.4) - 0.055,
             )
-    
-            # highlight scaling
-            rgb_max = np.amax(rgb, axis=0) + 1e-5
-            rgb = np.where(
-                rgb_max[None, ...] > 1.0,
-                rgb / rgb_max[None, ...],
-                rgb,
-            )
-    
-        rgb = np.moveaxis(rgb, 0, -1)  # (ny, nx, 3)
-        rgb = np.clip(rgb, 0.0, 1.0)
-    
-        return rgb
+            high = rgb.max(0) + 1e-5
+            rgb = np.where(high[None] > 1, rgb / high[None], rgb)
+        return np.clip(np.moveaxis(rgb, 0, -1), 0, 1)
     ```
 
 
 ??? info "Plotting code"
     ```python
-    rgb = rgb_from_psfs(500 * psf, wavels)
+    rgb = rgb_from_psfs(500 * spectral_psfs, wavelengths)
+    resize = optics.free_space.spec
+    output_spec = pupil_spec.resize(resize.output_size(grating.shape))
+    output_spec = output_spec.downsample(render_downsample)
+    pupil_extent = 1e3 * pupil_spec.extent
+    output_extent = 1e3 * output_spec.extent
     
-    aper_ext = dlu.imshow_extent(1e3 * diam)
-    psf_ext = dlu.imshow_extent(1e3 * diam * optics.pad / optics.crop)
-    
-    plt.figure(figsize=(10, 4))
-    ax = plt.subplot(1, 2, 1)
-    im = ax.imshow(grating, extent=aper_ext)
-    ax.set(title="Grating", xlabel="x (mm)", ylabel="y (mm)")
-    plt.colorbar(im, ax=ax, label="Transmission")
-    
-    ax = plt.subplot(1, 2, 2)
-    im = ax.imshow(rgb, extent=psf_ext)
-    ax.set(title=f"PSF: z={1.0} m", xlabel="x (mm)", ylabel="y (mm)")
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    image = axes[0].imshow(grating, extent=pupil_extent)
+    plt.colorbar(image, ax=axes[0], label="Transmission")
+    axes[0].set(title="Grating", xlabel="x [mm]", ylabel="y [mm]")
+    axes[1].imshow(rgb, extent=output_extent)
+    axes[1].set(title="Diffraction at z = 1 m", xlabel="x [mm]", ylabel="y [mm]")
     plt.tight_layout()
     plt.show()
     ```
@@ -206,40 +168,37 @@ These cells are just to turn our PSFs into a nice RGB image for display. The RGB
     
 
 
-That looks pretty awesome! Now lets use this function to watch the PSF actually _evolve_ as it propagates through free-space, we can just propagate the PSF to a number of different planes and convert each one to RGB for display.
+## Propagation through multiple planes
+
+The propagation distance is an ordinary array leaf, so one compiled function can be reused for every plane. We calculate a modest set of frames directly in memory; no multi-gigabyte cache is required.
 
 
 ```python
-# Build our propagation functions
-spectral_fn = lambda wl, optx: optx.propagate(wl, weights=weights, return_wf=True).psf
-prop_fn = jit(lambda z, wl: spectral_fn(wl, optics.set("distance", z)))
+distances = np.linspace(0.01, 1.0, 18)
+rgb_frames = []
+for distance in tqdm(distances):
+    frame = propagate_spectrum(distance)
+    rgb_frames.append(rgb_from_psfs(500 * frame, wavelengths))
 
-# Define our propagation distances
-zs = np.linspace(0, 1, 10)
-
-# Propagate to each plane and collect the PSFs. Note we do this one distance at a time
-# to avoid hitting RAM limits and slowing down from memory swap
-psfs = []
-for z in tqdm(zs):
-    psfs.append(prop_fn(z, wavels).block_until_ready())
-
-# Convert to RGB
-rgbs = [rgb_from_psfs(500 * psf, wavels) for psf in psfs]
+print("RGB frames:", len(rgb_frames), rgb_frames[0].shape)
 ```
 
 
-      0%|          | 0/10 [00:00<?, ?it/s]
+      0%|          | 0/18 [00:00<?, ?it/s]
+
+
+    RGB frames: 18 (320, 320, 3)
 
 
 
 ??? info "Plotting code"
     ```python
-    plt.figure(figsize=(20, 8))
-    for i in range(10):
-        plt.subplot(2, 5, i + 1)
-        plt.imshow(rgbs[i], extent=psf_ext)
-        plt.title(f"z={100*zs[i]:.2f} cm")
-        plt.axis("off")
+    indices = np.linspace(0, len(distances) - 1, 6).astype(int)
+    fig, axes = plt.subplots(2, 3, figsize=(12, 8))
+    for ax, index in zip(axes.flat, indices):
+        ax.imshow(rgb_frames[index], extent=output_extent)
+        ax.set_title(f"z = {100 * distances[index]:.1f} cm")
+        ax.set(xlabel="x [mm]", ylabel="y [mm]")
     plt.tight_layout()
     plt.show()
     ```
@@ -250,50 +209,31 @@ rgbs = [rgb_from_psfs(500 * psf, wavels) for psf in psfs]
     
 
 
-If you are running this locally, you can save these as a [nice video!](https://www.youtube.com/watch?v=ju8-E3PQ8NI)
+The same frames can be viewed as an inline animation. Saving the animation is left as an explicit user action because it requires a local movie writer such as FFmpeg.
 
 
 ??? info "Animation code"
     ```python
-    import matplotlib.pyplot as plt
-    from matplotlib import animation
-    from IPython.display import HTML
-    
-    # Add some start and stop frames to make the animation pause at the ends
-    rgbs = 10 * [rgbs[0]] + rgbs + 10 * [rgbs[-1]]
-    plt_zs = 10 * [zs[0]] + list(zs) + 10 * [zs[-1]]
-    
     fig, ax = plt.subplots(figsize=(5, 5), dpi=80)
+    image = ax.imshow(rgb_frames[0], extent=output_extent)
+    title = ax.set_title(f"z = {100 * distances[0]:.1f} cm")
+    ax.set(xlabel="x [mm]", ylabel="y [mm]")
     
-    im = ax.imshow(rgbs[0], extent=psf_ext)
-    title = ax.set_title(f"PSF: z={100 * plt_zs[0]:.2f} cm")
-    ax.set_xlabel("x (mm)")
-    ax.set_ylabel("y (mm)")
-    plt.tight_layout()
+    def update(index):
+        image.set_data(rgb_frames[index])
+        title.set_text(f"z = {100 * distances[index]:.1f} cm")
+        return image, title
     
-    def update(i):
-        im.set_data(rgbs[i])
-        title.set_text(f"PSF: z={100 * plt_zs[i]:.2f} cm")
-        return im, title
-    
-    anim = animation.FuncAnimation(
-        fig,
-        update,
-        frames=len(rgbs),
-        interval=200,
-        blit=False,
+    movie = animation.FuncAnimation(
+        fig, update, frames=len(rgb_frames), interval=150, blit=False
     )
-    
     plt.close(fig)
-    HTML(anim.to_jshtml())
+    HTML(movie.to_jshtml())
     ```
 
-```python
-# Save the animation
-anim.save("psf_animation.mp4", writer="ffmpeg")
-```
 
 
-```python
 
-```
+    <IPython.core.display.HTML object>
+
+

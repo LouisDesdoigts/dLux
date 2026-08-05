@@ -15,8 +15,14 @@
 ???+ info "imshow_extent"
     ::: dLux.utils.helpers.imshow_extent
 
-???+ info "inherit_docstrings"
-    ::: dLux.utils.helpers.inherit_docstrings
-
 ???+ info "missing_attribute_error"
     ::: dLux.utils.helpers.missing_attribute_error
+
+???+ info "from_complex"
+    ::: dLux.utils.helpers.from_complex
+
+???+ info "as_size"
+    ::: dLux.utils.helpers.as_size
+
+???+ info "as_axis"
+    ::: dLux.utils.helpers.as_axis

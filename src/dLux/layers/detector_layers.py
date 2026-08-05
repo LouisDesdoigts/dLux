@@ -2,99 +2,34 @@
 
 from __future__ import annotations
 from abc import abstractmethod
+
 import jax.numpy as np
 from jax import Array
 import dLux.utils as dlu
 
-from ..psfs import PSF
-from ..coordinates import BaseCoordTransform
+from ..fields import PSF
 from .optical_layers import BaseLayer
 
 __all__ = [
+    "BaseDetectorLayer",
+    "DetectorLayer",
     "ApplyPixelResponse",
-    "ApplyInterpolation",
     "ApplyJitter",
     "ApplySaturation",
     "AddConstant",
-    "Downsample",
 ]
 
 
-class DetectorLayer(BaseLayer):
-    """
-    A base detector layer class to help with type checking throughout the rest of the
-    software.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/DetectorLayer.png)
-    """
-
-    def __init__(self: DetectorLayer):
-        super().__init__()
+class BaseDetectorLayer(BaseLayer):
+    """Base class for layers that transform PSFs."""
 
     @abstractmethod
-    def __call__(self: DetectorLayer, psf: PSF) -> PSF:  # pragma: no cover
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
-
-    def apply(self: DetectorLayer, psf: PSF) -> PSF:
-        """
-        Backwards compatibility alias for `__call__`.
-
-        Parameters
-        ----------
-        psf : PSF
-            The PSF to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed PSF.
-        """
-        return self(psf)
+    def __call__(self, psf: PSF) -> PSF:  # pragma: no cover
+        """Transform a PSF."""
 
 
-class ApplyInterpolation(DetectorLayer):
-    """Interpolate a PSF through a coordinate transformation.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ApplyInterpolation.png)
-    """
-
-    transformation: BaseCoordTransform
-    method: str
-    fill: float
-
-    def __init__(
-        self,
-        transformation: BaseCoordTransform,
-        method: str = "linear",
-        fill: float = 0.0,
-    ):
-        super().__init__()
-        if not isinstance(transformation, BaseCoordTransform):
-            raise TypeError("transformation must be a BaseCoordTransform.")
-        self.transformation = transformation
-        self.method = str(method)
-        self.fill = np.asarray(fill, dtype=float)
-
-    def __call__(self, psf: PSF) -> PSF:
-        return psf.interpolate(
-            self.transformation,
-            method=self.method,
-            fill=self.fill,
-        )
+class DetectorLayer(BaseDetectorLayer):
+    """Public contract for layers that transform PSFs."""
 
 
 class ApplyPixelResponse(DetectorLayer):
@@ -102,9 +37,6 @@ class ApplyPixelResponse(DetectorLayer):
     Applies a pixel response array to the input PSF via multiplication. This can be
     used to model inter- and intra-pixel sensitivity variations common
     to most detectors.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ApplyPixelResponse.png)
 
     Attributes
     ----------
@@ -135,9 +67,6 @@ class ApplyJitter(DetectorLayer):
     """
     Convolves the PSF with a radially symmetric Gaussian kernel parameterised by its
     standard deviation (sigma).
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/ApplyJitter.png)
 
     Attributes
     ----------
@@ -204,9 +133,6 @@ class ApplySaturation(DetectorLayer):
     Applies a simple saturation model to the input PSF by clipping any values above
     the threshold value.
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/ApplySaturation.png)
-
     Attributes
     ----------
     threshold : float
@@ -234,9 +160,6 @@ class AddConstant(DetectorLayer):
     Adds a constant to the output PSF. This is typically used to model the mean value of
     the detector noise.
 
-    ??? abstract "UML"
-        ![UML](../assets/uml/AddConstant.png)
-
     Attributes
     ----------
     value : float
@@ -257,37 +180,3 @@ class AddConstant(DetectorLayer):
 
     def __call__(self: AddConstant, psf: PSF) -> PSF:
         return psf + self.value
-
-
-class Downsample(DetectorLayer):
-    """
-    Downsamples an input PSF by an integer number of pixels via a sum. Typically used
-    to downsample an oversampled PSF to the true pixel size. Note the input PSF size
-    must be divisible by kernel_size.
-
-    ??? abstract "UML"
-        ![UML](../assets/uml/Downsample.png)
-
-    Attributes
-    ----------
-    kernel_size : int
-        The size of the downsampling kernel.
-    """
-
-    kernel_size: int
-
-    def __init__(self: Downsample, kernel_size: int):
-        """
-        Parameters
-        ----------
-        kernel_size : int
-            The size of the downsampling kernel. Must be greater than 0.
-        """
-        super().__init__()
-        self.kernel_size = int(kernel_size)
-
-        if self.kernel_size <= 0:
-            raise ValueError("kernel_size must be greater than 0.")
-
-    def __call__(self: Downsample, psf: PSF) -> PSF:
-        return psf.downsample(self.kernel_size)

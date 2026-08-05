@@ -1,44 +1,92 @@
-from jax import numpy as np, config
+"""Tests for dLux.layers.unified_layers."""
 
-config.update("jax_debug_nans", True)
+import jax.numpy as np
 import pytest
-from dLux.layers import Flip, Lambda, Resize, Rotate
-from dLux import Wavefront, PSF
 
-wf = Wavefront(npixels=16, diameter=1, wavelength=1e-6)
-psf = PSF(np.ones((16, 16)), 1 / 16)
+import dLux as dl
 
-
-def _test_apply(layer):
-    assert isinstance(layer.apply(wf), Wavefront)
-    assert isinstance(layer.apply(psf), PSF)
+from tests.helpers import assert_jittable
 
 
-@pytest.mark.parametrize("npixels", [8, 32])
-def test_resize(npixels):
-    _test_apply(Resize(npixels))
+@pytest.fixture
+def targets(make_wavefront, make_psf):
+    return (make_wavefront(), make_psf())
 
 
-@pytest.mark.parametrize("angle", [np.pi])
-@pytest.mark.parametrize("method", ["nearest", "linear", "cubic"])
-@pytest.mark.parametrize("complex", [True, False])
-def test_rotate(angle, method, complex):
-    layer = Rotate(angle, method, complex)
-    _test_apply(layer)
-    assert layer.angle.shape == ()
+@pytest.mark.parametrize(
+    "layer",
+    [
+        dl.Resize(12),
+        dl.Downsample(2),
+        dl.Flip(0),
+        dl.Flip((0, 1)),
+        dl.Interpolate(
+            dl.Affine(translation=[0.01, -0.02], rotation=0.1), method="linear"
+        ),
+        dl.Normalise(),
+        dl.Normalise(mode="peak", value=2),
+        dl.Lambda(),
+    ],
+)
+def test_unified_layer_contract(layer, targets):
+    assert isinstance(layer, dl.OpticalLayer)
+    assert isinstance(layer, dl.DetectorLayer)
+
+    for target in targets:
+        output = assert_jittable(layer, target)
+        assert type(output) is type(target)
 
 
-@pytest.mark.parametrize("axes", [0, 1, (0, 1)])
-def test_flip(axes):
-    _test_apply(Flip(axes))
-    with pytest.raises(ValueError):
-        Flip((0.0, 1))
-    with pytest.raises(ValueError):
-        Flip(0.0)
+def test_lambda_identity(targets):
+    layer = dl.Lambda()
+    for target in targets:
+        assert layer(target) is target
 
 
-def test_lambda():
-    layer = Lambda()
+def test_normalise_modes(targets):
+    wavefront, psf = targets
 
-    assert layer.apply(wf) is wf
-    assert layer.apply(psf) is psf
+    assert np.allclose(dl.Normalise("power", 2)(wavefront).power, 2)
+    assert np.allclose(dl.Normalise("peak", 2)(psf).data.max(), 2)
+
+
+@pytest.mark.parametrize(
+    ("layer", "shape", "n", "d"),
+    [
+        (dl.Resize((10, 6)), (2, 3, 6, 10), (10, 6), (0.1, 0.1)),
+        (dl.Downsample((2, 4)), (2, 3, 2, 4), (4, 2), (0.2, 0.4)),
+        (dl.Flip((-2, -1)), (2, 3, 8, 8), (8, 8), (0.1, 0.1)),
+        (
+            dl.Interpolate(dl.Affine(translation=[0.01, -0.02])),
+            (2, 3, 8, 8),
+            (8, 8),
+            (0.1, 0.1),
+        ),
+    ],
+)
+def test_unified_layers_preserve_leading_axes(layer, shape, n, d, make_spec):
+    spec = make_spec(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
+    targets = (
+        dl.Wavefront(1e-6, spec, np.ones((2, 3, 8, 8), complex)),
+        dl.PSF(np.ones((2, 3, 8, 8)), spec),
+    )
+
+    for target in targets:
+        output = assert_jittable(layer, target)
+        assert output.field.shape == shape
+        assert output.n == n
+        assert np.allclose(output.d, np.asarray(d))
+        assert np.allclose(output.c, target.c)
+
+
+@pytest.mark.parametrize(
+    "constructor",
+    [
+        lambda: dl.Downsample(0),
+        lambda: dl.Flip((0.0, 1)),
+        lambda: dl.Interpolate("rotate"),
+    ],
+)
+def test_validation(constructor):
+    with pytest.raises((TypeError, ValueError)):
+        constructor()

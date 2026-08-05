@@ -1,145 +1,148 @@
-from jax import numpy as np, config
+"""Tests for dLux.sources."""
 
-config.update("jax_debug_nans", True)
+import jax.numpy as np
 import pytest
-from dLux import (
-    Scene,
-    PointSource,
-    PointSources,
-    BinarySource,
-    ResolvedSource,
-    PointResolvedSource,
-    Spectrum,
-    LayeredOpticalSystem,
-    Wavefront,
-    Optic,
-    PSF,
+
+import dLux as dl
+import dLux.utils as dlu
+
+from tests.helpers import assert_differentiable, assert_jittable
+
+
+def test_array_spectrum_contract():
+    spectrum = dl.Spectrum([0.9e-6, 1.1e-6], [0.25, 0.75])
+
+    wavelengths, weights = assert_jittable(
+        lambda value: value.spectrum_params(), spectrum
+    )
+    assert np.allclose(wavelengths, spectrum.wavelengths)
+    assert np.allclose(weights, spectrum.weights)
+
+
+def test_parametric_spectrum_contract():
+    wavelengths = np.linspace(0.8e-6, 1.2e-6, 5)
+    weights = dl.Polynomial(1, [1.0, 2e5])
+    spectrum = dl.Spectrum(wavelengths, weights)
+
+    resolved_wavelengths, resolved_weights = assert_jittable(
+        lambda value: value.spectrum_params(), spectrum
+    )
+    assert np.allclose(resolved_wavelengths, wavelengths)
+    assert np.allclose(resolved_weights, 1 + 2e5 * wavelengths)
+    assert_differentiable(
+        lambda coefficients: spectrum.set(
+            "weights.coefficients", coefficients
+        ).spectrum_params()[1],
+        weights.coefficients,
+    )
+    resolved = spectrum.resolve(variables=wavelengths)
+    assert isinstance(resolved, dl.Spectrum)
+    assert not isinstance(resolved.weights, dl.Parametric)
+
+
+def test_basis_weight_spectrum():
+    wavelengths = np.linspace(0.8e-6, 1.2e-6, 5)
+    basis = np.stack([np.ones(5), np.linspace(-1, 1, 5)])
+    spectrum = dl.Spectrum(
+        wavelengths, dl.ExplicitBasis(basis, coefficients=[1.0, 0.2])
+    )
+
+    _, weights = spectrum.spectrum_params()
+    assert weights.shape == wavelengths.shape
+
+
+def test_spectrum_and_source_parameters():
+    spectrum = dl.Spectrum([900, 1100], units={"wavelengths": "nm"})
+    source = dl.Source(
+        [900, 1100],
+        position=[1, -2],
+        flux=2,
+        units={"wavelengths": "nm", "position": "arcsec", "flux": "kphoton"},
+    )
+
+    wavelengths, weights = spectrum.spectrum_params()
+    parameters = source.params()
+    assert np.allclose(wavelengths, np.array([0.9e-6, 1.1e-6]))
+    assert np.allclose(weights, np.ones(2))
+    assert np.allclose(parameters["position"], np.array([1, -2]) * dlu.arcsec2rad(1))
+    assert np.allclose(parameters["flux"], 2000)
+    assert parameters["distribution"] is None
+
+
+def test_default_source():
+    source = dl.Source([1e-6])
+    parameters = source.params()
+
+    assert np.allclose(parameters["position"], np.zeros(2))
+    assert np.allclose(parameters["flux"], 1)
+    assert parameters["distribution"] is None
+
+
+def test_binary_source_parameters():
+    source = dl.BinarySource(
+        [1e-6],
+        centre=[0.1, -0.2],
+        separation=0.4,
+        position_angle=0.3,
+        contrast=3.0,
+        flux=2.0,
+    )
+
+    parameters = source.params()
+    positions = parameters["position"]
+    fluxes = parameters["flux"]
+    assert positions.shape == (2, 2)
+    assert fluxes.shape == (2,)
+    assert np.allclose(fluxes.mean(), 2)
+    assert np.allclose(fluxes[0] / fluxes[1], 3)
+    assert parameters["distribution"] is None
+
+    assert_differentiable(
+        lambda separation: source.set("separation", separation).params()["position"],
+        source.separation,
+    )
+
+
+def test_parametric_distribution():
+    distribution = dl.ExplicitBasis(np.ones((2, 3, 3)), coefficients=[1.0, 2.0])
+    source = dl.BinarySource([1e-6], distribution=distribution)
+
+    assert source.params()["distribution"].shape == (3, 3)
+
+
+def test_log_flux_units():
+    source = dl.Source(
+        [1e-6],
+        flux=np.log(1000),
+        distribution=np.log(np.full((3, 3), 2.0)),
+        units={"flux": "log_photon", "distribution": "log"},
+    )
+    assert np.allclose(source.params()["flux"], 1000)
+    assert np.allclose(source.params()["distribution"], 2)
+
+
+def test_distribution_flux_units():
+    source = dl.Source(
+        [1e-6], distribution=np.full((3, 3), 2.0), units={"distribution": "kphoton"}
+    )
+
+    assert np.allclose(source.params()["distribution"], 2000)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda: dl.Spectrum([[1e-6]]).spectrum_params(),
+        lambda: dl.Spectrum([1e-6], [[1.0, 1.0], [1.0, 1.0]]).spectrum_params(),
+        lambda: dl.Spectrum(dl.Polynomial(0, [1])),
+        lambda: dl.Spectrum([1, 2], np.ones((2, 2, 2))).spectrum_params(),
+        lambda: dl.Spectrum([1e-6], units={"unknown": "m"}),
+        lambda: dl.Source([1e-6], position=np.zeros(3)).params(),
+        lambda: dl.Source([1e-6], flux=np.ones(2)).params(),
+        lambda: dl.Source([1e-6], distribution=np.ones(3)).params(),
+        lambda: dl.BinarySource([1e-6], centre=np.zeros(3)).params(),
+    ],
 )
-import dLux.sources as sources_module
-
-
-def _test_model(source):
-    optics = LayeredOpticalSystem(16, 1.0, [Optic()])
-    assert isinstance(source.model(optics), np.ndarray)
-    if isinstance(source, (ResolvedSource, PointResolvedSource)):
-        with pytest.raises(NotImplementedError):
-            source.model(optics, return_wf=True)
-    else:
-        assert isinstance(source.model(optics, return_wf=True), Wavefront)
-    assert isinstance(source.model(optics, return_psf=True), PSF)
-    with pytest.raises(ValueError):
-        source.model(optics, return_wf=True, return_psf=True)
-
-
-@pytest.fixture
-def wavelengths():
-    return np.ones(2)
-
-
-@pytest.fixture
-def spectrum():
-    return Spectrum([1e-6])
-
-
-def test_point_source(wavelengths, spectrum):
-    source = PointSource(wavelengths)
-    _test_model(source)
-    assert source.flux.shape == ()
-    _test_model(PointSource(wavelengths, spectrum=spectrum))
-
-    with pytest.raises(ValueError):
-        PointSource(wavelengths, position=np.ones(1))
-    with pytest.raises(TypeError):
-        PointSource(wavelengths, spectrum=1)
-
-
-def test_point_sources(wavelengths, spectrum):
-    _test_model(PointSources(wavelengths))
-    _test_model(PointSources(wavelengths, spectrum=spectrum))
-    _test_model(PointSources(wavelengths, flux=np.ones(1)))
-
-    with pytest.raises(ValueError):
-        PointSources(wavelengths, position=np.ones(1))
-    with pytest.raises(ValueError):
-        PointSources(wavelengths, flux=np.ones(3))
-    with pytest.raises(ValueError):
-        PointSources(wavelengths, flux=np.ones((1, 3)))
-
-
-def test_resolved_source(wavelengths, spectrum):
-    _test_model(ResolvedSource(wavelengths))
-
-    with pytest.raises(ValueError):
-        ResolvedSource(wavelengths, distribution=np.ones(1))
-
-
-def test_binary_source(wavelengths, spectrum):
-    source = BinarySource(wavelengths, separation=1.0)
-    _test_model(source)
-    assert source.mean_flux.shape == ()
-    assert source.separation.shape == ()
-    assert source.position_angle.shape == ()
-    assert source.contrast.shape == ()
-
-    with pytest.raises(ValueError):
-        BinarySource(wavelengths, separation=1.0, position=np.ones(1))
-
-    weights = np.ones((2, wavelengths.size))
-    source = BinarySource(wavelengths, weights=weights)
-    assert source.weights.shape == weights.shape
-    assert np.allclose(source.weights.sum(-1), 1)
-
-
-def test_point_resolved_source(wavelengths, spectrum):
-    source = PointResolvedSource(wavelengths)
-    _test_model(source)
-    assert source.contrast.shape == ()
-
-    weights = np.ones((2, wavelengths.size))
-    source = PointResolvedSource(wavelengths, weights=weights)
-    assert source.weights.shape == weights.shape
-    assert np.allclose(source.weights.sum(-1), 1)
-
-
-def test_scene():
-    keyed_scene = Scene([("source", PointSource([1e-6]))])
-    assert isinstance(keyed_scene.source, PointSource)
-
-    single_scene = Scene(PointSource([1e-6]))
-    assert isinstance(single_scene.PointSource, PointSource)
-
-    tuple_scene = Scene((PointSource([1e-6]), PointSource([1e-6])))
-    assert isinstance(tuple_scene.PointSource_0, PointSource)
-
-    scene = Scene([PointSource([1e-6]), PointSource([1e-6])])
-    optics = LayeredOpticalSystem(16, 1.0, [Optic()])
-
-    # In this case we have an output dictionary of each source
-    assert isinstance(scene.model(optics), np.ndarray)
-    output = scene.model(optics, return_wf=True).values()
-    for o in output:
-        assert isinstance(o, Wavefront)
-
-    # In this case we have a single PSF object
-    assert isinstance(scene.model(optics, return_psf=True), PSF)
-
-    # Test getattr
-    scene.PointSource_0
-    with pytest.raises(AttributeError):
-        scene.not_an_attr
-
-
-def test_source_helper_functions(spectrum):
-    assert sources_module._as_wavelengths_1d(None) is None
-
-    with pytest.raises(ValueError):
-        sources_module._as_wavelengths_1d(np.ones((2, 2)))
-
-    assert sources_module._infer_n_wavelengths(np.ones(3), None) == 3
-    assert sources_module._infer_n_wavelengths(None, spectrum) == 1
-
-    with pytest.raises(ValueError):
-        sources_module._infer_n_wavelengths(None, None)
-
-    with pytest.raises(TypeError):
-        sources_module._infer_n_wavelengths(None, 1)
+def test_source_validation(operation):
+    with pytest.raises((TypeError, ValueError)):
+        operation()

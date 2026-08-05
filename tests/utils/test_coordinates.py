@@ -1,228 +1,93 @@
+"""Tests for dLux.utils.coordinates."""
+
+import jax.numpy as np
 import pytest
-from jax import numpy as np, config
 
-config.update("jax_debug_nans", True)
+import dLux.utils as dlu
 
-from dLux.utils import coordinates as coordinates_utils
-
-RTOL = 1e-5
-ATOL = 1e-7
+from tests.helpers import assert_jittable
 
 
-# ============================================================================
-# Tests for translate_coords
-# ============================================================================
-class TestTranslateCoords:
-    """Tests for coordinate translation."""
-
-    def test_formula(self):
-        """Translation subtracts the supplied center from each coordinate."""
-        coords = np.array([[[0.0, 0.5, 1.0]], [[0.0, 0.5, 1.0]]])
-        centre = np.array([0.5, 0.5])
-        expected = np.array([[[-0.5, 0.0, 0.5]], [[-0.5, 0.0, 0.5]]])
-        result = coordinates_utils.translate_coords(coords, centre)
-        assert np.allclose(result, expected)
-
-
-# ============================================================================
-# Tests for compress_coords
-# ============================================================================
-class TestCompressCoords:
-    """Tests for anisotropic coordinate compression."""
-
-    def test_formula(self):
-        """Compression scales each axis independently."""
-        coords = np.array([[[0.0, 0.5, 1.0]], [[0.0, 0.5, 1.0]]])
-        compress = np.array([0.5, 1.0])
-        expected = np.array([[[0.0, 0.25, 0.5]], [[0.0, 0.5, 1.0]]])
-        result = coordinates_utils.compress_coords(coords, compress)
-        assert np.allclose(result, expected)
+@pytest.mark.parametrize(
+    ("operation", "parameter"),
+    [
+        (dlu.translate_coords, np.asarray((0.1, -0.2))),
+        (dlu.compress_coords, np.asarray((0.5, 2.0))),
+        (dlu.rotate_coords, 0.3),
+    ],
+)
+def test_coordinate_transform_contract(operation, parameter):
+    coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    output = assert_jittable(operation, coordinates, parameter)
+    assert output.shape == coordinates.shape
 
 
-# ============================================================================
-# Tests for shear_coords
-# ============================================================================
-class TestShearCoords:
-    """Tests for coordinate shearing."""
-
-    def test_formula(self):
-        """Shearing a square coordinate grid gives the expected affine transform."""
-        coords = np.array(
-            [
-                [[0.0, 0.5, 1.0], [0.0, 0.5, 1.0], [0.0, 0.5, 1.0]],
-                [[0.0, 0.5, 1.0], [0.0, 0.5, 1.0], [0.0, 0.5, 1.0]],
-            ]
-        )
-        shear = np.array([0.0, 0.5])
-        expected = np.array(
-            [
-                [[0.0, 0.5, 1.0], [0.0, 0.5, 1.0], [0.0, 0.5, 1.0]],
-                [[0.0, 0.5, 1.0], [0.25, 0.75, 1.25], [0.5, 1.0, 1.5]],
-            ]
-        )
-        result = coordinates_utils.shear_coords(coords, shear)
-        assert np.allclose(result, expected)
+def test_shear_contract():
+    coordinates = dlu.nd_coords((6, 6), (0.1, 0.2))
+    output = assert_jittable(dlu.shear_coords, coordinates, np.asarray((0.1, -0.2)))
+    assert output.shape == coordinates.shape
 
 
-# ============================================================================
-# Tests for rotate_coords
-# ============================================================================
-class TestRotateCoords:
-    """Tests for coordinate rotation."""
-
-    def test_formula(self):
-        """Rotation by π flips both axes."""
-        coords = np.array([[0.0, 0.5, 1.0], [0.0, 0.5, 1.0]])
-        rotation = np.pi
-        expected = np.array([[0.0, -0.5, -1.0], [0.0, -0.5, -1.0]])
-        result = coordinates_utils.rotate_coords(coords, rotation)
-        assert np.allclose(result, expected)
-
-
-# ============================================================================
-# Tests for gen_powers
-# ============================================================================
-class TestGenPowers:
-    """Tests for polynomial power generation."""
-
-    def test_output(self):
-        """Generated power ordering matches the expected triangular pattern."""
-        expected = np.array(
-            [[0.0, 1.0, 0.0, 2.0, 1.0, 0.0], [0.0, 0.0, 1.0, 0.0, 1.0, 2.0]]
-        )
-        powers = coordinates_utils.gen_powers(3)
-        assert np.allclose(powers, expected)
-
-
-# ============================================================================
-# Tests for distort_coords
-# ============================================================================
-class TestDistortCoords:
-    """Tests for polynomial coordinate distortion."""
-
-    def test_output_shape(self):
-        """Distortion preserves the coordinate array shape."""
-        coords = np.array([[[0.0, 0.5, 1.0]], [[0.0, 0.5, 1.0]]])
-        powers = coordinates_utils.gen_powers(3)
-        distortion = coordinates_utils.distort_coords(coords, np.ones(6), powers)
-        assert distortion.shape == coords.shape
-
-
-# ============================================================================
-# Tests for cart2polar
-# ============================================================================
-class TestCart2Polar:
-    """Tests for Cartesian-to-polar conversion."""
-
-    @pytest.mark.parametrize(
-        "coordinates, expected",
-        [
-            (np.array([1, 0]), np.array([1, 0])),
-            (np.array([0, 1]), np.array([1, np.pi / 2])),
-            (np.array([-1, 0]), np.array([1, np.pi])),
-            (np.array([0, -1]), np.array([1, -np.pi / 2])),
-        ],
+def test_shear_non_square():
+    coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    assert dlu.shear_coords(coordinates, np.asarray((0.1, -0.2))).shape == (
+        coordinates.shape
     )
-    def test_known_points(self, coordinates, expected):
-        """Axis-aligned points convert to the expected polar coordinates."""
-        actual = coordinates_utils.cart2polar(coordinates)
-        assert np.allclose(actual, expected, rtol=RTOL, atol=ATOL)
 
 
-# ============================================================================
-# Tests for polar2cart
-# ============================================================================
-class TestPolar2Cart:
-    """Tests for polar-to-Cartesian conversion."""
-
-    @pytest.mark.parametrize(
-        "coordinates, expected",
-        [
-            (np.array([1, 0]), np.array([1, 0])),
-            (np.array([1, np.pi / 2]), np.array([0, 1])),
-            (np.array([1, np.pi]), np.array([-1, 0])),
-            (np.array([1, -np.pi / 2]), np.array([0, -1])),
-        ],
-    )
-    def test_known_points(self, coordinates, expected):
-        """Axis-aligned polar points convert to the expected Cartesian coordinates."""
-        actual = coordinates_utils.polar2cart(coordinates)
-        assert np.allclose(actual, expected, rtol=RTOL, atol=ATOL)
+def test_coordinate_system_roundtrip():
+    coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    polar = assert_jittable(dlu.cart2polar, coordinates)
+    assert np.allclose(dlu.polar2cart(polar), coordinates, atol=1e-6)
 
 
-# ============================================================================
-# Tests for pixel_coords
-# ============================================================================
-class TestPixelCoords:
-    """Tests for 2D pixel-center coordinate generation."""
-
-    @pytest.mark.parametrize(
-        "npixels, diameter, polar, expected_shape",
-        [
-            (10, 1.0, False, (2, 10, 10)),
-            (10, 1.0, True, (2, 10, 10)),
-            (20, 2.0, False, (2, 20, 20)),
-            (20, 2.0, True, (2, 20, 20)),
-        ],
-    )
-    def test_output_shape(self, npixels, diameter, polar, expected_shape):
-        """Pixel coordinates return the expected shape across argument combinations."""
-        actual = coordinates_utils.pixel_coords(npixels, diameter=diameter, polar=polar)
-        assert actual.shape == expected_shape
-
-    def test_no_scale_raises(self):
-        """Exactly one scale specification is required."""
-        with pytest.raises(ValueError, match="Exactly one"):
-            coordinates_utils.pixel_coords(10)
-
-    def test_radius(self):
-        """Radius-based pixel scale generation returns a 2D coordinate grid."""
-        result = coordinates_utils.pixel_coords(10, radius=0.5)
-        assert result.shape == (2, 10, 10)
-
-    def test_pixel_scale(self):
-        """Explicit pixel scale generation returns a 2D coordinate grid."""
-        result = coordinates_utils.pixel_coords(10, pixel_scale=0.1)
-        assert result.shape == (2, 10, 10)
-
-    def test_fft_style_even(self):
-        """FFT-style centering works for even pixel counts."""
-        result = coordinates_utils.pixel_coords(10, diameter=1.0, fft_style=True)
-        assert result.shape == (2, 10, 10)
+def test_polynomial_distortion():
+    coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    powers = dlu.polynomial_powers(2, 2)
+    coefficients = np.ones((2, powers.shape[-1])) * 0.01
+    output = assert_jittable(dlu.distort_coords, coordinates, coefficients, powers)
+    assert output.shape == coordinates.shape
 
 
-# ============================================================================
-# Tests for nd_coords
-# ============================================================================
-class TestNDCoords:
-    """Tests for n-dimensional pixel-center coordinate generation."""
+@pytest.mark.parametrize(
+    ("npixels", "scales", "shape"),
+    [
+        ((8,), (0.1,), (8,)),
+        ((8, 6), (0.1, 0.2), (2, 6, 8)),
+        ((8, 6, 4), (0.1, 0.2, 0.3), (3, 6, 8, 4)),
+    ],
+)
+def test_nd_coordinate_generation(npixels, scales, shape):
+    axes = dlu.nd_axes(npixels, scales)
+    coordinates = dlu.nd_coords(npixels, scales)
 
-    def test_1d_xy_indexing(self):
-        """Scalar input returns a squeezed 1D coordinate array."""
-        actual = coordinates_utils.nd_coords(10, 1.0, 0.0, "xy")
-        assert actual.shape == (10,)
+    assert tuple(axis.size for axis in axes) == npixels
+    assert coordinates.shape == shape
 
-    def test_2d_ij_indexing(self):
-        """Tuple input returns a 2D coordinate grid with ij indexing."""
-        actual = coordinates_utils.nd_coords((10, 20), (1.0, 2.0), (0.0, 1.0), "ij")
-        assert actual.shape == (2, 10, 20)
 
-    def test_3d(self):
-        """Three-dimensional inputs return a 3D coordinate grid."""
-        actual = coordinates_utils.nd_coords(
-            (10, 20, 30),
-            (1.0, 2.0, 3.0),
-            (0.0, 1.0, 2.0),
-            "ij",
-        )
-        assert actual.shape == (3, 10, 20, 30)
+@pytest.mark.parametrize("scale", ["diameter", "radius", "pixel_scale"])
+def test_pixel_coordinates(scale):
+    output = dlu.pixel_coords(8, **{scale: 1.0})
+    assert output.shape == (2, 8, 8)
 
-    def test_invalid_indexing_raises(self):
-        """Unsupported indexing conventions raise ValueError."""
-        with pytest.raises(ValueError):
-            coordinates_utils.nd_coords((10, 20, 30), (1.0, 2.0, 3.0), (0, 1, 2), "xi")
 
-    def test_scalar_npixels_expand(self):
-        """Scalar npixels expands when other parameters imply higher dimensionality."""
-        result = coordinates_utils.nd_coords(10, pixel_scales=(1.0, 2.0))
-        assert result.shape == (2, 10, 10)
+def test_fft_and_polar_pixel_coordinates():
+    centered = dlu.pixel_coords(8, diameter=1.0)
+    fft_centered = dlu.pixel_coords(8, diameter=1.0, fft_style=True)
+    polar = dlu.pixel_coords(8, diameter=1.0, polar=True)
+
+    assert np.allclose(fft_centered - centered, -1 / 16)
+    assert np.allclose(polar, dlu.cart2polar(centered))
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda: dlu.pixel_coords(8),
+        lambda: dlu.pixel_coords(8, diameter=1.0, radius=0.5),
+        lambda: dlu.nd_coords((4, 6), indexing="bad"),
+    ],
+)
+def test_validation(operation):
+    with pytest.raises(ValueError):
+        operation()

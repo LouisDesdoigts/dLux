@@ -1,89 +1,41 @@
-import pytest
-from jax import numpy as np, config
+"""Tests for dLux.utils.optics."""
 
-config.update("jax_debug_nans", True)
+import jax.numpy as np
 
-from dLux.utils import optics as optics_utils
+import dLux.utils as dlu
 
-
-# ============================================================================
-# Fixtures
-# ============================================================================
-@pytest.fixture
-def wavelength():
-    return 1.0
+from tests.helpers import assert_jittable
 
 
-@pytest.fixture
-def opd():
-    return np.array([1.0, 2.0, 3.0])
+def test_phase_opd_roundtrip():
+    opd = np.asarray((1e-9, 2e-9, 3e-9))
+    phase = assert_jittable(dlu.opd2phase, opd, 500e-9)
+
+    assert np.allclose(dlu.phase2opd(phase, 500e-9), opd)
+    assert np.isclose(dlu.wavenumber(500e-9), 2 * np.pi / 500e-9)
 
 
-@pytest.fixture
-def phase():
-    return np.array([np.pi / 2, np.pi, 3 * np.pi / 2])
+def test_fringe_size():
+    assert np.isclose(dlu.fringe_size(1e-6, 2.0), 0.5e-6)
+    assert np.isclose(dlu.fringe_size(1e-6, 2.0, 10.0), 5e-6)
 
 
-@pytest.fixture
-def diameter():
-    return 1.0
+def test_tilt_contract():
+    coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    field = np.ones((4, 6), dtype=complex)
+    output = assert_jittable(
+        dlu.tilt,
+        field,
+        coordinates,
+        np.asarray((0.1, -0.2)),
+        0.5,
+    )
 
-
-@pytest.fixture
-def focal_length():
-    return 2.0
-
-
-# ============================================================================
-# Tests for wavenumber
-# ============================================================================
-class TestWavenumber:
-    """Tests for scalar wavelength-to-wavenumber conversion."""
-
-    def test_formula(self, wavelength):
-        """Wavenumber equals 2π divided by wavelength."""
-        result = optics_utils.wavenumber(wavelength)
-        assert result == 2 * np.pi / wavelength
-
-
-# ============================================================================
-# Tests for opd2phase
-# ============================================================================
-class TestOPD2Phase:
-    """Tests for optical path difference to phase conversion."""
-
-    def test_formula(self, opd, wavelength):
-        """Phase equals wavenumber times OPD."""
-        result = optics_utils.opd2phase(opd, wavelength)
-        expected = optics_utils.wavenumber(wavelength) * opd
-        assert np.allclose(result, expected)
-
-
-# ============================================================================
-# Tests for phase2opd
-# ============================================================================
-class TestPhase2OPD:
-    """Tests for phase to optical path difference conversion."""
-
-    def test_formula(self, phase, wavelength):
-        """OPD equals phase divided by wavenumber."""
-        result = optics_utils.phase2opd(phase, wavelength)
-        expected = phase / optics_utils.wavenumber(wavelength)
-        assert np.allclose(result, expected)
-
-
-# ============================================================================
-# Tests for fringe_size
-# ============================================================================
-class TestFringeSize:
-    """Tests for diffraction fringe size calculation."""
-
-    def test_without_focal_length(self, wavelength, diameter):
-        """Without focal length the fringe size is angular."""
-        result = optics_utils.fringe_size(wavelength, diameter)
-        assert result == wavelength / diameter
-
-    def test_with_focal_length(self, wavelength, diameter, focal_length):
-        """With focal length the fringe size is linear in the focal plane."""
-        result = optics_utils.fringe_size(wavelength, diameter, focal_length)
-        assert result == wavelength * focal_length / diameter
+    assert np.allclose(np.abs(output), 1.0)
+    assert np.allclose(
+        np.angle(output),
+        dlu.opd2phase(
+            dlu.tilt_opd(coordinates, np.asarray((0.1, -0.2))),
+            0.5,
+        ),
+    )

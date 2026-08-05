@@ -31,15 +31,16 @@ dev = [
     "pytest-cov",
     "black",
     "ruff",
-    "selenium",           # Used to generate UML diagrams in documentation
-    "pylint",             # Provides pyreverse for UML generation
     "pre-commit",
-    "zensical",           # The new documentation engine
-    "mkdocstrings-python" # Required for API generation
+    "zensical",
+    "mkdocstrings-python"
 ]
 
 [tool.ruff]
 line-length = 88
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
 # E = pycodestyle, F = Pyflakes, I = Isort (replaces your separate isort config)
@@ -58,3 +59,26 @@ lines-after-imports = 2
 
 [tool.black]
 line-length = 88
+skip-magic-trailing-comma = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers"]
+markers = [
+    "slow: tests excluded from the default fast development loop",
+]
+
+[tool.coverage.run]
+source = ["dLux"]
+relative_files = true
+
+[tool.coverage.report]
+fail_under = 95
+precision = 2
+show_missing = true
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.coverage.html]
+directory = "htmlcov"

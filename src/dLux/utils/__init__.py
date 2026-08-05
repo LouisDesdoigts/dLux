@@ -1,9 +1,10 @@
 """Public utility functions used across dLux modules."""
 
-from .._exports import reexport
+from .helpers import reexport
 
 # Import as modules
 from . import (
+    abcd,
     propagation,
     coordinates,
     helpers,
@@ -12,16 +13,18 @@ from . import (
     optics,
     units,
     array_ops,
-    zernikes,
+    polynomials,
     source,
     geometry,
     misc,
     norms,
     apertures,
     fourier,
+    polarisation,
 )
 
 _modules = (
+    abcd,
     propagation,
     coordinates,
     helpers,
@@ -30,16 +33,18 @@ _modules = (
     optics,
     math,
     array_ops,
-    zernikes,
+    polynomials,
     source,
     geometry,
     misc,
     norms,
     apertures,
     fourier,
+    polarisation,
 )
 
 _module_names = [
+    "abcd",
     "propagation",
     "coordinates",
     "helpers",
@@ -48,12 +53,13 @@ _module_names = [
     "optics",
     "units",
     "array_ops",
-    "zernikes",
+    "polynomials",
     "source",
     "geometry",
     "misc",
     "norms",
     "apertures",
     "fourier",
+    "polarisation",
 ]
 __all__ = _module_names + reexport(_modules, globals())

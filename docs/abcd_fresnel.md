@@ -55,53 +55,54 @@ psf_npix = 256  # Number of pixels in the PSF
 psf_pixel_scale = 10e-6  # 10 microns
 
 # Propagate to focus using an MFT Fresnel propagator
-to_focal = dl.MFTPropagator(
+pupil_spec = dl.GridSpec(n=wf_npix, diam=diameter, unit="m")
+psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="m")
+to_focal = dl.ABCDPropagator(
     [
-        ("ThinLens", dl.ABCDConjugatePlane(focal_length)),  # Pupil -> Focal
+        ("ThinLens", dl.ABCDFraunhofer(focal_length)),  # Pupil -> Focal
         ("FreeSpace", dl.ABCDFreeSpace(-defocus)),  # Focal -> Defocused Detector
     ],
-    dl.CoordSpec(n=psf_npix, d=psf_pixel_scale),
+    psf_spec,
 )
 
 # Generate other layers
 aper = dlu.jwst_like(npixels=wf_npix, oversample=5)
-aperture = dl.TransmissiveLayer(aper, normalise=True)
-aberrations = dl.FourierBasis(wf_npix, n_modes=128)
-
-# Define the optical layers
-layers = [
-    ("aperture", aperture),
-    ("aberrations", aberrations),
-    ("to_focal", to_focal),
-]
-
-# Construct the optics object
-optics = dl.LayeredOpticalSystem(
-    wf_npixels=wf_npix,
-    diameter=diameter,
-    layers=layers,
+pupil = dl.Optic(
+    transmission=aper, opd=dl.FourierBasis(wf_npix, n_modes=128), normalise=True
 )
+
+# Define the optical layers and construct the system
+layers = [("pupil", pupil), ("to_focal", to_focal)]
+optics = dl.OpticalSystem(layers, pupil_spec)
 
 # Examine the optics object
 print(optics)
 ```
 
-    LayeredOpticalSystem(
-      wf_npixels=512,
-      diameter=6.6,
+    OpticalSystem(
       layers={
-        'aperture': TransmissiveLayer(transmission=f32[512,512], normalise=True),
-        'aberrations':
-        FourierBasis(coefficients=f32[128,128], kernels=f32[2,512,128]),
+        'pupil':
+        Optic(
+          opd=FourierBasis(
+            coefficients=f32[128,128],
+            basis_shape=(128, 128),
+            kernels=(f32[512,128], f32[512,128])
+          ),
+          phase=None,
+          transmission=f32[512,512],
+          normalise=True
+        ),
         'to_focal':
-        MFTPropagator(
+        ABCDPropagator(
+          spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m'),
           ABCDs={
-            'ThinLens': ABCDConjugatePlane(focal_length=f32[]),
+            'ThinLens': ABCDFraunhofer(focal_length=f32[]),
             'FreeSpace': ABCDFreeSpace(distance=f32[])
           },
-          spec=CoordSpec(n=256, d=1e-05, c=0.0)
+          method='lct'
         )
-      }
+      },
+      spec=GridSpec(n=(512, 512), d=f32[2], c=None, unit='m')
     )
 
 
@@ -110,20 +111,20 @@ Great now lets put some random phase error in and see how our +- defocused PSFs 
 
 ```python
 # Define some random coefficients for the Fourier basis
-coeffs = 2.0e-9 * jr.normal(jr.key(0), optics.coefficients.shape)
-optics = optics.set(coefficients=coeffs)
+coeffs = 2.0e-9 * jr.normal(jr.key(0), optics.pupil.opd.coefficients.shape)
+optics = optics.set("pupil.opd.coefficients", coeffs)
 
 # Model the positive and negative defocused PSFs
 psf_pos = optics.propagate(1e-6)
-psf_neg = optics.multiply(distance=-1).propagate(1e-6)
+psf_neg = optics.multiply("to_focal.ABCDs.FreeSpace.distance", -1).propagate(1e-6)
 ```
 
 
 ??? info "Plotting code"
     ```python
-    pupil = 1e9 * optics.eval_basis().at[aper <= 0].set(np.nan)
-    ap_ext = dlu.imshow_extent(optics.diameter)
-    psf_ext = dlu.imshow_extent(1e3 * to_focal.fov)
+    pupil = 1e9 * optics.pupil.opd.evaluate().at[aper <= 0].set(np.nan)
+    ap_ext = dlu.imshow_extent(optics.spec.fov[0])
+    psf_ext = dlu.imshow_extent(1e3 * psf_spec.fov[0])
     
     plt.figure(figsize=(15, 4))
     ax = plt.subplot(1, 3, 1)
@@ -190,11 +191,11 @@ Now we create some observation and statistical functions
 ```python
 def eval_wfs_psfs(optics):
     psf_pos = optics.propagate(1e-6)
-    psf_neg = optics.multiply(distance=-1).propagate(1e-6)
+    psf_neg = optics.multiply("to_focal.ABCDs.FreeSpace.distance", -1).propagate(1e-6)
     return np.array([psf_pos, psf_neg])
 
 def eval_wfs_data(params, optics):
-    optics = optics.set(coefficients=1e-9 * params["coeffs"])
+    optics = optics.set("pupil.opd.coefficients", 1e-9 * params["coeffs"])
     return 1e6 * eval_wfs_psfs(optics)
 
 def z_score_fn(params, optics, data, error):
@@ -210,7 +211,7 @@ opt_fn = lambda params, args: np.mean(z_score_fn(params, *args)**2)
 
 # Re-initialise our guess of parameters
 keys = jr.split(jr.key(1), 3)
-params = {"coeffs": np.zeros_like(optics.coefficients)}
+params = {"coeffs": np.zeros_like(optics.pupil.opd.coefficients)}
 
 # Apply the optimiser
 args = (optics, data, error)
@@ -223,15 +224,15 @@ print("Final reduced chi-squared:", chi2r)
 print("Steps:", int(sol.stats["num_steps"]))
 ```
 
-    Final reduced chi-squared: 1.0526975
-    Steps: 206
+    Final reduced chi-squared: 1.0513618
+    Steps: 230
 
 
 
 ??? info "Plotting code"
     ```python
-    true_opd = optics.eval_basis()
-    recovered_opd = optics.set(coefficients=1e-9 * sol.value["coeffs"]).eval_basis()
+    true_opd = optics.pupil.opd.evaluate()
+    recovered_opd = optics.set("pupil.opd.coefficients", 1e-9 * sol.value["coeffs"]).pupil.opd.evaluate()
     residual_opd = recovered_opd - true_opd
     
     true_pupil = 1e9 * true_opd.at[aper <= 0].set(np.nan)
