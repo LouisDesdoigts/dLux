@@ -8,7 +8,7 @@ from jax import Array
 
 from ..parametric import Parametric, to_param
 from ..fields import Wavefront
-from .optical_layers import OpticalLayer
+from .optical import OpticalLayer
 
 __all__ = ["RefractiveOptic", "Wedge"]
 

@@ -2,36 +2,36 @@
 
 from ..utils.helpers import reexport
 from . import (
-    unified_layers,
-    detector_layers,
-    optical_layers,
-    dynamic_layers,
-    sparse_layers,
-    refractive_layers,
-    polarised_layers,
-    propagation_layers,
+    unified,
+    detector,
+    optical,
+    dynamic,
+    sparse,
+    refractive,
+    polarised,
+    propagation,
 )
 
 _modules = (
-    unified_layers,
-    detector_layers,
-    optical_layers,
-    dynamic_layers,
-    sparse_layers,
-    refractive_layers,
-    polarised_layers,
-    propagation_layers,
+    unified,
+    detector,
+    optical,
+    dynamic,
+    sparse,
+    refractive,
+    polarised,
+    propagation,
 )
 
 _module_names = [
-    "unified_layers",
-    "detector_layers",
-    "optical_layers",
-    "dynamic_layers",
-    "sparse_layers",
-    "refractive_layers",
-    "polarised_layers",
-    "propagation_layers",
+    "unified",
+    "detector",
+    "optical",
+    "dynamic",
+    "sparse",
+    "refractive",
+    "polarised",
+    "propagation",
 ]
 
 __all__ = _module_names + reexport(_modules, globals())

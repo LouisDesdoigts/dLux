@@ -8,8 +8,8 @@ from jax import Array
 import dLux.utils as dlu
 from ..grids import CoordTransform
 from ..fields import PSF, Wavefront
-from .detector_layers import DetectorLayer
-from .optical_layers import OpticalLayer
+from .detector import DetectorLayer
+from .optical import OpticalLayer
 
 __all__ = [
     "UnifiedLayer",

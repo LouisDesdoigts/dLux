@@ -49,7 +49,7 @@ classDiagram
     click dLux_grids_TransformChain href "../grids/#dLux.grids.TransformChain" "Attributes: transformations"
     dLux_grids_CoordTransform <|-- dLux_grids_DistortCoords
     click dLux_grids_DistortCoords href "../grids/#dLux.grids.DistortCoords" "Attributes: powers, distortion, shift_invariant"
-    click dLux_sources_BaseSource href "../sources/#dLux.sources.BaseSource" "Attributes: flux, distribution, units · Methods: source_params(), flux_params(), distribution_params(), model()"
+    click dLux_sources_BaseSource href "../sources/#dLux.sources.BaseSource" "Attributes: flux, distribution, units · Methods: source_params(), flux_params(), distribution_params(), wavefront(), model()"
     click dLux_sources_Spectrum href "../sources/#dLux.sources.Spectrum" "Attributes: wavelengths, weights, units · Methods: spectrum_params(), model()"
     dLux_sources_BaseSource <|-- dLux_sources_Source
     dLux_sources_Spectrum <|-- dLux_sources_Source

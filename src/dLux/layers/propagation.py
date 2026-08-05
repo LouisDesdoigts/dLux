@@ -9,7 +9,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..grids import BaseGridSpec, GridSpec, ResizeSpec
-from .optical_layers import OpticalLayer
+from .optical import OpticalLayer
 
 __all__ = [
     "ABCDElement",

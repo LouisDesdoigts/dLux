@@ -1,0 +1,52 @@
+# Unified
+
+## Inheritance
+
+```mermaid
+classDiagram
+    class dLux_layers_unified_UnifiedLayer["UnifiedLayer"]
+    class dLux_layers_unified_Resize["Resize"]
+    class dLux_layers_unified_Downsample["Downsample"]
+    class dLux_layers_unified_Flip["Flip"]
+    class dLux_layers_unified_Interpolate["Interpolate"]
+    class dLux_layers_unified_Normalise["Normalise"]
+    class dLux_layers_unified_Lambda["Lambda"]
+    class dLux_layers_detector_DetectorLayer["DetectorLayer"]
+    class dLux_layers_optical_OpticalLayer["OpticalLayer"]
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_unified_UnifiedLayer
+    dLux_layers_detector_DetectorLayer <|-- dLux_layers_unified_UnifiedLayer
+    click dLux_layers_unified_UnifiedLayer href "#dLux.layers.unified.UnifiedLayer" "No direct public attributes or methods"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Resize
+    click dLux_layers_unified_Resize href "#dLux.layers.unified.Resize" "Attributes: npixels"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Downsample
+    click dLux_layers_unified_Downsample href "#dLux.layers.unified.Downsample" "Attributes: n"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Flip
+    click dLux_layers_unified_Flip href "#dLux.layers.unified.Flip" "Attributes: axes"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Interpolate
+    click dLux_layers_unified_Interpolate href "#dLux.layers.unified.Interpolate" "Attributes: transformation, method, complex, fill"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Normalise
+    click dLux_layers_unified_Normalise href "#dLux.layers.unified.Normalise" "Attributes: mode, value"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Lambda
+    click dLux_layers_unified_Lambda href "#dLux.layers.unified.Lambda" "No direct public attributes or methods"
+```
+
+???+ info "UnifiedLayer"
+    ::: dLux.layers.unified.UnifiedLayer
+
+???+ info "Resize"
+    ::: dLux.layers.unified.Resize
+
+???+ info "Downsample"
+    ::: dLux.layers.unified.Downsample
+
+???+ info "Flip"
+    ::: dLux.layers.unified.Flip
+
+???+ info "Interpolate"
+    ::: dLux.layers.unified.Interpolate
+
+???+ info "Normalise"
+    ::: dLux.layers.unified.Normalise
+
+???+ info "Lambda"
+    ::: dLux.layers.unified.Lambda

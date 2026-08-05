@@ -10,8 +10,8 @@ import zodiax as zdx
 
 import dLux.utils as dlu
 from .grids import GridSpec
-from .layers.detector_layers import BaseDetectorLayer
-from .layers.optical_layers import BaseLayer, BaseOpticalLayer
+from .layers.detector import BaseDetectorLayer
+from .layers.optical import BaseLayer, BaseOpticalLayer
 from .fields import Image, PSF, Wavefront
 from .sources import Spectrum
 

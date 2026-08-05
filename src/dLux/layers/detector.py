@@ -8,7 +8,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..fields import PSF
-from .optical_layers import BaseLayer
+from .optical import BaseLayer
 
 __all__ = [
     "BaseDetectorLayer",

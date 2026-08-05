@@ -10,8 +10,8 @@ from jax import Array, vmap
 from ..grids import Affine, AffineMap, CoordTransform, DistortCoords, GridSpec
 from ..parametric import Parametric, ParametricBasis, to_param
 from ..fields import Wavefront
-from .dynamic_layers import BaseDynamicLayer
-from .optical_layers import OpticalLayer, Optic, _optic_phasor
+from .dynamic import BaseDynamicLayer
+from .optical import OpticalLayer, Optic, _optic_phasor
 
 __all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
 

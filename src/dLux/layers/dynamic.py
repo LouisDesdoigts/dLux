@@ -11,7 +11,7 @@ from jax import Array
 from ..grids import CoordTransform, GridSpec
 from ..parametric import Parametric, to_param
 from ..fields import Wavefront
-from .optical_layers import AberratedLayer, BaseOpticalLayer, Optic, TransmissiveLayer
+from .optical import AberratedLayer, BaseOpticalLayer, Optic, TransmissiveLayer
 
 __all__ = [
     "BaseDynamicLayer",

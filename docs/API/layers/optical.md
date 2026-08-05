@@ -1,0 +1,57 @@
+# Optical
+
+## Inheritance
+
+```mermaid
+classDiagram
+    class dLux_layers_optical_BaseLayer["BaseLayer"]
+    class dLux_layers_optical_BaseOpticalLayer["BaseOpticalLayer"]
+    class dLux_layers_optical_OpticalLayer["OpticalLayer"]
+    class dLux_layers_optical_TransmissiveLayer["TransmissiveLayer"]
+    class dLux_layers_optical_AberratedLayer["AberratedLayer"]
+    class dLux_layers_optical_Optic["Optic"]
+    class dLux_layers_optical_Tilt["Tilt"]
+    class dLux_layers_optical_SoummerFPM["SoummerFPM"]
+    class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
+    dLux_parametric_parametrics_ParametricHolder <|-- dLux_layers_optical_BaseLayer
+    click dLux_layers_optical_BaseLayer href "#dLux.layers.optical.BaseLayer" "Methods: apply()"
+    dLux_layers_optical_BaseLayer <|-- dLux_layers_optical_BaseOpticalLayer
+    click dLux_layers_optical_BaseOpticalLayer href "#dLux.layers.optical.BaseOpticalLayer" "Methods: apply()"
+    dLux_layers_optical_BaseOpticalLayer <|-- dLux_layers_optical_OpticalLayer
+    click dLux_layers_optical_OpticalLayer href "#dLux.layers.optical.OpticalLayer" "Methods: context()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_TransmissiveLayer
+    click dLux_layers_optical_TransmissiveLayer href "#dLux.layers.optical.TransmissiveLayer" "Attributes: transmission, normalise"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_AberratedLayer
+    click dLux_layers_optical_AberratedLayer href "#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase"
+    dLux_layers_optical_TransmissiveLayer <|-- dLux_layers_optical_Optic
+    dLux_layers_optical_AberratedLayer <|-- dLux_layers_optical_Optic
+    click dLux_layers_optical_Optic href "#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, normalise · Methods: phasor()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
+    click dLux_layers_optical_Tilt href "#dLux.layers.optical.Tilt" "Attributes: angles, unit"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_SoummerFPM
+    click dLux_layers_optical_SoummerFPM href "#dLux.layers.optical.SoummerFPM" "Attributes: optic, focal_spec, focal_length · Methods: validate(), context()"
+```
+
+???+ info "BaseLayer"
+    ::: dLux.layers.optical.BaseLayer
+
+???+ info "BaseOpticalLayer"
+    ::: dLux.layers.optical.BaseOpticalLayer
+
+???+ info "OpticalLayer"
+    ::: dLux.layers.optical.OpticalLayer
+
+???+ info "TransmissiveLayer"
+    ::: dLux.layers.optical.TransmissiveLayer
+
+???+ info "AberratedLayer"
+    ::: dLux.layers.optical.AberratedLayer
+
+???+ info "Optic"
+    ::: dLux.layers.optical.Optic
+
+???+ info "Tilt"
+    ::: dLux.layers.optical.Tilt
+
+???+ info "SoummerFPM"
+    ::: dLux.layers.optical.SoummerFPM

@@ -109,14 +109,14 @@ nav:
 
     - Layers API:
       - Overview: API/layers/overview.md
-      - Detector Layers: API/layers/detector_layers.md
-      - Dynamic Layers: API/layers/dynamic_layers.md
-      - Optical Layers: API/layers/optical_layers.md
-      - Polarised Layers: API/layers/polarised_layers.md
-      - Propagation Layers: API/layers/propagation_layers.md
-      - Refractive Layers: API/layers/refractive_layers.md
-      - Sparse Layers: API/layers/sparse_layers.md
-      - Unified Layers: API/layers/unified_layers.md
+      - Detector: API/layers/detector.md
+      - Dynamic: API/layers/dynamic.md
+      - Optical: API/layers/optical.md
+      - Polarised: API/layers/polarised.md
+      - Propagation: API/layers/propagation.md
+      - Refractive: API/layers/refractive.md
+      - Sparse: API/layers/sparse.md
+      - Unified: API/layers/unified.md
 
     - Parametric API:
       - Overview: API/parametric/overview.md
