@@ -1,4 +1,4 @@
-"""Tests for dLux.layers.propagation_layers."""
+"""Tests for dLux.layers.propagation."""
 
 import jax.numpy as np
 import pytest
@@ -124,6 +124,46 @@ class TestPropagation:
 
         assert_tree_allclose(fft_output, mft_output, rtol=2e-5, atol=2e-6)
 
+    def test_fraunhofer_mft_inverse_roundtrip(self, make_wavefront):
+        wavefront = make_wavefront()
+        focal_spec = dl.Fraunhofer(dl.ResizeSpec(), method="fft")(wavefront).spec
+
+        focal = dl.Fraunhofer(focal_spec)(wavefront)
+        recovered = dl.Fraunhofer(wavefront.spec, inverse=True)(focal)
+
+        assert_tree_allclose(recovered, wavefront, rtol=2e-5, atol=2e-6)
+
+    def test_fraunhofer_fft_inverse_roundtrip_with_pad_and_crop(
+        self, make_wavefront
+    ):
+        wavefront = make_wavefront()
+
+        focal = dl.Fraunhofer(
+            dl.ResizeSpec(pad=2, c=np.zeros(2)), method="fft"
+        )(wavefront)
+        recovered = dl.Fraunhofer(
+            dl.ResizeSpec(crop=2, c=np.zeros(2)), method="fft", inverse=True
+        )(focal)
+
+        assert np.allclose(recovered.phasor, wavefront.phasor, rtol=2e-5, atol=2e-6)
+        assert recovered.spec.n == wavefront.spec.n
+        assert recovered.spec.unit == wavefront.spec.unit
+        assert np.allclose(recovered.spec.d, wavefront.spec.d)
+        assert np.allclose(recovered.spec.c, 0, atol=1e-7)
+
+    @pytest.mark.parametrize("method", ["mft", "lct"])
+    def test_fresnel_inverse_roundtrip(self, method, make_wavefront):
+        wavefront = make_wavefront()
+        kwargs = {"defocus": 1e-3, "focal_length": 2.0, "method": method}
+        focal_spec = dl.Fresnel(
+            dl.ResizeSpec(), defocus=1e-3, focal_length=2.0, method="fft"
+        )(wavefront).spec
+
+        focal = dl.Fresnel(focal_spec, **kwargs)(wavefront)
+        recovered = dl.Fresnel(wavefront.spec, inverse=True, **kwargs)(focal)
+
+        assert_tree_allclose(recovered, wavefront, rtol=2e-5, atol=2e-6)
+
     def test_field_gradient(self, angular_spec, make_wavefront):
         wavefront = make_wavefront()
         layer = dl.Fraunhofer(angular_spec)
@@ -182,6 +222,10 @@ class TestValidation:
     def test_construction(self, constructor, physical_spec):
         with pytest.raises((TypeError, ValueError)):
             constructor(physical_spec)
+
+    def test_inverse_fresnel_fft_is_rejected(self):
+        with pytest.raises(ValueError, match="not supported"):
+            dl.Fresnel(dl.ResizeSpec(), method="fft", inverse=True)
 
     def test_coordinate_compatibility(
         self,

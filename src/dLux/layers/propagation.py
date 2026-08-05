@@ -51,15 +51,25 @@ def _propagate_mft(wf, spec, ABCD=None, **kwargs):
     return wf.set(phasor=propagate(wf.phasor, wavelength, x, y), spec=spec)
 
 
-def _propagate_fft(wf, spec, unit, ABCD=None, **kwargs):
+def _propagate_fft(
+    wf, spec, unit=None, ABCD=None, focal_length=None, inverse=False, **kwargs
+):
     """Propagate every field at native FFT sampling."""
+    if unit is None:
+        unit = "m" if inverse else "rad"
+        if focal_length is not None:
+            unit = wf.spec.unit
     center = dlu.as_axis(spec.c, 2, "c")
     center = None if center is None else center * dlu.unit_factor(unit)
     padding = spec.padding
 
     def propagate(field, wavelength, x, y):
         fn = dlu.FFT if ABCD is None else dlu.ABCD_FFT
-        inputs = kwargs if ABCD is None else {"ABCD": ABCD}
+        inputs = (
+            {"focal_length": focal_length, "inverse": inverse, **kwargs}
+            if ABCD is None
+            else {"ABCD": ABCD}
+        )
         field, axes = fn(
             field, wavelength, (x, y), output_center=center, **padding, **inputs
         )
@@ -212,22 +222,31 @@ class Propagator(OpticalLayer):
 
 
 class FocalPropagator(Propagator):
-    """Base propagation layer with optional physical focal scaling."""
+    """Base focal propagation layer with an explicit propagation direction."""
 
     spec: BaseGridSpec
     focal_length: Array | None
+    inverse: bool
 
-    def __init__(self, spec, focal_length=None):
+    def __init__(self, spec, focal_length=None, inverse=False):
         super().__init__(spec)
         self.focal_length = (
             None if focal_length is None else np.asarray(focal_length, dtype=float)
         )
+        self.inverse = bool(inverse)
 
     def validate(self, wavefront):
         """Validate the input and explicitly requested output coordinates."""
-        super().validate(wavefront)
         if isinstance(self.spec, ResizeSpec):
+            angular = self.inverse and self.focal_length is None
+            _validate_grid(wavefront.spec, "input", angular=angular)
             return
+        if self.inverse:
+            angular = self.focal_length is None
+            _validate_grid(wavefront.spec, "input", angular=angular)
+            _validate_grid(self.spec, "output", wavefront.spec.ndim, angular=False)
+            return
+        super().validate(wavefront)
         angular = _validate_grid(self.spec, "output", wavefront.spec.ndim)
         if self.focal_length is None and not angular:
             raise ValueError(
@@ -244,21 +263,26 @@ class Fraunhofer(FocalPropagator):
 
     spec: BaseGridSpec
     focal_length: Array | None
+    inverse: bool
     method: str
 
-    def __init__(self, spec, focal_length=None, method="mft"):
+    def __init__(self, spec, focal_length=None, method="mft", inverse=False):
         method = _validate_method(method, spec, {"mft": GridSpec, "fft": ResizeSpec})
-        super().__init__(spec, focal_length)
+        super().__init__(spec, focal_length, inverse)
         self.method = method
 
     def __call__(self, wavefront):
         self.validate(wavefront)
         if self.method == "fft":
-            unit = "rad" if self.focal_length is None else wavefront.spec.unit
             return _propagate_fft(
-                wavefront, self.spec, unit, focal_length=self.focal_length
+                wavefront,
+                self.spec,
+                focal_length=self.focal_length,
+                inverse=self.inverse,
             )
-        return _propagate_mft(wavefront, self.spec, focal_length=self.focal_length)
+        return _propagate_mft(
+            wavefront, self.spec, focal_length=self.focal_length, inverse=self.inverse
+        )
 
 
 class Fresnel(FocalPropagator):
@@ -266,24 +290,38 @@ class Fresnel(FocalPropagator):
 
     spec: BaseGridSpec
     focal_length: Array | None
+    inverse: bool
     defocus: Array
     method: str
 
-    def __init__(self, spec, defocus=0.0, focal_length=None, method="lct"):
+    def __init__(
+        self, spec, defocus=0.0, focal_length=None, method="lct", inverse=False
+    ):
         types = {"fft": ResizeSpec, "mft": GridSpec, "lct": GridSpec}
         method = _validate_method(method, spec, types)
-        super().__init__(spec, focal_length)
+        if inverse and method == "fft":
+            raise ValueError(
+                "Inverse Fresnel propagation is not supported with method='fft'."
+            )
+        super().__init__(spec, focal_length, inverse)
         self.method = method
         self.defocus = np.asarray(defocus, dtype=float)
 
     def __call__(self, wavefront):
         self.validate(wavefront)
         if self.method == "fft":
-            unit = "rad" if self.focal_length is None else wavefront.spec.unit
-            kwargs = {"focal_length": self.focal_length, "defocus": self.defocus}
-            return _propagate_fft(wavefront, self.spec, unit, **kwargs)
+            return _propagate_fft(
+                wavefront,
+                self.spec,
+                focal_length=self.focal_length,
+                defocus=self.defocus,
+            )
         return _propagate_mft(
-            wavefront, self.spec, focal_length=self.focal_length, defocus=self.defocus
+            wavefront,
+            self.spec,
+            focal_length=self.focal_length,
+            defocus=self.defocus,
+            inverse=self.inverse,
         )
 
 

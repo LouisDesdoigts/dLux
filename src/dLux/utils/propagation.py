@@ -163,8 +163,15 @@ def ABCD_FFT(
     return field, spec_out
 
 
-def _fraunhofer_abcd(focal_length, defocus):
-    """Build the ABCD matrix for a defocused focal propagation."""
+def _fraunhofer_abcd(focal_length, defocus, inverse=False):
+    """Build the directed ABCD matrix for defocused focal propagation."""
+    if inverse:
+        return dlu.compose_abcd(
+            [
+                dlu.abcd_free_space(-defocus),
+                dlu.abcd_fraunhofer(-focal_length),
+            ]
+        )
     return dlu.compose_abcd(
         [dlu.abcd_fraunhofer(focal_length), dlu.abcd_free_space(defocus)]
     )
@@ -215,11 +222,6 @@ def MFT(
 ) -> Array:
     """Propagate to an explicit grid using a pure MFT or defocused LCT."""
     focal_length = 1.0 if focal_length is None else focal_length
-    if inverse and defocus is not None:
-        raise ValueError(
-            "LCT propagation has no inverse flag; reverse the longitudinal "
-            "distances in an explicit ABCD system."
-        )
     field = phasor
     if defocus is None:
         if inverse:
@@ -244,7 +246,7 @@ def MFT(
             wavelength=wavelength,
             spec_in=spec_in,
             spec_out=spec_out,
-            ABCD=_fraunhofer_abcd(focal_length, defocus),
+            ABCD=_fraunhofer_abcd(focal_length, defocus, inverse),
             apply_out_curv=apply_out_curv,
         )
     return field
@@ -265,10 +267,7 @@ def FFT(
     """Propagate using a pure FFT or a defocused FFT-based LCT."""
     focal_length = 1.0 if focal_length is None else focal_length
     if inverse and defocus is not None:
-        raise ValueError(
-            "LCT propagation has no inverse flag; reverse the longitudinal "
-            "distances in an explicit ABCD system."
-        )
+        raise ValueError("Inverse Fresnel propagation is not supported by FFT.")
     phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
     if defocus is None:
         ABCD = dlu.abcd_fraunhofer(focal_length)

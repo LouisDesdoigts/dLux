@@ -29,7 +29,7 @@ classDiagram
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
     click dLux_layers_optical_Tilt href "#dLux.layers.optical.Tilt" "Attributes: angles, unit"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_SoummerFPM
-    click dLux_layers_optical_SoummerFPM href "#dLux.layers.optical.SoummerFPM" "Attributes: optic, focal_spec, focal_length · Methods: validate(), context()"
+    click dLux_layers_optical_SoummerFPM href "#dLux.layers.optical.SoummerFPM" "Attributes: optic, propagator · Methods: context()"
 ```
 
 ???+ info "BaseLayer"

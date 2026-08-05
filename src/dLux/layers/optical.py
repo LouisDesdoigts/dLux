@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jax.numpy as np
 import equinox as eqx
 from jax import Array
 
-import dLux.utils as dlu
-
-from ..grids import GridSpec
 from ..parametric import Parametric, ParametricHolder, to_param
 from ..fields import Wavefront
+
+if TYPE_CHECKING:
+    from .propagation import Fraunhofer
 
 __all__ = [
     "BaseLayer",
@@ -169,26 +169,23 @@ class Tilt(OpticalLayer):
 class SoummerFPM(OpticalLayer):
     """Apply a focal-plane optical layer with the Soummer MFT algorithm.
 
-    The focal-plane field is evaluated only on the compact ``focal_spec`` grid.
+    The focal-plane field is evaluated only on the propagator's compact output grid.
     The difference introduced by ``optic`` is inverse transformed and subtracted
     from the original pupil field. This supports scalar amplitude and phase optics,
     parametric optics, and Jones optics that promote the wavefront to a polarised
     representation.
 
-    This implementation deliberately uses a conjugate-plane MFT pair. Defocused or
-    otherwise non-conjugate propagation is not the Soummer algorithm represented by
-    this layer.
+    This implementation requires a forward MFT ``Fraunhofer`` propagator. The same
+    propagator is configured for inverse propagation when returning the modified
+    field to the input pupil grid.
 
     Parameters
     ----------
     optic : BaseOpticalLayer
         Optical layer applied on the sampled focal-plane grid. It should act as the
         identity outside the compact region represented by ``focal_spec``.
-    focal_spec : GridSpec
-        Explicit sampling of the focal-plane optic. Angular units are required when
-        ``focal_length`` is omitted; physical units are required otherwise.
-    focal_length : float, optional
-        Physical focal length in metres. Omit for angular focal-plane coordinates.
+    propagator : Fraunhofer
+        Forward ``Fraunhofer`` propagator configured with ``method="mft"``.
 
     References
     ----------
@@ -198,34 +195,21 @@ class SoummerFPM(OpticalLayer):
     """
 
     optic: BaseOpticalLayer
-    focal_spec: GridSpec
-    focal_length: Array | None
+    propagator: Fraunhofer
 
-    def __init__(self, optic, focal_spec, focal_length=None):
+    def __init__(self, optic, propagator):
+        from .propagation import Fraunhofer
+
         if not isinstance(optic, BaseOpticalLayer):
             raise TypeError("optic must be a BaseOpticalLayer.")
-        if not isinstance(focal_spec, GridSpec):
-            raise TypeError("focal_spec must be a GridSpec.")
+        if not isinstance(propagator, Fraunhofer):
+            raise TypeError("propagator must be a Fraunhofer layer.")
+        if propagator.method != "mft":
+            raise ValueError("SoummerFPM requires an MFT Fraunhofer propagator.")
+        if propagator.inverse:
+            raise ValueError("SoummerFPM requires a forward propagator.")
         self.optic = optic
-        self.focal_spec = focal_spec.broadcast(2)
-        self.focal_length = (
-            None if focal_length is None else np.asarray(focal_length, dtype=float)
-        )
-
-    def validate(self, wavefront):
-        """Validate the pupil and focal coordinate systems."""
-        from .propagation import _validate_grid
-
-        _validate_grid(wavefront.spec, "input", angular=False)
-        angular = _validate_grid(self.focal_spec, "focal", ndim=2)
-        if self.focal_length is None and not angular:
-            raise ValueError(
-                "SoummerFPM without a focal length requires angular focal units."
-            )
-        if self.focal_length is not None and angular:
-            raise ValueError(
-                "SoummerFPM with a focal length requires physical focal units."
-            )
+        self.propagator = propagator
 
     def context(self, wavefront):
         """Return focal-plane context used to resolve the wrapped optic."""
@@ -237,25 +221,9 @@ class SoummerFPM(OpticalLayer):
         }
 
     def __call__(self, wavefront):
-        self.validate(wavefront)
-        focal_phasor = dlu.MFT(
-            wavefront.phasor,
-            wavefront.wavelength,
-            wavefront.axes,
-            self.focal_spec.axes,
-            focal_length=self.focal_length,
-        )
-        focal = wavefront.set(phasor=focal_phasor, spec=self.focal_spec)
+        focal = self.propagator(wavefront)
         optic = self.optic.resolve(**self.context(focal))
-        modified = optic.apply(focal)
-        difference = focal.phasor - modified.phasor
-        pupil_difference = dlu.MFT(
-            difference,
-            wavefront.wavelength,
-            self.focal_spec.axes,
-            wavefront.axes,
-            focal_length=self.focal_length,
-            inverse=True,
-        )
-        phasor = wavefront.phasor - pupil_difference
-        return modified.set(phasor=phasor, spec=wavefront.spec)
+        difference = focal - optic.apply(focal)
+        inverse = self.propagator.set(spec=wavefront.spec, inverse=True)
+        pupil_difference = inverse(difference)
+        return wavefront - pupil_difference

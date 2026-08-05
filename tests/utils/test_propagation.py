@@ -239,10 +239,23 @@ def test_native_leading_dimensions(method):
     _assert_field_close(actual, expected)
 
 
-@pytest.mark.parametrize("propagate", [dlu.FFT, dlu.MFT])
-def test_inverse_defocus_requires_reverse_system(propagate):
+def test_inverse_fresnel_mft_roundtrip():
     spec = dlu.nd_axes((8, 6), (0.1, 0.13))
-    kwargs = {"spec_out": spec} if propagate is dlu.MFT else {}
+    phasor = _field(spec)
+    kwargs = {"focal_length": 2.0, "defocus": 0.1}
+    ABCD = dlu.compose_abcd(
+        (dlu.abcd_fraunhofer(2.0), dlu.abcd_free_space(0.1))
+    )
+    spec_out = dlu.FFT_spec(spec, 0.5, ABCD)
 
-    with pytest.raises(ValueError, match="no inverse flag"):
-        propagate(_field(spec), 0.5, spec, defocus=0.1, inverse=True, **kwargs)
+    focal = dlu.MFT(phasor, 0.5, spec, spec_out, **kwargs)
+    recovered = dlu.MFT(focal, 0.5, spec_out, spec, inverse=True, **kwargs)
+
+    _assert_field_close(recovered, phasor)
+
+
+def test_inverse_fresnel_fft_is_rejected():
+    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
+
+    with pytest.raises(ValueError, match="not supported"):
+        dlu.FFT(_field(spec), 0.5, spec, defocus=0.1, inverse=True)

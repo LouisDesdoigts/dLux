@@ -1,11 +1,11 @@
-"""Tests for dLux.layers.optical_layers."""
+"""Tests for dLux.layers.optical."""
 
 import jax.numpy as np
 import pytest
 
 import dLux as dl
 
-from tests.helpers import assert_differentiable, assert_jittable
+from tests.helpers import assert_differentiable, assert_jittable, assert_tree_allclose
 
 
 @pytest.fixture
@@ -143,3 +143,97 @@ def test_optical_layers_preserve_leading_axes(layer, make_spec):
 def test_tilt_validation():
     with pytest.raises(ValueError, match="shape"):
         dl.Tilt([1])
+
+
+class TestSoummerFPM:
+    @pytest.fixture
+    def focal_spec(self):
+        return dl.GridSpec(n=(6, 8), d=(2e-7, 3e-7), unit="rad")
+
+    def test_complex_optic_matches_direct_mft(self, focal_spec, make_wavefront):
+        wavefront = make_wavefront()
+        phase = np.linspace(0.0, np.pi, 48).reshape(8, 6)
+        optic = dl.Optic(transmission=0.7, phase=phase)
+        layer = dl.SoummerFPM(optic, dl.Fraunhofer(focal_spec))
+
+        focal = dl.utils.MFT(
+            wavefront.phasor,
+            wavefront.wavelength,
+            wavefront.axes,
+            focal_spec.axes,
+        )
+        modified = focal * 0.7 * np.exp(1j * phase)
+        difference = dl.utils.MFT(
+            focal - modified,
+            wavefront.wavelength,
+            focal_spec.axes,
+            wavefront.axes,
+            inverse=True,
+        )
+        expected = wavefront.set(phasor=wavefront.phasor - difference)
+
+        output = assert_jittable(layer, wavefront, rtol=1e-5, atol=1e-5)
+        assert_tree_allclose(output, expected, rtol=1e-5, atol=1e-5)
+
+    def test_parametric_optic(self, focal_spec, make_wavefront):
+        wavefront = make_wavefront()
+        optic = dl.Optic(transmission=dl.Complement(dl.Circle(diameter=8e-7)))
+        layer = dl.SoummerFPM(optic, dl.Fraunhofer(focal_spec))
+
+        assert isinstance(layer.optic.transmission, dl.Parametric)
+        assert_jittable(layer, wavefront, rtol=1e-5, atol=1e-5)
+        assert_differentiable(
+            lambda diameter: layer.set(
+                "optic.transmission.shape.diameter", diameter
+            )(wavefront),
+            layer.optic.transmission.shape.diameter,
+            rtol=1e-5,
+            atol=1e-5,
+        )
+
+    def test_polarising_optic(self, focal_spec, make_wavefront):
+        wavefront = make_wavefront()
+        layer = dl.SoummerFPM(
+            dl.LinearPolariser(np.pi / 4), dl.Fraunhofer(focal_spec)
+        )
+
+        output = assert_jittable(layer, wavefront, rtol=1e-5, atol=1e-5)
+
+        assert isinstance(output, dl.PolarisedWavefront)
+        assert output.phasor.shape == (2, 2, *wavefront.phasor.shape)
+
+    def test_focal_length_gradient(self, make_wavefront):
+        wavefront = make_wavefront()
+        spec = dl.GridSpec(n=(6, 8), d=(2e-6, 3e-6), unit="m")
+        layer = dl.SoummerFPM(
+            dl.Optic(transmission=0.5), dl.Fraunhofer(spec, focal_length=2.0)
+        )
+
+        assert_differentiable(
+            lambda value: layer.set("propagator.focal_length", value)(wavefront),
+            layer.propagator.focal_length,
+            rtol=1e-5,
+            atol=1e-5,
+        )
+
+    def test_vectorised_wavefronts(self, focal_spec, make_wavefront):
+        layer = dl.SoummerFPM(
+            dl.Optic(transmission=0.5), dl.Fraunhofer(focal_spec)
+        )
+        chromatic = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
+        polarised = make_wavefront(polarised=True)
+
+        assert_jittable(layer.apply, chromatic, rtol=1e-5, atol=1e-5)
+        assert_jittable(layer.apply, polarised, rtol=1e-5, atol=1e-5)
+
+    def test_validation(self, focal_spec, make_wavefront):
+        with pytest.raises(TypeError, match="BaseOpticalLayer"):
+            dl.SoummerFPM(np.ones(focal_spec.shape), dl.Fraunhofer(focal_spec))
+        with pytest.raises(TypeError, match="Fraunhofer"):
+            dl.SoummerFPM(dl.Optic(), dl.FreeSpace(0.1))
+        with pytest.raises(ValueError, match="MFT"):
+            dl.SoummerFPM(
+                dl.Optic(), dl.Fraunhofer(dl.ResizeSpec(), method="fft")
+            )
+        with pytest.raises(ValueError, match="forward"):
+            dl.SoummerFPM(dl.Optic(), dl.Fraunhofer(focal_spec, inverse=True))

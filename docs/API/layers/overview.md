@@ -88,7 +88,7 @@ classDiagram
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
     click dLux_layers_optical_Tilt href "../optical/#dLux.layers.optical.Tilt" "Attributes: angles, unit"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_SoummerFPM
-    click dLux_layers_optical_SoummerFPM href "../optical/#dLux.layers.optical.SoummerFPM" "Attributes: optic, focal_spec, focal_length · Methods: validate(), context()"
+    click dLux_layers_optical_SoummerFPM href "../optical/#dLux.layers.optical.SoummerFPM" "Attributes: optic, propagator · Methods: context()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_polarised_PolarisationLayer
     click dLux_layers_polarised_PolarisationLayer href "../polarised/#dLux.layers.polarised.PolarisationLayer" "Attributes: polarisation"
     click dLux_layers_polarised_PolarisingOptic href "../polarised/#dLux.layers.polarised.PolarisingOptic" "Attributes: jones"
@@ -108,15 +108,15 @@ classDiagram
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_propagation_Propagator
     click dLux_layers_propagation_Propagator href "../propagation/#dLux.layers.propagation.Propagator" "Attributes: spec · Methods: apply(), validate()"
     dLux_layers_propagation_Propagator <|-- dLux_layers_propagation_FocalPropagator
-    click dLux_layers_propagation_FocalPropagator href "../propagation/#dLux.layers.propagation.FocalPropagator" "Attributes: spec, focal_length · Methods: validate()"
+    click dLux_layers_propagation_FocalPropagator href "../propagation/#dLux.layers.propagation.FocalPropagator" "Attributes: spec, focal_length, inverse · Methods: validate()"
     dLux_layers_propagation_Propagator <|-- dLux_layers_propagation_ABCDPropagator
     click dLux_layers_propagation_ABCDPropagator href "../propagation/#dLux.layers.propagation.ABCDPropagator" "Attributes: spec, ABCDs, method · Properties: abcd · Methods: validate()"
     dLux_layers_propagation_Propagator <|-- dLux_layers_propagation_FreeSpace
     click dLux_layers_propagation_FreeSpace href "../propagation/#dLux.layers.propagation.FreeSpace" "Attributes: spec, distance, crop"
     dLux_layers_propagation_FocalPropagator <|-- dLux_layers_propagation_Fraunhofer
-    click dLux_layers_propagation_Fraunhofer href "../propagation/#dLux.layers.propagation.Fraunhofer" "Attributes: spec, focal_length, method"
+    click dLux_layers_propagation_Fraunhofer href "../propagation/#dLux.layers.propagation.Fraunhofer" "Attributes: spec, focal_length, inverse, method"
     dLux_layers_propagation_FocalPropagator <|-- dLux_layers_propagation_Fresnel
-    click dLux_layers_propagation_Fresnel href "../propagation/#dLux.layers.propagation.Fresnel" "Attributes: spec, focal_length, defocus, method"
+    click dLux_layers_propagation_Fresnel href "../propagation/#dLux.layers.propagation.Fresnel" "Attributes: spec, focal_length, inverse, defocus, method"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_refractive_RefractiveOptic
     click dLux_layers_refractive_RefractiveOptic href "../refractive/#dLux.layers.refractive.RefractiveOptic" "Attributes: thickness, n"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_refractive_Wedge
