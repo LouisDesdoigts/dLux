@@ -202,7 +202,12 @@ class BaseSource(ParametricHolder):
 
 
 class Spectrum(ParametricHolder):
-    """Wavelength samples and their corresponding spectral weights."""
+    """Wavelength samples and their corresponding spectral weights.
+
+    Explicit weights are consumed exactly as supplied. Spectral parametrics may
+    optionally normalize each spectrum to unit sum along its trailing wavelength
+    axis. Realized weights must be positive with a finite, non-zero sum.
+    """
 
     wavelengths: Array | Parametric
     weights: Array | Parametric
@@ -220,8 +225,13 @@ class Spectrum(ParametricHolder):
         self.units = _merge_units(units)
 
     def spectrum_params(self, **context: Any) -> tuple[Array, Array]:
-        """Resolve wavelengths and weights in canonical wavelength units."""
+        """Resolve wavelengths and weights in canonical wavelength units.
+
+        Scalar monochromatic inputs are promoted to a length-one spectral axis.
+        """
         wavelengths = resolve(self.wavelengths, float, spectrum=self, **context)
+        wavelengths = np.atleast_1d(wavelengths)
+        wavelengths = wavelengths * dlu.unit_factor(self.units["wavelengths"])
         weights = resolve(
             self.weights,
             float,
@@ -230,13 +240,13 @@ class Spectrum(ParametricHolder):
             variables=wavelengths,
             **context,
         )
+        weights = np.atleast_1d(weights)
         if wavelengths.ndim != 1:
             raise ValueError("wavelengths must be a 1d array.")
         if weights.ndim not in (1, 2):
             raise ValueError("weights must be a 1d or 2d array.")
         if weights.shape[-1] != wavelengths.shape[0]:
             raise ValueError("weights trailing axis must match the wavelength axis.")
-        wavelengths = wavelengths * dlu.unit_factor(self.units["wavelengths"])
         return wavelengths, weights
 
     def model(self, optics, return_all=False):
