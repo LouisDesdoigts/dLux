@@ -103,8 +103,10 @@ nav:
     - Overview: API/overview.md
     - Core API:
       - Overview: API/core/overview.md
+      - Builders: API/core/builders.md
       - Fields: API/core/fields.md
       - Grids: API/core/grids.md
+      - Prebuilt: API/core/prebuilt.md
       - Sources: API/core/sources.md
       - Systems: API/core/systems.md
 
@@ -126,6 +128,7 @@ nav:
       - Polynomials: API/parametric/polynomials.md
       - Refractive: API/parametric/refractive.md
       - Shapes: API/parametric/shapes.md
+      - Spectral: API/parametric/spectral.md
 
     - Utils API:
       - Overview: API/utils/overview.md

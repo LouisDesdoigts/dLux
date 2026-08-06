@@ -4,6 +4,13 @@ This diagram is generated from the public API. Hover over a class for its direct
 
 ```mermaid
 classDiagram
+    class dLux_builders_GridBuilder["GridBuilder"]
+    class dLux_builders_OPDDef["OPDDef"]
+    class dLux_builders_ApertureData["ApertureData"]
+    class dLux_builders_Norm["Norm"]
+    class dLux_builders_ZernikeDef["ZernikeDef"]
+    class dLux_builders_ApertureBuilder["ApertureBuilder"]
+    class dLux_builders_SparseApertureBuilder["SparseApertureBuilder"]
     class dLux_fields_BaseField["BaseField"]
     class dLux_fields_ContinuousField["ContinuousField"]
     class dLux_fields_DiscreteField["DiscreteField"]
@@ -18,6 +25,13 @@ classDiagram
     class dLux_grids_AffineMap["AffineMap"]
     class dLux_grids_TransformChain["TransformChain"]
     class dLux_grids_DistortCoords["DistortCoords"]
+    class dLux_prebuilt_SimpleCircular["SimpleCircular"]
+    class dLux_prebuilt_SegmentedHex["SegmentedHex"]
+    class dLux_prebuilt_NRMLike["NRMLike"]
+    class dLux_prebuilt_HSTLike["HSTLike"]
+    class dLux_prebuilt_JWSTLike["JWSTLike"]
+    class dLux_prebuilt_JWSTNRMLike["JWSTNRMLike"]
+    class dLux_prebuilt_EuclidLike["EuclidLike"]
     class dLux_sources_BaseSource["BaseSource"]
     class dLux_sources_Spectrum["Spectrum"]
     class dLux_sources_Source["Source"]
@@ -25,6 +39,16 @@ classDiagram
     class dLux_systems_LayeredSystem["LayeredSystem"]
     class dLux_systems_OpticalSystem["OpticalSystem"]
     class dLux_systems_DetectorSystem["DetectorSystem"]
+    click dLux_builders_GridBuilder href "../builders/#dLux.builders.GridBuilder" "Methods: validate(), build()"
+    click dLux_builders_OPDDef href "../builders/#dLux.builders.OPDDef" "Methods: calculate()"
+    click dLux_builders_ApertureData href "../builders/#dLux.builders.ApertureData" "Attributes: transmission, support, diameter, centers"
+    click dLux_builders_Norm href "../builders/#dLux.builders.Norm" "Attributes: mode, scale"
+    dLux_builders_OPDDef <|-- dLux_builders_ZernikeDef
+    click dLux_builders_ZernikeDef href "../builders/#dLux.builders.ZernikeDef" "Attributes: nolls, oversize, norm · Methods: calculate()"
+    dLux_builders_GridBuilder <|-- dLux_builders_ApertureBuilder
+    click dLux_builders_ApertureBuilder href "../builders/#dLux.builders.ApertureBuilder" "Attributes: primary, obscurations, opd, oversample · Methods: build(), aperture_data()"
+    dLux_builders_ApertureBuilder <|-- dLux_builders_SparseApertureBuilder
+    click dLux_builders_SparseApertureBuilder href "../builders/#dLux.builders.SparseApertureBuilder" "Attributes: centers, global_obscurations · Methods: aperture_data()"
     click dLux_fields_BaseField href "../fields/#dLux.fields.BaseField" "Attributes: spec · Properties: field, spatial_shape, axes, coordinates, xs, npixels, pixel_scale, center, diameter · Methods: normalise(), convolve(), resize(), downsample(), flip()"
     dLux_fields_BaseField <|-- dLux_fields_ContinuousField
     click dLux_fields_ContinuousField href "../fields/#dLux.fields.ContinuousField" "Attributes: spec · Methods: scale_to(), interpolate(), rotate()"
@@ -38,7 +62,7 @@ classDiagram
     click dLux_fields_PSF href "../fields/#dLux.fields.PSF" "Attributes: data, spec · Properties: field, batch_ndim · Methods: from_wavefront()"
     dLux_fields_DiscreteField <|-- dLux_fields_Image
     click dLux_fields_Image href "../fields/#dLux.fields.Image" "Attributes: data, spec, variance, read_noise · Properties: field"
-    click dLux_grids_GridSpec href "../grids/#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov, extent · Methods: broadcast(), resize(), downsample(), resample(), axes_for(), xs_for(), coordinates_for()"
+    click dLux_grids_GridSpec href "../grids/#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov, extent · Methods: broadcast(), resize(), downsample(), oversample(), resample(), build(), axes_for(), xs_for(), transformed(), coordinates_for()"
     click dLux_grids_ResizeSpec href "../grids/#dLux.grids.ResizeSpec" "Attributes: n, pad, crop, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad_array(), crop_array(), resize()"
     click dLux_grids_CoordTransform href "../grids/#dLux.grids.CoordTransform" "Methods: get_coordinates(), apply()"
     dLux_grids_CoordTransform <|-- dLux_grids_Affine
@@ -49,6 +73,20 @@ classDiagram
     click dLux_grids_TransformChain href "../grids/#dLux.grids.TransformChain" "Attributes: transformations"
     dLux_grids_CoordTransform <|-- dLux_grids_DistortCoords
     click dLux_grids_DistortCoords href "../grids/#dLux.grids.DistortCoords" "Attributes: powers, distortion, shift_invariant"
+    dLux_builders_ApertureBuilder <|-- dLux_prebuilt_SimpleCircular
+    click dLux_prebuilt_SimpleCircular href "../prebuilt/#dLux.prebuilt.SimpleCircular" "No direct public attributes or methods"
+    dLux_builders_SparseApertureBuilder <|-- dLux_prebuilt_SegmentedHex
+    click dLux_prebuilt_SegmentedHex href "../prebuilt/#dLux.prebuilt.SegmentedHex" "No direct public attributes or methods"
+    dLux_builders_SparseApertureBuilder <|-- dLux_prebuilt_NRMLike
+    click dLux_prebuilt_NRMLike href "../prebuilt/#dLux.prebuilt.NRMLike" "No direct public attributes or methods"
+    dLux_prebuilt_SimpleCircular <|-- dLux_prebuilt_HSTLike
+    click dLux_prebuilt_HSTLike href "../prebuilt/#dLux.prebuilt.HSTLike" "No direct public attributes or methods"
+    dLux_prebuilt_SegmentedHex <|-- dLux_prebuilt_JWSTLike
+    click dLux_prebuilt_JWSTLike href "../prebuilt/#dLux.prebuilt.JWSTLike" "No direct public attributes or methods"
+    dLux_prebuilt_NRMLike <|-- dLux_prebuilt_JWSTNRMLike
+    click dLux_prebuilt_JWSTNRMLike href "../prebuilt/#dLux.prebuilt.JWSTNRMLike" "No direct public attributes or methods"
+    dLux_builders_ApertureBuilder <|-- dLux_prebuilt_EuclidLike
+    click dLux_prebuilt_EuclidLike href "../prebuilt/#dLux.prebuilt.EuclidLike" "No direct public attributes or methods"
     click dLux_sources_BaseSource href "../sources/#dLux.sources.BaseSource" "Attributes: flux, distribution, units · Methods: source_params(), flux_params(), distribution_params(), wavefront(), model()"
     click dLux_sources_Spectrum href "../sources/#dLux.sources.Spectrum" "Attributes: wavelengths, weights, units · Methods: spectrum_params(), model()"
     dLux_sources_BaseSource <|-- dLux_sources_Source

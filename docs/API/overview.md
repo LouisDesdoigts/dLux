@@ -4,10 +4,14 @@ This package map is generated from cross-module inheritance in the public API. H
 
 ```mermaid
 classDiagram
+    class dLux_builders["builders"]
+    click dLux_builders href "../core/builders/" "Public classes: GridBuilder, OPDDef, ApertureData, Norm, ZernikeDef, ApertureBuilder, SparseApertureBuilder"
     class dLux_fields["fields"]
     click dLux_fields href "../core/fields/" "Public classes: BaseField, ContinuousField, DiscreteField, Wavefront, PolarisedWavefront, PSF, Image"
     class dLux_grids["grids"]
     click dLux_grids href "../core/grids/" "Public classes: GridSpec, ResizeSpec, CoordTransform, Affine, AffineMap, TransformChain, DistortCoords"
+    class dLux_prebuilt["prebuilt"]
+    click dLux_prebuilt href "../core/prebuilt/" "Public classes: SimpleCircular, SegmentedHex, NRMLike, HSTLike, JWSTLike, JWSTNRMLike, EuclidLike"
     class dLux_sources["sources"]
     click dLux_sources href "../core/sources/" "Public classes: BaseSource, Spectrum, Source, BinarySource"
     class dLux_systems["systems"]
@@ -37,7 +41,10 @@ classDiagram
     class dLux_parametric_refractive["parametric.refractive"]
     click dLux_parametric_refractive href "../parametric/refractive/" "Public classes: CauchyIndex, PolynomialIndex, InterpolatedIndex"
     class dLux_parametric_shapes["parametric.shapes"]
-    click dLux_parametric_shapes href "../parametric/shapes/" "Public classes: Shape, SoftShape, RadialShape, Circle, Square, Rectangle, RegularPolygon, Spider, Complement, TransformedShape"
+    click dLux_parametric_shapes href "../parametric/shapes/" "Public classes: Shape, InvertibleShape, Soft, Circle, Square, Rectangle, RegularPolygon, Spider, Complement, TransformedShape"
+    class dLux_parametric_spectral["parametric.spectral"]
+    click dLux_parametric_spectral href "../parametric/spectral/" "Public classes: SpectralPolynomial, SpectralBasis, Blackbody"
+    dLux_builders <|-- dLux_prebuilt
     dLux_layers_detector <|-- dLux_layers_unified
     dLux_layers_dynamic <|-- dLux_layers_sparse
     dLux_layers_optical <|-- dLux_layers_detector
@@ -49,9 +56,12 @@ classDiagram
     dLux_layers_optical <|-- dLux_layers_unified
     dLux_layers_optical <|-- dLux_systems
     dLux_parametric_bases <|-- dLux_parametric_polynomials
+    dLux_parametric_bases <|-- dLux_parametric_spectral
     dLux_parametric_parametrics <|-- dLux_layers_optical
     dLux_parametric_parametrics <|-- dLux_parametric_bases
     dLux_parametric_parametrics <|-- dLux_parametric_refractive
     dLux_parametric_parametrics <|-- dLux_parametric_shapes
+    dLux_parametric_parametrics <|-- dLux_parametric_spectral
     dLux_parametric_parametrics <|-- dLux_sources
+    dLux_parametric_polynomials <|-- dLux_parametric_spectral
 ```
