@@ -48,8 +48,8 @@ def _poly_params(degree, coefficients, ndim, powers, degrees=None):
         raise ValueError("powers must be non-negative.")
     coefficients = np.zeros(powers.shape[1]) if coefficients is None else coefficients
     coefficients = np.asarray(coefficients, dtype=float)
-    if coefficients.ndim != 1 or coefficients.shape[0] != powers.shape[1]:
-        raise ValueError("coefficients must have shape (n_terms,).")
+    if coefficients.ndim < 1 or coefficients.shape[-1] != powers.shape[1]:
+        raise ValueError("coefficients must have trailing shape (n_terms,).")
     return powers, coefficients
 
 
@@ -197,7 +197,7 @@ class Polynomial(ParametricBasis):
             degree, coefficients, ndim, powers, degrees
         )
         self.powers = powers
-        self._set_coefficients(coefficients, (coefficients.size,))
+        self._set_coefficients(coefficients, (powers.shape[1],))
 
     def calculate_basis(self, *, variables=None, **context):
         if variables is None:

@@ -66,6 +66,7 @@ class SpectralPolynomial(Polynomial):
 
     def evaluate(self, *, wavelengths, **context):
         """Evaluate weights on centred, dimensionless wavelengths."""
+        context.pop("variables", None)
         wavelengths = np.asarray(wavelengths, dtype=float)
         lower = wavelengths.min()
         upper = wavelengths.max()
@@ -140,10 +141,10 @@ class Blackbody(Parametric):
     def evaluate(self, *, wavelengths, **context):
         """Evaluate the blackbody photon spectrum at supplied wavelengths."""
         wavelengths = np.asarray(wavelengths, dtype=float)
-        h = 6.62607015e-34
-        c = 299792458.0
-        k = 1.380649e-23
-        exponent = h * c / (wavelengths * k * self.temperature[..., None])
+        second_radiation_constant = 1.438776877e-2
+        exponent = second_radiation_constant / (
+            wavelengths * self.temperature[..., None]
+        )
         log_expm1 = exponent + np.log(-np.expm1(-exponent))
         log_weights = -4 * np.log(wavelengths) - log_expm1
         if self.normalise:
