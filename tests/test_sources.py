@@ -43,9 +43,7 @@ def test_parametric_spectrum_contract():
 def test_basis_weight_spectrum():
     wavelengths = np.linspace(0.8e-6, 1.2e-6, 5)
     basis = np.stack([np.ones(5), np.linspace(-1, 1, 5)])
-    spectrum = dl.Spectrum(
-        wavelengths, dl.ExplicitBasis(basis, coefficients=[1.0, 0.2])
-    )
+    spectrum = dl.Spectrum(wavelengths, dl.Basis(basis, coefficients=[1.0, 0.2]))
 
     _, weights = spectrum.spectrum_params()
     assert weights.shape == wavelengths.shape
@@ -104,7 +102,7 @@ def test_binary_source_parameters():
 
 
 def test_parametric_distribution():
-    distribution = dl.ExplicitBasis(np.ones((2, 3, 3)), coefficients=[1.0, 2.0])
+    distribution = dl.Basis(np.ones((2, 3, 3)), coefficients=[1.0, 2.0])
     source = dl.BinarySource([1e-6], distribution=distribution)
 
     assert source.params()["distribution"].shape == (3, 3)

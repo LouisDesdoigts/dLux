@@ -25,7 +25,7 @@ def system(input_spec, focal_spec):
             (
                 "pupil",
                 dl.DynamicOptic(
-                    transmission=dl.Circle(0.8, softening=0.02),
+                    transmission=dl.Circle(0.8, edge=0.02),
                     opd=dl.DynamicZernikeBasis(
                         js=[4], coefficients=[1e-8], diameter=0.8
                     ),

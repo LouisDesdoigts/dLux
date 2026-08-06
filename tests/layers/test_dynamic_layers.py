@@ -23,11 +23,11 @@ def wavefront(make_wavefront):
 @pytest.mark.parametrize(
     "layer",
     [
-        dl.DynamicTransmissiveLayer(dl.Circle(0.5, softening=0.02)),
+        dl.DynamicTransmissiveLayer(dl.Circle(0.5, edge=0.02)),
         dl.DynamicTransmissiveLayer(0.5, normalise=True),
         dl.DynamicAberratedLayer(opd=CoordinateValue(), phase=0.1),
         dl.DynamicOptic(
-            transmission=dl.Circle(0.5, softening=0.02),
+            transmission=dl.Circle(0.5, edge=0.02),
             opd=CoordinateValue(),
             phase=0.1,
         ),
@@ -76,7 +76,7 @@ def test_coordinate_sources(wavefront, make_spec):
     [
         (
             dl.DynamicTransmissiveLayer(
-                dl.Circle(0.5, softening=0.02),
+                dl.Circle(0.5, edge=0.02),
             ),
             "transmission.diameter",
         ),
@@ -86,7 +86,7 @@ def test_coordinate_sources(wavefront, make_spec):
         ),
         (
             dl.DynamicOptic(
-                transmission=dl.Circle(0.5, softening=0.02),
+                transmission=dl.Circle(0.5, edge=0.02),
             ),
             "transmission.diameter",
         ),

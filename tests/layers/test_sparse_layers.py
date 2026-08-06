@@ -21,7 +21,7 @@ def wavefront(make_wavefront, make_spec):
 @pytest.mark.parametrize("dynamic", [False, True])
 def test_sparse_optic_contract(dynamic, centers, wavefront):
     optic_type = dl.SparseDynamicOptic if dynamic else dl.SparseOptic
-    optic = optic_type(centers, transmission=dl.Circle(0.2, softening=0.01))
+    optic = optic_type(centers, transmission=dl.Circle(0.2, edge=0.01))
 
     output = assert_jittable(optic, wavefront)
     local = assert_jittable(optic.localise, wavefront)
@@ -32,7 +32,7 @@ def test_sparse_optic_contract(dynamic, centers, wavefront):
 
 
 def test_interfere(centers, wavefront):
-    optic = dl.SparseOptic(centers, transmission=dl.Circle(0.2, softening=0.01))
+    optic = dl.SparseOptic(centers, transmission=dl.Circle(0.2, edge=0.01))
     local = optic.localise(wavefront)
     output = assert_jittable(dl.Interfere(), local)
 
@@ -46,7 +46,7 @@ def test_shared_and_local_coefficients(centers, wavefront):
     local = dl.DynamicZernikeBasis(
         js=[4], coefficients=np.array([1e-7, 2e-7]), diameter=0.2
     )
-    common = {"centers": centers, "transmission": dl.Circle(0.2, softening=0.01)}
+    common = {"centers": centers, "transmission": dl.Circle(0.2, edge=0.01)}
     shared_optic = dl.SparseDynamicOptic(opd=shared, **common)
     local_optic = dl.SparseDynamicOptic(opd=local, **common)
 
@@ -68,14 +68,14 @@ def test_shared_and_local_distortions(centers, wavefront):
     local = shared.set(
         distortion=np.stack([shared.distortion, shared.distortion.at[0, 0].set(0.01)])
     )
-    common = {"centers": centers, "transmission": dl.Circle(0.2, softening=0.01)}
+    common = {"centers": centers, "transmission": dl.Circle(0.2, edge=0.01)}
 
     assert_jittable(dl.SparseDynamicOptic(transformation=shared, **common), wavefront)
     assert_jittable(dl.SparseDynamicOptic(transformation=local, **common), wavefront)
 
 
 def test_local_affine_and_mismatched_transform(centers, wavefront):
-    common = {"centers": centers, "transmission": dl.Circle(0.2, softening=0.01)}
+    common = {"centers": centers, "transmission": dl.Circle(0.2, edge=0.01)}
     affine = dl.Affine(translation=np.array([[0.0, 0.0], [0.01, -0.01]]))
     assert_jittable(dl.SparseDynamicOptic(transformation=affine, **common), wavefront)
 
@@ -92,7 +92,7 @@ def test_local_affine_map(centers, wavefront):
     offset = np.asarray(((0.0, 0.0), (0.01, -0.01)))
     optic = dl.SparseDynamicOptic(
         centers,
-        transmission=dl.Circle(0.2, softening=0.01),
+        transmission=dl.Circle(0.2, edge=0.01),
         transformation=dl.AffineMap(matrix, offset),
     )
 
@@ -101,13 +101,13 @@ def test_local_affine_map(centers, wavefront):
 
 
 def test_center_gradients(centers, wavefront):
-    optic = dl.SparseDynamicOptic(centers, transmission=dl.Circle(0.2, softening=0.01))
+    optic = dl.SparseDynamicOptic(centers, transmission=dl.Circle(0.2, edge=0.01))
 
     assert_differentiable(lambda value: optic.set(centers=value)(wavefront), centers)
 
 
 def test_sparse_phasor_and_coordinate_sources(centers, wavefront):
-    transmission = dl.Circle(0.2, softening=0.01)
+    transmission = dl.Circle(0.2, edge=0.01)
     optic = dl.SparseOptic(centers, transmission=transmission)
     coordinates = wavefront.coordinates
     spec = wavefront.spec
@@ -148,7 +148,7 @@ def test_sparse_propagation_dimensions(layer, polarised, make_spec, make_wavefro
     wavefront = make_wavefront(
         wavelength=np.asarray([1e-6, 1.1e-6]), spec=spec, polarised=polarised
     )
-    optic = dl.SparseOptic(centers, transmission=dl.Circle(0.2, softening=0.01))
+    optic = dl.SparseOptic(centers, transmission=dl.Circle(0.2, edge=0.01))
 
     local = optic.localise(wavefront)
     propagated = assert_jittable(layer, local, rtol=1e-5, atol=1e-5)
@@ -164,7 +164,7 @@ def test_sparse_propagation_dimensions(layer, polarised, make_spec, make_wavefro
 
 def test_sparse_propagation_gradient(wavefront):
     centers = np.array([[-0.2, 0.0], [0.0, 0.0], [0.2, 0.0]])
-    optic = dl.SparseDynamicOptic(centers, transmission=dl.Circle(0.2, softening=0.01))
+    optic = dl.SparseDynamicOptic(centers, transmission=dl.Circle(0.2, edge=0.01))
     layer = dl.Fraunhofer(dl.GridSpec(n=(6, 8), d=(2e-7, 3e-7), unit="rad"))
 
     def propagate(value):
