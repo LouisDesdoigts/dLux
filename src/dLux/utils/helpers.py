@@ -15,6 +15,8 @@ __all__ = [
     "from_complex",
     "as_size",
     "as_axis",
+    "as_float",
+    "as_array",
 ]
 
 
@@ -52,6 +54,16 @@ def as_axis(value, ndim=None, name="axis"):
     if value.shape[-1] == 1:
         return np.broadcast_to(value, value.shape[:-1] + (ndim,))
     raise ValueError(f"{name} must be scalar or have one value per axis.")
+
+
+def as_float(value):
+    """Convert a value to a floating-point array."""
+    return np.asarray(value, dtype=float)
+
+
+def as_array(value, dtype=float):
+    """Convert an optional value to an array of the requested dtype."""
+    return None if value is None else np.asarray(value, dtype=dtype)
 
 
 def reexport(modules: tuple[object, ...], namespace: dict[str, object]) -> list[str]:
