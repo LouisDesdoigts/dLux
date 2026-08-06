@@ -113,7 +113,7 @@ print(optics)
         'pupil':
         Optic(
           opd=Basis(
-            coefficients=f32[18], shape=(18,), basis=f32[18,256,256]
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
           ),
           phase=None,
           transmission=f32[256,256],
@@ -555,7 +555,7 @@ print(optics)
         'pupil':
         Optic(
           opd=Basis(
-            coefficients=f32[18], shape=(18,), basis=f32[18,256,256]
+            coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
           ),
           phase=None,
           transmission=f32[256,256],
@@ -698,7 +698,7 @@ print(model)
           'pupil':
           Optic(
             opd=Basis(
-              coefficients=f32[18], shape=(18,), basis=f32[18,256,256]
+              coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
             ),
             phase=None,
             transmission=f32[256,256],

@@ -72,17 +72,7 @@ print(optics)
 
 ## Sources and spectra
 
-A `Spectrum` contains wavelength samples and their corresponding weights. A `Source`
-adds position, flux, and an optional resolved distribution. Units are declared once
-on the source, so the user-facing values can remain in convenient units. Explicit
-array weights are treated as pre-integrated and are not automatically normalised.
-Parametric spectral models such as `SpectralPolynomial`, `SpectralBasis`, and
-`Blackbody` provide a `normalise` option and use unit-sum weights by default. This
-normalisation treats samples as equally weighted bins; nonuniform wavelength samples
-require explicit bin widths or quadrature weights for a physical spectral integral.
-Normalization is applied independently along the trailing wavelength axis for every
-leading source or batch element. Realized weights must be positive with a finite,
-non-zero sum.
+A `Spectrum` contains wavelength samples and their pre-integrated weights. A `Source` adds position, flux, and an optional resolved distribution. Units are declared once on the source, so the user-facing values can remain in convenient units. Spectral weights are deliberately not normalised inside the model; if unit total weight is required, normalise them before constructing or updating the source.
 
 
 ```python
@@ -156,8 +146,8 @@ print("PSF data:", psf.data.shape)
 
 ??? info "Plotting code"
     ```python
-    pupil_extent = pupil_spec.extent()
-    psf_extent = psf_spec.extent(unit="arcsec")
+    pupil_extent = pupil_spec.extent
+    psf_extent = psf_spec.set(unit=None).extent
     
     fig, axes = plt.subplots(1, 4, figsize=(18, 4))
     images = [
@@ -292,7 +282,7 @@ print(noisy)
 
 ??? info "Plotting code"
     ```python
-    image_extent = image.spec.extent(unit="arcsec")
+    image_extent = image.spec.set(unit=None).extent
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
     panels = [
         (image.data, "Detector expectation", PowerNorm(0.5)),

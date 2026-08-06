@@ -85,7 +85,7 @@ print(optics)
         Optic(
           opd=FourierBasis(
             coefficients=f32[128,128],
-            shape=(128, 128),
+            basis_shape=(128, 128),
             kernels=(f32[512,128], f32[512,128])
           ),
           phase=None,
