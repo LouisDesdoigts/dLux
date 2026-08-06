@@ -1,5 +1,6 @@
 theme:
   name: material
+  custom_dir: docs/overrides
   icon:
     logo: material/telescope
     repo: fontawesome/brands/github  # Sets the logo to the GitHub 'cat'
