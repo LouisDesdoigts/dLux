@@ -334,7 +334,7 @@ class ApertureBuilder(GridBuilder):
         transform=None,
         coefficients=None,
         key=None,
-        normalise=False,
+        normalise=True,
         jit=False,
     ):
         """Materialize this definition as a globally sampled ``Optic``.
@@ -464,7 +464,7 @@ class SparseApertureBuilder(ApertureBuilder):
         transform=None,
         coefficients=None,
         key=None,
-        normalise=False,
+        normalise=True,
         jit=False,
         sparse=False,
         shared=False,

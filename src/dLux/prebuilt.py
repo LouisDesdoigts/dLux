@@ -159,7 +159,7 @@ class NRMLike(SparseApertureBuilder):
         transform=None,
         coefficients=None,
         key=None,
-        normalise=False,
+        normalise=True,
         jit=False,
         sparse=False,
     ):
