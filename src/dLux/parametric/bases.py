@@ -30,7 +30,7 @@ class ParametricBasis(Parametric):
     """Base class for coefficient-weighted basis parameterisations."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
 
     @property
     def coeffs(self: ParametricBasis) -> Array:
@@ -64,18 +64,18 @@ class ParametricBasis(Parametric):
                 f"Expected {coefficient_shape}, got {coefficients.shape}."
             )
         self.coefficients = coefficients
-        self.basis_shape = coefficient_shape
+        self.shape = coefficient_shape
 
     def evaluate_basis(self, basis: Array) -> Array:
         """Apply global or leading-axis-vectorised coefficients to a basis."""
-        if self.coefficients.shape == self.basis_shape:
+        if self.coefficients.shape == self.shape:
             return dlu.eval_basis(basis, self.coefficients)
-        if self.basis_shape == (1,) and self.coefficients.ndim == 1:
+        if self.shape == (1,) and self.coefficients.ndim == 1:
             evaluate = lambda coefficient: dlu.eval_basis(basis, coefficient[None])
             return jax.vmap(evaluate)(self.coefficients)
-        if self.coefficients.ndim != len(self.basis_shape) + 1:
+        if self.coefficients.ndim != len(self.shape) + 1:
             raise ValueError("Only one leading coefficient axis is supported.")
-        axis = len(self.basis_shape)
+        axis = len(self.shape)
         if basis.shape[axis] != self.coefficients.shape[0]:
             raise ValueError(
                 "The leading coefficient axis must match the leading basis axis."
@@ -94,7 +94,7 @@ class Basis(ParametricBasis):
     """A parameterisation over an explicitly sampled basis array."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
 
     def __init__(
@@ -129,7 +129,7 @@ class ImplicitBasis(ParametricBasis):
     """Base class for bases generated or evaluated indirectly at runtime."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
 
     @abstractmethod
     def calculate_basis(
@@ -148,7 +148,7 @@ class CoordBasis(ImplicitBasis):
     """Base class for implicit bases evaluated at Cartesian coordinates."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
 
     @staticmethod
     def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
@@ -163,7 +163,7 @@ class CLIMBBasis(Basis):
     """A continuous latent basis mapped through the CLIMB binarisation."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
     values: Array
     oversample: int = eqx.field(static=True)
@@ -206,7 +206,7 @@ class FourierBasis(ImplicitBasis):
     """A parameterisation over a separable real Fourier basis."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     kernels: tuple[Array, Array]
 
     def __init__(self, npix, n_modes, coefficients=None, scale: float = 1.0):
@@ -231,7 +231,7 @@ class SplineBasis(ImplicitBasis):
     """A fixed 2D array represented by a lower-resolution grid of spline knots."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     knot_coords: Array
     sample_coords: Array
     method: str = eqx.field(static=True)

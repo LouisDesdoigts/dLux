@@ -19,7 +19,7 @@ __all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
 def _slice(obj, index, size):
     """Select one centre from a shared or centre-vectorised object."""
     if isinstance(obj, ParametricBasis):
-        params = (("coefficients", obj.basis_shape),)
+        params = (("coefficients", obj.shape),)
     elif isinstance(obj, DistortCoords):
         params = (("distortion", obj.powers.shape),)
     elif isinstance(obj, AffineMap):
