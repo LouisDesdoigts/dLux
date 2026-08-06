@@ -2,7 +2,6 @@
 
 import dLux.utils as dlu
 import equinox as eqx
-import interpax as ipx
 import jax
 import jax.numpy as np
 
@@ -13,6 +12,52 @@ __all__ = [
     "AtmosphericLayer",
     "InfiniteAtmosphericLayer",
 ]
+
+_SPLINE_PADDING = 12
+
+
+def _quintic_spline_weights(distance):
+    """Evaluate the centered cardinal B-spline of degree five."""
+    distance = np.abs(distance)
+    inner = (
+        -(distance**5) / 12
+        + distance**4 / 4
+        - distance**2 / 2
+        + 11 / 20
+    )
+    middle = (
+        distance**5 / 24
+        - 3 * distance**4 / 8
+        + 5 * distance**3 / 4
+        - 7 * distance**2 / 4
+        + 5 * distance / 8
+        + 17 / 40
+    )
+    outer = (3 - distance) ** 5 / 120
+    return np.where(
+        distance < 1,
+        inner,
+        np.where(distance < 2, middle, np.where(distance < 3, outer, 0)),
+    )
+
+
+def _quintic_spline_filter(size, dtype):
+    """Return the cardinal B-spline coefficient transform for one axis."""
+    rows = np.broadcast_to(np.arange(size)[:, None], (size, 5))
+    columns = np.clip(rows + np.arange(-2, 3), 0, size - 1)
+    values = np.broadcast_to(
+        np.asarray([1 / 120, 13 / 60, 11 / 20, 13 / 60, 1 / 120], dtype),
+        rows.shape,
+    )
+    matrix = np.zeros((size, size), dtype).at[rows, columns].add(values)
+    return np.linalg.inv(matrix)
+
+
+class _AtmosphereModel:
+    """Opaque storage for arrays that remain constant while a layer evolves."""
+
+    def __init__(self, coords):
+        self.coords = coords
 
 
 class AtmosphericLayer(OpticalLayer):
@@ -28,7 +73,7 @@ class AtmosphericLayer(OpticalLayer):
     L0: float
     velocity: Array
     height: Array
-    coords: Array
+    _model: _AtmosphereModel = eqx.field(static=True)
     base_opd: Array
     screen: Array
     center: Array
@@ -53,7 +98,20 @@ class AtmosphericLayer(OpticalLayer):
         self.velocity = velocity
         self.height = np.asarray(height, float)
         axis = (np.arange(npixels) - (npixels - 1) / 2) * self.pixel_scale
-        self.coords = np.stack((axis, axis))
+        self._model = _AtmosphereModel(np.stack((axis, axis)))
+
+    @property
+    def coords(self):
+        return self._model.coords
+
+    @property
+    def opd(self):
+        """The currently sampled achromatic optical-path-difference screen."""
+        return self.screen
+
+    def phase_for(self, wavelength):
+        """Return the current phase screen in radians at ``wavelength`` metres."""
+        return self.opd / np.asarray(wavelength)
 
     def __call__(self, wavefront):
         """Apply the current OPD without advancing the atmospheric state."""
@@ -70,15 +128,6 @@ class InfiniteAtmosphericLayer(AtmosphericLayer):
 
     stencil_length: int = eqx.field(static=True)
     use_interpolation: bool = eqx.field(static=True)
-    interpolation_method: str = eqx.field(static=True)
-    interpolation_kwargs: tuple = eqx.field(static=True)
-
-    initial_key: Array
-    stencils: tuple
-    A_matrices: tuple[Array]
-    B_matrices: tuple[Array]
-    high_filter: Array
-    low_basis: Array
 
     def __init__(
         self,
@@ -92,8 +141,6 @@ class InfiniteAtmosphericLayer(AtmosphericLayer):
         oversampling=16,
         seed=0,
         use_interpolation=True,
-        interpolation_method="linear",
-        **kwargs,
     ):
         AtmosphericLayer.__init__(
             self, npixels, pixel_scale, Cn_squared, L0, velocity, height
@@ -104,26 +151,59 @@ class InfiniteAtmosphericLayer(AtmosphericLayer):
             raise ValueError("oversampling must be a positive integer.")
         self.stencil_length = stencil_length
         self.use_interpolation = bool(use_interpolation)
-        self.interpolation_method = str(interpolation_method)
-        kwargs.pop("extrap", None)
-        self.interpolation_kwargs = tuple(sorted(kwargs.items()))
-        stencil_key, self.initial_key = jax.random.split(jax.random.PRNGKey(seed))
+        filter_size = npixels + 2 * _SPLINE_PADDING
+        self._model.spline_filter = _quintic_spline_filter(
+            filter_size, self.pixel_scale.dtype
+        )
+        stencil_key, self._model.initial_key = jax.random.split(
+            jax.random.PRNGKey(seed)
+        )
         vk, hk = jax.random.split(stencil_key)
         vertical_stencil, horizontal_stencil = self._stencil(vk, True), self._stencil(
             hk, False
         )
         vertical_ab = self._ab(vertical_stencil, True)
         horizontal_ab = self._ab(horizontal_stencil, False)
-        self.stencils = (vertical_stencil, horizontal_stencil)
-        self.A_matrices = (vertical_ab[0], horizontal_ab[0])
-        self.B_matrices = (vertical_ab[1], horizontal_ab[1])
-        self.high_filter, self.low_basis = self._spectral_model(oversampling)
+        self._model.stencils = (vertical_stencil, horizontal_stencil)
+        self._model.A_matrices = (vertical_ab[0], horizontal_ab[0])
+        self._model.B_matrices = (vertical_ab[1], horizontal_ab[1])
+        self._model.high_filter, self._model.low_basis = self._spectral_model(
+            oversampling
+        )
         self.base_opd, self.key = self._initial_screen(self.initial_key)
         self.screen, self.center, self.time = (
             self.base_opd,
             np.zeros(2),
             np.asarray(0.0),
         )
+
+    @property
+    def spline_filter(self):
+        return self._model.spline_filter
+
+    @property
+    def initial_key(self):
+        return self._model.initial_key
+
+    @property
+    def stencils(self):
+        return self._model.stencils
+
+    @property
+    def A_matrices(self):
+        return self._model.A_matrices
+
+    @property
+    def B_matrices(self):
+        return self._model.B_matrices
+
+    @property
+    def high_filter(self):
+        return self._model.high_filter
+
+    @property
+    def low_basis(self):
+        return self._model.low_basis
 
     def _stencil(self, key, vertical):
         n, mask = self.npixels, np.zeros((self.npixels, self.npixels), bool)
@@ -269,49 +349,34 @@ class InfiniteAtmosphericLayer(AtmosphericLayer):
     def _sample(self, base, residual):
         if not self.use_interpolation:
             return base
-        if self.interpolation_method == "linear" and not self.interpolation_kwargs:
-            shift = residual / self.pixel_scale
 
-            def interpolate_axis(values, amount, axis):
-                positive = lambda value: np.concatenate(
-                    (
-                        jax.lax.slice_in_dim(value, 1, self.npixels, axis=axis),
-                        jax.lax.slice_in_dim(
-                            value, self.npixels - 1, self.npixels, axis=axis
-                        ),
-                    ),
-                    axis=axis,
-                )
-                negative = lambda value: np.concatenate(
-                    (
-                        jax.lax.slice_in_dim(value, 0, 1, axis=axis),
-                        jax.lax.slice_in_dim(value, 0, self.npixels - 1, axis=axis),
-                    ),
-                    axis=axis,
-                )
-                neighbor = jax.lax.cond(amount >= 0, positive, negative, values)
-                return values + np.abs(amount) * (neighbor - values)
-
-            shifted = interpolate_axis(base, shift[0], 1)
-            return interpolate_axis(shifted, shift[1], 0)
-
-        xq = np.clip(
-            self.coords[0][None] + residual[0], self.coords[0][0], self.coords[0][-1]
-        )
-        yq = np.clip(
-            self.coords[1][:, None] + residual[1], self.coords[1][0], self.coords[1][-1]
-        )
-        xx, yy = np.broadcast_arrays(xq, yq)
-        return ipx.interp2d(
-            yy.ravel(),
-            xx.ravel(),
-            self.coords[1],
-            self.coords[0],
+        padded = np.pad(
             base,
-            method=self.interpolation_method,
-            extrap=False,
-            **dict(self.interpolation_kwargs),
-        ).reshape(base.shape)
+            ((_SPLINE_PADDING, _SPLINE_PADDING),) * 2,
+            mode="edge",
+        )
+        spline_filter = self._model.spline_filter
+        coefficients = spline_filter @ padded @ spline_filter.T
+        shift = residual / self.pixel_scale
+
+        def interpolation_indices_and_weights(amount):
+            coordinates = (
+                np.arange(self.npixels, dtype=base.dtype)
+                + _SPLINE_PADDING
+                + amount
+            )
+            indices = (
+                np.floor(coordinates).astype(int)[:, None] + np.arange(-2, 4)
+            )
+            weights = _quintic_spline_weights(coordinates[:, None] - indices)
+            return np.clip(indices, 0, coefficients.shape[0] - 1), weights
+
+        x_indices, x_weights = interpolation_indices_and_weights(shift[0])
+        horizontal = np.sum(
+            coefficients[:, x_indices] * x_weights[None, :, :], axis=-1
+        )
+        y_indices, y_weights = interpolation_indices_and_weights(shift[1])
+        return np.sum(horizontal[y_indices] * y_weights[:, :, None], axis=1)
 
     def step(self, dt):
         dt = np.asarray(dt, self.time.dtype)

@@ -24,11 +24,13 @@ dependencies = ["zodiax>=0.5", "abcdLux>=0.0.2", "interpax"]
 tests = [
     "pytest",
     "pytest-cov",
+    "scipy",
 ]
 
 dev = [
     "pytest",
     "pytest-cov",
+    "scipy",
     "black",
     "ruff",
     "selenium",           # Used to generate UML diagrams in documentation

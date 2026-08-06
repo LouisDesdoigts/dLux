@@ -1,5 +1,9 @@
+import equinox as eqx
+import jax
 import jax.numpy as np
+import numpy as onp
 import pytest
+from scipy.ndimage import affine_transform
 
 from dLux.layers import InfiniteAtmosphericLayer
 
@@ -36,6 +40,35 @@ def test_step_advances_state_without_mutating_original(layer):
     assert np.allclose(advanced.time, 0.5)
     assert np.allclose(layer.center, 0)
     assert np.allclose(layer.time, 0)
+
+
+def test_immutable_model_is_excluded_from_dynamic_state(layer):
+    array_leaves = [
+        leaf for leaf in jax.tree_util.tree_leaves(layer) if eqx.is_array(leaf)
+    ]
+
+    assert len(array_leaves) == 10
+
+    screen, advanced = eqx.filter_jit(lambda state: state.step(0.5))(layer)
+
+    assert np.allclose(screen, advanced.screen)
+    assert advanced._model is layer._model
+
+
+def test_sampling_matches_scipy_fifth_order_affine_transform(layer):
+    base = np.arange(16, dtype=float).reshape(4, 4)
+    residual = np.array([0.025, -0.025])
+    expected = affine_transform(
+        onp.asarray(base),
+        onp.ones(2),
+        onp.asarray(residual / layer.pixel_scale)[::-1],
+        mode="nearest",
+        order=5,
+    )
+
+    sampled = layer._sample(base, residual)
+
+    assert np.allclose(sampled, expected, rtol=2e-5, atol=2e-5)
 
 
 def test_evolve_matches_repeated_steps(layer):
