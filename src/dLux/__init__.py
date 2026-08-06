@@ -5,9 +5,9 @@ from .utils.helpers import reexport
 
 __version__ = importlib.metadata.version("dLux")
 
-from . import fields, parametric, layers, systems, sources, grids
+from . import fields, parametric, layers, systems, sources, grids, builders, prebuilt
 
-_modules = (parametric, layers, systems, sources, fields, grids)
+_modules = (parametric, layers, systems, sources, fields, grids, builders, prebuilt)
 
 _module_names = [
     "parametric",
@@ -17,5 +17,7 @@ _module_names = [
     "sources",
     "fields",
     "grids",
+    "builders",
+    "prebuilt",
 ]
 __all__ = _module_names + reexport(_modules, globals())
