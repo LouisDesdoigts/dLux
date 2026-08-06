@@ -19,7 +19,7 @@ class TestSpecifications:
                 value.axes,
                 value.xs_for((4, 4)),
                 value.fov,
-                value.extent,
+                value.extent(),
             ),
             spec,
         )
@@ -137,6 +137,7 @@ class TestSpecifications:
         spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
 
         assert np.max(np.abs(spec.coordinates)) < 0.01
+        assert np.allclose(spec.fov, np.asarray((8.0, 18.0)))
         assert_differentiable(lambda value: value.coordinates, spec)
 
     def test_diameter_sampling(self):
@@ -151,7 +152,17 @@ class TestSpecifications:
 
         assert tuple(axis.shape for axis in spec.axes) == ((6,), (4,))
         assert tuple(x.shape for x in spec.xs) == ((6,), (4,))
-        assert np.allclose(spec.extent, np.asarray((-0.6, 0.6, -0.6, 0.6)))
+        assert np.allclose(spec.extent(), np.asarray((-0.6, 0.6, -0.6, 0.6)))
+
+    def test_extent_expansion_and_units(self):
+        spec = dl.GridSpec(n=4, d=2.0, c=1.0, unit="mm")
+
+        native = assert_jittable(lambda value: value.extent(2), spec)
+        assert np.allclose(native, np.asarray((-3.0, 5.0, -3.0, 5.0)))
+        assert np.allclose(spec.extent(2, unit="m"), 1e-3 * native)
+
+        with pytest.raises(ValueError, match="cannot be smaller"):
+            spec.broadcast(2).extent(1)
 
     @pytest.mark.parametrize(
         ("kwargs", "error"),

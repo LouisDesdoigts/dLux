@@ -33,6 +33,18 @@ def test_general_polynomial_contract():
     )
 
 
+def test_selected_polynomial_degrees():
+    variables = np.linspace(-1, 1, 8)
+
+    linear = dl.Polynomial(degrees=1, coefficients=[2.0])
+    selected = dl.Polynomial(degrees=[0, 2], coefficients=[1.0, 3.0])
+
+    assert np.allclose(linear.evaluate(variables=variables), 2 * variables)
+    assert np.allclose(
+        selected.evaluate(variables=variables), 1 + 3 * variables**2
+    )
+
+
 def test_multivariate_polynomial(coordinates):
     powers = np.array([[0, 1, 0, 1], [0, 0, 1, 1]])
     polynomial = dl.Polynomial(1, [1.0, 2.0, 3.0, 4.0], powers=powers)
