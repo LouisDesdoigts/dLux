@@ -195,7 +195,7 @@ psf_spec = dl.GridSpec(
 )
 
 # Combine the Zernike and physical CLIMB-mask OPDs
-aberrations = dl.ExplicitBasis(z_basis, np.zeros(z_basis.shape[0]))
+aberrations = dl.Basis(z_basis, np.zeros(z_basis.shape[0]))
 mask = dl.CLIMBBasis(basis, coeffs, values=(-np.pi / 2, np.pi / 2))
 mask_opd = mask.map(lambda phase: dlu.phase2opd(phase, wavels.mean()))
 opd = dl.Combination([("aberrations", aberrations), ("mask", mask_opd)])

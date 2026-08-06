@@ -81,7 +81,7 @@ psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="arcsec")
 
 # Define the optical layers
 layers = [
-    ("pupil", dl.Optic(aper, opd=dl.ExplicitBasis(basis, coeffs), normalise=True)),
+    ("pupil", dl.Optic(aper, opd=dl.Basis(basis, coeffs), normalise=True)),
     ("to_focal", dl.Fraunhofer(dl.ResizeSpec(pad=4), focal_length=1, method="fft")),
     ("fpm", dl.Lambda()),
     ("from_focal", dl.Fraunhofer(dl.ResizeSpec(crop=4), focal_length=1, method="fft")),
@@ -100,7 +100,7 @@ print(optics)
       layers={
         'pupil':
         Optic(
-          opd=ExplicitBasis(
+          opd=Basis(
             coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
           ),
           phase=None,
@@ -310,7 +310,7 @@ coron
       layers={
         'pupil':
         Optic(
-          opd=ExplicitBasis(
+          opd=Basis(
             coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
           ),
           phase=None,
@@ -736,7 +736,7 @@ Now we can construct our new system using this new layer, rather than the FFTs. 
 # Define the optical layers
 layers = [
     ("pupil", dl.Optic(
-        aper, opd=dl.ExplicitBasis(basis, np.zeros(basis.shape[0])), normalise=True
+        aper, opd=dl.Basis(basis, np.zeros(basis.shape[0])), normalise=True
     )),
     ("fpm", fpm),
     ("lyot", LyotMask(undersize=0.9, aperture=aper)),
@@ -754,7 +754,7 @@ print(coron)
       layers={
         'pupil':
         Optic(
-          opd=ExplicitBasis(
+          opd=Basis(
             coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
           ),
           phase=None,

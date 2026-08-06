@@ -82,7 +82,7 @@ pupil_spec = dl.GridSpec(n=wf_npix, diam=diam, unit="m")
 psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="arcsec")
 optics = dl.OpticalSystem(
     [
-        ("pupil", dl.Optic(aper, opd=dl.ExplicitBasis(basis, coeffs), normalise=True)),
+        ("pupil", dl.Optic(aper, opd=dl.Basis(basis, coeffs), normalise=True)),
         ("propagator", dl.Fraunhofer(psf_spec)),
     ],
     pupil_spec,

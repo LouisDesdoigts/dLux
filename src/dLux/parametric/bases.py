@@ -15,7 +15,7 @@ from .parametrics import Parametric
 
 __all__ = [
     "ParametricBasis",
-    "ExplicitBasis",
+    "Basis",
     "ImplicitBasis",
     "CoordBasis",
     "CLIMBBasis",
@@ -90,7 +90,7 @@ class ParametricBasis(Parametric):
         pass
 
 
-class ExplicitBasis(ParametricBasis):
+class Basis(ParametricBasis):
     """A parameterisation over an explicitly sampled basis array."""
 
     coefficients: Array
@@ -98,7 +98,7 @@ class ExplicitBasis(ParametricBasis):
     basis: Array
 
     def __init__(
-        self: ExplicitBasis,
+        self: Basis,
         basis: Array,
         coefficients: Array = None,
         coefficient_shape: tuple[int, ...] = None,
@@ -118,10 +118,10 @@ class ExplicitBasis(ParametricBasis):
             )
         self._set_coefficients(coefficients, coefficient_shape)
 
-    def evaluate(self: ExplicitBasis, **kwargs: Any) -> Array:
+    def evaluate(self: Basis, **kwargs: Any) -> Array:
         return self.evaluate_basis(self.basis)
 
-    def solve_basis(self: ExplicitBasis, value: Array, **kwargs: Any) -> Array:
+    def solve_basis(self: Basis, value: Array, **kwargs: Any) -> Array:
         return dlu.solve_basis(value, self.basis)
 
 
@@ -159,7 +159,7 @@ class CoordBasis(ImplicitBasis):
         return wavefront.coordinates
 
 
-class CLIMBBasis(ExplicitBasis):
+class CLIMBBasis(Basis):
     """A continuous latent basis mapped through the CLIMB binarisation."""
 
     coefficients: Array

@@ -89,7 +89,7 @@ psf_spec = dl.GridSpec(n=psf_npix, d=psf_pixel_scale, unit="arcsec")
 
 # Combine the aperture and aberrations into a single pupil optic
 pupil = dl.Optic(
-    transmission=aperture, opd=dl.ExplicitBasis(basis, coeffs), normalise=True
+    transmission=aperture, opd=dl.Basis(basis, coeffs), normalise=True
 )
 
 # Define the optical layers in propagation order
@@ -109,7 +109,7 @@ print(optics)
       layers={
         'pupil':
         Optic(
-          opd=ExplicitBasis(
+          opd=Basis(
             coefficients=f32[18], basis_shape=(18,), basis=f32[18,256,256]
           ),
           phase=None,

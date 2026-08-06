@@ -29,7 +29,7 @@ classDiagram
     class dLux_layers_unified["layers.unified"]
     click dLux_layers_unified href "../layers/unified/" "Public classes: UnifiedLayer, Resize, Downsample, Flip, Interpolate, Normalise, Lambda"
     class dLux_parametric_bases["parametric.bases"]
-    click dLux_parametric_bases href "../parametric/bases/" "Public classes: ParametricBasis, ExplicitBasis, ImplicitBasis, CoordBasis, CLIMBBasis, FourierBasis, SplineBasis"
+    click dLux_parametric_bases href "../parametric/bases/" "Public classes: ParametricBasis, Basis, ImplicitBasis, CoordBasis, CLIMBBasis, FourierBasis, SplineBasis"
     class dLux_parametric_parametrics["parametric.parametrics"]
     click dLux_parametric_parametrics href "../parametric/parametrics/" "Public classes: Parametric, ParametricHolder, Transform, Interpolation, DynamicParametric, Combination"
     class dLux_parametric_polynomials["parametric.polynomials"]

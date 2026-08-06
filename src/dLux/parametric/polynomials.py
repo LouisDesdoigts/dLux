@@ -8,7 +8,7 @@ from jax import Array
 
 import dLux.utils as dlu
 from ..grids import GridSpec
-from .bases import CoordBasis, ExplicitBasis, ParametricBasis
+from .bases import Basis, CoordBasis, ParametricBasis
 from .parametrics import resolve
 
 __all__ = [
@@ -108,7 +108,7 @@ class _ZernikeBasis:
         return indices
 
 
-class ZernikeBasis(_ZernikeBasis, ExplicitBasis):
+class ZernikeBasis(_ZernikeBasis, Basis):
     """An explicitly sampled Zernike basis."""
 
     coefficients: Array
@@ -201,7 +201,7 @@ class Polynomial(ParametricBasis):
         return dlu.solve_basis(value, basis)
 
 
-class ExplicitPolynomial(ExplicitBasis):
+class ExplicitPolynomial(Basis):
     """A polynomial represented by basis vectors sampled on fixed coordinates."""
 
     coefficients: Array

@@ -5,7 +5,7 @@ This diagram is generated from the public API. Hover over a class for its direct
 ```mermaid
 classDiagram
     class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
-    class dLux_parametric_bases_ExplicitBasis["ExplicitBasis"]
+    class dLux_parametric_bases_Basis["Basis"]
     class dLux_parametric_bases_ImplicitBasis["ImplicitBasis"]
     class dLux_parametric_bases_CoordBasis["CoordBasis"]
     class dLux_parametric_bases_CLIMBBasis["CLIMBBasis"]
@@ -38,13 +38,13 @@ classDiagram
     class dLux_parametric_shapes_TransformedShape["TransformedShape"]
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_ParametricBasis
     click dLux_parametric_bases_ParametricBasis href "../bases/#dLux.parametric.bases.ParametricBasis" "Attributes: coefficients, basis_shape · Properties: coeffs, c, alpha, coefficient_shape · Methods: evaluate_basis(), solve_basis()"
-    dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ExplicitBasis
-    click dLux_parametric_bases_ExplicitBasis href "../bases/#dLux.parametric.bases.ExplicitBasis" "Attributes: coefficients, basis_shape, basis · Methods: evaluate(), solve_basis()"
+    dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_Basis
+    click dLux_parametric_bases_Basis href "../bases/#dLux.parametric.bases.Basis" "Attributes: coefficients, basis_shape, basis · Methods: evaluate(), solve_basis()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ImplicitBasis
     click dLux_parametric_bases_ImplicitBasis href "../bases/#dLux.parametric.bases.ImplicitBasis" "Attributes: coefficients, basis_shape · Methods: calculate_basis(), evaluate(), solve_basis()"
     dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_CoordBasis
     click dLux_parametric_bases_CoordBasis href "../bases/#dLux.parametric.bases.CoordBasis" "Attributes: coefficients, basis_shape · Methods: get_coordinates()"
-    dLux_parametric_bases_ExplicitBasis <|-- dLux_parametric_bases_CLIMBBasis
+    dLux_parametric_bases_Basis <|-- dLux_parametric_bases_CLIMBBasis
     click dLux_parametric_bases_CLIMBBasis href "../bases/#dLux.parametric.bases.CLIMBBasis" "Attributes: coefficients, basis_shape, basis, values, oversample · Methods: evaluate_latent(), evaluate()"
     dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_FourierBasis
     click dLux_parametric_bases_FourierBasis href "../bases/#dLux.parametric.bases.FourierBasis" "Attributes: coefficients, basis_shape, kernels · Methods: calculate_basis(), evaluate(), resize()"
@@ -61,13 +61,13 @@ classDiagram
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Combination
     click dLux_parametric_parametrics_Combination href "../parametrics/#dLux.parametric.parametrics.Combination" "Attributes: parametrics, operation · Methods: validate_operation(), combine(), values(), evaluate()"
     click dLux_parametric_polynomials_DynamicZernike href "../polynomials/#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name, _c, _k · Methods: calculate()"
-    dLux_parametric_bases_ExplicitBasis <|-- dLux_parametric_polynomials_ZernikeBasis
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
     click dLux_parametric_polynomials_ZernikeBasis href "../polynomials/#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coefficients, basis_shape, basis"
     dLux_parametric_bases_CoordBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
     click dLux_parametric_polynomials_DynamicZernikeBasis href "../polynomials/#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: coefficients, basis_shape, zernikes, nsides, diameter · Methods: calculate_basis()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_polynomials_Polynomial
     click dLux_parametric_polynomials_Polynomial href "../polynomials/#dLux.parametric.polynomials.Polynomial" "Attributes: coefficients, basis_shape, powers · Methods: calculate_basis(), evaluate(), solve_basis()"
-    dLux_parametric_bases_ExplicitBasis <|-- dLux_parametric_polynomials_ExplicitPolynomial
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ExplicitPolynomial
     click dLux_parametric_polynomials_ExplicitPolynomial href "../polynomials/#dLux.parametric.polynomials.ExplicitPolynomial" "Attributes: coefficients, basis_shape, basis, powers"
     dLux_parametric_polynomials_Polynomial <|-- dLux_parametric_polynomials_CoordinatePolynomial
     click dLux_parametric_polynomials_CoordinatePolynomial href "../polynomials/#dLux.parametric.polynomials.CoordinatePolynomial" "Attributes: coefficients, basis_shape, powers, ndim · Methods: calculate_basis()"

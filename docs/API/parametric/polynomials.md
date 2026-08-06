@@ -11,21 +11,21 @@ classDiagram
     class dLux_parametric_polynomials_ExplicitPolynomial["ExplicitPolynomial"]
     class dLux_parametric_polynomials_CoordinatePolynomial["CoordinatePolynomial"]
     class dLux_parametric_bases_CoordBasis["CoordBasis"]
-    class dLux_parametric_bases_ExplicitBasis["ExplicitBasis"]
+    class dLux_parametric_bases_Basis["Basis"]
     class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
     class dLux_parametric_polynomials__ZernikeBasis["_ZernikeBasis"]
     class zodiax_base_Base["Base"]
     zodiax_base_Base <|-- dLux_parametric_polynomials_DynamicZernike
     click dLux_parametric_polynomials_DynamicZernike href "#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name, _c, _k · Methods: calculate()"
     dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_ZernikeBasis
-    dLux_parametric_bases_ExplicitBasis <|-- dLux_parametric_polynomials_ZernikeBasis
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
     click dLux_parametric_polynomials_ZernikeBasis href "#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coefficients, basis_shape, basis"
     dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
     dLux_parametric_bases_CoordBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
     click dLux_parametric_polynomials_DynamicZernikeBasis href "#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: coefficients, basis_shape, zernikes, nsides, diameter · Methods: calculate_basis()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_polynomials_Polynomial
     click dLux_parametric_polynomials_Polynomial href "#dLux.parametric.polynomials.Polynomial" "Attributes: coefficients, basis_shape, powers · Methods: calculate_basis(), evaluate(), solve_basis()"
-    dLux_parametric_bases_ExplicitBasis <|-- dLux_parametric_polynomials_ExplicitPolynomial
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ExplicitPolynomial
     click dLux_parametric_polynomials_ExplicitPolynomial href "#dLux.parametric.polynomials.ExplicitPolynomial" "Attributes: coefficients, basis_shape, basis, powers"
     dLux_parametric_polynomials_Polynomial <|-- dLux_parametric_polynomials_CoordinatePolynomial
     click dLux_parametric_polynomials_CoordinatePolynomial href "#dLux.parametric.polynomials.CoordinatePolynomial" "Attributes: coefficients, basis_shape, powers, ndim · Methods: calculate_basis()"
