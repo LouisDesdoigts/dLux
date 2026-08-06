@@ -72,7 +72,17 @@ print(optics)
 
 ## Sources and spectra
 
-A `Spectrum` contains wavelength samples and their pre-integrated weights. A `Source` adds position, flux, and an optional resolved distribution. Units are declared once on the source, so the user-facing values can remain in convenient units. Spectral weights are deliberately not normalised inside the model; if unit total weight is required, normalise them before constructing or updating the source.
+A `Spectrum` contains wavelength samples and their corresponding weights. A `Source`
+adds position, flux, and an optional resolved distribution. Units are declared once
+on the source, so the user-facing values can remain in convenient units. Explicit
+array weights are treated as pre-integrated and are not automatically normalised.
+Parametric spectral models such as `SpectralPolynomial`, `SpectralBasis`, and
+`Blackbody` provide a `normalise` option and use unit-sum weights by default. This
+normalisation treats samples as equally weighted bins; nonuniform wavelength samples
+require explicit bin widths or quadrature weights for a physical spectral integral.
+Normalization is applied independently along the trailing wavelength axis for every
+leading source or batch element. Realized weights must be positive with a finite,
+non-zero sum.
 
 
 ```python
