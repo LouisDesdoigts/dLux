@@ -21,9 +21,25 @@ __all__ = [
 ]
 
 
-def _poly_params(degree, coefficients, ndim, powers):
+def _poly_params(degree, coefficients, ndim, powers, degrees=None):
     """Validate polynomial powers and coefficients."""
-    powers = dlu.polynomial_powers(degree, ndim) if powers is None else powers
+    if degree is not None and degrees is not None:
+        raise ValueError("Provide only one of degree or degrees.")
+    if powers is None:
+        if degree is None and degrees is None:
+            raise ValueError("Provide either degree, degrees, or powers.")
+        if degrees is None:
+            powers = dlu.polynomial_powers(degree, ndim)
+        else:
+            degrees = np.atleast_1d(np.asarray(degrees, dtype=int))
+            if degrees.ndim != 1 or degrees.size == 0:
+                raise ValueError("degrees must contain at least one degree.")
+            if np.any(degrees < 0):
+                raise ValueError("degrees must be non-negative.")
+            powers = dlu.polynomial_powers(int(degrees.max()), ndim)
+            powers = powers[:, np.isin(powers.sum(0), degrees)]
+    elif degrees is not None:
+        raise ValueError("degrees and powers are mutually exclusive.")
     powers = np.asarray(powers, dtype=int)
     powers = powers[None, :] if powers.ndim == 1 else powers
     if powers.ndim != 2:
@@ -112,7 +128,7 @@ class ZernikeBasis(_ZernikeBasis, Basis):
     """An explicitly sampled Zernike basis."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
 
     def __init__(
@@ -127,7 +143,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     """A Zernike basis evaluated dynamically from coordinate context."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
     diameter: Array | None
@@ -163,14 +179,23 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
 
 
 class Polynomial(ParametricBasis):
-    """A general polynomial in one or more supplied variables."""
+    """A general polynomial in one or more supplied variables.
+
+    Pass ``degree`` to include every total degree from zero through that value, or
+    pass ``degrees`` to select total degrees explicitly. For example,
+    ``degrees=[1]`` constructs only the linear terms and omits the constant term.
+    """
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     powers: Array
 
-    def __init__(self, degree, coefficients=None, ndim=1, powers=None):
-        powers, coefficients = _poly_params(degree, coefficients, ndim, powers)
+    def __init__(
+        self, degree=None, coefficients=None, ndim=1, powers=None, degrees=None
+    ):
+        powers, coefficients = _poly_params(
+            degree, coefficients, ndim, powers, degrees
+        )
         self.powers = powers
         self._set_coefficients(coefficients, (coefficients.size,))
 
@@ -205,20 +230,23 @@ class ExplicitPolynomial(Basis):
     """A polynomial represented by basis vectors sampled on fixed coordinates."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
     powers: Array
 
     def __init__(
         self,
         coordinates: Array | GridSpec,
-        degree,
+        degree=None,
         coefficients=None,
         ndim=None,
         powers=None,
+        degrees=None,
     ):
         coordinates, ndim = _poly_coordinates(coordinates, ndim)
-        powers, coefficients = _poly_params(degree, coefficients, ndim, powers)
+        powers, coefficients = _poly_params(
+            degree, coefficients, ndim, powers, degrees
+        )
         if coordinates.shape[0] != powers.shape[0]:
             raise ValueError(
                 "coordinate dimensionality must match the polynomial powers."
@@ -232,13 +260,13 @@ class CoordinatePolynomial(Polynomial):
     """A polynomial evaluated dynamically from Cartesian coordinate context."""
 
     coefficients: Array
-    basis_shape: tuple[int, ...] = eqx.field(static=True)
+    shape: tuple[int, ...] = eqx.field(static=True)
     powers: Array
     ndim: int = eqx.field(static=True)
 
-    def __init__(self, degree: int, coefficients=None, ndim: int = 2):
+    def __init__(self, degree=None, coefficients=None, ndim: int = 2, degrees=None):
         self.ndim = int(ndim)
-        super().__init__(degree, coefficients, ndim)
+        super().__init__(degree, coefficients, ndim, degrees=degrees)
 
     def calculate_basis(self, *, wavefront=None, coordinates=None, **kwargs):
         if coordinates is None:
