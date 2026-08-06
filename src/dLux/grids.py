@@ -186,10 +186,26 @@ class GridSpec(BaseGridSpec):
         n = tuple(n // factor for n, factor in zip(self.n, factors))
         return self.set(n=n, d=self.d * np.asarray(factors))
 
+    def oversample(self, factors) -> GridSpec:
+        """Increase pixel counts while preserving field of view and grid centre."""
+        if self.n is None or self.d is None:
+            raise ValueError("n and d are required to oversample a GridSpec.")
+        factors = dlu.as_size(factors, self.ndim, "factors")
+        n = tuple(n * factor for n, factor in zip(self.n, factors))
+        return self.set(n=n, d=self.d / np.asarray(factors))
+
     def resample(self, n, d) -> GridSpec:
         """Set a new grid size and per-axis sampling."""
         n = dlu.as_size(n, self.ndim, "n")
         return self.set(n=n, d=dlu.as_axis(d, self.ndim, "d"))
+
+    def build(self, builder, **kwargs):
+        """Evaluate a ``GridBuilder`` on this sampling specification."""
+        from .builders import GridBuilder
+
+        if not isinstance(builder, GridBuilder):
+            raise TypeError("builder must be a GridBuilder.")
+        return builder.build(self, **kwargs)
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -249,6 +265,14 @@ class GridSpec(BaseGridSpec):
         if self.n is None:
             raise ValueError("n must be specified to calculate coordinates.")
         return self.coordinates_for(self.n)
+
+    def transformed(self, transform=None) -> Array:
+        """Return coordinates after applying an optional coordinate transform."""
+        if transform is None:
+            return self.coordinates
+        if not isinstance(transform, CoordTransform):
+            raise TypeError("transform must be a CoordTransform or None.")
+        return transform(self.coordinates)
 
     def coordinates_for(self, n: tuple[int, ...]) -> Array:
         """Return full coordinates for concrete physical-axis pixel counts."""

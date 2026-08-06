@@ -66,12 +66,16 @@ class TestSpecifications:
 
         resized = spec.resize((10, 8))
         downsampled = spec.downsample((2, 3))
+        oversampled = spec.oversample((2, 3))
         resampled = spec.resample((12, 10), (0.05, 0.08))
 
         assert resized.n == (10, 8)
         assert np.allclose(resized.d, spec.d)
         assert downsampled.n == (4, 2)
         assert np.allclose(downsampled.d, np.asarray((0.2, 0.6)))
+        assert oversampled.n == (16, 18)
+        assert np.allclose(oversampled.d, np.asarray((0.05, 0.2 / 3)))
+        assert np.allclose(oversampled.fov, spec.fov)
         assert resampled.n == (12, 10)
         assert np.allclose(resampled.d, np.asarray((0.05, 0.08)))
 
@@ -82,6 +86,7 @@ class TestSpecifications:
 
         resized = spec.resize((10, 8))
         downsampled = spec.downsample((2, 3))
+        oversampled = spec.oversample((2, 3))
         resampled = spec.resample((12, 10), d / 2)
 
         assert resized.n == (10, 8)
@@ -89,6 +94,10 @@ class TestSpecifications:
         assert downsampled.n == (4, 2)
         assert np.allclose(downsampled.d, d * np.asarray((2, 3)))
         assert np.allclose(downsampled.c, c)
+        assert oversampled.n == (16, 18)
+        assert np.allclose(oversampled.d, d / np.asarray((2, 3)))
+        assert np.allclose(oversampled.c, c)
+        assert np.allclose(oversampled.fov, spec.fov)
         assert resampled.n == (12, 10)
         assert np.allclose(resampled.d, d / 2)
         assert np.allclose(resampled.c, c)
@@ -101,6 +110,8 @@ class TestSpecifications:
         assert empty.ndim == 0
         with pytest.raises(ValueError, match="n and d"):
             size_only.downsample(2)
+        with pytest.raises(ValueError, match="n and d"):
+            size_only.oversample(2)
         with pytest.raises(ValueError, match="n must"):
             _ = spacing_only.shape
         with pytest.raises(ValueError, match="n must"):
