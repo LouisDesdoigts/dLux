@@ -156,8 +156,8 @@ print("PSF data:", psf.data.shape)
 
 ??? info "Plotting code"
     ```python
-    pupil_extent = pupil_spec.extent
-    psf_extent = psf_spec.set(unit=None).extent
+    pupil_extent = pupil_spec.extent()
+    psf_extent = psf_spec.extent(unit="arcsec")
     
     fig, axes = plt.subplots(1, 4, figsize=(18, 4))
     images = [
@@ -292,7 +292,7 @@ print(noisy)
 
 ??? info "Plotting code"
     ```python
-    image_extent = image.spec.set(unit=None).extent
+    image_extent = image.spec.extent(unit="arcsec")
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
     panels = [
         (image.data, "Detector expectation", PowerNorm(0.5)),

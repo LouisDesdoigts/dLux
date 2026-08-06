@@ -297,19 +297,31 @@ class GridSpec(BaseGridSpec):
 
     @property
     def fov(self):
-        """Return the field of view along every physical axis."""
+        """Return the field of view in the grid's declared output unit."""
         if self.n is None or self.d is None:
             raise ValueError("n and d must be specified to calculate fov.")
-        return np.asarray(self.n) * self.d * self.scale
+        return np.asarray(self.n) * self.d
 
-    @property
-    def extent(self):
-        """Return plot-ready lower and upper grid edges in physical-axis order."""
-        half_width = self.fov / 2
-        center = np.zeros(self.ndim) if self.c is None else self.c * self.scale
-        return np.stack((center - half_width, center + half_width), axis=-1).reshape(
-            center.shape[:-1] + (2 * self.ndim,)
-        )
+    def extent(self, ndim=None, unit=None):
+        """Return plot-ready grid edges in the declared output unit.
+
+        The result may optionally be expanded to ``ndim`` axes. Passing ``ndim=2``
+        makes a scalar square-grid specification directly compatible with the
+        ``extent`` argument of ``matplotlib.pyplot.imshow``. Passing ``unit``
+        converts the result from the grid's declared unit into the requested unit.
+        """
+        ndim = self.ndim if ndim is None else int(ndim)
+        if ndim < self.ndim:
+            raise ValueError("ndim cannot be smaller than the grid dimensionality.")
+        spec = self if ndim == self.ndim else self.broadcast(ndim)
+        half_width = spec.fov / 2
+        center = np.zeros(ndim) if spec.c is None else spec.c
+        extent = np.stack(
+            (center - half_width, center + half_width), axis=-1
+        ).reshape(center.shape[:-1] + (2 * ndim,))
+        if unit is None:
+            return extent
+        return extent * spec.scale / dlu.unit_factor(unit)
 
 
 class CoordTransform(zdx.Base):

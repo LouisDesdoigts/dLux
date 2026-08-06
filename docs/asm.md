@@ -149,8 +149,8 @@ The following helper maps the wavelength-resolved intensities through the CIE co
     resize = optics.free_space.spec
     output_spec = pupil_spec.resize(resize.output_size(grating.shape))
     output_spec = output_spec.downsample(render_downsample)
-    pupil_extent = 1e3 * pupil_spec.extent
-    output_extent = 1e3 * output_spec.extent
+    pupil_extent = pupil_spec.extent(unit="mm")
+    output_extent = output_spec.extent(unit="mm")
     
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     image = axes[0].imshow(grating, extent=pupil_extent)
@@ -235,5 +235,3 @@ The same frames can be viewed as an inline animation. Saving the animation is le
 
 
     <IPython.core.display.HTML object>
-
-

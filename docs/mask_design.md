@@ -220,8 +220,8 @@ Now lets have a look at our optical model and PSF
     initial_psf = optics.propagate(wavels)
     
     # Image extents
-    aper_ext = pupil_spec.extent
-    psf_ext = psf_spec.set(unit=None).extent
+    aper_ext = pupil_spec.extent()
+    psf_ext = psf_spec.extent(unit="arcsec")
     
     # Plot
     plt.figure(figsize=(10, 4))
