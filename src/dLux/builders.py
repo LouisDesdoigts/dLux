@@ -116,8 +116,11 @@ class ZernikeDef(OPDDef):
 
     Parameters
     ----------
-    nolls : ArrayLike
+    nolls : ArrayLike or None
         One-dimensional collection of Noll indices.
+    orders : ArrayLike or None
+        Radial orders expanded into their complete Noll-index sequences. Exactly one
+        of ``nolls`` or ``orders`` must be provided.
     oversize : float
         Fractional enlargement of the aperture diameter used to sample the modes.
     norm : Norm or None
@@ -125,18 +128,27 @@ class ZernikeDef(OPDDef):
 
     Notes
     -----
-    This definition returns sampled basis data. ``ApertureBuilder.as_optic`` performs
-    the separate materialization into a ``Basis`` parameterization.
+    This definition returns sampled basis data. Calling an ``ApertureBuilder``
+    performs the separate materialization into a ``Basis`` parameterization.
     """
 
     nolls: Array
     oversize: Array = eqx.field(converter=dlu.as_float)
     norm: Norm | None
 
-    def __init__(self, nolls, oversize=0.01, norm=None):
+    def __init__(self, nolls=None, orders=None, oversize=0.01, norm=None):
+        if (nolls is None) == (orders is None):
+            raise ValueError("Provide exactly one of nolls or orders.")
+        if orders is not None:
+            orders = np.atleast_1d(np.asarray(orders, dtype=int))
+            if orders.ndim != 1 or orders.size == 0:
+                raise ValueError("orders must contain at least one radial order.")
+            nolls = dlu.radial_orders_to_indices(orders)
         self.nolls = np.atleast_1d(np.asarray(nolls, dtype=int))
         if self.nolls.ndim != 1 or self.nolls.size == 0:
             raise ValueError("nolls must contain at least one Noll index.")
+        if np.any(self.nolls < 1):
+            raise ValueError("nolls must contain positive Noll indices.")
         self.oversize = oversize
         if norm is not None and not isinstance(norm, Norm):
             raise TypeError("norm must be a Norm or None.")
@@ -211,24 +223,25 @@ class ApertureBuilder(GridBuilder):
 
     This is the general construction API. Named telescope builders retain simple
     numeric constructors and act as templates which assemble these definitions.
+    One-dimensional square-grid specifications are promoted to two spatial axes
+    before validation; explicit two-dimensional grids are preserved unchanged.
 
     Parameters
     ----------
     primary : Shape
         Transmissive primary geometry.
-    obscurations : sequence or dict of Shape
+    obscurations : list or tuple of Shape
         Geometry removed from the primary transmission.
     opd : OPDDef or None
         Optional OPD data definition evaluated over the primary support.
     oversample : int or tuple of int
         Sampling factor used before downsampling hard-edged geometry.
-    return_support : bool
-        Append the primary support to OPD-bearing ``build`` results.
-
     Returns
     -------
     transmission : Array
-        Returned by ``build`` when ``opd`` is ``None``.
+        Returned by ``build`` when ``opd`` is ``None`` and support is not requested.
+    transmission, support : tuple of Array
+        Returned when ``opd`` is ``None`` and ``return_support=True``.
     transmission, opd_data : tuple of Array
         Returned when ``opd`` is present.
     transmission, opd_data, support : tuple of Array
@@ -236,27 +249,39 @@ class ApertureBuilder(GridBuilder):
     """
 
     primary: Shape
-    obscurations: dict
+    obscurations: tuple
     opd: OPDDef | None
     oversample: tuple[int, int] = eqx.field(static=True)
-    return_support: bool = eqx.field(static=True)
 
-    def __init__(
-        self, primary, obscurations=(), opd=None, oversample=5, return_support=False
-    ):
+    def __init__(self, primary, obscurations=(), opd=None, oversample=5):
         if not isinstance(primary, Shape):
             raise TypeError("primary must be a Shape.")
-        if isinstance(obscurations, dict):
-            obscurations = list(obscurations.items())
-        else:
-            obscurations = list(obscurations)
+        if not isinstance(obscurations, (list, tuple)):
+            raise TypeError("obscurations must be a list or tuple of Shape objects.")
+        obscurations = tuple(obscurations)
+        if not all(isinstance(shape, Shape) for shape in obscurations):
+            raise TypeError("obscurations must contain only Shape objects.")
         self.primary = primary
-        self.obscurations = dlu.list2dictionary(obscurations, True, Shape)
+        self.obscurations = obscurations
         if opd is not None and not isinstance(opd, OPDDef):
             raise TypeError("opd must be an OPDDef or None.")
         self.opd = opd
         self.oversample = dlu.as_size(oversample, 2, "oversample")
-        self.return_support = bool(return_support)
+
+    @staticmethod
+    def _promote_grid(grid):
+        """Promote a scalar square-grid specification to two spatial axes."""
+        if isinstance(grid, GridSpec) and grid.ndim == 1:
+            return grid.broadcast(2)
+        return grid
+
+    def build(self, grid, transform=None, jit=False, return_support=False):
+        """Build on a 2D grid, optionally returning the aperture support."""
+        grid = self._promote_grid(grid)
+        self.validate(grid, transform)
+        if jit:
+            return eqx.filter_jit(self._build)(grid, transform, return_support)
+        return self._build(grid, transform, return_support)
 
     @staticmethod
     def _evaluate(shape, grid, transform):
@@ -273,7 +298,7 @@ class ApertureBuilder(GridBuilder):
         transmissions = [primary]
         transmissions.extend(
             1 - self._evaluate(shape, fine, transform)
-            for shape in self.obscurations.values()
+            for shape in self.obscurations
         )
         transmission = dlu.downsample(
             np.prod(np.stack(transmissions), 0), self.oversample
@@ -287,9 +312,11 @@ class ApertureBuilder(GridBuilder):
             diameter = 2 * self.primary.extent
         return ApertureData(transmission, support, diameter)
 
-    def _build(self, grid, transform):
+    def _build(self, grid, transform, return_support=False):
         aperture = self.aperture_data(grid, transform)
         if self.opd is None:
+            if return_support:
+                return aperture.transmission, aperture.support
             return aperture.transmission
         basis = self.opd.calculate(
             grid.transformed(transform),
@@ -297,11 +324,11 @@ class ApertureBuilder(GridBuilder):
             aperture.diameter,
             aperture.centers,
         )
-        if self.return_support:
+        if return_support:
             return aperture.transmission, basis, aperture.support
         return aperture.transmission, basis
 
-    def as_optic(
+    def __call__(
         self,
         grid,
         transform=None,
@@ -326,10 +353,6 @@ class ApertureBuilder(GridBuilder):
         opd = _explicit_basis(basis, coefficients, key)
         return Optic(transmission=transmission, opd=opd, normalise=normalise)
 
-    def as_sparse_optic(self, grid, **kwargs):
-        """Materialize compatible geometry as a locally sampled ``SparseOptic``."""
-        raise NotImplementedError  # pragma: no cover
-
 
 class SparseApertureBuilder(ApertureBuilder):
     """Repeat one local aperture shape over explicit ``(x, y)`` centres.
@@ -340,22 +363,23 @@ class SparseApertureBuilder(ApertureBuilder):
         Geometry shared by every local aperture.
     centers : ArrayLike
         Centre coordinates with shape ``(n_apertures, 2)``.
-    obscurations : sequence or dict of Shape
+    obscurations : list or tuple of Shape
         Local geometry repeated inside every sub-aperture.
-    global_obscurations : sequence or dict of Shape
+    global_obscurations : list or tuple of Shape
         Geometry removed after assembling the full global pupil.
-    opd, oversample, return_support
+    opd, oversample
         As defined by ``ApertureBuilder``.
 
     Notes
     -----
-    ``as_optic`` returns one globally sampled compound pupil. ``as_sparse_optic``
-    instead returns one local transmission plus explicit centres. Global
-    obscurations cannot be represented by that shared local transmission.
+    Calling the builder returns one globally sampled compound pupil by default.
+    Passing ``sparse=True`` instead returns one local transmission plus explicit
+    centres. Global obscurations cannot be represented by that shared local
+    transmission.
     """
 
     centers: Array = eqx.field(converter=dlu.as_float)
-    global_obscurations: dict
+    global_obscurations: tuple
 
     def __init__(
         self,
@@ -365,22 +389,20 @@ class SparseApertureBuilder(ApertureBuilder):
         global_obscurations=(),
         opd=None,
         oversample=5,
-        return_support=False,
     ):
         centers = dlu.as_float(centers)
         if centers.ndim != 2 or centers.shape[-1] != 2:
             raise ValueError("centers must have shape (n_apertures, 2).")
         self.centers = centers
-        if isinstance(global_obscurations, dict):
-            global_obscurations = list(global_obscurations.items())
-        else:
-            global_obscurations = list(global_obscurations)
-        self.global_obscurations = dlu.list2dictionary(
-            global_obscurations, True, Shape
-        )
-        super().__init__(
-            subaperture, obscurations, opd, oversample, return_support
-        )
+        if not isinstance(global_obscurations, (list, tuple)):
+            raise TypeError(
+                "global_obscurations must be a list or tuple of Shape objects."
+            )
+        global_obscurations = tuple(global_obscurations)
+        if not all(isinstance(shape, Shape) for shape in global_obscurations):
+            raise TypeError("global_obscurations must contain only Shape objects.")
+        self.global_obscurations = global_obscurations
+        super().__init__(subaperture, obscurations, opd, oversample)
 
     def _component(self, center, grid, transform):
         coordinates = dlu.translate_coords(grid.transformed(transform), center)
@@ -388,7 +410,7 @@ class SparseApertureBuilder(ApertureBuilder):
         transmission = self.primary.evaluate(
             coordinates=coordinates, pixel_scale=pixel_scale
         )
-        for shape in self.obscurations.values():
+        for shape in self.obscurations:
             transmission *= 1 - shape.evaluate(
                 coordinates=coordinates, pixel_scale=pixel_scale
             )
@@ -417,7 +439,7 @@ class SparseApertureBuilder(ApertureBuilder):
                 [np.ones_like(components[0])]
                 + [
                     1 - self._evaluate(shape, fine, transform)
-                    for shape in self.global_obscurations.values()
+                    for shape in self.global_obscurations
                 ]
             ),
             0,
@@ -436,28 +458,45 @@ class SparseApertureBuilder(ApertureBuilder):
             diameter = 2 * self.primary.extent
         return ApertureData(transmission, support, diameter, self.centers)
 
-    def as_sparse_optic(
+    def __call__(
         self,
         grid,
         transform=None,
         coefficients=None,
         key=None,
-        shared=False,
         normalise=False,
+        jit=False,
+        sparse=False,
+        shared=False,
     ):
-        """Materialize the definition as a locally sampled ``SparseOptic``.
+        """Materialize this definition as an ``Optic`` or ``SparseOptic``.
 
-        ``shared=True`` keeps the native OPD coefficient shape for every aperture;
-        ``shared=False`` adds a leading aperture axis. Explicit coefficients may use
-        either representation. A supplied random key follows the selected layout.
+        By default this uses the globally sampled ``Optic`` contract. With
+        ``sparse=True``, ``shared=True`` keeps the native OPD coefficient shape for
+        every aperture, while ``shared=False`` adds a leading aperture axis.
+        Explicit coefficients may use either representation. A supplied random key
+        follows the selected layout.
         """
+        if not sparse:
+            return super().__call__(
+                grid,
+                transform=transform,
+                coefficients=coefficients,
+                key=key,
+                normalise=normalise,
+                jit=jit,
+            )
+        if jit:
+            raise ValueError("jit is not supported with sparse=True.")
+
         from .layers import SparseOptic
 
+        grid = self._promote_grid(grid)
         self.validate(grid, transform)
         if self.global_obscurations:
             raise ValueError(
                 "Global obscurations cannot be represented by one shared local "
-                "SparseOptic transmission; use as_optic instead."
+                "SparseOptic transmission; use sparse=False instead."
             )
         fine = grid.oversample(self.oversample)
         transmission = self._component(np.zeros(2), fine, transform)
