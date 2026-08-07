@@ -99,6 +99,23 @@ class ResizeSpec(BaseGridSpec):
             return dlu.crop_to(array, self.n)
         return dlu.crop_to(array, self.crop_size(array.shape))
 
+    def crop_axes(self, axes: tuple[Array, ...]) -> tuple[Array, ...]:
+        """Crop physical coordinate axes using this specification.
+
+        Parameters
+        ----------
+        axes : tuple[Array, ...]
+            Coordinate axes in physical-axis order.
+        """
+        if self.explicit:
+            sizes = self.n
+        else:
+            factors = dlu.as_size(self.crop, len(axes), "crop")
+            sizes = tuple(a.shape[-1] // f for a, f in zip(axes, factors))
+
+        crop_fn = lambda a, n: dlu.crop_to(a, (n,))
+        return tuple(crop_fn(a, n) for a, n in zip(axes, sizes))
+
     def resize(self, array: Array, fill: float = 0.0) -> Array:
         """Resize an array to the final sampling represented by this object."""
         return dlu.resize(array, self.output_size(array.shape), fill)
@@ -202,6 +219,32 @@ class GridSpec(BaseGridSpec):
         """Set a new grid size and per-axis sampling."""
         n = dlu.as_size(n, self.ndim, "n")
         return self.set(n=n, d=dlu.as_axis(d, self.ndim, "d"))
+
+    @classmethod
+    def from_axes(cls, axes, unit=None) -> GridSpec:
+        """Construct a regular grid from physical coordinate axes.
+
+        Parameters
+        ----------
+        axes : tuple[Array, ...]
+            Regularly sampled coordinate axes in physical-axis order and SI
+            units. Each axis must contain at least two samples. Leading batch
+            dimensions are preserved.
+        unit : str or None
+            Unit used to store the recovered pixel scales and centers.
+        """
+
+        # Recover the pixel counts in physical-axis order
+        axes = tuple(axes)
+        n = tuple(axis.shape[-1] for axis in axes)
+
+        # Recover the pixel scales and centers
+        d = np.stack([axis[..., 1] - axis[..., 0] for axis in axes], -1)
+        c = np.stack([(axis[..., -1] + axis[..., 0]) / 2 for axis in axes], -1)
+
+        # Convert from SI coordinates into the requested output unit
+        scale = 1.0 if unit is None else dlu.unit_factor(unit)
+        return cls(n=n, d=d / scale, c=c / scale, unit=unit)
 
     def build(self, builder, **kwargs):
         """Evaluate a ``GridBuilder`` on this sampling specification."""

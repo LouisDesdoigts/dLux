@@ -61,6 +61,35 @@ class TestSpecifications:
         assert spec.pad_array(array).shape == (6, 8)
         assert spec.crop_array(np.ones((10, 10))).shape == (6, 8)
 
+    def test_crop_axes(self):
+        spec = dl.ResizeSpec(crop=(2, 3))
+        x = np.linspace(-1.0, 1.0, 8)
+        y = np.linspace(-2.0, 2.0, 12)
+
+        x_out, y_out = spec.crop_axes((x, y))
+
+        assert x_out.shape == (4,)
+        assert y_out.shape == (4,)
+        assert np.allclose(x_out, dlu.crop_to(x, (4,)))
+        assert np.allclose(y_out, dlu.crop_to(y, (4,)))
+
+    def test_grid_from_axes(self):
+        x = np.linspace(-3.5e-3, 3.5e-3, 8)
+        y = np.linspace(-2.5e-3, 2.5e-3, 6)
+
+        spec = dl.GridSpec.from_axes((x, y), unit="mm")
+        batched = dl.GridSpec.from_axes(
+            (np.stack((x, x + 1e-3)), np.stack((y, y - 2e-3))),
+            unit="mm",
+        )
+
+        assert spec.n == (8, 6)
+        assert np.allclose(spec.d, np.asarray((1.0, 1.0)))
+        assert np.allclose(spec.c, np.zeros(2))
+        assert spec.unit == "mm"
+        assert batched.d.shape == batched.c.shape == (2, 2)
+        assert np.allclose(batched.c, np.asarray(((0.0, 0.0), (1.0, -2.0))))
+
     def test_grid_sampling_transforms(self):
         spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
 

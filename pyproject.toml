@@ -39,9 +39,6 @@ dev = [
 [tool.ruff]
 line-length = 88
 
-[tool.ruff.format]
-skip-magic-trailing-comma = true
-
 [tool.ruff.lint]
 # E = pycodestyle, F = Pyflakes, I = Isort (replaces your separate isort config)
 select = ["E", "F", "I"]
@@ -56,10 +53,6 @@ ignore = [
 [tool.ruff.lint.isort]
 combine-as-imports = true
 lines-after-imports = 2
-
-[tool.black]
-line-length = 88
-skip-magic-trailing-comma = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

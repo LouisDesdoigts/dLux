@@ -55,45 +55,56 @@ def _propagate_fft(
     wf, spec, unit=None, ABCD=None, focal_length=None, inverse=False, **kwargs
 ):
     """Propagate every field at native FFT sampling."""
+
+    # Resolve the output units, center, and padding
     if unit is None:
         unit = "m" if inverse else "rad"
         if focal_length is not None:
             unit = wf.spec.unit
+
+    scale = dlu.unit_factor(unit)
     center = dlu.as_axis(spec.c, 2, "c")
-    center = None if center is None else center * dlu.unit_factor(unit)
+    center = None if center is None else center * scale
     padding = spec.padding
 
+    # Configure the FFT propagation function and inputs
+    if ABCD is None:
+        fn = dlu.FFT
+        inputs = {"focal_length": focal_length, "inverse": inverse, **kwargs}
+    else:
+        fn = dlu.ABCD_FFT
+        inputs = {"ABCD": ABCD}
+
+    # Define propagation over one monochromatic field
     def propagate(field, wavelength, x, y):
-        fn = dlu.FFT if ABCD is None else dlu.ABCD_FFT
-        inputs = (
-            {"focal_length": focal_length, "inverse": inverse, **kwargs}
-            if ABCD is None
-            else {"ABCD": ABCD}
-        )
         field, axes = fn(
-            field, wavelength, (x, y), output_center=center, **padding, **inputs
+            field,
+            wavelength,
+            (x, y),
+            output_center=center,
+            **padding,
+            **inputs,
         )
         return field, *axes
 
-    propagate = np.vectorize(propagate, signature="(n,m),(),(m),(n)->(p,q),(q),(p)")
+    # Vectorize propagation over the leading field axes
+    signature = "(n,m),(),(m),(n)->(p,q),(q),(p)"
+    propagate = np.vectorize(propagate, signature=signature)
     wavelength, x, y = _propagation_inputs(wf)
     field, x, y = propagate(wf.phasor, wavelength, x, y)
+
+    # Remove the polarization axes from the output coordinates
     if wf.is_polarised:
         x, y = x[..., 0, 0, :], y[..., 0, 0, :]
 
-    if any(f > 1 for f in spec.crop):
-        nx, ny = spec.crop_size(field.shape)
-        sy, sx = (field.shape[-2] - ny) // 2, (field.shape[-1] - nx) // 2
-        field, x, y = (
-            field[..., sy : sy + ny, sx : sx + nx],
-            x[..., sx : sx + nx],
-            y[..., sy : sy + ny],
-        )
+    # Crop the propagated field and coordinate axes
+    field = spec.crop_array(field)
+    x, y = spec.crop_axes((x, y))
 
-    scale = dlu.unit_factor(unit)
-    d = np.stack((x[..., 1] - x[..., 0], y[..., 1] - y[..., 0]), -1) / scale
-    c = np.stack(((x[..., -1] + x[..., 0]) / 2, (y[..., -1] + y[..., 0]) / 2), -1)
-    spec = wf.spec.set(n=field.shape[-2:][::-1], d=d, c=c / scale, unit=unit)
+    # Construct the realized output grid
+    spec = GridSpec.from_axes((x, y), unit)
+
+    # Update the propagated wavefront
     return wf.set(phasor=field, spec=spec)
 
 

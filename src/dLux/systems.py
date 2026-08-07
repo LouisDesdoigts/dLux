@@ -132,23 +132,32 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         Returns the sampled PSF array by default, or the final wavefront when
         ``return_wf`` is true. ``return_all`` returns all output containers.
         """
+
+        # Validate the requested output
         if return_wf and return_all:
             raise ValueError("return_wf and return_all are mutually exclusive.")
+
+        # Standardize and validate the spectrum
         wavelengths = np.atleast_1d(wavelengths)
-        weights = (
-            np.ones_like(wavelengths) / wavelengths.size
-            if weights is None
-            else np.atleast_1d(weights)
-        )
+        if weights is None:
+            weights = np.ones_like(wavelengths) / wavelengths.size
+        else:
+            weights = np.atleast_1d(weights)
+
         if weights.shape != wavelengths.shape:
             raise ValueError("wavelengths and weights must have matching shapes.")
 
+        # Initialize and spectrally weight the wavefront
         wavefront = self(self.initialise_wavefront(wavelengths, offset))
-        scale = np.sqrt(weights).reshape(
-            weights.shape + (1,) * (wavefront.phasor.ndim - weights.ndim)
-        )
+        ndim = wavefront.phasor.ndim - weights.ndim
+        shape = weights.shape + (1,) * ndim
+        scale = np.sqrt(weights).reshape(shape)
         wavefront = wavefront.set(phasor=wavefront.phasor * scale)
+
+        # Convert the propagated wavefront into a PSF
         psf = self._to_psf(wavefront, stokes)
+
+        # Return the requested output container
         if return_all:
             return {"Wavefront": wavefront, "PSF": psf}
         if return_wf:
