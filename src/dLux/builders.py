@@ -31,7 +31,7 @@ __all__ = [
 
 def _initialise_coefficients(shape, coefficients=None, key=None, initial_shape=None):
     """Return explicit, random, or zero coefficients for a basis shape."""
-    # Validate mutually exclusive initialization inputs
+    # Validate mutually exclusive initialisation inputs
     if coefficients is not None and key is not None:
         raise ValueError("Provide only one of coefficients or key.")
 
@@ -209,24 +209,22 @@ class ZernikeDef(OPDDef):
     def __init__(
         self, nolls=None, orders=None, oversize=0.01, norm=None, method="padded"
     ):
+        # Validate and expand the requested Zernike indices
         if (nolls is None) == (orders is None):
             raise ValueError("Provide exactly one of nolls or orders.")
-
         if orders is not None:
             orders = np.atleast_1d(dlu.to_value(orders, int))
-
             if orders.ndim != 1 or orders.size == 0:
                 raise ValueError("orders must contain at least one radial order.")
-
             nolls = dlu.radial_orders_to_indices(orders)
 
         self.nolls = np.atleast_1d(dlu.to_value(nolls, int))
-
         if self.nolls.ndim != 1 or self.nolls.size == 0:
             raise ValueError("nolls must contain at least one Noll index.")
         if np.any(self.nolls < 1):
             raise ValueError("nolls must contain positive Noll indices.")
 
+        # Build the static evaluation topology and output ordering
         method = str(method).lower()
         if method not in ("padded", "mapped"):
             raise ValueError("method must be either 'padded' or 'mapped'.")
@@ -235,11 +233,10 @@ class ZernikeDef(OPDDef):
         indices = np.concatenate(tuple(group.indices for group in self.groups))
         self.order = np.argsort(indices)
 
+        # Store the basis sampling and normalisation definitions
         self.oversize = dlu.to_value(oversize)
-
         if norm is not None and not isinstance(norm, Norm):
             raise TypeError("norm must be a Norm or None.")
-
         self.norm = norm
 
     def calculate(self, coordinates, support, diameter, centers=None):
@@ -350,23 +347,20 @@ class ApertureBuilder(GridBuilder):
     oversample: tuple[int, int] = eqx.field(static=True)
 
     def __init__(self, primary, obscurations=(), opd=None, oversample=5):
+        # Validate the primary and obscuration geometry
         if not isinstance(primary, Shape):
             raise TypeError("primary must be a Shape.")
-
         if not isinstance(obscurations, (list, tuple)):
             raise TypeError("obscurations must be a list or tuple of Shape objects.")
-
         obscurations = tuple(obscurations)
-
         if not all(isinstance(shape, Shape) for shape in obscurations):
             raise TypeError("obscurations must contain only Shape objects.")
 
+        # Store the geometry and optional OPD definition
         self.primary = primary
         self.obscurations = obscurations
-
         if opd is not None and not isinstance(opd, OPDDef):
             raise TypeError("opd must be an OPDDef or None.")
-
         self.opd = opd
         self.oversample = dlu.as_size(oversample, 2, "oversample")
 
@@ -452,7 +446,7 @@ class ApertureBuilder(GridBuilder):
         and omitting both initializes zero coefficients. ``normalise`` retains the
         existing wavefront-normalisation meaning of ``Optic.normalise``.
         """
-        components = self.build(grid, transform=transform, jit=jit)
+        components = self.build(grid, transform, jit)
         if self.opd is None:
             return Optic(transmission=components, normalise=normalise)
         transmission, basis = components[:2]
@@ -496,10 +490,13 @@ class SparseApertureBuilder(ApertureBuilder):
         opd=None,
         oversample=5,
     ):
+        # Validate and store the sub-aperture centres
         centers = dlu.to_value(centers)
         if centers.ndim != 2 or centers.shape[-1] != 2:
             raise ValueError("centers must have shape (n_apertures, 2).")
         self.centers = centers
+
+        # Validate and store the global obscuration geometry
         if not isinstance(global_obscurations, (list, tuple)):
             raise TypeError(
                 "global_obscurations must be a list or tuple of Shape objects."
@@ -508,6 +505,8 @@ class SparseApertureBuilder(ApertureBuilder):
         if not all(isinstance(shape, Shape) for shape in global_obscurations):
             raise TypeError("global_obscurations must contain only Shape objects.")
         self.global_obscurations = global_obscurations
+
+        # Initialise the shared local aperture definition
         super().__init__(subaperture, obscurations, opd, oversample)
 
     def _component(self, center, grid, transform):
@@ -600,14 +599,8 @@ class SparseApertureBuilder(ApertureBuilder):
         """
         # Materialise a global optic unless sparse output is requested
         if not sparse:
-            return super().__call__(
-                grid,
-                transform=transform,
-                coefficients=coefficients,
-                key=key,
-                normalise=normalise,
-                jit=jit,
-            )
+            return super().__call__(grid, transform, coefficients, key, normalise, jit)
+
         # Validate sparse construction requirements
         grid = self._promote_grid(grid)
         self.validate(grid, transform)

@@ -57,11 +57,14 @@ class SimpleCircular(ApertureBuilder):
     ):
         if (spider_width is None) != (spider_angles is None):
             raise ValueError("spider_width and spider_angles must both be provided.")
+
+        # Assemble the optional secondary and radial supports
         obscurations = []
         if secondary_diameter is not None:
             obscurations.append(Circle(secondary_diameter))
         if spider_width is not None:
             obscurations.append(Spider(spider_width, spider_angles))
+
         super().__init__(Circle(diameter), obscurations, opd, oversample)
 
 
@@ -112,16 +115,21 @@ class SegmentedHex(SparseApertureBuilder):
         oversample=5,
         paste_method="scan",
     ):
+        # Resolve and validate the construction options
         if (segment_diameter is None) == (segment_f2f is None):
             raise ValueError("Provide exactly one of segment_diameter or segment_f2f.")
+        if segment_diameter is None:
+            segment_diameter = 2 * segment_f2f / np.sqrt(3)
         paste_method = str(paste_method).lower()
         if paste_method not in ("scan", "scatter"):
             raise ValueError("paste_method must be either 'scan' or 'scatter'.")
-        if segment_diameter is None:
-            segment_diameter = 2 * segment_f2f / np.sqrt(3)
+
+        # Generate the requested ideal segment centres
         centers = dlu.segmented_hex_cens(nrings, segment_diameter / 2, gap)
         if remove_center:
             centers = centers[1:]
+
+        # Initialise the general sparse-aperture definition
         super().__init__(
             RegularPolygon(6, segment_diameter),
             centers,
@@ -129,6 +137,7 @@ class SegmentedHex(SparseApertureBuilder):
             opd=opd,
             oversample=oversample,
         )
+
         self.paste_method = paste_method
 
     def build(self, grid, transform=None, jit=True, return_support=False):
@@ -275,6 +284,7 @@ class NRMLike(SparseApertureBuilder):
     def __init__(self, centers, hole, opd=None, oversample=5):
         if not isinstance(hole, Shape):
             raise TypeError("hole must be a Shape.")
+
         super().__init__(hole, centers, opd=opd, oversample=oversample)
 
     def __call__(
@@ -294,15 +304,9 @@ class NRMLike(SparseApertureBuilder):
                 raise ValueError(
                     "coefficients must have a leading axis matching the holes."
                 )
+
         return super().__call__(
-            grid,
-            transform=transform,
-            coefficients=coefficients,
-            key=key,
-            normalise=normalise,
-            jit=jit,
-            sparse=sparse,
-            shared=False,
+            grid, transform, coefficients, key, normalise, jit, sparse, False
         )
 
 
@@ -328,12 +332,7 @@ class HSTLike(SimpleCircular):
         oversample=5,
     ):
         super().__init__(
-            diameter=diameter,
-            secondary_diameter=secondary_diameter,
-            spider_width=spider_width,
-            spider_angles=spider_angles,
-            opd=opd,
-            oversample=oversample,
+            diameter, secondary_diameter, spider_width, spider_angles, opd, oversample
         )
 
 
@@ -423,6 +422,7 @@ class EuclidLike(ApertureBuilder):
         opd=None,
         oversample=5,
     ):
+        # Generate the displaced support-arm geometry
         shift = np.asarray((secondary_diameter / 2 - spider_width / 2, diameter / 2))
         obscurations = [Circle(secondary_diameter)]
         for angle in spider_angles:
@@ -434,4 +434,6 @@ class EuclidLike(ApertureBuilder):
             obscurations.append(
                 TransformedShape(Rectangle(spider_width, diameter), transformation)
             )
+
+        # Initialise the complete sampled pupil definition
         super().__init__(Circle(diameter), obscurations, opd=opd, oversample=oversample)

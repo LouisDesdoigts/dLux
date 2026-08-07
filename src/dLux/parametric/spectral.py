@@ -14,6 +14,7 @@ import jax.numpy as np
 from jax import Array
 
 import dLux.utils as dlu
+
 from .bases import Basis
 from .parametrics import Parametric
 from .polynomials import Polynomial

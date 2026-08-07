@@ -7,9 +7,10 @@ from typing import Any
 import equinox as eqx
 import jax.numpy as np
 import jax.scipy as jsp
-from jax import Array
+from jax import Array, vmap
 
 import dLux.utils as dlu
+
 from .fields import Wavefront
 from .parametric import Parametric, ParametricHolder, resolve
 
@@ -119,8 +120,12 @@ class BaseSource(ParametricHolder):
         shape = data.shape
         images = data.reshape((-1,) + shape[-2:])
         kernels = distribution.reshape((-1,) + distribution.shape[-2:])
-        convolve = lambda image, kernel: jsp.signal.convolve(image, kernel, mode="same")
-        convolved = eqx.filter_vmap(convolve)(images, kernels)
+
+        @vmap
+        def convolve(image, kernel):
+            return jsp.signal.convolve(image, kernel, mode="same")
+
+        convolved = convolve(images, kernels)
 
         # Restore the original image shape
         return convolved.reshape(shape)
@@ -176,7 +181,7 @@ class BaseSource(ParametricHolder):
         flux = params["flux"]
         weights = params["weights"]
 
-        # Define initialization of one weighted source component
+        # Define initialisation of one weighted source component
         def initialise(pos, component_flux, component_weights):
             wavefront = Wavefront(wavelengths, spec).normalise().tilt(pos)
             weight = np.sqrt(component_flux * component_weights)
@@ -358,7 +363,7 @@ class Source(BaseSource, Spectrum):
 
 
 class BinarySource(BaseSource, Spectrum):
-    """Represent a binary source by center, separation, and contrast.
+    """Represent a binary source by centre, separation, and contrast.
 
     Parameters
     ----------

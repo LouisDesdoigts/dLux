@@ -1,8 +1,9 @@
 """Generate sampled telescope apertures and aperture supports."""
 
 import equinox as eqx
-from jax import Array, vmap
 import jax.numpy as np
+from jax import Array, vmap
+
 import dLux.utils as dlu
 
 __all__ = [
@@ -226,7 +227,7 @@ def segmented_aperture(
     diameter : float
         The full aperture diameter.
     nrings : int
-        The number of hexagonal rings including the center segment.
+        The number of hexagonal rings including the centre segment.
     segment_diameter : float
         Flat-to-flat diameter of each segment.
     gap : float = 0.0
@@ -236,7 +237,7 @@ def segmented_aperture(
     nrings_excluded : int = 1
         Number of inner rings to remove from the aperture. Set to ``0`` to
         keep all segments; ``1`` removes only the central segment; ``2``
-        removes the center plus the first surrounding ring, etc.
+        removes the centre plus the first surrounding ring, etc.
     secondary_diameter : float | None = None
         Optional circular secondary obscuration diameter.
     spider_width : float | None = None
@@ -277,7 +278,7 @@ def segmented_aperture(
     cens = segmented_hex_cens(nrings, rmax, gap)
 
     # Remove inner rings before computing any apertures.
-    # Ring k (0-indexed) has 6k segments (ring 0 = 1 center). Cumulative:
+    # Ring k has 6k segments, with one centre in ring zero. Cumulative:
     #   1 + 6*(1+2+...+(k-1)) = 1 + 3*k*(k-1)  (centred hexagonal numbers)
     if nrings_excluded > 0:
         n_excluded = 1 + 3 * nrings_excluded * (nrings_excluded - 1)

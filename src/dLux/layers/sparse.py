@@ -107,7 +107,7 @@ class SparseOptic(Optic):
         return len(self.centers)
 
     def _slice_local(self, index):
-        """Select parameters with a leading center axis for one aperture."""
+        """Select parameters with a leading centre axis for one aperture."""
         types = (ParametricBasis, DistortCoords, AffineMap, Affine)
         is_leaf = lambda leaf: isinstance(leaf, types)
         local_transform = False

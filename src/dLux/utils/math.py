@@ -1,10 +1,11 @@
 """Provide general numerical operations used throughout dLux."""
 
-from jax import Array, lax
+from typing import Any
+
 import jax.numpy as np
 import jax.scipy as jsp
 import jax.tree as jtu
-from typing import Any
+from jax import Array, lax
 
 import dLux.utils as dlu
 
@@ -30,7 +31,7 @@ def gaussian(
     Parameters
     ----------
     mean : float | Array = 0.0
-        The center position(s) of the Gaussian. Scalar for 1D, array for nD.
+        The centre position(s) of the Gaussian. Scalar for 1D, array for nD.
     std : float | Array = 1.0
         The standard deviation(s) of the Gaussian. Scalar for 1D, array for nD.
     npixels : int | tuple[int, ...] = 64

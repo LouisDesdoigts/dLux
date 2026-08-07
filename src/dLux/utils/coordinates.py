@@ -165,7 +165,7 @@ def pixel_coords(
     polar: bool = False,
     fft_style: bool = False,
 ) -> Array:
-    """Returns a paraxial set of 2d coordinates for each pixel center.
+    """Returns a paraxial set of 2d coordinates for each pixel centre.
 
     Parameters
     ----------
@@ -186,7 +186,7 @@ def pixel_coords(
     Returns
     -------
     coordinates : Array
-        The array of pixel center coordinates.
+        The array of pixel-centre coordinates.
     """
     supplied = sum(value is not None for value in (diameter, radius, pixel_scale))
     if supplied != 1:
@@ -201,7 +201,7 @@ def pixel_coords(
     else:
         pixscale = pixel_scale
 
-    # Default: symmetric pixel-center coordinates (half-integer for even N)
+    # Default to symmetric pixel-centre coordinates, half-integer for even sizes
     offsets = (0.0, 0.0)
 
     # FFT-style: shift by +0.5 pixel for even N so coordinates become integer-centred
@@ -247,7 +247,7 @@ def nd_coords(
     offsets: float | tuple[float, ...] = 0.0,
     indexing: str = "xy",
 ) -> Array:
-    """Returns a set of nd pixel center coordinates, with an optional offset. Each
+    """Returns a set of nd pixel-centre coordinates, with an optional offset. Each
     dimension can have a different number of pixels, pixel scale and offset by passing
     in tuples of values: `nd_coords((10, 10), (1, 2), (0, 1))`. pixel scale and offset
     can also be passed in as floats to apply those values to all dimensions, i.e.:

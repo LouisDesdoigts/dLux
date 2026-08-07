@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+
 import jax.numpy as np
 import zodiax as zdx
 from jax import Array, core, lax, vmap
@@ -68,7 +69,7 @@ class ResizeSpec(BaseGridSpec):
     pad, crop : int or tuple[int, ...]
         Integer factors applied before and after an operation.
     c : Array or None
-        Optional output center in the associated propagation unit.
+        Optional output centre in the associated propagation unit.
     """
 
     n: tuple[int, ...] | None
@@ -296,7 +297,7 @@ class GridSpec(BaseGridSpec):
             diam = dlu.as_axis(diam, ndim, "diam")
             d = diam / np.asarray(self.n)
 
-        # Standardize sampling and center arrays
+        # Standardise sampling and centre arrays
         self.d = dlu.as_axis(d, ndim, "d")
         self.c = dlu.as_axis(c, ndim, "c")
 
@@ -571,6 +572,7 @@ class TransformChain(CoordTransform):
         for transformation in self.transformations.values():
             coords = transformation(coords)
         return coords
+
 
 class DistortCoords(CoordTransform):
     """Apply a polynomial distortion to Cartesian coordinates.

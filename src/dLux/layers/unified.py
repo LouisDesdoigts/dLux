@@ -5,6 +5,7 @@ from __future__ import annotations
 from jax import Array
 
 import dLux.utils as dlu
+
 from ..grids import CoordTransform
 from ..fields import PSF, Wavefront
 from .detector import DetectorLayer

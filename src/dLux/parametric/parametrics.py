@@ -13,6 +13,7 @@ import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
+
 from ..grids import CoordTransform
 
 __all__ = [
@@ -58,6 +59,7 @@ class Parametric(zdx.Base):
         raise NotImplementedError(
             f"{type(self).__name__} does not define spectral integration."
         )
+
 
 class Transform(Parametric):
     """Apply a callable transformation to a realised parameterisation."""
@@ -182,7 +184,7 @@ class Combination(Parametric):
 
     @staticmethod
     def validate_operation(operation):
-        """Validate and standardize a supported combination operation."""
+        """Validate and standardise a supported combination operation."""
         operation = str(operation).lower()
         valid = ("sum", "product", "union", "intersection")
         if operation not in valid:

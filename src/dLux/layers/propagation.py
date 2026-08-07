@@ -65,7 +65,7 @@ def _propagate_fft(
     wf, spec, unit=None, ABCD=None, focal_length=None, inverse=False, **kwargs
 ):
     """Propagate every field at native FFT sampling."""
-    # Resolve the output units, center, and padding
+    # Resolve the output units, centre, and padding
     if unit is None:
         unit = "m" if inverse else "rad"
         if focal_length is not None:

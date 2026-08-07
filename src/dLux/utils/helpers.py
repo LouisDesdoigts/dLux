@@ -1,4 +1,4 @@
-"""Validate and standardize common dLux input values."""
+"""Validate and standardise common dLux input values."""
 
 from collections import Counter, OrderedDict, defaultdict
 from numbers import Integral

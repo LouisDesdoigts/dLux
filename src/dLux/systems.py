@@ -9,6 +9,7 @@ import jax.numpy as np
 import zodiax as zdx
 
 import dLux.utils as dlu
+
 from .grids import GridSpec
 from .layers.detector import BaseDetectorLayer
 from .layers.optical import BaseLayer, BaseOpticalLayer

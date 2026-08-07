@@ -386,7 +386,7 @@ class Wavefront(ContinuousField):
         spec: GridSpec,
         phasor: Array | None = None,
     ):
-        # Resolve wavelengths and initialize a uniform field when required
+        # Resolve wavelengths and initialise a uniform field when required
         self.wavelength = dlu.to_value(wavelength)
         if phasor is None:
             if not isinstance(spec, GridSpec):
@@ -791,7 +791,7 @@ class PolarisedWavefront(Wavefront):
         Returns
         -------
         polarised_wavefront : PolarisedWavefront
-            A new PolarisedWavefront with the same wavelength, pixel scale, and center
+            A new PolarisedWavefront with the same wavelength, pixel scale, and centre
             as the input wavefront, and the phasor promoted
         """
         return PolarisedWavefront(
