@@ -294,6 +294,10 @@ class TestTransforms:
         with pytest.raises(ValueError, match="shape"):
             dl.Affine()(np.ones((2, 6)))
 
+        grid = dl.GridSpec(n=(4, 5, 6), d=0.1)
+        with pytest.raises(ValueError, match="only 2D"):
+            grid.transformed(dl.Affine())
+
     def test_transform_dictionary(self, coordinates):
         transforms = {
             "translate": dl.Affine(translation=[0.1, 0.0]),
@@ -309,6 +313,19 @@ class TestTransforms:
 
         output = assert_jittable(lambda value: value(coordinates), transform)
         assert output.shape == (3,) + coordinates.shape
+
+    def test_batched_affine_coordinates(self, coordinates):
+        mapped_coordinates = np.stack((coordinates, coordinates + 0.1))
+        translation = np.asarray(((0.1, 0.0), (-0.1, 0.2)))
+        rotation = np.asarray((0.2, -0.1))
+        transform = dl.Affine(translation=translation, rotation=rotation)
+
+        output = assert_jittable(lambda value: transform(value), mapped_coordinates)
+        matrix, offset = transform.coeffs
+
+        assert output.shape == mapped_coordinates.shape
+        assert matrix.shape == (2, 2, 2)
+        assert offset.shape == (2, 2)
 
     def test_paired_vectorised_distortion(self, coordinates):
         base = dl.DistortCoords(orders=(1, 2))

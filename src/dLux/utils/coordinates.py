@@ -20,7 +20,10 @@ __all__ = [
 
 
 def translate_coords(coords: Array, translation: Array) -> Array:
-    """Translates the coordinates by to a new centre. Translation must have shape (2,).
+    """Translate n-dimensional coordinates into a new centre.
+
+    Coordinates follow ``(..., ndim, *spatial_shape)`` and translations follow
+    ``(..., ndim)``. Leading dimensions use paired JAX broadcasting.
 
     Parameters
     ----------
@@ -34,11 +37,16 @@ def translate_coords(coords: Array, translation: Array) -> Array:
     coords : Array
         The translated coordinates.
     """
-    return coords - translation[:, None, None]
+    translation = np.asarray(translation)
+    ndim = translation.shape[-1]
+    return coords - translation.reshape(translation.shape + (1,) * ndim)
 
 
 def compress_coords(coords: Array, compress: Array) -> Array:
-    """Compresses the coordinates by a given factor. Compress must have shape (2,).
+    """Compress n-dimensional coordinates by a per-axis factor.
+
+    Coordinates follow ``(..., ndim, *spatial_shape)`` and factors follow
+    ``(..., ndim)``. Leading dimensions use paired JAX broadcasting.
 
     Parameters
     ----------
@@ -52,11 +60,16 @@ def compress_coords(coords: Array, compress: Array) -> Array:
     coords : Array
         The compressed coordinates.
     """
-    return coords * compress[:, None, None]
+    compress = np.asarray(compress)
+    ndim = compress.shape[-1]
+    return coords * compress.reshape(compress.shape + (1,) * ndim)
 
 
 def shear_coords(coords: Array, shear: Array) -> Array:
-    """Shears the coordinates by a given factor. Shear must have shape (2,).
+    """Shear 2D coordinates by a per-axis factor.
+
+    Coordinates follow ``(..., 2, ny, nx)`` and shear values follow ``(..., 2)``.
+    Leading dimensions use paired JAX broadcasting.
 
     Parameters
     ----------
@@ -70,12 +83,22 @@ def shear_coords(coords: Array, shear: Array) -> Array:
     coords : Array
         The sheared coordinates.
     """
-    x, y = coords
-    return np.array((x + shear[0] * y, y + shear[1] * x))
+    # Extract coordinates and broadcast the shear over the spatial axes
+    x, y = coords[..., 0, :, :], coords[..., 1, :, :]
+    x_shear = shear[..., 0, None, None]
+    y_shear = shear[..., 1, None, None]
+
+    # Apply each shear and restore the coordinate axis
+    new_x = x + x_shear * y
+    new_y = y + y_shear * x
+    return np.stack((new_x, new_y), axis=-3)
 
 
 def rotate_coords(coords: Array, rotation: float) -> Array:
-    """Rotates the coordinates by a given angle.
+    """Rotate 2D coordinates by an angle in radians.
+
+    Coordinates follow ``(..., 2, ny, nx)`` and rotations follow ``(...)``.
+    Leading dimensions use paired JAX broadcasting.
 
     Parameters
     ----------
@@ -89,14 +112,23 @@ def rotate_coords(coords: Array, rotation: float) -> Array:
     coords : Array
         The rotated coordinates.
     """
-    x, y = coords
-    new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
-    new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
-    return np.array([new_x, new_y])
+    # Extract coordinates and broadcast the rotation over the spatial axes
+    x, y = coords[..., 0, :, :], coords[..., 1, :, :]
+    rotation = np.asarray(rotation)
+    angle = rotation[..., None, None]
+    cosine, sine = np.cos(-angle), np.sin(-angle)
+
+    # Rotate and restore the coordinate axis
+    new_x = cosine * x + sine * y
+    new_y = -sine * x + cosine * y
+    return np.stack((new_x, new_y), axis=-3)
 
 
 def distort_coords(coords: Array, coeffs: Array, pows: Array):
-    """Apply a 2D polynomial distortion to some coordinates.
+    """Apply a polynomial distortion to 2D coordinates.
+
+    Coordinates follow ``(..., 2, ny, nx)``. Unbatched coefficients have shape
+    ``(2, n_terms)``; batching is owned by :class:`dLux.DistortCoords`.
 
     Parameters
     ----------
@@ -112,14 +144,15 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     distorted_coords : Array
         Coords with the distortion applied
     """
-    pow_base = dlu.polynomial_basis(coords, pows)
+    variables = np.moveaxis(coords, -3, 0)
+    pow_base = dlu.polynomial_basis(variables, pows)
     distortion = np.tensordot(coeffs, pow_base, axes=(-1, 0))
+    distortion = np.moveaxis(distortion, 0, -3)
     return coords + distortion
 
 
 def cart2polar(coordinates: Array) -> Array:
-    """Converts the input (x, y) Cartesian coordinates into (r, phi) polar
-    coordinates.
+    """Convert ``(..., 2, ny, nx)`` Cartesian coordinates to polar coordinates.
 
     Parameters
     ----------
@@ -133,13 +166,13 @@ def cart2polar(coordinates: Array) -> Array:
         The input Cartesian coordinates converted into (r, phi) polar
         coordinates.
     """
-    x, y = coordinates
-    return np.array([np.hypot(x, y), np.arctan2(y, x)])
+    x = coordinates[..., 0, :, :]
+    y = coordinates[..., 1, :, :]
+    return np.stack((np.hypot(x, y), np.arctan2(y, x)), axis=-3)
 
 
 def polar2cart(coordinates: Array) -> Array:
-    """Converts the input (r, phi) polar coordinates into (x, y) Cartesian
-    coordinates.
+    """Convert ``(..., 2, ny, nx)`` polar coordinates to Cartesian coordinates.
 
     Parameters
     ----------
@@ -153,8 +186,9 @@ def polar2cart(coordinates: Array) -> Array:
         The input polar coordinates converted into (x, y) Cartesian
         coordinates.
     """
-    r, phi = coordinates
-    return np.array([r * np.cos(phi), r * np.sin(phi)])
+    r = coordinates[..., 0, :, :]
+    phi = coordinates[..., 1, :, :]
+    return np.stack((r * np.cos(phi), r * np.sin(phi)), axis=-3)
 
 
 def pixel_coords(

@@ -3,11 +3,11 @@
 import equinox as eqx
 import jax.numpy as np
 import jax.tree as jtu
-import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
+from ..base import Base
 from ..grids import GridSpec
 from .bases import Basis, CoordBasis, ParametricBasis, _resolve_coeffs
 from .parametrics import resolve
@@ -61,7 +61,7 @@ def _poly_params(degree, coeffs, ndim, powers, degrees=None):
     return powers, coeffs
 
 
-class DynamicZernike(zdx.Base):
+class DynamicZernike(Base):
     """A dynamically evaluable Zernike polynomial."""
 
     j: int = eqx.field(static=True)

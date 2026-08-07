@@ -57,6 +57,30 @@ def test_fft_inverse_roundtrip():
     assert np.max(np.abs(centers)) < np.finfo(centers.dtype).eps
 
 
+def test_shifted_fft_inverse_roundtrip():
+    spec_in = dlu.nd_axes((8, 6), (0.1, 0.13), offsets=(-0.07, 0.04))
+    phasor = _field(spec_in)
+    focal, spec_focal = dlu.FFT(
+        phasor,
+        0.5,
+        spec_in,
+        pad=(2, 3),
+        output_center=np.asarray((0.17, -0.11)),
+    )
+    recovered, spec_recovered = dlu.FFT(
+        focal,
+        0.5,
+        spec_focal,
+        inverse=True,
+        output_center=np.asarray((0.07, -0.04)),
+    )
+
+    expected = dlu.pad_to(phasor, (16, 18))
+    _assert_field_close(recovered, expected)
+    centers = np.stack([axis.mean() for axis in spec_recovered])
+    assert np.allclose(centers, np.asarray((0.07, -0.04)), atol=1e-7)
+
+
 def test_mft_inverse_roundtrip():
     spec_in = dlu.nd_axes((8, 6), (0.1, 0.13))
     phasor = _field(spec_in)

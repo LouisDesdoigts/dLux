@@ -22,6 +22,29 @@ def test_coordinate_transform_contract(operation, parameter):
     assert output.shape == coordinates.shape
 
 
+@pytest.mark.parametrize(
+    ("operation", "parameter"),
+    [
+        (dlu.translate_coords, np.asarray((0.1, -0.2))),
+        (dlu.compress_coords, np.asarray((0.5, 2.0))),
+        (dlu.shear_coords, np.asarray((0.1, -0.2))),
+        (dlu.rotate_coords, np.asarray(0.3)),
+    ],
+)
+def test_batched_coordinate_transform_contract(operation, parameter):
+    coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    coordinates = np.stack((coordinates, coordinates + 0.1))
+    output = assert_jittable(operation, coordinates, parameter)
+    assert output.shape == coordinates.shape
+
+
+@pytest.mark.parametrize("operation", [dlu.translate_coords, dlu.compress_coords])
+def test_nd_coordinate_transform_contract(operation):
+    coordinates = dlu.nd_coords((6, 4, 3), (0.1, 0.2, 0.3), indexing="ij")
+    output = assert_jittable(operation, coordinates, np.asarray((0.1, 0.2, 0.3)))
+    assert output.shape == coordinates.shape
+
+
 def test_shear_contract():
     coordinates = dlu.nd_coords((6, 6), (0.1, 0.2))
     output = assert_jittable(dlu.shear_coords, coordinates, np.asarray((0.1, -0.2)))
@@ -37,12 +60,14 @@ def test_shear_non_square():
 
 def test_coordinate_system_roundtrip():
     coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    coordinates = np.stack((coordinates, coordinates + 0.1))
     polar = assert_jittable(dlu.cart2polar, coordinates)
     assert np.allclose(dlu.polar2cart(polar), coordinates, atol=1e-6)
 
 
 def test_polynomial_distortion():
     coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
+    coordinates = np.stack((coordinates, coordinates + 0.1))
     powers = dlu.polynomial_powers(2, 2)
     coeffs = np.ones((2, powers.shape[-1])) * 0.01
     output = assert_jittable(dlu.distort_coords, coordinates, coeffs, powers)

@@ -73,6 +73,8 @@ def test_transformed_shape_gradient(context):
         ),
         shape.transformation.translation,
     )
+    assert np.isclose(shape.get("diameter"), 0.8)
+    assert np.array_equal(shape.get("translation"), [0.1, 0.0])
 
 
 def test_shape_extents():

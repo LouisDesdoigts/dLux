@@ -8,12 +8,12 @@ import operator
 import jax.numpy as np
 import jax.random as jr
 import jax.scipy as jsp
-import zodiax as zdx
 from jax import Array, vmap
 from jax.scipy.signal import convolve
 
 import dLux.utils as dlu
 
+from .base import Base
 from .grids import CoordTransform, GridSpec
 
 __all__ = [
@@ -47,16 +47,14 @@ def _field_spec(spec, shape):
     return spec
 
 
-class BaseField(zdx.Base):
+class BaseField(Base):
     """Base class for regularly sampled real or complex fields."""
 
     spec: GridSpec
 
     def __getattr__(self, key):
         """Forward unknown attributes to the coordinate specification."""
-        if hasattr(self.spec, key):
-            return getattr(self.spec, key)
-        raise AttributeError(f"{type(self).__name__} has no attribute {key!r}.")
+        return dlu.resolve_attr(self, key, self.spec)
 
     @property
     @abstractmethod

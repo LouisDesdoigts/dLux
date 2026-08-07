@@ -9,11 +9,11 @@ import equinox as eqx
 import interpax as ipx
 import jax.numpy as np
 import jax.tree as jtu
-import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
+from ..base import Base
 from ..grids import CoordTransform
 
 __all__ = [
@@ -33,7 +33,7 @@ def resolve(value: Any, dtype: Any = None, **context: Any) -> Any:
     return value if value is None or dtype is None else dlu.to_value(value, dtype)
 
 
-class ParametricHolder(zdx.Base):
+class ParametricHolder(Base):
     """Base class for objects containing context-dependent parameters."""
 
     def resolve(self, **context):
@@ -43,7 +43,7 @@ class ParametricHolder(zdx.Base):
         return jtu.map(evaluate, self, is_leaf=is_parametric)
 
 
-class Parametric(zdx.Base):
+class Parametric(ParametricHolder):
     """A contextual parameterisation consumed by another dLux object."""
 
     @abstractmethod

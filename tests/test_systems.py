@@ -46,6 +46,18 @@ def test_system_composition_contract(system):
     assert output.phasor.shape == (8, 6)
     assert np.allclose(output.power, 1)
 
+    assert system.pupil is system.layers["pupil"]
+    assert np.array_equal(system.get("coeffs"), system.pupil.opd.coeffs)
+    assert np.array_equal(system.get("pupil.coeffs"), system.pupil.opd.coeffs)
+    assert np.array_equal(system.get("pupil.opd.coeffs"), system.pupil.opd.coeffs)
+
+    with pytest.raises(AttributeError, match="Did you mean 'coeffs'"):
+        system.get("pupil.opd.coefss")
+
+    for method in ("set", "add", "multiply", "divide", "power", "min", "max"):
+        with pytest.raises(AttributeError, match="Did you mean 'coeffs'"):
+            getattr(system, method)("pupil.opd.coefss", np.asarray([1.0]))
+
 
 def test_nested_optical_system(input_spec):
     subsystem = dl.OpticalSystem([dl.Optic(transmission=0.5)], input_spec)

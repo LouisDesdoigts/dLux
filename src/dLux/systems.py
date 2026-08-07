@@ -6,10 +6,10 @@ from collections import OrderedDict
 from typing import Any
 
 import jax.numpy as np
-import zodiax as zdx
 
 import dLux.utils as dlu
 
+from .base import Base
 from .grids import GridSpec
 from .layers.detector import BaseDetectorLayer
 from .layers.optical import BaseLayer, BaseOpticalLayer
@@ -19,7 +19,7 @@ from .sources import Spectrum
 __all__ = ["LayeredSystem", "OpticalSystem", "DetectorSystem", "Detector"]
 
 
-class LayeredSystem(zdx.Base):
+class LayeredSystem(Base):
     """Apply an ordered collection of layers to a compatible dLux object."""
 
     layers: OrderedDict
@@ -29,12 +29,7 @@ class LayeredSystem(zdx.Base):
 
     def __getattr__(self, key: str) -> Any:
         """Resolve attributes from named or contained layers."""
-        if key in self.layers:
-            return self.layers[key]
-        for layer in self.layers.values():
-            if hasattr(layer, key):
-                return getattr(layer, key)
-        raise dlu.missing_attribute_error(self, key, list(self.layers))
+        return dlu.resolve_attr(self, key, self.layers)
 
     def __call__(self, target):
         """Apply every layer to a target in insertion order."""

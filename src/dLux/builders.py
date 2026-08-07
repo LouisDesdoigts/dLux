@@ -8,11 +8,11 @@ import equinox as eqx
 import jax.tree as jtu
 import jax.numpy as np
 import jax.random as jr
-import zodiax as zdx
 from jax import Array, vmap
 
 import dLux.utils as dlu
 
+from .base import Base
 from .grids import CoordTransform, GridSpec
 from .layers.optical import Optic
 from .layers.sparse import SparseOptic
@@ -88,7 +88,7 @@ def _zernike_groups(nolls, method):
     return tuple(groups)
 
 
-class ZernikeGroup(zdx.Base):
+class ZernikeGroup(Base):
     """A rectangular collection of jointly vectorised Zernike modes."""
 
     indices: Array
@@ -112,7 +112,7 @@ class ZernikeGroup(zdx.Base):
         return vmap(calculate)(self.n, self.m, self.coeffs, self.k)
 
 
-class Norm(zdx.Base):
+class Norm(Base):
     """Normalise and scale sampled basis modes over their aperture support.
 
     Parameters
@@ -142,7 +142,7 @@ class Norm(zdx.Base):
         return self.scale * basis / value
 
 
-class ApertureData(zdx.Base):
+class ApertureData(Base):
     """Sampled geometry passed internally to an OPD definition.
 
     ``transmission`` is the final downsampled pupil. ``support`` describes the
@@ -162,7 +162,7 @@ class ApertureData(zdx.Base):
         self.centers = dlu.to_value(centers, optional=True)
 
 
-class OPDDef(zdx.Base):
+class OPDDef(Base):
     """Define sampled OPD data from coordinates and aperture geometry."""
 
     @abstractmethod
@@ -262,7 +262,7 @@ class ZernikeDef(OPDDef):
         return basis if self.norm is None else self.norm(basis, support)
 
 
-class GridBuilder(zdx.Base):
+class GridBuilder(Base):
     """Base class for construction-time objects evaluated on a ``GridSpec``."""
 
     def validate(self, grid, transform):

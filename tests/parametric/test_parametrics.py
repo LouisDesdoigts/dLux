@@ -38,6 +38,10 @@ def test_dynamic_parametric_contract(coordinates):
         parametric.transformation.translation,
     )
 
+    raised = parametric.set("translation", np.asarray((0.2, -0.1)))
+    assert np.array_equal(parametric.get("translation"), [0.1, 0.0])
+    assert np.array_equal(raised.transformation.translation, [0.2, -0.1])
+
 
 def test_value_transform_contract(coordinates):
     parametric = CoordinateValue().map(Square())
@@ -106,6 +110,8 @@ def test_dictionary_combination(coordinates):
     output = parametric.evaluate(coordinates=coordinates)
 
     assert list(parametric.parametrics) == ["direct", "shifted"]
+    assert parametric.shifted is parametric.parametrics["shifted"]
+    assert np.array_equal(parametric.get("translation"), [0.1, 0.0])
     assert output.shape == coordinates.shape[-2:]
 
 

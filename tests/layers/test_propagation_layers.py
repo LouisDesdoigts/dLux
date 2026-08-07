@@ -38,6 +38,17 @@ def physical_spec():
 
 
 class TestPropagation:
+    def test_abcd_parameter_raising(self, physical_spec):
+        propagator = dl.ABCDPropagator(
+            {"space": dl.ABCDFreeSpace(0.1), "lens": dl.ABCDLens(2.0)},
+            physical_spec,
+        )
+        updated = propagator.set("distance", 0.2)
+
+        assert propagator.space is propagator.ABCDs["space"]
+        assert np.isclose(propagator.get("distance"), 0.1)
+        assert np.isclose(updated.space.distance, 0.2)
+
     @pytest.mark.parametrize(
         "make_layer",
         [
@@ -150,6 +161,21 @@ class TestPropagation:
         assert recovered.spec.unit == wavefront.spec.unit
         assert np.allclose(recovered.spec.d, wavefront.spec.d)
         assert np.allclose(recovered.spec.c, 0, atol=1e-7)
+
+    def test_chromatic_fft_inverse_roundtrip(self, make_wavefront):
+        wavefront = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
+
+        focal = dl.Fraunhofer(
+            dl.ResizeSpec(pad=2, c=np.asarray((2e-6, -1e-6))),
+            method="fft",
+        )(wavefront)
+        recovered = dl.Fraunhofer(
+            dl.ResizeSpec(crop=2, c=np.zeros(2)),
+            method="fft",
+            inverse=True,
+        )(focal)
+
+        assert_tree_allclose(recovered, wavefront, rtol=2e-5, atol=2e-6)
 
     @pytest.mark.parametrize("method", ["mft", "lct"])
     def test_fresnel_inverse_roundtrip(self, method, make_wavefront):

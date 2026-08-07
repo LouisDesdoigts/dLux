@@ -5,10 +5,11 @@ from __future__ import annotations
 from abc import abstractmethod
 
 import jax.numpy as np
-import zodiax as zdx
 from jax import Array, core, lax, vmap
 
 import dLux.utils as dlu
+
+from .base import Base
 
 __all__ = [
     "GridSpec",
@@ -54,7 +55,7 @@ def _distortion_powers(order, orders, powers, shift_invariant):
     return powers
 
 
-class BaseGridSpec(zdx.Base):
+class BaseGridSpec(Base):
     """Base class for coordinate and sampling specifications."""
 
 
@@ -454,17 +455,21 @@ class GridSpec(BaseGridSpec):
 
     @property
     def coordinates(self) -> Array:
-        """Return the full coordinate array with shape ``(ndim, *shape)``."""
+        """Return coordinates with shape ``(..., ndim, *shape)``."""
         if self.n is None:
             raise ValueError("n must be specified to calculate coordinates.")
         return self.coordinates_for(self.n)
 
     def transformed(self, transform=None) -> Array:
-        """Return coordinates after applying an optional coordinate transform."""
+        """Return 2D coordinates after applying an optional transform."""
         if transform is None:
             return self.coordinates
         if not isinstance(transform, CoordTransform):
             raise TypeError("transform must be a CoordTransform or None.")
+        if self.ndim != 2:
+            raise ValueError(
+                "CoordTransform currently supports only 2D GridSpec objects."
+            )
         return transform(self.coordinates)
 
     def coordinates_for(self, n: tuple[int, ...]) -> Array:
@@ -522,8 +527,13 @@ class GridSpec(BaseGridSpec):
         return extent * spec.scale / dlu.unit_factor(unit)
 
 
-class CoordTransform(zdx.Base):
-    """Base class for transformations applied to coordinate fields."""
+class CoordTransform(Base):
+    """Base class for transforms of ``(..., 2, ny, nx)`` coordinate fields.
+
+    Leading transform and coordinate dimensions use paired JAX broadcasting. An
+    unbatched coordinate field may therefore be expanded by batched transform
+    parameters, while matching batches are transformed element-by-element.
+    """
 
     @staticmethod
     def get_coordinates(coordinates) -> Array:
@@ -578,7 +588,8 @@ class DistortCoords(CoordTransform):
     """Apply a polynomial distortion to Cartesian coordinates.
 
     Polynomial coefficients have shape ``(2, n_terms)`` for output ``x`` and
-    ``y``. A leading coefficient axis vectorises independent distortions.
+    ``y``. Leading coefficient axes vectorise independent distortions; matching
+    coordinate batches are transformed element-by-element.
 
     Parameters
     ----------
@@ -632,6 +643,8 @@ class DistortCoords(CoordTransform):
 class AffineMap(CoordTransform):
     """Apply a direct affine coordinate map ``x' = matrix @ x + offset``.
 
+    Matrix, offset, and coordinate leading dimensions use paired JAX broadcasting.
+
     Parameters
     ----------
     matrix : Array or None
@@ -665,6 +678,7 @@ class Affine(CoordTransform):
 
     Translation, rotation, scale, and shear map coordinates into a transformed
     object's local frame. Operations are composed in the order supplied by ``order``.
+    Parameter and coordinate leading dimensions use paired JAX broadcasting.
 
     Parameters
     ----------
@@ -726,28 +740,45 @@ class Affine(CoordTransform):
 
     def _matrices(self) -> Array:
         """Return all affine components as ordered homogeneous matrices."""
-        # Initialize every optional component to the identity
-        identity = np.eye(3)
+        # Resolve the shared parameter batch shape
+        shapes = []
+        for value in (self.translation, self.scale, self.shear):
+            if value is not None:
+                shapes.append(value.shape[:-1])
+        if self.rotation is not None:
+            shapes.append(self.rotation.shape)
+        batch = np.broadcast_shapes(*shapes) if shapes else ()
+
+        # Initialise every optional component to the batched identity
+        identity = np.broadcast_to(np.eye(3), batch + (3, 3))
 
         translation = identity
         if self.translation is not None:
-            translation = identity.at[:2, 2].set(-self.translation)
+            value = np.broadcast_to(self.translation, batch + (2,))
+            translation = identity.at[..., :2, 2].set(-value)
 
         # Construct the inverse rotation into the local coordinate frame
         rotation = identity
         if self.rotation is not None:
-            cosine, sine = np.cos(self.rotation), np.sin(self.rotation)
-            rotation = np.array([[cosine, -sine, 0], [sine, cosine, 0], [0, 0, 1]])
+            angle = np.broadcast_to(self.rotation, batch)
+            cosine, sine = np.cos(angle), np.sin(angle)
+            rotation = rotation.at[..., 0, 0].set(cosine)
+            rotation = rotation.at[..., 0, 1].set(-sine)
+            rotation = rotation.at[..., 1, 0].set(sine)
+            rotation = rotation.at[..., 1, 1].set(cosine)
 
         # Construct scale and shear components
         scale = identity
         if self.scale is not None:
-            scale = np.diag(np.concatenate((1 / self.scale, np.ones(1))))
+            value = np.broadcast_to(self.scale, batch + (2,))
+            scale = scale.at[..., 0, 0].set(1 / value[..., 0])
+            scale = scale.at[..., 1, 1].set(1 / value[..., 1])
 
         shear = identity
         if self.shear is not None:
-            shear = shear.at[0, 1].set(self.shear[0])
-            shear = shear.at[1, 0].set(self.shear[1])
+            value = np.broadcast_to(self.shear, batch + (2,))
+            shear = shear.at[..., 0, 1].set(value[..., 0])
+            shear = shear.at[..., 1, 0].set(value[..., 1])
 
         # Select the configured component order
         matrices = np.stack((translation, rotation, scale, shear))
@@ -759,15 +790,18 @@ class Affine(CoordTransform):
         )
         return matrices[indices]
 
+    @property
     def coeffs(self) -> tuple[Array, Array]:
-        """Return the composed transformation matrix and offset."""
+        """Return the composed, optionally batched matrix and offset."""
         combine = lambda cumulative, operation: (operation @ cumulative, None)
-        homogeneous, _ = lax.scan(combine, np.eye(3), self._matrices())
-        return homogeneous[:2, :2], homogeneous[:2, 2]
+        matrices = self._matrices()
+        identity = np.broadcast_to(np.eye(3), matrices.shape[1:])
+        homogeneous, _ = lax.scan(combine, identity, matrices)
+        return homogeneous[..., :2, :2], homogeneous[..., :2, 2]
 
     def __call__(self, coords: Array) -> Array:
         """Apply the composed semantic affine transformation."""
         coords = self.get_coordinates(coords)
-        matrix, offset = self.coeffs()
-        shift = offset.reshape((2,) + (1,) * (coords.ndim - 1))
-        return np.einsum("ij,j...->i...", matrix, coords) + shift
+        matrix, offset = self.coeffs
+        shift = offset[..., :, None, None]
+        return np.einsum("...ij,...jxy->...ixy", matrix, coords) + shift

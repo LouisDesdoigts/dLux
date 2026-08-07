@@ -62,7 +62,10 @@ def gaussian(
 
 
 def mv_gaussian(
-    mean: Array, cov: Array, npix: int | Array = 64, extent: float = 5.0
+    mean: Array,
+    cov: Array,
+    npix: int | tuple[int, ...] = 64,
+    extent: float = 5.0,
 ) -> Array:
     """Generates a normalised multivariate Gaussian function.
 
@@ -82,41 +85,30 @@ def mv_gaussian(
     kernel : Array
         The normalised multivariate Gaussian kernel.
     """
-    raise NotImplementedError("Multivariate Gaussian generation is under development.")
-
+    # Validate the distribution and output dimensions
     mean = np.asarray(mean, dtype=float)
     cov = np.asarray(cov, dtype=float)
-    npix_arr = np.atleast_1d(np.asarray(npix, dtype=int))
+    if mean.ndim != 1 or mean.size == 0:
+        raise ValueError("mean must be a non-empty one-dimensional array.")
+    if cov.shape != (mean.size, mean.size):
+        raise ValueError("cov shape must match (mean.size, mean.size).")
+
     ndim = mean.size
+    npix = dlu.as_size(npix, ndim, "npix")
 
-    # Get standard deviations from covariance matrix diagonal
+    # Generate physical axes spanning the marginal standard deviations
     stds = np.sqrt(np.diag(cov))
+    axis_fn = lambda m, s, n: np.linspace(m - extent * s, m + extent * s, n)
+    axes = jtu.map(axis_fn, tuple(mean), tuple(stds), npix)
 
-    # Handle npix broadcasting
-    if npix_arr.size == 1:
-        npix_arr = np.repeat(npix_arr, ndim)
-
-    # Create linspace function
-    def make_axis(i):
-        return np.linspace(
-            mean[i] - extent * stds[i], mean[i] + extent * stds[i], npix_arr[i]
-        )
-
-    # Generate coordinate arrays for each dimension
-    linspaces = jtu.map(make_axis, np.arange(ndim))
-
-    # Create meshgrid
-    grids = np.meshgrid(*linspaces, indexing="xy")
-
-    # Stack grids into points array and reshape for computation
-    grid_shape = tuple(len(ls) for ls in linspaces)
-    points = np.stack(grids, axis=0).reshape(ndim, -1).T  # (n_points, ndim)
-
-    # Compute multivariate Gaussian
+    # Evaluate the distribution over the Cartesian product of the axes
+    shape = tuple(len(axis) for axis in axes)
+    grids = np.meshgrid(*axes, indexing="ij")
+    points = np.stack(grids, axis=-1).reshape(-1, ndim)
     kernel = jsp.stats.multivariate_normal.pdf(points, mean=mean, cov=cov)
-    kernel = kernel.reshape(grid_shape)
+    kernel = kernel.reshape(shape)
 
-    # Normalise
+    # Normalise the sampled kernel
     return kernel / np.sum(kernel)
 
 

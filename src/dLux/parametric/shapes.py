@@ -5,11 +5,11 @@ from __future__ import annotations
 from abc import abstractmethod
 
 import jax.numpy as np
-import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
+from ..base import Base
 from ..grids import CoordTransform
 from .parametrics import Parametric
 
@@ -37,11 +37,11 @@ class Shape(Parametric):
         return None
 
 
-class Hard(zdx.Base):
+class Hard(Base):
     """Evaluate an exact hard boundary without dynamic edge softening."""
 
 
-class Soft(zdx.Base):
+class Soft(Base):
     """Differentiate a shape boundary over a width measured in pixels."""
 
     pixels: Array

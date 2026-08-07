@@ -5,6 +5,7 @@ from collections import OrderedDict
 import jax.numpy as np
 import pytest
 
+import dLux as dl
 import dLux.utils as dlu
 
 
@@ -71,9 +72,24 @@ def test_complex_roundtrip(cartesian):
 
 def test_display_and_error_helpers():
     assert np.array_equal(dlu.imshow_extent(2), [-1, 1, -1, 1])
-    error = dlu.missing_attribute_error(object(), "bad", ["good"], "try this")
+    error = dlu.missing_attribute_error(object(), "god", ["good"], "try this")
     assert isinstance(error, AttributeError)
-    assert "bad" in str(error) and "good" in str(error)
+    assert "god" in str(error) and "good" in str(error)
+
+
+def test_raised_attribute_resolution():
+    first = dl.Affine(translation=[0.1, 0.2])
+    second = dl.Affine(translation=[0.3, 0.4])
+    owner = dl.TransformChain()
+
+    named = dlu.resolve_attr(owner, "first", {"first": first})
+    raised = dlu.resolve_attr(owner, "translation", (first, second))
+
+    assert named is first
+    assert np.array_equal(raised, first.translation)
+
+    with pytest.raises(AttributeError, match="Did you mean 'translation'"):
+        dlu.resolve_attr(owner, "translaton", (first, second))
 
 
 @pytest.mark.parametrize(

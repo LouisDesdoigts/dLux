@@ -1,6 +1,8 @@
 """Validate and standardise common dLux input values."""
 
 from collections import Counter, OrderedDict, defaultdict
+from collections.abc import Mapping
+from difflib import get_close_matches
 from numbers import Integral
 from typing import Any, Callable
 import jax.numpy as np
@@ -14,6 +16,7 @@ __all__ = [
     "remove_layer",
     "imshow_extent",
     "missing_attribute_error",
+    "resolve_attr",
     "from_complex",
     "as_size",
     "as_axis",
@@ -239,13 +242,71 @@ def missing_attribute_error(
     """
     message = f"{owner.__class__.__name__} has no attribute '{key}'."
     if valid_attrs:
-        attrs = sorted(valid_attrs)
-        attrs_str = ", ".join(attrs[:6])
-        ellipsis = "..." if len(attrs) > 6 else ""
-        message += f" Valid attributes: {attrs_str}{ellipsis}"
+        attrs = sorted(set(valid_attrs))
+        matches = get_close_matches(key, attrs, n=3, cutoff=0.6)
+        if matches:
+            message += f" Did you mean {', '.join(repr(match) for match in matches)}?"
     if hint:
         message += f" {hint}"
     return AttributeError(message)
+
+
+def _raised_attrs(children, seen=None):
+    """Collect public field and mapping names reachable through child objects."""
+    seen = set() if seen is None else seen
+    attrs = []
+
+    for child in children:
+        if child is None or id(child) in seen:
+            continue
+        seen.add(id(child))
+
+        if isinstance(child, Mapping):
+            attrs.extend(str(key) for key in child)
+            attrs.extend(_raised_attrs(child.values(), seen))
+            continue
+        if isinstance(child, (tuple, list)):
+            attrs.extend(_raised_attrs(child, seen))
+            continue
+
+        fields = getattr(type(child), "__dataclass_fields__", {})
+        names = [name for name in fields if not name.startswith("_")]
+        attrs.extend(names)
+        values = [getattr(child, name) for name in names]
+        attrs.extend(_raised_attrs(values, seen))
+    return attrs
+
+
+def resolve_attr(owner: Any, key: str, *children: Any) -> Any:
+    """Raise a named child or first matching descendant attribute.
+
+    Mapping keys take precedence over attributes raised from their values. Child
+    objects are searched in the supplied order, allowing progressively qualified
+    Zodiax paths to resolve ambiguity naturally.
+    """
+    # Raise named mapping children before searching their values
+    values = []
+    for child in children:
+        if child is None:
+            continue
+        if isinstance(child, Mapping):
+            if key in child:
+                return child[key]
+            values.extend(child.values())
+        elif isinstance(child, (tuple, list)):
+            values.extend(child)
+        else:
+            values.append(child)
+
+    # Return the first descendant match in stable child order
+    for value in values:
+        try:
+            return getattr(value, key)
+        except AttributeError:
+            pass
+
+    valid = _raised_attrs((owner, *children))
+    raise missing_attribute_error(owner, key, valid)
 
 
 def from_complex(array: Array, complex: bool = True) -> Array:

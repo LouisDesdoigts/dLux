@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import jax.numpy as np
-import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
+from ..base import Base
 from ..grids import BaseGridSpec, GridSpec, ResizeSpec
 from .optical import OpticalLayer
 
@@ -147,7 +147,7 @@ def _validate_method(method, spec, types):
     return method
 
 
-class ABCDElement(zdx.Base):
+class ABCDElement(Base):
     """Base class for elements represented by an ABCD matrix."""
 
 
@@ -387,6 +387,10 @@ class ABCDPropagator(Propagator):
         if not self.ABCDs:
             raise ValueError("ABCDs must contain at least one element.")
         self.method = method
+
+    def __getattr__(self, key):
+        """Raise grid parameters, named elements, and element parameters."""
+        return dlu.resolve_attr(self, key, self.spec, self.ABCDs)
 
     @property
     def abcd(self) -> Array:

@@ -21,6 +21,15 @@ def test_gaussian_contract():
     assert np.isclose(output.sum(), 1.0)
 
 
+def test_mv_gaussian_contract():
+    mean = np.asarray((0.2, -0.1))
+    cov = np.asarray(((1.0, 0.3), (0.3, 2.0)))
+    output = assert_jittable(dlu.mv_gaussian, mean, cov, npix=(8, 6))
+
+    assert output.shape == (8, 6)
+    assert np.isclose(output.sum(), 1.0)
+
+
 def test_basis_roundtrip():
     basis = random.normal(random.PRNGKey(0), (2, 3, 5, 4))
     coeffs = np.arange(6.0).reshape((2, 3))
@@ -51,9 +60,10 @@ def test_safe_division():
     [
         lambda: dlu.eval_basis(np.ones((2, 3, 4)), np.ones((3, 2))),
         lambda: dlu.solve_basis(np.ones((3, 4)), np.ones((2, 2, 6))),
-        lambda: dlu.mv_gaussian(np.zeros(2), np.eye(2)),
+        lambda: dlu.mv_gaussian(np.zeros((2, 1)), np.eye(2)),
+        lambda: dlu.mv_gaussian(np.zeros(2), np.eye(3)),
     ],
 )
 def test_validation(operation):
-    with pytest.raises((ValueError, NotImplementedError)):
+    with pytest.raises(ValueError):
         operation()
