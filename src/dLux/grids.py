@@ -392,10 +392,6 @@ class GridSpec(BaseGridSpec):
 
     def build(self, builder, **kwargs):
         """Evaluate a ``GridBuilder`` on this sampling specification."""
-        from .builders import GridBuilder
-
-        if not isinstance(builder, GridBuilder):
-            raise TypeError("builder must be a GridBuilder.")
         return builder.build(self, **kwargs)
 
     @property

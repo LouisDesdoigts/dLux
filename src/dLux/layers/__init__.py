@@ -10,6 +10,7 @@ from . import (
     refractive,
     polarised,
     propagation,
+    coronagraphy,
 )
 
 _modules = (
@@ -21,6 +22,7 @@ _modules = (
     refractive,
     polarised,
     propagation,
+    coronagraphy,
 )
 
 _module_names = [
@@ -32,6 +34,7 @@ _module_names = [
     "refractive",
     "polarised",
     "propagation",
+    "coronagraphy",
 ]
 
 __all__ = _module_names + reexport(_modules, globals())
