@@ -1,11 +1,11 @@
 """Manipulate sampled arrays while preserving their spatial conventions."""
 
 import jax.numpy as np
-from jax import Array
+from jax import Array, lax
 
 import dLux.utils as dlu
 
-__all__ = ["pad_to", "crop_to", "resize", "downsample"]
+__all__ = ["pad_to", "crop_to", "resize", "downsample", "paste"]
 
 
 def _size(npixels: int | tuple[int, ...]) -> tuple[int, ...]:
@@ -165,3 +165,73 @@ def downsample(array: Array, n: int | tuple[int, ...], mean: bool = True) -> Arr
     array = array.reshape(leading + shape)
     axes = tuple(len(leading) + 2 * axis + 1 for axis in range(ndim))
     return method(array, axis=axes)
+
+
+def _paste_scan(arrays, starts, sizes):
+    """Paste compact arrays sequentially with bounded working memory."""
+    # Initialise the common output and fixed slice geometry
+    nx, ny = sizes
+    height, width = arrays.shape[-2:]
+    leading = arrays.shape[1:-2]
+    slice_shape = leading + (height, width)
+    output = np.zeros(leading + (ny, nx), dtype=arrays.dtype)
+
+    # Add each contiguous stamp without constructing per-pixel indices
+    def add_stamp(output, data):
+        array, start = data
+        index = (0,) * len(leading) + (start[1], start[0])
+        current = lax.dynamic_slice(output, index, slice_shape)
+        output = lax.dynamic_update_slice(output, current + array, index)
+        return output, None
+
+    return lax.scan(add_stamp, output, (arrays, starts))[0]
+
+
+def _paste_scatter(arrays, starts, sizes):
+    """Paste compact arrays in parallel using flattened scatter indices."""
+    # Generate flattened output indices for every stamp pixel
+    nx, ny = sizes
+    height, width = arrays.shape[-2:]
+    x = starts[:, 0, None, None] + np.arange(width)[None, None, :]
+    y = starts[:, 1, None, None] + np.arange(height)[None, :, None]
+    indices = y * nx + x
+
+    # Align the stamp axis behind any intermediate array dimensions
+    leading = arrays.shape[1:-2]
+    values = np.moveaxis(arrays, 0, len(leading)).reshape(leading + (-1,))
+
+    # Add all stamp pixels into the flattened output in parallel
+    output = np.zeros(leading + (nx * ny,), dtype=arrays.dtype)
+    output = output.at[..., indices.reshape(-1)].add(values)
+    return output.reshape(leading + (ny, nx))
+
+
+def paste(
+    arrays: Array,
+    starts: Array,
+    npixels: int | tuple[int, int],
+    method: str = "scan",
+) -> Array:
+    """Add equally sized arrays into a common two-dimensional output.
+
+    ``arrays`` has shape ``(n, ..., ny, nx)`` and ``starts`` has shape ``(n, 2)``
+    in physical ``(x, y)`` pixel order. Intermediate axes are preserved. Every
+    compact array must lie completely within the output. ``method="scan"`` limits
+    working memory through sequential updates; ``method="scatter"`` constructs
+    flattened indices to expose parallel placement.
+    """
+    # Standardise the pasted arrays and placement indices
+    arrays = np.asarray(arrays)
+    starts = np.asarray(starts, dtype=int)
+    sizes = dlu.as_size(npixels, 2, "npixels")
+
+    if arrays.ndim < 3:
+        raise ValueError("arrays must have shape (n, ..., ny, nx).")
+    if starts.shape != (arrays.shape[0], 2):
+        raise ValueError("starts must have shape (n, 2).")
+    if method not in ("scan", "scatter"):
+        raise ValueError("method must be either 'scan' or 'scatter'.")
+
+    # Apply the requested memory or parallelism strategy
+    paste_fn = _paste_scan if method == "scan" else _paste_scatter
+    return paste_fn(arrays, starts, sizes)

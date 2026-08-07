@@ -6,6 +6,7 @@ import pytest
 
 import dLux as dl
 
+from dLux.builders import SparseApertureBuilder
 from tests.helpers import assert_jittable
 
 
@@ -140,11 +141,47 @@ def test_prebuilt_pupils(builder):
     assert 0 < transmission.sum() < transmission.size
 
 
+def test_segmented_hex_pasted_construction():
+    grid = dl.GridSpec(n=64, d=0.15, unit="m").broadcast(2)
+    builder = dl.JWSTLike(oversample=3)
+    scatter = builder.set(paste_method="scatter")
+
+    pasted = builder.build(grid)
+    compiled = builder.build(grid, jit=True)
+    parallel = scatter.build(grid, jit=True)
+    global_ = SparseApertureBuilder._build(builder, grid, None)
+
+    assert np.allclose(pasted, global_)
+    assert np.allclose(compiled, global_)
+    assert np.allclose(parallel, global_)
+
+    with pytest.raises(ValueError, match="does not support coordinate transforms"):
+        builder.build(grid, transform=dl.Affine(rotation=0.1))
+
+
+def test_segmented_hex_pasted_basis():
+    grid = dl.GridSpec(n=64, d=0.15, unit="m").broadcast(2)
+    builder = dl.JWSTLike(
+        opd=dl.ZernikeDef(orders=[1, 2], norm=dl.Norm("rms", 1e-9)),
+        oversample=2,
+    )
+
+    optic = builder(grid, key=jr.key(0), jit=True)
+    output = assert_jittable(lambda value: value.opd.evaluate(), optic)
+
+    assert isinstance(optic.opd, dl.PastedBasis)
+    assert optic.opd.basis.shape[:2] == (18, 5)
+    assert optic.opd.coefficients.shape == (18, 5)
+    assert output.shape == (64, 64)
+
+
 def test_prebuilt_validation():
     with pytest.raises(ValueError, match="both be provided"):
         dl.SimpleCircular(1.0, spider_width=0.1)
     with pytest.raises(ValueError, match="exactly one"):
         dl.SegmentedHex(nrings=2)
+    with pytest.raises(ValueError, match="paste_method"):
+        dl.SegmentedHex(nrings=2, segment_f2f=0.8, paste_method="invalid")
     with pytest.raises(TypeError, match="hole"):
         dl.NRMLike([[0.0, 0.0]], hole=np.ones((2, 2)))
 

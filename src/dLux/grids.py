@@ -12,6 +12,7 @@ import dLux.utils as dlu
 __all__ = [
     "GridSpec",
     "ResizeSpec",
+    "PasteSpec",
     "CoordTransform",
     "Affine",
     "AffineMap",
@@ -124,6 +125,94 @@ class ResizeSpec(BaseGridSpec):
     def resize(self, array: Array, fill: float = 0.0) -> Array:
         """Resize an array to the final sampling represented by this object."""
         return dlu.resize(array, self.output_size(array.shape), fill)
+
+
+class PasteSpec(BaseGridSpec):
+    """Map compact local arrays into a larger regularly sampled grid.
+
+    The specification stores integer ``(x, y)`` starts and residual physical offsets
+    for equally sized stamps. Construction is deliberately separate from evaluation:
+    stamp and output shapes are fixed before JIT compilation, while coordinates and
+    pasted values remain ordinary JAX calculations.
+    """
+
+    n: tuple[int, int]
+    shape: tuple[int, int]
+    starts: Array
+    offsets: Array
+    d: Array
+
+    def __init__(self, n, shape, starts, offsets, d):
+        self.n = dlu.as_size(n, 2, "n")
+        self.shape = dlu.as_size(shape, 2, "shape")
+        self.starts = dlu.to_value(starts, int)
+        self.offsets = dlu.to_value(offsets)
+        self.d = dlu.as_axis(d, 2, "d")
+
+        if self.starts.ndim != 2 or self.starts.shape[-1] != 2:
+            raise ValueError("starts must have shape (n_stamps, 2).")
+        if self.offsets.shape != self.starts.shape:
+            raise ValueError("offsets must match the shape of starts.")
+
+        ends = self.starts + np.asarray(self.shape)
+        if np.any(self.starts < 0) or np.any(ends > np.asarray(self.n)):
+            raise ValueError("Every stamp must lie within the output grid.")
+
+    @classmethod
+    def from_grid(cls, grid, centers, extent):
+        """Construct compact stamp placement from a concrete two-dimensional grid."""
+        if not isinstance(grid, GridSpec):
+            raise TypeError("grid must be a GridSpec.")
+        if grid.n is None or grid.d is None or grid.ndim != 2:
+            raise ValueError("grid must define two-dimensional n and d values.")
+
+        centers = dlu.to_value(centers)
+        if centers.ndim != 2 or centers.shape[-1] != 2:
+            raise ValueError("centers must have shape (n_stamps, 2).")
+
+        # Resolve the concrete grid geometry in canonical SI units
+        spacing = grid.d * grid.scale
+        center = np.zeros(2) if grid.c is None else grid.c * grid.scale
+        origin = center - (np.asarray(grid.n) - 1) * spacing / 2
+
+        # Fix the compact stamp shape before numerical evaluation
+        extent = dlu.as_axis(extent, 2, "extent")
+        half = tuple(int(value) + 1 for value in np.ceil(extent / spacing))
+        shape = tuple(2 * value + 1 for value in half)
+
+        # Resolve integer placements and exact residual physical offsets
+        pixels = (centers - origin) / spacing
+        anchors = np.rint(pixels).astype(int)
+        starts = anchors - np.asarray(half)
+        offsets = origin + anchors * spacing - centers
+        return cls(grid.n, shape, starts, offsets, spacing)
+
+    @property
+    def coordinates(self) -> Array:
+        """Return one local coordinate grid per stamp."""
+        coordinates = dlu.nd_coords(self.shape, self.d)
+        return coordinates[None] + self.offsets[:, :, None, None]
+
+    def paste(self, arrays, method="scan") -> Array:
+        """Add compact stamp arrays into the common output grid."""
+        return dlu.paste(arrays, self.starts, self.n, method)
+
+    def extract(self, array) -> Array:
+        """Extract one compact stamp from the output grid at every start."""
+        # Validate the full spatial shape and resolve slice geometry
+        array = np.asarray(array)
+        if array.shape[-2:] != self.n[::-1]:
+            raise ValueError("array spatial shape must match the PasteSpec output.")
+
+        leading = array.shape[:-2]
+        slice_shape = leading + self.shape[::-1]
+
+        # Extract every compact stamp in parallel
+        def extract_stamp(start):
+            index = (0,) * len(leading) + (start[1], start[0])
+            return lax.dynamic_slice(array, index, slice_shape)
+
+        return vmap(extract_stamp)(self.starts)
 
 
 class GridSpec(BaseGridSpec):

@@ -103,6 +103,50 @@ def test_vectorised_basis_coefficients():
     assert np.allclose(local_output[1], local_basis[1, 1])
 
 
+@pytest.mark.parametrize("method", ["scan", "scatter"])
+def test_pasted_basis_contract(method):
+    spec = dl.PasteSpec(
+        n=(6, 4),
+        shape=(2, 2),
+        starts=[[0, 0], [4, 2]],
+        offsets=np.zeros((2, 2)),
+        d=np.ones(2),
+    )
+    modes = np.asarray(
+        [
+            [[1.0, 0.0], [0.0, 0.0]],
+            [[0.0, 1.0], [0.0, 0.0]],
+        ]
+    )
+    basis = np.broadcast_to(modes, (2, 2, 2, 2))
+    coefficients = np.asarray([[1.0, 2.0], [3.0, 4.0]])
+    pasted = dl.PastedBasis(basis, spec, coefficients, method)
+
+    output = assert_jittable(lambda value: value.evaluate(), pasted)
+    recovered = assert_jittable(lambda value: pasted.solve_basis(value), output)
+    assert_differentiable(
+        lambda values: pasted.set(coefficients=values).evaluate(), coefficients
+    )
+
+    assert output.shape == (4, 6)
+    assert np.allclose(recovered, coefficients)
+
+
+@pytest.mark.parametrize(
+    "constructor",
+    [
+        lambda: dl.PastedBasis(np.ones((2, 1, 2, 2)), "invalid"),
+        lambda: dl.PastedBasis(
+            np.ones((2, 1, 2, 2)),
+            dl.PasteSpec((4, 4), (2, 2), [[0, 0]], [[0.0, 0.0]], [1.0, 1.0]),
+        ),
+    ],
+)
+def test_pasted_basis_validation(constructor):
+    with pytest.raises((TypeError, ValueError)):
+        constructor()
+
+
 @pytest.mark.parametrize(
     "constructor",
     [

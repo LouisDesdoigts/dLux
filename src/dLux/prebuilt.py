@@ -1,15 +1,18 @@
 """Prebuilt generic and representative aperture models."""
 
+import equinox as eqx
 import jax.numpy as np
+from jax import vmap
 
 import dLux.utils as dlu
 
-from .builders import ApertureBuilder, SparseApertureBuilder
-from .grids import Affine
+from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coefficients
+from .grids import Affine, PasteSpec
 from .parametric import (
     Circle,
     Rectangle,
     RegularPolygon,
+    PastedBasis,
     Shape,
     Spider,
     TransformedShape,
@@ -80,9 +83,21 @@ class SegmentedHex(SparseApertureBuilder):
         Remove the central segment after generating the complete tiling.
     obscurations : list or tuple of Shape
         Global geometry removed from the assembled pupil.
+    paste_method : str
+        Compact-stamp assembly strategy. ``"scan"`` is sequential and
+        memory-efficient; ``"scatter"`` uses per-pixel indices to expose more
+        parallelism at higher memory cost. Benchmark both for large systems because
+        performance depends on the hardware and pupil sampling.
     opd, oversample
         As defined by ``ApertureBuilder``.
+
+    Notes
+    -----
+    Both methods are numerically equivalent. Changing ``paste_method`` through an
+    immutable update may trigger a separate JAX compilation.
     """
+
+    paste_method: str
 
     def __init__(
         self,
@@ -94,9 +109,13 @@ class SegmentedHex(SparseApertureBuilder):
         obscurations=(),
         opd=None,
         oversample=5,
+        paste_method="scan",
     ):
         if (segment_diameter is None) == (segment_f2f is None):
             raise ValueError("Provide exactly one of segment_diameter or segment_f2f.")
+        paste_method = str(paste_method).lower()
+        if paste_method not in ("scan", "scatter"):
+            raise ValueError("paste_method must be either 'scan' or 'scatter'.")
         if segment_diameter is None:
             segment_diameter = 2 * segment_f2f / np.sqrt(3)
         centers = dlu.segmented_hex_cens(nrings, segment_diameter / 2, gap)
@@ -109,6 +128,141 @@ class SegmentedHex(SparseApertureBuilder):
             opd=opd,
             oversample=oversample,
         )
+        self.paste_method = paste_method
+
+    def _validate_ideal(self, grid, transform):
+        """Validate an untransformed grid for ideal segmented construction."""
+        super().validate(grid, transform)
+        if transform is not None:
+            raise ValueError("SegmentedHex does not support coordinate transforms.")
+
+    def build(self, grid, transform=None, jit=False, return_support=False):
+        """Build the ideal segmented aperture on an untransformed grid."""
+        # Promote and validate the construction grid
+        grid = self._promote_grid(grid)
+        self._validate_ideal(grid, transform)
+
+        # Compile the fixed-shape pasted calculation when requested
+        if jit:
+            if self.opd is not None or return_support:
+                raise ValueError(
+                    "jit is not yet supported for segmented OPD or support data."
+                )
+            fine, spec = self._stamp_data(grid)
+            build_fn = eqx.filter_jit(self._assemble_transmission)
+            return build_fn(fine, spec)
+
+        # Use compact stamps for ordinary eager construction
+        return self._build(grid, transform, return_support)
+
+    def _stamp_data(self, grid):
+        """Return the oversampled grid and compact placement specification."""
+        # Generate the oversampled grid and fixed stamp topology
+        fine = grid.oversample(self.oversample)
+        spec = PasteSpec.from_grid(fine, self.centers, self.primary.extent)
+        return fine, spec
+
+    def _assemble_transmission(self, fine, spec):
+        """Assemble a transmission from prepared segment stamps."""
+        # Generate each compact segment transmission in parallel
+        coordinates = spec.coordinates
+        scale = fine.d * fine.scale
+        eval_fn = lambda c: self.primary.evaluate(coordinates=c, pixel_scale=scale)
+        components = vmap(eval_fn)(coordinates)
+
+        for shape in self.obscurations:
+            eval_fn = lambda c: shape.evaluate(coordinates=c, pixel_scale=scale)
+            components *= 1 - vmap(eval_fn)(coordinates)
+
+        # Paste the compact segments into the oversampled global pupil
+        aperture = spec.paste(components, self.paste_method)
+        aperture = np.clip(aperture, 0.0, 1.0)
+
+        # Apply global obscurations on the complete pupil grid
+        mask = np.ones_like(aperture)
+        for shape in self.global_obscurations:
+            mask *= 1 - self._evaluate(shape, fine, None)
+
+        # Downsample the completed ideal pupil
+        return dlu.downsample(aperture * mask, self.oversample)
+
+    def _pasted_transmission(self, grid):
+        """Prepare and assemble the compact segment stamps."""
+        fine, spec = self._stamp_data(grid)
+        return self._assemble_transmission(fine, spec)
+
+    def _assemble_opd(self, spec):
+        """Generate compact supported OPD basis stamps."""
+        # Generate each compact segment support
+        coordinates = spec.coordinates
+        eval_fn = lambda c: self.primary.evaluate(coordinates=c, pixel_scale=spec.d)
+        support = vmap(eval_fn)(coordinates) > 0
+
+        # Generate the configured OPD basis over each local support
+        diameter = 2 * self.primary.extent
+        calc_fn = lambda c, s: self.opd.calculate(c, s, diameter)
+        basis = vmap(calc_fn)(coordinates, support)
+        return basis, support
+
+    def _pasted_opd(self, grid):
+        """Prepare and generate the compact OPD basis data."""
+        spec = PasteSpec.from_grid(grid, self.centers, self.primary.extent)
+        basis, support = self._assemble_opd(spec)
+        return basis, support, spec
+
+    def _build(self, grid, transform, return_support=False):
+        """Build the ideal pupil using compact segment stamps where possible."""
+        if self.opd is not None or return_support:
+            return super()._build(grid, transform, return_support)
+        return self._pasted_transmission(grid)
+
+    def __call__(
+        self,
+        grid,
+        transform=None,
+        coefficients=None,
+        key=None,
+        normalise=True,
+        jit=False,
+        sparse=False,
+        shared=False,
+    ):
+        """Materialise a global pasted optic or a genuinely sparse optic."""
+        # Retain the local sparse-optic construction path
+        if sparse:
+            return SparseApertureBuilder.__call__(
+                self,
+                grid,
+                transform=transform,
+                coefficients=coefficients,
+                key=key,
+                normalise=normalise,
+                jit=jit,
+                sparse=True,
+                shared=shared,
+            )
+
+        # Promote and validate the ideal construction grid
+        from .layers import Optic
+
+        grid = self._promote_grid(grid)
+        self._validate_ideal(grid, transform)
+
+        # Generate the compactly assembled pupil transmission
+        fine, spec = self._stamp_data(grid)
+        build_fn = self._assemble_transmission
+        build_fn = eqx.filter_jit(build_fn) if jit else build_fn
+        transmission = build_fn(fine, spec)
+        if self.opd is None:
+            return Optic(transmission=transmission, normalise=normalise)
+
+        # Generate and materialise the compact per-segment OPD basis
+        basis, _, spec = self._pasted_opd(grid)
+        shape = basis.shape[:-2]
+        coefficients = _initialise_coefficients(shape, coefficients, key, shape)
+        opd = PastedBasis(basis, spec, coefficients, self.paste_method)
+        return Optic(transmission=transmission, opd=opd, normalise=normalise)
+
 
 class NRMLike(SparseApertureBuilder):
     """Simple NRM with ``(x, y)`` hole centres and one shared hole shape.
@@ -219,6 +373,7 @@ class JWSTLike(SegmentedHex):
         spider_angles=(30, 180, 330),
         opd=None,
         oversample=5,
+        paste_method="scan",
     ):
         super().__init__(
             nrings=3,
@@ -228,6 +383,7 @@ class JWSTLike(SegmentedHex):
             obscurations=(Spider(spider_width, spider_angles),),
             opd=opd,
             oversample=oversample,
+            paste_method=paste_method,
         )
 
 

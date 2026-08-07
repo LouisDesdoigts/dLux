@@ -11,12 +11,13 @@ import jax.numpy as np
 from jax import Array
 
 import dLux.utils as dlu
-from ..grids import CoordTransform
+from ..grids import CoordTransform, PasteSpec
 from .parametrics import Parametric
 
 __all__ = [
     "ParametricBasis",
     "Basis",
+    "PastedBasis",
     "ImplicitBasis",
     "CoordBasis",
     "CLIMBBasis",
@@ -154,6 +155,64 @@ class Basis(ParametricBasis):
     def solve_basis(self: Basis, value: Array, **kwargs: Any) -> Array:
         """Solve the stored basis for coefficients representing ``value``."""
         return dlu.solve_basis(value, self.basis)
+
+
+class PastedBasis(ParametricBasis):
+    """Parameterise compact local bases pasted into a common output grid.
+
+    Parameters
+    ----------
+    basis : Array
+        Basis stamps with shape ``(n_stamps, *basis_shape, ny, nx)``.
+    spec : PasteSpec
+        Placement and sampling contract shared by every compact stamp.
+    coefficients : Array or None
+        Per-stamp coefficients with shape ``(n_stamps, *basis_shape)``. They default
+        to zero.
+    method : str
+        ``"scan"`` for bounded-memory placement or ``"scatter"`` for parallel
+        placement using flattened pixel indices.
+    """
+
+    coefficients: Array
+    shape: tuple[int, ...] = eqx.field(static=True)
+    basis: Array
+    spec: PasteSpec
+    method: str
+
+    def __init__(self, basis, spec, coefficients=None, method="scan"):
+        if not isinstance(spec, PasteSpec):
+            raise TypeError("spec must be a PasteSpec.")
+
+        basis = dlu.to_value(basis)
+        if basis.ndim < 4:
+            raise ValueError("basis must have shape (n_stamps, ..., ny, nx).")
+        if basis.shape[0] != len(spec.starts):
+            raise ValueError("basis and PasteSpec must contain the same stamp count.")
+        if basis.shape[-2:] != spec.shape[::-1]:
+            raise ValueError("basis spatial shape must match the PasteSpec stamps.")
+
+        method = str(method).lower()
+        if method not in ("scan", "scatter"):
+            raise ValueError("method must be either 'scan' or 'scatter'.")
+
+        shape = basis.shape[:-2]
+        coefficients = np.zeros(shape) if coefficients is None else coefficients
+        self._set_coefficients(coefficients, shape)
+        self.basis = basis
+        self.spec = spec
+        self.method = method
+
+    def evaluate(self, **kwargs: Any) -> Array:
+        """Evaluate each compact basis and paste the local values globally."""
+        local = jax.vmap(dlu.eval_basis)(self.basis, self.coefficients)
+        return self.spec.paste(local, self.method)
+
+    def solve_basis(self, value: Array, **kwargs: Any) -> Array:
+        """Solve coefficients independently from every extracted local stamp."""
+        values = self.spec.extract(value)
+        solve = lambda value, basis: dlu.solve_basis(value, basis)
+        return jax.vmap(solve)(values, self.basis)
 
 
 class ImplicitBasis(ParametricBasis):

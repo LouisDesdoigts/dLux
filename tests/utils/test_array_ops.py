@@ -41,6 +41,29 @@ def test_downsample_nd(mean):
         assert np.isclose(output.sum(), array.sum())
 
 
+@pytest.mark.parametrize("method", ["scan", "scatter"])
+def test_paste_compact_arrays(method):
+    arrays = np.asarray(
+        [
+            [[[1.0, 1.0], [1.0, 1.0]]],
+            [[[2.0, 2.0], [2.0, 2.0]]],
+        ]
+    )
+    starts = np.asarray([[0, 1], [2, 1]])
+
+    output = dlu.paste(arrays, starts, (4, 3), method)
+    expected = np.asarray(
+        [[[0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 2.0, 2.0], [1.0, 1.0, 2.0, 2.0]]]
+    )
+
+    assert np.array_equal(output, expected)
+
+
+def test_paste_validation():
+    with pytest.raises(ValueError, match="method"):
+        dlu.paste(np.ones((1, 2, 2)), np.zeros((1, 2), int), 4, "invalid")
+
+
 @pytest.mark.parametrize(
     "operation",
     [

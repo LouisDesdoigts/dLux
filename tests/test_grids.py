@@ -50,6 +50,24 @@ class TestSpecifications:
         assert pad.crop_size((12, 12)) == (4, 4)
         assert resize.resize(array).shape == (6, 8)
 
+    def test_paste_spec_contract(self):
+        grid = dl.GridSpec(n=(8, 6), d=0.5, unit="m").broadcast(2)
+        centers = np.asarray(((-0.5, 0.0), (0.5, 0.0)))
+        spec = dl.PasteSpec.from_grid(grid, centers, extent=0.4)
+        arrays = np.ones((2, 5, 5))
+
+        scan = spec.paste(arrays, "scan")
+        scatter = spec.paste(arrays, "scatter")
+
+        assert spec.n == (8, 6)
+        assert spec.shape == (5, 5)
+        assert spec.coordinates.shape == (2, 2, 5, 5)
+        assert np.array_equal(scan, scatter)
+        assert_jittable(lambda value, array: value.paste(array), spec, arrays)
+
+        with pytest.raises(ValueError, match="within the output"):
+            dl.PasteSpec((4, 4), (3, 3), [[3, 0]], [[0.0, 0.0]], [1.0, 1.0])
+
     def test_explicit_resize_contract(self):
         spec = dl.ResizeSpec((8, 6)).broadcast(2)
         array = np.ones((4, 4))
