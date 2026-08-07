@@ -53,6 +53,17 @@ def test_composed_shape_contract(shape, context):
     assert output.shape == context["coordinates"].shape[-2:]
 
 
+def test_edge_contract(context):
+    default = dl.Circle(0.8)
+    hard = dl.Circle(0.8, edge=dl.Hard())
+    soft = dl.Circle(0.8, edge=1.5)
+
+    assert isinstance(default.edge, dl.Hard)
+    assert isinstance(hard.edge, dl.Hard)
+    assert isinstance(soft.edge, dl.Soft)
+    assert np.allclose(default.evaluate(**context), hard.evaluate(**context))
+
+
 def test_transformed_shape_gradient(context):
     shape = dl.TransformedShape(dl.Circle(0.8), dl.Affine(translation=[0.1, 0.0]))
 

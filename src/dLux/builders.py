@@ -5,15 +5,18 @@ from __future__ import annotations
 from abc import abstractmethod
 
 import equinox as eqx
+import jax.tree as jtu
 import jax.numpy as np
 import jax.random as jr
 import zodiax as zdx
-from jax import Array
+from jax import Array, vmap
 
 import dLux.utils as dlu
 
 from .grids import CoordTransform, GridSpec
-from .parametric import Shape
+from .layers.optical import Optic
+from .layers.sparse import SparseOptic
+from .parametric import Basis, Shape
 
 __all__ = [
     "GridBuilder",
@@ -45,8 +48,6 @@ def _explicit_basis(
     basis, coefficients=None, key=None, coefficient_shape=None, initial_shape=None
 ):
     """Materialise a sampled OPD basis with explicit or random coefficients."""
-    from .parametric import Basis
-
     # Resolve the native and initial coefficient shapes
     coefficient_shape = (
         basis.shape[:-2] if coefficient_shape is None else tuple(coefficient_shape)
@@ -57,6 +58,63 @@ def _explicit_basis(
 
     # Materialise the sampled basis
     return Basis(basis, coefficients=coefficients, coefficient_shape=coefficient_shape)
+
+
+def _zernike_groups(nolls, method):
+    """Precompute padded or equal-complexity Zernike evaluation groups."""
+    # Generate native metadata for every requested mode
+    metadata = []
+    for index, j in enumerate(nolls):
+        n, m = dlu.noll_indices(j)
+        coeffs, k = dlu.zernike_factors(j)
+        metadata.append((index, n, m, coeffs, k))
+
+    # Partition modes by the requested evaluation strategy
+    if method == "padded":
+        widths = (max(len(values[3]) for values in metadata),)
+    else:
+        widths = tuple(sorted({len(values[3]) for values in metadata}))
+
+    # Build rectangular arrays within each evaluation group
+    groups = []
+    for width in widths:
+        if method == "padded":
+            values = metadata
+        else:
+            values = [value for value in metadata if len(value[3]) == width]
+        indices, ns, ms, coeffs, ks = zip(*values)
+
+        if method == "padded":
+            pad_k = lambda a, n: np.pad(a, (0, width - len(a)), constant_values=n / 2)
+            ks = [pad_k(array, n) for array, n in zip(ks, ns)]
+            coeffs = [np.pad(array, (0, width - len(array))) for array in coeffs]
+
+        groups.append(ZernikeGroup(indices, ns, ms, np.stack(coeffs), np.stack(ks)))
+    return tuple(groups)
+
+
+class ZernikeGroup(zdx.Base):
+    """A rectangular collection of jointly vectorised Zernike modes."""
+
+    indices: Array
+    n: Array
+    m: Array
+    coeffs: Array
+    k: Array
+
+    def __init__(self, indices, n, m, coeffs, k):
+        self.indices = dlu.to_value(indices, int)
+        self.n = dlu.to_value(n, int)
+        self.m = dlu.to_value(m, int)
+        self.coeffs = dlu.to_value(coeffs)
+        self.k = dlu.to_value(k)
+
+    def calculate(self, coordinates, diameter):
+        """Evaluate every mode in this equal-width group."""
+        calculate = lambda n, m, c, p: dlu.zernike_fast(
+            n, m, c, p, coordinates, diameter
+        )
+        return vmap(calculate)(self.n, self.m, self.coeffs, self.k)
 
 
 class Norm(zdx.Base):
@@ -108,6 +166,7 @@ class ApertureData(zdx.Base):
         self.diameter = dlu.to_value(diameter)
         self.centers = dlu.to_value(centers, optional=True)
 
+
 class OPDDef(zdx.Base):
     """Define sampled OPD data from coordinates and aperture geometry."""
 
@@ -130,6 +189,9 @@ class ZernikeDef(OPDDef):
         Fractional enlargement of the aperture diameter used to sample the modes.
     norm : Norm or None
         Optional support-aware normalisation and physical scaling.
+    method : str
+        ``"padded"`` evaluates one zero-padded vectorised group. ``"mapped"``
+        evaluates separate vectorised groups for each radial-term count.
 
     Notes
     -----
@@ -138,10 +200,15 @@ class ZernikeDef(OPDDef):
     """
 
     nolls: Array
+    groups: tuple[ZernikeGroup, ...]
+    order: Array
     oversize: Array
     norm: Norm | None
+    method: str = eqx.field(static=True)
 
-    def __init__(self, nolls=None, orders=None, oversize=0.01, norm=None):
+    def __init__(
+        self, nolls=None, orders=None, oversize=0.01, norm=None, method="padded"
+    ):
         if (nolls is None) == (orders is None):
             raise ValueError("Provide exactly one of nolls or orders.")
 
@@ -160,6 +227,14 @@ class ZernikeDef(OPDDef):
         if np.any(self.nolls < 1):
             raise ValueError("nolls must contain positive Noll indices.")
 
+        method = str(method).lower()
+        if method not in ("padded", "mapped"):
+            raise ValueError("method must be either 'padded' or 'mapped'.")
+        self.method = method
+        self.groups = _zernike_groups(map(int, self.nolls), method)
+        indices = np.concatenate(tuple(group.indices for group in self.groups))
+        self.order = np.argsort(indices)
+
         self.oversize = dlu.to_value(oversize)
 
         if norm is not None and not isinstance(norm, Norm):
@@ -169,16 +244,22 @@ class ZernikeDef(OPDDef):
 
     def calculate(self, coordinates, support, diameter, centers=None):
         """Sample, normalise, and clip the configured Zernike basis."""
-        # Generate the global or local Zernike bases
+        # Prepare the enlarged basis diameter
         diameter = np.asarray(diameter) * (1 + self.oversize)
-        if centers is None:
-            basis = dlu.zernike_basis(self.nolls, coordinates, diameter)
+
+        # Evaluate and restore the configured Noll ordering
+        def calculate_basis(coords):
+            calculate = lambda group: group.calculate(coords, diameter)
+            is_group = lambda value: isinstance(value, ZernikeGroup)
+            bases = jtu.map(calculate, self.groups, is_leaf=is_group)
+            return np.concatenate(bases)[self.order]
+
+        # Generate the global or translated local bases
+        if centers is not None:
+            calculate = lambda c: calculate_basis(dlu.translate_coords(coordinates, c))
+            basis = vmap(calculate)(centers)
         else:
-            zernike_fn = lambda c: dlu.zernike_basis(
-                self.nolls, dlu.translate_coords(coordinates, c), diameter
-            )
-            bases = [zernike_fn(c) for c in centers]
-            basis = np.stack(bases)
+            basis = calculate_basis(coordinates)
 
         # Promote and apply the aperture supports
         while support.ndim < basis.ndim:
@@ -205,7 +286,7 @@ class GridBuilder(zdx.Base):
         if transform is not None and not isinstance(transform, CoordTransform):
             raise TypeError("transform must be a CoordTransform or None.")
 
-    def build(self, grid, transform=None, jit=False):
+    def build(self, grid, transform=None, jit=True):
         """Evaluate this builder on a grid.
 
         Parameters
@@ -215,7 +296,8 @@ class GridBuilder(zdx.Base):
         transform : CoordTransform or None
             Optional map from grid coordinates into the builder's local frame.
         jit : bool
-            Compile the internal build operation with ``eqx.filter_jit``.
+            Use the shared compiled construction path. Defaults to ``True``;
+            repeated calls reuse compiled programs for matching static topology.
 
         Returns
         -------
@@ -223,9 +305,8 @@ class GridBuilder(zdx.Base):
             The concrete return contract is defined by the builder subclass.
         """
         self.validate(grid, transform)
-        if jit:
-            return eqx.filter_jit(self._build)(grid, transform)
-        return self._build(grid, transform)
+        build_fn = eqx.filter_jit(self._build) if jit else self._build
+        return build_fn(grid, transform)
 
     @abstractmethod
     def _build(self, grid, transform):
@@ -296,13 +377,12 @@ class ApertureBuilder(GridBuilder):
             return grid.broadcast(2)
         return grid
 
-    def build(self, grid, transform=None, jit=False, return_support=False):
+    def build(self, grid, transform=None, jit=True, return_support=False):
         """Build on a 2D grid, optionally returning the aperture support."""
         grid = self._promote_grid(grid)
         self.validate(grid, transform)
-        if jit:
-            return eqx.filter_jit(self._build)(grid, transform, return_support)
-        return self._build(grid, transform, return_support)
+        build_fn = eqx.filter_jit(self._build) if jit else self._build
+        return build_fn(grid, transform, return_support)
 
     @staticmethod
     def _evaluate(shape, grid, transform):
@@ -363,7 +443,7 @@ class ApertureBuilder(GridBuilder):
         coefficients=None,
         key=None,
         normalise=True,
-        jit=False,
+        jit=True,
     ):
         """Materialise this definition as a globally sampled ``Optic``.
 
@@ -372,8 +452,6 @@ class ApertureBuilder(GridBuilder):
         and omitting both initializes zero coefficients. ``normalise`` retains the
         existing wavefront-normalisation meaning of ``Optic.normalise``.
         """
-        from .layers import Optic
-
         components = self.build(grid, transform=transform, jit=jit)
         if self.opd is None:
             return Optic(transmission=components, normalise=normalise)
@@ -462,8 +540,8 @@ class SparseApertureBuilder(ApertureBuilder):
         fine = grid.oversample(self.oversample)
         comp_fn = lambda c: self._component(c, fine, transform)
         prim_fn = lambda c: self._primary_component(c, fine, transform)
-        components = np.stack([comp_fn(c) for c in self.centers])
-        primaries = np.stack([prim_fn(c) for c in self.centers])
+        components = vmap(comp_fn)(self.centers)
+        primaries = vmap(prim_fn)(self.centers)
 
         # Generate the combined global obscuration mask
         eval_fn = lambda s: 1 - self._evaluate(s, fine, transform)
@@ -485,6 +563,22 @@ class SparseApertureBuilder(ApertureBuilder):
         # Package the sampled aperture data
         return ApertureData(transmission, support, diameter, self.centers)
 
+    def _sparse_data(self, grid, transform):
+        """Sample the shared transmission and optional local OPD basis."""
+        # Sample the shared local transmission
+        fine = grid.oversample(self.oversample)
+        transmission = self._component(np.zeros(2), fine, transform)
+        transmission = dlu.downsample(transmission, self.oversample)
+        if self.opd is None:
+            return transmission, None
+
+        # Generate the supported local OPD basis
+        coordinates = grid.transformed(transform)
+        support = self._primary_component(np.zeros(2), grid, transform) > 0
+        diameter = 2 * self.primary.extent
+        basis = self.opd.calculate(coordinates, support, diameter)
+        return transmission, basis
+
     def __call__(
         self,
         grid,
@@ -492,7 +586,7 @@ class SparseApertureBuilder(ApertureBuilder):
         coefficients=None,
         key=None,
         normalise=True,
-        jit=False,
+        jit=True,
         sparse=False,
         shared=False,
     ):
@@ -514,12 +608,7 @@ class SparseApertureBuilder(ApertureBuilder):
                 normalise=normalise,
                 jit=jit,
             )
-        if jit:
-            raise ValueError("jit is not supported with sparse=True.")
-
         # Validate sparse construction requirements
-        from .layers import SparseOptic
-
         grid = self._promote_grid(grid)
         self.validate(grid, transform)
         if self.global_obscurations:
@@ -527,21 +616,19 @@ class SparseApertureBuilder(ApertureBuilder):
                 "Global obscurations cannot be represented by one shared local "
                 "SparseOptic transmission; use sparse=False instead."
             )
+        if transform is not None:
+            raise ValueError(
+                "transform cannot be represented by one shared local SparseOptic; "
+                "use sparse=False instead."
+            )
 
-        # Sample the shared local transmission
-        fine = grid.oversample(self.oversample)
-        transmission = self._component(np.zeros(2), fine, transform)
-        transmission = dlu.downsample(transmission, self.oversample)
+        # Sample the shared local transmission and OPD basis
+        build_fn = eqx.filter_jit(self._sparse_data) if jit else self._sparse_data
+        transmission, basis = build_fn(grid, transform)
         if self.opd is None:
             return SparseOptic(
                 self.centers, transmission=transmission, normalise=normalise
             )
-
-        # Generate the supported local OPD basis
-        coordinates = grid.transformed(transform)
-        support = self._primary_component(np.zeros(2), grid, transform) > 0
-        diameter = 2 * self.primary.extent
-        basis = self.opd.calculate(coordinates, support, diameter)
 
         # Materialise shared or aperture-dependent OPD coefficients
         shape = basis.shape[:-2]

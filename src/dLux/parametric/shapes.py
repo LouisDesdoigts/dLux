@@ -16,6 +16,7 @@ from .parametrics import Parametric
 __all__ = [
     "Shape",
     "InvertibleShape",
+    "Hard",
     "Soft",
     "Circle",
     "Square",
@@ -34,6 +35,10 @@ class Shape(Parametric):
     def extent(self) -> Array | None:
         """Return a finite bounding radius, or ``None`` when undefined."""
         return None
+
+
+class Hard(zdx.Base):
+    """Evaluate an exact hard boundary without dynamic edge softening."""
 
 
 class Soft(zdx.Base):
@@ -60,15 +65,17 @@ class Soft(zdx.Base):
 class InvertibleShape(Shape):
     """Geometry with optional edge softening and transmission inversion.
 
-    ``edge`` may be a ``Soft`` object, a numeric pixel width converted to ``Soft``,
-    or ``None`` for a hard edge.
+    ``edge`` may be ``Hard``, ``Soft``, a numeric pixel width converted to ``Soft``,
+    or ``None`` converted to the default ``Hard`` definition.
     """
 
-    edge: Soft | None
+    edge: Hard | Soft
     invert: bool
 
     def __init__(self, edge=None, invert=False):
-        if edge is not None and not isinstance(edge, Soft):
+        if edge is None:
+            edge = Hard()
+        elif not isinstance(edge, (Hard, Soft)):
             edge = Soft(edge)
 
         self.edge = edge
@@ -76,7 +83,7 @@ class InvertibleShape(Shape):
 
     def evaluate(self, *, coordinates, pixel_scale=None, **kwargs) -> Array:
         """Evaluate the hard or softened transmission and apply inversion."""
-        if self.edge is None:
+        if isinstance(self.edge, Hard):
             transmission = self.evaluate_hard(coordinates)
         else:
             transmission = self.evaluate_soft(coordinates, self.edge.clip(pixel_scale))

@@ -222,14 +222,13 @@ def eval_azimuthal(theta: Array, n: int, m: int) -> Array:
     azimuthal : Array
         The azimuthal component of the Zernike polynomial.
     """
-    # Get normalisation coefficient
-    norm_coeff = np.sqrt(n + 1)
-    if m != 0:
-        norm_coeff *= 1 + (np.sqrt(2) - 1)
+    # Get the radial and angular factors
+    norm_coeff = np.sqrt(n + 1) * np.where(m == 0, 1.0, np.sqrt(2))
+    angle = np.abs(m) * theta
 
-    # Get the right trig function and eval
-    trig_fn = np.cos if m >= 0 else np.sin
-    return norm_coeff * trig_fn(np.abs(m) * theta)
+    # Evaluate the positive or negative azimuthal convention
+    azimuthal = np.where(m >= 0, np.cos(angle), np.sin(angle))
+    return norm_coeff * azimuthal
 
 
 def scale_coords(coords: Array, rmax: float) -> Array:

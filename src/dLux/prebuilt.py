@@ -8,6 +8,7 @@ import dLux.utils as dlu
 
 from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coefficients
 from .grids import Affine, PasteSpec
+from .layers.optical import Optic
 from .parametric import (
     Circle,
     Rectangle,
@@ -130,30 +131,21 @@ class SegmentedHex(SparseApertureBuilder):
         )
         self.paste_method = paste_method
 
-    def _validate_ideal(self, grid, transform):
-        """Validate an untransformed grid for ideal segmented construction."""
-        super().validate(grid, transform)
-        if transform is not None:
-            raise ValueError("SegmentedHex does not support coordinate transforms.")
-
-    def build(self, grid, transform=None, jit=False, return_support=False):
-        """Build the ideal segmented aperture on an untransformed grid."""
+    def build(self, grid, transform=None, jit=True, return_support=False):
+        """Build a compact ideal or densely transformed segmented aperture."""
         # Promote and validate the construction grid
         grid = self._promote_grid(grid)
-        self._validate_ideal(grid, transform)
+        self.validate(grid, transform)
 
-        # Compile the fixed-shape pasted calculation when requested
-        if jit:
-            if self.opd is not None or return_support:
-                raise ValueError(
-                    "jit is not yet supported for segmented OPD or support data."
-                )
-            fine, spec = self._stamp_data(grid)
-            build_fn = eqx.filter_jit(self._assemble_transmission)
-            return build_fn(fine, spec)
+        # Use global sampling when compact ideal placement is not possible
+        if transform is not None or self.opd is not None or return_support:
+            return super().build(grid, transform, jit, return_support)
 
-        # Use compact stamps for ordinary eager construction
-        return self._build(grid, transform, return_support)
+        # Assemble compact transmission stamps through the selected path
+        fine, spec = self._stamp_data(grid)
+        build_fn = self._assemble_transmission
+        build_fn = eqx.filter_jit(build_fn) if jit else build_fn
+        return build_fn(fine, spec)
 
     def _stamp_data(self, grid):
         """Return the oversampled grid and compact placement specification."""
@@ -204,15 +196,17 @@ class SegmentedHex(SparseApertureBuilder):
         basis = vmap(calc_fn)(coordinates, support)
         return basis, support
 
-    def _pasted_opd(self, grid):
+    def _pasted_opd(self, grid, jit=True):
         """Prepare and generate the compact OPD basis data."""
         spec = PasteSpec.from_grid(grid, self.centers, self.primary.extent)
-        basis, support = self._assemble_opd(spec)
+        build_fn = self._assemble_opd
+        build_fn = eqx.filter_jit(build_fn) if jit else build_fn
+        basis, support = build_fn(spec)
         return basis, support, spec
 
     def _build(self, grid, transform, return_support=False):
         """Build the ideal pupil using compact segment stamps where possible."""
-        if self.opd is not None or return_support:
+        if transform is not None or self.opd is not None or return_support:
             return super()._build(grid, transform, return_support)
         return self._pasted_transmission(grid)
 
@@ -223,30 +217,20 @@ class SegmentedHex(SparseApertureBuilder):
         coefficients=None,
         key=None,
         normalise=True,
-        jit=False,
+        jit=True,
         sparse=False,
         shared=False,
     ):
         """Materialise a global pasted optic or a genuinely sparse optic."""
-        # Retain the local sparse-optic construction path
-        if sparse:
-            return SparseApertureBuilder.__call__(
-                self,
-                grid,
-                transform=transform,
-                coefficients=coefficients,
-                key=key,
-                normalise=normalise,
-                jit=jit,
-                sparse=True,
-                shared=shared,
+        # Use sparse or transformed global construction when requested
+        if sparse or transform is not None:
+            return super().__call__(
+                grid, transform, coefficients, key, normalise, jit, sparse, shared
             )
 
         # Promote and validate the ideal construction grid
-        from .layers import Optic
-
         grid = self._promote_grid(grid)
-        self._validate_ideal(grid, transform)
+        self.validate(grid, transform)
 
         # Generate the compactly assembled pupil transmission
         fine, spec = self._stamp_data(grid)
@@ -257,7 +241,7 @@ class SegmentedHex(SparseApertureBuilder):
             return Optic(transmission=transmission, normalise=normalise)
 
         # Generate and materialise the compact per-segment OPD basis
-        basis, _, spec = self._pasted_opd(grid)
+        basis, _, spec = self._pasted_opd(grid, jit)
         shape = basis.shape[:-2]
         coefficients = _initialise_coefficients(shape, coefficients, key, shape)
         opd = PastedBasis(basis, spec, coefficients, self.paste_method)
@@ -300,7 +284,7 @@ class NRMLike(SparseApertureBuilder):
         coefficients=None,
         key=None,
         normalise=True,
-        jit=False,
+        jit=True,
         sparse=False,
     ):
         """Materialise a global NRM, or independent holes with ``sparse=True``."""

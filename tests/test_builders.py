@@ -3,6 +3,7 @@
 import jax.numpy as np
 import jax.random as jr
 import pytest
+from jax import grad
 
 import dLux as dl
 
@@ -71,6 +72,31 @@ def test_aperture_builder_transform_and_validation():
         builder(grid, coefficients=[0.0], key=jr.key(0))
 
 
+def test_zernike_definition_methods():
+    grid = dl.GridSpec(n=24, d=0.1, unit="m").broadcast(2)
+    coordinates = grid.coordinates
+    support = dl.Circle(1.0).evaluate(coordinates=coordinates) > 0
+    nolls = [11, 1, 4, 2, 7]
+    padded = dl.ZernikeDef(nolls=nolls, method="padded")
+    mapped = dl.ZernikeDef(nolls=nolls, method="mapped")
+
+    padded_basis = padded.calculate(coordinates, support, 1.0)
+    mapped_basis = mapped.calculate(coordinates, support, 1.0)
+    expected = dl.utils.zernike_basis(nolls, coordinates, 1.01) * support
+
+    padded_grad = grad(lambda d: padded.calculate(coordinates, support, d).sum())(1.0)
+    mapped_grad = grad(lambda d: mapped.calculate(coordinates, support, d).sum())(1.0)
+
+    assert len(padded.groups) == 1
+    assert len(mapped.groups) == 3
+    assert np.allclose(padded_basis, expected)
+    assert np.allclose(mapped_basis, expected)
+    assert np.allclose(padded_grad, mapped_grad)
+
+    with pytest.raises(ValueError, match="padded.*mapped"):
+        dl.ZernikeDef(nolls=1, method="invalid")
+
+
 def test_sparse_builder_contract():
     grid = dl.GridSpec(n=24, d=0.1, unit="m")
     builder = dl.NRMLike(
@@ -109,8 +135,10 @@ def test_sparse_builder_materialisation_options():
     assert independent.opd.coefficients.shape == (2, 2)
     assert plain.opd is None
 
-    with pytest.raises(ValueError, match="jit is not supported"):
-        builder(grid, sparse=True, jit=True)
+    eager = builder(grid, sparse=True, jit=False)
+    compiled = builder(grid, sparse=True, jit=True)
+    assert np.allclose(eager.transmission, compiled.transmission)
+    assert np.allclose(eager.opd.basis, compiled.opd.basis)
 
     obscured = dl.SparseApertureBuilder(
         dl.Circle(0.4),
@@ -119,6 +147,8 @@ def test_sparse_builder_materialisation_options():
     )
     with pytest.raises(ValueError, match="Global obscurations"):
         obscured(grid, sparse=True)
+    with pytest.raises(ValueError, match="shared local SparseOptic"):
+        builder(grid, transform=dl.Affine(rotation=0.1), sparse=True)
 
 
 @pytest.mark.parametrize(
@@ -155,8 +185,9 @@ def test_segmented_hex_pasted_construction():
     assert np.allclose(compiled, global_)
     assert np.allclose(parallel, global_)
 
-    with pytest.raises(ValueError, match="does not support coordinate transforms"):
-        builder.build(grid, transform=dl.Affine(rotation=0.1))
+    rotated = builder.build(grid, transform=dl.Affine(rotation=0.1))
+    assert rotated.shape == pasted.shape
+    assert not np.allclose(rotated, pasted)
 
 
 def test_segmented_hex_pasted_basis():
@@ -167,9 +198,11 @@ def test_segmented_hex_pasted_basis():
     )
 
     optic = builder(grid, key=jr.key(0), jit=True)
+    rotated = builder(grid, transform=dl.Affine(rotation=0.1))
     output = assert_jittable(lambda value: value.opd.evaluate(), optic)
 
     assert isinstance(optic.opd, dl.PastedBasis)
+    assert isinstance(rotated.opd, dl.Basis)
     assert optic.opd.basis.shape[:2] == (18, 5)
     assert optic.opd.coefficients.shape == (18, 5)
     assert output.shape == (64, 64)

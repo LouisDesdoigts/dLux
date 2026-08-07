@@ -97,25 +97,18 @@ def non_redundant_support(apertures: Array) -> Array:
         A boolean support mask with the same shape as ``apertures`` and no pixel
         assigned to more than one segment.
     """
-    # Get the hexagonal support
+    # Get the individual and overlapping aperture supports
     aper_support = apertures > 0
     support_sum = aper_support.sum(0)
-    redundant_mask = support_sum > 1
 
-    # Select our redundant pixels
-    redundant_pix = apertures[:, redundant_mask]
+    # Select the strongest aperture wherever supports overlap
+    indices = np.arange(len(apertures))[:, None, None]
+    strongest = np.argmax(apertures, axis=0)
+    selected = indices == strongest[None]
 
-    # Get the index of the hexagon with the maximum value for each redundant pixel
-    argmax = np.argmax(redundant_pix, axis=0)
-
-    # Build the non-redundant support, choosing pixels with the maximum value
-    inds = np.arange(redundant_pix.shape[1])
-    empty = np.zeros_like(redundant_pix, dtype=bool)
-    nr_support = empty.at[argmax, inds].set(True)
-
-    # Remove the redundant pixels and paste back the non-redundant pixels
-    aper_support = np.where(redundant_mask, False, aper_support)
-    return aper_support.at[:, redundant_mask].set(nr_support)
+    # Keep ordinary supports and only select one overlapping aperture
+    unique = support_sum <= 1
+    return aper_support & (unique[None] | selected)
 
 
 def circular_aperture(
