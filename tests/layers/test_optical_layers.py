@@ -36,21 +36,28 @@ def test_layer_alias_and_inheritance(wavefront):
 
     assert isinstance(layer, dl.TransmissiveLayer)
     assert isinstance(layer, dl.AberratedLayer)
-    assert np.allclose(layer.apply(wavefront).phasor, layer(wavefront).phasor)
 
 
 def test_monochromatic_layer_mapping(make_spec):
     class MonochromaticLayer(dl.OpticalLayer):
-        def __call__(self, wavefront):
+        def apply_mono(self, wavefront):
             if wavefront.batch_ndim:
                 raise ValueError("Expected a monochromatic wavefront.")
             return wavefront.add_phase(wavefront.wavelength / 1e-6)
 
     wavefront = dl.Wavefront([0.9e-6, 1.1e-6], make_spec())
-    output = MonochromaticLayer().apply(wavefront)
+    layer = MonochromaticLayer()
+    output = layer(wavefront)
 
     assert output.phasor.shape == wavefront.phasor.shape
+    assert np.allclose(output.phasor, layer.apply(wavefront).phasor)
     assert np.allclose(output.phase[:, 0, 0], np.array([0.9, 1.1]))
+
+    monochromatic = dl.Wavefront(1e-6, make_spec())
+    assert np.allclose(
+        layer(monochromatic).phasor,
+        layer.apply_mono(monochromatic).phasor,
+    )
 
 
 def test_transmissive_layer_contract(wavefront):
@@ -104,7 +111,7 @@ def test_optical_layer_gradients(layer, attribute, wavefront):
 def test_parametric_optic(wavefront):
     optic = dl.Optic(
         transmission=0.5,
-        opd=dl.DynamicZernikeBasis(js=[4], coefficients=[1e-7], diameter=0.5),
+        opd=dl.DynamicZernikeBasis(js=[4], coeffs=[1e-7], diameter=0.5),
     )
 
     resolved = optic.resolve(wavefront=wavefront)
@@ -113,10 +120,10 @@ def test_parametric_optic(wavefront):
     assert not isinstance(resolved.opd, dl.Parametric)
     assert_jittable(optic, wavefront)
     assert_differentiable(
-        lambda coefficients: np.real(
-            optic.set("opd.coefficients", coefficients)(wavefront).phasor
+        lambda coeffs: np.real(
+            optic.set("opd.coeffs", coeffs)(wavefront).phasor
         ),
-        optic.opd.coefficients,
+        optic.opd.coeffs,
     )
 
 
@@ -223,8 +230,8 @@ class TestSoummerFPM:
         chromatic = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
         polarised = make_wavefront(polarised=True)
 
-        assert_jittable(layer.apply, chromatic, rtol=1e-5, atol=1e-5)
-        assert_jittable(layer.apply, polarised, rtol=1e-5, atol=1e-5)
+        assert_jittable(layer, chromatic, rtol=1e-5, atol=1e-5)
+        assert_jittable(layer, polarised, rtol=1e-5, atol=1e-5)
 
     def test_validation(self, focal_spec, make_wavefront):
         with pytest.raises(TypeError, match="BaseOpticalLayer"):

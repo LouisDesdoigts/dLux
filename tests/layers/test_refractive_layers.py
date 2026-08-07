@@ -49,7 +49,7 @@ def test_lens_is_chromatic(chromatic_wavefront):
     [
         (dl.RefractiveOptic(1e-7, 1.5), "thickness"),
         (dl.RefractiveOptic(1e-7, 1.5), "n"),
-        (dl.RefractiveOptic(1e-7, dl.CauchyIndex([1.5, 0.01])), "n.coefficients"),
+        (dl.RefractiveOptic(1e-7, dl.CauchyIndex([1.5, 0.01])), "n.coeffs"),
         (dl.Wedge([1e-9, -2e-9], 1.5), "angle"),
         (dl.Wedge([1e-9, -2e-9], 1.5), "n"),
     ],

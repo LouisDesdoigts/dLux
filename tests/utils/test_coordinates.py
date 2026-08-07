@@ -44,8 +44,8 @@ def test_coordinate_system_roundtrip():
 def test_polynomial_distortion():
     coordinates = dlu.nd_coords((6, 4), (0.1, 0.2))
     powers = dlu.polynomial_powers(2, 2)
-    coefficients = np.ones((2, powers.shape[-1])) * 0.01
-    output = assert_jittable(dlu.distort_coords, coordinates, coefficients, powers)
+    coeffs = np.ones((2, powers.shape[-1])) * 0.01
+    output = assert_jittable(dlu.distort_coords, coordinates, coeffs, powers)
     assert output.shape == coordinates.shape
 
 

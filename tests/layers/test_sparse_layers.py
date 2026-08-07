@@ -41,10 +41,10 @@ def test_interfere(centers, wavefront):
     assert output.spec.c.shape == wavefront.spec.c.shape
 
 
-def test_shared_and_local_coefficients(centers, wavefront):
-    shared = dl.DynamicZernikeBasis(js=[4], coefficients=[1e-7], diameter=0.2)
+def test_shared_and_local_coeffs(centers, wavefront):
+    shared = dl.DynamicZernikeBasis(js=[4], coeffs=[1e-7], diameter=0.2)
     local = dl.DynamicZernikeBasis(
-        js=[4], coefficients=np.array([1e-7, 2e-7]), diameter=0.2
+        js=[4], coeffs=np.array([1e-7, 2e-7]), diameter=0.2
     )
     common = {"centers": centers, "transmission": dl.Circle(0.2, edge=0.01)}
     shared_optic = dl.SparseDynamicOptic(opd=shared, **common)
@@ -56,10 +56,10 @@ def test_shared_and_local_coefficients(centers, wavefront):
         shared_optic(wavefront).phasor, local_optic(wavefront).phasor
     )
     assert_differentiable(
-        lambda coefficients: np.real(
-            local_optic.set("opd.coefficients", coefficients)(wavefront).phasor
+        lambda coeffs: np.real(
+            local_optic.set("opd.coeffs", coeffs)(wavefront).phasor
         ),
-        local.coefficients,
+        local.coeffs,
     )
 
 

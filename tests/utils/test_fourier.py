@@ -17,10 +17,10 @@ def test_fourier_kernel_contract(n_modes):
 
 def test_asymmetric_fourier_basis():
     kernel_x, kernel_y = dlu.fourier_kernels((3, 5), (16, 12))
-    coefficients = np.arange(15.0).reshape((3, 5))
+    coeffs = np.arange(15.0).reshape((3, 5))
     output = assert_jittable(
         dlu.eval_fourier_basis,
-        coefficients,
+        coeffs,
         kernel_x,
         kernel_y,
     )

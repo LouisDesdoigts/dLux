@@ -11,8 +11,8 @@ from tests.helpers import assert_differentiable, assert_jittable
 @pytest.mark.parametrize(
     ("index", "parameter"),
     [
-        (dl.CauchyIndex([1.5, 0.01, 0.001]), "coefficients"),
-        (dl.PolynomialIndex([1.5, 0.01, -0.001]), "coefficients"),
+        (dl.CauchyIndex([1.5, 0.01, 0.001]), "coeffs"),
+        (dl.PolynomialIndex([1.5, 0.01, -0.001]), "coeffs"),
         (
             dl.InterpolatedIndex(
                 [0.8e-6, 1.0e-6, 1.2e-6],

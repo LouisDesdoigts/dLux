@@ -32,8 +32,8 @@ def test_basis_evaluation_contract(index, bases):
     basis = bases[index]
     assert_jittable(lambda value: value.evaluate(), basis, rtol=1e-5, atol=1e-5)
     assert_differentiable(
-        lambda coefficients: basis.set(coefficients=coefficients).evaluate(),
-        basis.coefficients,
+        lambda coeffs: basis.set(coeffs=coeffs).evaluate(),
+        basis.coeffs,
         rtol=1e-5,
         atol=1e-5,
     )
@@ -45,7 +45,7 @@ def test_basis_solution_contract(index, bases):
     value = basis.evaluate()
 
     output = assert_jittable(lambda item, data: item.solve_basis(data), basis, value)
-    assert output.shape == basis.coefficient_shape
+    assert output.shape == basis.shape
 
 
 @pytest.mark.parametrize("index", [2, 3])
@@ -53,7 +53,7 @@ def test_implicit_basis_contract(index, bases):
     basis = bases[index]
     calculated = assert_jittable(lambda value: value.calculate_basis(), basis)
 
-    assert calculated.shape[: len(basis.coefficient_shape)] == basis.coefficient_shape
+    assert calculated.shape[: len(basis.shape)] == basis.shape
 
 
 def test_basis_specific_operations(bases):
@@ -71,32 +71,31 @@ def test_basis_specific_operations(bases):
 def test_coefficient_aliases(bases):
     basis = bases[0]
 
-    assert basis.coeffs is basis.coefficients
-    assert basis.c is basis.coefficients
-    assert basis.alpha is basis.coefficients
+    assert basis.c is basis.coeffs
+    assert basis.alpha is basis.coeffs
 
 
-def test_default_explicit_coefficients():
-    basis = dl.Basis(np.ones((2, 3, 4)), coefficient_shape=(2,))
+def test_default_explicit_coeffs():
+    basis = dl.Basis(np.ones((2, 3, 4)), shape=(2,))
 
-    assert basis.coefficient_shape == (2,)
-    assert np.allclose(basis.coefficients, 0)
+    assert basis.shape == (2,)
+    assert np.allclose(basis.coeffs, 0)
     assert np.allclose(basis.evaluate(), 0)
 
 
-def test_vectorised_basis_coefficients():
+def test_vectorised_basis_coeffs():
     shared_basis = np.arange(12.0).reshape(1, 3, 4)
-    shared = dl.Basis(shared_basis, [1.0, 2.0, 3.0], coefficient_shape=(1,))
+    shared = dl.Basis(shared_basis, [1.0, 2.0, 3.0], shape=(1,))
     local_basis = np.arange(48.0).reshape(2, 2, 3, 4)
-    local_coefficients = np.asarray([[1.0, 0.0], [0.0, 1.0]])
-    local = dl.Basis(local_basis, local_coefficients, coefficient_shape=(2,))
+    local_coeffs = np.asarray([[1.0, 0.0], [0.0, 1.0]])
+    local = dl.Basis(local_basis, local_coeffs, shape=(2,))
 
     shared_output = assert_jittable(lambda value: value.evaluate(), shared)
     local_output = assert_jittable(lambda value: value.evaluate(), local)
 
     assert shared_output.shape == (3, 3, 4)
     assert np.allclose(
-        shared_output, shared.coefficients[:, None, None] * shared_basis[0]
+        shared_output, shared.coeffs[:, None, None] * shared_basis[0]
     )
     assert local_output.shape == (2, 3, 4)
     assert np.allclose(local_output[0], local_basis[0, 0])
@@ -119,17 +118,17 @@ def test_pasted_basis_contract(method):
         ]
     )
     basis = np.broadcast_to(modes, (2, 2, 2, 2))
-    coefficients = np.asarray([[1.0, 2.0], [3.0, 4.0]])
-    pasted = dl.PastedBasis(basis, spec, coefficients, method)
+    coeffs = np.asarray([[1.0, 2.0], [3.0, 4.0]])
+    pasted = dl.PastedBasis(basis, spec, coeffs, method)
 
     output = assert_jittable(lambda value: value.evaluate(), pasted)
     recovered = assert_jittable(lambda value: pasted.solve_basis(value), output)
     assert_differentiable(
-        lambda values: pasted.set(coefficients=values).evaluate(), coefficients
+        lambda values: pasted.set(coeffs=values).evaluate(), coeffs
     )
 
     assert output.shape == (4, 6)
-    assert np.allclose(recovered, coefficients)
+    assert np.allclose(recovered, coeffs)
 
 
 @pytest.mark.parametrize(

@@ -49,7 +49,7 @@ def test_aperture_builder_contract():
     assert basis.shape == (2, 32, 32)
     assert np.all(basis[:, ~support] == 0)
     assert optic.transmission.shape == (32, 32)
-    assert optic.opd.coefficients.shape == (2,)
+    assert optic.opd.coeffs.shape == (2,)
     assert optic.normalise
     assert not builder(grid, normalise=False).normalise
 
@@ -68,8 +68,8 @@ def test_aperture_builder_transform_and_validation():
         dl.ApertureBuilder(np.ones((2, 2)))
     with pytest.raises(TypeError, match="obscurations"):
         dl.ApertureBuilder(dl.Circle(1.0), obscurations=[np.ones((2, 2))])
-    with pytest.raises(ValueError, match="one of coefficients or key"):
-        builder(grid, coefficients=[0.0], key=jr.key(0))
+    with pytest.raises(ValueError, match="one of coeffs or key"):
+        builder(grid, coeffs=[0.0], key=jr.key(0))
 
 
 def test_zernike_definition_methods():
@@ -107,13 +107,13 @@ def test_sparse_builder_contract():
     )
 
     global_optic = builder(grid)
-    sparse_optic = builder(grid, sparse=True, coefficients=[[0.1], [-0.1]])
+    sparse_optic = builder(grid, sparse=True, coeffs=[[0.1], [-0.1]])
 
     assert isinstance(global_optic, dl.Optic)
     assert isinstance(sparse_optic, dl.SparseOptic)
     assert global_optic.normalise and sparse_optic.normalise
     assert sparse_optic.centers.shape == (2, 2)
-    assert sparse_optic.opd.coefficients.shape == (2, 1)
+    assert sparse_optic.opd.coeffs.shape == (2, 1)
 
 
 def test_sparse_builder_materialisation_options():
@@ -131,8 +131,8 @@ def test_sparse_builder_materialisation_options():
         dl.Circle(0.4), centers=builder.centers, oversample=2
     )(grid, sparse=True)
 
-    assert shared.opd.coefficients.shape == (2,)
-    assert independent.opd.coefficients.shape == (2, 2)
+    assert shared.opd.coeffs.shape == (2,)
+    assert independent.opd.coeffs.shape == (2, 2)
     assert plain.opd is None
 
     eager = builder(grid, sparse=True, jit=False)
@@ -204,7 +204,7 @@ def test_segmented_hex_pasted_basis():
     assert isinstance(optic.opd, dl.PastedBasis)
     assert isinstance(rotated.opd, dl.Basis)
     assert optic.opd.basis.shape[:2] == (18, 5)
-    assert optic.opd.coefficients.shape == (18, 5)
+    assert optic.opd.coeffs.shape == (18, 5)
     assert output.shape == (64, 64)
 
 
@@ -224,4 +224,4 @@ def test_prebuilt_validation():
         opd=dl.ZernikeDef(nolls=1),
     )
     with pytest.raises(ValueError, match="leading axis"):
-        builder(dl.GridSpec(16, 0.1, unit="m"), sparse=True, coefficients=[0.0])
+        builder(dl.GridSpec(16, 0.1, unit="m"), sparse=True, coeffs=[0.0])

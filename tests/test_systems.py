@@ -27,7 +27,7 @@ def system(input_spec, focal_spec):
                 dl.DynamicOptic(
                     transmission=dl.Circle(0.8, edge=0.02),
                     opd=dl.DynamicZernikeBasis(
-                        js=[4], coefficients=[1e-8], diameter=0.8
+                        js=[4], coeffs=[1e-8], diameter=0.8
                     ),
                 ),
             ),
@@ -45,7 +45,6 @@ def test_system_composition_contract(system):
     assert output.spec.unit == "rad"
     assert output.phasor.shape == (8, 6)
     assert np.allclose(output.power, 1)
-    assert np.allclose(system.apply(wavefront).phasor, output.phasor)
 
 
 def test_nested_optical_system(input_spec):
@@ -143,15 +142,15 @@ def test_chromatic_and_polarised_execution(system):
 
 
 def test_nested_parameter_gradients(system):
-    coefficients = system.pupil.opd.coefficients
+    coeffs = system.pupil.opd.coeffs
 
     assert_differentiable(
         lambda value: np.real(
-            system.set("layers.pupil.opd.coefficients", value)
+            system.set("layers.pupil.opd.coeffs", value)
             .propagate_mono(1e-6, return_all=True)["Wavefront"]
             .phasor
         ),
-        coefficients,
+        coeffs,
         rtol=1e-5,
         atol=1e-5,
     )

@@ -23,12 +23,12 @@ def test_gaussian_contract():
 
 def test_basis_roundtrip():
     basis = random.normal(random.PRNGKey(0), (2, 3, 5, 4))
-    coefficients = np.arange(6.0).reshape((2, 3))
-    array = assert_jittable(dlu.eval_basis, basis, coefficients)
+    coeffs = np.arange(6.0).reshape((2, 3))
+    array = assert_jittable(dlu.eval_basis, basis, coeffs)
     recovered = dlu.solve_basis(array, basis)
 
     assert array.shape == (5, 4)
-    assert np.allclose(recovered, coefficients, rtol=1e-5, atol=1e-5)
+    assert np.allclose(recovered, coeffs, rtol=1e-5, atol=1e-5)
 
 
 @pytest.mark.parametrize(

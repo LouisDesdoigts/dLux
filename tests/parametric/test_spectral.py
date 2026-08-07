@@ -11,7 +11,7 @@ from tests.helpers import assert_differentiable, assert_jittable
 
 def test_spectral_polynomial_contract():
     wavelengths = np.linspace(600e-9, 700e-9, 5)
-    polynomial = dl.SpectralPolynomial(degree=1, coefficients=[0.5])
+    polynomial = dl.SpectralPolynomial(degree=1, coeffs=[0.5])
 
     weights = assert_jittable(
         lambda value: value.evaluate(wavelengths=wavelengths), polynomial
@@ -22,14 +22,12 @@ def test_spectral_polynomial_contract():
     assert np.allclose(weights, expected)
     assert np.isclose(weights.sum(), 1.0)
     assert_differentiable(
-        lambda coefficients: polynomial.set(
-            coefficients=coefficients
-        ).evaluate(wavelengths=wavelengths),
-        polynomial.coefficients,
+        lambda coeffs: polynomial.set(coeffs=coeffs).evaluate(wavelengths=wavelengths),
+        polynomial.coeffs,
     )
 
     raw = dl.SpectralPolynomial(
-        degrees=1, coefficients=[0.5], normalise=False
+        degrees=1, coeffs=[0.5], normalise=False
     ).evaluate(wavelengths=wavelengths)
     assert np.allclose(raw, np.linspace(0.75, 1.25, 5))
 
@@ -37,12 +35,12 @@ def test_spectral_polynomial_contract():
 def test_vectorized_spectral_models():
     wavelengths = np.linspace(0.8e-6, 1.2e-6, 7)
     polynomial = dl.SpectralPolynomial(
-        degree=1, coefficients=[[0.2], [-0.2]]
+        degree=1, coeffs=[[0.2], [-0.2]]
     )
     basis = dl.SpectralBasis(
         np.stack([np.ones(7), np.linspace(-0.2, 0.2, 7)]),
-        coefficients=[[1.0, 0.5], [1.0, -0.5]],
-        coefficient_shape=(2,),
+        coeffs=[[1.0, 0.5], [1.0, -0.5]],
+        shape=(2,),
     )
     blackbody = dl.Blackbody([4000.0, 8000.0])
 
@@ -90,12 +88,12 @@ def test_blackbody_temperature_derivatives():
 def test_spectral_source_unit_invariance():
     nanometres = dl.Source(
         np.linspace(600, 700, 5),
-        weights=dl.SpectralPolynomial(degree=1, coefficients=[0.5]),
+        weights=dl.SpectralPolynomial(degree=1, coeffs=[0.5]),
         units={"wavelengths": "nm"},
     )
     metres = dl.Source(
         np.linspace(600e-9, 700e-9, 5),
-        weights=dl.SpectralPolynomial(degree=1, coefficients=[0.5]),
+        weights=dl.SpectralPolynomial(degree=1, coeffs=[0.5]),
     )
 
     assert np.allclose(nanometres.params()["weights"], metres.params()["weights"])
@@ -105,7 +103,7 @@ def test_spectral_source_unit_invariance():
 @pytest.mark.parametrize(
     "constructor",
     [
-        lambda: dl.SpectralPolynomial(degrees=0, coefficients=[0.1]),
+        lambda: dl.SpectralPolynomial(degrees=0, coeffs=[0.1]),
         lambda: dl.Blackbody(0.0),
     ],
 )

@@ -26,18 +26,18 @@ def test_general_polynomial_contract():
         polynomial.solve_basis(output, variables=variables), np.asarray([1, 2, 3])
     )
     assert_differentiable(
-        lambda coefficients: polynomial.set(coefficients=coefficients).evaluate(
+        lambda coeffs: polynomial.set(coeffs=coeffs).evaluate(
             variables=variables
         ),
-        polynomial.coefficients,
+        polynomial.coeffs,
     )
 
 
 def test_selected_polynomial_degrees():
     variables = np.linspace(-1, 1, 8)
 
-    linear = dl.Polynomial(degrees=1, coefficients=[2.0])
-    selected = dl.Polynomial(degrees=[0, 2], coefficients=[1.0, 3.0])
+    linear = dl.Polynomial(degrees=1, coeffs=[2.0])
+    selected = dl.Polynomial(degrees=[0, 2], coeffs=[1.0, 3.0])
 
     assert np.allclose(linear.evaluate(variables=variables), 2 * variables)
     assert np.allclose(
@@ -61,24 +61,24 @@ def test_explicit_polynomial_contract(coordinate_source, coordinates):
     else:
         coordinate_source = coordinates
     polynomial = dl.ExplicitPolynomial(
-        coordinate_source, 1, coefficients=[1.0, 2.0, 3.0], ndim=2
+        coordinate_source, 1, coeffs=[1.0, 2.0, 3.0], ndim=2
     )
 
     output = assert_jittable(lambda value: value.evaluate(), polynomial)
     recovered = polynomial.solve_basis(output)
     assert output.shape == coordinates.shape[-2:]
-    assert np.allclose(recovered, polynomial.coefficients, atol=1e-5)
+    assert np.allclose(recovered, polynomial.coeffs, atol=1e-5)
 
 
 def test_explicit_polynomial_broadcasts_one_dimensional_spec():
     spec = dl.GridSpec(n=8, d=0.25, unit="m")
-    polynomial = dl.ExplicitPolynomial(spec, 1, coefficients=[1.0, 2.0, 3.0], ndim=2)
+    polynomial = dl.ExplicitPolynomial(spec, 1, coeffs=[1.0, 2.0, 3.0], ndim=2)
 
     output = assert_jittable(lambda value: value.evaluate(), polynomial)
 
     assert output.shape == (8, 8)
     assert np.allclose(
-        polynomial.solve_basis(output), polynomial.coefficients, atol=1e-5
+        polynomial.solve_basis(output), polynomial.coeffs, atol=1e-5
     )
 
 
@@ -95,16 +95,16 @@ def test_dynamic_zernike_contract(nsides, coordinates):
     "make_basis",
     [
         lambda coordinates: dl.ZernikeBasis(
-            coordinates, radial_orders=[2], coefficients=np.linspace(-0.2, 0.2, 3)
+            coordinates, radial_orders=[2], coeffs=np.linspace(-0.2, 0.2, 3)
         ),
         lambda coordinates: dl.DynamicZernikeBasis(
-            radial_orders=[2], coefficients=np.linspace(-0.2, 0.2, 3)
+            radial_orders=[2], coeffs=np.linspace(-0.2, 0.2, 3)
         ),
         lambda coordinates: dl.DynamicZernikeBasis(
-            js=[4, 5], coefficients=np.asarray([0.1, -0.1]), nsides=6
+            js=[4, 5], coeffs=np.asarray([0.1, -0.1]), nsides=6
         ),
         lambda coordinates: dl.CoordinatePolynomial(
-            2, coefficients=np.linspace(-0.2, 0.2, 6)
+            2, coeffs=np.linspace(-0.2, 0.2, 6)
         ),
     ],
 )
@@ -115,8 +115,8 @@ def test_polynomial_basis_contract(make_basis, coordinates):
     output = assert_jittable(lambda value: value.evaluate(**context), basis)
     assert output.shape == coordinates.shape[-2:]
     assert_differentiable(
-        lambda coefficients: basis.set(coefficients=coefficients).evaluate(**context),
-        basis.coefficients,
+        lambda coeffs: basis.set(coeffs=coeffs).evaluate(**context),
+        basis.coeffs,
         atol=2e-6,
     )
 
@@ -135,11 +135,11 @@ def test_dynamic_basis_context(basis, coordinates, make_wavefront):
 
 
 def test_coordinate_polynomial_solution(coordinates):
-    polynomial = dl.CoordinatePolynomial(1, coefficients=np.asarray([1.0, 2.0, 3.0]))
+    polynomial = dl.CoordinatePolynomial(1, coeffs=np.asarray([1.0, 2.0, 3.0]))
     value = polynomial.evaluate(coordinates=coordinates)
     recovered = polynomial.solve_basis(value, coordinates=coordinates)
 
-    assert np.allclose(recovered, polynomial.coefficients, atol=1e-5)
+    assert np.allclose(recovered, polynomial.coeffs, atol=1e-5)
 
 
 @pytest.mark.parametrize(
