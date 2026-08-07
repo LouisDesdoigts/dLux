@@ -15,7 +15,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from .bases import Basis
+from .bases import Basis, _resolve_coeffs
 from .parametrics import Parametric
 from .polynomials import Polynomial
 
@@ -43,7 +43,16 @@ class SpectralPolynomial(Polynomial):
 
     normalise: bool
 
-    def __init__(self, degree=None, coefficients=None, degrees=None, normalise=True):
+    def __init__(
+        self,
+        degree=None,
+        coeffs=None,
+        degrees=None,
+        normalise=True,
+        *,
+        coefficients=None,
+    ):
+        coeffs = _resolve_coeffs(coeffs, coefficients)
         if degree is not None:
             if degrees is not None:
                 raise ValueError("Provide only one of degree or degrees.")
@@ -55,7 +64,7 @@ class SpectralPolynomial(Polynomial):
             degrees = np.atleast_1d(dlu.to_value(degrees, int))
             if np.any(degrees < 1):
                 raise ValueError("SpectralPolynomial degrees must be positive.")
-        super().__init__(coefficients=coefficients, degrees=degrees)
+        super().__init__(coeffs=coeffs, degrees=degrees)
         self.normalise = bool(normalise)
 
     def evaluate(self, *, wavelengths, **context):
@@ -70,7 +79,7 @@ class SpectralPolynomial(Polynomial):
 
         # Evaluate perturbations around a fixed flat baseline
         basis = self.calculate_basis(variables=variables, **context)
-        weights = 1 + np.tensordot(self.coefficients, basis, axes=((-1,), (0,)))
+        weights = 1 + np.tensordot(self.coeffs, basis, axes=((-1,), (0,)))
 
         # Apply the shared spectral normalisation contract
         return _normalise(weights, self.normalise)
@@ -89,9 +98,16 @@ class SpectralBasis(Basis):
     normalise: bool
 
     def __init__(
-        self, basis, coefficients=None, coefficient_shape=None, normalise=True
+        self,
+        basis,
+        coeffs=None,
+        shape=None,
+        normalise=True,
+        *,
+        coefficients=None,
     ):
-        super().__init__(basis, coefficients, coefficient_shape)
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+        super().__init__(basis, coeffs, shape)
         self.normalise = bool(normalise)
 
     def evaluate(self, **context):
@@ -99,7 +115,7 @@ class SpectralBasis(Basis):
         # Contract the coefficient and basis dimensions
         ndim = len(self.shape)
         b_ax = tuple(range(ndim))
-        coeffs = self.coefficients
+        coeffs = self.coeffs
         c_ax = tuple(range(coeffs.ndim - ndim, coeffs.ndim))
         weights = np.tensordot(coeffs, self.basis, axes=(c_ax, b_ax))
 

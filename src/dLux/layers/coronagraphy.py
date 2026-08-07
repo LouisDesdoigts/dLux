@@ -58,12 +58,12 @@ class SoummerFPM(OpticalLayer):
             "spec": wavefront.spec,
         }
 
-    def __call__(self, wavefront):
+    def apply_mono(self, wavefront):
         """Apply the compact focal-plane optic and return to the input pupil."""
         # Propagate to and apply the compact focal-plane optic
         focal = self.propagator(wavefront)
         optic = self.optic.resolve(**self.context(focal))
-        difference = focal - optic.apply(focal)
+        difference = focal - optic(focal)
 
         # Inverse propagate only the field introduced by the optic
         inverse = self.propagator.set(spec=wavefront.spec, inverse=True)

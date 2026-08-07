@@ -39,18 +39,14 @@ class LayeredSystem(zdx.Base):
     def __call__(self, target):
         """Apply every layer to a target in insertion order."""
         for layer in self.layers.values():
-            target = layer.apply(target)
+            target = layer(target)
         return target
-
-    def apply(self, target):
-        """Backwards-compatible alias for calling the system."""
-        return self(target)
 
     def debug(self, target):
         """Apply every layer and return the intermediate states."""
         outputs = {"input": target}
         for name, layer in self.layers.items():
-            target = layer.apply(target)
+            target = layer(target)
             outputs[name] = target
         return target, outputs
 
@@ -92,11 +88,19 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
             data = data.sum(0)
         return PSF(data, wavefront.spec)
 
-    def __call__(self, wavefront: Wavefront):
-        """Propagate a wavefront through every optical layer."""
+    def apply_mono(self, wavefront: Wavefront):
+        """Propagate one monochromatic wavefront through every optical layer."""
         if not isinstance(wavefront, Wavefront):
             raise TypeError("wavefront must be a Wavefront instance.")
         return LayeredSystem.__call__(self, wavefront)
+
+    def apply(self, wavefront: Wavefront):
+        """Propagate the complete wavefront through every optical layer."""
+        return LayeredSystem.__call__(self, wavefront)
+
+    def __call__(self, wavefront: Wavefront):
+        """Call :meth:`apply` using concise system syntax."""
+        return self.apply(wavefront)
 
     def initialise_wavefront(self, wavelength, offset=None) -> Wavefront:
         """Construct an input Wavefront and apply an optional angular offset."""

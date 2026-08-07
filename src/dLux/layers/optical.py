@@ -49,36 +49,32 @@ class BaseLayer(ParametricHolder):
     def __call__(self, target: Any) -> Any:
         """Apply this layer to its target."""
 
-    def apply(self, target: Any) -> Any:
-        """Backwards-compatible alias for calling the layer."""
-        return self(target)
-
 
 class BaseOpticalLayer(BaseLayer):
     """Base class for layers that transform wavefronts."""
 
     @abstractmethod
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        """Transform a wavefront."""
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
+        """Transform one monochromatic wavefront."""
 
     def apply(self, wavefront: Wavefront) -> Wavefront:
-        """Apply a monochromatic layer over every leading wavefront axis."""
+        """Apply this layer over every leading wavefront axis."""
         # Apply directly to non-wavefront targets and scalar wavefronts
         if not isinstance(wavefront, Wavefront):
-            return self(wavefront)
+            return self.apply_mono(wavefront)
         axes = wavefront._mapped_axis
         if axes is None:
-            return self(wavefront)
+            return self.apply_mono(wavefront)
 
         # Define application to one monochromatic field
-        def apply(phasor, wavelength, d, c):
+        def apply_one(phasor, wavelength, d, c):
             spec = wavefront.spec.set(d=d, c=c)
             wavefront_i = wavefront.set(phasor=phasor, wavelength=wavelength, spec=spec)
             return self.apply(wavefront_i)
 
         # Vectorise the layer over leading wavefront dimensions
-        apply = eqx.filter_vmap(apply, in_axes=axes)
-        output = apply(
+        apply_one = eqx.filter_vmap(apply_one, in_axes=axes)
+        output = apply_one(
             wavefront.phasor, wavefront.wavelength, wavefront.spec.d, wavefront.spec.c
         )
 
@@ -89,6 +85,10 @@ class BaseOpticalLayer(BaseLayer):
 
         # Restore the realised wavefront grid
         return output.set(spec=output.spec.set(d=d, c=c))
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Call :meth:`apply` using concise layer syntax."""
+        return self.apply(wavefront)
 
 
 class OpticalLayer(BaseOpticalLayer):
@@ -118,7 +118,7 @@ class TransmissiveLayer(OpticalLayer):
         self.transmission = dlu.to_value(transmission, optional=True, types=Parametric)
         self.normalise = bool(normalise)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the resolved transmission and optional normalisation."""
         self = self.resolve(**self.context(wavefront))
         if self.transmission is not None:
@@ -147,7 +147,7 @@ class AberratedLayer(OpticalLayer):
         self.opd = dlu.to_value(opd, optional=True, types=Parametric)
         self.phase = dlu.to_value(phase, optional=True, types=Parametric)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the resolved optical-path and phase aberrations."""
         self = self.resolve(**self.context(wavefront))
         wavefront = wavefront.add_opd(self.opd)
@@ -183,7 +183,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
         self = self.resolve(**self.context(wavefront))
         return _optic_phasor(self, wavefront)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the cumulative complex optic phasor to a wavefront."""
         phasor = wavefront.phasor * self.phasor(wavefront)
         wavefront = wavefront.set(phasor=phasor)
@@ -212,6 +212,6 @@ class Tilt(OpticalLayer):
             raise ValueError("angles must have shape (2,).")
         self.unit = str(unit)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the configured angular tilt to a wavefront."""
         return wavefront.tilt(self.angles, self.unit)

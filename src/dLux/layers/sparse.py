@@ -17,49 +17,14 @@ from .optical import OpticalLayer, Optic, _optic_phasor
 __all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
 
 
-def _slice(obj, index, size):
-    """Select one centre from a shared or centre-vectorised object."""
-    if isinstance(obj, ParametricBasis):
-        params = (("coefficients", obj.shape),)
-    elif isinstance(obj, DistortCoords):
-        params = (("distortion", obj.powers.shape),)
-    elif isinstance(obj, AffineMap):
-        params = (("matrix", (2, 2)), ("offset", (2,)))
-    else:
-        params = (
-            ("translation", (2,)),
-            ("rotation", ()),
-            ("scale", (2,)),
-            ("shear", (2,)),
-        )
-
-    values, local = {}, False
-    for name, shape in params:
-        value = getattr(obj, name)
-        if value is None or value.shape == shape:
-            values[name] = value
-            continue
-        if (
-            isinstance(obj, ParametricBasis)
-            and shape == (1,)
-            and value.shape == (size,)
-        ):
-            values[name], local = value[index, None], True
-            continue
-        if value.shape[1:] != shape or value.shape[0] != size:
-            raise ValueError(f"{name} must have shape {shape} or ({size},) + {shape}.")
-        values[name], local = value[index], True
-    return obj.set(**values), local
-
-
 class Interfere(OpticalLayer):
     """Coherently sum the leading sub-aperture axis of a Wavefront."""
 
     def apply(self, wavefront: Wavefront) -> Wavefront:
-        """Apply directly because interference consumes a vectorised aperture axis."""
-        return self(wavefront)
+        """Apply directly because interference consumes a leading aperture axis."""
+        return self.apply_mono(wavefront)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Coherently collapse the leading sub-aperture dimension."""
         # Identify the sub-aperture axis and size
         axis = wavefront.batch_ndim - 1
@@ -106,6 +71,43 @@ class SparseOptic(Optic):
         """Return the number of centred sub-apertures."""
         return len(self.centers)
 
+    @staticmethod
+    def _slice(obj, index, size):
+        """Select one centre from a shared or centre-vectorised object."""
+        if isinstance(obj, ParametricBasis):
+            params = (("coeffs", obj.shape),)
+        elif isinstance(obj, DistortCoords):
+            params = (("distortion", obj.powers.shape),)
+        elif isinstance(obj, AffineMap):
+            params = (("matrix", (2, 2)), ("offset", (2,)))
+        else:
+            params = (
+                ("translation", (2,)),
+                ("rotation", ()),
+                ("scale", (2,)),
+                ("shear", (2,)),
+            )
+
+        values, local = {}, False
+        for name, shape in params:
+            value = getattr(obj, name)
+            if value is None or value.shape == shape:
+                values[name] = value
+                continue
+            if (
+                isinstance(obj, ParametricBasis)
+                and shape == (1,)
+                and value.shape == (size,)
+            ):
+                values[name], local = value[index, None], True
+                continue
+            if value.shape[1:] != shape or value.shape[0] != size:
+                raise ValueError(
+                    f"{name} must have shape {shape} or ({size},) + {shape}."
+                )
+            values[name], local = value[index], True
+        return obj.set(**values), local
+
     def _slice_local(self, index):
         """Select parameters with a leading centre axis for one aperture."""
         types = (ParametricBasis, DistortCoords, AffineMap, Affine)
@@ -116,7 +118,7 @@ class SparseOptic(Optic):
             nonlocal local_transform
             if not isinstance(leaf, types):
                 return leaf
-            leaf, local = _slice(leaf, index, self.n_apertures)
+            leaf, local = self._slice(leaf, index, self.n_apertures)
             local_transform |= local and isinstance(leaf, CoordTransform)
             return leaf
 
@@ -163,7 +165,7 @@ class SparseOptic(Optic):
         spec = wavefront.spec.set(c=self.centers / wavefront.spec.scale)
         return wavefront.set(phasor=phasor, spec=spec)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the optic and append its sub-aperture axis to the wavefront."""
         wavefront = self.localise(wavefront)
         return wavefront.normalise() if self.normalise else wavefront

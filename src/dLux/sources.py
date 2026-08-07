@@ -41,16 +41,6 @@ def _convert_flux(flux, unit):
     return flux * dlu.unit_factor(unit)
 
 
-def _convert_distribution(distribution, unit):
-    """Convert a resolved source distribution into canonical units."""
-    unit = str(unit).strip()
-    if unit == "linear":
-        return distribution
-    if unit == "log":
-        return np.exp(distribution)
-    return _convert_flux(distribution, unit)
-
-
 class BaseSource(ParametricHolder):
     """Source brightness and optional resolved distribution."""
 
@@ -96,7 +86,14 @@ class BaseSource(ParametricHolder):
         )
         if not valid:
             raise ValueError("distribution must have shape (y, x) or (nsource, y, x).")
-        return _convert_distribution(distribution, self.units["distribution"])
+
+        # Convert the resolved distribution into canonical linear units
+        unit = str(self.units["distribution"]).strip()
+        if unit == "linear":
+            return distribution
+        if unit == "log":
+            return np.exp(distribution)
+        return _convert_flux(distribution, unit)
 
     @staticmethod
     def _convolve(data, distribution):

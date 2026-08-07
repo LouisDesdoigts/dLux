@@ -28,7 +28,7 @@ class BasePolarisingOptic(OpticalLayer):
     their Jones matrices when applied to a wavefront.
     """
 
-    def __call__(self: PolarisingOptic, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self: PolarisingOptic, wavefront: Wavefront) -> Wavefront:
         """Applies the layer Jones matrix to the input wavefront.
 
         Parameters
@@ -61,7 +61,7 @@ class PolarisationLayer(OpticalLayer):
         )
         self.polarisation = dlu.list2dictionary(items, True, BasePolarisingOptic)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply every configured polarising optic in insertion order."""
         if self.polarisation is not None:
             for optic in self.polarisation.values():
@@ -123,7 +123,7 @@ class UniformPolarisingOptic(PolarisingOptic):
             raise ValueError("UniformPolarisingOptic requires a (2, 2) Jones matrix.")
         super().__init__(jones)
 
-    def __call__(self: UniformPolarisingOptic, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self: UniformPolarisingOptic, wavefront: Wavefront) -> Wavefront:
         """Applies the rotated Jones matrix to the input wavefront.
 
         Parameters
@@ -167,7 +167,7 @@ class LinearPolariser(BasePolarisingOptic):
         """Returns the Jones matrix for context-independent angles."""
         return dlu.linear_polariser(self.angle)
 
-    def __call__(self: LinearPolariser, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self: LinearPolariser, wavefront: Wavefront) -> Wavefront:
         """Applies the linear polariser to the input wavefront."""
         self = self.resolve(wavefront=wavefront)
         return wavefront.apply_jones(dlu.linear_polariser(self.angle))
@@ -210,7 +210,7 @@ class Retarder(BasePolarisingOptic):
         """Returns the Jones matrix for context-independent parameters."""
         return dlu.retarder(self.retardance, self.angle)
 
-    def __call__(self: Retarder, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self: Retarder, wavefront: Wavefront) -> Wavefront:
         """Applies the retarder to the input wavefront."""
         self = self.resolve(wavefront=wavefront)
         return wavefront.apply_jones(dlu.retarder(self.retardance, self.angle))

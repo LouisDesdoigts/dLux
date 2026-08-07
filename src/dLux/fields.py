@@ -375,11 +375,6 @@ class Wavefront(ContinuousField):
     phasor: Array[complex]
     wavelength: Array
 
-    @property
-    def field(self) -> Array:
-        """Return the complex phasor."""
-        return self.phasor
-
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
@@ -409,6 +404,11 @@ class Wavefront(ContinuousField):
 
         # Store the realised spatial specification
         self.spec = spec
+
+    @property
+    def field(self) -> Array:
+        """Return the complex phasor."""
+        return self.phasor
 
     @classmethod
     def from_phasor(
@@ -707,11 +707,6 @@ class PolarisedWavefront(Wavefront):
     phasor: Array[complex]
     wavelength: Array
 
-    @property
-    def is_polarised(self: PolarisedWavefront) -> bool:
-        """Return whether this wavefront carries Jones-matrix axes."""
-        return True
-
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
@@ -733,6 +728,11 @@ class PolarisedWavefront(Wavefront):
         if not is_jones:
             phasor = self._promote_phasor(phasor)
         super().__init__(wavelength, spec, phasor)
+
+    @property
+    def is_polarised(self: PolarisedWavefront) -> bool:
+        """Return whether this wavefront carries Jones-matrix axes."""
+        return True
 
     @staticmethod
     def _promote_phasor(phasor: Array) -> Array:
@@ -842,16 +842,16 @@ class PSF(ContinuousField):
     data: Array
     spec: GridSpec
 
-    @property
-    def field(self) -> Array:
-        """Return the sampled intensity."""
-        return self.data
-
     def __init__(self: PSF, data: Array, spec: GridSpec):
         self.data = dlu.to_value(data)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
         self.spec = _field_spec(spec, self.data.shape)
+
+    @property
+    def field(self) -> Array:
+        """Return the sampled intensity."""
+        return self.data
 
     @classmethod
     def from_wavefront(cls, wavefront) -> PSF:
@@ -885,11 +885,6 @@ class Image(DiscreteField):
     variance: Array | None
     read_noise: Array
 
-    @property
-    def field(self) -> Array:
-        """Return the detector data."""
-        return self.data
-
     def __init__(
         self,
         data: Array,
@@ -907,3 +902,8 @@ class Image(DiscreteField):
         self.variance = variance
         self.read_noise = dlu.to_value(read_noise)
         self.spec = spec
+
+    @property
+    def field(self) -> Array:
+        """Return the detector data."""
+        return self.data

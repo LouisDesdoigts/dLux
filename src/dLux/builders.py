@@ -17,6 +17,7 @@ from .grids import CoordTransform, GridSpec
 from .layers.optical import Optic
 from .layers.sparse import SparseOptic
 from .parametric import Basis, Shape
+from .parametric.bases import _resolve_coeffs
 
 __all__ = [
     "GridBuilder",
@@ -29,35 +30,29 @@ __all__ = [
 ]
 
 
-def _initialise_coefficients(shape, coefficients=None, key=None, initial_shape=None):
+def _initialise_coeffs(shape, coeffs=None, key=None, initial_shape=None):
     """Return explicit, random, or zero coefficients for a basis shape."""
     # Validate mutually exclusive initialisation inputs
-    if coefficients is not None and key is not None:
-        raise ValueError("Provide only one of coefficients or key.")
+    if coeffs is not None and key is not None:
+        raise ValueError("Provide only one of coeffs or key.")
 
-    # Initialize explicit or random coefficients
+    # Initialise explicit or random coefficients
     if key is not None:
         initial_shape = shape if initial_shape is None else initial_shape
-        coefficients = jr.normal(key, initial_shape)
-    elif coefficients is None and initial_shape is not None:
-        coefficients = np.zeros(initial_shape)
-    return coefficients
+        coeffs = jr.normal(key, initial_shape)
+    elif coeffs is None and initial_shape is not None:
+        coeffs = np.zeros(initial_shape)
+    return coeffs
 
 
-def _explicit_basis(
-    basis, coefficients=None, key=None, coefficient_shape=None, initial_shape=None
-):
+def _explicit_basis(basis, coeffs=None, key=None, shape=None, initial_shape=None):
     """Materialise a sampled OPD basis with explicit or random coefficients."""
     # Resolve the native and initial coefficient shapes
-    coefficient_shape = (
-        basis.shape[:-2] if coefficient_shape is None else tuple(coefficient_shape)
-    )
-    coefficients = _initialise_coefficients(
-        coefficient_shape, coefficients, key, initial_shape
-    )
+    shape = basis.shape[:-2] if shape is None else tuple(shape)
+    coeffs = _initialise_coeffs(shape, coeffs, key, initial_shape)
 
     # Materialise the sampled basis
-    return Basis(basis, coefficients=coefficients, coefficient_shape=coefficient_shape)
+    return Basis(basis, coeffs=coeffs, shape=shape)
 
 
 def _zernike_groups(nolls, method):
@@ -434,23 +429,25 @@ class ApertureBuilder(GridBuilder):
         self,
         grid,
         transform=None,
-        coefficients=None,
+        coeffs=None,
         key=None,
         normalise=True,
         jit=True,
+        coefficients=None,
     ):
         """Materialise this definition as a globally sampled ``Optic``.
 
-        ``coefficients`` and ``key`` are mutually exclusive. With an OPD definition,
+        ``coeffs`` and ``key`` are mutually exclusive. With an OPD definition,
         explicit coefficients are used directly, a key draws standard-normal values,
-        and omitting both initializes zero coefficients. ``normalise`` retains the
+        and omitting both initialises zero coefficients. ``normalise`` retains the
         existing wavefront-normalisation meaning of ``Optic.normalise``.
         """
+        coeffs = _resolve_coeffs(coeffs, coefficients)
         components = self.build(grid, transform, jit)
         if self.opd is None:
             return Optic(transmission=components, normalise=normalise)
         transmission, basis = components[:2]
-        opd = _explicit_basis(basis, coefficients, key)
+        opd = _explicit_basis(basis, coeffs, key)
         return Optic(transmission=transmission, opd=opd, normalise=normalise)
 
 
@@ -582,12 +579,13 @@ class SparseApertureBuilder(ApertureBuilder):
         self,
         grid,
         transform=None,
-        coefficients=None,
+        coeffs=None,
         key=None,
         normalise=True,
         jit=True,
         sparse=False,
         shared=False,
+        coefficients=None,
     ):
         """Materialise this definition as an ``Optic`` or ``SparseOptic``.
 
@@ -597,9 +595,11 @@ class SparseApertureBuilder(ApertureBuilder):
         Explicit coefficients may use either representation. A supplied random key
         follows the selected layout.
         """
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+
         # Materialise a global optic unless sparse output is requested
         if not sparse:
-            return super().__call__(grid, transform, coefficients, key, normalise, jit)
+            return super().__call__(grid, transform, coeffs, key, normalise, jit)
 
         # Validate sparse construction requirements
         grid = self._promote_grid(grid)
@@ -628,9 +628,9 @@ class SparseApertureBuilder(ApertureBuilder):
         initial_shape = shape if shared else (len(self.centers),) + shape
         opd = _explicit_basis(
             basis,
-            coefficients,
+            coeffs,
             key,
-            coefficient_shape=shape,
+            shape=shape,
             initial_shape=initial_shape,
         )
 

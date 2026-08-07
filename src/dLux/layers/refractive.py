@@ -32,7 +32,7 @@ class RefractiveOptic(OpticalLayer):
         self.thickness = dlu.to_value(thickness, types=Parametric)
         self.n = dlu.to_value(n, types=Parametric)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the resolved refractive optical path to a wavefront."""
         self = self.resolve(wavefront=wavefront)
         n = np.asarray(self.n - 1)
@@ -61,7 +61,7 @@ class Wedge(OpticalLayer):
             raise ValueError("angle must have shape (2,).")
         self.n = dlu.to_value(n, types=Parametric)
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
+    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the wavelength-dependent optical path of the wedge."""
         # Resolve the sampled wedge thickness
         self = self.resolve(wavefront=wavefront)

@@ -9,7 +9,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..grids import GridSpec
-from .bases import Basis, CoordBasis, ParametricBasis
+from .bases import Basis, CoordBasis, ParametricBasis, _resolve_coeffs
 from .parametrics import resolve
 
 __all__ = [
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-def _poly_params(degree, coefficients, ndim, powers, degrees=None):
+def _poly_params(degree, coeffs, ndim, powers, degrees=None):
     """Validate polynomial powers and coefficients."""
     # Validate the polynomial term selection
     if degree is not None and degrees is not None:
@@ -53,42 +53,12 @@ def _poly_params(degree, coefficients, ndim, powers, degrees=None):
     if np.any(powers < 0):
         raise ValueError("powers must be non-negative.")
 
-    # Initialize and validate the polynomial coefficients
-    coefficients = np.zeros(powers.shape[1]) if coefficients is None else coefficients
-    coefficients = dlu.to_value(coefficients)
-    if coefficients.ndim < 1 or coefficients.shape[-1] != powers.shape[1]:
-        raise ValueError("coefficients must have trailing shape (n_terms,).")
-    return powers, coefficients
-
-
-def _poly_coordinates(coordinates, ndim):
-    """Resolve explicit polynomial coordinates and dimensionality."""
-    # Resolve coordinates from a grid specification
-    if isinstance(coordinates, GridSpec):
-        ndim = coordinates.ndim if ndim is None else int(ndim)
-        if coordinates.ndim == 1 and ndim > 1:
-            coordinates = coordinates.broadcast(ndim)
-        if coordinates.ndim < ndim:
-            raise ValueError(
-                "GridSpec dimensionality must be greater than or equal to ndim."
-            )
-        if coordinates.n is None or coordinates.d is None:
-            raise ValueError("GridSpec must define n and d.")
-        coordinates = coordinates.coordinates
-
-    # Resolve explicit coordinate arrays
-    else:
-        coordinates = dlu.to_value(coordinates)
-        ndim = 1 if ndim is None and coordinates.ndim == 1 else ndim
-        ndim = coordinates.shape[0] if ndim is None else int(ndim)
-
-    # Validate and return the requested coordinate dimensions
-    if ndim < 1:
-        raise ValueError("ndim must be positive.")
-    coordinates = coordinates[None, :] if coordinates.ndim == 1 else coordinates
-    if coordinates.shape[0] < ndim:
-        raise ValueError("coordinates must contain at least ndim coordinate arrays.")
-    return coordinates[:ndim], ndim
+    # Initialise and validate the polynomial coefficients
+    coeffs = np.zeros(powers.shape[1]) if coeffs is None else coeffs
+    coeffs = dlu.to_value(coeffs)
+    if coeffs.ndim < 1 or coeffs.shape[-1] != powers.shape[1]:
+        raise ValueError("coeffs must have trailing shape (n_terms,).")
+    return powers, coeffs
 
 
 class DynamicZernike(zdx.Base):
@@ -142,34 +112,50 @@ class _ZernikeBasis:
 class ZernikeBasis(_ZernikeBasis, Basis):
     """An explicitly sampled Zernike basis."""
 
-    coefficients: Array
+    coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
 
     def __init__(
-        self, coordinates, js=None, radial_orders=None, coefficients=None, diameter=2.0
+        self,
+        coordinates,
+        js=None,
+        radial_orders=None,
+        coeffs=None,
+        diameter=2.0,
+        *,
+        coefficients=None,
     ):
+        coeffs = _resolve_coeffs(coeffs, coefficients)
         js = self.get_indices(js, radial_orders)
         basis = dlu.zernike_basis(js, coordinates, diameter)
-        super().__init__(basis, coefficients, (len(js),))
+        super().__init__(basis, coeffs, (len(js),))
 
 
 class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     """A Zernike basis evaluated dynamically from coordinate context."""
 
-    coefficients: Array
+    coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
     diameter: Array | None
 
     def __init__(
-        self, js=None, radial_orders=None, coefficients=None, nsides=0, diameter=None
+        self,
+        js=None,
+        radial_orders=None,
+        coeffs=None,
+        nsides=0,
+        diameter=None,
+        *,
+        coefficients=None,
     ):
+        coeffs = _resolve_coeffs(coeffs, coefficients)
         js = self.get_indices(js, radial_orders)
         self.zernikes = [DynamicZernike(j) for j in js]
-        coefficients = np.zeros(len(js)) if coefficients is None else coefficients
-        self._set_coefficients(coefficients, (len(js),))
+        coeffs = np.zeros(len(js)) if coeffs is None else coeffs
+        self._set_coeffs(coeffs, (len(js),))
         self.nsides = int(nsides)
         if self.nsides not in (0,) and self.nsides < 3:
             raise ValueError("nsides must be zero or greater than two.")
@@ -205,16 +191,24 @@ class Polynomial(ParametricBasis):
     ``degrees=[1]`` constructs only the linear terms and omits the constant term.
     """
 
-    coefficients: Array
+    coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
     powers: Array
 
     def __init__(
-        self, degree=None, coefficients=None, ndim=1, powers=None, degrees=None
+        self,
+        degree=None,
+        coeffs=None,
+        ndim=1,
+        powers=None,
+        degrees=None,
+        *,
+        coefficients=None,
     ):
-        powers, coefficients = _poly_params(degree, coefficients, ndim, powers, degrees)
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+        powers, coeffs = _poly_params(degree, coeffs, ndim, powers, degrees)
         self.powers = powers
-        self._set_coefficients(coefficients, (powers.shape[1],))
+        self._set_coeffs(coeffs, (powers.shape[1],))
 
     def calculate_basis(self, *, variables=None, **context):
         """Evaluate the polynomial terms at supplied variables."""
@@ -249,7 +243,7 @@ class Polynomial(ParametricBasis):
 class ExplicitPolynomial(Basis):
     """A polynomial represented by basis vectors sampled on fixed coordinates."""
 
-    coefficients: Array
+    coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
     powers: Array
@@ -258,33 +252,77 @@ class ExplicitPolynomial(Basis):
         self,
         coordinates: Array | GridSpec,
         degree=None,
-        coefficients=None,
+        coeffs=None,
         ndim=None,
         powers=None,
         degrees=None,
+        *,
+        coefficients=None,
     ):
-        coordinates, ndim = _poly_coordinates(coordinates, ndim)
-        powers, coefficients = _poly_params(degree, coefficients, ndim, powers, degrees)
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+        coordinates, ndim = self._coordinates(coordinates, ndim)
+        powers, coeffs = _poly_params(degree, coeffs, ndim, powers, degrees)
         if coordinates.shape[0] != powers.shape[0]:
             raise ValueError(
                 "coordinate dimensionality must match the polynomial powers."
             )
         self.powers = powers
         basis = dlu.polynomial_basis(coordinates, powers)
-        super().__init__(basis, coefficients)
+        super().__init__(basis, coeffs)
+
+    @staticmethod
+    def _coordinates(coordinates, ndim):
+        """Resolve explicit polynomial coordinates and dimensionality."""
+        # Resolve coordinates from a grid specification
+        if isinstance(coordinates, GridSpec):
+            ndim = coordinates.ndim if ndim is None else int(ndim)
+            if coordinates.ndim == 1 and ndim > 1:
+                coordinates = coordinates.broadcast(ndim)
+            if coordinates.ndim < ndim:
+                raise ValueError(
+                    "GridSpec dimensionality must be greater than or equal to ndim."
+                )
+            if coordinates.n is None or coordinates.d is None:
+                raise ValueError("GridSpec must define n and d.")
+            coordinates = coordinates.coordinates
+
+        # Resolve explicit coordinate arrays
+        else:
+            coordinates = dlu.to_value(coordinates)
+            ndim = 1 if ndim is None and coordinates.ndim == 1 else ndim
+            ndim = coordinates.shape[0] if ndim is None else int(ndim)
+
+        # Validate and return the requested coordinate dimensions
+        if ndim < 1:
+            raise ValueError("ndim must be positive.")
+        coordinates = coordinates[None, :] if coordinates.ndim == 1 else coordinates
+        if coordinates.shape[0] < ndim:
+            raise ValueError(
+                "coordinates must contain at least ndim coordinate arrays."
+            )
+        return coordinates[:ndim], ndim
 
 
 class CoordinatePolynomial(Polynomial):
     """A polynomial evaluated dynamically from Cartesian coordinate context."""
 
-    coefficients: Array
+    coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
     powers: Array
     ndim: int = eqx.field(static=True)
 
-    def __init__(self, degree=None, coefficients=None, ndim: int = 2, degrees=None):
+    def __init__(
+        self,
+        degree=None,
+        coeffs=None,
+        ndim: int = 2,
+        degrees=None,
+        *,
+        coefficients=None,
+    ):
+        coeffs = _resolve_coeffs(coeffs, coefficients)
         self.ndim = int(ndim)
-        super().__init__(degree, coefficients, ndim, degrees=degrees)
+        super().__init__(degree, coeffs, ndim, degrees=degrees)
 
     def calculate_basis(self, *, wavefront=None, coordinates=None, **kwargs):
         """Evaluate polynomial terms on explicit or wavefront coordinates."""

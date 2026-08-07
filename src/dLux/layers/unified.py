@@ -34,7 +34,7 @@ class Resize(UnifiedLayer):
     def __init__(self, npixels: int | tuple[int, ...]):
         self.npixels = dlu.as_size(npixels, name="npixels")
 
-    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply_mono(self, target: Wavefront | PSF) -> Wavefront | PSF:
         """Resize the target to ``npixels`` along its spatial axes."""
         return target.resize(self.npixels)
 
@@ -47,7 +47,7 @@ class Downsample(UnifiedLayer):
     def __init__(self, n: int | tuple[int, ...]):
         self.n = dlu.as_size(n, name="n")
 
-    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply_mono(self, target: Wavefront | PSF) -> Wavefront | PSF:
         """Downsample the target by the configured integer factors."""
         return target.downsample(self.n)
 
@@ -63,7 +63,7 @@ class Flip(UnifiedLayer):
         if not all(isinstance(axis, int) for axis in axes):
             raise ValueError("axes must be an int or tuple of ints.")
 
-    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply_mono(self, target: Wavefront | PSF) -> Wavefront | PSF:
         """Flip the target about the configured array axes."""
         return target.flip(self.axes)
 
@@ -84,7 +84,7 @@ class Interpolate(UnifiedLayer):
         self.complex = bool(complex)
         self.fill = dlu.to_value(fill)
 
-    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply_mono(self, target: Wavefront | PSF) -> Wavefront | PSF:
         """Interpolate the target through the coordinate transformation."""
         return target.interpolate(
             self.transformation,
@@ -104,7 +104,7 @@ class Normalise(UnifiedLayer):
         self.mode = str(mode)
         self.value = dlu.to_value(value)
 
-    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply_mono(self, target: Wavefront | PSF) -> Wavefront | PSF:
         """Normalise the target to the configured value."""
         return target.normalise(self.mode, self.value)
 
@@ -112,6 +112,6 @@ class Normalise(UnifiedLayer):
 class Lambda(UnifiedLayer):
     """Return a wavefront or PSF unchanged."""
 
-    def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
+    def apply_mono(self, target: Wavefront | PSF) -> Wavefront | PSF:
         """Return the target unchanged."""
         return target

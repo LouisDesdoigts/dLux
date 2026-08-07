@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 import equinox as eqx
 import interpax as ipx
 import jax.numpy as np
@@ -10,6 +12,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..fields import Wavefront
+from .bases import _resolve_coeffs
 from .parametrics import Parametric
 
 __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
@@ -18,46 +21,72 @@ __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 class CauchyIndex(Parametric):
     """A refractive index represented by a Cauchy dispersion relation."""
 
-    coefficients: Array
+    coeffs: Array
     scale: Array
 
-    def __init__(self, coefficients: Array, scale: float = 1e-6):
+    def __init__(self, coeffs: Array = None, scale: float = 1e-6, *, coefficients=None):
         """Initialise Cauchy coefficients and their wavelength scale."""
-        self.coefficients = dlu.to_value(coefficients)
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+        self.coeffs = dlu.to_value(coeffs)
         self.scale = dlu.to_value(scale)
 
-        if self.coefficients.ndim != 1 or self.coefficients.size == 0:
-            raise ValueError("coefficients must be a non-empty 1d array.")
+        if self.coeffs.ndim != 1 or self.coeffs.size == 0:
+            raise ValueError("coeffs must be a non-empty 1d array.")
         if self.scale <= 0:
             raise ValueError("scale must be positive.")
+
+    @property
+    def coefficients(self) -> Array:
+        """Deprecated alias for the dispersion coefficients."""
+        warnings.warn(
+            "The `.coefficients` attribute is deprecated and will be removed in "
+            "dLux 0.16.2. Use `.coeffs` instead: `model.coefficients` -> "
+            "`model.coeffs`.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.coeffs
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
         """Evaluate ``A + B/x² + C/x⁴ + ...`` at the wavefront wavelength."""
         x = wavefront.wavelength / self.scale
-        powers = 2 * np.arange(self.coefficients.size)
-        return np.sum(self.coefficients / x[..., None] ** powers, axis=-1)
+        powers = 2 * np.arange(self.coeffs.size)
+        return np.sum(self.coeffs / x[..., None] ** powers, axis=-1)
 
 
 class PolynomialIndex(Parametric):
     """A refractive index polynomial in normalised wavelength."""
 
-    coefficients: Array
+    coeffs: Array
     scale: Array
 
-    def __init__(self, coefficients: Array, scale: float = 1e-6):
-        self.coefficients = dlu.to_value(coefficients)
+    def __init__(self, coeffs: Array = None, scale: float = 1e-6, *, coefficients=None):
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+        self.coeffs = dlu.to_value(coeffs)
         self.scale = dlu.to_value(scale)
 
-        if self.coefficients.ndim != 1 or self.coefficients.size == 0:
-            raise ValueError("coefficients must be a non-empty 1d array.")
+        if self.coeffs.ndim != 1 or self.coeffs.size == 0:
+            raise ValueError("coeffs must be a non-empty 1d array.")
         if self.scale <= 0:
             raise ValueError("scale must be positive.")
+
+    @property
+    def coefficients(self) -> Array:
+        """Deprecated alias for the polynomial coefficients."""
+        warnings.warn(
+            "The `.coefficients` attribute is deprecated and will be removed in "
+            "dLux 0.16.2. Use `.coeffs` instead: `model.coefficients` -> "
+            "`model.coeffs`.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.coeffs
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
         """Evaluate ``c₀ + c₁x + c₂x² + ...`` for ``x = wavelength / scale``."""
         x = wavefront.wavelength / self.scale
-        powers = np.arange(self.coefficients.size)
-        return np.sum(self.coefficients * x[..., None] ** powers, axis=-1)
+        powers = np.arange(self.coeffs.size)
+        return np.sum(self.coeffs * x[..., None] ** powers, axis=-1)
 
 
 class InterpolatedIndex(Parametric):

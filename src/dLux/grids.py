@@ -759,7 +759,7 @@ class Affine(CoordTransform):
         )
         return matrices[indices]
 
-    def coefficients(self) -> tuple[Array, Array]:
+    def coeffs(self) -> tuple[Array, Array]:
         """Return the composed transformation matrix and offset."""
         combine = lambda cumulative, operation: (operation @ cumulative, None)
         homogeneous, _ = lax.scan(combine, np.eye(3), self._matrices())
@@ -768,6 +768,6 @@ class Affine(CoordTransform):
     def __call__(self, coords: Array) -> Array:
         """Apply the composed semantic affine transformation."""
         coords = self.get_coordinates(coords)
-        matrix, offset = self.coefficients()
+        matrix, offset = self.coeffs()
         shift = offset.reshape((2,) + (1,) * (coords.ndim - 1))
         return np.einsum("ij,j...->i...", matrix, coords) + shift

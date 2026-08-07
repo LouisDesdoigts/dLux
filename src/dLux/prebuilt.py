@@ -6,7 +6,7 @@ from jax import vmap
 
 import dLux.utils as dlu
 
-from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coefficients
+from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coeffs
 from .grids import Affine, PasteSpec
 from .layers.optical import Optic
 from .parametric import (
@@ -18,6 +18,7 @@ from .parametric import (
     Spider,
     TransformedShape,
 )
+from .parametric.bases import _resolve_coeffs
 
 __all__ = [
     "SimpleCircular",
@@ -223,18 +224,21 @@ class SegmentedHex(SparseApertureBuilder):
         self,
         grid,
         transform=None,
-        coefficients=None,
+        coeffs=None,
         key=None,
         normalise=True,
         jit=True,
         sparse=False,
         shared=False,
+        coefficients=None,
     ):
         """Materialise a global pasted optic or a genuinely sparse optic."""
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+
         # Use sparse or transformed global construction when requested
         if sparse or transform is not None:
             return super().__call__(
-                grid, transform, coefficients, key, normalise, jit, sparse, shared
+                grid, transform, coeffs, key, normalise, jit, sparse, shared
             )
 
         # Promote and validate the ideal construction grid
@@ -252,8 +256,8 @@ class SegmentedHex(SparseApertureBuilder):
         # Generate and materialise the compact per-segment OPD basis
         basis, _, spec = self._pasted_opd(grid, jit)
         shape = basis.shape[:-2]
-        coefficients = _initialise_coefficients(shape, coefficients, key, shape)
-        opd = PastedBasis(basis, spec, coefficients, self.paste_method)
+        coeffs = _initialise_coeffs(shape, coeffs, key, shape)
+        opd = PastedBasis(basis, spec, coeffs, self.paste_method)
         return Optic(transmission=transmission, opd=opd, normalise=normalise)
 
 
@@ -291,22 +295,22 @@ class NRMLike(SparseApertureBuilder):
         self,
         grid,
         transform=None,
-        coefficients=None,
+        coeffs=None,
         key=None,
         normalise=True,
         jit=True,
         sparse=False,
+        coefficients=None,
     ):
         """Materialise a global NRM, or independent holes with ``sparse=True``."""
-        if sparse and coefficients is not None:
-            coefficients = np.asarray(coefficients)
-            if coefficients.ndim == 0 or coefficients.shape[0] != len(self.centers):
-                raise ValueError(
-                    "coefficients must have a leading axis matching the holes."
-                )
+        coeffs = _resolve_coeffs(coeffs, coefficients)
+        if sparse and coeffs is not None:
+            coeffs = np.asarray(coeffs)
+            if coeffs.ndim == 0 or coeffs.shape[0] != len(self.centers):
+                raise ValueError("coeffs must have a leading axis matching the holes.")
 
         return super().__call__(
-            grid, transform, coefficients, key, normalise, jit, sparse, False
+            grid, transform, coeffs, key, normalise, jit, sparse, False
         )
 
 

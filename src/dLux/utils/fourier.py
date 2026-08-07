@@ -187,7 +187,7 @@ def fourier_kernels(
     return Kx, Ky
 
 
-def eval_fourier_basis(coefficients: Array, Kx: Array, Ky: Array) -> Array:
+def eval_fourier_basis(coeffs: Array, Kx: Array, Ky: Array) -> Array:
     """Evaluates a 2D real Fourier basis using cached kernels.
 
     The coefficient array is assumed to be ordered as `(x, y)`, with shape
@@ -196,7 +196,7 @@ def eval_fourier_basis(coefficients: Array, Kx: Array, Ky: Array) -> Array:
 
     Parameters
     ----------
-    coefficients : Array
+    coeffs : Array
         The Fourier coefficients.
     Kx : Array
         The x-axis Fourier kernel.
@@ -208,4 +208,4 @@ def eval_fourier_basis(coefficients: Array, Kx: Array, Ky: Array) -> Array:
     output : Array
         The evaluated Fourier basis.
     """
-    return Kx @ coefficients @ Ky.T
+    return Kx @ coeffs @ Ky.T

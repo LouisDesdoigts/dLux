@@ -136,25 +136,25 @@ def triangular_number(n: int) -> int:
     return n * (n + 1) / 2
 
 
-def eval_basis(basis: Array, coefficients: Array) -> Array:
+def eval_basis(basis: Array, coeffs: Array) -> Array:
     """Performs an n-dimensional dot-product between the basis and coefficients arrays.
 
     Parameters
     ----------
     basis: Array
         The basis to use.
-    coefficients: Array
+    coeffs: Array
         The Array of coefficients to be applied to each basis vector.
     """
-    coefficient_shape = coefficients.shape
-    if basis.shape[: coefficients.ndim] != coefficient_shape:
+    shape = coeffs.shape
+    if basis.shape[: coeffs.ndim] != shape:
         raise ValueError(
             "The leading basis dimensions must match the coefficient shape, "
-            f"received {basis.shape} and {coefficient_shape}."
+            f"received {basis.shape} and {shape}."
         )
 
-    axes = tuple(range(coefficients.ndim))
-    return np.tensordot(basis, coefficients, axes=(axes, axes))
+    axes = tuple(range(coeffs.ndim))
+    return np.tensordot(basis, coeffs, axes=(axes, axes))
 
 
 def solve_basis(array: Array, basis: Array) -> Array:
@@ -170,7 +170,7 @@ def solve_basis(array: Array, basis: Array) -> Array:
 
     Returns
     -------
-    coefficients : Array
+    coeffs : Array
         The least-squares coefficients with shape ``basis.shape[:-array.ndim]``.
     """
     output_shape = basis.shape[-array.ndim :] if array.ndim else ()

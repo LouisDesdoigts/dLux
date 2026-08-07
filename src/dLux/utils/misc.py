@@ -35,14 +35,14 @@ def _lsq_matrix(n: int, m: int = None) -> Array:
     return np.linalg.pinv(A).astype(xx.dtype)
 
 
-def _calc_area_fraction(coefficients: Array, epsilon: float = 1e-15) -> float:
+def _calc_area_fraction(coeffs: Array, epsilon: float = 1e-15) -> float:
     """Calculate the fractional area of a plane below zero.
 
     The plane is defined by ``z = ax + by + c`` and integrated over the pixel.
 
     Parameters
     ----------
-    coefficients: Array
+    coeffs: Array
         The a, b, c coefficients of the plane, where z = ax + by + c.
     epsilon: float
         Small value to avoid division by zero when coefficients are zero.
@@ -53,7 +53,7 @@ def _calc_area_fraction(coefficients: Array, epsilon: float = 1e-15) -> float:
         The fraction of the plane below zero.
     """
     # Apply the stabilisation epsilon
-    a, b, c = np.where(coefficients == 0, epsilon, coefficients)
+    a, b, c = np.where(coeffs == 0, epsilon, coeffs)
 
     # Calculate the x-bounds
     x1 = (-b - c) / a

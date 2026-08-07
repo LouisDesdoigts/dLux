@@ -117,22 +117,6 @@ def _propagate_fft(
     return wf.set(phasor=field, spec=spec)
 
 
-def _propagate_free_space(wf, spec, distance, crop):
-    """Propagate every field over a free-space distance."""
-    # Define and vectorise monochromatic angular-spectrum propagation
-    wavelength, x, y = _propagation_inputs(wf)
-    prop_fn = lambda field, lam, x, y: dlu.ASM(
-        field, lam, (x, y), distance, crop=False, **spec.padding
-    )
-    propagate = np.vectorize(prop_fn, signature="(n,m),(),(m),(n)->(p,q)")
-    field = propagate(wf.phasor, wavelength, x, y)
-
-    # Apply optional output cropping and update the realised grid
-    field = spec.crop_array(field) if crop else field
-    spec = wf.spec.resize(field.shape[-2:][::-1])
-    return wf.set(phasor=field, spec=spec)
-
-
 def _validate_grid(spec, name, ndim=2, angular=None):
     """Validate a complete propagation grid and its coordinate unit."""
     if spec.n is None or spec.d is None or spec.unit is None:
@@ -228,14 +212,14 @@ class Propagator(OpticalLayer):
 
     spec: BaseGridSpec
 
-    def apply(self, wavefront):
-        """Propagate the complete vectorised wavefront state."""
-        return self(wavefront)
-
     def __init__(self, spec):
         if not isinstance(spec, (GridSpec, ResizeSpec)):
             raise TypeError("spec must be a GridSpec or ResizeSpec.")
         self.spec = spec.broadcast(2)
+
+    def apply(self, wavefront):
+        """Propagate the complete vectorised wavefront state."""
+        return self.apply_mono(wavefront)
 
     def validate(self, wavefront):
         """Validate the input coordinate specification."""
@@ -302,7 +286,7 @@ class Fraunhofer(FocalPropagator):
         super().__init__(spec, focal_length, inverse)
         self.method = method
 
-    def __call__(self, wavefront):
+    def apply_mono(self, wavefront):
         """Propagate a wavefront between conjugate planes."""
         self.validate(wavefront)
         if self.method == "fft":
@@ -354,7 +338,7 @@ class Fresnel(FocalPropagator):
         self.method = method
         self.defocus = dlu.to_value(defocus)
 
-    def __call__(self, wavefront):
+    def apply_mono(self, wavefront):
         """Propagate a wavefront between defocused focal planes."""
         self.validate(wavefront)
         if self.method == "fft":
@@ -416,7 +400,7 @@ class ABCDPropagator(Propagator):
             return
         _validate_grid(self.spec, "output", wavefront.spec.ndim, angular=False)
 
-    def __call__(self, wavefront):
+    def apply_mono(self, wavefront):
         """Propagate a wavefront through the composed ABCD system."""
         self.validate(wavefront)
         if self.method == "fft":
@@ -452,7 +436,19 @@ class FreeSpace(Propagator):
         self.distance = dlu.to_value(distance)
         self.crop = bool(crop)
 
-    def __call__(self, wavefront):
+    def apply_mono(self, wavefront):
         """Propagate a wavefront over the configured free-space distance."""
         self.validate(wavefront)
-        return _propagate_free_space(wavefront, self.spec, self.distance, self.crop)
+
+        # Define and vectorise monochromatic angular-spectrum propagation
+        wavelength, x, y = _propagation_inputs(wavefront)
+        prop_fn = lambda field, lam, x, y: dlu.ASM(
+            field, lam, (x, y), self.distance, crop=False, **self.spec.padding
+        )
+        propagate = np.vectorize(prop_fn, signature="(n,m),(),(m),(n)->(p,q)")
+        field = propagate(wavefront.phasor, wavelength, x, y)
+
+        # Apply optional output cropping and update the realised grid
+        field = self.spec.crop_array(field) if self.crop else field
+        spec = wavefront.spec.resize(field.shape[-2:][::-1])
+        return wavefront.set(phasor=field, spec=spec)
