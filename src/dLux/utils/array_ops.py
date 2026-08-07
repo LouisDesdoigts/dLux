@@ -214,11 +214,35 @@ def paste(
 ) -> Array:
     """Add equally sized arrays into a common two-dimensional output.
 
-    ``arrays`` has shape ``(n, ..., ny, nx)`` and ``starts`` has shape ``(n, 2)``
-    in physical ``(x, y)`` pixel order. Intermediate axes are preserved. Every
-    compact array must lie completely within the output. ``method="scan"`` limits
-    working memory through sequential updates; ``method="scatter"`` constructs
-    flattened indices to expose parallel placement.
+    Overlapping values are added rather than overwritten. Every compact array must
+    lie completely inside the output; clipping and boundary padding are deliberately
+    left to the caller.
+
+    Parameters
+    ----------
+    arrays : Array
+        Compact arrays with shape ``(n_stamps, ..., ny, nx)``. Any intermediate
+        dimensions are retained as leading output dimensions.
+    starts : Array
+        Integer start indices with shape ``(n_stamps, 2)`` in physical ``(x, y)``
+        order. Array storage therefore applies them to the final axes as ``(y, x)``.
+    npixels : int or tuple[int, int]
+        Output size in physical ``(x, y)`` order. A scalar produces a square output.
+    method : str
+        ``"scan"`` applies sequential dynamic updates with bounded working memory.
+        ``"scatter"`` constructs flattened indices and exposes parallel placement at
+        the cost of larger intermediate arrays.
+
+    Returns
+    -------
+    Array
+        The summed output with shape ``(..., output_ny, output_nx)``.
+
+    Notes
+    -----
+    Both methods are JIT-compatible and numerically equivalent apart from ordinary
+    floating-point accumulation-order differences. Their relative performance is
+    hardware- and problem-dependent.
     """
     # Standardise the pasted arrays and placement indices
     arrays = np.asarray(arrays)

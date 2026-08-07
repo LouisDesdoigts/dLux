@@ -21,6 +21,38 @@ __all__ = [
 ]
 
 
+def _distortion_powers(order, orders, powers, shift_invariant):
+    """Resolve the polynomial powers used by a coordinate distortion."""
+    # Validate mutually exclusive term specifications
+    if sum(value is not None for value in (order, orders, powers)) > 1:
+        raise ValueError("Provide only one of order, orders, or powers.")
+
+    # Validate explicit powers or generate selected total orders
+    if powers is not None:
+        powers = np.asarray(powers, dtype=float)
+        if powers.ndim != 2 or powers.shape[0] != 2:
+            raise ValueError("powers must have shape (2, n_terms).")
+    else:
+        if orders is None:
+            order = 1 if order is None else int(order)
+            orders = tuple(range(1, order + 1))
+        else:
+            orders = tuple(map(int, orders))
+        if not orders or any(order < 1 for order in orders):
+            raise ValueError("orders must contain positive integers.")
+        powers = dlu.polynomial_powers(max(orders), 2)[:, 1:]
+        powers = powers[:, np.isin(powers.sum(0), np.asarray(orders))]
+
+    # Remove linear coordinate terms for shift-invariant distortions
+    if shift_invariant:
+        linear = np.logical_or(
+            np.all(powers == np.array([[1], [0]]), axis=0),
+            np.all(powers == np.array([[0], [1]]), axis=0),
+        )
+        powers = powers[:, ~linear]
+    return powers
+
+
 class BaseGridSpec(zdx.Base):
     """Base class for coordinate and sampling specifications."""
 
@@ -543,39 +575,6 @@ class TransformChain(CoordTransform):
         for transformation in self.transformations.values():
             coords = transformation(coords)
         return coords
-
-
-def _distortion_powers(order, orders, powers, shift_invariant):
-    """Resolve the polynomial powers used by a coordinate distortion."""
-    # Validate mutually exclusive term specifications
-    if sum(value is not None for value in (order, orders, powers)) > 1:
-        raise ValueError("Provide only one of order, orders, or powers.")
-
-    # Validate explicit powers or generate selected total orders
-    if powers is not None:
-        powers = np.asarray(powers, dtype=float)
-        if powers.ndim != 2 or powers.shape[0] != 2:
-            raise ValueError("powers must have shape (2, n_terms).")
-    else:
-        if orders is None:
-            order = 1 if order is None else int(order)
-            orders = tuple(range(1, order + 1))
-        else:
-            orders = tuple(map(int, orders))
-        if not orders or any(order < 1 for order in orders):
-            raise ValueError("orders must contain positive integers.")
-        powers = dlu.polynomial_powers(max(orders), 2)[:, 1:]
-        powers = powers[:, np.isin(powers.sum(0), np.asarray(orders))]
-
-    # Remove linear coordinate terms for shift-invariant distortions
-    if shift_invariant:
-        linear = np.logical_or(
-            np.all(powers == np.array([[1], [0]]), axis=0),
-            np.all(powers == np.array([[0], [1]]), axis=0),
-        )
-        powers = powers[:, ~linear]
-    return powers
-
 
 class DistortCoords(CoordTransform):
     """Apply a polynomial distortion to Cartesian coordinates.

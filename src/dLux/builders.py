@@ -26,6 +26,39 @@ __all__ = [
 ]
 
 
+def _initialise_coefficients(shape, coefficients=None, key=None, initial_shape=None):
+    """Return explicit, random, or zero coefficients for a basis shape."""
+    # Validate mutually exclusive initialization inputs
+    if coefficients is not None and key is not None:
+        raise ValueError("Provide only one of coefficients or key.")
+
+    # Initialize explicit or random coefficients
+    if key is not None:
+        initial_shape = shape if initial_shape is None else initial_shape
+        coefficients = jr.normal(key, initial_shape)
+    elif coefficients is None and initial_shape is not None:
+        coefficients = np.zeros(initial_shape)
+    return coefficients
+
+
+def _explicit_basis(
+    basis, coefficients=None, key=None, coefficient_shape=None, initial_shape=None
+):
+    """Materialise a sampled OPD basis with explicit or random coefficients."""
+    from .parametric import Basis
+
+    # Resolve the native and initial coefficient shapes
+    coefficient_shape = (
+        basis.shape[:-2] if coefficient_shape is None else tuple(coefficient_shape)
+    )
+    coefficients = _initialise_coefficients(
+        coefficient_shape, coefficients, key, initial_shape
+    )
+
+    # Materialise the sampled basis
+    return Basis(basis, coefficients=coefficients, coefficient_shape=coefficient_shape)
+
+
 class Norm(zdx.Base):
     """Normalise and scale sampled basis modes over their aperture support.
 
@@ -74,40 +107,6 @@ class ApertureData(zdx.Base):
         self.support = dlu.to_value(support, dtype=bool)
         self.diameter = dlu.to_value(diameter)
         self.centers = dlu.to_value(centers, optional=True)
-
-
-def _initialise_coefficients(shape, coefficients=None, key=None, initial_shape=None):
-    """Return explicit, random, or zero coefficients for a basis shape."""
-    # Validate mutually exclusive initialization inputs
-    if coefficients is not None and key is not None:
-        raise ValueError("Provide only one of coefficients or key.")
-
-    # Initialize explicit or random coefficients
-    if key is not None:
-        initial_shape = shape if initial_shape is None else initial_shape
-        coefficients = jr.normal(key, initial_shape)
-    elif coefficients is None and initial_shape is not None:
-        coefficients = np.zeros(initial_shape)
-    return coefficients
-
-
-def _explicit_basis(
-    basis, coefficients=None, key=None, coefficient_shape=None, initial_shape=None
-):
-    """Materialise a sampled OPD basis with explicit or random coefficients."""
-    from .parametric import Basis
-
-    # Resolve the native and initial coefficient shapes
-    coefficient_shape = (
-        basis.shape[:-2] if coefficient_shape is None else tuple(coefficient_shape)
-    )
-    coefficients = _initialise_coefficients(
-        coefficient_shape, coefficients, key, initial_shape
-    )
-
-    # Materialise the sampled basis
-    return Basis(basis, coefficients=coefficients, coefficient_shape=coefficient_shape)
-
 
 class OPDDef(zdx.Base):
     """Define sampled OPD data from coordinates and aperture geometry."""

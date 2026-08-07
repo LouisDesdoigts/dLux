@@ -26,6 +26,12 @@ __all__ = [
 ]
 
 
+def resolve(value: Any, dtype: Any = None, **context: Any) -> Any:
+    """Evaluate a parameterisation and optionally cast the result."""
+    value = value.evaluate(**context) if isinstance(value, Parametric) else value
+    return value if value is None or dtype is None else dlu.to_value(value, dtype)
+
+
 class ParametricHolder(zdx.Base):
     """Base class for objects containing context-dependent parameters."""
 
@@ -52,13 +58,6 @@ class Parametric(zdx.Base):
         raise NotImplementedError(
             f"{type(self).__name__} does not define spectral integration."
         )
-
-
-def resolve(value: Any, dtype: Any = None, **context: Any) -> Any:
-    """Evaluate a parameterisation and optionally cast the result."""
-    value = value.evaluate(**context) if isinstance(value, Parametric) else value
-    return value if value is None or dtype is None else dlu.to_value(value, dtype)
-
 
 class Transform(Parametric):
     """Apply a callable transformation to a realised parameterisation."""
