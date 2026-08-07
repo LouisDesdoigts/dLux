@@ -1,3 +1,5 @@
+"""Resolve fluxes and positions for astronomical source models."""
+
 import jax.numpy as np
 from jax import Array
 
@@ -5,44 +7,17 @@ __all__ = ["fluxes_from_contrast", "positions_from_sep"]
 
 
 def fluxes_from_contrast(mean_flux: float, contrast: float) -> Array:
-    """
-    Computes the fluxes of a binary object given the mean flux and contrast.
-
-    Parameters
-    ----------
-    mean_flux : float
-        The mean flux of the binary object.
-    contrast : float
-        The contrast of the binary object.
-
-    Returns
-    -------
-    fluxes : Array
-        The flux (flux1, flux2) of the binary object.
-    """
+    """Return two component fluxes with the requested mean and contrast."""
     return 2 * np.array([contrast * mean_flux, mean_flux]) / (1 + contrast)
 
 
 def positions_from_sep(
     position: Array, separation: float, position_angle: float
 ) -> Array:
-    """
-    Computes the on-sky positions of a binary object given the separation and
-    position angle.
+    """Return two on-sky positions about a mean position.
 
-    Parameters
-    ----------
-    position : Array, radians
-        The on-sky position of the primary object.
-    separation : float, radians
-        The separation of the binary object.
-    position_angle : float, radians
-        The position angle of the binary object.
-
-    Returns
-    -------
-    position : Array, radians
-        The ((x, y), (x, y)) on-sky position of this object.
+    ``position`` and ``separation`` are in radians, ``position_angle`` is measured
+    counter-clockwise, and the result has shape ``(2, 2)`` in ``(x, y)`` order.
     """
     r, phi = separation / 2, position_angle
     sep_vec = np.array([r * np.sin(phi), r * np.cos(phi)])

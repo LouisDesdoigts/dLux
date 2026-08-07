@@ -1,3 +1,5 @@
+"""Manipulate sampled arrays while preserving their spatial conventions."""
+
 import jax.numpy as np
 from jax import Array
 
@@ -35,8 +37,7 @@ def _check_parity(sizes_in, sizes_out, operation):
 
 
 def pad_to(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> Array:
-    """
-    Centrally pad the final spatial axes to a target size.
+    """Centrally pad the final spatial axes to a target size.
 
     Parameters
     ----------
@@ -44,7 +45,7 @@ def pad_to(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> A
         The input array to pad.
     npixels : int or tuple[int, ...]
         Target size in physical-axis order. A scalar preserves the historical
-        behavior of padding the final two axes to a square.
+        behaviour of padding the final two axes to a square.
     fill : float = 0.
         The value to fill the array with.
 
@@ -67,8 +68,7 @@ def pad_to(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> A
 
 
 def crop_to(array: Array, npixels: int | tuple[int, ...]) -> Array:
-    """
-    Centrally crop the final spatial axes to a target size.
+    """Centrally crop the final spatial axes to a target size.
 
     Parameters
     ----------
@@ -76,7 +76,7 @@ def crop_to(array: Array, npixels: int | tuple[int, ...]) -> Array:
         The input array to crop.
     npixels : int or tuple[int, ...]
         Target size in physical-axis order. A scalar preserves the historical
-        behavior of cropping the final two axes to a square.
+        behaviour of cropping the final two axes to a square.
 
     Returns
     -------
@@ -100,8 +100,7 @@ def crop_to(array: Array, npixels: int | tuple[int, ...]) -> Array:
 
 
 def resize(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> Array:
-    """
-    Centrally resize the final spatial axes using cropping and padding.
+    """Centrally resize the final spatial axes using cropping and padding.
 
     Parameters
     ----------
@@ -128,8 +127,7 @@ def resize(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> A
 
 
 def downsample(array: Array, n: int | tuple[int, ...], mean: bool = True) -> Array:
-    """
-    Downsample the final spatial axes by integer factors.
+    """Downsample the final spatial axes by integer factors.
 
     Parameters
     ----------

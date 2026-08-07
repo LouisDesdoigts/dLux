@@ -75,6 +75,7 @@ class InvertibleShape(Shape):
         self.invert = bool(invert)
 
     def evaluate(self, *, coordinates, pixel_scale=None, **kwargs) -> Array:
+        """Evaluate the hard or softened transmission and apply inversion."""
         if self.edge is None:
             transmission = self.evaluate_hard(coordinates)
         else:
@@ -91,7 +92,7 @@ class InvertibleShape(Shape):
 
 
 class Circle(InvertibleShape):
-    """A circular transmissive aperture described by its diameter."""
+    """A circular transmission described by its diameter."""
 
     diameter: Array
 
@@ -104,12 +105,15 @@ class Circle(InvertibleShape):
 
     @property
     def extent(self) -> Array:
+        """Return the circular bounding radius."""
         return self.diameter / 2
 
     def evaluate_hard(self, coordinates):
+        """Evaluate a hard circular boundary."""
         return dlu.circle(coordinates, self.diameter)
 
     def evaluate_soft(self, coordinates, clip):
+        """Evaluate a softened circular boundary."""
         return dlu.soft_circle(coordinates, self.diameter, clip)
 
 
@@ -127,12 +131,15 @@ class Square(InvertibleShape):
 
     @property
     def extent(self) -> Array:
+        """Return the radius of the square bounding circle."""
         return self.width / np.sqrt(2)
 
     def evaluate_hard(self, coordinates):
+        """Evaluate a hard square boundary."""
         return dlu.square(coordinates, self.width)
 
     def evaluate_soft(self, coordinates, clip):
+        """Evaluate a softened square boundary."""
         return dlu.soft_square(coordinates, self.width, clip)
 
 
@@ -152,12 +159,15 @@ class Rectangle(InvertibleShape):
 
     @property
     def extent(self) -> Array:
+        """Return the radius of the rectangular bounding circle."""
         return np.hypot(self.width, self.height) / 2
 
     def evaluate_hard(self, coordinates):
+        """Evaluate a hard rectangular boundary."""
         return dlu.rectangle(coordinates, self.width, self.height)
 
     def evaluate_soft(self, coordinates, clip):
+        """Evaluate a softened rectangular boundary."""
         return dlu.soft_rectangle(coordinates, self.width, self.height, clip)
 
 
@@ -179,12 +189,15 @@ class RegularPolygon(InvertibleShape):
 
     @property
     def extent(self) -> Array:
+        """Return the polygon circumradius."""
         return self.diameter / 2
 
     def evaluate_hard(self, coordinates):
+        """Evaluate a hard regular-polygon boundary."""
         return dlu.reg_polygon(coordinates, self.diameter, self.nsides)
 
     def evaluate_soft(self, coordinates, clip):
+        """Evaluate a softened regular-polygon boundary."""
         return dlu.soft_reg_polygon(coordinates, self.diameter, self.nsides, clip)
 
 
@@ -205,9 +218,11 @@ class Spider(InvertibleShape):
             raise ValueError("angles must be a one-dimensional array.")
 
     def evaluate_hard(self, coordinates):
+        """Evaluate hard radial support arms."""
         return 1 - dlu.spider(coordinates, self.width, self.angles)
 
     def evaluate_soft(self, coordinates, clip):
+        """Evaluate softened radial support arms."""
         return dlu.soft_spider(coordinates, self.width, self.angles, clip)
 
 
@@ -223,9 +238,11 @@ class Complement(Shape):
 
     @property
     def extent(self) -> Array | None:
+        """Return the wrapped shape extent."""
         return self.shape.extent
 
     def evaluate(self, **context) -> Array:
+        """Evaluate and invert the wrapped shape transmission."""
         return 1 - self.shape.evaluate(**context)
 
 
@@ -245,9 +262,11 @@ class TransformedShape(Shape):
 
     @property
     def extent(self) -> Array | None:
+        """Return the untransformed wrapped-shape extent."""
         return self.shape.extent
 
     def evaluate(self, *, coordinates, **context) -> Array:
+        """Evaluate the wrapped shape in its transformed coordinate frame."""
         return self.shape.evaluate(
             coordinates=self.transformation(coordinates), **context
         )

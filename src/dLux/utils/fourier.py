@@ -1,3 +1,5 @@
+"""Evaluate discrete Fourier transforms on regular and arbitrary grids."""
+
 from jax import Array
 import jax.numpy as np
 from abcdLux.mft import mft_kernels
@@ -6,8 +8,7 @@ __all__ = ["fourier_kernel_1d", "fourier_kernels", "eval_fourier_basis"]
 
 
 def _to_xy(value: int | tuple[int], name: str) -> tuple[int]:
-    """
-    Casts an integer or tuple input to an `(x, y)` tuple.
+    """Casts an integer or tuple input to an `(x, y)` tuple.
 
     Parameters
     ----------
@@ -34,8 +35,7 @@ def _to_xy(value: int | tuple[int], name: str) -> tuple[int]:
 
 
 def _fourier_mode_order(n_modes: int) -> Array:
-    """
-    Calculates the Fourier mode ordering for the complex exponential basis.
+    """Calculates the Fourier mode ordering for the complex exponential basis.
 
     Parameters
     ----------
@@ -63,8 +63,7 @@ def _fourier_mode_order(n_modes: int) -> Array:
 
 
 def _map_to_real(kernel: Array) -> Array:
-    """
-    Maps a complex exponential Fourier kernel to the real Fourier basis.
+    """Maps a complex exponential Fourier kernel to the real Fourier basis.
 
     The input kernel is assumed to use the mode ordering
     `[0, +1, -1, +2, -2, ...]`. The returned kernel uses
@@ -117,8 +116,7 @@ def _map_to_real(kernel: Array) -> Array:
 
 
 def fourier_kernel_1d(n_modes: int, npix: int, scale: float = 1.0) -> Array:
-    """
-    Calculates a cached 1D Fourier basis evaluation kernel.
+    """Calculates a cached 1D Fourier basis evaluation kernel.
 
     A unit-amplitude mode with `scale=1` evaluates to values between `-1` and `+1`.
 
@@ -152,8 +150,7 @@ def fourier_kernel_1d(n_modes: int, npix: int, scale: float = 1.0) -> Array:
 def fourier_kernels(
     n_modes: int | tuple[int], npix: int | tuple[int], scale: float = 1.0
 ) -> tuple[Array, Array]:
-    """
-    Calculates the cached 2D Fourier basis evaluation kernels.
+    """Calculates the cached 2D Fourier basis evaluation kernels.
 
     The input `n_modes` and `npix` are interpreted in `(x, y)` order. If an
     integer is provided it is cast to `(value, value)`. The returned kernels satisfy
@@ -191,8 +188,7 @@ def fourier_kernels(
 
 
 def eval_fourier_basis(coefficients: Array, Kx: Array, Ky: Array) -> Array:
-    """
-    Evaluates a 2D real Fourier basis using cached kernels.
+    """Evaluates a 2D real Fourier basis using cached kernels.
 
     The coefficient array is assumed to be ordered as `(x, y)`, with shape
     `(n_modes_x, n_modes_y)`. The returned output is also ordered as `(x, y)`,

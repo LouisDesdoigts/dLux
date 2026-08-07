@@ -1,4 +1,6 @@
-from collections import Counter, defaultdict, OrderedDict
+"""Validate and standardize common dLux input values."""
+
+from collections import Counter, OrderedDict, defaultdict
 from numbers import Integral
 from typing import Any, Callable
 import jax.numpy as np
@@ -85,8 +87,7 @@ def reexport(modules: tuple[object, ...], namespace: dict[str, object]) -> list[
 
 
 def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
-    """
-    Maps a function across a pytree, flattening it and turning it into an
+    """Maps a function across a pytree, flattening it and turning it into an
     array.
 
     Parameters
@@ -109,8 +110,7 @@ def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
 
 
 def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> dict:
-    """
-    Converts some input list to a dictionary. The input list entries can either be
+    """Converts some input list to a dictionary. The input list entries can either be
     objects, in which case the keys are taken as the class name, else a (key, object)
     tuple can be used to specify a key.
 
@@ -152,8 +152,7 @@ def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> 
 
 
 def insert_layer(layers: dict, layer: Any, index: int, allowed_type: Any) -> dict:
-    """
-    Inserts a layer into a dictionary of layers at a specified index. This function
+    """Inserts a layer into a dictionary of layers at a specified index. This function
     calls the list2dictionary function to ensure all keys remain unique. Note that this
     can result in some keys being modified if they are duplicates. The input 'layer'
     can be a tuple of (key, layer) to specify a key, else the key is taken as the
@@ -181,8 +180,7 @@ def insert_layer(layers: dict, layer: Any, index: int, allowed_type: Any) -> dic
 
 
 def remove_layer(layers: dict, key: str) -> dict:
-    """
-    Removes a layer from a dictionary of layers, specified by its key.
+    """Removes a layer from a dictionary of layers, specified by its key.
 
     Parameters
     ----------
@@ -202,8 +200,7 @@ def remove_layer(layers: dict, key: str) -> dict:
 
 
 def imshow_extent(size: float) -> Array:
-    """
-    Returns a square imshow extent in [xmin, xmax, ymin, ymax] order.
+    """Returns a square imshow extent in [xmin, xmax, ymin, ymax] order.
 
     Parameters
     ----------
@@ -222,8 +219,7 @@ def imshow_extent(size: float) -> Array:
 def missing_attribute_error(
     owner: Any, key: str, valid_attrs: list[str] = None, hint: str = None
 ) -> AttributeError:
-    """
-    Builds a consistent AttributeError message for missing attributes.
+    """Builds a consistent AttributeError message for missing attributes.
 
     Parameters
     ----------
@@ -253,8 +249,7 @@ def missing_attribute_error(
 
 
 def from_complex(array: Array, complex: bool = True) -> Array:
-    """
-    Maps a complex array to a 2-channel representation (real/imag or amplitude/phase).
+    """Map a complex array to a two-channel representation.
 
     Parameters
     ----------

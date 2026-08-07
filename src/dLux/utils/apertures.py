@@ -1,3 +1,5 @@
+"""Generate sampled telescope apertures and aperture supports."""
+
 import equinox as eqx
 from jax import Array, vmap
 import jax.numpy as np
@@ -17,8 +19,7 @@ __all__ = [
 
 @eqx.filter_jit
 def _hex_cens(rmax: float) -> Array:
-    """
-    Returns the centres of the six neighbouring hexagons.
+    """Returns the centres of the six neighbouring hexagons.
 
     Parameters
     ----------
@@ -36,8 +37,7 @@ def _hex_cens(rmax: float) -> Array:
 
 @eqx.filter_jit
 def segmented_hex_cens(nrings: int, rmax: float, gap: float = 0.0) -> Array:
-    """
-    Hex-segment centres including the central segment.
+    """Hex-segment centres including the central segment.
 
     Parameters
     ----------
@@ -84,8 +84,7 @@ def segmented_hex_cens(nrings: int, rmax: float, gap: float = 0.0) -> Array:
 
 
 def non_redundant_support(apertures: Array) -> Array:
-    """
-    Returns a non-redundant support mask for overlapping sub-apertures.
+    """Returns a non-redundant support mask for overlapping sub-apertures.
 
     Parameters
     ----------
@@ -131,8 +130,7 @@ def circular_aperture(
     zernike_oversize: float = 0.01,
     return_support: bool = False,
 ) -> Array | tuple[Array, ...]:
-    """
-    Builds a static circular aperture.
+    """Builds a static circular aperture.
 
     Parameters
     ----------
@@ -226,8 +224,7 @@ def segmented_aperture(
     zernike_oversize: float = 0.01,
     return_support: bool = False,
 ) -> Array | tuple[Array, ...]:
-    """
-    Builds a static segmented hexagonal aperture.
+    """Builds a static segmented hexagonal aperture.
 
     Parameters
     ----------
@@ -288,7 +285,7 @@ def segmented_aperture(
 
     # Remove inner rings before computing any apertures.
     # Ring k (0-indexed) has 6k segments (ring 0 = 1 center). Cumulative:
-    #   1 + 6*(1+2+...+(k-1)) = 1 + 3*k*(k-1)  (centered hexagonal numbers)
+    #   1 + 6*(1+2+...+(k-1)) = 1 + 3*k*(k-1)  (centred hexagonal numbers)
     if nrings_excluded > 0:
         n_excluded = 1 + 3 * nrings_excluded * (nrings_excluded - 1)
         cens = cens[n_excluded:]
@@ -351,8 +348,7 @@ def sparse_aperture(
     zernike_oversize: float = 0.01,
     return_support: bool = False,
 ) -> Array | tuple[Array, ...]:
-    """
-    Builds a static sparse aperture from explicit sub-aperture centres.
+    """Builds a static sparse aperture from explicit sub-aperture centres.
 
     Parameters
     ----------
@@ -450,8 +446,7 @@ def hst_like(
     zernike_oversize: float = 0.01,
     return_support: bool = False,
 ) -> Array | tuple[Array, ...]:
-    """
-    Builds an HST-like circular aperture model.
+    """Builds an HST-like circular aperture model.
 
     Parameters
     ----------
@@ -515,8 +510,7 @@ def jwst_like(
     zernike_oversize: float = 0.01,
     return_support: bool = False,
 ) -> Array | tuple[Array, ...]:
-    """
-    Builds a JWST-like segmented aperture model.
+    """Builds a JWST-like segmented aperture model.
 
     Parameters
     ----------
@@ -587,8 +581,7 @@ def euclid_like(
     zernike_oversize: float = 0.01,
     return_support: bool = False,
 ) -> Array | tuple[Array, ...]:
-    """
-    Builds a Euclid-like circular aperture model.
+    """Builds a Euclid-like circular aperture model.
 
     Parameters
     ----------

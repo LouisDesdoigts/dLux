@@ -90,6 +90,7 @@ class InterpolatedIndex(Parametric):
             raise ValueError("wavelengths must be strictly increasing.")
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
+        """Interpolate the index at the wavefront wavelength."""
         return ipx.interp1d(
             wavefront.wavelength,
             self.wavelengths,

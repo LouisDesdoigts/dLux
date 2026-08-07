@@ -28,9 +28,12 @@ __all__ = [
 
 def _propagation_inputs(wf):
     """Broadcast wavelength and coordinate axes over non-spatial field dimensions."""
+    # Broadcast wavelength over intrinsic non-spatial field axes
     wavelength = np.asarray(wf.wavelength)
     extra = wf.phasor.ndim - wavelength.ndim - 2
     wavelength = wavelength.reshape(wavelength.shape + (1,) * extra)
+
+    # Promote coordinate axes over Jones dimensions when required
     x, y = wf.axes
     if wf.is_polarised:
         x, y = x[..., None, None, :], y[..., None, None, :]
@@ -39,23 +42,29 @@ def _propagation_inputs(wf):
 
 def _propagate_mft(wf, spec, ABCD=None, **kwargs):
     """Propagate every field to an explicit output grid."""
+    # Resolve input and requested output coordinate axes
     wavelength, x, y = _propagation_inputs(wf)
     axes_out = spec.axes
 
+    # Define propagation of one monochromatic field
     def propagate(field, lam, x, y):
         if ABCD is None:
             return dlu.MFT(field, lam, (x, y), axes_out, **kwargs)
         return dlu.ABCD_MFT(field, lam, (x, y), axes_out, ABCD)
 
-    propagate = np.vectorize(propagate, signature="(n,m),(),(m),(n)->(p,q)")
-    return wf.set(phasor=propagate(wf.phasor, wavelength, x, y), spec=spec)
+    # Vectorise propagation over leading field dimensions
+    signature = "(n,m),(),(m),(n)->(p,q)"
+    propagate = np.vectorize(propagate, signature=signature)
+    phasor = propagate(wf.phasor, wavelength, x, y)
+
+    # Update the propagated field and requested grid
+    return wf.set(phasor=phasor, spec=spec)
 
 
 def _propagate_fft(
     wf, spec, unit=None, ABCD=None, focal_length=None, inverse=False, **kwargs
 ):
     """Propagate every field at native FFT sampling."""
-
     # Resolve the output units, center, and padding
     if unit is None:
         unit = "m" if inverse else "rad"
@@ -87,13 +96,13 @@ def _propagate_fft(
         )
         return field, *axes
 
-    # Vectorize propagation over the leading field axes
+    # Vectorise propagation over the leading field axes
     signature = "(n,m),(),(m),(n)->(p,q),(q),(p)"
     propagate = np.vectorize(propagate, signature=signature)
     wavelength, x, y = _propagation_inputs(wf)
     field, x, y = propagate(wf.phasor, wavelength, x, y)
 
-    # Remove the polarization axes from the output coordinates
+    # Remove the polarisation axes from the output coordinates
     if wf.is_polarised:
         x, y = x[..., 0, 0, :], y[..., 0, 0, :]
 
@@ -101,7 +110,7 @@ def _propagate_fft(
     field = spec.crop_array(field)
     x, y = spec.crop_axes((x, y))
 
-    # Construct the realized output grid
+    # Construct the realised output grid
     spec = GridSpec.from_axes((x, y), unit)
 
     # Update the propagated wavefront
@@ -110,14 +119,15 @@ def _propagate_fft(
 
 def _propagate_free_space(wf, spec, distance, crop):
     """Propagate every field over a free-space distance."""
+    # Define and vectorise monochromatic angular-spectrum propagation
     wavelength, x, y = _propagation_inputs(wf)
-    propagate = np.vectorize(
-        lambda field, lam, x, y: dlu.ASM(
-            field, lam, (x, y), distance, crop=False, **spec.padding
-        ),
-        signature="(n,m),(),(m),(n)->(p,q)",
+    prop_fn = lambda field, lam, x, y: dlu.ASM(
+        field, lam, (x, y), distance, crop=False, **spec.padding
     )
+    propagate = np.vectorize(prop_fn, signature="(n,m),(),(m),(n)->(p,q)")
     field = propagate(wf.phasor, wavelength, x, y)
+
+    # Apply optional output cropping and update the realised grid
     field = spec.crop_array(field) if crop else field
     spec = wf.spec.resize(field.shape[-2:][::-1])
     return wf.set(phasor=field, spec=spec)
@@ -268,7 +278,19 @@ class FocalPropagator(Propagator):
 
 
 class Fraunhofer(FocalPropagator):
-    """Conjugate-plane propagation using an MFT or FFT."""
+    """Propagate between conjugate planes using an MFT or FFT.
+
+    Parameters
+    ----------
+    spec : GridSpec or ResizeSpec
+        Explicit MFT output grid or FFT resizing specification.
+    focal_length : float or None
+        Focal length in meters. Omit for angular focal-plane coordinates.
+    method : {"mft", "fft"}
+        Numerical propagation method.
+    inverse : bool
+        Propagate from the focal plane back to a physical pupil plane.
+    """
 
     spec: BaseGridSpec
     focal_length: Array | None
@@ -281,6 +303,7 @@ class Fraunhofer(FocalPropagator):
         self.method = method
 
     def __call__(self, wavefront):
+        """Propagate a wavefront between conjugate planes."""
         self.validate(wavefront)
         if self.method == "fft":
             return _propagate_fft(
@@ -295,7 +318,22 @@ class Fraunhofer(FocalPropagator):
 
 
 class Fresnel(FocalPropagator):
-    """Defocused focal propagation using an FFT, MFT, or LCT."""
+    """Propagate between defocused focal planes using an FFT, MFT, or LCT.
+
+    Parameters
+    ----------
+    spec : GridSpec or ResizeSpec
+        Explicit MFT/LCT output grid or FFT resizing specification.
+    defocus : float
+        Longitudinal defocus distance in meters.
+    focal_length : float or None
+        Focal length in meters. Omit for angular focal-plane coordinates.
+    method : {"fft", "mft", "lct"}
+        Numerical propagation method.
+    inverse : bool
+        Reverse MFT or LCT propagation direction. Inverse FFT propagation is not
+        currently supported.
+    """
 
     spec: BaseGridSpec
     focal_length: Array | None
@@ -317,6 +355,7 @@ class Fresnel(FocalPropagator):
         self.defocus = dlu.to_value(defocus)
 
     def __call__(self, wavefront):
+        """Propagate a wavefront between defocused focal planes."""
         self.validate(wavefront)
         if self.method == "fft":
             return _propagate_fft(
@@ -335,7 +374,17 @@ class Fresnel(FocalPropagator):
 
 
 class ABCDPropagator(Propagator):
-    """Propagate through an ordered ABCD system using an LCT or FFT."""
+    """Propagate through an ordered ABCD system using an LCT or FFT.
+
+    Parameters
+    ----------
+    ABCDs : sequence or dict
+        Ordered ``ABCDElement`` objects composing the optical system.
+    spec : GridSpec or ResizeSpec
+        Explicit LCT output grid or FFT resizing specification.
+    method : {"lct", "fft"}
+        Numerical propagation method.
+    """
 
     spec: BaseGridSpec
     ABCDs: dict
@@ -368,6 +417,7 @@ class ABCDPropagator(Propagator):
         _validate_grid(self.spec, "output", wavefront.spec.ndim, angular=False)
 
     def __call__(self, wavefront):
+        """Propagate a wavefront through the composed ABCD system."""
         self.validate(wavefront)
         if self.method == "fft":
             return _propagate_fft(
@@ -377,7 +427,17 @@ class ABCDPropagator(Propagator):
 
 
 class FreeSpace(Propagator):
-    """Paraxial angular-spectrum propagation over a free-space distance."""
+    """Paraxial angular-spectrum propagation over a free-space distance.
+
+    Parameters
+    ----------
+    distance : float
+        Signed propagation distance in meters.
+    spec : ResizeSpec or None
+        Optional padding, cropping, or output-size specification.
+    crop : bool
+        Crop the propagated array according to ``spec``.
+    """
 
     spec: BaseGridSpec
     distance: Array
@@ -393,5 +453,6 @@ class FreeSpace(Propagator):
         self.crop = bool(crop)
 
     def __call__(self, wavefront):
+        """Propagate a wavefront over the configured free-space distance."""
         self.validate(wavefront)
         return _propagate_free_space(wavefront, self.spec, self.distance, self.crop)

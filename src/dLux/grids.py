@@ -25,7 +25,18 @@ class BaseGridSpec(zdx.Base):
 
 
 class ResizeSpec(BaseGridSpec):
-    """Array sampling defined by an explicit size or pad/crop factors."""
+    """Define output sampling by an explicit size or integer resize factors.
+
+    Parameters
+    ----------
+    n : int, tuple[int, ...], or None
+        Explicit output sizes in physical-axis order. Mutually exclusive with
+        non-unit ``pad`` or ``crop``.
+    pad, crop : int or tuple[int, ...]
+        Integer factors applied before and after an operation.
+    c : Array or None
+        Optional output center in the associated propagation unit.
+    """
 
     n: tuple[int, ...] | None
     pad: tuple[int, ...]
@@ -100,13 +111,7 @@ class ResizeSpec(BaseGridSpec):
         return dlu.crop_to(array, self.crop_size(array.shape))
 
     def crop_axes(self, axes: tuple[Array, ...]) -> tuple[Array, ...]:
-        """Crop physical coordinate axes using this specification.
-
-        Parameters
-        ----------
-        axes : tuple[Array, ...]
-            Coordinate axes in physical-axis order.
-        """
+        """Centrally crop physical coordinate axes to this output sampling."""
         if self.explicit:
             sizes = self.n
         else:
@@ -127,6 +132,19 @@ class GridSpec(BaseGridSpec):
     Axis parameters are ordered physically as ``(x, y, z, ...)``. Array dimensions
     are ordered in reverse, so a two-dimensional specification with
     ``n=(nx, ny)`` produces coordinate arrays with shape ``(2, ny, nx)``.
+
+    Parameters
+    ----------
+    n : int, tuple[int, ...], or None
+        Number of samples along each physical axis.
+    d : ArrayLike or None
+        Pixel scales in ``unit`` along each physical axis.
+    c : ArrayLike or None
+        Grid centers in ``unit`` along each physical axis.
+    unit : str or None
+        Physical or angular unit associated with ``d`` and ``c``.
+    diam : ArrayLike or None
+        Alternative physical extent used to calculate ``d = diam / n``.
     """
 
     n: tuple[int, ...] | None
@@ -135,11 +153,13 @@ class GridSpec(BaseGridSpec):
     unit: str | None
 
     def __init__(self, n=None, d=None, c=None, unit=None, diam=None):
+        # Validate mutually dependent sampling inputs
         if d is not None and diam is not None:
             raise ValueError("Provide only one of d or diam.")
         if diam is not None and n is None:
             raise ValueError("n must be provided with diam.")
 
+        # Infer the physical dimensionality from non-scalar inputs
         values = [value for value in (n, d, c, diam) if value is not None]
         lengths = [
             np.asarray(value).shape[-1]
@@ -148,15 +168,18 @@ class GridSpec(BaseGridSpec):
         ]
         ndim = max(lengths, default=1 if values else 0)
 
+        # Resolve sizes and optional diameter-based sampling
         self.n = None if n is None else dlu.as_size(n, ndim, "n")
 
         if diam is not None:
             diam = dlu.as_axis(diam, ndim, "diam")
             d = diam / np.asarray(self.n)
 
+        # Standardize sampling and center arrays
         self.d = dlu.as_axis(d, ndim, "d")
         self.c = dlu.as_axis(c, ndim, "c")
 
+        # Validate concrete positive pixel scales
         if (
             self.d is not None
             and not isinstance(self.d, core.Tracer)
@@ -164,6 +187,7 @@ class GridSpec(BaseGridSpec):
         ):
             raise ValueError("d must contain positive values.")
 
+        # Validate and store the declared coordinate unit
         self.unit = None if unit is None else self._validate_unit(unit)
 
     @staticmethod
@@ -227,13 +251,12 @@ class GridSpec(BaseGridSpec):
         Parameters
         ----------
         axes : tuple[Array, ...]
-            Regularly sampled coordinate axes in physical-axis order and SI
-            units. Each axis must contain at least two samples. Leading batch
-            dimensions are preserved.
+            Regularly sampled coordinate axes in physical-axis order and SI units.
+            Regular sampling is required but not validated. Each axis must contain
+            at least two samples. Leading batch dimensions are preserved.
         unit : str or None
             Unit used to store the recovered pixel scales and centers.
         """
-
         # Recover the pixel counts in physical-axis order
         axes = tuple(axes)
         n = tuple(axis.shape[-1] for axis in axes)
@@ -284,10 +307,13 @@ class GridSpec(BaseGridSpec):
 
     def xs_for(self, n: tuple[int, ...]) -> tuple[Array, ...]:
         """Return coordinate axes for concrete physical-axis pixel counts."""
+        # Validate the requested physical-axis sizes
         if self.d is None:
             raise ValueError("d must be specified to calculate xs.")
         if len(n) != self.ndim:
             raise ValueError("n dimensionality must match the coordinate spec.")
+
+        # Broadcast sampling and centers over their leading dimensions
         batch = self.d.shape[:-1]
         if self.c is not None:
             batch = np.broadcast_shapes(batch, self.c.shape[:-1])
@@ -297,6 +323,8 @@ class GridSpec(BaseGridSpec):
             if self.c is None
             else np.broadcast_to(self.c, batch + (self.ndim,))
         )
+
+        # Generate one SI-valued coordinate vector per physical axis
         return tuple(
             (
                 center[..., i, None]
@@ -323,11 +351,14 @@ class GridSpec(BaseGridSpec):
 
     def coordinates_for(self, n: tuple[int, ...]) -> Array:
         """Return full coordinates for concrete physical-axis pixel counts."""
+        # Resolve the broadcast batch and output spatial shapes
         batch = self.d.shape[:-1]
         if self.c is not None:
             batch = np.broadcast_shapes(batch, self.c.shape[:-1])
         spacing = np.broadcast_to(self.d, batch + (self.ndim,))
         shape = tuple(n[::-1])
+
+        # Generate and broadcast each physical coordinate axis
         axes = []
         for i, size in enumerate(n):
             axis = (np.arange(size) - (size - 1) / 2) * spacing[..., i, None]
@@ -335,6 +366,8 @@ class GridSpec(BaseGridSpec):
             spatial_shape[self.ndim - i - 1] = size
             axis = axis.reshape(batch + tuple(spatial_shape))
             axes.append(np.broadcast_to(axis, batch + shape))
+
+        # Stack axes and apply the physical unit scale
         coordinates = np.stack(tuple(axes), axis=len(batch))
         if self.c is None:
             return coordinates * self.scale
@@ -396,7 +429,13 @@ class CoordTransform(zdx.Base):
 
 
 class TransformChain(CoordTransform):
-    """Apply an ordered collection of coordinate transformations."""
+    """Apply an ordered collection of coordinate transformations.
+
+    Parameters
+    ----------
+    transformations : sequence or dict
+        Named or unnamed ``CoordTransform`` objects in application order.
+    """
 
     transformations: dict
 
@@ -410,6 +449,7 @@ class TransformChain(CoordTransform):
         )
 
     def __call__(self, coords: Array) -> Array:
+        """Apply each coordinate transformation in insertion order."""
         coords = self.get_coordinates(coords)
         for transformation in self.transformations.values():
             coords = transformation(coords)
@@ -418,8 +458,11 @@ class TransformChain(CoordTransform):
 
 def _distortion_powers(order, orders, powers, shift_invariant):
     """Resolve the polynomial powers used by a coordinate distortion."""
+    # Validate mutually exclusive term specifications
     if sum(value is not None for value in (order, orders, powers)) > 1:
         raise ValueError("Provide only one of order, orders, or powers.")
+
+    # Validate explicit powers or generate selected total orders
     if powers is not None:
         powers = np.asarray(powers, dtype=float)
         if powers.ndim != 2 or powers.shape[0] != 2:
@@ -434,6 +477,8 @@ def _distortion_powers(order, orders, powers, shift_invariant):
             raise ValueError("orders must contain positive integers.")
         powers = dlu.polynomial_powers(max(orders), 2)[:, 1:]
         powers = powers[:, np.isin(powers.sum(0), np.asarray(orders))]
+
+    # Remove linear coordinate terms for shift-invariant distortions
     if shift_invariant:
         linear = np.logical_or(
             np.all(powers == np.array([[1], [0]]), axis=0),
@@ -444,7 +489,24 @@ def _distortion_powers(order, orders, powers, shift_invariant):
 
 
 class DistortCoords(CoordTransform):
-    """Polynomially distorted Cartesian coordinates."""
+    """Apply a polynomial distortion to Cartesian coordinates.
+
+    Polynomial coefficients have shape ``(2, n_terms)`` for output ``x`` and
+    ``y``. A leading coefficient axis vectorises independent distortions.
+
+    Parameters
+    ----------
+    order : int or None
+        Maximum total polynomial order.
+    distortion : Array or None
+        Distortion coefficients with trailing shape matching ``powers``.
+    orders : sequence[int] or None
+        Explicit total polynomial orders, mutually exclusive with ``order``.
+    powers : Array or None
+        Explicit powers with shape ``(2, n_terms)``.
+    shift_invariant : bool
+        Remove the linear coordinate terms from the parameterisation.
+    """
 
     powers: Array
     distortion: Array
@@ -469,6 +531,7 @@ class DistortCoords(CoordTransform):
         self.distortion = distortion
 
     def __call__(self, coords: Array) -> Array:
+        """Apply the configured polynomial coordinate distortion."""
         coords = self.get_coordinates(coords)
         if self.distortion.ndim > 2:
             apply = lambda distortion, coordinates: dlu.distort_coords(
@@ -481,7 +544,15 @@ class DistortCoords(CoordTransform):
 
 
 class AffineMap(CoordTransform):
-    """A direct affine coordinate map ``x' = matrix @ x + offset``."""
+    """Apply a direct affine coordinate map ``x' = matrix @ x + offset``.
+
+    Parameters
+    ----------
+    matrix : Array or None
+        Matrix with trailing shape ``(2, 2)``. Defaults to identity.
+    offset : Array or None
+        Offset with trailing shape ``(2,)``. Defaults to zero.
+    """
 
     matrix: Array
     offset: Array
@@ -497,6 +568,7 @@ class AffineMap(CoordTransform):
         self.offset = offset
 
     def __call__(self, coords: Array) -> Array:
+        """Apply the direct affine matrix and offset to coordinates."""
         coords = self.get_coordinates(coords)
         shift = self.offset[..., :, None, None]
         return np.einsum("...ij,...jxy->...ixy", self.matrix, coords) + shift
@@ -507,6 +579,19 @@ class Affine(CoordTransform):
 
     Translation, rotation, scale, and shear map coordinates into a transformed
     object's local frame. Operations are composed in the order supplied by ``order``.
+
+    Parameters
+    ----------
+    translation : ArrayLike or None
+        Two-dimensional physical translation.
+    rotation : ArrayLike or None
+        Counter-clockwise rotation in radians.
+    scale : ArrayLike or None
+        Scalar or two-dimensional coordinate scale.
+    shear : ArrayLike or None
+        Two-dimensional shear coefficients.
+    order : tuple[str, ...]
+        Order in which the supplied transformations are composed.
     """
 
     translation: Array | None
@@ -555,17 +640,20 @@ class Affine(CoordTransform):
 
     def _matrices(self) -> Array:
         """Return all affine components as ordered homogeneous matrices."""
+        # Initialize every optional component to the identity
         identity = np.eye(3)
 
         translation = identity
         if self.translation is not None:
             translation = identity.at[:2, 2].set(-self.translation)
 
+        # Construct the inverse rotation into the local coordinate frame
         rotation = identity
         if self.rotation is not None:
             cosine, sine = np.cos(self.rotation), np.sin(self.rotation)
             rotation = np.array([[cosine, -sine, 0], [sine, cosine, 0], [0, 0, 1]])
 
+        # Construct scale and shear components
         scale = identity
         if self.scale is not None:
             scale = np.diag(np.concatenate((1 / self.scale, np.ones(1))))
@@ -575,6 +663,7 @@ class Affine(CoordTransform):
             shear = shear.at[0, 1].set(self.shear[0])
             shear = shear.at[1, 0].set(self.shear[1])
 
+        # Select the configured component order
         matrices = np.stack((translation, rotation, scale, shear))
         indices = np.array(
             tuple(
@@ -591,6 +680,7 @@ class Affine(CoordTransform):
         return homogeneous[:2, :2], homogeneous[:2, 2]
 
     def __call__(self, coords: Array) -> Array:
+        """Apply the composed semantic affine transformation."""
         coords = self.get_coordinates(coords)
         matrix, offset = self.coefficients()
         shift = offset.reshape((2,) + (1,) * (coords.ndim - 1))

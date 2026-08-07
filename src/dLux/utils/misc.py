@@ -1,3 +1,5 @@
+"""Provide specialized numerical algorithms used by optical models."""
+
 import jax.numpy as np
 from jax import Array, vmap
 
@@ -5,8 +7,7 @@ __all__ = ["soft_binarise"]
 
 
 def _lsq_matrix(n: int, m: int = None) -> Array:
-    """
-    Calculate the least-squares matrix for fitting a plane to an n x m patch on the
+    """Calculate the least-squares matrix for fitting a plane to an n x m patch on the
     unit square.
 
     Parameters
@@ -35,10 +36,9 @@ def _lsq_matrix(n: int, m: int = None) -> Array:
 
 
 def _calc_area_fraction(coefficients: Array, epsilon: float = 1e-15) -> float:
-    """
-    Calculates the fractional area of a plane below zero using the a, b, c coefficients
-    from a plane defined by `z = ax + by + c`. The area is calculated as the integral
-    of the plane.
+    """Calculate the fractional area of a plane below zero.
+
+    The plane is defined by ``z = ax + by + c`` and integrated over the pixel.
 
     Parameters
     ----------
@@ -74,8 +74,7 @@ def _calc_area_fraction(coefficients: Array, epsilon: float = 1e-15) -> float:
 
 
 def soft_binarise(array: Array, oversample: int = 3) -> Array:
-    """
-    Applies the CLIMB algorithm originally introduced in
+    """Applies the CLIMB algorithm originally introduced in
     [Wong et al., 2021](https://ui.adsabs.harvard.edu/abs/2021JOSAB..38.2465W/abstract).
     Assumes a square input array.
 

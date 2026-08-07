@@ -28,32 +28,40 @@ __all__ = [
 
 
 class ParametricBasis(Parametric):
-    """Base class for coefficient-weighted basis parameterisations."""
+    """Base contract for coefficient-weighted basis parameterisations."""
 
     coefficients: Array
     shape: tuple[int, ...] = eqx.field(static=True)
 
     @property
     def coeffs(self: ParametricBasis) -> Array:
+        """Return the basis coefficients."""
         return self.coefficients
 
     @property
     def c(self: ParametricBasis) -> Array:
+        """Return the basis coefficients using their compact alias."""
         return self.coefficients
 
     @property
     def alpha(self: ParametricBasis) -> Array:
+        """Return the basis coefficients using their conventional alias."""
         return self.coefficients
 
     @property
     def coefficient_shape(self: ParametricBasis) -> tuple[int, ...]:
+        """Return the complete stored coefficient shape."""
         return self.coefficients.shape
 
     def _set_coefficients(
         self: ParametricBasis, coefficients: Array, coefficient_shape: tuple[int, ...]
     ) -> None:
+        """Validate and assign coefficients with a native basis shape."""
+        # Standardize coefficients and their native shape
         coefficients = dlu.to_value(coefficients)
         coefficient_shape = tuple(coefficient_shape)
+
+        # Validate trailing basis dimensions while allowing compact vectors
         compact = coefficient_shape == (1,) and coefficients.ndim == 1
         if (
             not compact
@@ -64,16 +72,23 @@ class ParametricBasis(Parametric):
                 "dimensions. "
                 f"Expected {coefficient_shape}, got {coefficients.shape}."
             )
+
+        # Store the coefficients and native contraction shape
         self.coefficients = coefficients
         self.shape = coefficient_shape
 
     def evaluate_basis(self, basis: Array) -> Array:
         """Apply global or leading-axis-vectorised coefficients to a basis."""
+        # Evaluate coefficients shared across the complete basis
         if self.coefficients.shape == self.shape:
             return dlu.eval_basis(basis, self.coefficients)
+
+        # Vectorise a compact single-mode basis over coefficients
         if self.shape == (1,) and self.coefficients.ndim == 1:
             evaluate = lambda coefficient: dlu.eval_basis(basis, coefficient[None])
             return jax.vmap(evaluate)(self.coefficients)
+
+        # Validate one leading coefficient axis
         if self.coefficients.ndim != len(self.shape) + 1:
             raise ValueError("Only one leading coefficient axis is supported.")
         axis = len(self.shape)
@@ -81,6 +96,8 @@ class ParametricBasis(Parametric):
             raise ValueError(
                 "The leading coefficient axis must match the leading basis axis."
             )
+
+        # Align and vectorise matching coefficient and basis axes
         basis = np.moveaxis(basis, axis, 0)
         return jax.vmap(dlu.eval_basis)(basis, self.coefficients)
 
@@ -90,7 +107,17 @@ class ParametricBasis(Parametric):
 
 
 class Basis(ParametricBasis):
-    """A parameterisation over an explicitly sampled basis array."""
+    """Parameterise an explicitly sampled basis array.
+
+    Parameters
+    ----------
+    basis : Array
+        Basis vectors stored along the leading ``coefficient_shape`` dimensions.
+    coefficients : Array or None
+        Coefficients contracted against the basis dimensions.
+    coefficient_shape : tuple[int, ...] or None
+        Native basis dimensions. Required when ``coefficients`` is omitted.
+    """
 
     coefficients: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -102,6 +129,7 @@ class Basis(ParametricBasis):
         coefficients: Array = None,
         coefficient_shape: tuple[int, ...] = None,
     ):
+        # Resolve coefficients and their native basis shape
         self.basis = dlu.to_value(basis)
         if coefficients is None:
             if coefficient_shape is None:
@@ -111,6 +139,8 @@ class Basis(ParametricBasis):
             coefficients = dlu.to_value(coefficients)
             if coefficient_shape is None:
                 coefficient_shape = coefficients.shape
+
+        # Validate and store the explicit basis contract
         if self.basis.shape[: len(coefficient_shape)] != coefficient_shape:
             raise ValueError(
                 "The leading basis dimensions must match the coefficient shape."
@@ -118,9 +148,11 @@ class Basis(ParametricBasis):
         self._set_coefficients(coefficients, coefficient_shape)
 
     def evaluate(self: Basis, **kwargs: Any) -> Array:
+        """Contract the coefficients against the stored basis."""
         return self.evaluate_basis(self.basis)
 
     def solve_basis(self: Basis, value: Array, **kwargs: Any) -> Array:
+        """Solve the stored basis for coefficients representing ``value``."""
         return dlu.solve_basis(value, self.basis)
 
 
@@ -135,9 +167,11 @@ class ImplicitBasis(ParametricBasis):
         """Calculate basis vectors from the supplied context."""
 
     def evaluate(self: ImplicitBasis, **kwargs: Any) -> Array:
+        """Generate and evaluate the basis in the supplied context."""
         return self.evaluate_basis(self.calculate_basis(**kwargs))
 
     def solve_basis(self: ImplicitBasis, value: Array, **kwargs: Any) -> Array:
+        """Generate and solve the basis for coefficients representing ``value``."""
         return dlu.solve_basis(value, self.calculate_basis(**kwargs))
 
 
@@ -149,6 +183,7 @@ class CoordBasis(ImplicitBasis):
 
     @staticmethod
     def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
+        """Resolve explicit coordinates or coordinates from a wavefront."""
         if coordinates is not None:
             return CoordTransform.get_coordinates(coordinates)
         if wavefront is None:
@@ -194,6 +229,7 @@ class CLIMBBasis(Basis):
         return super().evaluate()
 
     def evaluate(self, **kwargs: Any) -> Array:
+        """Evaluate and softly binarize the latent basis."""
         binary = dlu.soft_binarise(self.evaluate_latent(), self.oversample)
         low, high = self.values
         return low + (high - low) * binary
@@ -213,13 +249,16 @@ class FourierBasis(ImplicitBasis):
         self._set_coefficients(coefficients, shape)
 
     def calculate_basis(self, **kwargs: Any) -> Array:
+        """Materialise the separable Fourier basis vectors."""
         Kx, Ky = self.kernels
         return np.einsum("xi,yj->ijxy", Kx, Ky)
 
     def evaluate(self, **kwargs: Any) -> Array:
+        """Evaluate the separable Fourier expansion directly."""
         return dlu.eval_fourier_basis(self.coefficients, *self.kernels)
 
     def resize(self, npix, scale: float = 1.0):
+        """Return a copy sampled onto a resized Fourier grid."""
         kernels = dlu.fourier_kernels(self.coefficient_shape, npix, scale)
         return self.set(kernels=kernels)
 
@@ -248,15 +287,22 @@ class SplineBasis(ImplicitBasis):
         self.method = str(method)
 
     def calculate_basis(self, **kwargs: Any) -> Array:
+        """Materialise one interpolated basis vector per spline knot."""
+        # Generate impulses at every spline knot
         size = self.coefficients.size
         impulses = np.eye(size).reshape((size,) + self.coefficient_shape)
+
+        # Interpolate every impulse onto the sampled output grid
         interpolate = lambda values: dlu.interp(
             values, self.knot_coords, self.sample_coords, method=self.method
         )
         basis = jax.vmap(interpolate)(impulses)
+
+        # Restore the native coefficient and sampled output dimensions
         return basis.reshape(self.coefficient_shape + self.sample_coords.shape[1:])
 
     def evaluate(self, **kwargs: Any) -> Array:
+        """Interpolate the spline coefficients onto the sampled output grid."""
         return dlu.interp(
             self.coefficients, self.knot_coords, self.sample_coords, method=self.method
         )

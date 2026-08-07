@@ -145,10 +145,13 @@ def ABCD_FFT(
     apply_out_curv: bool = True,
 ) -> tuple[Array, tuple[Array, Array]]:
     """Propagate an ABCD system onto native or shifted FFT axes."""
+    # Pad the field and calculate native and requested output axes
     ABCD = np.asarray(ABCD)
     phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
     spec_native = dlu.FFT_spec(spec_in, wavelength, ABCD)
     spec_out, shift = dlu.FFT_shift(spec_native, output_center)
+
+    # Apply the input shift ramp and FFT-based LCT
     phasor = phasor * dlu.FFT_ramp(wavelength, spec_in, ABCD, shift)
     field, _ = lct.lct_prop_fft(
         u_in=phasor,
@@ -158,6 +161,8 @@ def ABCD_FFT(
         npad=None,
         apply_out_curv=apply_out_curv,
     )
+
+    # Correct output curvature for the shifted coordinate grid
     if apply_out_curv:
         field *= dlu.FFT_ramp(wavelength, spec_native, ABCD, shift, plane="output")
     return field, spec_out
@@ -182,12 +187,15 @@ def _fraunhofer_fft(
     inverse: bool,
 ) -> tuple[Array, tuple[Array, Array]]:
     """Apply a pure optical FFT without calculating LCT chirps."""
+    # Calculate native output sampling and coordinates
     ABCD = dlu.abcd_fraunhofer(focal_length)
     spec_out = dlu.FFT_spec(spec_in, wavelength, ABCD)
     _, spacings, centers = _spec_parameters(spec_out)
     coordinates = dlu.nd_coords(
         phasor.shape[-2:][::-1], spacings, offsets=tuple(-center for center in centers)
     )
+
+    # Recover the discrete input-grid origin
     sizes_in, spacings_in, centers_in = _spec_parameters(spec_in)
     input_origin = np.asarray(
         tuple(
@@ -195,6 +203,8 @@ def _fraunhofer_fft(
             for size, spacing, center in zip(sizes_in, spacings_in, centers_in)
         )
     )
+
+    # Apply the unitary forward or inverse FFT
     norm = np.sqrt(phasor.shape[-2] * phasor.shape[-1])
     if inverse:
         field = np.fft.fftshift(np.fft.ifft2(np.fft.ifftshift(phasor)))
@@ -202,6 +212,8 @@ def _fraunhofer_fft(
     else:
         field = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(phasor)))
         field /= norm
+
+    # Correct the physical shift and Collins phase
     sign = 1 if inverse else -1
     field = dlu.tilt(field, coordinates, sign * input_origin / focal_length, wavelength)
     return field * _collins_phase(inverse), spec_out
@@ -218,18 +230,18 @@ def MFT(
     apply_out_curv: bool = True,
 ) -> Array:
     """Propagate to an explicit grid using a pure MFT or defocused LCT."""
+    # Resolve normalised angular or physical focal coordinates
     focal_length = 1.0 if focal_length is None else focal_length
     field = phasor
+
+    # Apply pure forward or inverse Fraunhofer propagation
     if defocus is None:
         if inverse:
             scale, kernel_x, kernel_y = fraunhofer.fraunhofer_kernels(
                 spec_in=spec_in, spec_out=spec_out, lam=wavelength, f=focal_length
             )
-            return (
-                _collins_phase(inverse)
-                * scale
-                * _mft(phasor, kernel_x, kernel_y, left_conj=True, right_conj=True)
-            )
+            phasor = _mft(phasor, kernel_x, kernel_y, left_conj=True, right_conj=True)
+            return _collins_phase(inverse) * scale * phasor
         return _collins_phase(inverse) * fraunhofer.fraunhofer_prop(
             u_pupil=phasor,
             spec_in=spec_in,
@@ -237,15 +249,16 @@ def MFT(
             lam=wavelength,
             f=focal_length,
         )
-    else:
-        field = dlu.ABCD_MFT(
-            phasor=field,
-            wavelength=wavelength,
-            spec_in=spec_in,
-            spec_out=spec_out,
-            ABCD=_fraunhofer_abcd(focal_length, defocus, inverse),
-            apply_out_curv=apply_out_curv,
-        )
+
+    # Apply defocused focal propagation through an explicit LCT
+    field = dlu.ABCD_MFT(
+        phasor=field,
+        wavelength=wavelength,
+        spec_in=spec_in,
+        spec_out=spec_out,
+        ABCD=_fraunhofer_abcd(focal_length, defocus, inverse),
+        apply_out_curv=apply_out_curv,
+    )
     return field
 
 
@@ -262,10 +275,13 @@ def FFT(
     apply_out_curv: bool = True,
 ) -> tuple[Array, tuple[Array, Array]]:
     """Propagate using a pure FFT or a defocused FFT-based LCT."""
+    # Validate direction and pad the input field
     focal_length = 1.0 if focal_length is None else focal_length
     if inverse and defocus is not None:
         raise ValueError("Inverse Fresnel propagation is not supported by FFT.")
     phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
+
+    # Apply a pure forward or inverse optical FFT
     if defocus is None:
         ABCD = dlu.abcd_fraunhofer(focal_length)
         spec_native = dlu.FFT_spec(spec_in, wavelength, ABCD)
@@ -275,6 +291,8 @@ def FFT(
             phasor, wavelength, spec_in, focal_length, inverse
         )
         return field, spec_out
+
+    # Apply defocused focal propagation through an FFT-based LCT
     field, spec_out = dlu.ABCD_FFT(
         phasor=phasor,
         wavelength=wavelength,

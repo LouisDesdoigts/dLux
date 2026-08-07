@@ -23,8 +23,11 @@ __all__ = [
 
 def _poly_params(degree, coefficients, ndim, powers, degrees=None):
     """Validate polynomial powers and coefficients."""
+    # Validate the polynomial term selection
     if degree is not None and degrees is not None:
         raise ValueError("Provide only one of degree or degrees.")
+
+    # Generate powers from a maximum or selected total degrees
     if powers is None:
         if degree is None and degrees is None:
             raise ValueError("Provide either degree, degrees, or powers.")
@@ -40,12 +43,16 @@ def _poly_params(degree, coefficients, ndim, powers, degrees=None):
             powers = powers[:, np.isin(powers.sum(0), degrees)]
     elif degrees is not None:
         raise ValueError("degrees and powers are mutually exclusive.")
+
+    # Standardize and validate the polynomial powers
     powers = dlu.to_value(powers, int)
     powers = powers[None, :] if powers.ndim == 1 else powers
     if powers.ndim != 2:
         raise ValueError("powers must have shape (n_variables, n_terms).")
     if np.any(powers < 0):
         raise ValueError("powers must be non-negative.")
+
+    # Initialize and validate the polynomial coefficients
     coefficients = np.zeros(powers.shape[1]) if coefficients is None else coefficients
     coefficients = dlu.to_value(coefficients)
     if coefficients.ndim < 1 or coefficients.shape[-1] != powers.shape[1]:
@@ -55,6 +62,7 @@ def _poly_params(degree, coefficients, ndim, powers, degrees=None):
 
 def _poly_coordinates(coordinates, ndim):
     """Resolve explicit polynomial coordinates and dimensionality."""
+    # Resolve coordinates from a grid specification
     if isinstance(coordinates, GridSpec):
         ndim = coordinates.ndim if ndim is None else int(ndim)
         if coordinates.ndim == 1 and ndim > 1:
@@ -66,10 +74,14 @@ def _poly_coordinates(coordinates, ndim):
         if coordinates.n is None or coordinates.d is None:
             raise ValueError("GridSpec must define n and d.")
         coordinates = coordinates.coordinates
+
+    # Resolve explicit coordinate arrays
     else:
         coordinates = dlu.to_value(coordinates)
         ndim = 1 if ndim is None and coordinates.ndim == 1 else ndim
         ndim = coordinates.shape[0] if ndim is None else int(ndim)
+
+    # Validate and return the requested coordinate dimensions
     if ndim < 1:
         raise ValueError("ndim must be positive.")
     coordinates = coordinates[None, :] if coordinates.ndim == 1 else coordinates
@@ -99,6 +111,7 @@ class DynamicZernike(zdx.Base):
     def calculate(
         self, coordinates: Array, nsides: int = 0, diameter: float = 2.0
     ) -> Array:
+        """Evaluate the mode on circular or regular-polygon coordinates."""
         if nsides == 0:
             return dlu.zernike_fast(
                 self.n, self.m, self._c, self._k, coordinates, diameter
@@ -111,6 +124,7 @@ class DynamicZernike(zdx.Base):
 class _ZernikeBasis:
     @staticmethod
     def get_indices(js=None, radial_orders=None) -> list[int]:
+        """Resolve explicit Noll indices or complete radial orders."""
         if (js is None) == (radial_orders is None):
             raise ValueError("Provide exactly one of js or radial_orders.")
         if js is not None:
@@ -165,12 +179,16 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     def calculate_basis(
         self, *, wavefront=None, coordinates=None, diameter=None, **kwargs
     ):
+        """Evaluate every configured Zernike mode in coordinate context."""
+        # Resolve coordinates and the aperture diameter
         infer_diameter = coordinates is None and wavefront is not None
         coordinates = self.get_coordinates(wavefront=wavefront, coordinates=coordinates)
         if diameter is None:
             diameter = self.diameter
         if diameter is None:
             diameter = wavefront.diameter if infer_diameter else 2.0
+
+        # Evaluate every dynamic Zernike mode
         is_zernike = lambda leaf: isinstance(leaf, DynamicZernike)
         calculate = lambda zernike: zernike.calculate(
             coordinates, self.nsides, diameter
@@ -198,6 +216,7 @@ class Polynomial(ParametricBasis):
         self._set_coefficients(coefficients, (powers.shape[1],))
 
     def calculate_basis(self, *, variables=None, **context):
+        """Evaluate the polynomial terms at supplied variables."""
         if variables is None:
             raise ValueError("variables must be provided.")
         variables = resolve(variables, float, **context)
@@ -210,6 +229,7 @@ class Polynomial(ParametricBasis):
         return dlu.polynomial_basis(variables, self.powers)
 
     def evaluate(self, *, variables=None, **context):
+        """Evaluate the polynomial at supplied or contextual variables."""
         if variables is None:
             basis = self.calculate_basis(**context)
         else:
@@ -217,6 +237,7 @@ class Polynomial(ParametricBasis):
         return self.evaluate_basis(basis)
 
     def solve_basis(self, value, *, variables=None, **context):
+        """Solve for coefficients representing ``value`` at the variables."""
         if variables is None:
             basis = self.calculate_basis(**context)
         else:
@@ -265,6 +286,7 @@ class CoordinatePolynomial(Polynomial):
         super().__init__(degree, coefficients, ndim, degrees=degrees)
 
     def calculate_basis(self, *, wavefront=None, coordinates=None, **kwargs):
+        """Evaluate polynomial terms on explicit or wavefront coordinates."""
         if coordinates is None:
             if wavefront is None:
                 raise ValueError("Provide either wavefront or coordinates.")

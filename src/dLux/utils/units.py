@@ -1,3 +1,5 @@
+"""Convert between supported angular and physical units."""
+
 import jax.numpy as np
 from jax import Array
 from functools import lru_cache
@@ -76,10 +78,7 @@ def _canon(unit: str) -> str:
 
 @lru_cache(maxsize=None)
 def unit_factor_to_rad(unit: str):
-    """
-    Returns factor f such that:
-        value_in_unit * f = value_in_radians
-    """
+    """Return the factor satisfying ``value_in_unit * factor = value_in_radians``."""
     u = _canon(unit)
 
     # base unit
@@ -114,8 +113,7 @@ def unit_factor(unit: str):
 
 
 def convert(value, unit_in: str, unit_out: str, scale: float = 1.0):
-    """
-    Convert angles from unit_in to unit_out with output unit scaling.
+    """Convert angles from unit_in to unit_out with output unit scaling.
 
     Returns value expressed in (scale * unit_out).
 
@@ -131,206 +129,60 @@ def convert(value, unit_in: str, unit_out: str, scale: float = 1.0):
 
 
 def rad2arcsec(values: Array) -> Array:
-    """
-    Converts the inputs values from radians to arcseconds.
-
-    Parameters
-    ----------
-    values : Array, radians
-        The input values in units of radians to be converted into arcseconds.
-
-    Returns
-    -------
-    values : Array, arcseconds
-        The input values converted into arcseconds.
-    """
+    """Convert values from radians to arcseconds."""
     return convert(values, "rad", "arcsec")
 
 
 def rad2deg(values: Array) -> Array:
-    """
-    Converts the inputs values from radians to degrees.
-
-    Parameters
-    ----------
-    values : Array, radians
-        The input values in units of radians to be converted into degrees.
-
-    Returns
-    -------
-    values : Array, degrees
-        The input values converted into degrees.
-    """
+    """Convert values from radians to degrees."""
     return convert(values, "rad", "deg")
 
 
 def rad2arcmin(values: Array) -> Array:
-    """
-    Converts the inputs values from radians to arcminutes.
-
-    Parameters
-    ----------
-    values : Array, radians
-        The input values in units of radians to be converted into arcminutes.
-
-    Returns
-    -------
-    values : Array, arcminutes
-        The input values converted into arcminutes.
-    """
+    """Convert values from radians to arcminutes."""
     return convert(values, "rad", "arcmin")
 
 
 def deg2rad(values: Array) -> Array:
-    """
-    Converts the inputs values from degrees to radians.
-
-    Parameters
-    ----------
-    values : Array, degrees
-        The input values in units of degrees to be converted into radians.
-
-    Returns
-    -------
-    values : Array, radians
-        The input values converted into radians.
-    """
+    """Convert values from degrees to radians."""
     return convert(values, "deg", "rad")
 
 
 def deg2arcmin(values: Array) -> Array:
-    """
-    Converts the inputs values from degrees to arcminutes.
-
-    Parameters
-    ----------
-    values : Array, degrees
-        The input values in units of degrees to be converted into arcminutes.
-
-    Returns
-    -------
-    values : Array, arcminutes
-        The input values converted into arcminutes.
-    """
+    """Convert values from degrees to arcminutes."""
     return convert(values, "deg", "arcmin")
 
 
 def deg2arcsec(values: Array) -> Array:
-    """
-    Converts the inputs values from degrees to arcseconds.
-
-    Parameters
-    ----------
-    values : Array, degrees
-        The input values in units of degrees to be converted into arcseconds.
-
-    Returns
-    -------
-    values : Array, arcseconds
-        The input values converted into arcseconds.
-    """
+    """Convert values from degrees to arcseconds."""
     return convert(values, "deg", "arcsec")
 
 
 def arcmin2rad(values: Array) -> Array:
-    """
-    Converts the inputs values from arcminutes to radians.
-
-    Parameters
-    ----------
-    values : Array, arcminutes
-        The input values in units of arcminutes to be converted into radians.
-
-    Returns
-    -------
-    values : Array, radians
-        The input values converted into radians.
-    """
+    """Convert values from arcminutes to radians."""
     return convert(values, "arcmin", "rad")
 
 
 def arcmin2deg(values: Array) -> Array:
-    """
-    Converts the inputs values from arcminutes to degrees.
-
-    Parameters
-    ----------
-    values : Array, arcminutes
-        The input values in units of arcminutes to be converted into degrees.
-
-    Returns
-    -------
-    values : Array, degrees
-        The input values converted into degrees.
-    """
+    """Convert values from arcminutes to degrees."""
     return convert(values, "arcmin", "deg")
 
 
 def arcmin2arcsec(values: Array) -> Array:
-    """
-    Converts the inputs values from arcminutes to arcseconds.
-
-    Parameters
-    ----------
-    values : Array, arcminutes
-        The input values in units of arcminutes to be converted into
-        arcseconds.
-
-    Returns
-    -------
-    values : Array, arcseconds
-        The input values converted into arcseconds.
-    """
+    """Convert values from arcminutes to arcseconds."""
     return convert(values, "arcmin", "arcsec")
 
 
 def arcsec2rad(values: Array) -> Array:
-    """
-    Converts the inputs values from arcseconds to radians.
-
-    Parameters
-    ----------
-    values : Array, arcseconds
-        The input values in units of arcseconds to be converted into radians.
-
-    Returns
-    -------
-    values : Array, radians
-        The input values converted into radians.
-    """
+    """Convert values from arcseconds to radians."""
     return convert(values, "arcsec", "rad")
 
 
 def arcsec2deg(values: Array) -> Array:
-    """
-    Converts the inputs values from arcseconds to degrees.
-
-    Parameters
-    ----------
-    values : Array, arcseconds
-        The input values in units of arcseconds to be converted into degrees.
-
-    Returns
-    -------
-    values : Array, degrees
-        The input values converted into degrees.
-    """
+    """Convert values from arcseconds to degrees."""
     return convert(values, "arcsec", "deg")
 
 
 def arcsec2arcmin(values: Array) -> Array:
-    """
-    Converts the inputs values from arcseconds to arcminutes.
-
-    Parameters
-    ----------
-    values : Array, arcseconds
-        The input values in units of arcseconds to be converted into
-        arcminutes.
-
-    Returns
-    -------
-    values : Array, arcminutes
-        The input values converted into arcminutes.
-    """
+    """Convert values from arcseconds to arcminutes."""
     return convert(values, "arcsec", "arcmin")

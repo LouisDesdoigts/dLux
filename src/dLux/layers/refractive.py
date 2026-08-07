@@ -15,7 +15,15 @@ __all__ = ["RefractiveOptic", "Wedge"]
 
 
 class RefractiveOptic(OpticalLayer):
-    """Apply a refractive thickness profile as optical path difference."""
+    """Apply a refractive thickness profile as optical path difference.
+
+    Parameters
+    ----------
+    thickness : Array or Parametric
+        Scalar or sampled material thickness in meters.
+    n : Array or Parametric
+        Wavelength-dependent or fixed refractive index.
+    """
 
     thickness: Array | Parametric
     n: Array | Parametric
@@ -25,6 +33,7 @@ class RefractiveOptic(OpticalLayer):
         self.n = dlu.to_value(n, types=Parametric)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Apply the resolved refractive optical path to a wavefront."""
         self = self.resolve(wavefront=wavefront)
         n = np.asarray(self.n - 1)
         if n.ndim:
@@ -33,7 +42,15 @@ class RefractiveOptic(OpticalLayer):
 
 
 class Wedge(OpticalLayer):
-    """Apply the optical path of a thin refractive wedge."""
+    """Apply the optical path of a thin refractive wedge.
+
+    Parameters
+    ----------
+    angle : ArrayLike
+        Two wedge angles in radians along the physical ``(x, y)`` axes.
+    n : Array or Parametric
+        Wavelength-dependent or fixed refractive index.
+    """
 
     angle: Array
     n: Array | Parametric
@@ -45,10 +62,14 @@ class Wedge(OpticalLayer):
         self.n = dlu.to_value(n, types=Parametric)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Apply the wavelength-dependent optical path of the wedge."""
+        # Resolve the sampled wedge thickness
         self = self.resolve(wavefront=wavefront)
         coordinates = wavefront.coordinates
         x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
         thickness = x * np.tan(self.angle[0]) + y * np.tan(self.angle[1])
+
+        # Convert thickness into refractive optical path
         n = np.asarray(self.n - 1)
         if n.ndim:
             n = n[..., None, None]

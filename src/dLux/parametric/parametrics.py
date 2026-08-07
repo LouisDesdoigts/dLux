@@ -75,6 +75,7 @@ class Transform(Parametric):
         self.transformation = transformation
 
     def evaluate(self, **context):
+        """Evaluate the wrapped parameterisation and transform its value."""
         return self.transformation(self.parametric.evaluate(**context))
 
 
@@ -160,6 +161,7 @@ class DynamicParametric(Parametric):
         self.transformation = transformation
 
     def evaluate(self, *, coordinates, **context) -> Array:
+        """Evaluate the wrapped parameterisation in transformed coordinates."""
         return self.parametric.evaluate(
             coordinates=self.transformation(coordinates), **context
         )
@@ -181,6 +183,7 @@ class Combination(Parametric):
 
     @staticmethod
     def validate_operation(operation):
+        """Validate and standardize a supported combination operation."""
         operation = str(operation).lower()
         valid = ("sum", "product", "union", "intersection")
         if operation not in valid:
@@ -189,15 +192,18 @@ class Combination(Parametric):
 
     @staticmethod
     def combine(values, operation):
+        """Combine a stack of realised values with one operation."""
         if operation in ("product", "intersection"):
             return values.prod(0)
         output = values.sum(0)
         return np.clip(output, 0.0, 1.0) if operation == "union" else output
 
     def values(self, **context) -> Array:
+        """Evaluate every contained parameterisation into one stack."""
         return np.asarray(
             [parametric.evaluate(**context) for parametric in self.parametrics.values()]
         )
 
     def evaluate(self, **context) -> Array:
+        """Evaluate and combine the contained parameterisations."""
         return self.combine(self.values(**context), self.operation)

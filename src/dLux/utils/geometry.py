@@ -1,3 +1,5 @@
+"""Evaluate hard and softened geometric transmission functions."""
+
 import jax.numpy as np
 from jax import lax, vmap, Array
 import dLux.utils as dlu
@@ -18,8 +20,7 @@ __all__ = [
 
 
 def combine(arrays: Array, oversample: int = 1, use_sum: bool = False) -> Array:
-    """
-    Combines multiple arrays by multiplying them together, and downsampling the output.
+    """Combine arrays multiplicatively and downsample the result.
 
     Parameters
     ----------
@@ -43,8 +44,7 @@ def combine(arrays: Array, oversample: int = 1, use_sum: bool = False) -> Array:
 
 
 def shift_and_scale(array: Array) -> Array:
-    """
-    Shifts and scales the array to be between 0 and 1
+    """Shifts and scales the array to be between 0 and 1.
 
     Parameters
     ----------
@@ -60,8 +60,7 @@ def shift_and_scale(array: Array) -> Array:
 
 
 def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
-    """
-    Softens the edges of a distances array by clipping the distances to a maximum
+    """Softens the edges of a distances array by clipping the distances to a maximum
     value, and then shifting and scaling the array to be between 0 and 1.
 
     Parameters
@@ -89,8 +88,7 @@ def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
 
 #####################
 def circle(coords: Array, diameter: float, invert: bool = False) -> Array:
-    """
-    Calculates a hard-edged circle. This function is not differentiable.
+    """Calculates a hard-edged circle. This function is not differentiable.
 
     Parameters
     ----------
@@ -106,15 +104,13 @@ def circle(coords: Array, diameter: float, invert: bool = False) -> Array:
     circle : Array
         The circle.
     """
-
     if invert:
         return (circ_distance(coords, diameter / 2) > 0).astype(float)
     return (circ_distance(coords, diameter / 2) < 0).astype(float)
 
 
 def square(coords: Array, width: float, invert: bool = False) -> Array:
-    """
-    Calculates a hard-edged square. This function is not differentiable.
+    """Calculates a hard-edged square. This function is not differentiable.
 
     Parameters
     ----------
@@ -138,8 +134,7 @@ def square(coords: Array, width: float, invert: bool = False) -> Array:
 def rectangle(
     coords: Array, width: float, height: float, invert: bool = False
 ) -> Array:
-    """
-    Calculates a hard-edged rectangle. This function is not differentiable.
+    """Calculates a hard-edged rectangle. This function is not differentiable.
 
     Parameters
     ----------
@@ -165,8 +160,7 @@ def rectangle(
 def reg_polygon(
     coords: Array, diameter: float, nsides: int, invert: bool = False
 ) -> Array:
-    """
-    Calculates a hard-edged regular polygon. This function is not differentiable.
+    """Calculates a hard-edged regular polygon. This function is not differentiable.
 
     Parameters
     ----------
@@ -184,15 +178,13 @@ def reg_polygon(
     polygon : Array
         The polygon.
     """
-
     if invert:
         return (reg_polygon_distance(coords, nsides, diameter / 2) > 0).astype(float)
     return (reg_polygon_distance(coords, nsides, diameter / 2) < 0).astype(float)
 
 
 def spider(coords: Array, width: float, angles: Array) -> Array:
-    """
-    Calculates a hard-edged spider. This function is not differentiable.
+    """Calculates a hard-edged spider. This function is not differentiable.
 
     Parameters
     ----------
@@ -227,8 +219,7 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
 def soft_circle(
     coords: Array, diameter: float, clip_dist: float = 0.1, invert: bool = False
 ) -> Array:
-    """
-    Calculates a soft-edged circle differentiably. The 'clip_dist' parameter defines
+    """Calculates a soft-edged circle differentiably. The 'clip_dist' parameter defines
     the distance from the edge to 'soften' up to. A large clip_dist will result in a
     circle with a very soft edge, while a small clip_dist will result in a circle with
     a very hard edge.
@@ -256,8 +247,7 @@ def soft_circle(
 def soft_square(
     coords: Array, width: float, clip_dist: float = 0.1, invert: bool = False
 ) -> Array:
-    """
-    Calculates a soft-edged square differentiably. The 'clip_dist' parameter defines
+    """Calculates a soft-edged square differentiably. The 'clip_dist' parameter defines
     the distance from the edge to 'soften' up to. A large clip_dist will result in a
     square with a very soft edge, while a small clip_dist will result in a square with
     a very hard edge.
@@ -289,11 +279,11 @@ def soft_rectangle(
     clip_dist: float = 0.1,
     invert: bool = False,
 ) -> Array:
-    """
-    Calculates a soft-edged rectangle differentiably. The 'clip_dist' parameter defines
-    the distance from the edge to 'soften' up to. A large clip_dist will result in a
-    rectangle with a very soft edge, while a small clip_dist will result in a rectangle
-    with a very hard edge.
+    """Calculate a differentiable soft-edged rectangle.
+
+    The 'clip_dist' parameter defines the distance from the edge to 'soften' up to. A
+    large clip_dist will result in a rectangle with a very soft edge, while a small
+    clip_dist will result in a rectangle with a very hard edge.
 
     Parameters
     ----------
@@ -324,8 +314,7 @@ def soft_reg_polygon(
     clip_dist: float = 0.1,
     invert: bool = False,
 ) -> Array:
-    """
-    Calculates a soft-edged regular polygon differentiably. The 'clip_dist' parameter
+    """Calculates a soft-edged regular polygon differentiably. The 'clip_dist' parameter
     defines the distance from the edge to 'soften' up to. A large clip_dist will result
     in a polygon with a very soft edge, while a small clip_dist will result in a polygon
     with a very hard edge.
@@ -359,8 +348,7 @@ def soft_spider(
     clip_dist: float = 0.1,
     invert: bool = False,
 ) -> Array:
-    """
-    Calculates a soft-edged spider differentiably. The 'clip_dist' parameter defines
+    """Calculates a soft-edged spider differentiably. The 'clip_dist' parameter defines
     the distance from the edge to 'soften' up to. A large clip_dist will result in a
     spider with a very soft edge, while a small clip_dist will result in a spider with
     a very hard edge.
@@ -398,8 +386,7 @@ def soft_spider(
 ### Distance functions ###
 ##########################
 def circ_distance(coords: Array, radius: float) -> Array:
-    """
-    Calculates the distance from the edge of a circle.
+    """Calculates the distance from the edge of a circle.
 
     Parameters
     ----------
@@ -417,8 +404,7 @@ def circ_distance(coords: Array, radius: float) -> Array:
 
 
 def square_distance(coords: Array, width: float) -> Array:
-    """
-    Calculates the distance from the edge of a square.
+    """Calculates the distance from the edge of a square.
 
     Parameters
     ----------
@@ -436,8 +422,7 @@ def square_distance(coords: Array, width: float) -> Array:
 
 
 def rectangle_distance(coords: Array, width: float, height: float) -> Array:
-    """
-    Calculates the distance from the edge of a rectangle.
+    """Calculates the distance from the edge of a rectangle.
 
     Parameters
     ----------
@@ -459,8 +444,7 @@ def rectangle_distance(coords: Array, width: float, height: float) -> Array:
 
 
 def spider_distance(coords: Array, width: float, angle: float) -> Array:
-    """
-    Calculates the distance from the edge of a spider.
+    """Calculates the distance from the edge of a spider.
 
     Parameters
     ----------
@@ -483,9 +467,9 @@ def spider_distance(coords: Array, width: float, angle: float) -> Array:
 
 
 def line_distance(coords: Array, m: float, xy: Array) -> Array:
-    """
-    Calculates the distance from the edge of a line. This should work for the irregular
-    polygon case too, when it is implemented.
+    """Calculate the signed distance from a line.
+
+    This should also support a future irregular-polygon implementation.
 
     Parameters
     ----------
@@ -525,9 +509,9 @@ def line_distance(coords: Array, m: float, xy: Array) -> Array:
 
 
 def reg_polygon_edges(n: int, radius: float) -> Array:
-    """
-    Calculates the gradients and points on the edges of a regular polygon. Can probably
-    be extended to irregular polygons too by taking in x, y.
+    """Calculate gradients and points on the edges of a regular polygon.
+
+    This may be extended to irregular polygons by accepting explicit vertices.
 
     Parameters
     ----------
@@ -556,8 +540,7 @@ def reg_polygon_edges(n: int, radius: float) -> Array:
 
 
 def reg_polygon_distance(coords: Array, nsides: int, radius: float) -> Array:
-    """
-    Calculates the distance from the edge of a regular polygon.
+    """Calculates the distance from the edge of a regular polygon.
 
     Parameters
     ----------

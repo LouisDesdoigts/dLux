@@ -1,4 +1,6 @@
-from jax import lax, Array
+"""Provide general numerical operations used throughout dLux."""
+
+from jax import Array, lax
 import jax.numpy as np
 import jax.scipy as jsp
 import jax.tree as jtu
@@ -23,8 +25,7 @@ def gaussian(
     npixels: int | tuple[int, ...] = 64,
     extent: float = 5.0,
 ) -> Array:
-    """
-    Generates a normalized n-dimensional Gaussian function.
+    """Generates a normalised n-dimensional Gaussian function.
 
     Parameters
     ----------
@@ -40,7 +41,7 @@ def gaussian(
     Returns
     -------
     kernel : Array
-        The normalized n-dimensional Gaussian kernel.
+        The normalised n-dimensional Gaussian kernel.
     """
     # Resolve dimensionality and broadcast each axis input
     npixels = dlu.as_size(npixels, name="npixels")
@@ -50,13 +51,9 @@ def gaussian(
     mean, std = dlu.as_axis(mean, ndim, "mean"), dlu.as_axis(std, ndim, "std")
 
     # Generate per-axis coordinates and corresponding 1D Gaussians
+    gauss_fn = lambda axis, m, s: jsp.stats.norm.pdf(axis, loc=m, scale=s)
     linspaces = jtu.map(lambda n: np.linspace(-extent, extent, n), npixels)
-    one_d_gauss = jtu.map(
-        lambda axis, m, s: jsp.stats.norm.pdf(axis, loc=m, scale=s),
-        linspaces,
-        tuple(mean),
-        tuple(std),
-    )
+    one_d_gauss = jtu.map(gauss_fn, linspaces, tuple(mean), tuple(std))
 
     # Construct nD separable Gaussian kernel from 1D marginals
     kernel = np.array(np.meshgrid(*one_d_gauss, indexing="ij")).prod(0)
@@ -66,8 +63,7 @@ def gaussian(
 def mv_gaussian(
     mean: Array, cov: Array, npix: int | Array = 64, extent: float = 5.0
 ) -> Array:
-    """
-    Generates a normalized multivariate Gaussian function.
+    """Generates a normalised multivariate Gaussian function.
 
     Parameters
     ----------
@@ -83,7 +79,7 @@ def mv_gaussian(
     Returns
     -------
     kernel : Array
-        The normalized multivariate Gaussian kernel.
+        The normalised multivariate Gaussian kernel.
     """
     raise NotImplementedError("Multivariate Gaussian generation is under development.")
 
@@ -119,24 +115,12 @@ def mv_gaussian(
     kernel = jsp.stats.multivariate_normal.pdf(points, mean=mean, cov=cov)
     kernel = kernel.reshape(grid_shape)
 
-    # Normalize
+    # Normalise
     return kernel / np.sum(kernel)
 
 
 def factorial(n: float) -> float:
-    """
-    Calculate n! in a JAX-friendly way.
-
-    Parameters
-    ----------
-    n : float
-        The value to calculate the factorial of.
-
-    Returns
-    -------
-    n! : float
-        The factorial of the value.
-    """
+    """Calculate ``n!`` through the JAX-compatible gamma function."""
     n = np.asarray(n, float)
     return lax.cond(
         n == 0,
@@ -147,25 +131,12 @@ def factorial(n: float) -> float:
 
 
 def triangular_number(n: int) -> int:
-    """
-    Calculate the nth triangular number.
-
-    Parameters
-    ----------
-    n : int
-        The nth triangular number to calculate.
-
-    Returns
-    -------
-    n : int
-        The nth triangular number.
-    """
+    """Calculate the ``n``th triangular number."""
     return n * (n + 1) / 2
 
 
 def eval_basis(basis: Array, coefficients: Array) -> Array:
-    """
-    Performs an n-dimensional dot-product between the basis and coefficients arrays.
+    """Performs an n-dimensional dot-product between the basis and coefficients arrays.
 
     Parameters
     ----------
@@ -186,8 +157,7 @@ def eval_basis(basis: Array, coefficients: Array) -> Array:
 
 
 def solve_basis(array: Array, basis: Array) -> Array:
-    """
-    Solves for the coefficients of an array over a basis using least squares.
+    """Solves for the coefficients of an array over a basis using least squares.
 
     Parameters
     ----------
@@ -215,8 +185,7 @@ def solve_basis(array: Array, basis: Array) -> Array:
 
 
 def nandiv(a: Array, b: Array, fill: Any = np.inf) -> Array:
-    """
-    Divides two arrays, replacing any NaNs with a fill value.
+    """Divides two arrays, replacing any NaNs with a fill value.
 
     Parameters
     ----------

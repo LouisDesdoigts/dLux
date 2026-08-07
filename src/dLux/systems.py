@@ -27,6 +27,7 @@ class LayeredSystem(zdx.Base):
         self.layers = dlu.list2dictionary(layers, True, layer_type)
 
     def __getattr__(self, key: str) -> Any:
+        """Resolve attributes from named or contained layers."""
         if key in self.layers:
             return self.layers[key]
         for layer in self.layers.values():
@@ -35,6 +36,7 @@ class LayeredSystem(zdx.Base):
         raise dlu.missing_attribute_error(self, key, list(self.layers))
 
     def __call__(self, target):
+        """Apply every layer to a target in insertion order."""
         for layer in self.layers.values():
             target = layer.apply(target)
         return target
@@ -80,6 +82,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
 
     @staticmethod
     def _to_psf(wavefront: Wavefront, stokes=None) -> PSF:
+        """Convert a propagated wavefront into a sampled PSF."""
         data = wavefront.psf_from_stokes(stokes)
         mapped_sampling = wavefront.d.ndim > 1 or (
             wavefront.c is not None and wavefront.c.ndim > 1
@@ -89,6 +92,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         return PSF(data, wavefront.spec)
 
     def __call__(self, wavefront: Wavefront):
+        """Propagate a wavefront through every optical layer."""
         if not isinstance(wavefront, Wavefront):
             raise TypeError("wavefront must be a Wavefront instance.")
         return LayeredSystem.__call__(self, wavefront)
@@ -108,10 +112,15 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         Returns the sampled PSF array by default, or the final wavefront when
         ``return_wf`` is true. ``return_all`` returns all output containers.
         """
+        # Validate the requested output
         if return_wf and return_all:
             raise ValueError("return_wf and return_all are mutually exclusive.")
+
+        # Initialize and propagate the monochromatic wavefront
         wavefront = self(self.initialise_wavefront(wavelength, offset))
         psf = self._to_psf(wavefront, stokes)
+
+        # Return the requested output container
         if return_all:
             return {"Wavefront": wavefront, "PSF": psf, "psf": psf.data}
         if return_wf:
@@ -132,7 +141,6 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         Returns the sampled PSF array by default, or the final wavefront when
         ``return_wf`` is true. ``return_all`` returns all output containers.
         """
-
         # Validate the requested output
         if return_wf and return_all:
             raise ValueError("return_wf and return_all are mutually exclusive.")
@@ -190,6 +198,7 @@ class DetectorSystem(LayeredSystem):
         super().__init__(layers, BaseDetectorLayer)
 
     def __call__(self, psf: PSF) -> PSF:
+        """Apply every detector layer to a PSF."""
         if not isinstance(psf, PSF):
             raise TypeError("psf must be a PSF instance.")
         return super().__call__(psf)

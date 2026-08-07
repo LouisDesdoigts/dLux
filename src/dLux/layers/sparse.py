@@ -60,15 +60,19 @@ class Interfere(OpticalLayer):
         return self(wavefront)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Coherently collapse the leading sub-aperture dimension."""
+        # Identify the sub-aperture axis and size
         axis = wavefront.batch_ndim - 1
         size = wavefront.phasor.shape[axis]
 
+        # Define collapse of matching vectorised grid metadata
         def collapse(value):
             if value is None or value.ndim <= 1:
                 return value
             axes = [i for i, n in enumerate(value.shape[:-1]) if n == size]
             return np.take(value, 0, axis=axes[-1]) if axes else value
 
+        # Collapse the field and its realised grid metadata
         spec = wavefront.spec
         spec = spec.set(d=collapse(spec.d), c=collapse(spec.c))
         return wavefront.set(phasor=wavefront.phasor.sum(axis), spec=spec)
@@ -121,6 +125,7 @@ class SparseOptic(Optic):
     def _context_at(
         self, wavefront: Wavefront, center: Array, optic: SparseOptic, local=False
     ) -> dict:
+        """Build parametric context in one sub-aperture frame."""
         coordinates = AffineMap(offset=-center)(wavefront.coordinates)
         return {
             "wavefront": wavefront,
@@ -129,6 +134,7 @@ class SparseOptic(Optic):
         }
 
     def _phasor_at(self, index, center, wavefront):
+        """Resolve and evaluate one centred local optic phasor."""
         optic, local = self._slice_local(index)
         context = self._context_at(wavefront, center, optic, local)
         optic = optic.resolve(**context)
@@ -185,6 +191,8 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
         SparseOptic.__init__(self, centers, transmission, opd, phase, normalise)
 
     def _context_at(self, wavefront, center, optic, local=False):
+        """Build dynamic context in a global or local transformed frame."""
+        # Resolve the coordinate source and its physical sampling
         coordinate_source = optic.coordinates
         if coordinate_source is None:
             coordinates = wavefront.coordinates
@@ -196,9 +204,12 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
             coordinates = coordinate_source
             pixel_scale = wavefront.pixel_scale
 
+        # Apply global transformation before aperture placement
         if optic.transformation is not None and not local:
             coordinates = optic.transformation(coordinates)
         coordinates = AffineMap(offset=-center)(coordinates)
+
+        # Apply aperture-dependent transformation in the local frame
         if optic.transformation is not None and local:
             coordinates = optic.transformation(coordinates)
         return {

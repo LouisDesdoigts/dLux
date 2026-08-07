@@ -2,7 +2,7 @@
 
 All models use the trailing axis as wavelength. With ``normalise=True``, realised
 weights are divided by their sum along that axis, independently for every leading
-batch or source element. This is equal-sample normalization, not wavelength
+batch or source element. This is equal-sample normalisation, not wavelength
 quadrature. Realised weights must be positive with a finite, non-zero sum; these
 conditions are documented rather than enforced inside compiled evaluation.
 """
@@ -36,7 +36,7 @@ class SpectralPolynomial(Polynomial):
 
     Coefficients may have leading batch axes; each resulting spectrum occupies the
     trailing wavelength axis. Realised weights must remain positive with a finite,
-    non-zero sum. Equal normalization weights every wavelength sample equally, so it
+    non-zero sum. Equal normalisation weights every wavelength sample equally, so it
     represents equal-width bins and is not quadrature for nonuniform sampling.
     """
 
@@ -59,24 +59,29 @@ class SpectralPolynomial(Polynomial):
 
     def evaluate(self, *, wavelengths, **context):
         """Evaluate weights on centred, dimensionless wavelengths."""
+        # Map wavelengths onto centred dimensionless coordinates
         context.pop("variables", None)
         wavelengths = np.asarray(wavelengths, dtype=float)
         lower = wavelengths.min()
         upper = wavelengths.max()
         span = np.where(upper == lower, 1.0, upper - lower)
         variables = (wavelengths - (lower + upper) / 2) / span
+
+        # Evaluate perturbations around a fixed flat baseline
         basis = self.calculate_basis(variables=variables, **context)
         weights = 1 + np.tensordot(self.coefficients, basis, axes=((-1,), (0,)))
+
+        # Apply the shared spectral normalisation contract
         return _normalise(weights, self.normalise)
 
 
 class SpectralBasis(Basis):
-    """Explicit spectral basis with optional unit-sum normalization.
+    """Explicit spectral basis with optional unit-sum normalisation.
 
     Basis vectors are combined exactly as supplied. Coefficients may have leading
     batch axes; each resulting spectrum occupies the trailing wavelength axis.
     Realised weights must remain positive with a finite, non-zero sum. Equal
-    normalization weights every wavelength sample equally and is not quadrature for
+    normalisation weights every wavelength sample equally and is not quadrature for
     nonuniform sampling.
     """
 
@@ -89,20 +94,20 @@ class SpectralBasis(Basis):
         self.normalise = bool(normalise)
 
     def evaluate(self, **context):
-        """Evaluate and optionally normalize the sampled spectral weights."""
+        """Evaluate and optionally normalise the sampled spectral weights."""
+        # Contract the coefficient and basis dimensions
         ndim = len(self.shape)
-        coefficient_axes = tuple(
-            range(self.coefficients.ndim - ndim, self.coefficients.ndim)
-        )
-        basis_axes = tuple(range(ndim))
-        weights = np.tensordot(
-            self.coefficients, self.basis, axes=(coefficient_axes, basis_axes)
-        )
+        b_ax = tuple(range(ndim))
+        coeffs = self.coefficients
+        c_ax = tuple(range(coeffs.ndim - ndim, coeffs.ndim))
+        weights = np.tensordot(coeffs, self.basis, axes=(c_ax, b_ax))
+
+        # Apply the shared spectral normalisation contract
         return _normalise(weights, self.normalise)
 
 
 class Blackbody(Parametric):
-    """Blackbody photon spectrum parameterized by effective temperature.
+    """Blackbody photon spectrum parameterised by effective temperature.
 
     This evaluates the photon-number form of Planck's law, proportional to
     ``1 / (wavelength**4 * expm1(h*c / (wavelength*k*T)))``. Wavelengths must be
@@ -110,7 +115,7 @@ class Blackbody(Parametric):
     realised weights are divided by their sum.
 
     Temperature may have leading batch or source axes; each resulting spectrum
-    occupies the trailing wavelength axis. Equal normalization weights every
+    occupies the trailing wavelength axis. Equal normalisation weights every
     wavelength sample equally, so it represents equal-width bins and is not
     quadrature for nonuniform sampling.
     """
@@ -127,13 +132,16 @@ class Blackbody(Parametric):
 
     def evaluate(self, *, wavelengths, **context):
         """Evaluate the blackbody photon spectrum at supplied wavelengths."""
+        # Evaluate the dimensionless Planck exponent
         wavelengths = np.asarray(wavelengths, dtype=float)
-        second_radiation_constant = 1.438776877e-2
-        exponent = second_radiation_constant / (
-            wavelengths * self.temperature[..., None]
-        )
+        c2 = 1.438776877e-2
+        exponent = c2 / (wavelengths * self.temperature[..., None])
+
+        # Evaluate stable logarithmic photon-number weights
         log_expm1 = exponent + np.log(-np.expm1(-exponent))
         log_weights = -4 * np.log(wavelengths) - log_expm1
+
+        # Return normalised or absolute relative spectral weights
         if self.normalise:
             return jnn.softmax(log_weights)
         return np.exp(log_weights)

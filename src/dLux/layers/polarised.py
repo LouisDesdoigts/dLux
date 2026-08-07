@@ -20,8 +20,7 @@ __all__ = [
 
 
 class BasePolarisingOptic(OpticalLayer):
-    """
-    Base class for layers that apply a Jones matrix to a wavefront.
+    """Base class for layers that apply a Jones matrix to a wavefront.
 
     Subclasses expose Jones matrices with shape `(2, 2, ...)`, matching the
     polarisation utility convention. The trailing axes may be empty for global
@@ -30,8 +29,7 @@ class BasePolarisingOptic(OpticalLayer):
     """
 
     def __call__(self: PolarisingOptic, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer Jones matrix to the input wavefront.
+        """Applies the layer Jones matrix to the input wavefront.
 
         Parameters
         ----------
@@ -64,6 +62,7 @@ class PolarisationLayer(OpticalLayer):
         self.polarisation = dlu.list2dictionary(items, True, BasePolarisingOptic)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Apply every configured polarising optic in insertion order."""
         if self.polarisation is not None:
             for optic in self.polarisation.values():
                 wavefront = optic(wavefront)
@@ -71,8 +70,7 @@ class PolarisationLayer(OpticalLayer):
 
 
 class PolarisingOptic(BasePolarisingOptic):
-    """
-    A polarising optic defined directly by a Jones matrix.
+    """A polarising optic defined directly by a Jones matrix.
 
     Attributes
     ----------
@@ -83,8 +81,7 @@ class PolarisingOptic(BasePolarisingOptic):
     jones: Array
 
     def __init__(self: PolarisingOptic, jones: Array):
-        """
-        Parameters
+        """Parameters
         ----------
         jones : Array
             Jones matrix with shape `(2, 2, ...)`.
@@ -93,8 +90,7 @@ class PolarisingOptic(BasePolarisingOptic):
 
 
 class UniformPolarisingOptic(PolarisingOptic):
-    """
-    A spatially uniform Jones matrix optic.
+    """A spatially uniform Jones matrix optic.
 
     The input Jones matrix must have shape `(2, 2)`. If `orientation` is provided, the
     Jones matrix is rotated when the layer is applied.
@@ -113,8 +109,7 @@ class UniformPolarisingOptic(PolarisingOptic):
     def __init__(
         self: UniformPolarisingOptic, jones: Array, orientation: Array | None = None
     ):
-        """
-        Parameters
+        """Parameters
         ----------
         jones : Array
             Spatially uniform Jones matrix with shape `(2, 2)`.
@@ -129,8 +124,7 @@ class UniformPolarisingOptic(PolarisingOptic):
         super().__init__(jones)
 
     def __call__(self: UniformPolarisingOptic, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the rotated Jones matrix to the input wavefront.
+        """Applies the rotated Jones matrix to the input wavefront.
 
         Parameters
         ----------
@@ -146,8 +140,7 @@ class UniformPolarisingOptic(PolarisingOptic):
 
 
 class LinearPolariser(BasePolarisingOptic):
-    """
-    An ideal linear polariser.
+    """An ideal linear polariser.
 
     `angle` is the transmission-axis angle measured counter-clockwise from the
     horizontal x-axis. It may be a scalar, array, or `Parametric` object. Parametric
@@ -162,8 +155,7 @@ class LinearPolariser(BasePolarisingOptic):
     angle: Array | Parametric
 
     def __init__(self: LinearPolariser, angle: Array | Parametric = 0.0):
-        """
-        Parameters
+        """Parameters
         ----------
         angle : Array or Parametric = 0.0
             Transmission-axis angle in radians.
@@ -182,8 +174,7 @@ class LinearPolariser(BasePolarisingOptic):
 
 
 class Retarder(BasePolarisingOptic):
-    """
-    A retarder with uniform or spatially varying parameters.
+    """A retarder with uniform or spatially varying parameters.
 
     `retardance` is the phase delay of the vertical component relative to horizontal.
     `angle` rotates the fast axis counter-clockwise from horizontal. Both parameters
@@ -204,8 +195,7 @@ class Retarder(BasePolarisingOptic):
     def __init__(
         self: Retarder, retardance: Array | Parametric, angle: Array | Parametric = 0.0
     ):
-        """
-        Parameters
+        """Parameters
         ----------
         retardance : Array or Parametric
             Retardance in radians.

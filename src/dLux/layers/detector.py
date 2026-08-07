@@ -33,52 +33,40 @@ class DetectorLayer(BaseDetectorLayer):
 
 
 class ApplyPixelResponse(DetectorLayer):
-    """
-    Applies a pixel response array to the input PSF via multiplication. This can be
-    used to model inter- and intra-pixel sensitivity variations common
-    to most detectors.
+    """Multiply a PSF by a two-dimensional pixel-response map.
 
-    Attributes
+    Parameters
     ----------
     pixel_response : Array
-        The pixel_response to apply to the input PSF.
+        Response map applied to the final two PSF axes. Its shape must match the
+        detector sampling when the layer is evaluated.
     """
 
     pixel_response: Array
 
     def __init__(self: ApplyPixelResponse, pixel_response: Array):
-        """
-        Parameters
-        ----------
-        pixel_response : Array
-            The pixel_response to apply to the input PSF. Must be a 2d array that
-            matches the PSF shape at time of application.
-        """
         super().__init__()
         self.pixel_response = dlu.to_value(pixel_response)
+
         if self.pixel_response.ndim != 2:
             raise ValueError("pixel_response must be a 2d array.")
 
     def __call__(self: ApplyPixelResponse, psf: PSF) -> PSF:
+        """Apply the response map to a PSF."""
         return psf * self.pixel_response
 
 
 class ApplyJitter(DetectorLayer):
-    """
-    Convolves the PSF with a radially symmetric Gaussian kernel parameterised by its
-    standard deviation (sigma).
+    """Convolve a PSF with a radially symmetric Gaussian jitter kernel.
 
-    Attributes
+    Parameters
     ----------
     sigma : float, pixels
-        The standard deviation of the Gaussian kernel, in units of pixels.
+        Standard deviation of the Gaussian kernel in detector pixels.
     kernel_size : int
-        The size of the convolution kernel to use.
+        Width of the sampled convolution kernel.
     oversample : int
-        The oversampling factor to use when generating the kernel. This is used to
-        mitigate aliasing when the kernel is small compared to the pixel size.
-    kernel : Array, property
-        The derived normalised Gaussian convolution kernel.
+        Sampling factor used before integrating the kernel to detector pixels.
     """
 
     sigma: float
@@ -88,17 +76,6 @@ class ApplyJitter(DetectorLayer):
     def __init__(
         self: ApplyJitter, sigma: float, kernel_size: int = 9, oversample: int = 3
     ):
-        """
-        Parameters
-        ----------
-        sigma : float, pixels
-            The standard deviation of the Gaussian kernel, in units of pixels.
-        kernel_size : int = 9
-            The size of the convolution kernel to use.
-        oversample : int = 3
-            The oversampling factor to use when generating the kernel. This is used to
-            mitigate aliasing when the kernel is small compared to the pixel size.
-        """
         super().__init__()
         self.kernel_size = int(kernel_size)
         self.sigma = dlu.to_value(sigma)
@@ -109,14 +86,7 @@ class ApplyJitter(DetectorLayer):
 
     @property
     def kernel(self: ApplyJitter) -> Array:
-        """
-        Generates the normalised Gaussian kernel.
-
-        Returns
-        -------
-        kernel : Array
-            The Gaussian kernel.
-        """
+        """Return the normalised, pixel-integrated Gaussian kernel."""
         kernel = dlu.gaussian(
             mean=np.array([0.0, 0.0]),
             std=np.array([self.sigma, self.sigma]),
@@ -125,58 +95,45 @@ class ApplyJitter(DetectorLayer):
         return dlu.downsample(kernel, self.oversample, mean=False)
 
     def __call__(self: ApplyJitter, psf: PSF) -> PSF:
+        """Convolve a PSF with the jitter kernel."""
         return psf.convolve(self.kernel)
 
 
 class ApplySaturation(DetectorLayer):
-    """
-    Applies a simple saturation model to the input PSF by clipping any values above
-    the threshold value.
+    """Clip PSF values at a fixed saturation threshold.
 
-    Attributes
+    Parameters
     ----------
     threshold : float
-        The threshold at which the saturation is applied.
+        Maximum retained detector value.
     """
 
     threshold: float
 
     def __init__(self: ApplySaturation, threshold: float):
-        """
-        Parameters
-        ----------
-        threshold : float
-            The threshold at which the saturation is applied.
-        """
         super().__init__()
         self.threshold = dlu.to_value(threshold)
 
     def __call__(self: ApplySaturation, psf: PSF) -> PSF:
+        """Apply the saturation threshold to a PSF."""
         return psf.min("data", self.threshold)
 
 
 class AddConstant(DetectorLayer):
-    """
-    Adds a constant to the output PSF. This is typically used to model the mean value of
-    the detector noise.
+    """Add a spatially constant detector signal to a PSF.
 
-    Attributes
+    Parameters
     ----------
     value : float
-        The value to add to the PSF.
+        Constant value added to every PSF sample.
     """
 
     value: float
 
     def __init__(self: AddConstant, value: float):
-        """
-        Parameters
-        ----------
-        value : float
-            The value to add to the PSF.
-        """
         super().__init__()
         self.value = dlu.to_value(value)
 
     def __call__(self: AddConstant, psf: PSF) -> PSF:
+        """Add the configured constant to a PSF."""
         return psf + self.value

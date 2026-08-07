@@ -1,5 +1,4 @@
-"""
-Polarisation utilities using Jones matrices with shape `(2, 2, ...)`.
+"""Polarisation utilities using Jones matrices with shape `(2, 2, ...)`.
 
 The first two axes are the Jones matrix axes and trailing axes are broadcast
 dimensions, usually spatial coordinates. Angles are measured counter-clockwise from
@@ -26,8 +25,7 @@ __all__ = [
 
 
 def horizontal_polariser() -> Array:
-    """
-    Jones matrix for an ideal horizontal linear polariser.
+    """Jones matrix for an ideal horizontal linear polariser.
 
     Returns
     -------
@@ -38,8 +36,7 @@ def horizontal_polariser() -> Array:
 
 
 def vertical_polariser() -> Array:
-    """
-    Jones matrix for an ideal vertical linear polariser.
+    """Jones matrix for an ideal vertical linear polariser.
 
     Returns
     -------
@@ -50,8 +47,7 @@ def vertical_polariser() -> Array:
 
 
 def rhc_polariser() -> Array:
-    """
-    Jones matrix for an ideal right-handed circular polariser.
+    """Jones matrix for an ideal right-handed circular polariser.
 
     Returns
     -------
@@ -63,8 +59,7 @@ def rhc_polariser() -> Array:
 
 
 def lhc_polariser() -> Array:
-    """
-    Jones matrix for an ideal left-handed circular polariser.
+    """Jones matrix for an ideal left-handed circular polariser.
 
     Returns
     -------
@@ -76,24 +71,19 @@ def lhc_polariser() -> Array:
 
 
 def quarter_wave_plate(angle: Array) -> Array:
-    """
-    Jones matrix for a quarter-wave plate with fast axis rotated by `angle`.
-    """
+    """Jones matrix for a quarter-wave plate with fast axis rotated by `angle`."""
     jones = np.array([[1, 0], [0, 1j]])
     return rotate_jones(jones, angle)
 
 
 def half_wave_plate(angle: Array) -> Array:
-    """
-    Jones matrix for a half-wave plate with fast axis rotated by `angle`.
-    """
+    """Jones matrix for a half-wave plate with fast axis rotated by `angle`."""
     jones = np.array([[1, 0], [0, -1]])
     return rotate_jones(jones, angle)
 
 
 def linear_polariser(angle: Array) -> Array:
-    """
-    Jones matrix for an ideal linear polariser.
+    """Jones matrix for an ideal linear polariser.
 
     Parameters
     ----------
@@ -111,8 +101,7 @@ def linear_polariser(angle: Array) -> Array:
 
 
 def retarder(retardance: Array, angle: Array) -> Array:
-    """
-    Jones matrix for a retarder.
+    """Jones matrix for a retarder.
 
     Parameters
     ----------
@@ -135,8 +124,7 @@ def retarder(retardance: Array, angle: Array) -> Array:
 
 
 def apply_jones(jones: Array, phasor: Array) -> Array:
-    """
-    Applies a Jones matrix to a Jones phasor.
+    """Applies a Jones matrix to a Jones phasor.
 
     Parameters
     ----------
@@ -154,8 +142,7 @@ def apply_jones(jones: Array, phasor: Array) -> Array:
 
 
 def rotate_jones(jones: Array, angle: Array | None) -> Array:
-    """
-    Rotate a Jones matrix by a given angle.
+    """Rotate a Jones matrix by a given angle.
 
     Parameters
     ----------
@@ -191,8 +178,7 @@ A_inv = np.linalg.inv(A)
 
 
 def jones_to_stokes(jones, stokes=None):
-    """
-    Convert a Jones matrix to the output Stokes parameters for an input Stokes vector.
+    """Convert a Jones matrix and input Stokes vector to output Stokes parameters.
     This follows the module convention strictly: the first two axes are Jones axes,
     and all remaining axes are trailing broadcast dimensions. Leading vectorisation
     dimensions should be handled by the caller.

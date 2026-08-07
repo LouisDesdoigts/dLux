@@ -1,3 +1,5 @@
+"""Generate and transform Cartesian and polar coordinate grids."""
+
 import jax.numpy as np
 from jax import Array
 
@@ -18,8 +20,7 @@ __all__ = [
 
 
 def translate_coords(coords: Array, translation: Array) -> Array:
-    """
-    Translates the coordinates by to a new centre. Translation must have shape (2,).
+    """Translates the coordinates by to a new centre. Translation must have shape (2,).
 
     Parameters
     ----------
@@ -37,8 +38,7 @@ def translate_coords(coords: Array, translation: Array) -> Array:
 
 
 def compress_coords(coords: Array, compress: Array) -> Array:
-    """
-    Compresses the coordinates by a given factor. Compress must have shape (2,).
+    """Compresses the coordinates by a given factor. Compress must have shape (2,).
 
     Parameters
     ----------
@@ -56,8 +56,7 @@ def compress_coords(coords: Array, compress: Array) -> Array:
 
 
 def shear_coords(coords: Array, shear: Array) -> Array:
-    """
-    Shears the coordinates by a given factor. Shear must have shape (2,).
+    """Shears the coordinates by a given factor. Shear must have shape (2,).
 
     Parameters
     ----------
@@ -76,8 +75,7 @@ def shear_coords(coords: Array, shear: Array) -> Array:
 
 
 def rotate_coords(coords: Array, rotation: float) -> Array:
-    """
-    Rotates the coordinates by a given angle.
+    """Rotates the coordinates by a given angle.
 
     Parameters
     ----------
@@ -91,7 +89,6 @@ def rotate_coords(coords: Array, rotation: float) -> Array:
     coords : Array
         The rotated coordinates.
     """
-
     x, y = coords
     new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
     new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
@@ -99,8 +96,7 @@ def rotate_coords(coords: Array, rotation: float) -> Array:
 
 
 def distort_coords(coords: Array, coeffs: Array, pows: Array):
-    """
-    Apply a 2D polynomial distortion to some coordinates
+    """Apply a 2D polynomial distortion to some coordinates.
 
     Parameters
     ----------
@@ -122,8 +118,7 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
 
 
 def cart2polar(coordinates: Array) -> Array:
-    """
-    Converts the input (x, y) Cartesian coordinates into (r, phi) polar
+    """Converts the input (x, y) Cartesian coordinates into (r, phi) polar
     coordinates.
 
     Parameters
@@ -143,8 +138,7 @@ def cart2polar(coordinates: Array) -> Array:
 
 
 def polar2cart(coordinates: Array) -> Array:
-    """
-    Converts the input (r, phi) polar coordinates into (x, y) Cartesian
+    """Converts the input (r, phi) polar coordinates into (x, y) Cartesian
     coordinates.
 
     Parameters
@@ -171,8 +165,7 @@ def pixel_coords(
     polar: bool = False,
     fft_style: bool = False,
 ) -> Array:
-    """
-    Returns a paraxial set of 2d coordinates for each pixel center.
+    """Returns a paraxial set of 2d coordinates for each pixel center.
 
     Parameters
     ----------
@@ -188,7 +181,7 @@ def pixel_coords(
         Output the coordinates in polar (r, phi) coordinates.
     fft_style : bool = False
         If True, use FFT-style centering. For even npixels this produces integer
-        centered coordinates. For odd npixels this is identical to the default.
+        centred coordinates. For odd npixels this is identical to the default.
 
     Returns
     -------
@@ -211,7 +204,7 @@ def pixel_coords(
     # Default: symmetric pixel-center coordinates (half-integer for even N)
     offsets = (0.0, 0.0)
 
-    # FFT-style: shift by +0.5 pixel for even N so coordinates become integer-centered
+    # FFT-style: shift by +0.5 pixel for even N so coordinates become integer-centred
     if fft_style and (npixels % 2 == 0):
         offsets = (pixscale / 2.0, pixscale / 2.0)
 
@@ -254,8 +247,7 @@ def nd_coords(
     offsets: float | tuple[float, ...] = 0.0,
     indexing: str = "xy",
 ) -> Array:
-    """
-    Returns a set of nd pixel center coordinates, with an optional offset. Each
+    """Returns a set of nd pixel center coordinates, with an optional offset. Each
     dimension can have a different number of pixels, pixel scale and offset by passing
     in tuples of values: `nd_coords((10, 10), (1, 2), (0, 1))`. pixel scale and offset
     can also be passed in as floats to apply those values to all dimensions, i.e.:

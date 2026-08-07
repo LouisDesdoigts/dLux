@@ -110,12 +110,11 @@ class SegmentedHex(SparseApertureBuilder):
             oversample=oversample,
         )
 
-
 class NRMLike(SparseApertureBuilder):
     """Simple NRM with ``(x, y)`` hole centres and one shared hole shape.
 
     This helper deliberately excludes global stops and obscurations. Sparse
-    materialization always gives every hole independent OPD coefficients.
+    materialisation always gives every hole independent OPD coefficients.
 
     Parameters
     ----------
@@ -150,7 +149,7 @@ class NRMLike(SparseApertureBuilder):
         jit=False,
         sparse=False,
     ):
-        """Materialize a global NRM, or independent holes with ``sparse=True``."""
+        """Materialise a global NRM, or independent holes with ``sparse=True``."""
         if sparse and coefficients is not None:
             coefficients = np.asarray(coefficients)
             if coefficients.ndim == 0 or coefficients.shape[0] != len(self.centers):

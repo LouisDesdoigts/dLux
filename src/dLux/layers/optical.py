@@ -31,13 +31,18 @@ __all__ = [
 
 def _optic_phasor(optic, wavefront):
     """Combine a resolved optic into one scalar complex field."""
+    # Resolve absent optical terms to their identities
     transmission = 1.0 if optic.transmission is None else optic.transmission
     opd = 0.0 if optic.opd is None else optic.opd
     phase = 0.0 if optic.phase is None else optic.phase
+
+    # Promote every term to the wavefront field shape
     wavenumber = wavefront._to_phasor_shape(wavefront.wavenumber)
     transmission = wavefront._to_phasor_shape(transmission)
     opd = wavefront._to_phasor_shape(opd)
     phase = wavefront._to_phasor_shape(phase)
+
+    # Construct the combined scalar phasor
     return transmission * np.exp(1j * (wavenumber * opd + phase))
 
 
@@ -62,23 +67,31 @@ class BaseOpticalLayer(BaseLayer):
 
     def apply(self, wavefront: Wavefront) -> Wavefront:
         """Apply a monochromatic layer over every leading wavefront axis."""
+        # Apply directly to non-wavefront targets and scalar wavefronts
         if not isinstance(wavefront, Wavefront):
             return self(wavefront)
         axes = wavefront._mapped_axis
         if axes is None:
             return self(wavefront)
 
+        # Define application to one monochromatic field
         def apply(phasor, wavelength, d, c):
             spec = wavefront.spec.set(d=d, c=c)
             wavefront_i = wavefront.set(phasor=phasor, wavelength=wavelength, spec=spec)
             return self.apply(wavefront_i)
 
-        output = eqx.filter_vmap(apply, in_axes=axes)(
+        # Vectorise the layer over leading wavefront dimensions
+        apply = eqx.filter_vmap(apply, in_axes=axes)
+        output = apply(
             wavefront.phasor, wavefront.wavelength, wavefront.spec.d, wavefront.spec.c
         )
-        d = output.spec.d[0] if axes[2] is None else output.spec.d
+
+        # Remove axes introduced for grid values that were not vectorised
         c = output.spec.c
         c = c[0] if c is not None and axes[3] is None else c
+        d = output.spec.d[0] if axes[2] is None else output.spec.d
+
+        # Restore the realised wavefront grid
         return output.set(spec=output.spec.set(d=d, c=c))
 
 
@@ -92,7 +105,15 @@ class OpticalLayer(BaseOpticalLayer):
 
 
 class TransmissiveLayer(OpticalLayer):
-    """Apply a transmission, with optional output normalisation."""
+    """Apply a transmission with optional output normalisation.
+
+    Parameters
+    ----------
+    transmission : Array, Parametric, or None
+        Scalar or sampled amplitude transmission.
+    normalise : bool
+        Normalise the resulting wavefront to unit power.
+    """
 
     transmission: Array | Parametric | None
     normalise: bool
@@ -102,6 +123,7 @@ class TransmissiveLayer(OpticalLayer):
         self.normalise = bool(normalise)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Apply the resolved transmission and optional normalisation."""
         self = self.resolve(**self.context(wavefront))
         if self.transmission is not None:
             transmission = wavefront._to_phasor_shape(self.transmission)
@@ -112,7 +134,15 @@ class TransmissiveLayer(OpticalLayer):
 
 
 class AberratedLayer(OpticalLayer):
-    """Apply optical-path and phase aberrations to a wavefront."""
+    """Apply optical-path and phase aberrations to a wavefront.
+
+    Parameters
+    ----------
+    opd : Array, Parametric, or None
+        Optical path difference in meters.
+    phase : Array, Parametric, or None
+        Additional phase in radians.
+    """
 
     opd: Array | Parametric | None
     phase: Array | Parametric | None
@@ -122,13 +152,26 @@ class AberratedLayer(OpticalLayer):
         self.phase = dlu.to_value(phase, optional=True, types=Parametric)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Apply the resolved optical-path and phase aberrations."""
         self = self.resolve(**self.context(wavefront))
         wavefront = wavefront.add_opd(self.opd)
         return wavefront.add_phase(self.phase)
 
 
 class Optic(TransmissiveLayer, AberratedLayer):
-    """A scalar physical optic evaluated at one plane."""
+    """Represent a scalar physical optic evaluated at one plane.
+
+    Parameters
+    ----------
+    transmission : Array, Parametric, or None
+        Scalar or sampled amplitude transmission.
+    opd : Array, Parametric, or None
+        Optical path difference in meters.
+    phase : Array, Parametric, or None
+        Additional phase in radians.
+    normalise : bool
+        Normalise the resulting wavefront to unit power.
+    """
 
     transmission: Array | Parametric | None
     opd: Array | Parametric | None
@@ -145,6 +188,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
         return _optic_phasor(self, wavefront)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Apply the cumulative complex optic phasor to a wavefront."""
         phasor = wavefront.phasor * self.phasor(wavefront)
         wavefront = wavefront.set(phasor=phasor)
         if self.normalise:
@@ -153,7 +197,15 @@ class Optic(TransmissiveLayer, AberratedLayer):
 
 
 class Tilt(OpticalLayer):
-    """Tilt a wavefront by two angular coordinates."""
+    """Tilt a wavefront by two angular coordinates.
+
+    Parameters
+    ----------
+    angles : ArrayLike
+        Two angular offsets in ``(x, y)`` order.
+    unit : str
+        Angular unit associated with ``angles``.
+    """
 
     angles: Array
     unit: str
@@ -165,6 +217,7 @@ class Tilt(OpticalLayer):
         self.unit = str(unit)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """Apply the configured angular tilt to a wavefront."""
         return wavefront.tilt(self.angles, self.unit)
 
 
@@ -223,9 +276,15 @@ class SoummerFPM(OpticalLayer):
         }
 
     def __call__(self, wavefront):
+        """Apply the compact focal-plane optic and return to the input pupil."""
+        # Propagate to and apply the compact focal-plane optic
         focal = self.propagator(wavefront)
         optic = self.optic.resolve(**self.context(focal))
         difference = focal - optic.apply(focal)
+
+        # Inverse propagate only the field introduced by the optic
         inverse = self.propagator.set(spec=wavefront.spec, inverse=True)
         pupil_difference = inverse(difference)
+
+        # Subtract the focal-plane modification from the original pupil
         return wavefront - pupil_difference

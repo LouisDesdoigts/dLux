@@ -27,14 +27,14 @@ __all__ = [
 
 
 class Norm(zdx.Base):
-    """Normalize and scale sampled basis modes over their aperture support.
+    """Normalise and scale sampled basis modes over their aperture support.
 
     Parameters
     ----------
     mode : str
         One of ``"l1"``, ``"l2"``, ``"max"``, ``"rms"``, or ``"p2v"``.
     scale : ArrayLike
-        Physical scale applied after each mode is normalized.
+        Physical scale applied after each mode is normalised.
     """
 
     mode: str = eqx.field(static=True)
@@ -48,7 +48,7 @@ class Norm(zdx.Base):
         self.scale = dlu.to_value(scale)
 
     def __call__(self, basis, support):
-        """Normalize every basis vector over its matching aperture support."""
+        """Normalise every basis vector over its matching aperture support."""
         while support.ndim < basis.ndim:
             support = np.expand_dims(support, -3)
         norm = getattr(dlu, f"{self.mode}_norm")
@@ -60,7 +60,7 @@ class ApertureData(zdx.Base):
     """Sampled geometry passed internally to an OPD definition.
 
     ``transmission`` is the final downsampled pupil. ``support`` describes the
-    primary or individual sub-apertures used to clip and normalize OPD modes.
+    primary or individual sub-apertures used to clip and normalise OPD modes.
     ``diameter`` and optional ``(x, y)`` centres define the local OPD geometry.
     """
 
@@ -79,19 +79,26 @@ class ApertureData(zdx.Base):
 def _explicit_basis(
     basis, coefficients=None, key=None, coefficient_shape=None, initial_shape=None
 ):
-    """Materialize a sampled OPD basis with explicit or random coefficients."""
+    """Materialise a sampled OPD basis with explicit or random coefficients."""
     from .parametric import Basis
 
+    # Validate mutually exclusive initialization inputs
     if coefficients is not None and key is not None:
         raise ValueError("Provide only one of coefficients or key.")
+
+    # Resolve the native and initial coefficient shapes
     coefficient_shape = (
         basis.shape[:-2] if coefficient_shape is None else tuple(coefficient_shape)
     )
+
+    # Initialize explicit or random coefficients
     if key is not None:
         initial_shape = coefficient_shape if initial_shape is None else initial_shape
         coefficients = jr.normal(key, initial_shape)
     elif coefficients is None and initial_shape is not None:
         coefficients = np.zeros(initial_shape)
+
+    # Materialise the sampled basis
     return Basis(basis, coefficients=coefficients, coefficient_shape=coefficient_shape)
 
 
@@ -116,12 +123,12 @@ class ZernikeDef(OPDDef):
     oversize : float
         Fractional enlargement of the aperture diameter used to sample the modes.
     norm : Norm or None
-        Optional support-aware normalization and physical scaling.
+        Optional support-aware normalisation and physical scaling.
 
     Notes
     -----
     This definition returns sampled basis data. Calling an ``ApertureBuilder``
-    performs the separate materialization into a ``Basis`` parameterization.
+    performs the separate materialisation into a ``Basis`` parameterisation.
     """
 
     nolls: Array
@@ -155,21 +162,24 @@ class ZernikeDef(OPDDef):
         self.norm = norm
 
     def calculate(self, coordinates, support, diameter, centers=None):
-        """Sample, normalize, and clip the configured Zernike basis."""
+        """Sample, normalise, and clip the configured Zernike basis."""
+        # Generate the global or local Zernike bases
         diameter = np.asarray(diameter) * (1 + self.oversize)
         if centers is None:
             basis = dlu.zernike_basis(self.nolls, coordinates, diameter)
         else:
-            bases = [
-                dlu.zernike_basis(
-                    self.nolls, dlu.translate_coords(coordinates, center), diameter
-                )
-                for center in centers
-            ]
+            zernike_fn = lambda c: dlu.zernike_basis(
+                self.nolls, dlu.translate_coords(coordinates, c), diameter
+            )
+            bases = [zernike_fn(c) for c in centers]
             basis = np.stack(bases)
+
+        # Promote and apply the aperture supports
         while support.ndim < basis.ndim:
             support = np.expand_dims(support, -3)
         basis = basis * support
+
+        # Normalise the supported basis when requested
         return basis if self.norm is None else self.norm(basis, support)
 
 
@@ -234,6 +244,7 @@ class ApertureBuilder(GridBuilder):
         Optional OPD data definition evaluated over the primary support.
     oversample : int or tuple of int
         Sampling factor used before downsampling hard-edged geometry.
+
     Returns
     -------
     transmission : Array
@@ -289,41 +300,52 @@ class ApertureBuilder(GridBuilder):
 
     @staticmethod
     def _evaluate(shape, grid, transform):
+        """Evaluate one shape on a possibly transformed grid."""
         coordinates = grid.transformed(transform)
         return shape.evaluate(coordinates=coordinates, pixel_scale=grid.d * grid.scale)
 
     def aperture_data(self, grid, transform):
         """Sample the aperture and retain its native primary support."""
+        # Generate the oversampled aperture components
         fine = grid.oversample(self.oversample)
         primary = self._evaluate(self.primary, fine, transform)
-        transmissions = [primary]
-        transmissions.extend(
-            1 - self._evaluate(shape, fine, transform) for shape in self.obscurations
-        )
-        transmission = dlu.downsample(
-            np.prod(np.stack(transmissions), 0), self.oversample
-        )
+        eval_fn = lambda s: 1 - self._evaluate(s, fine, transform)
+        obscurations = [eval_fn(s) for s in self.obscurations]
+
+        # Combine and downsample the transmission and support
+        transmissions = np.stack([primary, *obscurations])
+        transmission = dlu.downsample(transmissions.prod(0), self.oversample)
         support = dlu.downsample(primary, self.oversample) > 0
-        if self.primary.extent is None:
-            if self.opd is not None:
-                raise ValueError("primary must define an extent when opd is provided.")
-            diameter = np.asarray(0.0)
-        else:
-            diameter = 2 * self.primary.extent
+
+        # Get the physical diameter required for OPD generation
+        extent = self.primary.extent
+        if extent is None and self.opd is not None:
+            raise ValueError("primary must define an extent when opd is provided.")
+        diameter = np.asarray(0.0) if extent is None else 2 * extent
+
+        # Package the sampled aperture data
         return ApertureData(transmission, support, diameter)
 
     def _build(self, grid, transform, return_support=False):
+        """Build sampled transmission, OPD data, and optional support."""
+        # Generate the aperture transmission and support
         aperture = self.aperture_data(grid, transform)
+
+        # Return the transmission when no OPD is defined
         if self.opd is None:
             if return_support:
                 return aperture.transmission, aperture.support
             return aperture.transmission
+
+        # Generate the supported OPD data
         basis = self.opd.calculate(
             grid.transformed(transform),
             aperture.support,
             aperture.diameter,
             aperture.centers,
         )
+
+        # Return the requested components
         if return_support:
             return aperture.transmission, basis, aperture.support
         return aperture.transmission, basis
@@ -337,12 +359,12 @@ class ApertureBuilder(GridBuilder):
         normalise=True,
         jit=False,
     ):
-        """Materialize this definition as a globally sampled ``Optic``.
+        """Materialise this definition as a globally sampled ``Optic``.
 
         ``coefficients`` and ``key`` are mutually exclusive. With an OPD definition,
         explicit coefficients are used directly, a key draws standard-normal values,
         and omitting both initializes zero coefficients. ``normalise`` retains the
-        existing wavefront-normalization meaning of ``Optic.normalise``.
+        existing wavefront-normalisation meaning of ``Optic.normalise``.
         """
         from .layers import Optic
 
@@ -405,8 +427,12 @@ class SparseApertureBuilder(ApertureBuilder):
         super().__init__(subaperture, obscurations, opd, oversample)
 
     def _component(self, center, grid, transform):
+        """Evaluate one complete local aperture component."""
+        # Generate coordinates in the local aperture frame
         coordinates = dlu.translate_coords(grid.transformed(transform), center)
         pixel_scale = grid.d * grid.scale
+
+        # Evaluate the primary and local obscurations
         transmission = self.primary.evaluate(
             coordinates=coordinates, pixel_scale=pixel_scale
         )
@@ -414,9 +440,11 @@ class SparseApertureBuilder(ApertureBuilder):
             transmission *= 1 - shape.evaluate(
                 coordinates=coordinates, pixel_scale=pixel_scale
             )
+
         return transmission
 
     def _primary_component(self, center, grid, transform):
+        """Evaluate one local primary aperture support."""
         coordinates = dlu.translate_coords(grid.transformed(transform), center)
         return self.primary.evaluate(
             coordinates=coordinates, pixel_scale=grid.d * grid.scale
@@ -424,37 +452,31 @@ class SparseApertureBuilder(ApertureBuilder):
 
     def aperture_data(self, grid, transform):
         """Sample global component transmissions and non-redundant supports."""
+        # Generate the oversampled components and primary supports
         fine = grid.oversample(self.oversample)
-        components = np.stack(
-            [self._component(center, fine, transform) for center in self.centers]
-        )
-        primaries = np.stack(
-            [
-                self._primary_component(center, fine, transform)
-                for center in self.centers
-            ]
-        )
-        global_transmission = np.prod(
-            np.stack(
-                [np.ones_like(components[0])]
-                + [
-                    1 - self._evaluate(shape, fine, transform)
-                    for shape in self.global_obscurations
-                ]
-            ),
-            0,
-        )
-        transmission = dlu.downsample(
-            np.clip(components.sum(0), 0.0, 1.0) * global_transmission, self.oversample
-        )
+        comp_fn = lambda c: self._component(c, fine, transform)
+        prim_fn = lambda c: self._primary_component(c, fine, transform)
+        components = np.stack([comp_fn(c) for c in self.centers])
+        primaries = np.stack([prim_fn(c) for c in self.centers])
+
+        # Generate the combined global obscuration mask
+        eval_fn = lambda s: 1 - self._evaluate(s, fine, transform)
+        obscurations = [eval_fn(s) for s in self.global_obscurations]
+        mask = np.stack([np.ones_like(components[0]), *obscurations]).prod(0)
+
+        # Combine and downsample the aperture components
+        aperture = np.clip(components.sum(0), 0.0, 1.0)
+        transmission = dlu.downsample(aperture * mask, self.oversample)
         primaries = dlu.downsample(primaries, self.oversample)
         support = dlu.non_redundant_support(primaries)
-        if self.primary.extent is None:
-            if self.opd is not None:
-                raise ValueError("subaperture must define an extent when opd is used.")
-            diameter = np.asarray(0.0)
-        else:
-            diameter = 2 * self.primary.extent
+
+        # Get the physical sub-aperture diameter
+        extent = self.primary.extent
+        if extent is None and self.opd is not None:
+            raise ValueError("subaperture must define an extent when opd is used.")
+        diameter = np.asarray(0.0) if extent is None else 2 * extent
+
+        # Package the sampled aperture data
         return ApertureData(transmission, support, diameter, self.centers)
 
     def __call__(
@@ -468,7 +490,7 @@ class SparseApertureBuilder(ApertureBuilder):
         sparse=False,
         shared=False,
     ):
-        """Materialize this definition as an ``Optic`` or ``SparseOptic``.
+        """Materialise this definition as an ``Optic`` or ``SparseOptic``.
 
         By default this uses the globally sampled ``Optic`` contract. With
         ``sparse=True``, ``shared=True`` keeps the native OPD coefficient shape for
@@ -476,6 +498,7 @@ class SparseApertureBuilder(ApertureBuilder):
         Explicit coefficients may use either representation. A supplied random key
         follows the selected layout.
         """
+        # Materialise a global optic unless sparse output is requested
         if not sparse:
             return super().__call__(
                 grid,
@@ -488,6 +511,7 @@ class SparseApertureBuilder(ApertureBuilder):
         if jit:
             raise ValueError("jit is not supported with sparse=True.")
 
+        # Validate sparse construction requirements
         from .layers import SparseOptic
 
         grid = self._promote_grid(grid)
@@ -497,6 +521,8 @@ class SparseApertureBuilder(ApertureBuilder):
                 "Global obscurations cannot be represented by one shared local "
                 "SparseOptic transmission; use sparse=False instead."
             )
+
+        # Sample the shared local transmission
         fine = grid.oversample(self.oversample)
         transmission = self._component(np.zeros(2), fine, transform)
         transmission = dlu.downsample(transmission, self.oversample)
@@ -504,10 +530,14 @@ class SparseApertureBuilder(ApertureBuilder):
             return SparseOptic(
                 self.centers, transmission=transmission, normalise=normalise
             )
+
+        # Generate the supported local OPD basis
         coordinates = grid.transformed(transform)
         support = self._primary_component(np.zeros(2), grid, transform) > 0
         diameter = 2 * self.primary.extent
         basis = self.opd.calculate(coordinates, support, diameter)
+
+        # Materialise shared or aperture-dependent OPD coefficients
         shape = basis.shape[:-2]
         initial_shape = shape if shared else (len(self.centers),) + shape
         opd = _explicit_basis(
@@ -517,6 +547,8 @@ class SparseApertureBuilder(ApertureBuilder):
             coefficient_shape=shape,
             initial_shape=initial_shape,
         )
+
+        # Package the locally sampled sparse optic
         return SparseOptic(
             self.centers, transmission=transmission, opd=opd, normalise=normalise
         )

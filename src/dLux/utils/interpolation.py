@@ -1,3 +1,5 @@
+"""Interpolate and rotate regularly sampled arrays."""
+
 import jax.numpy as np
 from jax import Array, vmap
 import interpax as ipx
@@ -14,8 +16,7 @@ def interp(
     fill: float = 0.0,
     complex: bool = True,
 ) -> Array:
-    """
-    General 2D interpolation wrapper around `interpax.interp2d`.
+    """General 2D interpolation wrapper around `interpax.interp2d`.
 
     Parameters
     ----------
@@ -61,8 +62,7 @@ def scale(
     method: str = "linear",
     complex: bool = True,
 ) -> Array:
-    """
-    Paraxially interpolate a 2D array using per-axis sampling ratios.
+    """Paraxially interpolate a 2D array using per-axis sampling ratios.
 
     Parameters
     ----------
@@ -101,8 +101,7 @@ def scale(
 def rotate(
     array: Array, angle: Array, method: str = "linear", complex: bool = True
 ) -> Array:
-    """
-    Rotates a 2D array by the angle, retaining its input shape.
+    """Rotates a 2D array by the angle, retaining its input shape.
 
     Parameters
     ----------
