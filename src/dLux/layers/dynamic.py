@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-import equinox as eqx
-import jax.numpy as np
 from jax import Array
 
+import dLux.utils as dlu
+
 from ..grids import CoordTransform, GridSpec
-from ..parametric import Parametric, to_param
+from ..parametric import Parametric
 from ..fields import Wavefront
 from .optical import AberratedLayer, BaseOpticalLayer, Optic, TransmissiveLayer
 
@@ -28,14 +28,19 @@ class BaseDynamicLayer(BaseOpticalLayer):
     transformation: CoordTransform | None
 
     def __init__(self, coordinates=None, transformation=None):
-        if coordinates is not None and not isinstance(coordinates, GridSpec):
-            coordinates = np.asarray(coordinates, dtype=float)
-            if coordinates.shape[-3] != 2:
-                raise ValueError("coordinates must have shape (..., 2, n, n).")
         if transformation is not None and not isinstance(
             transformation, CoordTransform
         ):
             raise TypeError("transformation must be a CoordTransform or None.")
+
+        coordinates = dlu.to_value(coordinates, optional=True, types=GridSpec)
+        if (
+            coordinates is not None
+            and not isinstance(coordinates, GridSpec)
+            and (coordinates.ndim < 3 or coordinates.shape[-3] != 2)
+        ):
+            raise ValueError("coordinates must have shape (..., 2, ny, nx).")
+
         self.coordinates = coordinates
         self.transformation = transformation
 
@@ -58,7 +63,7 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    transmission: Array | Parametric | None = eqx.field(converter=to_param)
+    transmission: Array | Parametric | None
     normalise: bool
 
     def __init__(
@@ -73,8 +78,8 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    opd: Array | Parametric | None = eqx.field(converter=to_param)
-    phase: Array | Parametric | None = eqx.field(converter=to_param)
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
 
     def __init__(self, opd=None, phase=None, coordinates=None, transformation=None):
         BaseDynamicLayer.__init__(self, coordinates, transformation)
@@ -86,9 +91,9 @@ class DynamicOptic(BaseDynamicLayer, Optic):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    transmission: Array | Parametric | None = eqx.field(converter=to_param)
-    opd: Array | Parametric | None = eqx.field(converter=to_param)
-    phase: Array | Parametric | None = eqx.field(converter=to_param)
+    transmission: Array | Parametric | None
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
     normalise: bool
 
     def __init__(

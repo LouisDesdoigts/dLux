@@ -9,7 +9,9 @@ import jax.numpy as np
 import equinox as eqx
 from jax import Array
 
-from ..parametric import Parametric, ParametricHolder, to_param
+import dLux.utils as dlu
+
+from ..parametric import Parametric, ParametricHolder
 from ..fields import Wavefront
 
 if TYPE_CHECKING:
@@ -43,7 +45,7 @@ class BaseLayer(ParametricHolder):
     """Base class for callable transformations of dLux objects."""
 
     @abstractmethod
-    def __call__(self, target: Any) -> Any:  # pragma: no cover
+    def __call__(self, target: Any) -> Any:
         """Apply this layer to its target."""
 
     def apply(self, target: Any) -> Any:
@@ -55,7 +57,7 @@ class BaseOpticalLayer(BaseLayer):
     """Base class for layers that transform wavefronts."""
 
     @abstractmethod
-    def __call__(self, wavefront: Wavefront) -> Wavefront:  # pragma: no cover
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
         """Transform a wavefront."""
 
     def apply(self, wavefront: Wavefront) -> Wavefront:
@@ -92,11 +94,11 @@ class OpticalLayer(BaseOpticalLayer):
 class TransmissiveLayer(OpticalLayer):
     """Apply a transmission, with optional output normalisation."""
 
-    transmission: Array | Parametric | None = eqx.field(converter=to_param)
+    transmission: Array | Parametric | None
     normalise: bool
 
     def __init__(self, transmission=None, normalise=False):
-        self.transmission = transmission
+        self.transmission = dlu.to_value(transmission, optional=True, types=Parametric)
         self.normalise = bool(normalise)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
@@ -112,12 +114,12 @@ class TransmissiveLayer(OpticalLayer):
 class AberratedLayer(OpticalLayer):
     """Apply optical-path and phase aberrations to a wavefront."""
 
-    opd: Array | Parametric | None = eqx.field(converter=to_param)
-    phase: Array | Parametric | None = eqx.field(converter=to_param)
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
 
     def __init__(self, opd=None, phase=None):
-        self.opd = opd
-        self.phase = phase
+        self.opd = dlu.to_value(opd, optional=True, types=Parametric)
+        self.phase = dlu.to_value(phase, optional=True, types=Parametric)
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         self = self.resolve(**self.context(wavefront))
@@ -128,9 +130,9 @@ class AberratedLayer(OpticalLayer):
 class Optic(TransmissiveLayer, AberratedLayer):
     """A scalar physical optic evaluated at one plane."""
 
-    transmission: Array | Parametric | None = eqx.field(converter=to_param)
-    opd: Array | Parametric | None = eqx.field(converter=to_param)
-    phase: Array | Parametric | None = eqx.field(converter=to_param)
+    transmission: Array | Parametric | None
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
     normalise: bool
 
     def __init__(self, transmission=None, opd=None, phase=None, normalise=False):
@@ -157,7 +159,7 @@ class Tilt(OpticalLayer):
     unit: str
 
     def __init__(self, angles, unit="rad"):
-        self.angles = np.asarray(angles, dtype=float)
+        self.angles = dlu.to_value(angles)
         if self.angles.shape != (2,):
             raise ValueError("angles must have shape (2,).")
         self.unit = str(unit)

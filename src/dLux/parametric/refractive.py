@@ -7,6 +7,8 @@ import interpax as ipx
 import jax.numpy as np
 from jax import Array
 
+import dLux.utils as dlu
+
 from ..fields import Wavefront
 from .parametrics import Parametric
 
@@ -21,13 +23,13 @@ class CauchyIndex(Parametric):
 
     def __init__(self, coefficients: Array, scale: float = 1e-6):
         """Initialise Cauchy coefficients and their wavelength scale."""
-        coefficients = np.asarray(coefficients, dtype=float)
-        if coefficients.ndim != 1 or coefficients.size == 0:
+        self.coefficients = dlu.to_value(coefficients)
+        self.scale = dlu.to_value(scale)
+
+        if self.coefficients.ndim != 1 or self.coefficients.size == 0:
             raise ValueError("coefficients must be a non-empty 1d array.")
-        if scale <= 0:
+        if self.scale <= 0:
             raise ValueError("scale must be positive.")
-        self.coefficients = coefficients
-        self.scale = np.asarray(scale, dtype=float)
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
         """Evaluate ``A + B/x² + C/x⁴ + ...`` at the wavefront wavelength."""
@@ -43,13 +45,13 @@ class PolynomialIndex(Parametric):
     scale: Array
 
     def __init__(self, coefficients: Array, scale: float = 1e-6):
-        coefficients = np.asarray(coefficients, dtype=float)
-        if coefficients.ndim != 1 or coefficients.size == 0:
+        self.coefficients = dlu.to_value(coefficients)
+        self.scale = dlu.to_value(scale)
+
+        if self.coefficients.ndim != 1 or self.coefficients.size == 0:
             raise ValueError("coefficients must be a non-empty 1d array.")
-        if scale <= 0:
+        if self.scale <= 0:
             raise ValueError("scale must be positive.")
-        self.coefficients = coefficients
-        self.scale = np.asarray(scale, dtype=float)
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
         """Evaluate ``c₀ + c₁x + c₂x² + ...`` for ``x = wavelength / scale``."""
@@ -73,8 +75,11 @@ class InterpolatedIndex(Parametric):
         method: str = "linear",
         extrapolate: bool = False,
     ):
-        self.wavelengths = np.asarray(wavelengths, dtype=float)
-        self.indices = np.asarray(indices, dtype=float)
+        self.wavelengths = dlu.to_value(wavelengths)
+        self.indices = dlu.to_value(indices)
+        self.method = str(method)
+        self.extrapolate = bool(extrapolate)
+
         if self.wavelengths.ndim != 1 or self.indices.ndim != 1:
             raise ValueError("wavelengths and indices must be 1d arrays.")
         if self.wavelengths.shape != self.indices.shape:
@@ -83,8 +88,6 @@ class InterpolatedIndex(Parametric):
             raise ValueError("At least two wavelength-index samples are required.")
         if not bool(np.all(np.diff(self.wavelengths) > 0)):
             raise ValueError("wavelengths must be strictly increasing.")
-        self.method = str(method)
-        self.extrapolate = bool(extrapolate)
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
         return ipx.interp1d(

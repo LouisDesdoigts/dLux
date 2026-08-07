@@ -38,7 +38,7 @@ class ResizeSpec(BaseGridSpec):
         self.n = None if n is None else dlu.as_size(n, name="n")
         self.pad = dlu.as_size(pad, name="pad")
         self.crop = dlu.as_size(crop, name="crop")
-        self.c = None if c is None else np.asarray(c, float)
+        self.c = dlu.to_value(c, optional=True)
 
     def broadcast(self, ndim: int) -> BaseGridSpec:
         """Broadcast sizes and factors to ``ndim`` dimensions."""
@@ -132,17 +132,21 @@ class GridSpec(BaseGridSpec):
         ndim = max(lengths, default=1 if values else 0)
 
         self.n = None if n is None else dlu.as_size(n, ndim, "n")
+
         if diam is not None:
             diam = dlu.as_axis(diam, ndim, "diam")
             d = diam / np.asarray(self.n)
+
         self.d = dlu.as_axis(d, ndim, "d")
         self.c = dlu.as_axis(c, ndim, "c")
+
         if (
             self.d is not None
             and not isinstance(self.d, core.Tracer)
             and np.any(self.d <= 0)
         ):
             raise ValueError("d must contain positive values.")
+
         self.unit = None if unit is None else self._validate_unit(unit)
 
     @staticmethod
@@ -316,9 +320,9 @@ class GridSpec(BaseGridSpec):
         spec = self if ndim == self.ndim else self.broadcast(ndim)
         half_width = spec.fov / 2
         center = np.zeros(ndim) if spec.c is None else spec.c
-        extent = np.stack(
-            (center - half_width, center + half_width), axis=-1
-        ).reshape(center.shape[:-1] + (2 * ndim,))
+        extent = np.stack((center - half_width, center + half_width), axis=-1).reshape(
+            center.shape[:-1] + (2 * ndim,)
+        )
         if unit is None:
             return extent
         return extent * spec.scale / dlu.unit_factor(unit)
@@ -332,13 +336,15 @@ class CoordTransform(zdx.Base):
         """Validate and return a Cartesian coordinate array."""
         if coordinates is None:
             raise ValueError("Provide coordinates when calling the transformation.")
-        coordinates = np.asarray(coordinates, dtype=float)
+
+        coordinates = dlu.to_value(coordinates)
         if coordinates.ndim < 3 or coordinates.shape[-3] != 2:
             raise ValueError("coordinates must have shape (..., 2, ny, nx).")
-        return np.asarray(coordinates, dtype=float)
+
+        return coordinates
 
     @abstractmethod
-    def __call__(self, coordinates: Array) -> Array:  # pragma: no cover
+    def __call__(self, coordinates: Array) -> Array:
         """Transform an array of Cartesian coordinates."""
 
     def apply(self, coordinates: Array) -> Array:
@@ -414,7 +420,7 @@ class DistortCoords(CoordTransform):
         self.powers = _distortion_powers(order, orders, powers, self.shift_invariant)
         if distortion is None:
             distortion = np.zeros_like(self.powers)
-        distortion = np.asarray(distortion, dtype=float)
+        distortion = dlu.to_value(distortion)
         if distortion.shape[-2:] != self.powers.shape:
             raise ValueError("distortion trailing dimensions must match powers shape.")
         self.distortion = distortion
@@ -438,8 +444,8 @@ class AffineMap(CoordTransform):
     offset: Array
 
     def __init__(self, matrix=None, offset=None):
-        matrix = np.eye(2) if matrix is None else np.asarray(matrix, dtype=float)
-        offset = np.zeros(2) if offset is None else np.asarray(offset, dtype=float)
+        matrix = np.eye(2) if matrix is None else dlu.to_value(matrix)
+        offset = np.zeros(2) if offset is None else dlu.to_value(offset)
         if matrix.shape[-2:] != (2, 2):
             raise ValueError("matrix must have trailing shape (2, 2).")
         if offset.shape[-1:] != (2,):
@@ -475,14 +481,19 @@ class Affine(CoordTransform):
         order=("translation", "rotation", "scale", "shear"),
     ):
         self.translation = self._vector(translation, "translation")
-        self.rotation = None if rotation is None else np.asarray(rotation, dtype=float)
+        self.rotation = dlu.to_value(rotation, optional=True)
+
         if self.rotation is not None and self.rotation.ndim > 1:
             raise ValueError("rotation must be scalar or one-dimensional.")
+
         self.scale = None
+
         if scale is not None:
             self.scale = dlu.as_axis(scale, 2, "scale")
+
             if np.any(self.scale == 0):
                 raise ValueError("scale values must be non-zero.")
+
         self.shear = self._vector(shear, "shear")
 
         valid = ("translation", "rotation", "scale", "shear")
@@ -494,7 +505,7 @@ class Affine(CoordTransform):
     def _vector(value, name):
         if value is None:
             return None
-        value = np.asarray(value, dtype=float)
+        value = dlu.to_value(value)
         if value.shape[-1:] != (2,):
             raise ValueError(f"{name} must have trailing shape (2,).")
         return value

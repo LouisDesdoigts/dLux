@@ -9,7 +9,6 @@ conditions are documented rather than enforced inside compiled evaluation.
 
 from __future__ import annotations
 
-import equinox as eqx
 import jax.nn as jnn
 import jax.numpy as np
 from jax import Array
@@ -43,13 +42,7 @@ class SpectralPolynomial(Polynomial):
 
     normalise: bool
 
-    def __init__(
-        self,
-        degree=None,
-        coefficients=None,
-        degrees=None,
-        normalise=True,
-    ):
+    def __init__(self, degree=None, coefficients=None, degrees=None, normalise=True):
         if degree is not None:
             if degrees is not None:
                 raise ValueError("Provide only one of degree or degrees.")
@@ -58,7 +51,7 @@ class SpectralPolynomial(Polynomial):
                 raise ValueError("degree must be positive for SpectralPolynomial.")
             degrees = np.arange(1, degree + 1)
         if degrees is not None:
-            degrees = np.atleast_1d(np.asarray(degrees, dtype=int))
+            degrees = np.atleast_1d(dlu.to_value(degrees, int))
             if np.any(degrees < 1):
                 raise ValueError("SpectralPolynomial degrees must be positive.")
         super().__init__(coefficients=coefficients, degrees=degrees)
@@ -90,11 +83,7 @@ class SpectralBasis(Basis):
     normalise: bool
 
     def __init__(
-        self,
-        basis,
-        coefficients=None,
-        coefficient_shape=None,
-        normalise=True,
+        self, basis, coefficients=None, coefficient_shape=None, normalise=True
     ):
         super().__init__(basis, coefficients, coefficient_shape)
         self.normalise = bool(normalise)
@@ -107,9 +96,7 @@ class SpectralBasis(Basis):
         )
         basis_axes = tuple(range(ndim))
         weights = np.tensordot(
-            self.coefficients,
-            self.basis,
-            axes=(coefficient_axes, basis_axes),
+            self.coefficients, self.basis, axes=(coefficient_axes, basis_axes)
         )
         return _normalise(weights, self.normalise)
 
@@ -128,11 +115,11 @@ class Blackbody(Parametric):
     quadrature for nonuniform sampling.
     """
 
-    temperature: Array = eqx.field(converter=dlu.as_float)
+    temperature: Array
     normalise: bool
 
     def __init__(self, temperature, normalise=True):
-        temperature = dlu.as_float(temperature)
+        temperature = dlu.to_value(temperature)
         if np.any(temperature <= 0):
             raise ValueError("temperature values must be positive.")
         self.temperature = temperature

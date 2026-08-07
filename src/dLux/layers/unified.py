@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import jax.numpy as np
 from jax import Array
 
 import dLux.utils as dlu
@@ -79,7 +78,7 @@ class Interpolate(UnifiedLayer):
         self.transformation = transformation
         self.method = str(method)
         self.complex = bool(complex)
-        self.fill = np.asarray(fill, dtype=float)
+        self.fill = dlu.to_value(fill)
 
     def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
         return target.interpolate(
@@ -98,7 +97,7 @@ class Normalise(UnifiedLayer):
 
     def __init__(self, mode="power", value=1.0):
         self.mode = str(mode)
-        self.value = np.asarray(value, dtype=float)
+        self.value = dlu.to_value(value)
 
     def __call__(self, target: Wavefront | PSF) -> Wavefront | PSF:
         return target.normalise(self.mode, self.value)

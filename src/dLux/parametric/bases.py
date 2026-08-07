@@ -11,6 +11,7 @@ import jax.numpy as np
 from jax import Array
 
 import dLux.utils as dlu
+from ..grids import CoordTransform
 from .parametrics import Parametric
 
 __all__ = [
@@ -51,7 +52,7 @@ class ParametricBasis(Parametric):
     def _set_coefficients(
         self: ParametricBasis, coefficients: Array, coefficient_shape: tuple[int, ...]
     ) -> None:
-        coefficients = np.asarray(coefficients, dtype=float)
+        coefficients = dlu.to_value(coefficients)
         coefficient_shape = tuple(coefficient_shape)
         compact = coefficient_shape == (1,) and coefficients.ndim == 1
         if (
@@ -84,10 +85,8 @@ class ParametricBasis(Parametric):
         return jax.vmap(dlu.eval_basis)(basis, self.coefficients)
 
     @abstractmethod
-    def solve_basis(
-        self: ParametricBasis, value: Array, **kwargs: Any
-    ) -> Array:  # pragma: no cover
-        pass
+    def solve_basis(self: ParametricBasis, value: Array, **kwargs: Any) -> Array:
+        """Solve for coefficients representing a supplied value."""
 
 
 class Basis(ParametricBasis):
@@ -103,13 +102,13 @@ class Basis(ParametricBasis):
         coefficients: Array = None,
         coefficient_shape: tuple[int, ...] = None,
     ):
-        self.basis = np.asarray(basis, dtype=float)
+        self.basis = dlu.to_value(basis)
         if coefficients is None:
             if coefficient_shape is None:
                 raise ValueError("Provide either coefficients or coefficient_shape.")
             coefficients = np.zeros(coefficient_shape)
         else:
-            coefficients = np.asarray(coefficients, dtype=float)
+            coefficients = dlu.to_value(coefficients)
             if coefficient_shape is None:
                 coefficient_shape = coefficients.shape
         if self.basis.shape[: len(coefficient_shape)] != coefficient_shape:
@@ -132,10 +131,8 @@ class ImplicitBasis(ParametricBasis):
     shape: tuple[int, ...] = eqx.field(static=True)
 
     @abstractmethod
-    def calculate_basis(
-        self: ImplicitBasis, **kwargs: Any
-    ) -> Array:  # pragma: no cover
-        pass
+    def calculate_basis(self: ImplicitBasis, **kwargs: Any) -> Array:
+        """Calculate basis vectors from the supplied context."""
 
     def evaluate(self: ImplicitBasis, **kwargs: Any) -> Array:
         return self.evaluate_basis(self.calculate_basis(**kwargs))
@@ -153,10 +150,10 @@ class CoordBasis(ImplicitBasis):
     @staticmethod
     def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
         if coordinates is not None:
-            return coordinates
+            return CoordTransform.get_coordinates(coordinates)
         if wavefront is None:
             raise ValueError("Provide either wavefront or coordinates.")
-        return wavefront.coordinates
+        return CoordTransform.get_coordinates(wavefront.coordinates)
 
 
 class CLIMBBasis(Basis):
@@ -180,7 +177,7 @@ class CLIMBBasis(Basis):
         output_shape = self.basis.shape[len(self.coefficient_shape) :]
         if len(output_shape) != 2 or output_shape[0] != output_shape[1]:
             raise ValueError("The CLIMB latent output must be a square 2D array.")
-        values = np.asarray(values, dtype=float)
+        values = dlu.to_value(values)
         if values.shape != (2,):
             raise ValueError("values must contain exactly two output values.")
         self.values = values

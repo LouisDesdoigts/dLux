@@ -18,20 +18,12 @@ from ..grids import CoordTransform
 __all__ = [
     "Parametric",
     "ParametricHolder",
-    "to_param",
     "resolve",
     "Transform",
     "Interpolation",
     "DynamicParametric",
     "Combination",
 ]
-
-
-def to_param(value: Any, dtype: Any = float) -> Any:
-    """Preserve parameterisations and cast ordinary values to arrays."""
-    if value is None or isinstance(value, Parametric):
-        return value
-    return np.asarray(value, dtype=dtype)
 
 
 class ParametricHolder(zdx.Base):
@@ -48,7 +40,7 @@ class Parametric(zdx.Base):
     """A contextual parameterisation consumed by another dLux object."""
 
     @abstractmethod
-    def evaluate(self, **kwargs: Any) -> Array:  # pragma: no cover
+    def evaluate(self, **kwargs: Any) -> Array:
         """Evaluate the parameterisation in the supplied context."""
 
     def map(self, transformation) -> Parametric:
@@ -57,7 +49,7 @@ class Parametric(zdx.Base):
 
     def integrate(self, lower, upper, **context) -> Array:
         """Integrate the realised parameterisation between two bounds."""
-        raise NotImplementedError(  # pragma: no cover
+        raise NotImplementedError(
             f"{type(self).__name__} does not define spectral integration."
         )
 
@@ -65,7 +57,7 @@ class Parametric(zdx.Base):
 def resolve(value: Any, dtype: Any = None, **context: Any) -> Any:
     """Evaluate a parameterisation and optionally cast the result."""
     value = value.evaluate(**context) if isinstance(value, Parametric) else value
-    return value if value is None or dtype is None else np.asarray(value, dtype)
+    return value if value is None or dtype is None else dlu.to_value(value, dtype)
 
 
 class Transform(Parametric):
@@ -95,8 +87,8 @@ class Interpolation(Parametric):
     extrapolate: bool | float = eqx.field(static=True)
 
     def __init__(self, knots, values, method="linear", extrapolate=0.0):
-        knots = np.asarray(knots, dtype=float)
-        values = np.asarray(values, dtype=float)
+        knots = dlu.to_value(knots)
+        values = dlu.to_value(values)
         if knots.ndim != 1:
             raise ValueError("knots must be one-dimensional.")
         if knots.size < 2:
@@ -123,15 +115,15 @@ class Interpolation(Parametric):
     def integrate(self, lower, upper, **context) -> Array:
         """Exactly integrate a piecewise-linear interpolation."""
         if self.method != "linear":
-            raise NotImplementedError(  # pragma: no cover
+            raise NotImplementedError(
                 "Exact Interpolation integration currently requires method='linear'."
             )
         if self.values.ndim != 1:
-            raise NotImplementedError(  # pragma: no cover
+            raise NotImplementedError(
                 "Interpolation integration currently requires scalar values."
             )
         if self.extrapolate not in (False, 0, 0.0):
-            raise NotImplementedError(  # pragma: no cover
+            raise NotImplementedError(
                 "Interpolation integration currently requires zero extrapolation."
             )
 

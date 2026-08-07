@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import equinox as eqx
 import jax.numpy as np
 import jax.tree as jtu
 from jax import Array, vmap
 
+import dLux.utils as dlu
+
 from ..grids import Affine, AffineMap, CoordTransform, DistortCoords, GridSpec
-from ..parametric import Parametric, ParametricBasis, to_param
+from ..parametric import Parametric, ParametricBasis
 from ..fields import Wavefront
 from .dynamic import BaseDynamicLayer
 from .optical import OpticalLayer, Optic, _optic_phasor
@@ -81,16 +82,16 @@ class SparseOptic(Optic):
     coefficients. The same convention applies to polynomial distortion arrays.
     """
 
-    transmission: Array | Parametric | None = eqx.field(converter=to_param)
-    opd: Array | Parametric | None = eqx.field(converter=to_param)
-    phase: Array | Parametric | None = eqx.field(converter=to_param)
+    transmission: Array | Parametric | None
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
     normalise: bool
     centers: Array
 
     def __init__(
         self, centers, transmission=None, opd=None, phase=None, normalise=False
     ):
-        centers = np.asarray(centers, dtype=float)
+        centers = dlu.to_value(centers)
         if centers.ndim != 2 or centers.shape[-1] != 2:
             raise ValueError("centers must have shape (n, 2).")
         self.centers = centers
@@ -208,8 +209,8 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
 
     coordinates: Array | GridSpec | None
     transformation: CoordTransform | None
-    transmission: Array | Parametric | None = eqx.field(converter=to_param)
-    opd: Array | Parametric | None = eqx.field(converter=to_param)
-    phase: Array | Parametric | None = eqx.field(converter=to_param)
+    transmission: Array | Parametric | None
+    opd: Array | Parametric | None
+    phase: Array | Parametric | None
     normalise: bool
     centers: Array

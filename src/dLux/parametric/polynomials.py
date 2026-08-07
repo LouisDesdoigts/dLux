@@ -31,7 +31,7 @@ def _poly_params(degree, coefficients, ndim, powers, degrees=None):
         if degrees is None:
             powers = dlu.polynomial_powers(degree, ndim)
         else:
-            degrees = np.atleast_1d(np.asarray(degrees, dtype=int))
+            degrees = np.atleast_1d(dlu.to_value(degrees, int))
             if degrees.ndim != 1 or degrees.size == 0:
                 raise ValueError("degrees must contain at least one degree.")
             if np.any(degrees < 0):
@@ -40,14 +40,14 @@ def _poly_params(degree, coefficients, ndim, powers, degrees=None):
             powers = powers[:, np.isin(powers.sum(0), degrees)]
     elif degrees is not None:
         raise ValueError("degrees and powers are mutually exclusive.")
-    powers = np.asarray(powers, dtype=int)
+    powers = dlu.to_value(powers, int)
     powers = powers[None, :] if powers.ndim == 1 else powers
     if powers.ndim != 2:
         raise ValueError("powers must have shape (n_variables, n_terms).")
     if np.any(powers < 0):
         raise ValueError("powers must be non-negative.")
     coefficients = np.zeros(powers.shape[1]) if coefficients is None else coefficients
-    coefficients = np.asarray(coefficients, dtype=float)
+    coefficients = dlu.to_value(coefficients)
     if coefficients.ndim < 1 or coefficients.shape[-1] != powers.shape[1]:
         raise ValueError("coefficients must have trailing shape (n_terms,).")
     return powers, coefficients
@@ -67,7 +67,7 @@ def _poly_coordinates(coordinates, ndim):
             raise ValueError("GridSpec must define n and d.")
         coordinates = coordinates.coordinates
     else:
-        coordinates = np.asarray(coordinates, dtype=float)
+        coordinates = dlu.to_value(coordinates)
         ndim = 1 if ndim is None and coordinates.ndim == 1 else ndim
         ndim = coordinates.shape[0] if ndim is None else int(ndim)
     if ndim < 1:
@@ -158,7 +158,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
         self.nsides = int(nsides)
         if self.nsides not in (0,) and self.nsides < 3:
             raise ValueError("nsides must be zero or greater than two.")
-        self.diameter = None if diameter is None else np.asarray(diameter, dtype=float)
+        self.diameter = diameter
         if self.diameter is not None and self.diameter <= 0:
             raise ValueError("diameter must be greater than zero.")
 
@@ -193,9 +193,7 @@ class Polynomial(ParametricBasis):
     def __init__(
         self, degree=None, coefficients=None, ndim=1, powers=None, degrees=None
     ):
-        powers, coefficients = _poly_params(
-            degree, coefficients, ndim, powers, degrees
-        )
+        powers, coefficients = _poly_params(degree, coefficients, ndim, powers, degrees)
         self.powers = powers
         self._set_coefficients(coefficients, (powers.shape[1],))
 
@@ -244,9 +242,7 @@ class ExplicitPolynomial(Basis):
         degrees=None,
     ):
         coordinates, ndim = _poly_coordinates(coordinates, ndim)
-        powers, coefficients = _poly_params(
-            degree, coefficients, ndim, powers, degrees
-        )
+        powers, coefficients = _poly_params(degree, coefficients, ndim, powers, degrees)
         if coordinates.shape[0] != powers.shape[0]:
             raise ValueError(
                 "coordinate dimensionality must match the polynomial powers."

@@ -1,13 +1,12 @@
 """Polarised optical layers and parameterised polarisation fields."""
 
 from __future__ import annotations
-import equinox as eqx
 import jax.numpy as np
 import dLux.utils as dlu
 from jax import Array
 
 
-from ..parametric import Parametric, to_param
+from ..parametric import Parametric
 from ..fields import Wavefront
 from .optical import OpticalLayer
 
@@ -81,7 +80,7 @@ class PolarisingOptic(BasePolarisingOptic):
         Jones matrix with shape `(2, 2, ...)`.
     """
 
-    jones: Array  # Concrete this as an array
+    jones: Array
 
     def __init__(self: PolarisingOptic, jones: Array):
         """
@@ -160,7 +159,7 @@ class LinearPolariser(BasePolarisingOptic):
         Transmission-axis angle in radians.
     """
 
-    angle: Array | Parametric = eqx.field(converter=to_param)
+    angle: Array | Parametric
 
     def __init__(self: LinearPolariser, angle: Array | Parametric = 0.0):
         """
@@ -169,7 +168,7 @@ class LinearPolariser(BasePolarisingOptic):
         angle : Array or Parametric = 0.0
             Transmission-axis angle in radians.
         """
-        self.angle = angle
+        self.angle = dlu.to_value(angle, types=Parametric)
 
     @property
     def jones(self: LinearPolariser) -> Array:
@@ -199,8 +198,8 @@ class Retarder(BasePolarisingOptic):
         Fast-axis angle in radians.
     """
 
-    retardance: Array | Parametric = eqx.field(converter=to_param)
-    angle: Array | Parametric = eqx.field(converter=to_param)
+    retardance: Array | Parametric
+    angle: Array | Parametric
 
     def __init__(
         self: Retarder, retardance: Array | Parametric, angle: Array | Parametric = 0.0
@@ -213,8 +212,8 @@ class Retarder(BasePolarisingOptic):
         angle : Array or Parametric = 0.0
             Fast-axis angle in radians.
         """
-        self.retardance = retardance
-        self.angle = angle
+        self.retardance = dlu.to_value(retardance, types=Parametric)
+        self.angle = dlu.to_value(angle, types=Parametric)
 
     @property
     def jones(self: Retarder) -> Array:

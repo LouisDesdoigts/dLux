@@ -96,9 +96,7 @@ class SegmentedHex(SparseApertureBuilder):
         oversample=5,
     ):
         if (segment_diameter is None) == (segment_f2f is None):
-            raise ValueError(
-                "Provide exactly one of segment_diameter or segment_f2f."
-            )
+            raise ValueError("Provide exactly one of segment_diameter or segment_f2f.")
         if segment_diameter is None:
             segment_diameter = 2 * segment_f2f / np.sqrt(3)
         centers = dlu.segmented_hex_cens(nrings, segment_diameter / 2, gap)
@@ -137,21 +135,10 @@ class NRMLike(SparseApertureBuilder):
         independent OPD coefficients.
     """
 
-    def __init__(
-        self,
-        centers,
-        hole,
-        opd=None,
-        oversample=5,
-    ):
+    def __init__(self, centers, hole, opd=None, oversample=5):
         if not isinstance(hole, Shape):
             raise TypeError("hole must be a Shape.")
-        super().__init__(
-            hole,
-            centers,
-            opd=opd,
-            oversample=oversample,
-        )
+        super().__init__(hole, centers, opd=opd, oversample=oversample)
 
     def __call__(
         self,
@@ -256,13 +243,7 @@ class JWSTNRMLike(NRMLike):
     perturbed NRM geometries while retaining a shared hexagonal hole shape.
     """
 
-    def __init__(
-        self,
-        centers=None,
-        hole_f2f=0.8,
-        opd=None,
-        oversample=5,
-    ):
+    def __init__(self, centers=None, hole_f2f=0.8, opd=None, oversample=5):
         # Ideal mask coordinates used by AMIGO, excluding its fitted pupil offset.
         if centers is None:
             centers = np.asarray(
@@ -278,10 +259,7 @@ class JWSTNRMLike(NRMLike):
             )
         diameter = 2 * hole_f2f / np.sqrt(3)
         super().__init__(
-            centers,
-            RegularPolygon(6, diameter),
-            opd=opd,
-            oversample=oversample,
+            centers, RegularPolygon(6, diameter), opd=opd, oversample=oversample
         )
 
 
@@ -306,9 +284,7 @@ class EuclidLike(ApertureBuilder):
         opd=None,
         oversample=5,
     ):
-        shift = np.asarray(
-            (secondary_diameter / 2 - spider_width / 2, diameter / 2)
-        )
+        shift = np.asarray((secondary_diameter / 2 - spider_width / 2, diameter / 2))
         obscurations = [Circle(secondary_diameter)]
         for angle in spider_angles:
             transformation = Affine(
@@ -317,13 +293,6 @@ class EuclidLike(ApertureBuilder):
                 order=("rotation", "translation"),
             )
             obscurations.append(
-                TransformedShape(
-                    Rectangle(spider_width, diameter), transformation
-                )
+                TransformedShape(Rectangle(spider_width, diameter), transformation)
             )
-        super().__init__(
-            Circle(diameter),
-            obscurations,
-            opd=opd,
-            oversample=oversample,
-        )
+        super().__init__(Circle(diameter), obscurations, opd=opd, oversample=oversample)

@@ -38,14 +38,14 @@ class Norm(zdx.Base):
     """
 
     mode: str = eqx.field(static=True)
-    scale: Array = eqx.field(converter=dlu.as_float)
+    scale: Array
 
     def __init__(self, mode="rms", scale=1.0):
         mode = str(mode).lower()
         if mode not in ("l1", "l2", "max", "rms", "p2v"):
             raise ValueError("mode must be one of l1, l2, max, rms, or p2v.")
         self.mode = mode
-        self.scale = scale
+        self.scale = dlu.to_value(scale)
 
     def __call__(self, basis, support):
         """Normalize every basis vector over its matching aperture support."""
@@ -66,22 +66,18 @@ class ApertureData(zdx.Base):
 
     transmission: Array
     support: Array
-    diameter: Array = eqx.field(converter=dlu.as_float)
-    centers: Array | None = eqx.field(converter=dlu.as_array)
+    diameter: Array
+    centers: Array | None
 
     def __init__(self, transmission, support, diameter, centers=None):
-        self.transmission = np.asarray(transmission)
-        self.support = np.asarray(support, dtype=bool)
-        self.diameter = diameter
-        self.centers = centers
+        self.transmission = dlu.to_value(transmission, dtype=None)
+        self.support = dlu.to_value(support, dtype=bool)
+        self.diameter = dlu.to_value(diameter)
+        self.centers = dlu.to_value(centers, optional=True)
 
 
 def _explicit_basis(
-    basis,
-    coefficients=None,
-    key=None,
-    coefficient_shape=None,
-    initial_shape=None,
+    basis, coefficients=None, key=None, coefficient_shape=None, initial_shape=None
 ):
     """Materialize a sampled OPD basis with explicit or random coefficients."""
     from .parametric import Basis
@@ -96,11 +92,7 @@ def _explicit_basis(
         coefficients = jr.normal(key, initial_shape)
     elif coefficients is None and initial_shape is not None:
         coefficients = np.zeros(initial_shape)
-    return Basis(
-        basis,
-        coefficients=coefficients,
-        coefficient_shape=coefficient_shape,
-    )
+    return Basis(basis, coefficients=coefficients, coefficient_shape=coefficient_shape)
 
 
 class OPDDef(zdx.Base):
@@ -133,25 +125,33 @@ class ZernikeDef(OPDDef):
     """
 
     nolls: Array
-    oversize: Array = eqx.field(converter=dlu.as_float)
+    oversize: Array
     norm: Norm | None
 
     def __init__(self, nolls=None, orders=None, oversize=0.01, norm=None):
         if (nolls is None) == (orders is None):
             raise ValueError("Provide exactly one of nolls or orders.")
+
         if orders is not None:
-            orders = np.atleast_1d(np.asarray(orders, dtype=int))
+            orders = np.atleast_1d(dlu.to_value(orders, int))
+
             if orders.ndim != 1 or orders.size == 0:
                 raise ValueError("orders must contain at least one radial order.")
+
             nolls = dlu.radial_orders_to_indices(orders)
-        self.nolls = np.atleast_1d(np.asarray(nolls, dtype=int))
+
+        self.nolls = np.atleast_1d(dlu.to_value(nolls, int))
+
         if self.nolls.ndim != 1 or self.nolls.size == 0:
             raise ValueError("nolls must contain at least one Noll index.")
         if np.any(self.nolls < 1):
             raise ValueError("nolls must contain positive Noll indices.")
-        self.oversize = oversize
+
+        self.oversize = dlu.to_value(oversize)
+
         if norm is not None and not isinstance(norm, Norm):
             raise TypeError("norm must be a Norm or None.")
+
         self.norm = norm
 
     def calculate(self, coordinates, support, diameter, centers=None):
@@ -162,9 +162,7 @@ class ZernikeDef(OPDDef):
         else:
             bases = [
                 dlu.zernike_basis(
-                    self.nolls,
-                    dlu.translate_coords(coordinates, center),
-                    diameter,
+                    self.nolls, dlu.translate_coords(coordinates, center), diameter
                 )
                 for center in centers
             ]
@@ -214,7 +212,7 @@ class GridBuilder(zdx.Base):
         return self._build(grid, transform)
 
     @abstractmethod
-    def _build(self, grid, transform):  # pragma: no cover
+    def _build(self, grid, transform):
         """Evaluate this builder on an already validated grid."""
 
 
@@ -256,15 +254,21 @@ class ApertureBuilder(GridBuilder):
     def __init__(self, primary, obscurations=(), opd=None, oversample=5):
         if not isinstance(primary, Shape):
             raise TypeError("primary must be a Shape.")
+
         if not isinstance(obscurations, (list, tuple)):
             raise TypeError("obscurations must be a list or tuple of Shape objects.")
+
         obscurations = tuple(obscurations)
+
         if not all(isinstance(shape, Shape) for shape in obscurations):
             raise TypeError("obscurations must contain only Shape objects.")
+
         self.primary = primary
         self.obscurations = obscurations
+
         if opd is not None and not isinstance(opd, OPDDef):
             raise TypeError("opd must be an OPDDef or None.")
+
         self.opd = opd
         self.oversample = dlu.as_size(oversample, 2, "oversample")
 
@@ -286,10 +290,7 @@ class ApertureBuilder(GridBuilder):
     @staticmethod
     def _evaluate(shape, grid, transform):
         coordinates = grid.transformed(transform)
-        return shape.evaluate(
-            coordinates=coordinates,
-            pixel_scale=grid.d * grid.scale,
-        )
+        return shape.evaluate(coordinates=coordinates, pixel_scale=grid.d * grid.scale)
 
     def aperture_data(self, grid, transform):
         """Sample the aperture and retain its native primary support."""
@@ -297,8 +298,7 @@ class ApertureBuilder(GridBuilder):
         primary = self._evaluate(self.primary, fine, transform)
         transmissions = [primary]
         transmissions.extend(
-            1 - self._evaluate(shape, fine, transform)
-            for shape in self.obscurations
+            1 - self._evaluate(shape, fine, transform) for shape in self.obscurations
         )
         transmission = dlu.downsample(
             np.prod(np.stack(transmissions), 0), self.oversample
@@ -378,7 +378,7 @@ class SparseApertureBuilder(ApertureBuilder):
     transmission.
     """
 
-    centers: Array = eqx.field(converter=dlu.as_float)
+    centers: Array
     global_obscurations: tuple
 
     def __init__(
@@ -390,7 +390,7 @@ class SparseApertureBuilder(ApertureBuilder):
         opd=None,
         oversample=5,
     ):
-        centers = dlu.as_float(centers)
+        centers = dlu.to_value(centers)
         if centers.ndim != 2 or centers.shape[-1] != 2:
             raise ValueError("centers must have shape (n_apertures, 2).")
         self.centers = centers
@@ -445,8 +445,7 @@ class SparseApertureBuilder(ApertureBuilder):
             0,
         )
         transmission = dlu.downsample(
-            np.clip(components.sum(0), 0.0, 1.0) * global_transmission,
-            self.oversample,
+            np.clip(components.sum(0), 0.0, 1.0) * global_transmission, self.oversample
         )
         primaries = dlu.downsample(primaries, self.oversample)
         support = dlu.non_redundant_support(primaries)
@@ -519,8 +518,5 @@ class SparseApertureBuilder(ApertureBuilder):
             initial_shape=initial_shape,
         )
         return SparseOptic(
-            self.centers,
-            transmission=transmission,
-            opd=opd,
-            normalise=normalise,
+            self.centers, transmission=transmission, opd=opd, normalise=normalise
         )

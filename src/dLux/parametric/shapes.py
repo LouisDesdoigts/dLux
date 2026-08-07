@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-import equinox as eqx
+from abc import abstractmethod
+
 import jax.numpy as np
 import zodiax as zdx
 from jax import Array
@@ -38,12 +39,11 @@ class Shape(Parametric):
 class Soft(zdx.Base):
     """Differentiate a shape boundary over a width measured in pixels."""
 
-    pixels: Array = eqx.field(converter=dlu.as_float)
+    pixels: Array
 
     def __init__(self, pixels=1.0):
-        self.pixels = pixels
+        self.pixels = dlu.to_value(pixels)
 
-    def __check_init__(self):
         if self.pixels <= 0:
             raise ValueError("pixels must be greater than zero.")
 
@@ -70,6 +70,7 @@ class InvertibleShape(Shape):
     def __init__(self, edge=None, invert=False):
         if edge is not None and not isinstance(edge, Soft):
             edge = Soft(edge)
+
         self.edge = edge
         self.invert = bool(invert)
 
@@ -77,28 +78,27 @@ class InvertibleShape(Shape):
         if self.edge is None:
             transmission = self.evaluate_hard(coordinates)
         else:
-            transmission = self.evaluate_soft(
-                coordinates, self.edge.clip(pixel_scale)
-            )
+            transmission = self.evaluate_soft(coordinates, self.edge.clip(pixel_scale))
         return 1 - transmission if self.invert else transmission
 
-    def evaluate_hard(self, coordinates):  # pragma: no cover
-        raise NotImplementedError
+    @abstractmethod
+    def evaluate_hard(self, coordinates):
+        """Evaluate the hard-edged shape on Cartesian coordinates."""
 
-    def evaluate_soft(self, coordinates, clip):  # pragma: no cover
-        raise NotImplementedError
+    @abstractmethod
+    def evaluate_soft(self, coordinates, clip):
+        """Evaluate the softened shape on Cartesian coordinates."""
 
 
 class Circle(InvertibleShape):
     """A circular transmissive aperture described by its diameter."""
 
-    diameter: Array = eqx.field(converter=dlu.as_float)
+    diameter: Array
 
     def __init__(self, diameter, edge=None, invert=False):
         super().__init__(edge, invert)
-        self.diameter = diameter
+        self.diameter = dlu.to_value(diameter)
 
-    def __check_init__(self):
         if self.diameter <= 0:
             raise ValueError("diameter must be greater than zero.")
 
@@ -116,13 +116,12 @@ class Circle(InvertibleShape):
 class Square(InvertibleShape):
     """A square transmissive aperture."""
 
-    width: Array = eqx.field(converter=dlu.as_float)
+    width: Array
 
     def __init__(self, width, edge=None, invert=False):
         super().__init__(edge, invert)
-        self.width = width
+        self.width = dlu.to_value(width)
 
-    def __check_init__(self):
         if self.width <= 0:
             raise ValueError("width must be greater than zero.")
 
@@ -140,15 +139,14 @@ class Square(InvertibleShape):
 class Rectangle(InvertibleShape):
     """A rectangular transmissive aperture."""
 
-    width: Array = eqx.field(converter=dlu.as_float)
-    height: Array = eqx.field(converter=dlu.as_float)
+    width: Array
+    height: Array
 
     def __init__(self, width, height, edge=None, invert=False):
         super().__init__(edge, invert)
-        self.width = width
-        self.height = height
+        self.width = dlu.to_value(width)
+        self.height = dlu.to_value(height)
 
-    def __check_init__(self):
         if self.width <= 0 or self.height <= 0:
             raise ValueError("width and height must be greater than zero.")
 
@@ -166,15 +164,14 @@ class Rectangle(InvertibleShape):
 class RegularPolygon(InvertibleShape):
     """A regular polygon described by its circumscribed-circle diameter."""
 
-    diameter: Array = eqx.field(converter=dlu.as_float)
+    diameter: Array
     nsides: int
 
     def __init__(self, nsides, diameter, edge=None, invert=False):
         super().__init__(edge, invert)
-        self.diameter = diameter
+        self.diameter = dlu.to_value(diameter)
         self.nsides = int(nsides)
 
-    def __check_init__(self):
         if self.diameter <= 0:
             raise ValueError("diameter must be greater than zero.")
         if self.nsides < 3:
@@ -194,15 +191,14 @@ class RegularPolygon(InvertibleShape):
 class Spider(InvertibleShape):
     """A general set of occulting radial support arms with angles in degrees."""
 
-    width: Array = eqx.field(converter=dlu.as_float)
-    angles: Array = eqx.field(converter=dlu.as_array)
+    width: Array
+    angles: Array
 
     def __init__(self, width, angles, edge=None, invert=False):
         super().__init__(edge, invert)
-        self.width = width
-        self.angles = angles
+        self.width = dlu.to_value(width)
+        self.angles = dlu.to_value(angles)
 
-    def __check_init__(self):
         if self.width <= 0:
             raise ValueError("width must be greater than zero.")
         if self.angles.ndim != 1:

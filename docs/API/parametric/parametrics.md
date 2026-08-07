@@ -31,9 +31,6 @@ classDiagram
 ???+ info "ParametricHolder"
     ::: dLux.parametric.parametrics.ParametricHolder
 
-???+ info "to_param"
-    ::: dLux.parametric.parametrics.to_param
-
 ???+ info "resolve"
     ::: dLux.parametric.parametrics.resolve
 

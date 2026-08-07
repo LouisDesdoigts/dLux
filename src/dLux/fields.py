@@ -63,7 +63,6 @@ class BaseField(zdx.Base):
     @abstractmethod
     def field(self) -> Array:
         """Return the stored sampled array."""
-        raise NotImplementedError()  # pragma: no cover
 
     @property
     def spatial_shape(self) -> tuple[int, ...]:
@@ -416,7 +415,7 @@ class Wavefront(ContinuousField):
             Optional complex electric field. If omitted, a uniform field is generated
             from ``spec.n``.
         """
-        self.wavelength = np.asarray(wavelength, float)
+        self.wavelength = dlu.to_value(wavelength)
         if phasor is None:
             if not isinstance(spec, GridSpec):
                 raise TypeError("spec must be a GridSpec.")
@@ -426,7 +425,7 @@ class Wavefront(ContinuousField):
             shape = self.wavelength.shape + spec.shape
             self.phasor = np.ones(shape, dtype=complex) / prod(spec.n)
         else:
-            phasor = np.asarray(phasor, complex)
+            phasor = dlu.to_value(phasor, complex)
             if phasor.ndim < 2:
                 raise ValueError("phasor must have at least two spatial dimensions.")
             spec = _field_spec(spec, phasor.shape)
@@ -885,9 +884,9 @@ class PolarisedWavefront(Wavefront):
             self.phasor = self._promote_phasor(self.phasor)
             return
 
-        phasor = np.asarray(phasor, complex)
+        phasor = dlu.to_value(phasor, complex)
         is_jones = phasor.ndim >= 4 and phasor.shape[-4:-2] == (2, 2)
-        wavelength = np.asarray(wavelength, float)
+        wavelength = dlu.to_value(wavelength)
         if phasor.ndim == 2 and wavelength.ndim > 0:
             phasor = phasor * np.ones(wavelength.shape + (1, 1))
         elif is_jones and phasor.ndim == 4 and wavelength.ndim > 0:
@@ -1019,7 +1018,7 @@ class PSF(ContinuousField):
         return self.data
 
     def __init__(self: PSF, data: Array, spec: GridSpec):
-        self.data = np.asarray(data, dtype=float)
+        self.data = dlu.to_value(data)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
         self.spec = _field_spec(spec, self.data.shape)
@@ -1068,13 +1067,13 @@ class Image(DiscreteField):
         variance: Array | None = None,
         read_noise: float | Array = 0.0,
     ):
-        data = np.asarray(data, dtype=float)
+        data = dlu.to_value(data)
         if data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
         spec = _field_spec(spec, data.shape)
         if variance is not None:
-            variance = np.broadcast_to(np.asarray(variance, dtype=float), data.shape)
+            variance = np.broadcast_to(dlu.to_value(variance), data.shape)
         self.data = data
         self.variance = variance
-        self.read_noise = np.asarray(read_noise, dtype=float)
+        self.read_noise = dlu.to_value(read_noise)
         self.spec = spec

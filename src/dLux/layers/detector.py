@@ -24,7 +24,7 @@ class BaseDetectorLayer(BaseLayer):
     """Base class for layers that transform PSFs."""
 
     @abstractmethod
-    def __call__(self, psf: PSF) -> PSF:  # pragma: no cover
+    def __call__(self, psf: PSF) -> PSF:
         """Transform a PSF."""
 
 
@@ -55,7 +55,7 @@ class ApplyPixelResponse(DetectorLayer):
             matches the PSF shape at time of application.
         """
         super().__init__()
-        self.pixel_response = np.asarray(pixel_response, dtype=float)
+        self.pixel_response = dlu.to_value(pixel_response)
         if self.pixel_response.ndim != 2:
             raise ValueError("pixel_response must be a 2d array.")
 
@@ -101,7 +101,7 @@ class ApplyJitter(DetectorLayer):
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
-        self.sigma = np.asarray(sigma, float)
+        self.sigma = dlu.to_value(sigma)
         self.oversample = int(oversample)
 
         if self.kernel_size <= 0:
@@ -149,7 +149,7 @@ class ApplySaturation(DetectorLayer):
             The threshold at which the saturation is applied.
         """
         super().__init__()
-        self.threshold = np.asarray(threshold, float)
+        self.threshold = dlu.to_value(threshold)
 
     def __call__(self: ApplySaturation, psf: PSF) -> PSF:
         return psf.min("data", self.threshold)
@@ -176,7 +176,7 @@ class AddConstant(DetectorLayer):
             The value to add to the PSF.
         """
         super().__init__()
-        self.value = np.asarray(value, float)
+        self.value = dlu.to_value(value)
 
     def __call__(self: AddConstant, psf: PSF) -> PSF:
         return psf + self.value

@@ -27,8 +27,5 @@
 ???+ info "as_axis"
     ::: dLux.utils.helpers.as_axis
 
-???+ info "as_float"
-    ::: dLux.utils.helpers.as_float
-
-???+ info "as_array"
-    ::: dLux.utils.helpers.as_array
+???+ info "to_value"
+    ::: dLux.utils.helpers.to_value

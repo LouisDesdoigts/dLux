@@ -152,7 +152,7 @@ class ABCDFreeSpace(ABCDElement):
     distance: float
 
     def __init__(self, distance):
-        self.distance = np.asarray(distance, float)
+        self.distance = dlu.to_value(distance)
 
     @property
     def abcd(self):
@@ -166,7 +166,7 @@ class ABCDLens(ABCDElement):
     focal_length: float
 
     def __init__(self, focal_length):
-        self.focal_length = np.asarray(focal_length, float)
+        self.focal_length = dlu.to_value(focal_length)
 
     @property
     def abcd(self):
@@ -180,7 +180,7 @@ class ABCDMirror(ABCDElement):
     radius: float
 
     def __init__(self, radius):
-        self.radius = np.asarray(radius, float)
+        self.radius = dlu.to_value(radius)
 
     @property
     def abcd(self):
@@ -194,7 +194,7 @@ class ABCDFraunhofer(ABCDElement):
     focal_length: float
 
     def __init__(self, focal_length):
-        self.focal_length = np.asarray(focal_length, float)
+        self.focal_length = dlu.to_value(focal_length)
 
     @property
     def abcd(self):
@@ -230,9 +230,7 @@ class FocalPropagator(Propagator):
 
     def __init__(self, spec, focal_length=None, inverse=False):
         super().__init__(spec)
-        self.focal_length = (
-            None if focal_length is None else np.asarray(focal_length, dtype=float)
-        )
+        self.focal_length = dlu.to_value(focal_length, optional=True)
         self.inverse = bool(inverse)
 
     def validate(self, wavefront):
@@ -305,7 +303,7 @@ class Fresnel(FocalPropagator):
             )
         super().__init__(spec, focal_length, inverse)
         self.method = method
-        self.defocus = np.asarray(defocus, dtype=float)
+        self.defocus = dlu.to_value(defocus)
 
     def __call__(self, wavefront):
         self.validate(wavefront)
@@ -380,7 +378,7 @@ class FreeSpace(Propagator):
         if not isinstance(spec, ResizeSpec):
             raise TypeError("FreeSpace spec must be a ResizeSpec.")
         super().__init__(spec)
-        self.distance = np.asarray(distance, dtype=float)
+        self.distance = dlu.to_value(distance)
         self.crop = bool(crop)
 
     def __call__(self, wavefront):

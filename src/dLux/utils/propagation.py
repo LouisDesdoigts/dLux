@@ -167,10 +167,7 @@ def _fraunhofer_abcd(focal_length, defocus, inverse=False):
     """Build the directed ABCD matrix for defocused focal propagation."""
     if inverse:
         return dlu.compose_abcd(
-            [
-                dlu.abcd_free_space(-defocus),
-                dlu.abcd_fraunhofer(-focal_length),
-            ]
+            [dlu.abcd_free_space(-defocus), dlu.abcd_fraunhofer(-focal_length)]
         )
     return dlu.compose_abcd(
         [dlu.abcd_fraunhofer(focal_length), dlu.abcd_free_space(defocus)]

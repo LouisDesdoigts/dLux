@@ -76,6 +76,7 @@ relative_files = true
 fail_under = 95
 precision = 2
 show_missing = true
+exclude_also = ["@(abc\\.)?abstractmethod"]
 
 [tool.coverage.xml]
 output = "coverage.xml"

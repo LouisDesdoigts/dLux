@@ -11,7 +11,7 @@ from jax import Array
 
 import dLux.utils as dlu
 from .fields import Wavefront
-from .parametric import Parametric, ParametricHolder, resolve, to_param
+from .parametric import Parametric, ParametricHolder, resolve
 
 __all__ = ["BaseSource", "Spectrum", "Source", "BinarySource"]
 
@@ -55,8 +55,8 @@ class BaseSource(ParametricHolder):
     units: dict
 
     def __init__(self, flux=None, distribution=None, units=None):
-        self.flux = to_param(flux)
-        self.distribution = to_param(distribution)
+        self.flux = dlu.to_value(flux, optional=True, types=Parametric)
+        self.distribution = dlu.to_value(distribution, optional=True, types=Parametric)
         self.units = _merge_units(units)
 
     def source_params(self, nsource=None, **context):
@@ -214,14 +214,14 @@ class Spectrum(ParametricHolder):
     units: dict
 
     def __init__(self, wavelengths, weights=None, units=None):
-        self.wavelengths = to_param(wavelengths)
+        self.wavelengths = dlu.to_value(wavelengths, types=Parametric)
         if weights is None:
             if isinstance(self.wavelengths, Parametric):
                 raise ValueError(
                     "weights are required when wavelengths are parametric."
                 )
             weights = np.ones_like(self.wavelengths)
-        self.weights = to_param(weights)
+        self.weights = dlu.to_value(weights, types=Parametric)
         self.units = _merge_units(units)
 
     def spectrum_params(self, **context: Any) -> tuple[Array, Array]:
@@ -275,7 +275,7 @@ class Source(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        self.position = to_param(position)
+        self.position = dlu.to_value(position, optional=True, types=Parametric)
         BaseSource.__init__(self, flux, distribution, units)
         Spectrum.__init__(self, wavelengths, weights, self.units)
 
@@ -324,10 +324,10 @@ class BinarySource(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        self.centre = to_param(centre)
-        self.separation = to_param(separation)
-        self.position_angle = to_param(position_angle)
-        self.contrast = to_param(contrast)
+        self.centre = dlu.to_value(centre, optional=True, types=Parametric)
+        self.separation = dlu.to_value(separation, types=Parametric)
+        self.position_angle = dlu.to_value(position_angle, types=Parametric)
+        self.contrast = dlu.to_value(contrast, types=Parametric)
         BaseSource.__init__(self, flux, distribution, units)
         Spectrum.__init__(self, wavelengths, weights, self.units)
 

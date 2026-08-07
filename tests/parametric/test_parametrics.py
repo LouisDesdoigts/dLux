@@ -48,11 +48,8 @@ def test_value_transform_contract(coordinates):
 
 
 def test_conversion_and_resolution(coordinates):
-    array = dl.to_param([1.0, 2.0])
     parametric = CoordinateValue()
 
-    assert np.array_equal(array, [1.0, 2.0])
-    assert dl.to_param(parametric) is parametric
     assert np.array_equal(
         dl.resolve(parametric, float, coordinates=coordinates), coordinates[0]
     )
