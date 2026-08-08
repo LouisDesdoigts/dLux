@@ -9,6 +9,7 @@ import equinox as eqx
 import jax.numpy as np
 import jax.random as jr
 import jax.scipy as jsp
+import zodiax as zdx
 from jax import Array, vmap
 from jax.scipy.signal import convolve
 
@@ -866,6 +867,16 @@ class Image(DiscreteField):
     def error(self) -> Array | None:
         """Return the standard deviation implied by ``variance``."""
         return None if self.variance is None else np.sqrt(self.variance)
+
+    def z_score(self, model: BaseField | Array) -> Array:
+        """Return the standardised residuals between the model and image."""
+        if self.error is None:
+            raise ValueError("variance is required to calculate z-scores.")
+
+        model = model.field if isinstance(model, BaseField) else np.asarray(model)
+        if model.shape != self.field.shape:
+            raise ValueError("model and data must have matching shapes.")
+        return zdx.z_score(model, self.field, self.error)
 
     def add_poisson_noise(self, key: Array) -> Image:
         """Add a Poisson realisation and its expected variance."""

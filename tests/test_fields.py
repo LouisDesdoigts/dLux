@@ -417,9 +417,11 @@ class TestImage:
         poisson = assert_jittable(
             lambda value: value.log_likelihood(model, "poisson"), image
         )
+        z_score = assert_jittable(lambda value: value.z_score(model), image)
 
         assert np.isfinite(gaussian)
         assert np.isfinite(poisson)
+        assert np.allclose(z_score, 0.0)
 
     def test_leading_axis_contract(self, make_grid):
         data = np.full((2, 3, 8, 8), 10.0)
@@ -445,6 +447,10 @@ class TestImage:
             lambda grid: dl.Image(np.ones((8, 8)), grid).log_likelihood(
                 np.ones((4, 4))
             ),
+            lambda grid: dl.Image(np.ones((8, 8)), grid).z_score(np.ones((8, 8))),
+            lambda grid: dl.Image(
+                np.ones((8, 8)), grid, variance=1.0
+            ).z_score(np.ones((4, 4))),
             lambda grid: dl.Image(np.ones((8, 8)), grid).log_likelihood(
                 np.ones((8, 8)), "gaussian"
             ),
