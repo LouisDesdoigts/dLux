@@ -27,9 +27,9 @@ def test_differentiable_contract():
     assert_finite_tree(gradient)
 
 
-def test_shared_factories(make_spec, make_wavefront, make_psf):
-    spec = make_spec()
-    assert_finite_tree(spec)
-    assert_finite_tree(make_wavefront(spec=spec))
-    assert_finite_tree(make_wavefront(spec=spec, polarised=True))
-    assert_finite_tree(make_psf(spec=spec))
+def test_shared_factories(make_grid, make_wavefront, make_psf):
+    grid = make_grid()
+    assert_finite_tree(grid)
+    assert_finite_tree(make_wavefront(grid=grid))
+    assert_finite_tree(make_wavefront(grid=grid, polarised=True))
+    assert_finite_tree(make_psf(grid=grid))

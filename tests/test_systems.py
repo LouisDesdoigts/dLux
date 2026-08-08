@@ -34,7 +34,7 @@ def system(input_spec, focal_spec):
             ("propagator", dl.Fraunhofer(focal_spec)),
             ("normalise", dl.Normalise()),
         ],
-        spec=input_spec,
+        grid=input_spec,
     )
 
 
@@ -42,7 +42,7 @@ def test_system_composition_contract(system):
     wavefront = system.initialise_wavefront(1e-6)
     output = assert_jittable(system, wavefront, rtol=1e-5, atol=1e-5)
 
-    assert output.spec.unit == "rad"
+    assert output.grid.unit == "rad"
     assert output.phasor.shape == (8, 6)
     assert np.allclose(output.power, 1)
 
@@ -205,7 +205,7 @@ def test_model_interface(system):
     binary = system.model(binary, return_all=True)
     assert binary["Wavefront"].phasor.shape[0] == 2
     assert binary["PSF"].data.shape == (8, 6)
-    assert binary["PSF"].spec.d.shape == (2,)
+    assert binary["PSF"].grid.d.shape == (2,)
 
 
 def test_resolved_source_model(system):
@@ -254,9 +254,11 @@ def test_binary_source_component_distributions(system):
         lambda system: dl.OpticalSystem([], np.ones(2)),
         lambda system: dl.OpticalSystem([], dl.GridSpec(n=8, unit="m")),
         lambda system: dl.OpticalSystem([], dl.GridSpec(n=8, d=0.1, unit="rad")),
+        lambda system: dl.OpticalSystem([], spec=system.grid),
+        lambda system: system.spec,
         lambda system: dl.DetectorSystem([dl.Optic()]),
         lambda system: dl.DetectorSystem([])(np.ones((8, 8))),
-        lambda system: dl.OpticalSystem([dl.AddConstant(1)], system.spec),
+        lambda system: dl.OpticalSystem([dl.AddConstant(1)], system.grid),
         lambda system: system.insert_layer(dl.AddConstant(1), 0, dl.BaseOpticalLayer),
         lambda system: dl.DetectorSystem([]).insert_layer(
             dl.Optic(), 0, dl.BaseDetectorLayer

@@ -62,7 +62,7 @@ def test_detector_layers_preserve_leading_axes(layer, make_psf):
     output = assert_jittable(layer, psf)
 
     assert output.data.shape == psf.data.shape
-    assert output.spec == psf.spec
+    assert output.grid == psf.grid
 
 
 @pytest.mark.parametrize(

@@ -7,7 +7,7 @@ import dLux as dl
 
 
 @pytest.fixture
-def make_spec():
+def make_grid():
     """Return a factory for small two-dimensional coordinate specifications."""
 
     def factory(n=8, d=0.1, c=0.0, unit="m"):
@@ -17,29 +17,29 @@ def make_spec():
 
 
 @pytest.fixture
-def make_wavefront(make_spec):
+def make_wavefront(make_grid):
     """Return a factory for small scalar or polarised wavefronts."""
 
     def factory(
         wavelength=1e-6,
-        spec=None,
+        grid=None,
         phasor=None,
         polarised=False,
     ):
-        spec = make_spec() if spec is None else spec
+        grid = make_grid() if grid is None else grid
         wavefront = dl.PolarisedWavefront if polarised else dl.Wavefront
-        return wavefront(wavelength, spec, phasor)
+        return wavefront(wavelength, grid, phasor)
 
     return factory
 
 
 @pytest.fixture
-def make_psf(make_spec):
+def make_psf(make_grid):
     """Return a factory for small PSFs."""
 
-    def factory(data=None, spec=None):
-        spec = make_spec() if spec is None else spec
-        data = np.ones(spec.shape) if data is None else data
-        return dl.PSF(data, spec)
+    def factory(data=None, grid=None):
+        grid = make_grid() if grid is None else grid
+        data = np.ones(grid.shape) if data is None else data
+        return dl.PSF(data, grid)
 
     return factory

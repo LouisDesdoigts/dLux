@@ -59,17 +59,17 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
     """Model an optical train from an input coordinate specification."""
 
     layers: OrderedDict
-    spec: GridSpec
+    grid: GridSpec
 
-    def __init__(self, layers, spec: GridSpec):
-        if not isinstance(spec, GridSpec):
-            raise TypeError("spec must be a GridSpec.")
-        spec = spec.broadcast(2)
-        if spec.n is None or spec.d is None:
-            raise ValueError("spec must define n and d.")
-        if spec.unit != "m":
+    def __init__(self, layers, grid: GridSpec):
+        if not isinstance(grid, GridSpec):
+            raise TypeError("grid must be a GridSpec.")
+        grid = grid.broadcast(2)
+        if grid.n is None or grid.d is None:
+            raise ValueError("grid must define n and d.")
+        if grid.unit != "m":
             raise ValueError("OpticalSystem input coordinates must use metres.")
-        self.spec = spec
+        self.grid = grid
         super().__init__(layers, BaseOpticalLayer)
 
     @staticmethod
@@ -81,7 +81,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         )
         if wavefront.is_chromatic and not mapped_sampling:
             data = data.sum(0)
-        return PSF(data, wavefront.spec)
+        return PSF(data, wavefront.grid)
 
     def apply_mono(self, wavefront: Wavefront):
         """Propagate one monochromatic wavefront through every optical layer."""
@@ -102,7 +102,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         offset = np.zeros(2) if offset is None else np.asarray(offset)
         if offset.shape != (2,):
             raise ValueError("offset must have shape (2,).")
-        return Wavefront(wavelength, self.spec).tilt(offset)
+        return Wavefront(wavelength, self.grid).tilt(offset)
 
     def propagate_mono(
         self, wavelength, offset=None, return_wf=False, return_all=False, stokes=None
@@ -206,7 +206,7 @@ class DetectorSystem(LayeredSystem):
     def model(self, psf: PSF, return_all=False):
         """Apply the detector model and return an Image."""
         output = self(psf)
-        image = Image(output.data, output.spec)
+        image = Image(output.data, output.grid)
         if return_all:
             return {"PSF": output, "Image": image}
         return image

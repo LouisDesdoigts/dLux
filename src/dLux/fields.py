@@ -34,27 +34,27 @@ _ops = {
 }
 
 
-def _field_spec(spec, shape):
+def _field_spec(grid, shape):
     """Validate a field specification against its two spatial axes."""
-    if not isinstance(spec, GridSpec):
-        raise TypeError("spec must be a GridSpec.")
-    spec = spec.broadcast(2)
+    if not isinstance(grid, GridSpec):
+        raise TypeError("grid must be a GridSpec.")
+    grid = grid.broadcast(2)
     n = shape[-2:][::-1]
-    if spec.n is None:
-        return spec.set(n=n)
-    if spec.n != n:
-        raise ValueError("Field spatial shape must match spec.n.")
-    return spec
+    if grid.n is None:
+        return grid.set(n=n)
+    if grid.n != n:
+        raise ValueError("Field spatial shape must match grid.n.")
+    return grid
 
 
 class BaseField(Base):
     """Base class for regularly sampled real or complex fields."""
 
-    spec: GridSpec
+    grid: GridSpec
 
     def __getattr__(self, key):
         """Forward unknown attributes to the coordinate specification."""
-        return dlu.resolve_attr(self, key, self.spec)
+        return dlu.resolve_attr(self, key, self.grid)
 
     @property
     @abstractmethod
@@ -74,12 +74,12 @@ class BaseField(Base):
     @property
     def coordinates(self) -> Array:
         """Return coordinates using the field's static spatial shape."""
-        return self.spec.coordinates_for(self.spatial_shape[::-1])
+        return self.grid.coordinates_for(self.spatial_shape[::-1])
 
     @property
     def xs(self) -> tuple[Array, ...]:
         """Return coordinate axes using the field's static spatial shape."""
-        return self.spec.xs_for(self.spatial_shape[::-1])
+        return self.grid.xs_for(self.spatial_shape[::-1])
 
     @property
     def npixels(self) -> int:
@@ -90,7 +90,7 @@ class BaseField(Base):
     def pixel_scale(self) -> Array:
         """Return per-axis sampling in canonical SI units."""
         if self.d is None:
-            raise ValueError("spec.d is not defined.")
+            raise ValueError("grid.d is not defined.")
         return self.d * self.scale
 
     @property
@@ -131,8 +131,8 @@ class BaseField(Base):
 
         # Restore the batch dimensions and realised sampling
         field = field.reshape(batch + field.shape[-2:])
-        spec = self.spec.resize(field.shape[-2:][::-1])
-        return self.set(field=field, spec=spec)
+        grid = self.grid.resize(field.shape[-2:][::-1])
+        return self.set(field=field, grid=grid)
 
     def _binary_op(self, other, op: str) -> BaseField:
         """Apply arithmetic to another compatible sampled field or array."""
@@ -156,7 +156,7 @@ class BaseField(Base):
         """Resize spatial axes by centred zero-padding or cropping."""
         fill = 0j if np.iscomplexobj(self.field) else 0.0
         field = dlu.resize(self.field, npixels, fill)
-        return self.set(field=field, spec=self.spec.resize(npixels))
+        return self.set(field=field, grid=self.grid.resize(npixels))
 
     def downsample(
         self, n: int | tuple[int, int], mean: bool | None = None
@@ -165,7 +165,7 @@ class BaseField(Base):
         if mean is None:
             mean = bool(np.iscomplexobj(self.field))
         field = dlu.downsample(self.field, n, mean)
-        return self.set(field=field, spec=self.spec.downsample(n))
+        return self.set(field=field, grid=self.grid.downsample(n))
 
     def flip(self, axis: tuple[int, ...] | int) -> BaseField:
         """Flip the sampled array about one or more array axes."""
@@ -199,7 +199,7 @@ class BaseField(Base):
 class ContinuousField(BaseField):
     """Base class for fields representing a continuously sampled quantity."""
 
-    spec: GridSpec
+    grid: GridSpec
 
     def scale_to(
         self,
@@ -215,7 +215,7 @@ class ContinuousField(BaseField):
         """
         # Resolve the requested sampling and scale ratios
         n = dlu.as_size(npixels, 2, "npixels")
-        spacing = dlu.as_axis(pixel_scale, 2, "pixel_scale") / self.spec.scale
+        spacing = dlu.as_axis(pixel_scale, 2, "pixel_scale") / self.grid.scale
         ratio = spacing / self.d
 
         # Vectorise resampling over leading field dimensions
@@ -226,7 +226,7 @@ class ContinuousField(BaseField):
         field = scale(self.field, ratio)
 
         # Update the sampled field and coordinate specification
-        return self.set(field=field, spec=self.spec.resample(n, spacing))
+        return self.set(field=field, grid=self.grid.resample(n, spacing))
 
     def interpolate(
         self,
@@ -275,7 +275,7 @@ class ContinuousField(BaseField):
 class DiscreteField(BaseField):
     """Base class for discrete detector-sampled fields."""
 
-    spec: GridSpec
+    grid: GridSpec
     variance: Array | None
     read_noise: Array
 
@@ -362,46 +362,46 @@ class Wavefront(ContinuousField):
     ----------
     wavelength : float or Array, meters
         Scalar wavelength or array of wavelengths.
-    spec : GridSpec
+    grid : GridSpec
         Two-dimensional spatial sampling specification.
     phasor : Array or None
         Complex field with shape ``(..., ny, nx)``. When omitted, a uniform
-        unit-power field is generated from ``spec``.
+        unit-power field is generated from ``grid``.
     """
 
-    spec: GridSpec
+    grid: GridSpec
     phasor: Array[complex]
     wavelength: Array
 
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
-        spec: GridSpec,
+        grid: GridSpec,
         phasor: Array | None = None,
     ):
         # Resolve wavelengths and initialise a uniform field when required
         self.wavelength = dlu.to_value(wavelength)
         if phasor is None:
-            if not isinstance(spec, GridSpec):
-                raise TypeError("spec must be a GridSpec.")
-            spec = spec.broadcast(2)
-            if spec.n is None:
-                raise ValueError("spec.n is required when phasor is not provided.")
-            shape = self.wavelength.shape + spec.shape
-            self.phasor = np.ones(shape, dtype=complex) / prod(spec.n)
+            if not isinstance(grid, GridSpec):
+                raise TypeError("grid must be a GridSpec.")
+            grid = grid.broadcast(2)
+            if grid.n is None:
+                raise ValueError("grid.n is required when phasor is not provided.")
+            shape = self.wavelength.shape + grid.shape
+            self.phasor = np.ones(shape, dtype=complex) / prod(grid.n)
 
         # Validate and align an explicit phasor with wavelengths
         else:
             phasor = dlu.to_value(phasor, complex)
             if phasor.ndim < 2:
                 raise ValueError("phasor must have at least two spatial dimensions.")
-            spec = _field_spec(spec, phasor.shape)
+            grid = _field_spec(grid, phasor.shape)
             if phasor.ndim == 2 and self.wavelength.ndim > 0:
                 phasor = phasor * np.ones(self.wavelength.shape + (1, 1))
             self.phasor = phasor
 
         # Store the realised spatial specification
-        self.spec = spec
+        self.grid = grid
 
     @property
     def field(self) -> Array:
@@ -410,7 +410,10 @@ class Wavefront(ContinuousField):
 
     @classmethod
     def from_phasor(
-        cls, phasor: Array[complex], wavelength: float | Array, spec: GridSpec
+        cls,
+        phasor: Array[complex],
+        wavelength: float | Array,
+        grid: GridSpec,
     ) -> Wavefront:
         """Create a Wavefront from an existing phasor array.
 
@@ -423,7 +426,7 @@ class Wavefront(ContinuousField):
         wavelength : float or Array, meters
             The wavelength of the wavefront. Vector-valued wavelengths define a
             chromatic wavefront.
-        spec : GridSpec
+        grid : GridSpec
             Sampling and coordinate definition for the wavefront.
 
         Returns
@@ -431,7 +434,7 @@ class Wavefront(ContinuousField):
         wavefront : Wavefront
             A new Wavefront object with the specified phasor.
         """
-        return cls(wavelength=wavelength, spec=spec, phasor=phasor)
+        return cls(wavelength, grid, phasor)
 
     @property
     def real(self: Wavefront) -> Array:
@@ -509,7 +512,7 @@ class Wavefront(ContinuousField):
         axis = lambda x, ndim=0: (
             0 if x is not None and x.ndim > ndim and x.shape[0] == size else None
         )
-        return 0, axis(self.wavelength), axis(self.spec.d, 1), axis(self.spec.c, 1)
+        return 0, axis(self.wavelength), axis(self.grid.d, 1), axis(self.grid.c, 1)
 
     @property
     def power(self: Wavefront) -> Array:
@@ -701,18 +704,18 @@ class PolarisedWavefront(Wavefront):
     and final spatial axes.
     """
 
-    spec: GridSpec
+    grid: GridSpec
     phasor: Array[complex]
     wavelength: Array
 
     def __init__(
         self: Wavefront,
         wavelength: float | Array,
-        spec: GridSpec,
+        grid: GridSpec,
         phasor: Array | None = None,
     ):
         if phasor is None:
-            super().__init__(wavelength, spec)
+            super().__init__(wavelength, grid)
             self.phasor = self._promote_phasor(self.phasor)
             return
 
@@ -725,7 +728,7 @@ class PolarisedWavefront(Wavefront):
             phasor = phasor * np.ones(wavelength.shape + (1, 1, 1, 1))
         if not is_jones:
             phasor = self._promote_phasor(phasor)
-        super().__init__(wavelength, spec, phasor)
+        super().__init__(wavelength, grid, phasor)
 
     @property
     def is_polarised(self: PolarisedWavefront) -> bool:
@@ -750,7 +753,10 @@ class PolarisedWavefront(Wavefront):
 
     @classmethod
     def from_phasor(
-        cls, phasor: Array[complex], wavelength: float | Array, spec: GridSpec
+        cls,
+        phasor: Array[complex],
+        wavelength: float | Array,
+        grid: GridSpec,
     ) -> PolarisedWavefront:
         """Create a PolarisedWavefront from a regular or Jones phasor.
 
@@ -762,7 +768,7 @@ class PolarisedWavefront(Wavefront):
         wavelength : float or Array, meters
             The wavelength of the wavefront. If a 2D phasor is passed with vector
             wavelengths, it is broadcast over the wavelength axes.
-        spec : GridSpec
+        grid : GridSpec
             Sampling and coordinate definition for the wavefront.
 
         Returns
@@ -770,7 +776,7 @@ class PolarisedWavefront(Wavefront):
         wavefront : PolarisedWavefront
             A new polarised wavefront with phasor shape `(..., 2, 2, n, n)`.
         """
-        return cls(wavelength=wavelength, spec=spec, phasor=phasor)
+        return cls(wavelength, grid, phasor)
 
     @property
     def batch_ndim(self: PolarisedWavefront) -> int:
@@ -794,7 +800,7 @@ class PolarisedWavefront(Wavefront):
         """
         return PolarisedWavefront(
             wavelength=wavefront.wavelength,
-            spec=wavefront.spec,
+            grid=wavefront.grid,
             phasor=PolarisedWavefront._promote_phasor(wavefront.phasor),
         )
 
@@ -838,13 +844,13 @@ class PSF(ContinuousField):
     """A real-valued point-spread function sampled on a coordinate grid."""
 
     data: Array
-    spec: GridSpec
+    grid: GridSpec
 
-    def __init__(self: PSF, data: Array, spec: GridSpec):
+    def __init__(self: PSF, data: Array, grid: GridSpec):
         self.data = dlu.to_value(data)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        self.spec = _field_spec(spec, self.data.shape)
+        self.grid = _field_spec(grid, self.data.shape)
 
     @property
     def field(self) -> Array:
@@ -854,7 +860,7 @@ class PSF(ContinuousField):
     @classmethod
     def from_wavefront(cls, wavefront) -> PSF:
         """Construct a PSF from a wavefront's intensity and specification."""
-        return cls(wavefront.psf, wavefront.spec)
+        return cls(wavefront.psf, wavefront.grid)
 
     @property
     def batch_ndim(self: PSF) -> int:
@@ -869,7 +875,7 @@ class Image(DiscreteField):
     ----------
     data : Array
         Detector-sampled image data.
-    spec : GridSpec
+    grid : GridSpec
         Coordinate specification tracking the detector pixel grid.
     variance : Array or None
         Known variance of the observed data. This is populated by the noise
@@ -879,27 +885,27 @@ class Image(DiscreteField):
     """
 
     data: Array
-    spec: GridSpec
+    grid: GridSpec
     variance: Array | None
     read_noise: Array
 
     def __init__(
         self,
         data: Array,
-        spec: GridSpec,
+        grid: GridSpec,
         variance: Array | None = None,
         read_noise: float | Array = 0.0,
     ):
         data = dlu.to_value(data)
         if data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        spec = _field_spec(spec, data.shape)
+        grid = _field_spec(grid, data.shape)
         if variance is not None:
             variance = np.broadcast_to(dlu.to_value(variance), data.shape)
         self.data = data
         self.variance = variance
         self.read_noise = dlu.to_value(read_noise)
-        self.spec = spec
+        self.grid = grid
 
     @property
     def field(self) -> Array:

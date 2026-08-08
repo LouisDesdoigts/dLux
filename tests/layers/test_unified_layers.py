@@ -64,11 +64,11 @@ def test_normalise_modes(targets):
         ),
     ],
 )
-def test_unified_layers_preserve_leading_axes(layer, shape, n, d, make_spec):
-    spec = make_spec(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
+def test_unified_layers_preserve_leading_axes(layer, shape, n, d, make_grid):
+    grid = make_grid(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
     targets = (
-        dl.Wavefront(1e-6, spec, np.ones((2, 3, 8, 8), complex)),
-        dl.PSF(np.ones((2, 3, 8, 8)), spec),
+        dl.Wavefront(1e-6, grid, np.ones((2, 3, 8, 8), complex)),
+        dl.PSF(np.ones((2, 3, 8, 8)), grid),
     )
 
     for target in targets:

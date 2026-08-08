@@ -13,10 +13,10 @@ class TestWavefront:
     def test_construction_and_properties(self, make_wavefront):
         wavefront = make_wavefront()
         restored = dl.Wavefront.from_phasor(
-            wavefront.phasor * np.exp(0.2j), wavefront.wavelength, wavefront.spec
+            wavefront.phasor * np.exp(0.2j), wavefront.wavelength, wavefront.grid
         )
 
-        assert restored.spatial_shape == restored.spec.shape
+        assert restored.spatial_shape == restored.grid.shape
         assert restored.batch_ndim == 0
         assert restored.is_chromatic is False
         assert restored._mapped_axis is None
@@ -27,9 +27,9 @@ class TestWavefront:
         assert np.allclose(restored.wavenumber, 2 * np.pi / restored.wavelength)
         assert np.allclose(restored.power, restored.psf.sum())
 
-    def test_chromatic_contract(self, make_spec):
+    def test_chromatic_contract(self, make_grid):
         wavelengths = np.asarray((0.9e-6, 1.1e-6))
-        wavefront = dl.Wavefront(wavelengths, make_spec())
+        wavefront = dl.Wavefront(wavelengths, make_grid())
         normalised = wavefront.normalise()
 
         assert wavefront.phasor.shape == (2, 8, 8)
@@ -39,11 +39,11 @@ class TestWavefront:
         assert normalised.power.shape == wavelengths.shape
         assert np.allclose(normalised.power, 1)
 
-    def test_chromatic_phasor_broadcasting(self, make_spec):
+    def test_chromatic_phasor_broadcasting(self, make_grid):
         wavelengths = np.asarray((0.9e-6, 1.1e-6))
         phasor = np.ones((8, 8), dtype=complex)
-        wavefront = dl.Wavefront(wavelengths, make_spec(), phasor)
-        polarised = dl.PolarisedWavefront(wavelengths, make_spec(), phasor)
+        wavefront = dl.Wavefront(wavelengths, make_grid(), phasor)
+        polarised = dl.PolarisedWavefront(wavelengths, make_grid(), phasor)
         normalised = polarised.normalise()
 
         assert wavefront.phasor.shape == (2, 8, 8)
@@ -51,8 +51,8 @@ class TestWavefront:
         assert normalised.power.shape == wavelengths.shape
         assert np.allclose(normalised.power, 1)
 
-    def test_chromatic_phase_broadcasting(self, make_spec):
-        wavefront = dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), make_spec())
+    def test_chromatic_phase_broadcasting(self, make_grid):
+        wavefront = dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), make_grid())
         phase = np.asarray((0.1, 0.2))
         spatial = np.linspace(0.0, 0.1, 64).reshape((8, 8))
 
@@ -100,7 +100,7 @@ class TestWavefront:
 
     def test_mixed_wavefront_arithmetic(self, make_wavefront):
         wavefront = make_wavefront()
-        chromatic = dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.spec)
+        chromatic = dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.grid)
         polarised = dl.PolarisedWavefront.from_wavefront(wavefront)
 
         mixed = assert_jittable(lambda left, right: left * right, wavefront, polarised)
@@ -133,7 +133,7 @@ class TestWavefront:
     def test_polarised_from_phasor(self, make_wavefront):
         wavefront = make_wavefront()
         polarised = dl.PolarisedWavefront.from_phasor(
-            wavefront.phasor, wavefront.wavelength, wavefront.spec
+            wavefront.phasor, wavefront.wavelength, wavefront.grid
         )
 
         assert polarised.phasor.shape == (2, 2) + wavefront.phasor.shape
@@ -147,10 +147,10 @@ class TestWavefront:
             lambda wavefront: wavefront * "invalid",
             lambda wavefront: wavefront / wavefront,
             lambda wavefront: (
-                wavefront + dl.Wavefront(1e-6, wavefront.spec.set(n=(6, 6)))
+                wavefront + dl.Wavefront(1e-6, wavefront.grid.set(n=(6, 6)))
             ),
             lambda wavefront: (
-                wavefront + dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.spec)
+                wavefront + dl.Wavefront(np.asarray((0.9e-6, 1.1e-6)), wavefront.grid)
             ),
             lambda wavefront: wavefront + np.ones((2, 3, 8, 8)),
         ],
@@ -162,16 +162,16 @@ class TestWavefront:
     @pytest.mark.parametrize(
         "operation",
         [
-            lambda spec: dl.Wavefront(1e-6, "invalid"),
-            lambda spec: dl.Wavefront(1e-6, dl.GridSpec(d=0.1, unit="m")),
-            lambda spec: dl.Wavefront(1e-6, spec, np.ones(8)),
-            lambda spec: dl.Wavefront(1e-6, spec) + dl.PSF(np.ones((8, 8)), spec),
-            lambda spec: dl.Wavefront(np.ones(2), spec) + np.ones((3, 8, 8)),
+            lambda grid: dl.Wavefront(1e-6, "invalid"),
+            lambda grid: dl.Wavefront(1e-6, dl.GridSpec(d=0.1, unit="m")),
+            lambda grid: dl.Wavefront(1e-6, grid, np.ones(8)),
+            lambda grid: dl.Wavefront(1e-6, grid) + dl.PSF(np.ones((8, 8)), grid),
+            lambda grid: dl.Wavefront(np.ones(2), grid) + np.ones((3, 8, 8)),
         ],
     )
-    def test_construction_and_operand_validation(self, operation, make_spec):
+    def test_construction_and_operand_validation(self, operation, make_grid):
         with pytest.raises((TypeError, ValueError)):
-            operation(make_spec())
+            operation(make_grid())
 
 
 class TestPolarisedWavefront:
@@ -190,10 +190,10 @@ class TestPolarisedWavefront:
         output = assert_jittable(lambda value: value.apply_jones(np.eye(2)), wavefront)
         assert output.phasor.shape == wavefront.phasor.shape
 
-    def test_chromatic_jones_phasor(self, make_spec):
+    def test_chromatic_jones_phasor(self, make_grid):
         wavelengths = np.asarray((0.9e-6, 1.1e-6))
         phasor = np.broadcast_to(np.eye(2)[:, :, None, None], (2, 2, 8, 8))
-        wavefront = dl.PolarisedWavefront(wavelengths, make_spec(), phasor)
+        wavefront = dl.PolarisedWavefront(wavelengths, make_grid(), phasor)
 
         assert wavefront.is_polarised
         assert wavefront.phasor.shape == (2, 2, 2, 8, 8)
@@ -205,15 +205,15 @@ class TestPSF:
         psf = make_psf()
         converted = dl.PSF.from_wavefront(make_wavefront())
 
-        assert psf.data.shape == psf.spec.shape
+        assert psf.data.shape == psf.grid.shape
         assert psf.batch_ndim == 0
-        assert converted.data.shape == converted.spec.shape
+        assert converted.data.shape == converted.grid.shape
 
     def test_sampling_contract(self):
-        spec = dl.GridSpec(d=(0.1, 0.2), c=(0.3, -0.4), unit="m")
-        psf = dl.PSF(np.ones((8, 8)), spec)
+        grid = dl.GridSpec(d=(0.1, 0.2), c=(0.3, -0.4), unit="m")
+        psf = dl.PSF(np.ones((8, 8)), grid)
 
-        assert psf.spec.n == (8, 8)
+        assert psf.grid.n == (8, 8)
         assert psf.npixels == 8
         assert len(psf.axes) == 2
         assert psf.coordinates.shape == (2, 8, 8)
@@ -268,12 +268,12 @@ class TestPSF:
             _ = make_psf().not_an_attribute
 
         psf = dl.PSF(np.ones((8, 8)), dl.GridSpec(n=8).broadcast(2))
-        with pytest.raises(ValueError, match="spec.d"):
+        with pytest.raises(ValueError, match="grid.d"):
             _ = psf.pixel_scale
 
     def test_coordinate_batch_validation(self):
-        spec = dl.GridSpec(n=8, d=0.1, c=np.zeros((2, 2)), unit="m").broadcast(2)
-        psf = dl.PSF(np.ones((8, 8)), spec)
+        grid = dl.GridSpec(n=8, d=0.1, c=np.zeros((2, 2)), unit="m").broadcast(2)
+        psf = dl.PSF(np.ones((8, 8)), grid)
 
         with pytest.raises(ValueError, match="Coordinate batch"):
             psf.interpolate(dl.Affine())
@@ -297,12 +297,12 @@ class TestPSF:
     def test_sampling_updates(self, make_psf):
         psf = make_psf().downsample(2)
 
-        assert psf.spec.n == (4, 4)
-        assert np.allclose(psf.spec.d, 0.2)
+        assert psf.grid.n == (4, 4)
+        assert np.allclose(psf.grid.d, 0.2)
 
     def test_rectangular_sampling_operations(self):
-        spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
-        psf = dl.PSF(np.arange(48.0).reshape(6, 8) + 1, spec)
+        grid = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
+        psf = dl.PSF(np.arange(48.0).reshape(6, 8) + 1, grid)
 
         downsampled = assert_jittable(lambda value: value.downsample((2, 3)), psf)
         scaled = assert_jittable(
@@ -311,22 +311,22 @@ class TestPSF:
         rotated = assert_jittable(lambda value: value.rotate(0.1), psf)
 
         assert downsampled.data.shape == (2, 4)
-        assert downsampled.spec.n == (4, 2)
-        assert np.allclose(downsampled.spec.d, np.asarray((0.2, 0.6)))
+        assert downsampled.grid.n == (4, 2)
+        assert np.allclose(downsampled.grid.d, np.asarray((0.2, 0.6)))
         assert scaled.data.shape == (12, 10)
-        assert scaled.spec.n == (10, 12)
-        assert np.allclose(scaled.spec.d, np.asarray((0.08, 0.15)))
+        assert scaled.grid.n == (10, 12)
+        assert np.allclose(scaled.grid.d, np.asarray((0.08, 0.15)))
         assert rotated.data.shape == psf.data.shape
 
     def test_batched_convolution(self):
-        spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
+        grid = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
         data = np.arange(96.0).reshape(2, 6, 8)
-        psf = dl.PSF(data, spec)
+        psf = dl.PSF(data, grid)
         kernel = np.ones((3, 3)) / 9
 
         output = assert_jittable(lambda value: value.convolve(kernel), psf)
         expected = np.stack(
-            tuple(dl.PSF(image, spec).convolve(kernel).data for image in data)
+            tuple(dl.PSF(image, grid).convolve(kernel).data for image in data)
         )
 
         assert output.data.shape == data.shape
@@ -335,14 +335,14 @@ class TestPSF:
     @pytest.mark.parametrize(
         "constructor",
         [
-            lambda spec: dl.PSF(np.ones(8), spec),
-            lambda spec: dl.PSF(np.ones((4, 4)), spec),
-            lambda spec: dl.PSF(np.ones((8, 8)), "invalid"),
+            lambda grid: dl.PSF(np.ones(8), grid),
+            lambda grid: dl.PSF(np.ones((4, 4)), grid),
+            lambda grid: dl.PSF(np.ones((8, 8)), "invalid"),
         ],
     )
-    def test_construction_validation(self, constructor, make_spec):
+    def test_construction_validation(self, constructor, make_grid):
         with pytest.raises((TypeError, ValueError)):
-            constructor(make_spec())
+            constructor(make_grid())
 
     def test_operation_validation(self, make_psf):
         psf = make_psf()
@@ -356,8 +356,8 @@ class TestPSF:
 
 
 class TestImage:
-    def test_discrete_field_contract(self, make_spec):
-        image = dl.Image(np.full((8, 8), 10.0), make_spec())
+    def test_discrete_field_contract(self, make_grid):
+        image = dl.Image(np.full((8, 8), 10.0), make_grid())
         poisson = assert_jittable(
             lambda value: value.add_poisson_noise(jr.key(0)), image
         )
@@ -371,9 +371,9 @@ class TestImage:
         assert noisy.error.shape == image.data.shape
         assert np.allclose(noisy.read_noise, 2.0)
 
-    def test_noise_variance_accumulates(self, make_spec):
+    def test_noise_variance_accumulates(self, make_grid):
         image = dl.Image(
-            np.full((8, 8), 10.0), make_spec(), variance=np.full((8, 8), 4.0)
+            np.full((8, 8), 10.0), make_grid(), variance=np.full((8, 8), 4.0)
         )
         poisson = image.add_poisson_noise(jr.key(0))
         noisy = poisson.add_read_noise(jr.key(1), 2.0)
@@ -381,8 +381,8 @@ class TestImage:
         assert np.allclose(poisson.variance, 14.0)
         assert np.allclose(noisy.variance, 18.0)
 
-    def test_fourier_spectra(self, make_spec):
-        image = dl.Image(np.eye(8), make_spec())
+    def test_fourier_spectra(self, make_grid):
+        image = dl.Image(np.eye(8), make_grid())
 
         transformed = image.fourier_transform
         amplitude = image.amplitude_spectrum
@@ -392,10 +392,10 @@ class TestImage:
         assert np.allclose(amplitude, np.abs(transformed))
         assert np.allclose(power, amplitude**2)
 
-    def test_likelihood_contract(self, make_spec):
-        model = dl.PSF(np.full((8, 8), 10.0), make_spec())
+    def test_likelihood_contract(self, make_grid):
+        model = dl.PSF(np.full((8, 8), 10.0), make_grid())
         image = dl.Image(
-            model.data, model.spec, variance=np.full((8, 8), 4.0), read_noise=2.0
+            model.data, model.grid, variance=np.full((8, 8), 4.0), read_noise=2.0
         )
 
         gaussian = assert_jittable(
@@ -408,9 +408,9 @@ class TestImage:
         assert np.isfinite(gaussian)
         assert np.isfinite(poisson)
 
-    def test_leading_axis_contract(self, make_spec):
+    def test_leading_axis_contract(self, make_grid):
         data = np.full((2, 3, 8, 8), 10.0)
-        image = dl.Image(data, make_spec(), variance=2.0)
+        image = dl.Image(data, make_grid(), variance=2.0)
         poisson = assert_jittable(
             lambda value: value.add_poisson_noise(jr.key(0)), image
         )
@@ -426,20 +426,20 @@ class TestImage:
     @pytest.mark.parametrize(
         "operation",
         [
-            lambda spec: dl.Image(np.ones(8), spec),
-            lambda spec: dl.Image(np.ones((4, 4)), spec),
-            lambda spec: dl.Image(np.ones((8, 8)), "invalid"),
-            lambda spec: dl.Image(np.ones((8, 8)), spec).log_likelihood(
+            lambda grid: dl.Image(np.ones(8), grid),
+            lambda grid: dl.Image(np.ones((4, 4)), grid),
+            lambda grid: dl.Image(np.ones((8, 8)), "invalid"),
+            lambda grid: dl.Image(np.ones((8, 8)), grid).log_likelihood(
                 np.ones((4, 4))
             ),
-            lambda spec: dl.Image(np.ones((8, 8)), spec).log_likelihood(
+            lambda grid: dl.Image(np.ones((8, 8)), grid).log_likelihood(
                 np.ones((8, 8)), "gaussian"
             ),
-            lambda spec: dl.Image(np.ones((8, 8)), spec, variance=1.0).log_likelihood(
+            lambda grid: dl.Image(np.ones((8, 8)), grid, variance=1.0).log_likelihood(
                 np.ones((8, 8)), "invalid"
             ),
         ],
     )
-    def test_validation(self, operation, make_spec):
+    def test_validation(self, operation, make_grid):
         with pytest.raises((TypeError, ValueError)):
-            operation(make_spec())
+            operation(make_grid())

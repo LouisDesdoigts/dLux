@@ -22,7 +22,6 @@ from .layers.propagation import (
 from .sources import Source, Spectrum
 from .systems import DetectorSystem, OpticalSystem
 
-
 REMOVAL_VERSION = "0.17.0"
 
 
@@ -125,12 +124,12 @@ class LayeredOpticalSystem(OpticalSystem):
     @property
     def wf_npixels(self):
         """Return the legacy pupil pixel count."""
-        return self.spec.n[0]
+        return self.grid.n[0]
 
     @property
     def diameter(self):
         """Return the legacy pupil diameter in metres."""
-        return self.spec.n[0] * self.spec.d[0]
+        return self.grid.n[0] * self.grid.d[0]
 
 
 class PointSource(Source):
@@ -210,10 +209,10 @@ class MFT(Fraunhofer):
 
     def __init__(self, npixels, pixel_scale, focal_length=None, inverse=False):
         unit = "rad" if focal_length is None else "m"
-        spec = GridSpec(n=npixels, d=pixel_scale, unit=unit)
+        grid = GridSpec(n=npixels, d=pixel_scale, unit=unit)
         migration = "`dl.MFT(n, d, f)` -> `dl.Fraunhofer(GridSpec(n=n, d=d), f)`"
         warn_deprecated("MFT", "Fraunhofer", migration)
-        super().__init__(spec, focal_length, "mft", inverse)
+        super().__init__(grid, focal_length, "mft", inverse)
 
 
 class FFT(Fraunhofer):
@@ -223,32 +222,32 @@ class FFT(Fraunhofer):
         if not center:
             example = "`dl.Fraunhofer(dl.ResizeSpec(...), method='fft')`"
             migration_error("FFT(center=False)", "Fraunhofer", example)
-        spec = ResizeSpec(pad=pad, crop=crop, c=0.0)
+        grid = ResizeSpec(pad=pad, crop=crop, c=0.0)
         migration = "`dl.FFT(...)` -> `dl.Fraunhofer(ResizeSpec(...), method='fft')`"
         warn_deprecated("FFT", "Fraunhofer", migration)
-        super().__init__(spec, focal_length, "fft", inverse)
+        super().__init__(grid, focal_length, "fft", inverse)
 
 
 class MFTPropagator(ABCDPropagator):
     """Deprecated LCT-based ABCD propagation wrapper."""
 
-    def __init__(self, ABCDs, spec):
+    def __init__(self, ABCDs, grid):
         migration = (
-            "`dl.MFTPropagator(ABCDs, spec)` -> `dl.ABCDPropagator(ABCDs, spec)`"
+            "`dl.MFTPropagator(ABCDs, grid)` -> `dl.ABCDPropagator(ABCDs, grid)`"
         )
         warn_deprecated("MFTPropagator", "ABCDPropagator", migration)
-        super().__init__(ABCDs, spec, "lct")
+        super().__init__(ABCDs, grid, "lct")
 
 
 class FFTPropagator(ABCDPropagator):
     """Deprecated FFT-based ABCD propagation wrapper."""
 
-    def __init__(self, ABCDs, spec):
-        old = "`dl.FFTPropagator(ABCDs, spec)`"
-        new = "`dl.ABCDPropagator(ABCDs, spec, method='fft')`"
+    def __init__(self, ABCDs, grid):
+        old = "`dl.FFTPropagator(ABCDs, grid)`"
+        new = "`dl.ABCDPropagator(ABCDs, grid, method='fft')`"
         migration = f"{old} -> {new}"
         warn_deprecated("FFTPropagator", "ABCDPropagator", migration)
-        super().__init__(ABCDs, spec, "fft")
+        super().__init__(ABCDs, grid, "fft")
 
 
 class ABCDConjugatePlane(ABCDFraunhofer):

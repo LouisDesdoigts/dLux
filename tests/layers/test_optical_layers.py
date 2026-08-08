@@ -38,14 +38,14 @@ def test_layer_alias_and_inheritance(wavefront):
     assert isinstance(layer, dl.AberratedLayer)
 
 
-def test_monochromatic_layer_mapping(make_spec):
+def test_monochromatic_layer_mapping(make_grid):
     class MonochromaticLayer(dl.OpticalLayer):
         def apply_mono(self, wavefront):
             if wavefront.batch_ndim:
                 raise ValueError("Expected a monochromatic wavefront.")
             return wavefront.add_phase(wavefront.wavelength / 1e-6)
 
-    wavefront = dl.Wavefront([0.9e-6, 1.1e-6], make_spec())
+    wavefront = dl.Wavefront([0.9e-6, 1.1e-6], make_grid())
     layer = MonochromaticLayer()
     output = layer(wavefront)
 
@@ -53,7 +53,7 @@ def test_monochromatic_layer_mapping(make_spec):
     assert np.allclose(output.phasor, layer.apply(wavefront).phasor)
     assert np.allclose(output.phase[:, 0, 0], np.array([0.9, 1.1]))
 
-    monochromatic = dl.Wavefront(1e-6, make_spec())
+    monochromatic = dl.Wavefront(1e-6, make_grid())
     assert np.allclose(
         layer(monochromatic).phasor,
         layer.apply_mono(monochromatic).phasor,
@@ -138,13 +138,13 @@ def test_parametric_optic(wavefront):
         dl.Wedge([1e-6, -2e-6], 1.5),
     ],
 )
-def test_optical_layers_preserve_leading_axes(layer, make_spec):
-    spec = make_spec(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
-    wavefront = dl.Wavefront(1e-6, spec, np.ones((2, 3, 8, 8), complex))
+def test_optical_layers_preserve_leading_axes(layer, make_grid):
+    grid = make_grid(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
+    wavefront = dl.Wavefront(1e-6, grid, np.ones((2, 3, 8, 8), complex))
     output = assert_jittable(layer, wavefront)
 
     assert output.phasor.shape == wavefront.phasor.shape
-    assert output.spec == wavefront.spec
+    assert output.grid == wavefront.grid
 
 
 def test_tilt_validation():
@@ -211,9 +211,9 @@ class TestSoummerFPM:
 
     def test_focal_length_gradient(self, make_wavefront):
         wavefront = make_wavefront()
-        spec = dl.GridSpec(n=(6, 8), d=(2e-6, 3e-6), unit="m")
+        grid = dl.GridSpec(n=(6, 8), d=(2e-6, 3e-6), unit="m")
         layer = dl.SoummerFPM(
-            dl.Optic(transmission=0.5), dl.Fraunhofer(spec, focal_length=2.0)
+            dl.Optic(transmission=0.5), dl.Fraunhofer(grid, focal_length=2.0)
         )
 
         assert_differentiable(

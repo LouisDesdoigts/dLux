@@ -29,7 +29,7 @@ def test_refractive_layer_contract(layer, chromatic_wavefront):
 
 def test_lens_applies_residual_material_opd(make_wavefront):
     wavefront = make_wavefront()
-    thickness = np.ones(wavefront.spec.shape) * 1e-7
+    thickness = np.ones(wavefront.grid.shape) * 1e-7
     output = dl.RefractiveOptic(thickness, n=1.5)(wavefront)
     expected = wavefront.add_opd(0.5 * thickness)
 

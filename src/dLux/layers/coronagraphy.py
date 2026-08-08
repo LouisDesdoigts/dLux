@@ -54,8 +54,8 @@ class SoummerFPM(OpticalLayer):
         return {
             "wavefront": wavefront,
             "coordinates": wavefront.coordinates,
-            "pixel_scale": wavefront.spec.d * wavefront.spec.scale,
-            "spec": wavefront.spec,
+            "pixel_scale": wavefront.grid.d * wavefront.grid.scale,
+            "grid": wavefront.grid,
         }
 
     def apply_mono(self, wavefront):
@@ -66,7 +66,7 @@ class SoummerFPM(OpticalLayer):
         difference = focal - optic(focal)
 
         # Inverse propagate only the field introduced by the optic
-        inverse = self.propagator.set(spec=wavefront.spec, inverse=True)
+        inverse = self.propagator.set(grid=wavefront.grid, inverse=True)
         pupil_difference = inverse(difference)
 
         # Subtract the focal-plane modification from the original pupil

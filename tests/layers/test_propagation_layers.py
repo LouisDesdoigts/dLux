@@ -94,28 +94,28 @@ class TestPropagation:
 
     def test_output_sampling(self, angular_spec, make_wavefront):
         requested = dl.Fraunhofer(angular_spec)(make_wavefront())
-        assert_tree_allclose(requested.spec, angular_spec)
+        assert_tree_allclose(requested.grid, angular_spec)
 
         native = dl.Fraunhofer(dl.ResizeSpec(), method="fft")(make_wavefront())
-        assert native.spec.unit == "rad"
-        assert native.spec.n == (8, 8)
+        assert native.grid.unit == "rad"
+        assert native.grid.n == (8, 8)
 
     @pytest.mark.parametrize(
         ("make_fft", "make_mft"),
         [
             (
-                lambda spec: dl.Fraunhofer(dl.ResizeSpec(), method="fft"),
-                lambda spec: dl.Fraunhofer(spec, method="mft"),
+                lambda grid: dl.Fraunhofer(dl.ResizeSpec(), method="fft"),
+                lambda grid: dl.Fraunhofer(grid, method="mft"),
             ),
             (
-                lambda spec: dl.Fresnel(
+                lambda grid: dl.Fresnel(
                     dl.ResizeSpec(),
                     defocus=0.1,
                     focal_length=2.0,
                     method="fft",
                 ),
-                lambda spec: dl.Fresnel(
-                    spec,
+                lambda grid: dl.Fresnel(
+                    grid,
                     defocus=0.1,
                     focal_length=2.0,
                     method="mft",
@@ -129,18 +129,18 @@ class TestPropagation:
         make_mft,
         make_wavefront,
     ):
-        wavefront = make_wavefront(spec=dl.GridSpec(n=8, d=1e-3, unit="m").broadcast(2))
+        wavefront = make_wavefront(grid=dl.GridSpec(n=8, d=1e-3, unit="m").broadcast(2))
         fft_output = make_fft(None)(wavefront)
-        mft_output = make_mft(fft_output.spec)(wavefront)
+        mft_output = make_mft(fft_output.grid)(wavefront)
 
         assert_tree_allclose(fft_output, mft_output, rtol=2e-5, atol=2e-6)
 
     def test_fraunhofer_mft_inverse_roundtrip(self, make_wavefront):
         wavefront = make_wavefront()
-        focal_spec = dl.Fraunhofer(dl.ResizeSpec(), method="fft")(wavefront).spec
+        focal_spec = dl.Fraunhofer(dl.ResizeSpec(), method="fft")(wavefront).grid
 
         focal = dl.Fraunhofer(focal_spec)(wavefront)
-        recovered = dl.Fraunhofer(wavefront.spec, inverse=True)(focal)
+        recovered = dl.Fraunhofer(wavefront.grid, inverse=True)(focal)
 
         assert_tree_allclose(recovered, wavefront, rtol=2e-5, atol=2e-6)
 
@@ -157,10 +157,10 @@ class TestPropagation:
         )(focal)
 
         assert np.allclose(recovered.phasor, wavefront.phasor, rtol=2e-5, atol=2e-6)
-        assert recovered.spec.n == wavefront.spec.n
-        assert recovered.spec.unit == wavefront.spec.unit
-        assert np.allclose(recovered.spec.d, wavefront.spec.d)
-        assert np.allclose(recovered.spec.c, 0, atol=1e-7)
+        assert recovered.grid.n == wavefront.grid.n
+        assert recovered.grid.unit == wavefront.grid.unit
+        assert np.allclose(recovered.grid.d, wavefront.grid.d)
+        assert np.allclose(recovered.grid.c, 0, atol=1e-7)
 
     def test_chromatic_fft_inverse_roundtrip(self, make_wavefront):
         wavefront = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
@@ -183,10 +183,10 @@ class TestPropagation:
         kwargs = {"defocus": 1e-3, "focal_length": 2.0, "method": method}
         focal_spec = dl.Fresnel(
             dl.ResizeSpec(), defocus=1e-3, focal_length=2.0, method="fft"
-        )(wavefront).spec
+        )(wavefront).grid
 
         focal = dl.Fresnel(focal_spec, **kwargs)(wavefront)
-        recovered = dl.Fresnel(wavefront.spec, inverse=True, **kwargs)(focal)
+        recovered = dl.Fresnel(wavefront.grid, inverse=True, **kwargs)(focal)
 
         assert_tree_allclose(recovered, wavefront, rtol=2e-5, atol=2e-6)
 
@@ -233,16 +233,16 @@ class TestValidation:
     @pytest.mark.parametrize(
         "constructor",
         [
-            lambda spec: dl.Fraunhofer(spec, method="invalid"),
-            lambda spec: dl.Fraunhofer(dl.ResizeSpec(), method="mft"),
-            lambda spec: dl.Fresnel(spec, method="fft"),
-            lambda spec: dl.ABCDPropagator([], spec),
-            lambda spec: dl.ABCDPropagator(
+            lambda grid: dl.Fraunhofer(grid, method="invalid"),
+            lambda grid: dl.Fraunhofer(dl.ResizeSpec(), method="mft"),
+            lambda grid: dl.Fresnel(grid, method="fft"),
+            lambda grid: dl.ABCDPropagator([], grid),
+            lambda grid: dl.ABCDPropagator(
                 [dl.ABCDFreeSpace(1.0)],
                 dl.ResizeSpec(),
                 method="lct",
             ),
-            lambda spec: dl.FreeSpace(1.0, spec),
+            lambda grid: dl.FreeSpace(1.0, grid),
         ],
     )
     def test_construction(self, constructor, physical_spec):
@@ -271,7 +271,7 @@ class TestValidation:
                 angular_spec,
             )(wavefront)
 
-        angular_input = make_wavefront(spec=dl.GridSpec(n=8, d=0.1, unit="rad"))
+        angular_input = make_wavefront(grid=dl.GridSpec(n=8, d=0.1, unit="rad"))
         with pytest.raises(ValueError, match="physical units"):
             dl.Fraunhofer(angular_spec)(angular_input)
 
@@ -282,4 +282,4 @@ class TestValidation:
         output = layer(wavefront)
 
         assert output.phasor.shape == (2, 8, 8)
-        assert output.spec.d.shape == (2, 2)
+        assert output.grid.d.shape == (2, 2)

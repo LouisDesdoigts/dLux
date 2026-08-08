@@ -430,7 +430,7 @@ class GridSpec(BaseGridSpec):
         if self.d is None:
             raise ValueError("d must be specified to calculate xs.")
         if len(n) != self.ndim:
-            raise ValueError("n dimensionality must match the coordinate spec.")
+            raise ValueError("n dimensionality must match the coordinate grid.")
 
         # Broadcast sampling and centers over their leading dimensions
         batch = self.d.shape[:-1]
@@ -516,15 +516,15 @@ class GridSpec(BaseGridSpec):
         ndim = self.ndim if ndim is None else int(ndim)
         if ndim < self.ndim:
             raise ValueError("ndim cannot be smaller than the grid dimensionality.")
-        spec = self if ndim == self.ndim else self.broadcast(ndim)
-        half_width = spec.fov / 2
-        center = np.zeros(ndim) if spec.c is None else spec.c
+        grid = self if ndim == self.ndim else self.broadcast(ndim)
+        half_width = grid.fov / 2
+        center = np.zeros(ndim) if grid.c is None else grid.c
         extent = np.stack((center - half_width, center + half_width), axis=-1).reshape(
             center.shape[:-1] + (2 * ndim,)
         )
         if unit is None:
             return extent
-        return extent * spec.scale / dlu.unit_factor(unit)
+        return extent * grid.scale / dlu.unit_factor(unit)
 
 
 class CoordTransform(Base):

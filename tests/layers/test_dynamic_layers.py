@@ -38,9 +38,9 @@ def test_dynamic_layer_contract(layer, wavefront):
     assert output.phasor.shape == wavefront.phasor.shape
 
 
-def test_coordinate_sources(wavefront, make_spec):
-    spec = make_spec(c=[0.1, -0.1])
-    coordinates = spec.coordinates
+def test_coordinate_sources(wavefront, make_grid):
+    grid = make_grid(c=[0.1, -0.1])
+    coordinates = grid.coordinates
     transformations = [
         dl.Affine(translation=[0.1, 0.0]),
         dl.Affine(translation=[0.1, 0.0]),
@@ -48,7 +48,7 @@ def test_coordinate_sources(wavefront, make_spec):
     layers = [
         dl.DynamicTransmissiveLayer(CoordinateValue()),
         dl.DynamicTransmissiveLayer(CoordinateValue(), coordinates=coordinates),
-        dl.DynamicTransmissiveLayer(CoordinateValue(), coordinates=spec),
+        dl.DynamicTransmissiveLayer(CoordinateValue(), coordinates=grid),
         dl.DynamicTransmissiveLayer(
             CoordinateValue(),
             transformation=transformations[0],
@@ -64,7 +64,7 @@ def test_coordinate_sources(wavefront, make_spec):
         assert context["coordinates"].shape == wavefront.coordinates.shape
         assert_jittable(layer, wavefront)
 
-        assert np.allclose(layers[2].context(wavefront)["pixel_scale"], spec.d)
+        assert np.allclose(layers[2].context(wavefront)["pixel_scale"], grid.d)
         assert np.allclose(
             layers[-1].context(wavefront)["coordinates"],
             transformations[-1](wavefront.coordinates),

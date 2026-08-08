@@ -77,7 +77,7 @@ def test_legacy_optical_system_grid_contract():
 
     assert system.wf_npixels == 8
     assert np.isclose(system.diameter, 2.0)
-    assert system.spec.unit == "m"
+    assert system.grid.unit == "m"
 
 
 def test_legacy_source_normalisation():

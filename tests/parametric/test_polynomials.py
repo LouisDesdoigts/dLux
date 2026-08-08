@@ -54,9 +54,9 @@ def test_multivariate_polynomial(coordinates):
     assert np.allclose(output, 1 + 2 * x + 3 * y + 4 * x * y)
 
 
-@pytest.mark.parametrize("coordinate_source", ["array", "spec"])
+@pytest.mark.parametrize("coordinate_source", ["array", "grid"])
 def test_explicit_polynomial_contract(coordinate_source, coordinates):
-    if coordinate_source == "spec":
+    if coordinate_source == "grid":
         coordinate_source = dl.GridSpec(n=10, d=0.2, unit="m").broadcast(2)
     else:
         coordinate_source = coordinates
@@ -71,8 +71,8 @@ def test_explicit_polynomial_contract(coordinate_source, coordinates):
 
 
 def test_explicit_polynomial_broadcasts_one_dimensional_spec():
-    spec = dl.GridSpec(n=8, d=0.25, unit="m")
-    polynomial = dl.ExplicitPolynomial(spec, 1, coeffs=[1.0, 2.0, 3.0], ndim=2)
+    grid = dl.GridSpec(n=8, d=0.25, unit="m")
+    polynomial = dl.ExplicitPolynomial(grid, 1, coeffs=[1.0, 2.0, 3.0], ndim=2)
 
     output = assert_jittable(lambda value: value.evaluate(), polynomial)
 

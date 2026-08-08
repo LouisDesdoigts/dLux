@@ -181,7 +181,7 @@ class BaseSource(ParametricHolder):
         propagate = eqx.filter_vmap(propagate)
         return propagate(position, flux, weights)
 
-    def wavefront(self, spec):
+    def wavefront(self, grid):
         """Create flux-weighted point-source wavefronts on an input grid.
 
         Resolved distributions remain an image-plane operation in ``model``. A
@@ -196,7 +196,7 @@ class BaseSource(ParametricHolder):
 
         # Define initialisation of one weighted source component
         def initialise(pos, component_flux, component_weights):
-            wavefront = Wavefront(wavelengths, spec).normalise().tilt(pos)
+            wavefront = Wavefront(wavelengths, grid).normalise().tilt(pos)
             weight = np.sqrt(component_flux * component_weights)
             scale = wavefront._to_phasor_shape(weight)
             return wavefront.set(phasor=wavefront.phasor * scale)
@@ -233,9 +233,9 @@ class BaseSource(ParametricHolder):
 
         # Collapse vectorised spatial source components
         if params["position"].ndim > 1:
-            spec = psf.spec
-            spec = spec.set(d=spec.d[0], c=None if spec.c is None else spec.c[0])
-            psf = psf.set(data=psf.data.sum(0), spec=spec)
+            grid = psf.grid
+            grid = grid.set(d=grid.d[0], c=None if grid.c is None else grid.c[0])
+            psf = psf.set(data=psf.data.sum(0), grid=grid)
 
         # Package the modeled source outputs
         result = {**result, "PSF": psf, "psf": psf.data}

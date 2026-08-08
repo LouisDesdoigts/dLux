@@ -14,8 +14,8 @@ def centers():
 
 
 @pytest.fixture
-def wavefront(make_wavefront, make_spec):
-    return make_wavefront(spec=make_spec(n=16, d=0.05))
+def wavefront(make_wavefront, make_grid):
+    return make_wavefront(grid=make_grid(n=16, d=0.05))
 
 
 @pytest.mark.parametrize("dynamic", [False, True])
@@ -38,7 +38,7 @@ def test_interfere(centers, wavefront):
 
     assert np.allclose(output.phasor, local.phasor.sum(0))
     assert output.phasor.shape == wavefront.phasor.shape
-    assert output.spec.c.shape == wavefront.spec.c.shape
+    assert output.grid.c.shape == wavefront.grid.c.shape
 
 
 def test_shared_and_local_coeffs(centers, wavefront):
@@ -110,12 +110,12 @@ def test_sparse_phasor_and_coordinate_sources(centers, wavefront):
     transmission = dl.Circle(0.2, edge=0.01)
     optic = dl.SparseOptic(centers, transmission=transmission)
     coordinates = wavefront.coordinates
-    spec = wavefront.spec
+    grid = wavefront.grid
     array_optic = dl.SparseDynamicOptic(
         centers, transmission=transmission, coordinates=coordinates
     )
     spec_optic = dl.SparseDynamicOptic(
-        centers, transmission=transmission, coordinates=spec
+        centers, transmission=transmission, coordinates=grid
     )
 
     phasor = assert_jittable(optic.phasor, wavefront)
@@ -142,11 +142,11 @@ def test_sparse_phasor_and_coordinate_sources(centers, wavefront):
         dl.FreeSpace(0.1, dl.ResizeSpec(pad=(2, 3)), crop=False),
     ],
 )
-def test_sparse_propagation_dimensions(layer, polarised, make_spec, make_wavefront):
+def test_sparse_propagation_dimensions(layer, polarised, make_grid, make_wavefront):
     centers = np.array([[-0.2, 0.0], [0.0, 0.0], [0.2, 0.0]])
-    spec = make_spec(n=(8, 6), d=(0.05, 0.06))
+    grid = make_grid(n=(8, 6), d=(0.05, 0.06))
     wavefront = make_wavefront(
-        wavelength=np.asarray([1e-6, 1.1e-6]), spec=spec, polarised=polarised
+        wavelength=np.asarray([1e-6, 1.1e-6]), grid=grid, polarised=polarised
     )
     optic = dl.SparseOptic(centers, transmission=dl.Circle(0.2, edge=0.01))
 
@@ -158,8 +158,8 @@ def test_sparse_propagation_dimensions(layer, polarised, make_spec, make_wavefro
     assert propagated.phasor.shape[:2] == (2, 3)
     assert np.allclose(combined.phasor, propagated.phasor.sum(1))
     assert combined.phasor.shape[0] == 2
-    assert combined.spec.d.ndim <= 2
-    assert combined.spec.c is None or combined.spec.c.ndim <= 2
+    assert combined.grid.d.ndim <= 2
+    assert combined.grid.c is None or combined.grid.c.ndim <= 2
 
 
 def test_sparse_propagation_gradient(wavefront):
@@ -175,8 +175,8 @@ def test_sparse_propagation_gradient(wavefront):
 
 
 @pytest.mark.parametrize("polarise_input", [False, True])
-def test_sparse_optical_system_contract(polarise_input, centers, make_spec):
-    spec_in = make_spec(n=(8, 6), d=(0.05, 0.06))
+def test_sparse_optical_system_contract(polarise_input, centers, make_grid):
+    spec_in = make_grid(n=(8, 6), d=(0.05, 0.06))
     spec_out = dl.GridSpec(n=(6, 8), d=(2e-7, 3e-7), unit="rad")
     polarisation = dl.PolarisationLayer(dl.LinearPolariser(0.2))
     layers = []

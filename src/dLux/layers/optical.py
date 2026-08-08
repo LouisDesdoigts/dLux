@@ -68,23 +68,23 @@ class BaseOpticalLayer(BaseLayer):
 
         # Define application to one monochromatic field
         def apply_one(phasor, wavelength, d, c):
-            spec = wavefront.spec.set(d=d, c=c)
-            wavefront_i = wavefront.set(phasor=phasor, wavelength=wavelength, spec=spec)
+            grid = wavefront.grid.set(d=d, c=c)
+            wavefront_i = wavefront.set(phasor=phasor, wavelength=wavelength, grid=grid)
             return self.apply(wavefront_i)
 
         # Vectorise the layer over leading wavefront dimensions
         apply_one = eqx.filter_vmap(apply_one, in_axes=axes)
         output = apply_one(
-            wavefront.phasor, wavefront.wavelength, wavefront.spec.d, wavefront.spec.c
+            wavefront.phasor, wavefront.wavelength, wavefront.grid.d, wavefront.grid.c
         )
 
         # Remove axes introduced for grid values that were not vectorised
-        c = output.spec.c
+        c = output.grid.c
         c = c[0] if c is not None and axes[3] is None else c
-        d = output.spec.d[0] if axes[2] is None else output.spec.d
+        d = output.grid.d[0] if axes[2] is None else output.grid.d
 
         # Restore the realised wavefront grid
-        return output.set(spec=output.spec.set(d=d, c=c))
+        return output.set(grid=output.grid.set(d=d, c=c))
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         """Call :meth:`apply` using concise layer syntax."""

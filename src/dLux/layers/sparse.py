@@ -38,9 +38,9 @@ class Interfere(OpticalLayer):
             return np.take(value, 0, axis=axes[-1]) if axes else value
 
         # Collapse the field and its realised grid metadata
-        spec = wavefront.spec
-        spec = spec.set(d=collapse(spec.d), c=collapse(spec.c))
-        return wavefront.set(phasor=wavefront.phasor.sum(axis), spec=spec)
+        grid = wavefront.grid
+        grid = grid.set(d=collapse(grid.d), c=collapse(grid.c))
+        return wavefront.set(phasor=wavefront.phasor.sum(axis), grid=grid)
 
 
 class SparseOptic(Optic):
@@ -155,15 +155,15 @@ class SparseOptic(Optic):
         indices = np.arange(self.n_apertures)
 
         def make_wavefront(index, center):
-            spec = wavefront.spec.set(c=center / wavefront.spec.scale)
-            local = wavefront.set(spec=spec)
+            grid = wavefront.grid.set(c=center / wavefront.grid.scale)
+            local = wavefront.set(grid=grid)
             phasor = local.phasor * self._phasor_at(index, center, local)
             return phasor
 
         phasor = vmap(make_wavefront)(indices, self.centers)
         phasor = np.moveaxis(phasor, 0, wavefront.batch_ndim)
-        spec = wavefront.spec.set(c=self.centers / wavefront.spec.scale)
-        return wavefront.set(phasor=phasor, spec=spec)
+        grid = wavefront.grid.set(c=self.centers / wavefront.grid.scale)
+        return wavefront.set(phasor=phasor, grid=grid)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the optic and append its sub-aperture axis to the wavefront."""
