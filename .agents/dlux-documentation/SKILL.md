@@ -11,6 +11,7 @@ and generation scripts own generated Markdown and UML diagrams.
 
 Read `content.md` for documentation structure and API depth. Read `generation.md`
 when API pages, UMLs, notebook exports, navigation, or build scripts are affected.
+Read `tutorials.md` when authoring, reviewing, executing, or exporting tutorials.
 
 Write for user tasks before module names. Substantial APIs need physical contracts and
 small complete examples; simple wrappers need only precise documentation. Tutorials

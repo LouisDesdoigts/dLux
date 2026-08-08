@@ -19,11 +19,22 @@
 - **Images:** added Poisson and read-noise simulation, variance and error tracking,
   Gaussian and Poisson likelihoods, and Fourier amplitude and power spectra.
 - **Coordinates:** added broadcastable grid specifications, `ResizeSpec`,
-  coordinate transformations, affine maps, polynomial distortions, and ordered
-  transformation composition.
+  coordinate transformations, affine maps, polynomial distortions, ordered
+  transformation composition, construction from regular axes, oversampling, and
+  unit-aware plotting extents.
 - **Parametrics:** added general explicit and implicit bases, dynamic coordinate
   evaluation, interpolation, arbitrary-dimensional polynomial models, refractive
-  index models, and reusable shape definitions.
+  index models, selected polynomial degrees, and reusable hard or softened shape
+  definitions. `Basis` replaces the former `ExplicitBasis` name.
+- **Spectral parametrics:** added normalised `SpectralPolynomial`, `SpectralBasis`,
+  and `Blackbody` models for wavelength-dependent source weights.
+- **Aperture construction:** added grid-aware builders for dense and sparse optics,
+  Zernike OPD definitions, and configurable HST-, JWST-, JWST NRM-, and Euclid-like
+  templates. Named templates describe their intended fidelity rather than claiming
+  exact observatory models.
+- **Segmented apertures:** added compact pasted transmission and `PastedBasis`
+  construction, with parallel and memory-efficient placement strategies for large
+  segmented pupils such as ELT-scale apertures.
 - **Dynamic optics:** added coordinate-aware dynamic optical layers and sparse
   optic foundations that compose shapes, aberrations, positions, and local or
   global transformations.
@@ -32,19 +43,29 @@
   coherent interference of propagated sub-apertures.
 - **Propagation:** added `Fraunhofer`, `Fresnel`, `FreeSpace`, and
   `ABCDPropagator`, including FFT, MFT, and LCT routes with coordinate-unit
-  validation and vectorised chromatic sampling.
+  validation and vectorised chromatic sampling. Fraunhofer and Fresnel propagation
+  support explicit reverse propagation where the numerical route has a defined
+  physical inverse.
 - **Optical systems:** added a single layered `OpticalSystem`, a dedicated
   `DetectorSystem`, intermediate-state debugging, and optional wavefront returns
   from propagation.
 - **Sources:** added composable `Spectrum`, `Source`, and `BinarySource` models
   with parametric wavelengths, weights, positions, fluxes, and resolved
-  distributions.
+  distributions. `Source` now supports vectorised populations of positions, fluxes,
+  spectra, and resolved distributions through one leading-axis contract.
+- **Coronagraphy:** added `SoummerFPM`, a modular Soummer-style focal-plane-mask
+  layer built around a Fraunhofer MFT propagator and an arbitrary optical mask layer.
 - **Optical layers:** added `RefractiveOptic` and `Wedge` layers for static or
   parametrically generated thickness and refractive-index profiles.
 - **Polarisation:** added polarised wavefront propagation, Stokes evaluation, and
   uniform or spatially varying parametric polariser and retarder fields.
 - Added shared interpolation methods and layers for complex wavefronts and real
   PSFs ([#302](https://github.com/LouisDesdoigts/dLux/issues/302)).
+- Added a normalised multidimensional Gaussian utility with explicit physical-axis
+  ordering and batched mean or covariance support.
+- Added consistent raised-parameter paths across nested fields, sources, parametrics,
+  layers, and systems, with clearer errors for unresolved paths.
+- Added official Python 3.14 support.
 
 ### ⚠️ Breaking Changes
 - Replaced `CoordSpec` and `PadSpec` with `GridSpec` and `ResizeSpec`, and moved
@@ -62,11 +83,25 @@
 - Reworked aperture and basis aberrations around dynamic optics and general
   parametric interfaces, replacing the specialised aperture-layer hierarchy
   ([#331](https://github.com/LouisDesdoigts/dLux/issues/331)).
+- Unified hard and softened geometry through explicit edge definitions. Aperture
+  builders now materialise a layer when called and return sampled arrays through
+  their explicit `build(...)` methods.
 - Standardised aperture and polygon sizes on diameter, with polygon diameters
   referring to their enclosing circles.
 - `LinearPolariser` and `Retarder` now cover uniform and spatially varying fields;
   their axis parameter is named `angle`, and `SVLinearPolariser` and `SVRetarder`
   have been removed.
+- Optical layers define their monochromatic operation through `apply_mono(...)`;
+  `apply(...)` owns leading-axis vectorisation and `__call__(...)` remains its concise
+  callable interface.
+
+### ⏳ Deprecations and Compatibility
+- Added a central compatibility layer for supported dLux 0.14 and 0.15 interfaces.
+  Safe aliases emit actionable warnings with direct migration examples; legacy
+  contracts that cannot preserve their physical meaning raise migration errors.
+- Legacy module import paths are exposed without retaining empty compatibility
+  modules throughout the package.
+- Deprecated interfaces are scheduled for removal in dLux 0.17.0.
 
 ### 🐛 Bug Fixes
 - Corrected FFT coordinate centring and restored explicit final-wavefront returns.
@@ -77,6 +112,8 @@
   while preserving complex and real-valued data requirements.
 - Expanded propagation and array operations to preserve leading vectorisation
   dimensions and non-square spatial shapes where supported.
+- Standardised batched coordinate transformations and vectorised optical application
+  so semantic leading axes are preserved through nested models.
 
 ### 📚 Documentation and Testing
 - Rebuilt the tests around public behavioural contracts, shared JAX transformation
@@ -84,6 +121,8 @@
 - Automated API page and inheritance-diagram generation from public module exports.
 - Added dedicated installation, citation, and publications pages and removed the
   empty FAQ and manually maintained UML image assets.
+- Added repository guidance and a dLux development skill for consistent AI-assisted
+  implementation, review, testing, and documentation.
 
 ## V0.15.1
 
