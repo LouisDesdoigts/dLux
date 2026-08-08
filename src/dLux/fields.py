@@ -5,6 +5,7 @@ from abc import abstractmethod
 from math import prod
 import operator
 
+import equinox as eqx
 import jax.numpy as np
 import jax.random as jr
 import jax.scipy as jsp
@@ -276,13 +277,6 @@ class DiscreteField(BaseField):
     """Base class for discrete detector-sampled fields."""
 
     grid: GridSpec
-    variance: Array | None
-    read_noise: Array
-
-    @property
-    def error(self) -> Array | None:
-        """Return the standard deviation implied by ``variance``."""
-        return None if self.variance is None else np.sqrt(self.variance)
 
     @property
     def fourier_transform(self) -> Array:
@@ -299,57 +293,6 @@ class DiscreteField(BaseField):
     def power_spectrum(self) -> Array:
         """Return the squared amplitude of the centred Fourier transform."""
         return self.amplitude_spectrum**2
-
-    def add_poisson_noise(self, key: Array) -> DiscreteField:
-        """Add a Poisson realization and its expected variance."""
-        expectation = self.field
-        data = jr.poisson(key, expectation).astype(self.field.dtype)
-        variance = expectation
-        if self.variance is not None:
-            variance = variance + self.variance
-        return self.set(field=data, variance=variance)
-
-    def add_read_noise(self, key: Array, sigma: float | Array) -> DiscreteField:
-        """Add zero-mean Gaussian read noise and update its variance."""
-        sigma = np.asarray(sigma, dtype=self.field.dtype)
-        noise = jr.normal(key, self.field.shape, self.field.dtype) * sigma
-        variance = sigma**2
-        if self.variance is not None:
-            variance = variance + self.variance
-        read_noise = np.sqrt(self.read_noise**2 + sigma**2)
-        return self.set(field=self.field + noise).set(
-            variance=np.broadcast_to(variance, self.field.shape), read_noise=read_noise
-        )
-
-    def log_likelihood(
-        self, model: BaseField | Array, distribution: str = "gaussian"
-    ) -> Array:
-        """Return a summed Gaussian or Poisson log likelihood.
-
-        The Gaussian likelihood uses the stored ``variance``. The Poisson
-        likelihood is exact for count data without additive read noise.
-        """
-        # Resolve and validate the model data
-        model = model.field if isinstance(model, BaseField) else np.asarray(model)
-        if model.shape != self.field.shape:
-            raise ValueError("model and data must have matching shapes.")
-
-        # Evaluate a Gaussian likelihood with stored variance
-        if distribution == "gaussian":
-            if self.variance is None:
-                raise ValueError("variance is required for a Gaussian likelihood.")
-            residual = self.field - model
-            terms = residual**2 / self.variance + np.log(2 * np.pi * self.variance)
-            return -0.5 * terms.sum()
-
-        # Evaluate an exact Poisson count likelihood
-        if distribution == "poisson":
-            return (
-                jsp.special.xlogy(self.field, model)
-                - model
-                - jsp.special.gammaln(self.field + 1)
-            ).sum()
-        raise ValueError("distribution must be 'gaussian' or 'poisson'.")
 
 
 class Wavefront(ContinuousField):
@@ -873,10 +816,10 @@ class Image(DiscreteField):
 
     Parameters
     ----------
-    data : Array
-        Detector-sampled image data.
-    grid : GridSpec
-        Coordinate specification tracking the detector pixel grid.
+    data : Array or PSF
+        Detector-sampled image data, or a PSF to convert directly into an image.
+    grid : GridSpec or None
+        Coordinate specification tracking array inputs. This is inherited from a PSF.
     variance : Array or None
         Known variance of the observed data. This is populated by the noise
         simulation methods and may also be supplied directly.
@@ -891,11 +834,18 @@ class Image(DiscreteField):
 
     def __init__(
         self,
-        data: Array,
-        grid: GridSpec,
+        data: Array | PSF,
+        grid: GridSpec | None = None,
         variance: Array | None = None,
         read_noise: float | Array = 0.0,
     ):
+        # Unpack a sampled optical PSF directly into detector image data
+        if isinstance(data, PSF):
+            if grid is not None:
+                raise ValueError("grid must not be supplied when data is a PSF.")
+            data, grid = data.data, data.grid
+
+        # Validate and store the detector image
         data = dlu.to_value(data)
         if data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
@@ -911,3 +861,94 @@ class Image(DiscreteField):
     def field(self) -> Array:
         """Return the detector data."""
         return self.data
+
+    @property
+    def error(self) -> Array | None:
+        """Return the standard deviation implied by ``variance``."""
+        return None if self.variance is None else np.sqrt(self.variance)
+
+    def add_poisson_noise(self, key: Array) -> Image:
+        """Add a Poisson realisation and its expected variance."""
+        expectation = self.field
+        data = jr.poisson(key, expectation).astype(self.field.dtype)
+        variance = expectation
+        if self.variance is not None:
+            variance = variance + self.variance
+        return self.set(field=data, variance=variance)
+
+    def add_read_noise(self, key: Array, sigma: float | Array) -> Image:
+        """Add zero-mean Gaussian read noise and update its variance."""
+        sigma = np.asarray(sigma, dtype=self.field.dtype)
+        noise = jr.normal(key, self.field.shape, self.field.dtype) * sigma
+        variance = sigma**2
+        if self.variance is not None:
+            variance = variance + self.variance
+        read_noise = np.sqrt(self.read_noise**2 + sigma**2)
+        return self.set(field=self.field + noise).set(
+            variance=np.broadcast_to(variance, self.field.shape), read_noise=read_noise
+        )
+
+    def simulate(self, key: Array, n_frames: int = 1) -> Image:
+        """Simulate and average independent noisy images.
+
+        Each image receives Poisson noise followed by zero-mean Gaussian read noise.
+        The returned image stores the expected variance of the mean, including any
+        variance already attached to the input image.
+
+        Parameters
+        ----------
+        key : Array
+            JAX random key used to generate every noise realisation.
+        n_frames : int
+            Number of independent images to average.
+        """
+        if n_frames < 1:
+            raise ValueError("n_frames must be a positive integer.")
+
+        # Simulate independent photon and read-noise realisations
+        read_noise = self.read_noise
+        expectation = self.set(read_noise=np.zeros_like(read_noise))
+
+        def simulate(key):
+            photon_key, read_key = jr.split(key)
+            image = expectation.add_poisson_noise(photon_key)
+            return image.add_read_noise(read_key, read_noise)
+
+        keys = jr.split(key, n_frames)
+        images = eqx.filter_vmap(simulate)(keys)
+
+        # Average the images and propagate the variance of their mean
+        data = images.field.mean(0)
+        variance = images.variance.mean(0) / n_frames
+        error = images.read_noise[0] / np.sqrt(n_frames)
+        return self.set(field=data, variance=variance, read_noise=error)
+
+    def log_likelihood(
+        self, model: BaseField | Array, distribution: str = "gaussian"
+    ) -> Array:
+        """Return a summed Gaussian or Poisson log likelihood.
+
+        The Gaussian likelihood uses the stored ``variance``. The Poisson
+        likelihood is exact for count data without additive read noise.
+        """
+        # Resolve and validate the model data
+        model = model.field if isinstance(model, BaseField) else np.asarray(model)
+        if model.shape != self.field.shape:
+            raise ValueError("model and data must have matching shapes.")
+
+        # Evaluate a Gaussian likelihood with stored variance
+        if distribution == "gaussian":
+            if self.variance is None:
+                raise ValueError("variance is required for a Gaussian likelihood.")
+            residual = self.field - model
+            terms = residual**2 / self.variance + np.log(2 * np.pi * self.variance)
+            return -0.5 * terms.sum()
+
+        # Evaluate an exact Poisson count likelihood
+        if distribution == "poisson":
+            return (
+                jsp.special.xlogy(self.field, model)
+                - model
+                - jsp.special.gammaln(self.field + 1)
+            ).sum()
+        raise ValueError("distribution must be 'gaussian' or 'poisson'.")

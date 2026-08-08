@@ -381,6 +381,19 @@ class TestImage:
         assert np.allclose(poisson.variance, 14.0)
         assert np.allclose(noisy.variance, 18.0)
 
+    def test_psf_conversion_and_simulation(self, make_grid):
+        psf = dl.PSF(np.full((8, 8), 10.0), make_grid())
+        image = dl.Image(psf, read_noise=2.0)
+        simulated = assert_jittable(lambda value: value.simulate(jr.key(0), 4), image)
+
+        assert image.variance is None
+        assert simulated.data.shape == psf.data.shape
+        assert np.allclose(simulated.variance, 3.5)
+        assert np.allclose(simulated.read_noise, 1.0)
+
+        with pytest.raises(ValueError):
+            dl.Image(psf, make_grid())
+
     def test_fourier_spectra(self, make_grid):
         image = dl.Image(np.eye(8), make_grid())
 
