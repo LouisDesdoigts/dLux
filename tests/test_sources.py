@@ -123,14 +123,23 @@ def test_parametric_distribution():
 
 
 def test_log_flux_units():
-    source = dl.Source(
+    log_source = dl.Source(
+        [1e-6],
+        flux=np.log10(1000),
+        distribution=np.log10(np.full((3, 3), 2.0)),
+        units={"flux": "log", "distribution": "log"},
+    )
+    ln_source = dl.Source(
         [1e-6],
         flux=np.log(1000),
         distribution=np.log(np.full((3, 3), 2.0)),
-        units={"flux": "log_photon", "distribution": "log"},
+        units={"flux": "ln", "distribution": "ln"},
     )
-    assert np.allclose(source.params()["flux"], 1000)
-    assert np.allclose(source.params()["distribution"], 2)
+
+    assert np.allclose(log_source.params()["flux"], 1000)
+    assert np.allclose(log_source.params()["distribution"], 2)
+    assert np.allclose(ln_source.params()["flux"], 1000)
+    assert np.allclose(ln_source.params()["distribution"], 2)
 
 
 def test_distribution_flux_units():
@@ -139,6 +148,17 @@ def test_distribution_flux_units():
     )
 
     assert np.allclose(source.params()["distribution"], 2000)
+
+
+def test_source_unit_errors():
+    with pytest.raises(ValueError, match="Flux unit must be 'photon'"):
+        dl.Source([1e-6], flux=1.0, units={"flux": "logr"}).params()
+
+    with pytest.raises(ValueError, match="Unknown wavelength unit 'invalid'"):
+        dl.Source([1.0], units={"wavelengths": "invalid"}).params()
+
+    with pytest.raises(ValueError, match="Unknown position unit 'm'"):
+        dl.Source([1e-6], position=[0.0, 0.0], units={"position": "m"}).params()
 
 
 @pytest.mark.parametrize(

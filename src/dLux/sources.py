@@ -52,9 +52,18 @@ def _merge_units(units=None):
 def _convert_flux(flux, unit):
     """Convert linear or logarithmic flux into canonical units."""
     unit = str(unit).strip()
-    if unit.startswith("log_"):
-        return np.exp(flux) * dlu.unit_factor(unit[4:])
-    return flux * dlu.unit_factor(unit)
+    if unit == "log":
+        return 10**flux
+    if unit == "ln":
+        return np.exp(flux)
+    try:
+        factor = dlu.unit_factor(unit)
+    except ValueError as error:
+        raise ValueError(
+            "Flux unit must be 'photon', a supported prefixed photon unit, "
+            "'log', or 'ln'. See TODO: add units documentation link."
+        ) from error
+    return flux * factor
 
 
 class BaseSource(ParametricHolder):
@@ -108,6 +117,8 @@ class BaseSource(ParametricHolder):
         if unit == "linear":
             return distribution
         if unit == "log":
+            return 10**distribution
+        if unit == "ln":
             return np.exp(distribution)
         return _convert_flux(distribution, unit)
 
@@ -258,7 +269,8 @@ class Spectrum(ParametricHolder):
     weights : Array, Parametric, or None
         Spectral weights with a trailing axis matching ``wavelengths``.
     units : dict or None
-        Unit overrides, including the wavelength unit.
+        Unit overrides. Wavelengths accept supported length units such as ``"m"``,
+        ``"um"``, ``"nm"``, or ``"angstrom"``.
     """
 
     wavelengths: Array | Parametric
@@ -284,7 +296,14 @@ class Spectrum(ParametricHolder):
         # Resolve wavelengths in canonical physical units
         wavelengths = resolve(self.wavelengths, float, spectrum=self, **context)
         wavelengths = np.atleast_1d(wavelengths)
-        wavelengths = wavelengths * dlu.unit_factor(self.units["wavelengths"])
+        unit = self.units["wavelengths"]
+        try:
+            wavelengths = wavelengths * dlu.unit_factor(unit)
+        except ValueError as error:
+            raise ValueError(
+                f"Unknown wavelength unit {unit!r}. See TODO: add units "
+                "documentation link."
+            ) from error
 
         # Resolve spectral weights on the wavelength samples
         weights = resolve(
@@ -332,7 +351,12 @@ class Source(BaseSource, Spectrum):
         Optional shared distribution with shape ``(y, x)`` or per-source
         distributions with shape ``(nsource, y, x)``.
     units : dict or None
-        Overrides for wavelength, position, flux, and distribution units.
+        Unit overrides for ``wavelengths``, ``position``, ``flux``, and
+        ``distribution``. Wavelengths accept supported length units; positions accept
+        angular units such as ``"rad"``, ``"deg"``, ``"arcsec"``, or ``"mas"``.
+        Flux defaults to ``"photon"`` and also accepts prefixed photon units,
+        ``"log"`` for base-10 photon flux, or ``"ln"`` for natural-log photon flux.
+        Distributions accept ``"linear"``, ``"log"``, ``"ln"``, or photon units.
     """
 
     wavelengths: Array | Parametric
@@ -366,7 +390,14 @@ class Source(BaseSource, Spectrum):
         valid = position.ndim in (1, 2) and position.shape[-1] == 2
         if not valid:
             raise ValueError("position must have shape (2,) or (nsource, 2).")
-        position = position * dlu.unit_factor(self.units["position"])
+        unit = self.units["position"]
+        try:
+            position = position * dlu.unit_factor_to_rad(unit)
+        except ValueError as error:
+            raise ValueError(
+                f"Unknown position unit {unit!r}. See TODO: add units "
+                "documentation link."
+            ) from error
 
         # Resolve brightness and optional spatial distribution
         nsource = None if position.ndim == 1 else position.shape[0]
@@ -402,7 +433,8 @@ class BinarySource(BaseSource, Spectrum):
     distribution : Array, Parametric, or None
         Shared or per-component resolved distributions.
     units : dict or None
-        Overrides for wavelength, position, flux, and distribution units.
+        Unit overrides for wavelength, angular position, photon flux, and resolved
+        distributions, following the same conventions as :class:`Source`.
     """
 
     wavelengths: Array | Parametric
