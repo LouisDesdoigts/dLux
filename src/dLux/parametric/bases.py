@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from typing import Any
-import warnings
 
 import equinox as eqx
 import jax
@@ -36,12 +35,13 @@ def _resolve_coeffs(coeffs, coefficients):
         return coeffs
     if coeffs is not None:
         raise ValueError("Provide only one of coeffs or coefficients.")
-    warnings.warn(
-        "The `coefficients` argument is deprecated and will be removed in dLux "
-        "0.16.2. Use `coeffs` instead: `Class(coefficients=value)` -> "
-        "`Class(coeffs=value)`.",
-        DeprecationWarning,
-        stacklevel=3,
+    from ..compatibility import warn_deprecated
+
+    warn_deprecated(
+        "coefficients argument",
+        "coeffs",
+        "`Class(coefficients=value)` -> `Class(coeffs=value)`",
+        stacklevel=4,
     )
     return coefficients
 
@@ -55,12 +55,13 @@ class ParametricBasis(Parametric):
     @property
     def coefficients(self: ParametricBasis) -> Array:
         """Deprecated alias for the basis coefficients."""
-        warnings.warn(
-            "The `.coefficients` attribute is deprecated and will be removed in "
-            "dLux 0.16.2. Use `.coeffs` instead: `basis.coefficients` -> "
-            "`basis.coeffs`.",
-            DeprecationWarning,
-            stacklevel=2,
+        from ..compatibility import warn_deprecated
+
+        warn_deprecated(
+            ".coefficients attribute",
+            ".coeffs",
+            "`basis.coefficients` -> `basis.coeffs`",
+            stacklevel=3,
         )
         return self.coeffs
 

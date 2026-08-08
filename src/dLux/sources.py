@@ -24,6 +24,22 @@ _DEFAULT_UNITS = {
 }
 
 
+def __getattr__(name):
+    """Resolve source names retained by the compatibility layer."""
+    legacy = {
+        "PointResolvedSource",
+        "PointSource",
+        "PointSources",
+        "ResolvedSource",
+        "Scene",
+    }
+    if name in legacy:
+        from . import compatibility
+
+        return getattr(compatibility, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 def _merge_units(units=None):
     """Merge source unit overrides with canonical defaults."""
     units = {} if units is None else dict(units)
@@ -298,20 +314,23 @@ class Spectrum(ParametricHolder):
 
 
 class Source(BaseSource, Spectrum):
-    """Represent a point source with spatial and spectral parameters.
+    """Represent one or more sources with spatial and spectral parameters.
 
     Parameters
     ----------
     wavelengths : Array or Parametric
         Scalar or one-dimensional wavelength samples.
     position : Array, Parametric, or None
-        On-sky ``(x, y)`` position in the configured position unit.
+        One on-sky position with shape ``(2,)``, or multiple positions with shape
+        ``(nsource, 2)``, in the configured position unit.
     flux : Array, Parametric, or None
-        Total source flux in the configured flux unit.
+        Scalar or per-source flux in the configured flux unit.
     weights : Array, Parametric, or None
-        Spectral weights with a trailing wavelength axis.
+        Shared weights with shape ``(nwavelength,)`` or per-source weights with
+        shape ``(nsource, nwavelength)``.
     distribution : Array, Parametric, or None
-        Optional two-dimensional resolved image-plane distribution.
+        Optional shared distribution with shape ``(y, x)`` or per-source
+        distributions with shape ``(nsource, y, x)``.
     units : dict or None
         Overrides for wavelength, position, flux, and distribution units.
     """
@@ -344,12 +363,14 @@ class Source(BaseSource, Spectrum):
         position = (
             np.zeros(2) if position is None else np.asarray(position, dtype=float)
         )
-        if position.shape != (2,):
-            raise ValueError("position must have shape (2,).")
+        valid = position.ndim in (1, 2) and position.shape[-1] == 2
+        if not valid:
+            raise ValueError("position must have shape (2,) or (nsource, 2).")
         position = position * dlu.unit_factor(self.units["position"])
 
         # Resolve brightness and optional spatial distribution
-        flux, distribution = self.source_params(wavelengths=wavelengths)
+        nsource = None if position.ndim == 1 else position.shape[0]
+        flux, distribution = self.source_params(nsource, wavelengths=wavelengths)
         return {
             "wavelengths": wavelengths,
             "weights": weights,

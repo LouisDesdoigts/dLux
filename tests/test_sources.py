@@ -74,6 +74,22 @@ def test_default_source():
     assert parameters["distribution"] is None
 
 
+def test_vectorised_source_parameters():
+    wavelengths = np.linspace(0.8e-6, 1.2e-6, 5)
+    source = dl.Source(
+        wavelengths,
+        position=[[0.0, 0.0], [0.1, -0.2]],
+        flux=[2.0, 3.0],
+        weights=dl.Blackbody([4000.0, 6000.0]),
+    )
+
+    parameters = assert_jittable(lambda value: value.params(), source)
+    assert parameters["position"].shape == (2, 2)
+    assert parameters["flux"].shape == (2,)
+    assert parameters["weights"].shape == (2, 5)
+    assert np.allclose(parameters["weights"].sum(-1), np.ones(2))
+
+
 def test_binary_source_parameters():
     source = dl.BinarySource(
         [1e-6],

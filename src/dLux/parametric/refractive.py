@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
-
 import equinox as eqx
 import interpax as ipx
 import jax.numpy as np
@@ -38,12 +36,13 @@ class CauchyIndex(Parametric):
     @property
     def coefficients(self) -> Array:
         """Deprecated alias for the dispersion coefficients."""
-        warnings.warn(
-            "The `.coefficients` attribute is deprecated and will be removed in "
-            "dLux 0.16.2. Use `.coeffs` instead: `model.coefficients` -> "
-            "`model.coeffs`.",
-            DeprecationWarning,
-            stacklevel=2,
+        from ..compatibility import warn_deprecated
+
+        warn_deprecated(
+            ".coefficients attribute",
+            ".coeffs",
+            "`model.coefficients` -> `model.coeffs`",
+            stacklevel=3,
         )
         return self.coeffs
 
@@ -73,12 +72,13 @@ class PolynomialIndex(Parametric):
     @property
     def coefficients(self) -> Array:
         """Deprecated alias for the polynomial coefficients."""
-        warnings.warn(
-            "The `.coefficients` attribute is deprecated and will be removed in "
-            "dLux 0.16.2. Use `.coeffs` instead: `model.coefficients` -> "
-            "`model.coeffs`.",
-            DeprecationWarning,
-            stacklevel=2,
+        from ..compatibility import warn_deprecated
+
+        warn_deprecated(
+            ".coefficients attribute",
+            ".coeffs",
+            "`model.coefficients` -> `model.coeffs`",
+            stacklevel=3,
         )
         return self.coeffs
 
