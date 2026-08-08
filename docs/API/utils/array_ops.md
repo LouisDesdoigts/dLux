@@ -11,3 +11,6 @@
 
 ???+ info "downsample"
     ::: dLux.utils.array_ops.downsample
+
+???+ info "paste"
+    ::: dLux.utils.array_ops.paste

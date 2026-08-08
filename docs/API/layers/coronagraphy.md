@@ -1,0 +1,14 @@
+# Coronagraphy
+
+## Inheritance
+
+```mermaid
+classDiagram
+    class dLux_layers_coronagraphy_SoummerFPM["SoummerFPM"]
+    class dLux_layers_optical_OpticalLayer["OpticalLayer"]
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_coronagraphy_SoummerFPM
+    click dLux_layers_coronagraphy_SoummerFPM href "#dLux.layers.coronagraphy.SoummerFPM" "Attributes: optic, propagator · Methods: context(), apply_mono()"
+```
+
+???+ info "SoummerFPM"
+    ::: dLux.layers.coronagraphy.SoummerFPM

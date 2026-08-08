@@ -10,10 +10,10 @@ classDiagram
     class dLux_parametric_parametrics_Interpolation["Interpolation"]
     class dLux_parametric_parametrics_DynamicParametric["DynamicParametric"]
     class dLux_parametric_parametrics_Combination["Combination"]
-    class zodiax_base_Base["Base"]
-    zodiax_base_Base <|-- dLux_parametric_parametrics_Parametric
+    class dLux_base_Base["Base"]
+    dLux_parametric_parametrics_ParametricHolder <|-- dLux_parametric_parametrics_Parametric
     click dLux_parametric_parametrics_Parametric href "#dLux.parametric.parametrics.Parametric" "Methods: evaluate(), map(), integrate()"
-    zodiax_base_Base <|-- dLux_parametric_parametrics_ParametricHolder
+    dLux_base_Base <|-- dLux_parametric_parametrics_ParametricHolder
     click dLux_parametric_parametrics_ParametricHolder href "#dLux.parametric.parametrics.ParametricHolder" "Methods: resolve()"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Transform
     click dLux_parametric_parametrics_Transform href "#dLux.parametric.parametrics.Transform" "Attributes: parametric, transformation · Methods: evaluate()"

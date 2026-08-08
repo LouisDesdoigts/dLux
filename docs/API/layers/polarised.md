@@ -12,15 +12,15 @@ classDiagram
     class dLux_layers_optical_OpticalLayer["OpticalLayer"]
     class dLux_layers_polarised_BasePolarisingOptic["BasePolarisingOptic"]
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_polarised_PolarisationLayer
-    click dLux_layers_polarised_PolarisationLayer href "#dLux.layers.polarised.PolarisationLayer" "Attributes: polarisation"
+    click dLux_layers_polarised_PolarisationLayer href "#dLux.layers.polarised.PolarisationLayer" "Attributes: polarisation · Methods: apply_mono()"
     dLux_layers_polarised_BasePolarisingOptic <|-- dLux_layers_polarised_PolarisingOptic
     click dLux_layers_polarised_PolarisingOptic href "#dLux.layers.polarised.PolarisingOptic" "Attributes: jones"
     dLux_layers_polarised_PolarisingOptic <|-- dLux_layers_polarised_UniformPolarisingOptic
-    click dLux_layers_polarised_UniformPolarisingOptic href "#dLux.layers.polarised.UniformPolarisingOptic" "Attributes: jones, orientation"
+    click dLux_layers_polarised_UniformPolarisingOptic href "#dLux.layers.polarised.UniformPolarisingOptic" "Attributes: jones, orientation · Methods: apply_mono()"
     dLux_layers_polarised_BasePolarisingOptic <|-- dLux_layers_polarised_LinearPolariser
-    click dLux_layers_polarised_LinearPolariser href "#dLux.layers.polarised.LinearPolariser" "Attributes: angle · Properties: jones"
+    click dLux_layers_polarised_LinearPolariser href "#dLux.layers.polarised.LinearPolariser" "Attributes: angle · Properties: jones · Methods: apply_mono()"
     dLux_layers_polarised_BasePolarisingOptic <|-- dLux_layers_polarised_Retarder
-    click dLux_layers_polarised_Retarder href "#dLux.layers.polarised.Retarder" "Attributes: retardance, angle · Properties: jones"
+    click dLux_layers_polarised_Retarder href "#dLux.layers.polarised.Retarder" "Attributes: retardance, angle · Properties: jones · Methods: apply_mono()"
 ```
 
 ???+ info "PolarisationLayer"

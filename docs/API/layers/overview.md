@@ -4,6 +4,7 @@ This diagram is generated from the public API. Hover over a class for its direct
 
 ```mermaid
 classDiagram
+    class dLux_layers_coronagraphy_SoummerFPM["SoummerFPM"]
     class dLux_layers_detector_BaseDetectorLayer["BaseDetectorLayer"]
     class dLux_layers_detector_DetectorLayer["DetectorLayer"]
     class dLux_layers_detector_ApplyPixelResponse["ApplyPixelResponse"]
@@ -21,7 +22,6 @@ classDiagram
     class dLux_layers_optical_AberratedLayer["AberratedLayer"]
     class dLux_layers_optical_Optic["Optic"]
     class dLux_layers_optical_Tilt["Tilt"]
-    class dLux_layers_optical_SoummerFPM["SoummerFPM"]
     class dLux_layers_polarised_PolarisationLayer["PolarisationLayer"]
     class dLux_layers_polarised_PolarisingOptic["PolarisingOptic"]
     class dLux_layers_polarised_UniformPolarisingOptic["UniformPolarisingOptic"]
@@ -50,6 +50,8 @@ classDiagram
     class dLux_layers_unified_Interpolate["Interpolate"]
     class dLux_layers_unified_Normalise["Normalise"]
     class dLux_layers_unified_Lambda["Lambda"]
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_coronagraphy_SoummerFPM
+    click dLux_layers_coronagraphy_SoummerFPM href "../coronagraphy/#dLux.layers.coronagraphy.SoummerFPM" "Attributes: optic, propagator · Methods: context(), apply_mono()"
     dLux_layers_optical_BaseLayer <|-- dLux_layers_detector_BaseDetectorLayer
     click dLux_layers_detector_BaseDetectorLayer href "../detector/#dLux.layers.detector.BaseDetectorLayer" "No direct public attributes or methods"
     dLux_layers_detector_BaseDetectorLayer <|-- dLux_layers_detector_DetectorLayer
@@ -73,29 +75,27 @@ classDiagram
     dLux_layers_dynamic_BaseDynamicLayer <|-- dLux_layers_dynamic_DynamicOptic
     dLux_layers_optical_Optic <|-- dLux_layers_dynamic_DynamicOptic
     click dLux_layers_dynamic_DynamicOptic href "../dynamic/#dLux.layers.dynamic.DynamicOptic" "Attributes: coordinates, transformation, transmission, opd, phase, normalise"
-    click dLux_layers_optical_BaseLayer href "../optical/#dLux.layers.optical.BaseLayer" "Methods: apply()"
+    click dLux_layers_optical_BaseLayer href "../optical/#dLux.layers.optical.BaseLayer" "No direct public attributes or methods"
     dLux_layers_optical_BaseLayer <|-- dLux_layers_optical_BaseOpticalLayer
-    click dLux_layers_optical_BaseOpticalLayer href "../optical/#dLux.layers.optical.BaseOpticalLayer" "Methods: apply()"
+    click dLux_layers_optical_BaseOpticalLayer href "../optical/#dLux.layers.optical.BaseOpticalLayer" "Methods: apply_mono(), apply()"
     dLux_layers_optical_BaseOpticalLayer <|-- dLux_layers_optical_OpticalLayer
     click dLux_layers_optical_OpticalLayer href "../optical/#dLux.layers.optical.OpticalLayer" "Methods: context()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_TransmissiveLayer
-    click dLux_layers_optical_TransmissiveLayer href "../optical/#dLux.layers.optical.TransmissiveLayer" "Attributes: transmission, normalise"
+    click dLux_layers_optical_TransmissiveLayer href "../optical/#dLux.layers.optical.TransmissiveLayer" "Attributes: transmission, normalise · Methods: apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_AberratedLayer
-    click dLux_layers_optical_AberratedLayer href "../optical/#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase"
+    click dLux_layers_optical_AberratedLayer href "../optical/#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase · Methods: apply_mono()"
     dLux_layers_optical_TransmissiveLayer <|-- dLux_layers_optical_Optic
     dLux_layers_optical_AberratedLayer <|-- dLux_layers_optical_Optic
-    click dLux_layers_optical_Optic href "../optical/#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, normalise · Methods: phasor()"
+    click dLux_layers_optical_Optic href "../optical/#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, normalise · Methods: phasor(), apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
-    click dLux_layers_optical_Tilt href "../optical/#dLux.layers.optical.Tilt" "Attributes: angles, unit"
-    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_SoummerFPM
-    click dLux_layers_optical_SoummerFPM href "../optical/#dLux.layers.optical.SoummerFPM" "Attributes: optic, propagator · Methods: context()"
+    click dLux_layers_optical_Tilt href "../optical/#dLux.layers.optical.Tilt" "Attributes: angles, unit · Methods: apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_polarised_PolarisationLayer
-    click dLux_layers_polarised_PolarisationLayer href "../polarised/#dLux.layers.polarised.PolarisationLayer" "Attributes: polarisation"
+    click dLux_layers_polarised_PolarisationLayer href "../polarised/#dLux.layers.polarised.PolarisationLayer" "Attributes: polarisation · Methods: apply_mono()"
     click dLux_layers_polarised_PolarisingOptic href "../polarised/#dLux.layers.polarised.PolarisingOptic" "Attributes: jones"
     dLux_layers_polarised_PolarisingOptic <|-- dLux_layers_polarised_UniformPolarisingOptic
-    click dLux_layers_polarised_UniformPolarisingOptic href "../polarised/#dLux.layers.polarised.UniformPolarisingOptic" "Attributes: jones, orientation"
-    click dLux_layers_polarised_LinearPolariser href "../polarised/#dLux.layers.polarised.LinearPolariser" "Attributes: angle · Properties: jones"
-    click dLux_layers_polarised_Retarder href "../polarised/#dLux.layers.polarised.Retarder" "Attributes: retardance, angle · Properties: jones"
+    click dLux_layers_polarised_UniformPolarisingOptic href "../polarised/#dLux.layers.polarised.UniformPolarisingOptic" "Attributes: jones, orientation · Methods: apply_mono()"
+    click dLux_layers_polarised_LinearPolariser href "../polarised/#dLux.layers.polarised.LinearPolariser" "Attributes: angle · Properties: jones · Methods: apply_mono()"
+    click dLux_layers_polarised_Retarder href "../polarised/#dLux.layers.polarised.Retarder" "Attributes: retardance, angle · Properties: jones · Methods: apply_mono()"
     click dLux_layers_propagation_ABCDElement href "../propagation/#dLux.layers.propagation.ABCDElement" "No direct public attributes or methods"
     dLux_layers_propagation_ABCDElement <|-- dLux_layers_propagation_ABCDFreeSpace
     click dLux_layers_propagation_ABCDFreeSpace href "../propagation/#dLux.layers.propagation.ABCDFreeSpace" "Attributes: distance · Properties: abcd"
@@ -106,25 +106,25 @@ classDiagram
     dLux_layers_propagation_ABCDElement <|-- dLux_layers_propagation_ABCDFraunhofer
     click dLux_layers_propagation_ABCDFraunhofer href "../propagation/#dLux.layers.propagation.ABCDFraunhofer" "Attributes: focal_length · Properties: abcd"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_propagation_Propagator
-    click dLux_layers_propagation_Propagator href "../propagation/#dLux.layers.propagation.Propagator" "Attributes: spec · Methods: apply(), validate()"
+    click dLux_layers_propagation_Propagator href "../propagation/#dLux.layers.propagation.Propagator" "Attributes: grid · Methods: apply(), validate()"
     dLux_layers_propagation_Propagator <|-- dLux_layers_propagation_FocalPropagator
-    click dLux_layers_propagation_FocalPropagator href "../propagation/#dLux.layers.propagation.FocalPropagator" "Attributes: spec, focal_length, inverse · Methods: validate()"
+    click dLux_layers_propagation_FocalPropagator href "../propagation/#dLux.layers.propagation.FocalPropagator" "Attributes: grid, focal_length, inverse · Methods: validate()"
     dLux_layers_propagation_Propagator <|-- dLux_layers_propagation_ABCDPropagator
-    click dLux_layers_propagation_ABCDPropagator href "../propagation/#dLux.layers.propagation.ABCDPropagator" "Attributes: spec, ABCDs, method · Properties: abcd · Methods: validate()"
+    click dLux_layers_propagation_ABCDPropagator href "../propagation/#dLux.layers.propagation.ABCDPropagator" "Attributes: grid, ABCDs, method · Properties: abcd · Methods: validate(), apply_mono()"
     dLux_layers_propagation_Propagator <|-- dLux_layers_propagation_FreeSpace
-    click dLux_layers_propagation_FreeSpace href "../propagation/#dLux.layers.propagation.FreeSpace" "Attributes: spec, distance, crop"
+    click dLux_layers_propagation_FreeSpace href "../propagation/#dLux.layers.propagation.FreeSpace" "Attributes: grid, distance, crop · Methods: apply_mono()"
     dLux_layers_propagation_FocalPropagator <|-- dLux_layers_propagation_Fraunhofer
-    click dLux_layers_propagation_Fraunhofer href "../propagation/#dLux.layers.propagation.Fraunhofer" "Attributes: spec, focal_length, inverse, method"
+    click dLux_layers_propagation_Fraunhofer href "../propagation/#dLux.layers.propagation.Fraunhofer" "Attributes: grid, focal_length, inverse, method · Methods: apply_mono()"
     dLux_layers_propagation_FocalPropagator <|-- dLux_layers_propagation_Fresnel
-    click dLux_layers_propagation_Fresnel href "../propagation/#dLux.layers.propagation.Fresnel" "Attributes: spec, focal_length, inverse, defocus, method"
+    click dLux_layers_propagation_Fresnel href "../propagation/#dLux.layers.propagation.Fresnel" "Attributes: grid, focal_length, inverse, defocus, method · Methods: apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_refractive_RefractiveOptic
-    click dLux_layers_refractive_RefractiveOptic href "../refractive/#dLux.layers.refractive.RefractiveOptic" "Attributes: thickness, n"
+    click dLux_layers_refractive_RefractiveOptic href "../refractive/#dLux.layers.refractive.RefractiveOptic" "Attributes: thickness, n · Methods: apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_refractive_Wedge
-    click dLux_layers_refractive_Wedge href "../refractive/#dLux.layers.refractive.Wedge" "Attributes: angle, n"
+    click dLux_layers_refractive_Wedge href "../refractive/#dLux.layers.refractive.Wedge" "Attributes: angle, n · Methods: apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_sparse_Interfere
-    click dLux_layers_sparse_Interfere href "../sparse/#dLux.layers.sparse.Interfere" "Methods: apply()"
+    click dLux_layers_sparse_Interfere href "../sparse/#dLux.layers.sparse.Interfere" "Methods: apply(), apply_mono()"
     dLux_layers_optical_Optic <|-- dLux_layers_sparse_SparseOptic
-    click dLux_layers_sparse_SparseOptic href "../sparse/#dLux.layers.sparse.SparseOptic" "Attributes: transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise()"
+    click dLux_layers_sparse_SparseOptic href "../sparse/#dLux.layers.sparse.SparseOptic" "Attributes: transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise(), apply_mono()"
     dLux_layers_dynamic_BaseDynamicLayer <|-- dLux_layers_sparse_SparseDynamicOptic
     dLux_layers_sparse_SparseOptic <|-- dLux_layers_sparse_SparseDynamicOptic
     click dLux_layers_sparse_SparseDynamicOptic href "../sparse/#dLux.layers.sparse.SparseDynamicOptic" "Attributes: coordinates, transformation, transmission, opd, phase, normalise, centers"
@@ -132,15 +132,15 @@ classDiagram
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_unified_UnifiedLayer
     click dLux_layers_unified_UnifiedLayer href "../unified/#dLux.layers.unified.UnifiedLayer" "No direct public attributes or methods"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Resize
-    click dLux_layers_unified_Resize href "../unified/#dLux.layers.unified.Resize" "Attributes: npixels"
+    click dLux_layers_unified_Resize href "../unified/#dLux.layers.unified.Resize" "Attributes: npixels · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Downsample
-    click dLux_layers_unified_Downsample href "../unified/#dLux.layers.unified.Downsample" "Attributes: n"
+    click dLux_layers_unified_Downsample href "../unified/#dLux.layers.unified.Downsample" "Attributes: n · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Flip
-    click dLux_layers_unified_Flip href "../unified/#dLux.layers.unified.Flip" "Attributes: axes"
+    click dLux_layers_unified_Flip href "../unified/#dLux.layers.unified.Flip" "Attributes: axes · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Interpolate
-    click dLux_layers_unified_Interpolate href "../unified/#dLux.layers.unified.Interpolate" "Attributes: transformation, method, complex, fill"
+    click dLux_layers_unified_Interpolate href "../unified/#dLux.layers.unified.Interpolate" "Attributes: transformation, method, complex, fill · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Normalise
-    click dLux_layers_unified_Normalise href "../unified/#dLux.layers.unified.Normalise" "Attributes: mode, value"
+    click dLux_layers_unified_Normalise href "../unified/#dLux.layers.unified.Normalise" "Attributes: mode, value · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Lambda
-    click dLux_layers_unified_Lambda href "../unified/#dLux.layers.unified.Lambda" "No direct public attributes or methods"
+    click dLux_layers_unified_Lambda href "../unified/#dLux.layers.unified.Lambda" "Methods: apply_mono()"
 ```

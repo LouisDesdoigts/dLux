@@ -6,21 +6,24 @@
 classDiagram
     class dLux_grids_GridSpec["GridSpec"]
     class dLux_grids_ResizeSpec["ResizeSpec"]
+    class dLux_grids_PasteSpec["PasteSpec"]
     class dLux_grids_CoordTransform["CoordTransform"]
     class dLux_grids_Affine["Affine"]
     class dLux_grids_AffineMap["AffineMap"]
     class dLux_grids_TransformChain["TransformChain"]
     class dLux_grids_DistortCoords["DistortCoords"]
+    class dLux_base_Base["Base"]
     class dLux_grids_BaseGridSpec["BaseGridSpec"]
-    class zodiax_base_Base["Base"]
     dLux_grids_BaseGridSpec <|-- dLux_grids_GridSpec
-    click dLux_grids_GridSpec href "#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov · Methods: broadcast(), resize(), downsample(), oversample(), resample(), build(), axes_for(), xs_for(), transformed(), coordinates_for(), extent()"
+    click dLux_grids_GridSpec href "#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov · Methods: broadcast(), resize(), downsample(), oversample(), resample(), from_axes(), build(), axes_for(), xs_for(), transformed(), coordinates_for(), extent()"
     dLux_grids_BaseGridSpec <|-- dLux_grids_ResizeSpec
-    click dLux_grids_ResizeSpec href "#dLux.grids.ResizeSpec" "Attributes: n, pad, crop, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad_array(), crop_array(), resize()"
-    zodiax_base_Base <|-- dLux_grids_CoordTransform
+    click dLux_grids_ResizeSpec href "#dLux.grids.ResizeSpec" "Attributes: n, pad, crop, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad_array(), crop_array(), crop_axes(), resize()"
+    dLux_grids_BaseGridSpec <|-- dLux_grids_PasteSpec
+    click dLux_grids_PasteSpec href "#dLux.grids.PasteSpec" "Attributes: n, shape, starts, offsets, d · Properties: coordinates · Methods: from_grid(), paste(), extract()"
+    dLux_base_Base <|-- dLux_grids_CoordTransform
     click dLux_grids_CoordTransform href "#dLux.grids.CoordTransform" "Methods: get_coordinates(), apply()"
     dLux_grids_CoordTransform <|-- dLux_grids_Affine
-    click dLux_grids_Affine href "#dLux.grids.Affine" "Attributes: translation, rotation, scale, shear, order · Methods: coefficients()"
+    click dLux_grids_Affine href "#dLux.grids.Affine" "Attributes: translation, rotation, scale, shear, order · Properties: coeffs"
     dLux_grids_CoordTransform <|-- dLux_grids_AffineMap
     click dLux_grids_AffineMap href "#dLux.grids.AffineMap" "Attributes: matrix, offset"
     dLux_grids_CoordTransform <|-- dLux_grids_TransformChain
@@ -34,6 +37,9 @@ classDiagram
 
 ???+ info "ResizeSpec"
     ::: dLux.grids.ResizeSpec
+
+???+ info "PasteSpec"
+    ::: dLux.grids.PasteSpec
 
 ???+ info "CoordTransform"
     ::: dLux.grids.CoordTransform

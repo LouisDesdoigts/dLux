@@ -16,7 +16,7 @@ classDiagram
     dLux_builders_ApertureBuilder <|-- dLux_prebuilt_SimpleCircular
     click dLux_prebuilt_SimpleCircular href "#dLux.prebuilt.SimpleCircular" "No direct public attributes or methods"
     dLux_builders_SparseApertureBuilder <|-- dLux_prebuilt_SegmentedHex
-    click dLux_prebuilt_SegmentedHex href "#dLux.prebuilt.SegmentedHex" "No direct public attributes or methods"
+    click dLux_prebuilt_SegmentedHex href "#dLux.prebuilt.SegmentedHex" "Attributes: paste_method · Methods: build()"
     dLux_builders_SparseApertureBuilder <|-- dLux_prebuilt_NRMLike
     click dLux_prebuilt_NRMLike href "#dLux.prebuilt.NRMLike" "No direct public attributes or methods"
     dLux_prebuilt_SimpleCircular <|-- dLux_prebuilt_HSTLike

@@ -17,17 +17,17 @@ classDiagram
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_unified_UnifiedLayer
     click dLux_layers_unified_UnifiedLayer href "#dLux.layers.unified.UnifiedLayer" "No direct public attributes or methods"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Resize
-    click dLux_layers_unified_Resize href "#dLux.layers.unified.Resize" "Attributes: npixels"
+    click dLux_layers_unified_Resize href "#dLux.layers.unified.Resize" "Attributes: npixels · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Downsample
-    click dLux_layers_unified_Downsample href "#dLux.layers.unified.Downsample" "Attributes: n"
+    click dLux_layers_unified_Downsample href "#dLux.layers.unified.Downsample" "Attributes: n · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Flip
-    click dLux_layers_unified_Flip href "#dLux.layers.unified.Flip" "Attributes: axes"
+    click dLux_layers_unified_Flip href "#dLux.layers.unified.Flip" "Attributes: axes · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Interpolate
-    click dLux_layers_unified_Interpolate href "#dLux.layers.unified.Interpolate" "Attributes: transformation, method, complex, fill"
+    click dLux_layers_unified_Interpolate href "#dLux.layers.unified.Interpolate" "Attributes: transformation, method, complex, fill · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Normalise
-    click dLux_layers_unified_Normalise href "#dLux.layers.unified.Normalise" "Attributes: mode, value"
+    click dLux_layers_unified_Normalise href "#dLux.layers.unified.Normalise" "Attributes: mode, value · Methods: apply_mono()"
     dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Lambda
-    click dLux_layers_unified_Lambda href "#dLux.layers.unified.Lambda" "No direct public attributes or methods"
+    click dLux_layers_unified_Lambda href "#dLux.layers.unified.Lambda" "Methods: apply_mono()"
 ```
 
 ???+ info "UnifiedLayer"

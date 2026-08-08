@@ -6,6 +6,7 @@
 classDiagram
     class dLux_parametric_shapes_Shape["Shape"]
     class dLux_parametric_shapes_InvertibleShape["InvertibleShape"]
+    class dLux_parametric_shapes_Hard["Hard"]
     class dLux_parametric_shapes_Soft["Soft"]
     class dLux_parametric_shapes_Circle["Circle"]
     class dLux_parametric_shapes_Square["Square"]
@@ -14,13 +15,15 @@ classDiagram
     class dLux_parametric_shapes_Spider["Spider"]
     class dLux_parametric_shapes_Complement["Complement"]
     class dLux_parametric_shapes_TransformedShape["TransformedShape"]
+    class dLux_base_Base["Base"]
     class dLux_parametric_parametrics_Parametric["Parametric"]
-    class zodiax_base_Base["Base"]
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_shapes_Shape
     click dLux_parametric_shapes_Shape href "#dLux.parametric.shapes.Shape" "Properties: extent"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_InvertibleShape
     click dLux_parametric_shapes_InvertibleShape href "#dLux.parametric.shapes.InvertibleShape" "Attributes: edge, invert · Methods: evaluate(), evaluate_hard(), evaluate_soft()"
-    zodiax_base_Base <|-- dLux_parametric_shapes_Soft
+    dLux_base_Base <|-- dLux_parametric_shapes_Hard
+    click dLux_parametric_shapes_Hard href "#dLux.parametric.shapes.Hard" "No direct public attributes or methods"
+    dLux_base_Base <|-- dLux_parametric_shapes_Soft
     click dLux_parametric_shapes_Soft href "#dLux.parametric.shapes.Soft" "Attributes: pixels · Methods: clip()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Circle
     click dLux_parametric_shapes_Circle href "#dLux.parametric.shapes.Circle" "Attributes: diameter · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
@@ -43,6 +46,9 @@ classDiagram
 
 ???+ info "InvertibleShape"
     ::: dLux.parametric.shapes.InvertibleShape
+
+???+ info "Hard"
+    ::: dLux.parametric.shapes.Hard
 
 ???+ info "Soft"
     ::: dLux.parametric.shapes.Soft

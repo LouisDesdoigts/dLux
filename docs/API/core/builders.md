@@ -11,17 +11,17 @@ classDiagram
     class dLux_builders_ZernikeDef["ZernikeDef"]
     class dLux_builders_ApertureBuilder["ApertureBuilder"]
     class dLux_builders_SparseApertureBuilder["SparseApertureBuilder"]
-    class zodiax_base_Base["Base"]
-    zodiax_base_Base <|-- dLux_builders_GridBuilder
+    class dLux_base_Base["Base"]
+    dLux_base_Base <|-- dLux_builders_GridBuilder
     click dLux_builders_GridBuilder href "#dLux.builders.GridBuilder" "Methods: validate(), build()"
-    zodiax_base_Base <|-- dLux_builders_OPDDef
+    dLux_base_Base <|-- dLux_builders_OPDDef
     click dLux_builders_OPDDef href "#dLux.builders.OPDDef" "Methods: calculate()"
-    zodiax_base_Base <|-- dLux_builders_ApertureData
+    dLux_base_Base <|-- dLux_builders_ApertureData
     click dLux_builders_ApertureData href "#dLux.builders.ApertureData" "Attributes: transmission, support, diameter, centers"
-    zodiax_base_Base <|-- dLux_builders_Norm
+    dLux_base_Base <|-- dLux_builders_Norm
     click dLux_builders_Norm href "#dLux.builders.Norm" "Attributes: mode, scale"
     dLux_builders_OPDDef <|-- dLux_builders_ZernikeDef
-    click dLux_builders_ZernikeDef href "#dLux.builders.ZernikeDef" "Attributes: nolls, oversize, norm · Methods: calculate()"
+    click dLux_builders_ZernikeDef href "#dLux.builders.ZernikeDef" "Attributes: nolls, groups, order, oversize, norm, method · Methods: calculate()"
     dLux_builders_GridBuilder <|-- dLux_builders_ApertureBuilder
     click dLux_builders_ApertureBuilder href "#dLux.builders.ApertureBuilder" "Attributes: primary, obscurations, opd, oversample · Methods: build(), aperture_data()"
     dLux_builders_ApertureBuilder <|-- dLux_builders_SparseApertureBuilder

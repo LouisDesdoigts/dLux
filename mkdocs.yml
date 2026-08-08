@@ -85,25 +85,32 @@ nav:
   - Home: index.md
   - Installation: installation.md
   - Tutorials:
-    - Find a Tutorial:          tutorials/index.md
-    - Learn dLux:
-      - Systems, Sources & Images: optical_systems.md
-      - A Basic Overview:         phase_retrieval.md
-      - Building Apertures:       apertures.md
-    - Inference & Design:
-      - Instrumental Calibration: calibration.md
-      - Phase Mask Design:        mask_design.md
-      - Coronagraphs:             coronagraphs.md
-    - Propagation Methods:
-      - ABCD Fresnel:              abcd_fresnel.md
-      - ASM Fresnel:               asm.md
-      - Sparse Propagation:        sparse_propagation.md
+    - Overview: tutorials/overview.md
+    - Introductory:
+      - Overview: tutorials/introductory/overview.md
+      - Getting Started: tutorials/introductory/getting_started.md
+    - Basics:
+      - Overview: tutorials/basics/overview.md
+    - Advanced:
+      - Overview: tutorials/advanced/overview.md
+    - Old Tutorials:
+      - Optical Systems: tutorials/old/optical_systems.md
+      - Phase Retrieval: tutorials/old/phase_retrieval.md
+      - Apertures: tutorials/old/apertures.md
+      - Calibration: tutorials/old/calibration.md
+      - Coronagraphs: tutorials/old/coronagraphs.md
+      - Phase Mask Design: tutorials/old/mask_design.md
+      - ABCD Fresnel: tutorials/old/abcd_fresnel.md
+      - ASM Fresnel: tutorials/old/asm.md
+      - Sparse Propagation: tutorials/old/sparse_propagation.md
 
   - API:
     - Overview: API/overview.md
     - Core API:
       - Overview: API/core/overview.md
+      - Base: API/core/base.md
       - Builders: API/core/builders.md
+      - Compatibility: API/core/compatibility.md
       - Fields: API/core/fields.md
       - Grids: API/core/grids.md
       - Prebuilt: API/core/prebuilt.md
@@ -112,6 +119,7 @@ nav:
 
     - Layers API:
       - Overview: API/layers/overview.md
+      - Coronagraphy: API/layers/coronagraphy.md
       - Detector: API/layers/detector.md
       - Dynamic: API/layers/dynamic.md
       - Optical: API/layers/optical.md

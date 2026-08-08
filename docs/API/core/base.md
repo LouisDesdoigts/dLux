@@ -1,0 +1,14 @@
+# Base
+
+## Inheritance
+
+```mermaid
+classDiagram
+    class dLux_base_Base["Base"]
+    class zodiax_base_Base["Base"]
+    zodiax_base_Base <|-- dLux_base_Base
+    click dLux_base_Base href "#dLux.base.Base" "Methods: get(), set(), add(), multiply(), divide(), power(), min(), max()"
+```
+
+???+ info "Base"
+    ::: dLux.base.Base

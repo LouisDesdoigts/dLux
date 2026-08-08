@@ -18,6 +18,9 @@
 ???+ info "missing_attribute_error"
     ::: dLux.utils.helpers.missing_attribute_error
 
+???+ info "resolve_attr"
+    ::: dLux.utils.helpers.resolve_attr
+
 ???+ info "from_complex"
     ::: dLux.utils.helpers.from_complex
 

@@ -11,25 +11,22 @@ classDiagram
     class dLux_layers_optical_AberratedLayer["AberratedLayer"]
     class dLux_layers_optical_Optic["Optic"]
     class dLux_layers_optical_Tilt["Tilt"]
-    class dLux_layers_optical_SoummerFPM["SoummerFPM"]
     class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
     dLux_parametric_parametrics_ParametricHolder <|-- dLux_layers_optical_BaseLayer
-    click dLux_layers_optical_BaseLayer href "#dLux.layers.optical.BaseLayer" "Methods: apply()"
+    click dLux_layers_optical_BaseLayer href "#dLux.layers.optical.BaseLayer" "No direct public attributes or methods"
     dLux_layers_optical_BaseLayer <|-- dLux_layers_optical_BaseOpticalLayer
-    click dLux_layers_optical_BaseOpticalLayer href "#dLux.layers.optical.BaseOpticalLayer" "Methods: apply()"
+    click dLux_layers_optical_BaseOpticalLayer href "#dLux.layers.optical.BaseOpticalLayer" "Methods: apply_mono(), apply()"
     dLux_layers_optical_BaseOpticalLayer <|-- dLux_layers_optical_OpticalLayer
     click dLux_layers_optical_OpticalLayer href "#dLux.layers.optical.OpticalLayer" "Methods: context()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_TransmissiveLayer
-    click dLux_layers_optical_TransmissiveLayer href "#dLux.layers.optical.TransmissiveLayer" "Attributes: transmission, normalise"
+    click dLux_layers_optical_TransmissiveLayer href "#dLux.layers.optical.TransmissiveLayer" "Attributes: transmission, normalise · Methods: apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_AberratedLayer
-    click dLux_layers_optical_AberratedLayer href "#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase"
+    click dLux_layers_optical_AberratedLayer href "#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase · Methods: apply_mono()"
     dLux_layers_optical_TransmissiveLayer <|-- dLux_layers_optical_Optic
     dLux_layers_optical_AberratedLayer <|-- dLux_layers_optical_Optic
-    click dLux_layers_optical_Optic href "#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, normalise · Methods: phasor()"
+    click dLux_layers_optical_Optic href "#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, normalise · Methods: phasor(), apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
-    click dLux_layers_optical_Tilt href "#dLux.layers.optical.Tilt" "Attributes: angles, unit"
-    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_SoummerFPM
-    click dLux_layers_optical_SoummerFPM href "#dLux.layers.optical.SoummerFPM" "Attributes: optic, propagator · Methods: context()"
+    click dLux_layers_optical_Tilt href "#dLux.layers.optical.Tilt" "Attributes: angles, unit · Methods: apply_mono()"
 ```
 
 ???+ info "BaseLayer"
@@ -52,6 +49,3 @@ classDiagram
 
 ???+ info "Tilt"
     ::: dLux.layers.optical.Tilt
-
-???+ info "SoummerFPM"
-    ::: dLux.layers.optical.SoummerFPM
