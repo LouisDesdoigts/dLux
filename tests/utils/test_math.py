@@ -21,6 +21,19 @@ def test_gaussian_contract():
     assert np.isclose(output.sum(), 1.0)
 
 
+def test_gaussian_zero_width_and_axis_extents():
+    output = assert_jittable(
+        dlu.gaussian,
+        mean=np.zeros(2),
+        std=np.asarray((0.0, 1.0)),
+        npixels=(9, 7),
+        extent=np.asarray((2.0, 3.0)),
+    )
+
+    assert np.isclose(output.sum(), 1.0)
+    assert np.count_nonzero(output.sum(1)) == 1
+
+
 def test_mv_gaussian_contract():
     mean = np.asarray((0.2, -0.1))
     cov = np.asarray(((1.0, 0.3), (0.3, 2.0)))

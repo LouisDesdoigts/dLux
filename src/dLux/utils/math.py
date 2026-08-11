@@ -24,7 +24,7 @@ def gaussian(
     mean: float | Array = 0.0,
     std: float | Array = 1.0,
     npixels: int | tuple[int, ...] = 64,
-    extent: float = 5.0,
+    extent: float | Array = 5.0,
 ) -> Array:
     """Generates a normalised n-dimensional Gaussian function.
 
@@ -36,8 +36,8 @@ def gaussian(
         The standard deviation(s) of the Gaussian. Scalar for 1D, array for nD.
     npixels : int | tuple[int, ...] = 64
         The number of pixels along each axis. Scalar for 1D, tuple for nD.
-    extent : float = 5.0
-        The extent of the grid in units of standard deviation on each side.
+    extent : float or Array = 5.0
+        Per-axis coordinate extent on each side of the origin.
 
     Returns
     -------
@@ -47,13 +47,20 @@ def gaussian(
     # Resolve dimensionality and broadcast each axis input
     npixels = dlu.as_size(npixels, name="npixels")
     mean, std = dlu.as_axis(mean), dlu.as_axis(std)
-    ndim = max(len(npixels), mean.shape[-1], std.shape[-1])
+    extent = dlu.as_axis(extent)
+    ndim = max(len(npixels), mean.shape[-1], std.shape[-1], extent.shape[-1])
     npixels = dlu.as_size(npixels, ndim, "npixels")
     mean, std = dlu.as_axis(mean, ndim, "mean"), dlu.as_axis(std, ndim, "std")
+    extent = dlu.as_axis(extent, ndim, "extent")
 
     # Generate per-axis coordinates and corresponding 1D Gaussians
-    gauss_fn = lambda axis, m, s: jsp.stats.norm.pdf(axis, loc=m, scale=s)
-    linspaces = jtu.map(lambda n: np.linspace(-extent, extent, n), npixels)
+    def gauss_fn(axis, m, s):
+        safe = np.where(s == 0, 1.0, s)
+        gaussian = jsp.stats.norm.pdf(axis, loc=m, scale=safe)
+        delta = np.abs(axis - m) == np.min(np.abs(axis - m))
+        return np.where(s == 0, delta, gaussian)
+
+    linspaces = jtu.map(lambda n, e: np.linspace(-e, e, n), npixels, tuple(extent))
     one_d_gauss = jtu.map(gauss_fn, linspaces, tuple(mean), tuple(std))
 
     # Construct nD separable Gaussian kernel from 1D marginals
@@ -65,7 +72,7 @@ def mv_gaussian(
     mean: Array,
     cov: Array,
     npix: int | tuple[int, ...] = 64,
-    extent: float = 5.0,
+    extent: float | Array = 5.0,
 ) -> Array:
     """Generates a normalised multivariate Gaussian function.
 
@@ -77,8 +84,8 @@ def mv_gaussian(
         The covariance matrix of the multivariate Gaussian. Shape (ndim, ndim).
     npix : int | Array = 64
         The number of pixels along each axis.
-    extent : float = 5.0
-        The extent of the grid in units of standard deviation on each side.
+    extent : float or Array = 5.0
+        Per-axis marginal standard-deviation multiplier.
 
     Returns
     -------
@@ -95,11 +102,12 @@ def mv_gaussian(
 
     ndim = mean.size
     npix = dlu.as_size(npix, ndim, "npix")
+    extent = dlu.as_axis(extent, ndim, "extent")
 
     # Generate physical axes spanning the marginal standard deviations
     stds = np.sqrt(np.diag(cov))
-    axis_fn = lambda m, s, n: np.linspace(m - extent * s, m + extent * s, n)
-    axes = jtu.map(axis_fn, tuple(mean), tuple(stds), npix)
+    axis_fn = lambda m, s, n, e: np.linspace(m - e * s, m + e * s, n)
+    axes = jtu.map(axis_fn, tuple(mean), tuple(stds), npix, tuple(extent))
 
     # Evaluate the distribution over the Cartesian product of the axes
     shape = tuple(len(axis) for axis in axes)
