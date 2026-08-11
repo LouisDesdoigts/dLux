@@ -2,6 +2,10 @@
 
 dLux is an open-source framework and as such is very welcoming to contributions via pull requests! If you would like to contribute but are unfamiliar with any of this process, as I imagine many coming from a science background will be, please feel free to reach out to me at my [email](mailto:louis.desdoigts@sydney.edu.au) or on [twitter](https://twitter.com/gradientrider) and I will be happy to help you through the process!
 
+Contributions to code, science, tutorials, documentation, testing, and review are
+recognised in [CONTRIBUTORS.md](CONTRIBUTORS.md). Please include additions or
+corrections to that file with a contribution where appropriate.
+
 ---
 
 ## Getting Started

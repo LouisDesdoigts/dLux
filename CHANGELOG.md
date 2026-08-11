@@ -102,6 +102,9 @@
 - Legacy module import paths are exposed without retaining empty compatibility
   modules throughout the package.
 - Deprecated interfaces are scheduled for removal in dLux 0.17.0.
+- Added a task-oriented [0.16 migration guide](https://louisdesdoigts.github.io/dLux/latest/migration/)
+  covering grids, fields, systems, sources, parametrics, apertures, propagation, and
+  custom layers.
 
 ### 🐛 Bug Fixes
 - Corrected FFT coordinate centring and restored explicit final-wavefront returns.
@@ -123,6 +126,19 @@
   empty FAQ and manually maintained UML image assets.
 - Added repository guidance and a dLux development skill for consistent AI-assisted
   implementation, review, testing, and documentation.
+- Reorganised tutorials into introductory, basics, advanced, and retained legacy
+  routes, with Getting Started published as the reference end-to-end workflow.
+- Replaced package-scale class diagrams with compact package and module maps while
+  retaining local inheritance diagrams on generated API pages.
+- Added a maintained contributor register covering software, science, tutorials,
+  documentation, testing, and review.
+
+### 🎉 Contributors
+- [Jaren Ashcraft (@Jashcraf)](https://github.com/Jashcraf) contributed the
+  polarisation foundations, including polarised wavefronts, Stokes evaluation, and
+  uniform and spatially varying polarisation layers.
+- [Adam Taras (@ataras2)](https://github.com/ataras2) contributed to the v0.16
+  development series.
 
 ## V0.15.1
 

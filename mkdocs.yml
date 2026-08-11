@@ -84,6 +84,8 @@ extra:
 nav:
   - Home: index.md
   - Installation: installation.md
+  - Migrating to 0.16: migration.md
+  - Parameters and Updates: parameters.md
   - Tutorials:
     - Overview: tutorials/overview.md
     - Introductory:
@@ -158,6 +160,7 @@ nav:
       - Source: API/utils/source.md
       - Units: API/utils/units.md
   - Publications: publications.md
+  - Contributors: contributors.md
   - Citation: citation.md
   - Change Log: changelog.md
   - Contributing: contributing.md

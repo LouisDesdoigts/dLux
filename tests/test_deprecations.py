@@ -20,16 +20,43 @@ def test_coefficients_constructor_alias():
     assert np.allclose(parametric.coeffs, np.array([1.0, 2.0]))
 
 
-def test_coefficients_attribute_alias():
-    basis = dl.Basis(np.ones((2, 3, 3)), coeffs=[1.0, 2.0])
+@pytest.mark.parametrize(
+    "constructor",
+    [
+        lambda: dl.Polynomial(degree=1, coefficients=[1.0, 2.0]),
+        lambda: dl.SpectralPolynomial(degree=1, coefficients=[0.2]),
+        lambda: dl.CauchyIndex(coefficients=[1.5, 0.01]),
+    ],
+)
+def test_coefficients_constructor_aliases(constructor):
+    with pytest.warns(DeprecationWarning, match="Class\\(coefficients=value\\)"):
+        parametric = constructor()
+
+    assert hasattr(parametric, "coeffs")
+
+
+@pytest.mark.parametrize(
+    "parametric, migration",
+    [
+        (
+            dl.Basis(np.ones((2, 3, 3)), coeffs=[1.0, 2.0]),
+            "basis.coefficients` -> `basis.coeffs",
+        ),
+        (
+            dl.CauchyIndex(coeffs=[1.5, 0.01]),
+            "model.coefficients` -> `model.coeffs",
+        ),
+    ],
+)
+def test_coefficients_attribute_alias(parametric, migration):
 
     with pytest.warns(DeprecationWarning) as record:
-        coeffs = basis.coefficients
+        coeffs = parametric.coefficients
 
     message = str(record[0].message)
     assert "removed in dLux 0.17.0" in message
-    assert "basis.coefficients` -> `basis.coeffs" in message
-    assert np.allclose(coeffs, basis.coeffs)
+    assert migration in message
+    assert np.allclose(coeffs, parametric.coeffs)
 
 
 @pytest.mark.parametrize(

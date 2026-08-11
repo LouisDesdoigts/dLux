@@ -23,13 +23,15 @@ from .sources import Source, Spectrum
 from .systems import DetectorSystem, OpticalSystem
 
 REMOVAL_VERSION = "0.17.0"
+MIGRATION_GUIDE = "https://louisdesdoigts.github.io/dLux/latest/migration/"
 
 
 def warn_deprecated(old, new, example, stacklevel=2):
     """Warn about a deprecated interface and provide its direct migration."""
     message = (
         f"The `{old}` interface is deprecated and will be removed in dLux "
-        f"{REMOVAL_VERSION}. Use `{new}` instead: {example}."
+        f"{REMOVAL_VERSION}. Use `{new}` instead: {example}. See the migration "
+        f"guide: {MIGRATION_GUIDE}"
     )
     warnings.warn(message, DeprecationWarning, stacklevel=stacklevel)
 
@@ -38,7 +40,8 @@ def migration_error(old, new, example):
     """Raise an actionable error for a legacy contract without a safe wrapper."""
     message = (
         f"`{old}` was removed in dLux 0.16 and cannot be translated without "
-        f"changing its behaviour. Use `{new}` instead: {example}."
+        f"changing its behaviour. Use `{new}` instead: {example}. See the migration "
+        f"guide: {MIGRATION_GUIDE}"
     )
     raise TypeError(message)
 

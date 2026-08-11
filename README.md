@@ -50,6 +50,12 @@ If you have any other projects that use dLux and would like to be added to this 
 
 If you have any other papers that use dLux and would like to be added to this list, please let us know!
 
+## Contributors
+
+dLux is developed through software, scientific, tutorial, documentation, testing, and
+review contributions. See the [contributor list](CONTRIBUTORS.md), and please let us
+know if anyone or any contribution is missing.
+
 
 ## Citation
 
