@@ -207,10 +207,10 @@ class Tilt(OpticalLayer):
     unit: str
 
     def __init__(self, angles, unit="rad"):
-        self.angles = dlu.to_value(angles)
+        self.angles = dlu.to_value(angles, name="angles")
         if self.angles.shape != (2,):
             raise ValueError("angles must have shape (2,).")
-        self.unit = str(unit)
+        self.unit = dlu.canonical_unit(unit, dimension="angle", name="tilt unit")
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the configured angular tilt to a wavefront."""

@@ -70,6 +70,9 @@ def test_detector_layers_preserve_leading_axes(layer, make_psf):
     [
         lambda: dl.ApplyPixelResponse(np.ones(8)),
         lambda: dl.ApplyJitter(0.5, kernel_size=0),
+        lambda: dl.ApplyJitter(0.0),
+        lambda: dl.ApplyJitter([0.5]),
+        lambda: dl.ApplyJitter(0.5, oversample=0),
     ],
 )
 def test_validation(constructor):

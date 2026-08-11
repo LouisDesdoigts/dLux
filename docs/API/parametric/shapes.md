@@ -37,7 +37,7 @@ classDiagram
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_RegularPolygon
     click dLux_parametric_shapes_RegularPolygon href "#dLux.parametric.shapes.RegularPolygon" "Attributes: diameter, nsides · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_ConvexPolygon
-    click dLux_parametric_shapes_ConvexPolygon href "#dLux.parametric.shapes.ConvexPolygon" "Attributes: vertices · Properties: extent · Methods: validate(), evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_ConvexPolygon href "#dLux.parametric.shapes.ConvexPolygon" "Attributes: vertices · Properties: extent · Methods: evaluate_hard(), evaluate_soft(), validate()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Spider
     click dLux_parametric_shapes_Spider href "#dLux.parametric.shapes.Spider" "Attributes: width, angles · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_Complement

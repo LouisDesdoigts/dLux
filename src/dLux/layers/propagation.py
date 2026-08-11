@@ -124,7 +124,7 @@ def _validate_grid(grid, name, ndim=2, angular=None):
     if grid.ndim != ndim:
         raise ValueError(f"The {name} GridSpec must have {ndim} dimensions.")
     try:
-        dlu.unit_factor_to_rad(grid.unit)
+        dlu.canonical_unit(grid.unit, dimension="angle")
         is_angular = True
     except ValueError:
         is_angular = False

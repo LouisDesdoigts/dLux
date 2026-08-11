@@ -62,11 +62,12 @@ class ApplyJitter(DetectorLayer):
     Parameters
     ----------
     sigma : float, pixels
-        Standard deviation of the Gaussian kernel in detector pixels.
+        Strictly positive standard deviation in detector pixels.
     kernel_size : int
-        Width of the sampled convolution kernel.
+        Positive width of the sampled convolution kernel.
     oversample : int
-        Sampling factor used before integrating the kernel to detector pixels.
+        Positive sampling factor used before integrating the kernel to detector
+        pixels.
     """
 
     sigma: float
@@ -77,12 +78,14 @@ class ApplyJitter(DetectorLayer):
         self: ApplyJitter, sigma: float, kernel_size: int = 9, oversample: int = 3
     ):
         super().__init__()
-        self.kernel_size = int(kernel_size)
-        self.sigma = dlu.to_value(sigma)
-        self.oversample = int(oversample)
+        self.kernel_size = dlu.as_size(kernel_size, 1, "kernel_size")[0]
+        self.oversample = dlu.as_size(oversample, 1, "oversample")[0]
+        self.sigma = dlu.to_value(sigma, name="sigma")
 
-        if self.kernel_size <= 0:
-            raise ValueError("kernel_size must be greater than 0.")
+        if self.sigma.ndim != 0:
+            raise ValueError("sigma must be scalar.")
+        if self.sigma <= 0:
+            raise ValueError("sigma must be greater than zero.")
 
     @property
     def kernel(self: ApplyJitter) -> Array:

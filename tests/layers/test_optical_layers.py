@@ -148,8 +148,12 @@ def test_optical_layers_preserve_leading_axes(layer, make_grid):
 
 
 def test_tilt_validation():
+    assert dl.Tilt([0.0, 0.0], unit="arcseconds").unit == "arcsec"
+
     with pytest.raises(ValueError, match="shape"):
         dl.Tilt([1])
+    with pytest.raises(ValueError, match="tilt unit"):
+        dl.Tilt([0.0, 0.0], unit="m")
 
 
 class TestSoummerFPM:

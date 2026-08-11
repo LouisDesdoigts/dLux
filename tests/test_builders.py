@@ -215,6 +215,10 @@ def test_prebuilt_validation():
         dl.SegmentedHex(nrings=2)
     with pytest.raises(ValueError, match="paste_method"):
         dl.SegmentedHex(nrings=2, segment_f2f=0.8, paste_method="invalid")
+    with pytest.raises(ValueError, match="greater than zero"):
+        dl.SegmentedHex(nrings=2, segment_f2f=0.0)
+    with pytest.raises(ValueError, match="greater than or equal to zero"):
+        dl.SegmentedHex(nrings=2, segment_f2f=0.8, gap=-0.1)
     with pytest.raises(TypeError, match="hole"):
         dl.NRMLike([[0.0, 0.0]], hole=np.ones((2, 2)))
 

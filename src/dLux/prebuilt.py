@@ -83,7 +83,7 @@ class SegmentedHex(SparseApertureBuilder):
     segment_diameter, segment_f2f : float or None
         Alternative segment-size conventions; exactly one is required.
     gap : float
-        Edge-to-edge gap between adjacent segments.
+        Non-negative edge-to-edge gap between adjacent segments.
     remove_center : bool
         Remove the central segment after generating the complete tiling.
     obscurations : list or tuple of Shape
@@ -119,8 +119,21 @@ class SegmentedHex(SparseApertureBuilder):
         # Resolve and validate the construction options
         if (segment_diameter is None) == (segment_f2f is None):
             raise ValueError("Provide exactly one of segment_diameter or segment_f2f.")
+        nrings = dlu.as_size(nrings, 1, "nrings")[0]
+        gap = dlu.to_value(gap, name="gap")
+        segment_f2f = dlu.to_value(segment_f2f, optional=True, name="segment_f2f")
+        segment_diameter = dlu.to_value(
+            segment_diameter, optional=True, name="segment_diameter"
+        )
         if segment_diameter is None:
             segment_diameter = 2 * segment_f2f / np.sqrt(3)
+        if segment_diameter.ndim != 0 or gap.ndim != 0:
+            raise ValueError("segment diameter and gap must be scalar.")
+        if segment_diameter <= 0:
+            raise ValueError("segment diameter must be greater than zero.")
+        if gap < 0:
+            raise ValueError("gap must be greater than or equal to zero.")
+
         paste_method = str(paste_method).lower()
         if paste_method not in ("scan", "scatter"):
             raise ValueError("paste_method must be either 'scan' or 'scatter'.")
@@ -399,6 +412,7 @@ class JWSTNRMLike(NRMLike):
                     (-1.14315, -1.98),
                 )
             )
+        hole_f2f = dlu.to_value(hole_f2f, name="hole_f2f")
         diameter = 2 * hole_f2f / np.sqrt(3)
         super().__init__(
             centers, RegularPolygon(6, diameter), opd=opd, oversample=oversample

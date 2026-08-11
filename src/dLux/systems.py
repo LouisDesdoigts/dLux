@@ -56,7 +56,12 @@ class LayeredSystem(Base):
 
 
 class OpticalSystem(LayeredSystem, BaseOpticalLayer):
-    """Model an optical train from an input coordinate specification."""
+    """Model an optical train from a physical input coordinate specification.
+
+    The input grid may use any supported length unit. Its coordinates are converted
+    to canonical SI values when fields are evaluated; angular input grids are not
+    accepted.
+    """
 
     layers: OrderedDict
     grid: GridSpec
@@ -67,8 +72,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         grid = grid.broadcast(2)
         if grid.n is None or grid.d is None:
             raise ValueError("grid must define n and d.")
-        if grid.unit != "m":
-            raise ValueError("OpticalSystem input coordinates must use metres.")
+        dlu.canonical_unit(grid.unit, dimension="length", name="input grid unit")
         self.grid = grid
         super().__init__(layers, BaseOpticalLayer)
 

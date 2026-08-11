@@ -70,6 +70,16 @@ def test_nested_optical_system(input_spec):
     assert np.allclose(output.phasor, 0.25 * wavefront.phasor)
 
 
+def test_optical_system_accepts_physical_grid_units():
+    grid = dl.GridSpec(n=8, d=100.0, unit="mm")
+    system = dl.OpticalSystem([], grid)
+    reference = dl.GridSpec(n=8, d=0.1, unit="m")
+
+    assert system.grid.unit == "mm"
+    assert np.allclose(system.grid.d, np.asarray((100.0, 100.0)))
+    assert np.allclose(system.grid.coordinates, reference.broadcast(2).coordinates)
+
+
 def test_layered_system_contract(make_psf):
     system = dl.LayeredSystem(
         [("offset", dl.AddConstant(1)), ("normalise", dl.Normalise())]
