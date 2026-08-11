@@ -11,13 +11,17 @@
   Fresnel, free-space, and ABCD propagation layers.
 - Added first-class support for chromatic and polarised wavefronts throughout the
   optical modelling stack.
+- Added grid-aware dense, sparse, dynamic, and segmented aperture construction for
+  building realistic differentiable instruments without materialising unnecessary
+  full-array bases.
 
 ### ✨ New Features
 - **Fields and grids:** added `BaseField`, `ContinuousField`, and `DiscreteField`
-  contracts for `Wavefront`, `PolarisedWavefront`, `PSF`, and `Image`, all backed
-  by a multidimensional `GridSpec`.
-- **Images:** added Poisson and read-noise simulation, variance and error tracking,
-  Gaussian and Poisson likelihoods, and Fourier amplitude and power spectra.
+  contracts for `Wavefront`, `PolarisedWavefront`, deterministic `Intensity`, and
+  realised `Image`, all backed by a multidimensional `GridSpec`.
+- **Images:** added explicit `Intensity` to `Image` conversion, Poisson and read-noise
+  simulation, standard-deviation and derived-variance tracking, and Fourier amplitude
+  and power spectra. Statistical residuals and likelihoods remain in Zodiax.
 - **Coordinates:** added broadcastable grid specifications, `ResizeSpec`,
   coordinate transformations, affine maps, polynomial distortions, ordered
   transformation composition, construction from regular axes, oversampling, and
@@ -32,6 +36,9 @@
   Zernike OPD definitions, and configurable HST-, JWST-, JWST NRM-, and Euclid-like
   templates. Named templates describe their intended fidelity rather than claiming
   exact observatory models.
+- **Geometry:** added hard and softened convex polygons, differentiable vertices, and
+  opt-in convexity validation alongside the existing circular, rectangular, polygon,
+  and spider primitives.
 - **Segmented apertures:** added compact pasted transmission and `PastedBasis`
   construction, with parallel and memory-efficient placement strategies for large
   segmented pupils such as ELT-scale apertures.
@@ -49,6 +56,10 @@
 - **Optical systems:** added a single layered `OpticalSystem`, a dedicated
   `DetectorSystem`, intermediate-state debugging, and optional wavefront returns
   from propagation.
+- **Detector modelling:** added deterministic `Sensitivity`, `Convolve`, `Jitter`,
+  `Bias`, `Gain`, and `Saturation` layers. Responses may be fixed arrays or
+  parametrics, allowing spatial and nonlinear detector models to use the same layer
+  contract.
 - **Sources:** added composable `Spectrum`, `Source`, and `BinarySource` models
   with parametric wavelengths, weights, positions, fluxes, and resolved
   distributions. `Source` now supports vectorised populations of positions, fluxes,
@@ -60,24 +71,31 @@
 - **Polarisation:** added polarised wavefront propagation, Stokes evaluation, and
   uniform or spatially varying parametric polariser and retarder fields.
 - Added shared interpolation methods and layers for complex wavefronts and real
-  PSFs ([#302](https://github.com/LouisDesdoigts/dLux/issues/302)).
+  intensity fields ([#302](https://github.com/LouisDesdoigts/dLux/issues/302)).
 - Added a normalised multidimensional Gaussian utility with explicit physical-axis
   ordering and batched mean or covariance support.
+- Added central unit parsing, canonicalisation, validation, and contextual errors for
+  grids, wavelengths, positions, fluxes, and relative source distributions.
 - Added consistent raised-parameter paths across nested fields, sources, parametrics,
   layers, and systems, with clearer errors for unresolved paths.
+- Added `dLux.utils.update(...)` for applying one parameter-path mapping across one or
+  more Zodiax objects with strict unused-path detection.
 - Added official Python 3.14 support.
 
 ### ⚠️ Breaking Changes
 - Replaced `CoordSpec` and `PadSpec` with `GridSpec` and `ResizeSpec`, and moved
   coordinate specifications and transformations into `dLux.grids`.
 - `ResizeSpec` now uses the concise `pad` and `crop` attribute names.
-- Consolidated wavefronts, PSFs, and detector images into `dLux.fields`; removed
-  the former wavefront, PSF, detector, spectrum, and scene module structure.
+- Consolidated wavefronts, deterministic intensities, and detector images into
+  `dLux.fields`; removed the former wavefront, PSF, detector, spectrum, and scene
+  module structure. `PSF` is retained only as a deprecated compatibility wrapper for
+  `Intensity`.
 - Replaced the separate layered, angular, Cartesian, and parametric optical-system
   classes with `OpticalSystem`; detector processing now lives in
   `DetectorSystem`.
-- `OpticalSystem.model(...)` now takes a source and returns a `PSF`, while
-  `DetectorSystem.model(...)` takes a `PSF` and returns an `Image`.
+- `OpticalSystem.model(...)` now takes a source and returns an `Intensity`.
+  `DetectorSystem.model(...)` applies deterministic detector responses and also
+  returns an `Intensity`; construct an `Image` explicitly to simulate observations.
 - Replaced the legacy FFT, MFT, and ASM propagation-layer classes with the new
   propagation contracts; `ASM` is now represented by `FreeSpace`.
 - Reworked aperture and basis aberrations around dynamic optics and general
@@ -86,6 +104,11 @@
 - Unified hard and softened geometry through explicit edge definitions. Aperture
   builders now materialise a layer when called and return sampled arrays through
   their explicit `build(...)` methods.
+- Renamed abstract extension contracts consistently: coordinate transforms derive
+  from `BaseCoordTransform`, aperture construction derives from `BaseBuilder`, and
+  OPD recipes derive from `BaseOPDDef`. `Distortion` is the general coordinate-field
+  transformation; the released concrete `CoordTransform` remains a deprecated
+  affine compatibility wrapper.
 - Standardised aperture and polygon sizes on diameter, with polygon diameters
   referring to their enclosing circles.
 - `LinearPolariser` and `Retarder` now cover uniform and spatially varying fields;
@@ -94,6 +117,8 @@
 - Optical layers define their monochromatic operation through `apply_mono(...)`;
   `apply(...)` owns leading-axis vectorisation and `__call__(...)` remains its concise
   callable interface.
+- Renamed public parameter leaves and constructor keywords from `coefficients` to
+  `coeffs`. Warning-backed aliases preserve released uses through dLux 0.17.
 
 ### ⏳ Deprecations and Compatibility
 - Added a central compatibility layer for supported dLux 0.14 and 0.15 interfaces.
@@ -102,6 +127,9 @@
 - Legacy module import paths are exposed without retaining empty compatibility
   modules throughout the package.
 - Deprecated interfaces are scheduled for removal in dLux 0.17.0.
+- Retained `PSF`, `CoordSpec`, `PadSpec`, `CoordTransform`, `DistortedCoords`, legacy
+  detector-layer names, system names, source wrappers, propagator wrappers, and
+  `coefficients` aliases where their released behaviour can be translated safely.
 - Added a task-oriented [0.16 migration guide](https://louisdesdoigts.github.io/dLux/latest/migration/)
   covering grids, fields, systems, sources, parametrics, apertures, propagation, and
   custom layers.
@@ -111,12 +139,17 @@
 - Standardised the Collins phase across Fourier propagation routes, with FFT and
   MFT forward, inverse, centring, and mixed-route behaviour checked against common
   correctness contracts.
-- Wavefront and PSF interpolation share the established interpolation utility
+- Wavefront and intensity interpolation share the established interpolation utility
   while preserving complex and real-valued data requirements.
 - Expanded propagation and array operations to preserve leading vectorisation
   dimensions and non-square spatial shapes where supported.
 - Standardised batched coordinate transformations and vectorised optical application
   so semantic leading axes are preserved through nested models.
+- Corrected source spectral evaluation by using normalised wavelength coordinates,
+  optional spectral-weight normalisation, and explicit `linear`, `log`, and `ln`
+  distribution conventions.
+- Corrected finite-grid jitter construction for scalar, axis-aligned, correlated,
+  and zero-width kernels while preserving differentiability.
 
 ### 📚 Documentation and Testing
 - Rebuilt the tests around public behavioural contracts, shared JAX transformation
@@ -125,7 +158,9 @@
 - Added dedicated installation, citation, and publications pages and removed the
   empty FAQ and manually maintained UML image assets.
 - Added repository guidance and a dLux development skill for consistent AI-assisted
-  implementation, review, testing, and documentation.
+  implementation, review, testing, documentation, and external model construction.
+- Added a dedicated 0.14/0.15 migration guide, parameter-path guide, compatibility
+  API reference, and deprecation test suite.
 - Reorganised tutorials into introductory, basics, advanced, and retained legacy
   routes, with Getting Started published as the reference end-to-end workflow.
 - Replaced package-scale class diagrams with compact package and module maps while
