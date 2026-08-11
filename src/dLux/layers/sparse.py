@@ -12,7 +12,7 @@ from ..grids import Affine, AffineMap, CoordTransform, DistortCoords, GridSpec
 from ..parametric import Parametric, ParametricBasis
 from ..fields import Wavefront
 from .dynamic import BaseDynamicLayer
-from .optical import OpticalLayer, Optic, _optic_phasor
+from .optical import OpticalLayer, Optic
 
 __all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
 
@@ -38,9 +38,9 @@ class Interfere(OpticalLayer):
             return np.take(value, 0, axis=axes[-1]) if axes else value
 
         # Collapse the field and its realised grid metadata
-        grid = wavefront.grid
-        grid = grid.set(d=collapse(grid.d), c=collapse(grid.c))
-        return wavefront.set(phasor=wavefront.phasor.sum(axis), grid=grid)
+        d = collapse(wavefront.grid.d)
+        c = collapse(wavefront.grid.c)
+        return wavefront.set(phasor=wavefront.phasor.sum(axis), d=d, c=c)
 
 
 class SparseOptic(Optic):
@@ -140,7 +140,7 @@ class SparseOptic(Optic):
         optic, local = self._slice_local(index)
         context = self._context_at(wavefront, center, optic, local)
         optic = optic.resolve(**context)
-        return _optic_phasor(optic, wavefront)
+        return optic._phasor(wavefront)
 
     def phasor(self, wavefront: Wavefront, params: dict = None) -> Array:
         """Return the coherent sum of every centred optic phasor."""
@@ -155,15 +155,14 @@ class SparseOptic(Optic):
         indices = np.arange(self.n_apertures)
 
         def make_wavefront(index, center):
-            grid = wavefront.grid.set(c=center / wavefront.grid.scale)
-            local = wavefront.set(grid=grid)
+            local = wavefront.set(c=center / wavefront.grid.scale)
             phasor = local.phasor * self._phasor_at(index, center, local)
             return phasor
 
         phasor = vmap(make_wavefront)(indices, self.centers)
         phasor = np.moveaxis(phasor, 0, wavefront.batch_ndim)
-        grid = wavefront.grid.set(c=self.centers / wavefront.grid.scale)
-        return wavefront.set(phasor=phasor, grid=grid)
+        c = self.centers / wavefront.grid.scale
+        return wavefront.set(phasor=phasor, c=c)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the optic and append its sub-aperture axis to the wavefront."""

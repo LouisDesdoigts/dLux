@@ -263,24 +263,32 @@ class BaseSource(ParametricHolder):
         # Resolve and propagate the source parameters
         params = self.params()
         result = self._propagate(optics, params)
-        psf = result["PSF"]
+        intensity = result["Intensity"]
         distribution = params["distribution"]
 
         # Convolve any resolved source distributions
         if distribution is not None:
-            psf = psf.set(data=self._convolve(psf.data, distribution))
+            intensity = intensity.set(
+                data=self._convolve(intensity.data, distribution)
+            )
 
         # Collapse vectorised spatial source components
         if params["position"].ndim > 1:
-            grid = psf.grid
-            grid = grid.set(d=grid.d[0], c=None if grid.c is None else grid.c[0])
-            psf = psf.set(data=psf.data.sum(0), grid=grid)
+            d = intensity.grid.d[0]
+            c = None if intensity.grid.c is None else intensity.grid.c[0]
+            intensity = intensity.set(data=intensity.data.sum(0), d=d, c=c)
 
         # Package the modeled source outputs
-        result = {**result, "PSF": psf, "psf": psf.data}
+        result = {
+            **result,
+            "Intensity": intensity,
+            "intensity": intensity.data,
+            "PSF": intensity,
+            "psf": intensity.data,
+        }
         if return_all:
             return result
-        return psf
+        return intensity
 
 
 class Spectrum(ParametricHolder):

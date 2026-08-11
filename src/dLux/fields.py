@@ -22,7 +22,7 @@ __all__ = [
     "DiscreteField",
     "Wavefront",
     "PolarisedWavefront",
-    "PSF",
+    "Intensity",
     "Image",
 ]
 
@@ -32,6 +32,69 @@ _ops = {
     "multiply": operator.mul,
     "divide": operator.truediv,
 }
+
+
+def __getattr__(name):
+    """Resolve field names retained by the compatibility layer."""
+    if name == "PSF":
+        from . import compatibility
+
+        return compatibility.PSF
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def _scale_field(field, npixels, pixel_scale, method, complex):
+    """Interpolate a field to new dimensions and physical sampling."""
+    # Resolve the requested sampling and scale ratios
+    n = dlu.as_size(npixels, 2, "npixels")
+    spacing = dlu.as_axis(pixel_scale, 2, "pixel_scale") / field.grid.scale
+    ratio = spacing / field.d
+
+    # Vectorise resampling over leading field dimensions
+    scale = np.vectorize(
+        lambda data, value: dlu.scale(data, n, value, method, complex),
+        signature="(n,m),(c)->(p,q)",
+    )
+    data = scale(field.field, ratio)
+
+    # Update the sampled field and coordinate specification
+    return field.set(field=data, grid=field.grid.resample(n, spacing))
+
+
+def _interpolate_field(field, transformation, method, complex, fill):
+    """Interpolate a field through a coordinate transformation."""
+    # Validate and transform the sampled coordinate grid
+    if not isinstance(transformation, CoordTransform):
+        raise TypeError("transformation must be a CoordTransform.")
+
+    knots = field.coordinates
+    transform = np.vectorize(transformation, signature="(c,n,m)->(c,n,m)")
+    samples = transform(knots)
+
+    # Align coordinate batches before intrinsic field dimensions
+    n_batch = field.field.ndim - 2
+    c_batch = knots.ndim - 3
+    if c_batch > n_batch:
+        raise ValueError("Coordinate batch dimensions exceed field dimensions.")
+    shape = knots.shape[:c_batch] + (1,) * (n_batch - c_batch) + knots.shape[-3:]
+    knots, samples = knots.reshape(shape), samples.reshape(shape)
+
+    # Vectorise interpolation over every leading field dimension
+    interpolate = np.vectorize(
+        lambda data, x, y: dlu.interp(data, x, y, method, fill, complex),
+        signature="(n,m),(c,n,m),(c,p,q)->(p,q)",
+    )
+    return field.set(field=interpolate(field.field, knots, samples))
+
+
+def _rotate_field(field, angle, method, complex):
+    """Rotate a field clockwise through interpolation."""
+    rotate = np.vectorize(
+        lambda data, value: dlu.rotate(data, value, method, complex),
+        signature="(n,m),()->(n,m)",
+    )
+    return field.set(field=rotate(field.field, angle))
+
 
 class BaseField(Base):
     """Base class for regularly sampled real or complex fields."""
@@ -199,20 +262,7 @@ class ContinuousField(BaseField):
         ``complex`` selects Cartesian or polar decomposition for complex fields and
         has no effect on real fields such as PSFs.
         """
-        # Resolve the requested sampling and scale ratios
-        n = dlu.as_size(npixels, 2, "npixels")
-        spacing = dlu.as_axis(pixel_scale, 2, "pixel_scale") / self.grid.scale
-        ratio = spacing / self.d
-
-        # Vectorise resampling over leading field dimensions
-        scale = np.vectorize(
-            lambda field, value: dlu.scale(field, npixels, value, method, complex),
-            signature="(n,m),(c)->(p,q)",
-        )
-        field = scale(self.field, ratio)
-
-        # Update the sampled field and coordinate specification
-        return self.set(field=field, grid=self.grid.resample(n, spacing))
+        return _scale_field(self, npixels, pixel_scale, method, complex)
 
     def interpolate(
         self,
@@ -222,27 +272,7 @@ class ContinuousField(BaseField):
         fill: float = 0.0,
     ) -> ContinuousField:
         """Interpolate every sampled field through a coordinate transformation."""
-        # Validate and transform the sampled coordinate grid
-        if not isinstance(transformation, CoordTransform):
-            raise TypeError("transformation must be a CoordTransform.")
-        knots = self.coordinates
-        transform = np.vectorize(transformation, signature="(c,n,m)->(c,n,m)")
-        samples = transform(knots)
-
-        # Align coordinate batches before intrinsic field axes such as Jones matrices
-        n_batch = self.field.ndim - 2
-        c_batch = knots.ndim - 3
-        if c_batch > n_batch:
-            raise ValueError("Coordinate batch dimensions exceed field dimensions.")
-        shape = knots.shape[:c_batch] + (1,) * (n_batch - c_batch) + knots.shape[-3:]
-        knots, samples = knots.reshape(shape), samples.reshape(shape)
-
-        # Vectorise interpolation over every leading field dimension
-        interpolate = np.vectorize(
-            lambda field, x, y: dlu.interp(field, x, y, method, fill, complex),
-            signature="(n,m),(c,n,m),(c,p,q)->(p,q)",
-        )
-        return self.set(field=interpolate(self.field, knots, samples))
+        return _interpolate_field(self, transformation, method, complex, fill)
 
     def rotate(
         self, angle: float | Array, method: str = "linear", complex: bool = True
@@ -251,33 +281,11 @@ class ContinuousField(BaseField):
 
         ``complex`` has no effect when the stored sampled array is real.
         """
-        rotate = np.vectorize(
-            lambda field, value: dlu.rotate(field, value, method, complex),
-            signature="(n,m),()->(n,m)",
-        )
-        return self.set(field=rotate(self.field, angle))
+        return _rotate_field(self, angle, method, complex)
 
 
 class DiscreteField(BaseField):
-    """Base class for discrete detector-sampled fields."""
-
-    grid: GridSpec
-
-    @property
-    def fourier_transform(self) -> Array:
-        """Return the centred two-dimensional Fourier transform."""
-        transformed = np.fft.fft2(self.field, axes=(-2, -1))
-        return np.fft.fftshift(transformed, axes=(-2, -1))
-
-    @property
-    def amplitude_spectrum(self) -> Array:
-        """Return the amplitude of the centred Fourier transform."""
-        return np.abs(self.fourier_transform)
-
-    @property
-    def power_spectrum(self) -> Array:
-        """Return the squared amplitude of the centred Fourier transform."""
-        return self.amplitude_spectrum**2
+    """Base class for real-valued fields sampled on a discrete grid."""
 
 
 class Wavefront(ContinuousField):
@@ -400,6 +408,10 @@ class Wavefront(ContinuousField):
     def psf(self: Wavefront) -> Array:
         """Return the squared modulus of the complex field."""
         return np.abs(self.phasor) ** 2
+
+    def to_intensity(self, stokes=None) -> Intensity:
+        """Return the sampled intensity of this wavefront."""
+        return Intensity(self.psf_from_stokes(stokes), self.grid)
 
     @property
     def wavenumber(self: Wavefront) -> Array:
@@ -770,13 +782,36 @@ class PolarisedWavefront(Wavefront):
         return self.set(phasor=np.moveaxis(phasor, (0, 1), (-4, -3)))
 
 
-class PSF(ContinuousField):
-    """A real-valued point-spread function sampled on a coordinate grid."""
+class Intensity(DiscreteField):
+    """A deterministic sampled optical intensity or expected detector signal.
+
+    The stored values may represent a normalised photon distribution, expected
+    counts, or another deterministic detector-domain signal. Their interpretation
+    is set by the preceding model rather than enforced by this container.
+
+    Parameters
+    ----------
+    data : Array
+        Real sampled values with shape ``(..., ny, nx)``. Leading axes are preserved
+        as vectorisation axes.
+    grid : GridSpec
+        Spatial sampling whose physical ``(x, y)`` sizes must match the final array
+        axes in reversed ``(nx, ny)`` order.
+
+    Examples
+    --------
+    Convert a propagated wavefront, then explicitly begin detector-image modelling:
+
+    ```python
+    intensity = wavefront.to_intensity()
+    image = intensity.to_image(read_noise=3.0)
+    ```
+    """
 
     data: Array
     grid: GridSpec
 
-    def __init__(self: PSF, data: Array, grid: GridSpec):
+    def __init__(self: Intensity, data: Array, grid: GridSpec):
         self.data = dlu.to_value(data)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
@@ -789,15 +824,33 @@ class PSF(ContinuousField):
         """Return the sampled intensity."""
         return self.data
 
-    @classmethod
-    def from_wavefront(cls, wavefront) -> PSF:
-        """Construct a PSF from a wavefront's intensity and specification."""
-        return cls(wavefront.psf, wavefront.grid)
-
     @property
-    def batch_ndim(self: PSF) -> int:
+    def batch_ndim(self: Intensity) -> int:
         """Return the number of leading vectorisation dimensions."""
         return self.data.ndim - 2
+
+    @classmethod
+    def from_wavefront(cls, wavefront, stokes=None) -> Intensity:
+        """Construct sampled intensity from a wavefront."""
+        if not isinstance(wavefront, Wavefront):
+            raise TypeError("wavefront must be a Wavefront.")
+        return cls(wavefront.psf_from_stokes(stokes), wavefront.grid)
+
+    def scale_to(self, npixels, pixel_scale, method="linear", complex=True):
+        """Interpolate to a size and physical per-axis pixel scale."""
+        return _scale_field(self, npixels, pixel_scale, method, complex)
+
+    def interpolate(self, transformation, method="linear", complex=True, fill=0.0):
+        """Interpolate through a coordinate transformation."""
+        return _interpolate_field(self, transformation, method, complex, fill)
+
+    def rotate(self, angle, method="linear", complex=True):
+        """Rotate the sampled intensity clockwise through interpolation."""
+        return _rotate_field(self, angle, method, complex)
+
+    def to_image(self, std=None, read_noise=0.0) -> Image:
+        """Create an image from this deterministic intensity."""
+        return Image(self, std=std, read_noise=read_noise)
 
 
 class Image(DiscreteField):
@@ -805,37 +858,40 @@ class Image(DiscreteField):
 
     Parameters
     ----------
-    data : Array or PSF
-        Detector-sampled image data, or a PSF to convert directly into an image.
+    data : Array or Intensity
+        Detector data, or an Intensity to convert directly into an image.
     grid : GridSpec or None
-        Coordinate specification tracking array inputs. This is inherited from a PSF.
-    variance : Array or None
-        Known variance of the observed data. This is populated by the noise
-        simulation methods and may also be supplied directly.
+        Coordinate specification for array inputs. This is inherited from an
+        Intensity when one is supplied.
     std : Array or None
-        Known standard deviation, converted to ``variance=std**2``. Supply at most
-        one of ``variance`` or ``std``.
+        Known standard deviation of the observed data.
     read_noise : float or Array
         Gaussian read-noise standard deviation associated with the image.
+
+    Notes
+    -----
+    ``Image`` stores realised or simulated data. Deterministic optical and detector
+    models should retain ``Intensity`` until an image is explicitly constructed.
+    Uncertainty is optional because deterministic detector transformations generally
+    do not define a complete propagation rule for it.
     """
 
     data: Array
     grid: GridSpec
-    variance: Array | None
+    std: Array | None
     read_noise: Array
 
     def __init__(
         self,
-        data: Array | PSF,
+        data: Array | Intensity,
         grid: GridSpec | None = None,
-        variance: Array | None = None,
         std: Array | None = None,
         read_noise: float | Array = 0.0,
     ):
-        # Unpack a sampled optical PSF directly into detector image data
-        if isinstance(data, PSF):
+        # Unpack a sampled intensity directly into detector image data
+        if isinstance(data, Intensity):
             if grid is not None:
-                raise ValueError("grid must not be supplied when data is a PSF.")
+                raise ValueError("grid must not be supplied with an Intensity.")
             data, grid = data.data, data.grid
 
         # Validate and store the detector image
@@ -844,18 +900,13 @@ class Image(DiscreteField):
             raise ValueError("data must have at least two spatial dimensions.")
         if not isinstance(grid, GridSpec):
             raise TypeError("grid must be a GridSpec.")
-        if variance is not None and std is not None:
-            raise ValueError("Provide only one of variance or std.")
 
-        # Resolve either uncertainty representation into stored variance
+        # Resolve and store optional uncertainty information
         grid = grid.match_shape(data.shape[-2:])
         if std is not None:
-            std = dlu.to_value(std)
-            variance = std**2
-        if variance is not None:
-            variance = np.broadcast_to(dlu.to_value(variance), data.shape)
+            std = np.broadcast_to(dlu.to_value(std), data.shape)
         self.data = data
-        self.variance = variance
+        self.std = std
         self.read_noise = dlu.to_value(read_noise)
         self.grid = grid
 
@@ -864,30 +915,55 @@ class Image(DiscreteField):
         """Return the detector data."""
         return self.data
 
+    @classmethod
+    def from_intensity(cls, intensity, std=None, read_noise=0.0) -> Image:
+        """Construct an image from deterministic sampled intensity."""
+        if not isinstance(intensity, Intensity):
+            raise TypeError("intensity must be an Intensity.")
+        return cls(intensity, std=std, read_noise=read_noise)
+
     @property
-    def std(self) -> Array | None:
-        """Return the standard deviation implied by ``variance``."""
-        return None if self.variance is None else np.sqrt(self.variance)
+    def variance(self) -> Array | None:
+        """Return the variance implied by the stored standard deviation."""
+        return None if self.std is None else self.std**2
+
+    @property
+    def fourier_transform(self) -> Array:
+        """Return the centred two-dimensional Fourier transform."""
+        transformed = np.fft.fft2(self.field, axes=(-2, -1))
+        return np.fft.fftshift(transformed, axes=(-2, -1))
+
+    @property
+    def amplitude_spectrum(self) -> Array:
+        """Return the amplitude of the centred Fourier transform."""
+        return np.abs(self.fourier_transform)
+
+    @property
+    def power_spectrum(self) -> Array:
+        """Return the squared amplitude of the centred Fourier transform."""
+        return self.amplitude_spectrum**2
 
     def add_poisson_noise(self, key: Array) -> Image:
         """Add a Poisson realisation and its expected variance."""
         expectation = self.field
         data = jr.poisson(key, expectation).astype(self.field.dtype)
         variance = expectation
-        if self.variance is not None:
-            variance = variance + self.variance
-        return self.set(field=data, variance=variance)
+        if self.std is not None:
+            variance = variance + self.std**2
+        return self.set(field=data, std=np.sqrt(variance))
 
     def add_read_noise(self, key: Array, sigma: float | Array) -> Image:
         """Add zero-mean Gaussian read noise and update its variance."""
         sigma = np.asarray(sigma, dtype=self.field.dtype)
         noise = jr.normal(key, self.field.shape, self.field.dtype) * sigma
         variance = sigma**2
-        if self.variance is not None:
-            variance = variance + self.variance
+        if self.std is not None:
+            variance = variance + self.std**2
         read_noise = np.sqrt(self.read_noise**2 + sigma**2)
-        return self.set(field=self.field + noise).set(
-            variance=np.broadcast_to(variance, self.field.shape), read_noise=read_noise
+        return self.set(
+            field=self.field + noise,
+            std=np.broadcast_to(np.sqrt(variance), self.field.shape),
+            read_noise=read_noise,
         )
 
     def simulate(self, key: Array, n_frames: int = 1) -> Image:
@@ -921,6 +997,6 @@ class Image(DiscreteField):
 
         # Average the images and propagate the variance of their mean
         data = images.field.mean(0)
-        variance = images.variance.mean(0) / n_frames
-        error = images.read_noise[0] / np.sqrt(n_frames)
-        return self.set(field=data, variance=variance, read_noise=error)
+        variance = (images.std**2).mean(0) / n_frames
+        read_noise = images.read_noise[0] / np.sqrt(n_frames)
+        return self.set(field=data, std=np.sqrt(variance), read_noise=read_noise)

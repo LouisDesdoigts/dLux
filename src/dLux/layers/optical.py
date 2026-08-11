@@ -25,29 +25,16 @@ __all__ = [
 ]
 
 
-def _optic_phasor(optic, wavefront):
-    """Combine a resolved optic into one scalar complex field."""
-    # Resolve absent optical terms to their identities
-    transmission = 1.0 if optic.transmission is None else optic.transmission
-    opd = 0.0 if optic.opd is None else optic.opd
-    phase = 0.0 if optic.phase is None else optic.phase
-
-    # Promote every term to the wavefront field shape
-    wavenumber = wavefront._to_phasor_shape(wavefront.wavenumber)
-    transmission = wavefront._to_phasor_shape(transmission)
-    opd = wavefront._to_phasor_shape(opd)
-    phase = wavefront._to_phasor_shape(phase)
-
-    # Construct the combined scalar phasor
-    return transmission * np.exp(1j * (wavenumber * opd + phase))
-
-
 class BaseLayer(ParametricHolder):
     """Base class for callable transformations of dLux objects."""
 
     @abstractmethod
-    def __call__(self, target: Any) -> Any:
+    def apply(self, target: Any) -> Any:
         """Apply this layer to its target."""
+
+    def __call__(self, target: Any) -> Any:
+        """Call :meth:`apply` using concise layer syntax."""
+        return self.apply(target)
 
 
 class BaseOpticalLayer(BaseLayer):
@@ -68,8 +55,12 @@ class BaseOpticalLayer(BaseLayer):
 
         # Define application to one monochromatic field
         def apply_one(phasor, wavelength, d, c):
-            grid = wavefront.grid.set(d=d, c=c)
-            wavefront_i = wavefront.set(phasor=phasor, wavelength=wavelength, grid=grid)
+            wavefront_i = wavefront.set(
+                phasor=phasor,
+                wavelength=wavelength,
+                d=d,
+                c=c,
+            )
             return self.apply(wavefront_i)
 
         # Vectorise the layer over leading wavefront dimensions
@@ -84,12 +75,7 @@ class BaseOpticalLayer(BaseLayer):
         d = output.grid.d[0] if axes[2] is None else output.grid.d
 
         # Restore the realised wavefront grid
-        return output.set(grid=output.grid.set(d=d, c=c))
-
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        """Call :meth:`apply` using concise layer syntax."""
-        return self.apply(wavefront)
-
+        return output.set(d=d, c=c)
 
 class OpticalLayer(BaseOpticalLayer):
     """Public contract for layers that transform wavefronts."""
@@ -181,7 +167,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
     def phasor(self, wavefront: Wavefront) -> Array:
         """Return the cumulative complex scalar field for this optical plane."""
         self = self.resolve(**self.context(wavefront))
-        return _optic_phasor(self, wavefront)
+        return self._phasor(wavefront)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
         """Apply the cumulative complex optic phasor to a wavefront."""
@@ -190,6 +176,22 @@ class Optic(TransmissiveLayer, AberratedLayer):
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
+
+    def _phasor(self, wavefront: Wavefront) -> Array:
+        """Combine resolved optical terms into one complex field."""
+        # Resolve absent optical terms to their identities
+        transmission = 1.0 if self.transmission is None else self.transmission
+        opd = 0.0 if self.opd is None else self.opd
+        phase = 0.0 if self.phase is None else self.phase
+
+        # Promote every term to the wavefront field shape
+        wavenumber = wavefront._to_phasor_shape(wavefront.wavenumber)
+        transmission = wavefront._to_phasor_shape(transmission)
+        opd = wavefront._to_phasor_shape(opd)
+        phase = wavefront._to_phasor_shape(phase)
+
+        # Construct the combined scalar phasor
+        return transmission * np.exp(1j * (wavenumber * opd + phase))
 
 
 class Tilt(OpticalLayer):

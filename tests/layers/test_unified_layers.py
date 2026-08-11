@@ -34,7 +34,10 @@ def test_unified_layer_contract(layer, targets):
 
     for target in targets:
         output = assert_jittable(layer, target)
+        applied = assert_jittable(layer.apply, target)
+
         assert type(output) is type(target)
+        assert np.allclose(output.field, applied.field)
 
 
 def test_lambda_identity(targets):
@@ -68,7 +71,7 @@ def test_unified_layers_preserve_leading_axes(layer, shape, n, d, make_grid):
     grid = make_grid(n=(8, 8), d=(0.1, 0.1), c=(0.2, -0.1))
     targets = (
         dl.Wavefront(1e-6, grid, np.ones((2, 3, 8, 8), complex)),
-        dl.PSF(np.ones((2, 3, 8, 8)), grid),
+        dl.Intensity(np.ones((2, 3, 8, 8)), grid),
     )
 
     for target in targets:

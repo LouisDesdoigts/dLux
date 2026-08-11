@@ -165,7 +165,7 @@ class TestWavefront:
             lambda grid: dl.Wavefront(1e-6, "invalid"),
             lambda grid: dl.Wavefront(1e-6, dl.GridSpec(d=0.1, unit="m")),
             lambda grid: dl.Wavefront(1e-6, grid, np.ones(8)),
-            lambda grid: dl.Wavefront(1e-6, grid) + dl.PSF(np.ones((8, 8)), grid),
+            lambda grid: dl.Wavefront(1e-6, grid) + dl.Intensity(np.ones((8, 8)), grid),
             lambda grid: dl.Wavefront(np.ones(2), grid) + np.ones((3, 8, 8)),
         ],
     )
@@ -200,18 +200,21 @@ class TestPolarisedWavefront:
         assert wavefront.psf_from_stokes(np.asarray((1.0, 0, 0, 0))).shape == (2, 8, 8)
 
 
-class TestPSF:
+class TestIntensity:
     def test_construction(self, make_psf, make_wavefront):
         psf = make_psf()
-        converted = dl.PSF.from_wavefront(make_wavefront())
+        wavefront = make_wavefront()
+        converted = dl.Intensity.from_wavefront(wavefront)
+        direct = assert_jittable(lambda value: value.to_intensity(), wavefront)
 
         assert psf.data.shape == psf.grid.shape
         assert psf.batch_ndim == 0
         assert converted.data.shape == converted.grid.shape
+        assert np.allclose(direct.data, converted.data)
 
     def test_sampling_contract(self):
         grid = dl.GridSpec(d=(0.1, 0.2), c=(0.3, -0.4), unit="m")
-        psf = dl.PSF(np.ones((8, 8)), grid)
+        psf = dl.Intensity(np.ones((8, 8)), grid)
 
         assert psf.grid.n == (8, 8)
         assert psf.npixels == 8
@@ -267,13 +270,13 @@ class TestPSF:
         with pytest.raises(AttributeError, match="not_an_attribute"):
             _ = make_psf().not_an_attribute
 
-        psf = dl.PSF(np.ones((8, 8)), dl.GridSpec(n=8).broadcast(2))
+        psf = dl.Intensity(np.ones((8, 8)), dl.GridSpec(n=8).broadcast(2))
         with pytest.raises(ValueError, match="grid.d"):
             _ = psf.pixel_scale
 
     def test_coordinate_batch_validation(self):
         grid = dl.GridSpec(n=8, d=0.1, c=np.zeros((2, 2)), unit="m").broadcast(2)
-        psf = dl.PSF(np.ones((8, 8)), grid)
+        psf = dl.Intensity(np.ones((8, 8)), grid)
 
         with pytest.raises(ValueError, match="Coordinate batch"):
             psf.interpolate(dl.Affine())
@@ -302,7 +305,7 @@ class TestPSF:
 
     def test_rectangular_sampling_operations(self):
         grid = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
-        psf = dl.PSF(np.arange(48.0).reshape(6, 8) + 1, grid)
+        psf = dl.Intensity(np.arange(48.0).reshape(6, 8) + 1, grid)
 
         downsampled = assert_jittable(lambda value: value.downsample((2, 3)), psf)
         scaled = assert_jittable(
@@ -321,12 +324,12 @@ class TestPSF:
     def test_batched_convolution(self):
         grid = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
         data = np.arange(96.0).reshape(2, 6, 8)
-        psf = dl.PSF(data, grid)
+        psf = dl.Intensity(data, grid)
         kernel = np.ones((3, 3)) / 9
 
         output = assert_jittable(lambda value: value.convolve(kernel), psf)
         expected = np.stack(
-            tuple(dl.PSF(image, grid).convolve(kernel).data for image in data)
+            tuple(dl.Intensity(image, grid).convolve(kernel).data for image in data)
         )
 
         assert output.data.shape == data.shape
@@ -335,9 +338,9 @@ class TestPSF:
     @pytest.mark.parametrize(
         "constructor",
         [
-            lambda grid: dl.PSF(np.ones(8), grid),
-            lambda grid: dl.PSF(np.ones((4, 4)), grid),
-            lambda grid: dl.PSF(np.ones((8, 8)), "invalid"),
+            lambda grid: dl.Intensity(np.ones(8), grid),
+            lambda grid: dl.Intensity(np.ones((4, 4)), grid),
+            lambda grid: dl.Intensity(np.ones((8, 8)), "invalid"),
         ],
     )
     def test_construction_validation(self, constructor, make_grid):
@@ -373,7 +376,7 @@ class TestImage:
 
     def test_noise_variance_accumulates(self, make_grid):
         image = dl.Image(
-            np.full((8, 8), 10.0), make_grid(), variance=np.full((8, 8), 4.0)
+            np.full((8, 8), 10.0), make_grid(), std=np.full((8, 8), 2.0)
         )
         poisson = image.add_poisson_noise(jr.key(0))
         noisy = poisson.add_read_noise(jr.key(1), 2.0)
@@ -387,21 +390,19 @@ class TestImage:
         assert np.allclose(image.variance, 4.0)
         assert np.allclose(image.std, 2.0)
 
-        with pytest.raises(ValueError, match="one of variance or std"):
-            dl.Image(np.ones((8, 8)), make_grid(), variance=1.0, std=1.0)
-
-    def test_psf_conversion_and_simulation(self, make_grid):
-        psf = dl.PSF(np.full((8, 8), 10.0), make_grid())
-        image = dl.Image(psf, read_noise=2.0)
+    def test_intensity_conversion_and_simulation(self, make_grid):
+        intensity = dl.Intensity(np.full((8, 8), 10.0), make_grid())
+        image = intensity.to_image(read_noise=2.0)
         simulated = assert_jittable(lambda value: value.simulate(jr.key(0), 4), image)
 
         assert image.variance is None
-        assert simulated.data.shape == psf.data.shape
+        assert simulated.data.shape == intensity.data.shape
         assert np.allclose(simulated.variance, 3.5)
         assert np.allclose(simulated.read_noise, 1.0)
+        assert isinstance(dl.Image.from_intensity(intensity), dl.Image)
 
         with pytest.raises(ValueError):
-            dl.Image(psf, make_grid())
+            dl.Image(intensity, make_grid())
 
     def test_fourier_spectra(self, make_grid):
         image = dl.Image(np.eye(8), make_grid())
@@ -416,7 +417,7 @@ class TestImage:
 
     def test_leading_axis_contract(self, make_grid):
         data = np.full((2, 3, 8, 8), 10.0)
-        image = dl.Image(data, make_grid(), variance=2.0)
+        image = dl.Image(data, make_grid(), std=np.sqrt(2.0))
         poisson = assert_jittable(
             lambda value: value.add_poisson_noise(jr.key(0)), image
         )

@@ -13,10 +13,10 @@ from .base import Base
 from .grids import GridSpec
 from .layers.detector import BaseDetectorLayer
 from .layers.optical import BaseLayer, BaseOpticalLayer
-from .fields import Image, PSF, Wavefront
+from .fields import Intensity, Wavefront
 from .sources import Spectrum
 
-__all__ = ["LayeredSystem", "OpticalSystem", "DetectorSystem", "Detector"]
+__all__ = ["LayeredSystem", "OpticalSystem", "DetectorSystem"]
 
 
 class LayeredSystem(Base):
@@ -31,11 +31,15 @@ class LayeredSystem(Base):
         """Resolve attributes from named or contained layers."""
         return dlu.resolve_attr(self, key, self.layers)
 
-    def __call__(self, target):
+    def apply(self, target):
         """Apply every layer to a target in insertion order."""
         for layer in self.layers.values():
             target = layer(target)
         return target
+
+    def __call__(self, target):
+        """Call :meth:`apply` using concise system syntax."""
+        return self.apply(target)
 
     def debug(self, target):
         """Apply every layer and return the intermediate states."""
@@ -77,29 +81,25 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         super().__init__(layers, BaseOpticalLayer)
 
     @staticmethod
-    def _to_psf(wavefront: Wavefront, stokes=None) -> PSF:
-        """Convert a propagated wavefront into a sampled PSF."""
-        data = wavefront.psf_from_stokes(stokes)
+    def _to_intensity(wavefront: Wavefront, stokes=None) -> Intensity:
+        """Convert a propagated wavefront into sampled intensity."""
+        intensity = wavefront.to_intensity(stokes)
         mapped_sampling = wavefront.d.ndim > 1 or (
             wavefront.c is not None and wavefront.c.ndim > 1
         )
         if wavefront.is_chromatic and not mapped_sampling:
-            data = data.sum(0)
-        return PSF(data, wavefront.grid)
+            intensity = intensity.set(data=intensity.data.sum(0))
+        return intensity
 
     def apply_mono(self, wavefront: Wavefront):
         """Propagate one monochromatic wavefront through every optical layer."""
-        if not isinstance(wavefront, Wavefront):
-            raise TypeError("wavefront must be a Wavefront instance.")
-        return LayeredSystem.__call__(self, wavefront)
+        return self.apply(wavefront)
 
     def apply(self, wavefront: Wavefront):
         """Propagate the complete wavefront through every optical layer."""
-        return LayeredSystem.__call__(self, wavefront)
-
-    def __call__(self, wavefront: Wavefront):
-        """Call :meth:`apply` using concise system syntax."""
-        return self.apply(wavefront)
+        if not isinstance(wavefront, Wavefront):
+            raise TypeError("wavefront must be a Wavefront instance.")
+        return super().apply(wavefront)
 
     def initialise_wavefront(self, wavelength, offset=None) -> Wavefront:
         """Construct an input Wavefront and apply an optional angular offset."""
@@ -113,7 +113,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
     ):
         """Propagate a monochromatic point source through the system.
 
-        Returns the sampled PSF array by default, or the final wavefront when
+        Returns the sampled intensity array by default, or the final wavefront when
         ``return_wf`` is true. ``return_all`` returns all output containers.
         """
         # Validate the requested output
@@ -122,14 +122,20 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
 
         # Initialize and propagate the monochromatic wavefront
         wavefront = self(self.initialise_wavefront(wavelength, offset))
-        psf = self._to_psf(wavefront, stokes)
+        intensity = self._to_intensity(wavefront, stokes)
 
         # Return the requested output container
         if return_all:
-            return {"Wavefront": wavefront, "PSF": psf, "psf": psf.data}
+            return {
+                "Wavefront": wavefront,
+                "Intensity": intensity,
+                "intensity": intensity.data,
+                "PSF": intensity,
+                "psf": intensity.data,
+            }
         if return_wf:
             return wavefront
-        return psf.data
+        return intensity.data
 
     def propagate(
         self,
@@ -142,7 +148,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
     ):
         """Propagate a weighted polychromatic point source through the system.
 
-        Returns the sampled PSF array by default, or the final wavefront when
+        Returns the sampled intensity array by default, or the final wavefront when
         ``return_wf`` is true. ``return_all`` returns all output containers.
         """
         # Validate the requested output
@@ -166,18 +172,22 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
         scale = np.sqrt(weights).reshape(shape)
         wavefront = wavefront.set(phasor=wavefront.phasor * scale)
 
-        # Convert the propagated wavefront into a PSF
-        psf = self._to_psf(wavefront, stokes)
+        # Convert the propagated wavefront into sampled intensity
+        intensity = self._to_intensity(wavefront, stokes)
 
         # Return the requested output container
         if return_all:
-            return {"Wavefront": wavefront, "PSF": psf}
+            return {
+                "Wavefront": wavefront,
+                "Intensity": intensity,
+                "PSF": intensity,
+            }
         if return_wf:
             return wavefront
-        return psf.data
+        return intensity.data
 
     def model(self, source, return_all=False):
-        """Model a spectral source, returning its PSF by default."""
+        """Model a spectral source, returning its intensity by default."""
         if not isinstance(source, Spectrum):
             raise TypeError("source must be a Spectrum.")
         return source.model(self, return_all)
@@ -194,27 +204,20 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
 
 
 class DetectorSystem(LayeredSystem):
-    """Transform a PSF through detector layers and produce an Image."""
+    """Apply deterministic detector transformations to an intensity."""
 
     layers: OrderedDict
 
     def __init__(self, layers):
         super().__init__(layers, BaseDetectorLayer)
 
-    def __call__(self, psf: PSF) -> PSF:
-        """Apply every detector layer to a PSF."""
-        if not isinstance(psf, PSF):
-            raise TypeError("psf must be a PSF instance.")
-        return super().__call__(psf)
+    def apply(self, intensity: Intensity) -> Intensity:
+        """Apply every detector layer to an intensity."""
+        if not isinstance(intensity, Intensity):
+            raise TypeError("intensity must be an Intensity instance.")
+        return super().apply(intensity)
 
-    def model(self, psf: PSF, return_all=False):
-        """Apply the detector model and return an Image."""
-        output = self(psf)
-        image = Image(output.data, output.grid)
-        if return_all:
-            return {"PSF": output, "Image": image}
-        return image
-
-
-# Backwards-compatible public name.
-Detector = DetectorSystem
+    def model(self, intensity: Intensity, return_all=False):
+        """Apply the detector model to an intensity."""
+        output = self(intensity)
+        return {"Intensity": output} if return_all else output

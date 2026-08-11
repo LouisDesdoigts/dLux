@@ -82,16 +82,18 @@ def test_optical_system_accepts_physical_grid_units():
 
 def test_layered_system_contract(make_psf):
     system = dl.LayeredSystem(
-        [("offset", dl.AddConstant(1)), ("normalise", dl.Normalise())]
+        [("offset", dl.Bias(1)), ("normalise", dl.Normalise())]
     )
     psf = make_psf()
 
     output = assert_jittable(system, psf)
+    applied = assert_jittable(system.apply, psf)
     debugged, intermediate = system.debug(psf)
     inserted = system.insert_layer(("flip", dl.Flip(0)), 1)
     removed = inserted.remove_layer("flip")
 
-    assert isinstance(output, dl.PSF)
+    assert isinstance(output, dl.Intensity)
+    assert np.allclose(applied.data, output.data)
     assert np.allclose(debugged.data, output.data)
     assert list(intermediate) == ["input", "offset", "normalise"]
     assert list(inserted.layers) == ["offset", "flip", "normalise"]
@@ -123,31 +125,34 @@ def test_propagation_interfaces(system):
     assert isinstance(mono["Wavefront"], dl.Wavefront)
     assert isinstance(mono_wavefront, dl.Wavefront)
     assert isinstance(wavefront, dl.Wavefront)
-    assert mono_array.shape == mono["PSF"].data.shape
+    assert mono_array.shape == mono["Intensity"].data.shape
     assert chromatic["Wavefront"].wavelength.shape == wavelengths.shape
-    assert isinstance(results["PSF"], dl.PSF)
-    assert array.shape == results["PSF"].data.shape
-    assert np.allclose(array, results["PSF"].data)
+    assert isinstance(results["Intensity"], dl.Intensity)
+    assert array.shape == results["Intensity"].data.shape
+    assert np.allclose(array, results["Intensity"].data)
     assert np.allclose(wavefront.power, weights)
     assert np.allclose(array.sum(), weights.sum())
 
 
 def test_detector_uses_common_system_contract(make_psf):
     detector = dl.DetectorSystem(
-        [dl.ApplyPixelResponse(np.ones((8, 8))), dl.AddConstant(1), dl.Normalise()]
+        [dl.Sensitivity(np.ones((8, 8))), dl.Bias(1), dl.Normalise()]
     )
-    psf = make_psf()
+    intensity = make_psf()
 
-    transformed = assert_jittable(detector, psf)
-    image = assert_jittable(detector.model, psf)
-    output = assert_jittable(lambda value: detector.model(value, return_all=True), psf)
+    transformed = assert_jittable(detector, intensity)
+    applied = assert_jittable(detector.apply, intensity)
+    modelled = assert_jittable(detector.model, intensity)
+    output = assert_jittable(
+        lambda value: detector.model(value, return_all=True), intensity
+    )
 
     assert isinstance(detector, dl.LayeredSystem)
-    assert isinstance(transformed, dl.PSF)
-    assert isinstance(image, dl.Image)
-    assert isinstance(output["PSF"], dl.PSF)
-    assert isinstance(output["Image"], dl.Image)
-    assert np.allclose(image.data, output["Image"].data)
+    assert isinstance(transformed, dl.Intensity)
+    assert np.allclose(applied.data, transformed.data)
+    assert isinstance(modelled, dl.Intensity)
+    assert isinstance(output["Intensity"], dl.Intensity)
+    assert np.allclose(modelled.data, output["Intensity"].data)
 
 
 def test_chromatic_and_polarised_execution(system):
@@ -205,17 +210,17 @@ def test_model_interface(system):
         spectrum.wavelengths, separation=0.1, contrast=2.0, weights=spectrum.weights
     )
 
-    assert isinstance(system.model(spectrum), dl.PSF)
+    assert isinstance(system.model(spectrum), dl.Intensity)
     results = system.model(spectrum, return_all=True)
     assert isinstance(results["Wavefront"], dl.Wavefront)
-    assert isinstance(results["PSF"], dl.PSF)
+    assert isinstance(results["Intensity"], dl.Intensity)
     assert np.allclose(results["Wavefront"].wavelength, spectrum.wavelengths)
     sourced = system.model(source, return_all=True)
     assert np.allclose(sourced["Wavefront"].wavelength, spectrum.wavelengths)
     binary = system.model(binary, return_all=True)
     assert binary["Wavefront"].phasor.shape[0] == 2
-    assert binary["PSF"].data.shape == (8, 6)
-    assert binary["PSF"].grid.d.shape == (2,)
+    assert binary["Intensity"].data.shape == (8, 6)
+    assert binary["Intensity"].grid.d.shape == (2,)
 
 
 def test_resolved_source_model(system):
@@ -231,7 +236,7 @@ def test_resolved_source_model(system):
     psf = assert_jittable(
         lambda value: value.model(system), source, rtol=1e-5, atol=1e-5
     )
-    assert isinstance(psf, dl.PSF)
+    assert isinstance(psf, dl.Intensity)
     assert psf.data.shape == (8, 6)
 
 
@@ -268,8 +273,8 @@ def test_binary_source_component_distributions(system):
         lambda system: system.spec,
         lambda system: dl.DetectorSystem([dl.Optic()]),
         lambda system: dl.DetectorSystem([])(np.ones((8, 8))),
-        lambda system: dl.OpticalSystem([dl.AddConstant(1)], system.grid),
-        lambda system: system.insert_layer(dl.AddConstant(1), 0, dl.BaseOpticalLayer),
+        lambda system: dl.OpticalSystem([dl.Bias(1)], system.grid),
+        lambda system: system.insert_layer(dl.Bias(1), 0, dl.BaseOpticalLayer),
         lambda system: dl.DetectorSystem([]).insert_layer(
             dl.Optic(), 0, dl.BaseDetectorLayer
         ),

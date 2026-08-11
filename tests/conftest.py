@@ -35,11 +35,11 @@ def make_wavefront(make_grid):
 
 @pytest.fixture
 def make_psf(make_grid):
-    """Return a factory for small PSFs."""
+    """Return a factory for small sampled intensities."""
 
     def factory(data=None, grid=None):
         grid = make_grid() if grid is None else grid
         data = np.ones(grid.shape) if data is None else data
-        return dl.PSF(data, grid)
+        return dl.Intensity(data, grid)
 
     return factory
