@@ -27,7 +27,7 @@ transformations now live in `dLux.grids`; use `DistortCoords` in place of
 
 ## Fields
 
-Wavefronts, continuous focal-plane intensities, and detector images now live in
+Wavefronts, deterministic sampled intensities, and detector images now live in
 `dLux.fields`. Construct a wavefront from its wavelength and a grid:
 
 ```python
@@ -37,6 +37,17 @@ wavefront = dl.Wavefront(650e-9, pupil_grid)
 Fields retain their `GridSpec`, including its physical unit. Use field methods for
 normalisation, tilts, OPD, phase, interpolation, and image simulation rather than
 manually updating their sampled arrays.
+
+`Intensity` replaces the former `PSF` container because extended-source and
+detector-domain predictions are not necessarily point-spread functions. Convert
+between the deterministic and observed containers explicitly:
+
+```python
+intensity = wavefront.to_intensity()
+image = intensity.to_image(read_noise=3.0)
+```
+
+`PSF` remains a warning-backed constructor alias until dLux 0.17.
 
 ## Optical and detector systems
 
@@ -52,13 +63,27 @@ pupil_grid = dl.GridSpec(n=npix, diam=diameter, unit="m")
 optics = dl.OpticalSystem(layers, pupil_grid)
 ```
 
-`OpticalSystem.model(source)` and `source.model(optics)` are equivalent and return the
-continuous focal-plane result. Apply detector response separately:
+`OpticalSystem.model(source)` and `source.model(optics)` are equivalent and return an
+`Intensity`. Detector systems apply deterministic response layers and also return an
+`Intensity`; construct an `Image` explicitly before simulating observations:
 
 ```python
-psf = optics.model(source)
-image = detector.model(psf)
+intensity = optics.model(source)
+intensity = detector.model(intensity)
+image = dl.Image(intensity, read_noise=3.0)
 ```
+
+Detector layers now use concise transformation names:
+
+| Deprecated | Current |
+| --- | --- |
+| `ApplyPixelResponse` | `Sensitivity` |
+| `ApplyJitter` | `Jitter` |
+| `ApplySaturation` | `Saturation` |
+| `AddConstant` | `Bias` |
+
+`Convolve` supplies arbitrary fixed or parametric kernels, while `Gain` supports
+linear arrays and nonlinear parametric gain curves.
 
 ## Sources and spectra
 
@@ -169,10 +194,12 @@ Do not manually batch ordinary wavelength axes in a custom optical layer.
 
 ## Removed contracts
 
-Interfaces such as `BasisLayer`, `BasisOptic`, `ParametricOpticalSystem`, `Scene`, and
-the specialised aperture-layer classes changed too substantially for a safe alias.
-Instantiating them raises an error containing the current replacement and a migration
-example. The complete compatibility surface is available in the
+Interfaces such as `BasisLayer`, `BasisOptic`, `ParametricOpticalSystem`,
+`ParametricLayeredOpticalSystem`, `Scene`, and the specialised aperture-layer classes
+changed too substantially for a safe alias. Instantiating them raises an error
+containing the current replacement and a migration example. Custom subclasses of the
+former `OpticalSystem` base should instead subclass the layer or system contract they
+actually implement. The complete compatibility surface is available in the
 [compatibility API](API/core/compatibility.md).
 
 If a migration error does not explain your use case, please open an issue with a

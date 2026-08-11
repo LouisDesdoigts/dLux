@@ -7,13 +7,18 @@ when constructed.
 
 from __future__ import annotations
 
+from abc import abstractmethod
 import sys
 import warnings
 
 import jax.numpy as np
+from jax import Array
+
+import dLux.utils as dlu
 
 from .grids import BaseGridSpec, CoordTransform, DistortCoords, GridSpec, ResizeSpec
-from .fields import PSF, Wavefront
+from .fields import Intensity, Wavefront
+from .layers.detector import DetectorLayer
 from .layers.propagation import (
     ABCDFraunhofer,
     ABCDPropagator,
@@ -44,6 +49,144 @@ def migration_error(old, new, example):
         f"guide: {MIGRATION_GUIDE}"
     )
     raise TypeError(message)
+
+
+class PSF(Intensity):
+    """Deprecated compatibility wrapper for ``Intensity``."""
+
+    def __init__(self, data, pixel_scale):
+        migration = "`dl.PSF(data, pixel_scale)` -> `dl.Intensity(data, grid)`"
+        warn_deprecated("PSF", "Intensity", migration)
+
+        # Preserve both the released scalar sampling and transitional grid input
+        if isinstance(pixel_scale, GridSpec):
+            grid = pixel_scale
+        else:
+            data = np.asarray(data, dtype=float)
+            pixel_scale = np.asarray(pixel_scale, dtype=float)
+            spacing = np.stack((pixel_scale, pixel_scale), axis=-1)
+            grid = GridSpec(n=data.shape[-2:][::-1], d=spacing, unit="rad")
+        super().__init__(data, grid)
+
+    @property
+    def pixel_scale(self):
+        """Return the legacy scalar or vectorised angular sampling."""
+        return self.grid.d[..., 0] * self.grid.scale
+
+    @property
+    def ndim(self):
+        """Return the legacy pixel-scale vectorisation rank."""
+        return self.pixel_scale.ndim
+
+
+class LegacyDetectorLayer(DetectorLayer):
+    """Preserve the released detector-layer extension contract."""
+
+    @abstractmethod
+    def __call__(self, intensity):
+        """Transform an intensity using the released callable contract."""
+
+    def apply(self, intensity):
+        """Delegate the compatibility method to the legacy callable implementation."""
+        return self(intensity)
+
+
+class ApplyPixelResponse(LegacyDetectorLayer):
+    """Deprecated compatibility wrapper for ``Sensitivity``."""
+
+    pixel_response: Array
+
+    def __init__(self, pixel_response):
+        migration = "`dl.ApplyPixelResponse(value)` -> `dl.Sensitivity(value)`"
+        warn_deprecated("ApplyPixelResponse", "Sensitivity", migration)
+        self.pixel_response = np.asarray(pixel_response, dtype=float)
+
+        if self.pixel_response.ndim != 2:
+            raise ValueError("pixel_response must be a 2d array.")
+
+    def __call__(self, intensity):
+        """Apply the legacy pixel-response multiplication."""
+        return intensity * self.pixel_response
+
+
+class ApplyJitter(LegacyDetectorLayer):
+    """Deprecated compatibility wrapper for ``Jitter``."""
+
+    sigma: Array
+    kernel_size: int
+    oversample: int
+
+    def __init__(self, sigma, kernel_size=9, oversample=3):
+        migration = "`dl.ApplyJitter(sigma)` -> `dl.Jitter(sigma)`"
+        warn_deprecated("ApplyJitter", "Jitter", migration)
+        self.sigma = np.asarray(sigma, dtype=float)
+        self.kernel_size = int(kernel_size)
+        self.oversample = int(oversample)
+
+        if self.kernel_size <= 0:
+            raise ValueError("kernel_size must be greater than 0.")
+        if self.oversample <= 0:
+            raise ValueError("oversample must be greater than 0.")
+
+    @property
+    def kernel(self):
+        """Return the legacy eagerly resolved kernel property."""
+        kernel = dlu.gaussian(
+            mean=np.zeros(2),
+            std=np.repeat(self.sigma, 2),
+            npixels=self.kernel_size * self.oversample,
+        )
+        return dlu.downsample(kernel, self.oversample, mean=False)
+
+    def __call__(self, intensity):
+        """Apply the legacy jitter convolution."""
+        return intensity.convolve(self.kernel)
+
+
+class ApplySaturation(LegacyDetectorLayer):
+    """Deprecated compatibility wrapper for ``Saturation``."""
+
+    threshold: Array
+
+    def __init__(self, threshold):
+        migration = "`dl.ApplySaturation(value)` -> `dl.Saturation(value)`"
+        warn_deprecated("ApplySaturation", "Saturation", migration)
+        self.threshold = np.asarray(threshold, dtype=float)
+
+    def __call__(self, intensity):
+        """Apply the legacy saturation threshold."""
+        return intensity.set(data=np.minimum(intensity.data, self.threshold))
+
+
+class AddConstant(LegacyDetectorLayer):
+    """Deprecated compatibility wrapper for ``Bias``."""
+
+    value: Array
+
+    def __init__(self, value):
+        migration = "`dl.AddConstant(value)` -> `dl.Bias(value)`"
+        warn_deprecated("AddConstant", "Bias", migration)
+        self.value = np.asarray(value, dtype=float)
+
+    def __call__(self, intensity):
+        """Apply the legacy additive constant."""
+        return intensity + self.value
+
+
+class LegacyDownsample(LegacyDetectorLayer):
+    """Preserve the released detector downsampling contract."""
+
+    kernel_size: int
+
+    def __init__(self, kernel_size):
+        self.kernel_size = int(kernel_size)
+
+        if self.kernel_size <= 0:
+            raise ValueError("kernel_size must be greater than 0.")
+
+    def __call__(self, intensity):
+        """Downsample by summing detector pixels in fixed blocks."""
+        return intensity.downsample(self.kernel_size)
 
 
 class CoordSpec(GridSpec):
@@ -311,6 +454,10 @@ _REMOVED = {
         "OpticalSystem",
         "place parametrics directly in optical layers",
     ),
+    "ParametricLayeredOpticalSystem": (
+        "OpticalSystem",
+        "place parametrics directly in layers passed to `dl.OpticalSystem`",
+    ),
     "PointResolvedSource": (
         "Source",
         "use vectorised positions and resolved distributions explicitly",
@@ -354,6 +501,9 @@ Instrument = _removed_class("Instrument", *_REMOVED["Instrument"])
 MultiAperture = _removed_class("MultiAperture", *_REMOVED["MultiAperture"])
 ParametricOpticalSystem = _removed_class(
     "ParametricOpticalSystem", *_REMOVED["ParametricOpticalSystem"]
+)
+ParametricLayeredOpticalSystem = _removed_class(
+    "ParametricLayeredOpticalSystem", *_REMOVED["ParametricLayeredOpticalSystem"]
 )
 PointResolvedSource = _removed_class(
     "PointResolvedSource", *_REMOVED["PointResolvedSource"]
@@ -446,6 +596,7 @@ optical_systems = _legacy_module(
     {
         "BaseOpticalSystem": BaseOpticalSystem,
         "ParametricOpticalSystem": ParametricOpticalSystem,
+        "ParametricLayeredOpticalSystem": ParametricLayeredOpticalSystem,
         "LayeredOpticalSystem": LayeredOpticalSystem,
         "AngularOpticalSystem": AngularOpticalSystem,
         "CartesianOpticalSystem": CartesianOpticalSystem,
@@ -466,14 +617,40 @@ wavefronts = _legacy_module(
     "dLux.fields",
     {"Wavefront": Wavefront},
 )
+detector_layers = _legacy_module(
+    "layers.detector_layers",
+    "dLux.layers.detector and dLux.layers.unified",
+    {
+        "DetectorLayer": LegacyDetectorLayer,
+        "ApplyPixelResponse": ApplyPixelResponse,
+        "ApplyJitter": ApplyJitter,
+        "ApplySaturation": ApplySaturation,
+        "AddConstant": AddConstant,
+        "Downsample": LegacyDownsample,
+    },
+)
 
 
 COMPATIBILITY = {
-    "0.14": ("CoordSpec", "DistortedCoords", "LayeredDetector", "LayeredOpticalSystem"),
+    "0.14": (
+        "AddConstant",
+        "ApplyJitter",
+        "ApplyPixelResponse",
+        "ApplySaturation",
+        "CoordSpec",
+        "DistortedCoords",
+        "LayeredDetector",
+        "LayeredOpticalSystem",
+        "PSF",
+    ),
     "0.15": tuple(
         sorted(
             {
                 "ABCDConjugatePlane",
+                "AddConstant",
+                "ApplyJitter",
+                "ApplyPixelResponse",
+                "ApplySaturation",
                 "CoordSpec",
                 "DistortedCoords",
                 "FFT",
@@ -484,6 +661,7 @@ COMPATIBILITY = {
                 "MFTPropagator",
                 "PadSpec",
                 "PointSource",
+                "PSF",
                 "ResolvedSource",
                 *_REMOVED,
             }
@@ -494,9 +672,13 @@ COMPATIBILITY = {
 
 __all__ = [
     "ABCDConjugatePlane",
+    "AddConstant",
     "ASMPropagator",
     "AberratedAperture",
     "AngularOpticalSystem",
+    "ApplyJitter",
+    "ApplyPixelResponse",
+    "ApplySaturation",
     "BaseCoordTransform",
     "BaseDetector",
     "BaseOpticalSystem",
@@ -519,9 +701,11 @@ __all__ = [
     "MultiAperture",
     "PadSpec",
     "ParametricOpticalSystem",
+    "ParametricLayeredOpticalSystem",
     "PointResolvedSource",
     "PointSource",
     "PointSources",
+    "PSF",
     "PolySpectrum",
     "RectangularAperture",
     "RegPolyAperture",

@@ -6,6 +6,7 @@ import jax.numpy as np
 import pytest
 
 import dLux as dl
+import dLux.utils as dlu
 
 
 def test_coefficients_constructor_alias():
@@ -89,13 +90,74 @@ def test_legacy_coordinate_behaviour():
 
 
 def test_legacy_detector_return_contract():
-    psf = dl.PSF(np.ones((4, 4)), dl.GridSpec(4, 0.1, unit="rad"))
+    with pytest.warns(DeprecationWarning):
+        psf = dl.PSF(np.ones((4, 4)), dl.GridSpec(4, 0.1, unit="rad"))
 
     with pytest.warns(DeprecationWarning):
         detector = dl.LayeredDetector([])
 
     assert isinstance(detector(psf), type(psf.data))
     assert isinstance(detector(psf, return_psf=True), dl.PSF)
+
+
+@pytest.mark.parametrize(
+    ("legacy", "current", "args", "path"),
+    [
+        (dl.ApplyPixelResponse, dl.Sensitivity, (np.ones((4, 4)),), "pixel_response"),
+        (dl.ApplyJitter, dl.Jitter, (0.5,), "sigma"),
+        (dl.ApplySaturation, dl.Saturation, (10.0,), "threshold"),
+        (dl.AddConstant, dl.Bias, (1.0,), "value"),
+    ],
+)
+def test_legacy_detector_layers(legacy, current, args, path):
+    intensity = dl.Intensity(np.arange(16.0).reshape(4, 4), dl.GridSpec(4, 0.1))
+
+    with pytest.warns(DeprecationWarning) as record:
+        layer = legacy(*args)
+
+    replacement = current(*args)
+    message = str(record[0].message)
+
+    assert "removed in dLux 0.17.0" in message
+    assert current.__name__ in message
+    assert " -> " in message
+    assert hasattr(layer, path)
+    if legacy is not dl.ApplyJitter:
+        assert np.allclose(layer(intensity).data, replacement(intensity).data)
+
+
+def test_psf_alias():
+    grid = dl.GridSpec(4, 0.1, unit="rad")
+
+    with pytest.warns(DeprecationWarning) as record:
+        intensity = dl.PSF(np.ones((4, 4)), grid)
+
+    message = str(record[0].message)
+    assert "removed in dLux 0.17.0" in message
+    assert "`dl.PSF(data, pixel_scale)` -> `dl.Intensity(data, grid)`" in message
+    assert isinstance(intensity, dl.Intensity)
+
+
+def test_released_psf_constructor():
+    with pytest.warns(DeprecationWarning):
+        psf = dl.PSF(np.ones((4, 4)), 0.1)
+
+    assert np.isclose(psf.pixel_scale, 0.1)
+    assert psf.ndim == 0
+    assert np.allclose(psf.downsample(2).pixel_scale, 0.2)
+
+
+def test_released_jitter_contract():
+    with pytest.warns(DeprecationWarning):
+        jitter = dl.ApplyJitter(0.5, kernel_size=4, oversample=2)
+
+    expected = dlu.gaussian(np.zeros(2), np.ones(2) * 0.5, 8)
+    expected = dlu.downsample(expected, 2, mean=False)
+
+    assert jitter.kernel_size == 4
+    assert jitter.oversample == 2
+    assert jitter.kernel.shape == (4, 4)
+    assert np.allclose(jitter.kernel, expected)
 
 
 def test_legacy_optical_system_grid_contract():
@@ -138,6 +200,7 @@ def test_legacy_point_sources_contract():
         "BaseOpticalSystem",
         "BaseSpectrum",
         "BasisLayer",
+        "ParametricLayeredOpticalSystem",
         "Scene",
     ],
 )
@@ -167,3 +230,21 @@ def test_legacy_module_paths(module, name):
         value = getattr(imported, name)
 
     assert value is not None
+
+
+def test_legacy_detector_layer_module():
+    module = importlib.import_module("dLux.layers.detector_layers")
+
+    with pytest.warns(DeprecationWarning, match="module"):
+        detector_layer = module.DetectorLayer
+    with pytest.warns(DeprecationWarning, match="module"):
+        downsample = module.Downsample(2)
+
+    class CustomLayer(detector_layer):
+        def __call__(self, intensity):
+            return intensity + 1
+
+    intensity = dl.Intensity(np.ones((4, 4)), dl.GridSpec(4, 0.1))
+    assert np.allclose(CustomLayer().apply(intensity).data, 2)
+    assert downsample.kernel_size == 2
+    assert downsample(intensity).data.shape == (2, 2)
