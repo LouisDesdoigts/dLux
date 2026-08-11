@@ -11,6 +11,8 @@ Use five complementary forms:
 Public documentation should state units, shapes, axes, normalisation, leading
 dimensions, limitations, and relevant differentiability. Add concise executable
 examples to core classes and behaviours where the interaction is not obvious.
+Document every public concrete-class constructor, even when its concise constructor
+docstring points back to a fuller class-level contract.
 
 The documentation landing page should explain these routes, expose the stable version,
 link the package and UML maps, point directly to the utilities guide, and end with

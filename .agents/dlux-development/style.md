@@ -182,6 +182,10 @@ Within a class, use this order:
 5. secondary public methods;
 6. private implementation methods.
 
+Document the constructor of every public concrete class. Keep its docstring concise
+when the class docstring already defines the full contract, but never leave public
+construction behaviour discoverable only from type annotations or implementation.
+
 ## Module organisation
 
 Place module-level functions after imports and `__all__`, before the first class.
@@ -213,6 +217,12 @@ An abstraction should define a public extension point, encode a domain concept,
 centralise behaviour that must remain identical, or remove meaningful repetition.
 Do not extract a helper solely to shorten one caller. Search its call sites first.
 
+Before implementing numerical behaviour, search the complete package for the
+operation and its physical synonyms. Reuse the canonical utility even when its
+current signature needs a small generalisation. Do not reproduce Gaussian,
+interpolation, propagation, coordinate, normalisation, padding, cropping, or basis
+evaluation mathematics inside a layer when `dLux.utils` already owns that contract.
+
 For registries and parsers, keep canonical data separate from aliases, prefix rules,
 validation, and error presentation. A one-off spelling exception usually indicates
 that canonicalisation has been modelled at the wrong level. Lay resolution out as a
@@ -239,6 +249,7 @@ Documentation depth follows contract importance:
 
 - substantial public APIs document parameters and returns plus units, shapes, axes,
   leading dimensions, normalisation, limitations, and relevant JAX behaviour;
+- public concrete classes document both their overall class contract and constructor;
 - simple wrappers, aliases, properties, and obvious transformations use one precise
   sentence;
 - abstract methods document the requirements placed on implementations;

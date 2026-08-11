@@ -23,7 +23,9 @@ or Zodiax behaviour is involved, and `releases.md` for release work.
    - normalisation ownership;
    - differentiable leaves, static topology, JIT, and vectorisation;
    - approximation or fidelity limits.
-4. Search for existing utilities and extension points before adding machinery.
+4. Search the full package for existing utilities and extension points before adding
+   machinery. Compose or extend the canonical implementation instead of rebuilding
+   its numerical operation locally.
 5. Keep exploratory notebooks and working Markdown untracked unless the user asks to
    publish them.
 
