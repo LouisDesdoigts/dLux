@@ -15,7 +15,7 @@ classDiagram
     class dLux_layers_optical_Tilt["Tilt"]
     class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
     dLux_parametric_parametrics_ParametricHolder <|-- dLux_layers_optical_BaseLayer
-    click dLux_layers_optical_BaseLayer href "#dLux.layers.optical.BaseLayer" "No direct public attributes or methods"
+    click dLux_layers_optical_BaseLayer href "#dLux.layers.optical.BaseLayer" "Methods: apply()"
     dLux_layers_optical_BaseLayer <|-- dLux_layers_optical_BaseOpticalLayer
     click dLux_layers_optical_BaseOpticalLayer href "#dLux.layers.optical.BaseOpticalLayer" "Methods: apply_mono(), apply()"
     dLux_layers_optical_BaseOpticalLayer <|-- dLux_layers_optical_OpticalLayer

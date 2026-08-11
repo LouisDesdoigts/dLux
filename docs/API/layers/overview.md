@@ -9,7 +9,7 @@ flowchart LR
     dLux_layers_coronagraphy["Coronagraphy"]
     click dLux_layers_coronagraphy href "../coronagraphy/" "Public API: SoummerFPM"
     dLux_layers_detector["Detector"]
-    click dLux_layers_detector href "../detector/" "Public API: BaseDetectorLayer, DetectorLayer, ApplyPixelResponse, ApplyJitter, ApplySaturation, AddConstant"
+    click dLux_layers_detector href "../detector/" "Public API: BaseDetectorLayer, DetectorLayer, Sensitivity, Convolve, Jitter, Bias, Gain, Saturation"
     dLux_layers_dynamic["Dynamic"]
     click dLux_layers_dynamic href "../dynamic/" "Public API: BaseDynamicLayer, DynamicTransmissiveLayer, DynamicAberratedLayer, DynamicOptic"
     dLux_layers_optical["Optical"]

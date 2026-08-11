@@ -7,9 +7,13 @@
 ```mermaid
 classDiagram
     class dLux_compatibility_ABCDConjugatePlane["ABCDConjugatePlane"]
+    class dLux_compatibility_AddConstant["AddConstant"]
     class dLux_compatibility_ASMPropagator["ASMPropagator"]
     class dLux_compatibility_AberratedAperture["AberratedAperture"]
     class dLux_compatibility_AngularOpticalSystem["AngularOpticalSystem"]
+    class dLux_compatibility_ApplyJitter["ApplyJitter"]
+    class dLux_compatibility_ApplyPixelResponse["ApplyPixelResponse"]
+    class dLux_compatibility_ApplySaturation["ApplySaturation"]
     class dLux_grids_CoordTransform["CoordTransform"]
     class dLux_compatibility_BaseDetector["BaseDetector"]
     class dLux_compatibility_BaseOpticalSystem["BaseOpticalSystem"]
@@ -32,9 +36,11 @@ classDiagram
     class dLux_compatibility_MultiAperture["MultiAperture"]
     class dLux_compatibility_PadSpec["PadSpec"]
     class dLux_compatibility_ParametricOpticalSystem["ParametricOpticalSystem"]
+    class dLux_compatibility_ParametricLayeredOpticalSystem["ParametricLayeredOpticalSystem"]
     class dLux_compatibility_PointResolvedSource["PointResolvedSource"]
     class dLux_compatibility_PointSource["PointSource"]
     class dLux_compatibility_PointSources["PointSources"]
+    class dLux_compatibility_PSF["PSF"]
     class dLux_compatibility_PolySpectrum["PolySpectrum"]
     class dLux_compatibility_RectangularAperture["RectangularAperture"]
     class dLux_compatibility_RegPolyAperture["RegPolyAperture"]
@@ -46,6 +52,8 @@ classDiagram
     class dLux_compatibility_Telescope["Telescope"]
     class dLux_compatibility_Zernike["Zernike"]
     class dLux_base_Base["Base"]
+    class dLux_compatibility_LegacyDetectorLayer["LegacyDetectorLayer"]
+    class dLux_fields_Intensity["Intensity"]
     class dLux_grids_DistortCoords["DistortCoords"]
     class dLux_grids_GridSpec["GridSpec"]
     class dLux_grids_ResizeSpec["ResizeSpec"]
@@ -57,9 +65,17 @@ classDiagram
     class dLux_systems_OpticalSystem["OpticalSystem"]
     dLux_layers_propagation_ABCDFraunhofer <|-- dLux_compatibility_ABCDConjugatePlane
     click dLux_compatibility_ABCDConjugatePlane href "#dLux.compatibility.ABCDConjugatePlane" "No direct public attributes or methods"
+    dLux_compatibility_LegacyDetectorLayer <|-- dLux_compatibility_AddConstant
+    click dLux_compatibility_AddConstant href "#dLux.compatibility.AddConstant" "Attributes: value"
     click dLux_compatibility_ASMPropagator href "#dLux.compatibility.ASMPropagator" "No direct public attributes or methods"
     click dLux_compatibility_AberratedAperture href "#dLux.compatibility.AberratedAperture" "No direct public attributes or methods"
     click dLux_compatibility_AngularOpticalSystem href "#dLux.compatibility.AngularOpticalSystem" "No direct public attributes or methods"
+    dLux_compatibility_LegacyDetectorLayer <|-- dLux_compatibility_ApplyJitter
+    click dLux_compatibility_ApplyJitter href "#dLux.compatibility.ApplyJitter" "Attributes: sigma, kernel_size, oversample · Properties: kernel"
+    dLux_compatibility_LegacyDetectorLayer <|-- dLux_compatibility_ApplyPixelResponse
+    click dLux_compatibility_ApplyPixelResponse href "#dLux.compatibility.ApplyPixelResponse" "Attributes: pixel_response"
+    dLux_compatibility_LegacyDetectorLayer <|-- dLux_compatibility_ApplySaturation
+    click dLux_compatibility_ApplySaturation href "#dLux.compatibility.ApplySaturation" "Attributes: threshold"
     dLux_base_Base <|-- dLux_grids_CoordTransform
     click dLux_grids_CoordTransform href "#dLux.grids.CoordTransform" "Methods: get_coordinates(), apply()"
     click dLux_compatibility_BaseDetector href "#dLux.compatibility.BaseDetector" "No direct public attributes or methods"
@@ -92,11 +108,14 @@ classDiagram
     dLux_grids_ResizeSpec <|-- dLux_compatibility_PadSpec
     click dLux_compatibility_PadSpec href "#dLux.compatibility.PadSpec" "No direct public attributes or methods"
     click dLux_compatibility_ParametricOpticalSystem href "#dLux.compatibility.ParametricOpticalSystem" "No direct public attributes or methods"
+    click dLux_compatibility_ParametricLayeredOpticalSystem href "#dLux.compatibility.ParametricLayeredOpticalSystem" "No direct public attributes or methods"
     click dLux_compatibility_PointResolvedSource href "#dLux.compatibility.PointResolvedSource" "No direct public attributes or methods"
     dLux_sources_Source <|-- dLux_compatibility_PointSource
     click dLux_compatibility_PointSource href "#dLux.compatibility.PointSource" "No direct public attributes or methods"
     dLux_sources_Source <|-- dLux_compatibility_PointSources
     click dLux_compatibility_PointSources href "#dLux.compatibility.PointSources" "No direct public attributes or methods"
+    dLux_fields_Intensity <|-- dLux_compatibility_PSF
+    click dLux_compatibility_PSF href "#dLux.compatibility.PSF" "Properties: pixel_scale, ndim"
     click dLux_compatibility_PolySpectrum href "#dLux.compatibility.PolySpectrum" "No direct public attributes or methods"
     click dLux_compatibility_RectangularAperture href "#dLux.compatibility.RectangularAperture" "No direct public attributes or methods"
     click dLux_compatibility_RegPolyAperture href "#dLux.compatibility.RegPolyAperture" "No direct public attributes or methods"
@@ -114,6 +133,9 @@ classDiagram
 ???+ info "ABCDConjugatePlane"
     ::: dLux.compatibility.ABCDConjugatePlane
 
+???+ info "AddConstant"
+    ::: dLux.compatibility.AddConstant
+
 ???+ info "ASMPropagator"
     ::: dLux.compatibility.ASMPropagator
 
@@ -122,6 +144,15 @@ classDiagram
 
 ???+ info "AngularOpticalSystem"
     ::: dLux.compatibility.AngularOpticalSystem
+
+???+ info "ApplyJitter"
+    ::: dLux.compatibility.ApplyJitter
+
+???+ info "ApplyPixelResponse"
+    ::: dLux.compatibility.ApplyPixelResponse
+
+???+ info "ApplySaturation"
+    ::: dLux.compatibility.ApplySaturation
 
 ???+ info "BaseCoordTransform"
     ::: dLux.grids.CoordTransform
@@ -189,6 +220,9 @@ classDiagram
 ???+ info "ParametricOpticalSystem"
     ::: dLux.compatibility.ParametricOpticalSystem
 
+???+ info "ParametricLayeredOpticalSystem"
+    ::: dLux.compatibility.ParametricLayeredOpticalSystem
+
 ???+ info "PointResolvedSource"
     ::: dLux.compatibility.PointResolvedSource
 
@@ -197,6 +231,9 @@ classDiagram
 
 ???+ info "PointSources"
     ::: dLux.compatibility.PointSources
+
+???+ info "PSF"
+    ::: dLux.compatibility.PSF
 
 ???+ info "PolySpectrum"
     ::: dLux.compatibility.PolySpectrum
