@@ -406,7 +406,7 @@ class GridSpec(BaseGridSpec):
         return cls(n=n, d=d / scale, c=c / scale, unit=unit)
 
     def build(self, builder, **kwargs):
-        """Evaluate a ``GridBuilder`` on this sampling specification."""
+        """Evaluate a ``BaseBuilder`` on this sampling specification."""
         return builder.build(self, **kwargs)
 
     @property

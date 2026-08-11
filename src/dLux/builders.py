@@ -20,8 +20,8 @@ from .parametric import Basis, Shape
 from .parametric.bases import _resolve_coeffs
 
 __all__ = [
-    "GridBuilder",
-    "OPDDef",
+    "BaseBuilder",
+    "BaseOPDDef",
     "Norm",
     "ZernikeDef",
     "ApertureBuilder",
@@ -161,7 +161,7 @@ class _ApertureData(Base):
         self.centers = dlu.to_value(centers, optional=True)
 
 
-class OPDDef(Base):
+class BaseOPDDef(Base):
     """Define sampled OPD data from coordinates and aperture geometry."""
 
     @abstractmethod
@@ -169,7 +169,7 @@ class OPDDef(Base):
         """Return the sampled representation required by this definition."""
 
 
-class ZernikeDef(OPDDef):
+class ZernikeDef(BaseOPDDef):
     """Configure a support-clipped, explicitly sampled Zernike basis.
 
     Parameters
@@ -261,7 +261,7 @@ class ZernikeDef(OPDDef):
         return basis if self.norm is None else self.norm(basis, support)
 
 
-class GridBuilder(Base):
+class BaseBuilder(Base):
     """Base class for construction-time objects evaluated on a ``GridSpec``."""
 
     def validate(self, grid, transform):
@@ -273,7 +273,7 @@ class GridBuilder(Base):
         if grid.ndim != 2:
             raise ValueError("grid must have two dimensions.")
         if grid.d.ndim != 1 or (grid.c is not None and grid.c.ndim != 1):
-            raise ValueError("batched grids are not yet supported by GridBuilder.")
+            raise ValueError("batched grids are not yet supported by BaseBuilder.")
         if transform is not None and not isinstance(transform, BaseCoordTransform):
             raise TypeError("transform must be a BaseCoordTransform or None.")
 
@@ -304,7 +304,7 @@ class GridBuilder(Base):
         """Evaluate this builder on an already validated grid."""
 
 
-class ApertureBuilder(GridBuilder):
+class ApertureBuilder(BaseBuilder):
     """Compose a primary, obscurations, and optional OPD definition on a grid.
 
     This is the general construction API. Named telescope builders retain simple
@@ -318,7 +318,7 @@ class ApertureBuilder(GridBuilder):
         Transmissive primary geometry.
     obscurations : list or tuple of Shape
         Geometry removed from the primary transmission.
-    opd : OPDDef or None
+    opd : BaseOPDDef or None
         Optional OPD data definition evaluated over the primary support.
     oversample : int or tuple of int
         Sampling factor used before downsampling hard-edged geometry.
@@ -337,7 +337,7 @@ class ApertureBuilder(GridBuilder):
 
     primary: Shape
     obscurations: tuple
-    opd: OPDDef | None
+    opd: BaseOPDDef | None
     oversample: tuple[int, int] = eqx.field(static=True)
 
     def __init__(self, primary, obscurations=(), opd=None, oversample=5):
@@ -353,8 +353,8 @@ class ApertureBuilder(GridBuilder):
         # Store the geometry and optional OPD definition
         self.primary = primary
         self.obscurations = obscurations
-        if opd is not None and not isinstance(opd, OPDDef):
-            raise TypeError("opd must be an OPDDef or None.")
+        if opd is not None and not isinstance(opd, BaseOPDDef):
+            raise TypeError("opd must be a BaseOPDDef or None.")
         self.opd = opd
         self.oversample = dlu.as_size(oversample, 2, "oversample")
 
