@@ -125,7 +125,9 @@ class TestWavefront:
         polarised = wavefront.apply_jones(np.eye(2))
         assert isinstance(polarised, dl.PolarisedWavefront)
         assert polarised.phasor.shape == (2, 2, 8, 8)
+        assert np.allclose(wavefront.intensity, wavefront.psf)
         assert np.allclose(wavefront.psf_from_stokes(), wavefront.psf)
+        assert np.allclose(wavefront.intensity_from_stokes(), wavefront.intensity)
         assert np.allclose(
             wavefront.psf_from_stokes(np.asarray((2.0, 0, 0, 0))), 2 * wavefront.psf
         )
@@ -182,8 +184,12 @@ class TestPolarisedWavefront:
         assert wavefront.batch_ndim == 0
         assert wavefront.phasor.shape == promoted.phasor.shape == (2, 2, 8, 8)
         assert wavefront.psf.shape == (8, 8)
+        assert np.allclose(wavefront.intensity, wavefront.psf)
         assert wavefront.stokes().shape == (4, 8, 8)
         assert wavefront.psf_from_stokes().shape == (8, 8)
+        assert np.allclose(
+            wavefront.intensity_from_stokes(), wavefront.psf_from_stokes()
+        )
 
     def test_jones_application(self, make_wavefront):
         wavefront = make_wavefront(polarised=True)
@@ -197,7 +203,12 @@ class TestPolarisedWavefront:
 
         assert wavefront.is_polarised
         assert wavefront.phasor.shape == (2, 2, 2, 8, 8)
-        assert wavefront.psf_from_stokes(np.asarray((1.0, 0, 0, 0))).shape == (2, 8, 8)
+        stokes = np.asarray((1.0, 0, 0, 0))
+        assert wavefront.psf_from_stokes(stokes).shape == (2, 8, 8)
+        assert np.allclose(
+            wavefront.intensity_from_stokes(stokes),
+            wavefront.psf_from_stokes(stokes),
+        )
 
 
 class TestIntensity:

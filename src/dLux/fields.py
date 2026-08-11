@@ -405,13 +405,18 @@ class Wavefront(ContinuousField):
         return np.stack([self.amplitude, self.phase], axis=0)
 
     @property
-    def psf(self: Wavefront) -> Array:
+    def intensity(self: Wavefront) -> Array:
         """Return the squared modulus of the complex field."""
         return np.abs(self.phasor) ** 2
 
+    @property
+    def psf(self: Wavefront) -> Array:
+        """Return the point-spread function intensity."""
+        return self.intensity
+
     def to_intensity(self, stokes=None) -> Intensity:
         """Return the sampled intensity of this wavefront."""
-        return Intensity(self.psf_from_stokes(stokes), self.grid)
+        return Intensity(self.intensity_from_stokes(stokes), self.grid)
 
     @property
     def wavenumber(self: Wavefront) -> Array:
@@ -459,7 +464,7 @@ class Wavefront(ContinuousField):
     @property
     def power(self: Wavefront) -> Array:
         """Return field power summed over the spatial axes."""
-        return np.sum(self.psf, axis=(-2, -1))
+        return np.sum(self.intensity, axis=(-2, -1))
 
     def _to_phasor_shape(self: Wavefront, array: Array) -> Array:
         """Reshape scalar or spatial arrays to broadcast against the phasor, preserving
@@ -524,7 +529,7 @@ class Wavefront(ContinuousField):
         if mode == "power":
             scale = np.sqrt(value / self.power)
         elif mode == "peak":
-            scale = np.sqrt(value / self.psf.max(axis=(-2, -1)))
+            scale = np.sqrt(value / self.intensity.max(axis=(-2, -1)))
         else:
             raise ValueError("mode must be 'power' or 'peak'")
         return self.set(phasor=self.phasor * self._to_phasor_shape(scale))
@@ -628,13 +633,17 @@ class Wavefront(ContinuousField):
         """Promote the field and apply a Jones matrix."""
         return PolarisedWavefront.from_wavefront(self).apply_jones(jones)
 
-    def psf_from_stokes(self, stokes: Array | None = None) -> Array:
+    def intensity_from_stokes(self, stokes: Array | None = None) -> Array:
         """Return intensity for an optional input Stokes vector."""
         if stokes is None:
-            return self.psf
+            return self.intensity
 
         # For a polarisation-insensitive system, only total input intensity matters.
-        return stokes[0] * self.psf
+        return stokes[0] * self.intensity
+
+    def psf_from_stokes(self, stokes: Array | None = None) -> Array:
+        """Return the point-spread function for an optional input Stokes vector."""
+        return self.intensity_from_stokes(stokes)
 
 
 class PolarisedWavefront(Wavefront):
@@ -747,16 +756,27 @@ class PolarisedWavefront(Wavefront):
         )
 
     @property
-    def psf(self: Wavefront) -> Array:
+    def intensity(self: Wavefront) -> Array:
         """Return intensity for an unpolarised unit input."""
-        return self.psf_from_stokes()
+        return self.intensity_from_stokes()
 
-    def psf_from_stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
+    @property
+    def psf(self: Wavefront) -> Array:
+        """Return the point-spread function intensity."""
+        return self.intensity
+
+    def intensity_from_stokes(
+        self: Wavefront, input_stokes: Array | None = None
+    ) -> Array:
         """Return intensity for an optional input Stokes vector."""
         if input_stokes is None:
             return 0.5 * np.sum(np.abs(self.phasor) ** 2, axis=(-4, -3))
         stokes = self.stokes(input_stokes)
         return stokes[..., 0, :, :]
+
+    def psf_from_stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
+        """Return the point-spread function for an optional input Stokes vector."""
+        return self.intensity_from_stokes(input_stokes)
 
     def stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """Return output Stokes parameters.
