@@ -159,6 +159,7 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           python docs/scripts/generate_api_mds.py
+          git diff --exit-code -- docs/API mkdocs.yml
           DLUX_DOCS_SITE_NAME="dLux v${VERSION}" zensical build --strict
 
       - name: Deploy release documentation
