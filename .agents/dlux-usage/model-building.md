@@ -19,3 +19,10 @@ Hessians, and posterior calculations share the same physical prediction.
 Validate sampling and units before fitting. Separate fixed, fitted, shared, and derived
 parameters, state model fidelity and data provenance, and return complete runnable
 code with the parameter paths users are expected to change.
+
+Use direct attributes to inspect an object and Zodiax paths to construct reusable
+parameter selections. `get(..., as_dict=True)` builds an optimisation-facing mapping;
+`set`, `add`, `multiply`, `divide`, `power`, `min`, and `max` return immutable updated
+objects. Omit fixed leaves from the fitted dictionary, qualify ambiguous leaves with a
+layer or collection name, and fail on unused paths when updating several top-level
+objects.

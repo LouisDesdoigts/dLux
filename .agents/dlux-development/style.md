@@ -147,7 +147,7 @@ the block denser and more regular:
 # Contract the coefficient and basis dimensions
 ndim = len(self.shape)
 b_ax = tuple(range(ndim))
-coeffs = self.coefficients
+coeffs = self.coeffs
 c_ax = tuple(range(coeffs.ndim - ndim, coeffs.ndim))
 weights = np.tensordot(coeffs, self.basis, axes=(c_ax, b_ax))
 ```
@@ -182,11 +182,40 @@ Within a class, use this order:
 5. secondary public methods;
 6. private implementation methods.
 
+## Module organisation
+
+Place module-level functions after imports and `__all__`, before the first class.
+Order utility functions by dependency and public workflow; do not scatter free
+functions between classes. Keep imports at module scope unless an unavoidable
+annotation-only cycle requires `TYPE_CHECKING`.
+
+Use `super()` to follow the MRO rather than naming a parent implementation directly.
+Prefer concise positional arguments for an established internal signature when the
+whole call remains clear. Do not bind a parent method or construct an argument tuple
+for one call.
+
+Resolve Python topology before compilation. When optional JIT is part of a builder
+contract, transform the bound method that performs the calculation:
+
+```python
+build_fn = eqx.filter_jit(self._build) if jit else self._build
+return build_fn(grid, transform)
+```
+
+Do not create module-level pass-through functions and separately compiled aliases
+whose only purpose is to call the real method.
+
 ## Abstraction review
 
 An abstraction should define a public extension point, encode a domain concept,
 centralise behaviour that must remain identical, or remove meaningful repetition.
 Do not extract a helper solely to shorten one caller. Search its call sites first.
+
+Keep a private helper beside its owning implementation when it depends on core dLux
+objects or represents only that module's structure. Move it into `dLux.utils` only
+when it defines a reusable array-oriented numerical contract. Utilities must remain
+independent of grids, fields, layers, parametrics, builders, sources, systems, and
+other higher-level dLux objects.
 
 Use `super()` for the next implementation in the MRO. Prefer concise positional
 arguments for an established internal signature when the complete call stays clear;

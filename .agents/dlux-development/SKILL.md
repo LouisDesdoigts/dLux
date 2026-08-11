@@ -44,8 +44,11 @@ objects:
 - `compatibility`: explicit, warning-backed migration surfaces for released APIs.
 
 Keep `utils` independent from the core object model. Within core modules, call its
-functions through `dlu`. Do not create a utility for a calculation used once unless
-it has a meaningful independent numerical contract.
+functions through `dlu`. Move a helper into `utils` only when it has a meaningful,
+array-oriented numerical contract and genuine reuse beyond its original caller. Do
+not use `utils` as a holding area for one-use core helpers, and never make it import
+grids, fields, layers, parametrics, builders, sources, systems, or other higher-level
+dLux objects.
 
 ## Preserve object contracts
 

@@ -28,3 +28,14 @@ contract is accepted:
 Keep stochastic generation separate from deterministic model evaluation. Fix and
 split random keys explicitly, and test distributions or seeded outcomes at the level
 the public API guarantees.
+
+Use a representative transformation matrix rather than applying every transformation
+to every input. A public numerical path normally needs an eager reference plus the
+smallest JIT, vectorisation, or differentiation cases that expose its promised
+contract. Add Hessian or nested-transformation checks only where higher derivatives
+are scientifically used or especially vulnerable to normalisation and control-flow
+choices.
+
+Keep compatibility behaviour in the dedicated deprecation tests. Assert the warning
+category, removal version, replacement, and before/after migration example as well as
+the preserved result.
