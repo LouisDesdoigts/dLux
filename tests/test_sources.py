@@ -142,17 +142,13 @@ def test_log_flux_units():
     assert np.allclose(ln_source.params()["distribution"], 2)
 
 
-def test_distribution_flux_units():
-    source = dl.Source(
-        [1e-6], distribution=np.full((3, 3), 2.0), units={"distribution": "kphoton"}
-    )
-
-    assert np.allclose(source.params()["distribution"], 2000)
-
-
 def test_source_unit_errors():
     with pytest.raises(ValueError, match="Flux unit must be a photon unit"):
         dl.Source([1e-6], flux=1.0, units={"flux": "logr"}).params()
+
+    with pytest.raises(ValueError, match="Distribution unit must be one of"):
+        units = {"distribution": "photon"}
+        dl.Source([1e-6], distribution=np.ones((3, 3)), units=units)
 
     with pytest.raises(ValueError, match="Unknown wavelength unit 'invalid'"):
         dl.Source([1.0], units={"wavelengths": "invalid"}).params()

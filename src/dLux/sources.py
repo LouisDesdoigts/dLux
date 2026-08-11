@@ -48,6 +48,12 @@ def _brightness_unit(name, unit):
     """Resolve photon units and logarithmic value representations."""
     if unit in _VALUE_MODES[name]:
         return unit
+
+    # Spatial distributions are relative scalings, not physical photon values
+    if name == "distribution":
+        modes = ", ".join(map(repr, _VALUE_MODES[name]))
+        raise ValueError(f"Distribution unit must be one of {modes}.")
+
     try:
         return dlu.canonical_unit(unit, dimension="photon", name=f"{name} unit")
     except ValueError as error:
@@ -135,7 +141,7 @@ class BaseSource(ParametricHolder):
         if not valid:
             raise ValueError("distribution must have shape (y, x) or (nsource, y, x).")
 
-        # Convert the resolved distribution into canonical linear units
+        # Convert the resolved distribution into a linear spatial scaling
         unit = str(self.units["distribution"]).strip()
         if unit == "linear":
             return distribution
@@ -143,7 +149,6 @@ class BaseSource(ParametricHolder):
             return 10**distribution
         if unit == "ln":
             return np.exp(distribution)
-        return _convert_flux(distribution, unit)
 
     @staticmethod
     def _convolve(data, distribution):
@@ -374,7 +379,8 @@ class Source(BaseSource, Spectrum):
         angular units such as ``"rad"``, ``"deg"``, ``"arcsec"``, or ``"mas"``.
         Flux defaults to ``"photon"`` and also accepts prefixed photon units,
         ``"log"`` for base-10 photon flux, or ``"ln"`` for natural-log photon flux.
-        Distributions accept ``"linear"``, ``"log"``, ``"ln"``, or photon units.
+        Distributions are relative spatial scalings and accept only ``"linear"``,
+        ``"log"``, or ``"ln"``.
     """
 
     wavelengths: Array | Parametric
