@@ -14,7 +14,7 @@ classDiagram
     class dLux_compatibility_ApplyJitter["ApplyJitter"]
     class dLux_compatibility_ApplyPixelResponse["ApplyPixelResponse"]
     class dLux_compatibility_ApplySaturation["ApplySaturation"]
-    class dLux_grids_CoordTransform["CoordTransform"]
+    class dLux_grids_BaseCoordTransform["BaseCoordTransform"]
     class dLux_compatibility_BaseDetector["BaseDetector"]
     class dLux_compatibility_BaseOpticalSystem["BaseOpticalSystem"]
     class dLux_compatibility_BaseSpectrum["BaseSpectrum"]
@@ -24,6 +24,7 @@ classDiagram
     class dLux_compatibility_CircularAperture["CircularAperture"]
     class dLux_compatibility_CompoundAperture["CompoundAperture"]
     class dLux_compatibility_CoordSpec["CoordSpec"]
+    class dLux_compatibility_CoordTransform["CoordTransform"]
     class dLux_compatibility_DistortedCoords["DistortedCoords"]
     class dLux_compatibility_Dither["Dither"]
     class dLux_compatibility_FFT["FFT"]
@@ -54,7 +55,7 @@ classDiagram
     class dLux_base_Base["Base"]
     class dLux_compatibility_LegacyDetectorLayer["LegacyDetectorLayer"]
     class dLux_fields_Intensity["Intensity"]
-    class dLux_grids_DistortCoords["DistortCoords"]
+    class dLux_grids_Distortion["Distortion"]
     class dLux_grids_GridSpec["GridSpec"]
     class dLux_grids_ResizeSpec["ResizeSpec"]
     class dLux_layers_propagation_ABCDFraunhofer["ABCDFraunhofer"]
@@ -76,8 +77,8 @@ classDiagram
     click dLux_compatibility_ApplyPixelResponse href "#dLux.compatibility.ApplyPixelResponse" "Attributes: pixel_response"
     dLux_compatibility_LegacyDetectorLayer <|-- dLux_compatibility_ApplySaturation
     click dLux_compatibility_ApplySaturation href "#dLux.compatibility.ApplySaturation" "Attributes: threshold"
-    dLux_base_Base <|-- dLux_grids_CoordTransform
-    click dLux_grids_CoordTransform href "#dLux.grids.CoordTransform" "Methods: get_coordinates(), apply()"
+    dLux_base_Base <|-- dLux_grids_BaseCoordTransform
+    click dLux_grids_BaseCoordTransform href "#dLux.grids.BaseCoordTransform" "Methods: get_coordinates(), apply()"
     click dLux_compatibility_BaseDetector href "#dLux.compatibility.BaseDetector" "No direct public attributes or methods"
     click dLux_compatibility_BaseOpticalSystem href "#dLux.compatibility.BaseOpticalSystem" "No direct public attributes or methods"
     click dLux_compatibility_BaseSpectrum href "#dLux.compatibility.BaseSpectrum" "No direct public attributes or methods"
@@ -88,7 +89,9 @@ classDiagram
     click dLux_compatibility_CompoundAperture href "#dLux.compatibility.CompoundAperture" "No direct public attributes or methods"
     dLux_grids_GridSpec <|-- dLux_compatibility_CoordSpec
     click dLux_compatibility_CoordSpec href "#dLux.compatibility.CoordSpec" "Properties: xs, fov, extent"
-    dLux_grids_DistortCoords <|-- dLux_compatibility_DistortedCoords
+    dLux_grids_BaseCoordTransform <|-- dLux_compatibility_CoordTransform
+    click dLux_compatibility_CoordTransform href "#dLux.compatibility.CoordTransform" "Attributes: translation, rotation, compression, shear"
+    dLux_grids_Distortion <|-- dLux_compatibility_DistortedCoords
     click dLux_compatibility_DistortedCoords href "#dLux.compatibility.DistortedCoords" "Methods: calculate()"
     click dLux_compatibility_Dither href "#dLux.compatibility.Dither" "No direct public attributes or methods"
     dLux_layers_propagation_Fraunhofer <|-- dLux_compatibility_FFT
@@ -155,7 +158,7 @@ classDiagram
     ::: dLux.compatibility.ApplySaturation
 
 ???+ info "BaseCoordTransform"
-    ::: dLux.grids.CoordTransform
+    ::: dLux.grids.BaseCoordTransform
 
 ???+ info "BaseDetector"
     ::: dLux.compatibility.BaseDetector
@@ -183,6 +186,9 @@ classDiagram
 
 ???+ info "CoordSpec"
     ::: dLux.compatibility.CoordSpec
+
+???+ info "CoordTransform"
+    ::: dLux.compatibility.CoordTransform
 
 ???+ info "DistortedCoords"
     ::: dLux.compatibility.DistortedCoords

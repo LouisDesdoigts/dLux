@@ -10,11 +10,11 @@ classDiagram
     class dLux_grids_GridSpec["GridSpec"]
     class dLux_grids_ResizeSpec["ResizeSpec"]
     class dLux_grids_PasteSpec["PasteSpec"]
-    class dLux_grids_CoordTransform["CoordTransform"]
+    class dLux_grids_BaseCoordTransform["BaseCoordTransform"]
     class dLux_grids_Affine["Affine"]
     class dLux_grids_AffineMap["AffineMap"]
     class dLux_grids_TransformChain["TransformChain"]
-    class dLux_grids_DistortCoords["DistortCoords"]
+    class dLux_grids_Distortion["Distortion"]
     class dLux_base_Base["Base"]
     dLux_base_Base <|-- dLux_grids_BaseGridSpec
     click dLux_grids_BaseGridSpec href "#dLux.grids.BaseGridSpec" "No direct public attributes or methods"
@@ -24,16 +24,16 @@ classDiagram
     click dLux_grids_ResizeSpec href "#dLux.grids.ResizeSpec" "Attributes: n, pad, crop, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad_array(), crop_array(), crop_axes(), resize()"
     dLux_grids_BaseGridSpec <|-- dLux_grids_PasteSpec
     click dLux_grids_PasteSpec href "#dLux.grids.PasteSpec" "Attributes: n, shape, starts, offsets, d · Properties: coordinates · Methods: from_grid(), paste(), extract()"
-    dLux_base_Base <|-- dLux_grids_CoordTransform
-    click dLux_grids_CoordTransform href "#dLux.grids.CoordTransform" "Methods: get_coordinates(), apply()"
-    dLux_grids_CoordTransform <|-- dLux_grids_Affine
+    dLux_base_Base <|-- dLux_grids_BaseCoordTransform
+    click dLux_grids_BaseCoordTransform href "#dLux.grids.BaseCoordTransform" "Methods: get_coordinates(), apply()"
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_Affine
     click dLux_grids_Affine href "#dLux.grids.Affine" "Attributes: translation, rotation, scale, shear, order · Properties: coeffs"
-    dLux_grids_CoordTransform <|-- dLux_grids_AffineMap
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_AffineMap
     click dLux_grids_AffineMap href "#dLux.grids.AffineMap" "Attributes: matrix, offset"
-    dLux_grids_CoordTransform <|-- dLux_grids_TransformChain
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_TransformChain
     click dLux_grids_TransformChain href "#dLux.grids.TransformChain" "Attributes: transformations"
-    dLux_grids_CoordTransform <|-- dLux_grids_DistortCoords
-    click dLux_grids_DistortCoords href "#dLux.grids.DistortCoords" "Attributes: powers, distortion, shift_invariant"
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_Distortion
+    click dLux_grids_Distortion href "#dLux.grids.Distortion" "Attributes: powers, distortion, shift_invariant"
 ```
 
 ???+ info "BaseGridSpec"
@@ -48,8 +48,8 @@ classDiagram
 ???+ info "PasteSpec"
     ::: dLux.grids.PasteSpec
 
-???+ info "CoordTransform"
-    ::: dLux.grids.CoordTransform
+???+ info "BaseCoordTransform"
+    ::: dLux.grids.BaseCoordTransform
 
 ???+ info "Affine"
     ::: dLux.grids.Affine
@@ -60,5 +60,5 @@ classDiagram
 ???+ info "TransformChain"
     ::: dLux.grids.TransformChain
 
-???+ info "DistortCoords"
-    ::: dLux.grids.DistortCoords
+???+ info "Distortion"
+    ::: dLux.grids.Distortion

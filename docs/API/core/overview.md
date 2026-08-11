@@ -11,11 +11,11 @@ flowchart LR
     dLux_builders["Builders"]
     click dLux_builders href "../builders/" "Public API: GridBuilder, OPDDef, Norm, ZernikeDef, ApertureBuilder, SparseApertureBuilder"
     dLux_compatibility["Compatibility"]
-    click dLux_compatibility href "../compatibility/" "Public API: ABCDConjugatePlane, AddConstant, ASMPropagator, AberratedAperture, AngularOpticalSystem, ApplyJitter, ApplyPixelResponse, ApplySaturation, BaseCoordTransform, BaseDetector, BaseOpticalSystem, BaseSpectrum, BasisLayer, BasisOptic, CartesianOpticalSystem, CircularAperture, CompoundAperture, CoordSpec, DistortedCoords, Dither, FFT, FFTPropagator, Instrument, LayeredDetector, LayeredOpticalSystem, MFT, MFTPropagator, MultiAperture, PadSpec, ParametricOpticalSystem, ParametricLayeredOpticalSystem, PointResolvedSource, PointSource, PointSources, PSF, PolySpectrum, RectangularAperture, RegPolyAperture, ResolvedSource, Rotate, Scene, Spec, SquareAperture, Telescope, Zernike"
+    click dLux_compatibility href "../compatibility/" "Public API: ABCDConjugatePlane, AddConstant, ASMPropagator, AberratedAperture, AngularOpticalSystem, ApplyJitter, ApplyPixelResponse, ApplySaturation, BaseCoordTransform, BaseDetector, BaseOpticalSystem, BaseSpectrum, BasisLayer, BasisOptic, CartesianOpticalSystem, CircularAperture, CompoundAperture, CoordSpec, CoordTransform, DistortedCoords, Dither, FFT, FFTPropagator, Instrument, LayeredDetector, LayeredOpticalSystem, MFT, MFTPropagator, MultiAperture, PadSpec, ParametricOpticalSystem, ParametricLayeredOpticalSystem, PointResolvedSource, PointSource, PointSources, PSF, PolySpectrum, RectangularAperture, RegPolyAperture, ResolvedSource, Rotate, Scene, Spec, SquareAperture, Telescope, Zernike"
     dLux_fields["Fields"]
     click dLux_fields href "../fields/" "Public API: BaseField, ContinuousField, DiscreteField, Wavefront, PolarisedWavefront, Intensity, Image"
     dLux_grids["Grids"]
-    click dLux_grids href "../grids/" "Public API: BaseGridSpec, GridSpec, ResizeSpec, PasteSpec, CoordTransform, Affine, AffineMap, TransformChain, DistortCoords"
+    click dLux_grids href "../grids/" "Public API: BaseGridSpec, GridSpec, ResizeSpec, PasteSpec, BaseCoordTransform, Affine, AffineMap, TransformChain, Distortion"
     dLux_prebuilt["Prebuilt"]
     click dLux_prebuilt href "../prebuilt/" "Public API: SimpleCircular, SegmentedHex, NRMLike, HSTLike, JWSTLike, JWSTNRMLike, EuclidLike"
     dLux_sources["Sources"]
