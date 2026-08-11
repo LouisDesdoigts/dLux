@@ -6,6 +6,7 @@
 
 ```mermaid
 classDiagram
+    class dLux_grids_BaseGridSpec["BaseGridSpec"]
     class dLux_grids_GridSpec["GridSpec"]
     class dLux_grids_ResizeSpec["ResizeSpec"]
     class dLux_grids_PasteSpec["PasteSpec"]
@@ -15,9 +16,10 @@ classDiagram
     class dLux_grids_TransformChain["TransformChain"]
     class dLux_grids_DistortCoords["DistortCoords"]
     class dLux_base_Base["Base"]
-    class dLux_grids_BaseGridSpec["BaseGridSpec"]
+    dLux_base_Base <|-- dLux_grids_BaseGridSpec
+    click dLux_grids_BaseGridSpec href "#dLux.grids.BaseGridSpec" "No direct public attributes or methods"
     dLux_grids_BaseGridSpec <|-- dLux_grids_GridSpec
-    click dLux_grids_GridSpec href "#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov · Methods: broadcast(), resize(), downsample(), oversample(), resample(), from_axes(), build(), axes_for(), xs_for(), transformed(), coordinates_for(), extent()"
+    click dLux_grids_GridSpec href "#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov · Methods: broadcast(), match_shape(), resize(), downsample(), oversample(), resample(), from_axes(), build(), axes_for(), xs_for(), transformed(), coordinates_for(), extent()"
     dLux_grids_BaseGridSpec <|-- dLux_grids_ResizeSpec
     click dLux_grids_ResizeSpec href "#dLux.grids.ResizeSpec" "Attributes: n, pad, crop, c · Properties: explicit, padding · Methods: broadcast(), output_size(), crop_size(), pad_array(), crop_array(), crop_axes(), resize()"
     dLux_grids_BaseGridSpec <|-- dLux_grids_PasteSpec
@@ -33,6 +35,9 @@ classDiagram
     dLux_grids_CoordTransform <|-- dLux_grids_DistortCoords
     click dLux_grids_DistortCoords href "#dLux.grids.DistortCoords" "Attributes: powers, distortion, shift_invariant"
 ```
+
+???+ info "BaseGridSpec"
+    ::: dLux.grids.BaseGridSpec
 
 ???+ info "GridSpec"
     ::: dLux.grids.GridSpec

@@ -10,6 +10,7 @@ from ..fields import Wavefront
 from .optical import OpticalLayer
 
 __all__ = [
+    "BasePolarisingOptic",
     "PolarisationLayer",
     "PolarisingOptic",
     "UniformPolarisingOptic",

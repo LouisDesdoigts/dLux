@@ -190,6 +190,17 @@ def test_segmented_hex_pasted_construction():
     assert not np.allclose(rotated, pasted)
 
 
+def test_segmented_hex_rectangular_construction():
+    grid = dl.GridSpec(n=(72, 64), d=(0.15, 0.15), unit="m")
+    builder = dl.JWSTLike(oversample=(2, 3))
+
+    pasted = builder.build(grid, jit=True)
+    dense = SparseApertureBuilder._build(builder, grid, None)
+
+    assert pasted.shape == (64, 72)
+    assert np.allclose(pasted, dense)
+
+
 def test_segmented_hex_pasted_basis():
     grid = dl.GridSpec(n=64, d=0.15, unit="m").broadcast(2)
     builder = dl.JWSTLike(

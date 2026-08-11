@@ -84,6 +84,11 @@ Take gradients with respect to the parameter dictionary and reconstruct the mode
 inside the transformed function:
 
 ```python
+import equinox as eqx
+import jax.numpy as np
+import zodiax as zdx
+
+
 @eqx.filter_value_and_grad
 def loss(params, optics, source, data):
     optics = optics.set(**{"pupil.coeffs": params["pupil.coeffs"]})
@@ -92,7 +97,8 @@ def loss(params, optics, source, data):
         flux=params["flux"],
     )
     model = optics.model(source)
-    return np.mean(data.z_score(model) ** 2)
+    z_score = zdx.z_score(model.data, data.data, data.std)
+    return np.mean(z_score**2)
 ```
 
 The keys and pytree structure of `params` are static topology under JIT. Change values

@@ -6,14 +6,14 @@ We recover the source flux, position, effective temperature, and optical aberrat
 
 
 ```python
+import equinox as eqx
 import jax.numpy as np
 import jax.random as jr
-import equinox as eqx
 import optax
-import zodiax as zdx
 from tqdm.notebook import tqdm
 
 import dLux as dl
+import zodiax as zdx
 ```
 
 
@@ -208,7 +208,7 @@ exposure = image.simulate(jr.key(1), n_frames=64)
     axes[1].set(title="Simulated exposure", xlabel="Focal x [arcsec]", ylabel="Focal y [arcsec]")
     colorbar(im, "Photons")
 
-    im = axes[2].imshow(exposure.error, cmaps["intensity"], extent=focal_extent, norm=PowerNorm(0.5))
+    im = axes[2].imshow(exposure.std, cmaps["intensity"], extent=focal_extent, norm=PowerNorm(0.5))
     axes[2].set(title="Exposure standard deviation", xlabel="Focal x [arcsec]", ylabel="Focal y [arcsec]")
     colorbar(im, "Standard deviation [photon]")
 
@@ -267,7 +267,8 @@ def model_fn(params, optics, source):
 @eqx.filter_value_and_grad
 def loss_fn(params, optics, source, exposure):
     prediction = model_fn(params, optics, source)
-    return np.mean(exposure.z_score(prediction)**2)
+    z_score = zdx.z_score(prediction.data, exposure.data, exposure.std)
+    return np.mean(z_score**2)
 
 
 start_prediction = model_fn(params, optics, source)
@@ -362,8 +363,8 @@ The parameter histories reveal when each group becomes active and whether it con
     ```python
     # Evaluate the recovered image and both standardised residuals
     fit_prediction = model_fn(params, optics, source)
-    start_z_score = exposure.z_score(start_prediction)
-    fit_z_score = exposure.z_score(fit_prediction)
+    start_z_score = zdx.z_score(start_prediction.data, exposure.data, exposure.std)
+    fit_z_score = zdx.z_score(fit_prediction.data, exposure.data, exposure.std)
 
     # Use a shared photon scale to compare the data and both model images
     images = np.stack([start_prediction.data, exposure.data, fit_prediction.data])

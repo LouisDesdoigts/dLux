@@ -36,6 +36,17 @@ class TestSpecifications:
         assert_jittable(lambda value: value.coordinates, mapped)
         assert mapped.coordinates.shape == (2, 2, 4, 4)
 
+    def test_match_shape(self):
+        grid = dl.GridSpec(d=0.1, unit="m")
+        matched = grid.match_shape((6, 8))
+
+        assert matched.n == (8, 6)
+        assert matched.d.shape == (2,)
+        assert dl.GridSpec((8, 6), 0.1).match_shape((6, 8)).n == (8, 6)
+
+        with pytest.raises(ValueError, match="shape must match grid.n"):
+            dl.GridSpec((8, 6), 0.1).match_shape((8, 6))
+
     def test_sampling_spec_contracts(self):
         pad = dl.ResizeSpec(pad=2, crop=3, c=(0.1, -0.1))
         resize = dl.ResizeSpec((8, 6), c=0.0).broadcast(2)

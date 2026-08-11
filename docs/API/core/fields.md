@@ -27,7 +27,7 @@ classDiagram
     dLux_fields_ContinuousField <|-- dLux_fields_PSF
     click dLux_fields_PSF href "#dLux.fields.PSF" "Attributes: data, grid · Properties: field, batch_ndim · Methods: from_wavefront()"
     dLux_fields_DiscreteField <|-- dLux_fields_Image
-    click dLux_fields_Image href "#dLux.fields.Image" "Attributes: data, grid, variance, read_noise · Properties: field, error · Methods: z_score(), add_poisson_noise(), add_read_noise(), simulate(), log_likelihood()"
+    click dLux_fields_Image href "#dLux.fields.Image" "Attributes: data, grid, variance, read_noise · Properties: field, std · Methods: add_poisson_noise(), add_read_noise(), simulate()"
 ```
 
 ???+ info "BaseField"

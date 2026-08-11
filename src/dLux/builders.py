@@ -22,7 +22,6 @@ from .parametric.bases import _resolve_coeffs
 __all__ = [
     "GridBuilder",
     "OPDDef",
-    "ApertureData",
     "Norm",
     "ZernikeDef",
     "ApertureBuilder",
@@ -142,7 +141,7 @@ class Norm(Base):
         return self.scale * basis / value
 
 
-class ApertureData(Base):
+class _ApertureData(Base):
     """Sampled geometry passed internally to an OPD definition.
 
     ``transmission`` is the final downsampled pupil. ``support`` describes the
@@ -399,7 +398,7 @@ class ApertureBuilder(GridBuilder):
         diameter = np.asarray(0.0) if extent is None else 2 * extent
 
         # Package the sampled aperture data
-        return ApertureData(transmission, support, diameter)
+        return _ApertureData(transmission, support, diameter)
 
     def _build(self, grid, transform, return_support=False):
         """Build sampled transmission, OPD data, and optional support."""
@@ -557,7 +556,7 @@ class SparseApertureBuilder(ApertureBuilder):
         diameter = np.asarray(0.0) if extent is None else 2 * extent
 
         # Package the sampled aperture data
-        return ApertureData(transmission, support, diameter, self.centers)
+        return _ApertureData(transmission, support, diameter, self.centers)
 
     def _sparse_data(self, grid, transform):
         """Sample the shared transmission and optional local OPD basis."""

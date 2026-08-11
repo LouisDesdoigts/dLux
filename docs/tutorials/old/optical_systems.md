@@ -61,18 +61,19 @@ print(optics)
         Optic(opd=None, phase=None, transmission=f32[256,256], normalise=True),
         'propagator':
         Fraunhofer(
-          spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+          grid=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
           focal_length=None,
+          inverse=False,
           method='mft'
         )
       },
-      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
+      grid=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m')
     )
 
 
 ## Sources and spectra
 
-A `Spectrum` contains wavelength samples and their pre-integrated weights. A `Source` adds position, flux, and an optional resolved distribution. Units are declared once on the source, so the user-facing values can remain in convenient units. Spectral weights are deliberately not normalised inside the model; if unit total weight is required, normalise them before constructing or updating the source.
+A `Spectrum` contains wavelength samples and their corresponding weights. A `Source` adds position, flux, and an optional resolved distribution. Units are declared once on the source, so user-facing values can remain convenient. Explicit array weights are treated as pre-integrated and are not automatically normalised. Parametric spectral models such as `SpectralPolynomial`, `SpectralBasis`, and `Blackbody` provide a `normalise` option and use unit-sum weights by default. This normalization is applied independently along the trailing wavelength axis and treats samples as equally weighted bins; nonuniform wavelength samples require explicit bin widths or quadrature weights. Realized weights must be positive with a finite, non-zero sum.
 
 
 ```python
@@ -126,17 +127,17 @@ print("PSF data:", psf.data.shape)
 ```
 
     Wavefront(
-      spec=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m'),
+      grid=GridSpec(n=(256, 256), d=f32[2], c=None, unit='m'),
       phasor=c64[9,256,256],
       wavelength=f32[9]
     )
     Wavefront(
-      spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+      grid=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
       phasor=c64[9,128,128],
       wavelength=f32[9]
     )
     PSF(
-      spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+      grid=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
       data=f32[128,128]
     )
     Wavefront phasor: (9, 128, 128)
@@ -146,9 +147,9 @@ print("PSF data:", psf.data.shape)
 
 ??? info "Plotting code"
     ```python
-    pupil_extent = pupil_spec.extent
-    psf_extent = psf_spec.set(unit=None).extent
-    
+    pupil_extent = pupil_spec.extent()
+    psf_extent = psf_spec.extent(unit="arcsec")
+
     fig, axes = plt.subplots(1, 4, figsize=(18, 4))
     images = [
         axes[0].imshow(aperture, extent=pupil_extent),
@@ -169,9 +170,9 @@ print("PSF data:", psf.data.shape)
     ```
 
 
-    
+
 ![png](assets/optical_systems_files/output_8_0.png)
-    
+
 
 
 A `BinarySource` uses the same spectral contract while generating two positions and their flux ratio. Its weights may be shared by both stars or have a leading two-source axis for distinct component spectra.
@@ -211,7 +212,7 @@ print(binary_psf)
       contrast=f32[]
     )
     PSF(
-      spec=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
+      grid=GridSpec(n=(128, 128), d=f32[2], c=None, unit='arcsec'),
       data=f32[128,128]
     )
 
@@ -230,9 +231,9 @@ print(binary_psf)
     ```
 
 
-    
+
 ![png](assets/optical_systems_files/output_11_0.png)
-    
+
 
 
 ## Detector systems and images
@@ -266,28 +267,28 @@ print(noisy)
       }
     )
     Image(
-      spec=GridSpec(n=(64, 128), d=f32[2], c=None, unit='arcsec'),
+      grid=GridSpec(n=(64, 128), d=f32[2], c=None, unit='arcsec'),
+      data=f32[128,64],
       variance=None,
-      read_noise=f32[],
-      data=f32[128,64]
+      read_noise=f32[]
     )
     Image(
-      spec=GridSpec(n=(64, 128), d=f32[2], c=None, unit='arcsec'),
+      grid=GridSpec(n=(64, 128), d=f32[2], c=None, unit='arcsec'),
+      data=f32[128,64],
       variance=f32[128,64],
-      read_noise=f32[],
-      data=f32[128,64]
+      read_noise=f32[]
     )
 
 
 
 ??? info "Plotting code"
     ```python
-    image_extent = image.spec.set(unit=None).extent
+    image_extent = image.grid.extent(unit="arcsec")
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
     panels = [
         (image.data, "Detector expectation", PowerNorm(0.5)),
         (noisy.data, "Noisy Image", PowerNorm(0.5)),
-        (noisy.error, "Tracked error", None),
+        (noisy.std, "Tracked standard deviation", None),
     ]
     for ax, (data, title, norm) in zip(axes, panels):
         im = ax.imshow(data, extent=image_extent, norm=norm)
@@ -298,9 +299,9 @@ print(noisy)
     ```
 
 
-    
+
 ![png](assets/optical_systems_files/output_14_0.png)
-    
+
 
 
 ## Summary

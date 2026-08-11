@@ -12,6 +12,7 @@ import dLux.utils as dlu
 from .base import Base
 
 __all__ = [
+    "BaseGridSpec",
     "GridSpec",
     "ResizeSpec",
     "PasteSpec",
@@ -335,6 +336,23 @@ class GridSpec(BaseGridSpec):
             d=dlu.as_axis(self.d, ndim, "d"),
             c=dlu.as_axis(self.c, ndim, "c"),
         )
+
+    def match_shape(self, shape) -> GridSpec:
+        """Return a grid matching a spatial shape in array-axis order.
+
+        The grid is broadcast to the number of supplied spatial axes. An undefined
+        ``n`` is populated from the reversed array shape; an existing ``n`` must
+        already describe the same physical-axis pixel counts.
+        """
+        shape = dlu.as_size(shape, name="shape")
+        grid = self.broadcast(len(shape))
+        n = shape[::-1]
+
+        if grid.n is None:
+            return grid.set(n=n)
+        if grid.n != n:
+            raise ValueError("Spatial shape must match grid.n.")
+        return grid
 
     def resize(self, n) -> GridSpec:
         """Change the grid size while retaining its sampling."""

@@ -8,8 +8,6 @@ import operator
 import equinox as eqx
 import jax.numpy as np
 import jax.random as jr
-import jax.scipy as jsp
-import zodiax as zdx
 from jax import Array, vmap
 from jax.scipy.signal import convolve
 
@@ -34,20 +32,6 @@ _ops = {
     "multiply": operator.mul,
     "divide": operator.truediv,
 }
-
-
-def _field_spec(grid, shape):
-    """Validate a field specification against its two spatial axes."""
-    if not isinstance(grid, GridSpec):
-        raise TypeError("grid must be a GridSpec.")
-    grid = grid.broadcast(2)
-    n = shape[-2:][::-1]
-    if grid.n is None:
-        return grid.set(n=n)
-    if grid.n != n:
-        raise ValueError("Field spatial shape must match grid.n.")
-    return grid
-
 
 class BaseField(Base):
     """Base class for regularly sampled real or complex fields."""
@@ -323,11 +307,13 @@ class Wavefront(ContinuousField):
         grid: GridSpec,
         phasor: Array | None = None,
     ):
-        # Resolve wavelengths and initialise a uniform field when required
+        # Validate the grid and resolve the input wavelengths
+        if not isinstance(grid, GridSpec):
+            raise TypeError("grid must be a GridSpec.")
         self.wavelength = dlu.to_value(wavelength)
+
+        # Initialise a uniform field when no phasor is supplied
         if phasor is None:
-            if not isinstance(grid, GridSpec):
-                raise TypeError("grid must be a GridSpec.")
             grid = grid.broadcast(2)
             if grid.n is None:
                 raise ValueError("grid.n is required when phasor is not provided.")
@@ -339,7 +325,7 @@ class Wavefront(ContinuousField):
             phasor = dlu.to_value(phasor, complex)
             if phasor.ndim < 2:
                 raise ValueError("phasor must have at least two spatial dimensions.")
-            grid = _field_spec(grid, phasor.shape)
+            grid = grid.match_shape(phasor.shape[-2:])
             if phasor.ndim == 2 and self.wavelength.ndim > 0:
                 phasor = phasor * np.ones(self.wavelength.shape + (1, 1))
             self.phasor = phasor
@@ -794,7 +780,9 @@ class PSF(ContinuousField):
         self.data = dlu.to_value(data)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        self.grid = _field_spec(grid, self.data.shape)
+        if not isinstance(grid, GridSpec):
+            raise TypeError("grid must be a GridSpec.")
+        self.grid = grid.match_shape(self.data.shape[-2:])
 
     @property
     def field(self) -> Array:
@@ -824,6 +812,9 @@ class Image(DiscreteField):
     variance : Array or None
         Known variance of the observed data. This is populated by the noise
         simulation methods and may also be supplied directly.
+    std : Array or None
+        Known standard deviation, converted to ``variance=std**2``. Supply at most
+        one of ``variance`` or ``std``.
     read_noise : float or Array
         Gaussian read-noise standard deviation associated with the image.
     """
@@ -838,6 +829,7 @@ class Image(DiscreteField):
         data: Array | PSF,
         grid: GridSpec | None = None,
         variance: Array | None = None,
+        std: Array | None = None,
         read_noise: float | Array = 0.0,
     ):
         # Unpack a sampled optical PSF directly into detector image data
@@ -850,7 +842,16 @@ class Image(DiscreteField):
         data = dlu.to_value(data)
         if data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
-        grid = _field_spec(grid, data.shape)
+        if not isinstance(grid, GridSpec):
+            raise TypeError("grid must be a GridSpec.")
+        if variance is not None and std is not None:
+            raise ValueError("Provide only one of variance or std.")
+
+        # Resolve either uncertainty representation into stored variance
+        grid = grid.match_shape(data.shape[-2:])
+        if std is not None:
+            std = dlu.to_value(std)
+            variance = std**2
         if variance is not None:
             variance = np.broadcast_to(dlu.to_value(variance), data.shape)
         self.data = data
@@ -864,19 +865,9 @@ class Image(DiscreteField):
         return self.data
 
     @property
-    def error(self) -> Array | None:
+    def std(self) -> Array | None:
         """Return the standard deviation implied by ``variance``."""
         return None if self.variance is None else np.sqrt(self.variance)
-
-    def z_score(self, model: BaseField | Array) -> Array:
-        """Return the standardised residuals between the model and image."""
-        if self.error is None:
-            raise ValueError("variance is required to calculate z-scores.")
-
-        model = model.field if isinstance(model, BaseField) else np.asarray(model)
-        if model.shape != self.field.shape:
-            raise ValueError("model and data must have matching shapes.")
-        return zdx.z_score(model, self.field, self.error)
 
     def add_poisson_noise(self, key: Array) -> Image:
         """Add a Poisson realisation and its expected variance."""
@@ -933,33 +924,3 @@ class Image(DiscreteField):
         variance = images.variance.mean(0) / n_frames
         error = images.read_noise[0] / np.sqrt(n_frames)
         return self.set(field=data, variance=variance, read_noise=error)
-
-    def log_likelihood(
-        self, model: BaseField | Array, distribution: str = "gaussian"
-    ) -> Array:
-        """Return a summed Gaussian or Poisson log likelihood.
-
-        The Gaussian likelihood uses the stored ``variance``. The Poisson
-        likelihood is exact for count data without additive read noise.
-        """
-        # Resolve and validate the model data
-        model = model.field if isinstance(model, BaseField) else np.asarray(model)
-        if model.shape != self.field.shape:
-            raise ValueError("model and data must have matching shapes.")
-
-        # Evaluate a Gaussian likelihood with stored variance
-        if distribution == "gaussian":
-            if self.variance is None:
-                raise ValueError("variance is required for a Gaussian likelihood.")
-            residual = self.field - model
-            terms = residual**2 / self.variance + np.log(2 * np.pi * self.variance)
-            return -0.5 * terms.sum()
-
-        # Evaluate an exact Poisson count likelihood
-        if distribution == "poisson":
-            return (
-                jsp.special.xlogy(self.field, model)
-                - model
-                - jsp.special.gammaln(self.field + 1)
-            ).sum()
-        raise ValueError("distribution must be 'gaussian' or 'poisson'.")

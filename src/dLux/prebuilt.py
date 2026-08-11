@@ -99,7 +99,9 @@ class SegmentedHex(SparseApertureBuilder):
     Notes
     -----
     Both methods are numerically equivalent. Changing ``paste_method`` through an
-    immutable update may trigger a separate JAX compilation.
+    immutable update may trigger a separate JAX compilation. Compact OPD bases are
+    evaluated directly at the output sampling and clipped by the corresponding hard
+    segment support; only the transmission uses the configured oversampling.
     """
 
     paste_method: str

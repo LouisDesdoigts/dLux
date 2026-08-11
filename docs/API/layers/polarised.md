@@ -6,13 +6,15 @@
 
 ```mermaid
 classDiagram
+    class dLux_layers_polarised_BasePolarisingOptic["BasePolarisingOptic"]
     class dLux_layers_polarised_PolarisationLayer["PolarisationLayer"]
     class dLux_layers_polarised_PolarisingOptic["PolarisingOptic"]
     class dLux_layers_polarised_UniformPolarisingOptic["UniformPolarisingOptic"]
     class dLux_layers_polarised_LinearPolariser["LinearPolariser"]
     class dLux_layers_polarised_Retarder["Retarder"]
     class dLux_layers_optical_OpticalLayer["OpticalLayer"]
-    class dLux_layers_polarised_BasePolarisingOptic["BasePolarisingOptic"]
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_polarised_BasePolarisingOptic
+    click dLux_layers_polarised_BasePolarisingOptic href "#dLux.layers.polarised.BasePolarisingOptic" "Methods: apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_polarised_PolarisationLayer
     click dLux_layers_polarised_PolarisationLayer href "#dLux.layers.polarised.PolarisationLayer" "Attributes: polarisation · Methods: apply_mono()"
     dLux_layers_polarised_BasePolarisingOptic <|-- dLux_layers_polarised_PolarisingOptic
@@ -24,6 +26,9 @@ classDiagram
     dLux_layers_polarised_BasePolarisingOptic <|-- dLux_layers_polarised_Retarder
     click dLux_layers_polarised_Retarder href "#dLux.layers.polarised.Retarder" "Attributes: retardance, angle · Properties: jones · Methods: apply_mono()"
 ```
+
+???+ info "BasePolarisingOptic"
+    ::: dLux.layers.polarised.BasePolarisingOptic
 
 ???+ info "PolarisationLayer"
     ::: dLux.layers.polarised.PolarisationLayer

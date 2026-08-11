@@ -368,7 +368,7 @@ class TestImage:
         assert isinstance(image, dl.DiscreteField)
         assert not isinstance(image, dl.ContinuousField)
         assert poisson.variance.shape == image.data.shape
-        assert noisy.error.shape == image.data.shape
+        assert noisy.std.shape == image.data.shape
         assert np.allclose(noisy.read_noise, 2.0)
 
     def test_noise_variance_accumulates(self, make_grid):
@@ -380,6 +380,15 @@ class TestImage:
 
         assert np.allclose(poisson.variance, 14.0)
         assert np.allclose(noisy.variance, 18.0)
+
+    def test_standard_deviation_input(self, make_grid):
+        image = dl.Image(np.ones((8, 8)), make_grid(), std=2.0)
+
+        assert np.allclose(image.variance, 4.0)
+        assert np.allclose(image.std, 2.0)
+
+        with pytest.raises(ValueError, match="one of variance or std"):
+            dl.Image(np.ones((8, 8)), make_grid(), variance=1.0, std=1.0)
 
     def test_psf_conversion_and_simulation(self, make_grid):
         psf = dl.PSF(np.full((8, 8), 10.0), make_grid())
@@ -405,24 +414,6 @@ class TestImage:
         assert np.allclose(amplitude, np.abs(transformed))
         assert np.allclose(power, amplitude**2)
 
-    def test_likelihood_contract(self, make_grid):
-        model = dl.PSF(np.full((8, 8), 10.0), make_grid())
-        image = dl.Image(
-            model.data, model.grid, variance=np.full((8, 8), 4.0), read_noise=2.0
-        )
-
-        gaussian = assert_jittable(
-            lambda value: value.log_likelihood(model, "gaussian"), image
-        )
-        poisson = assert_jittable(
-            lambda value: value.log_likelihood(model, "poisson"), image
-        )
-        z_score = assert_jittable(lambda value: value.z_score(model), image)
-
-        assert np.isfinite(gaussian)
-        assert np.isfinite(poisson)
-        assert np.allclose(z_score, 0.0)
-
     def test_leading_axis_contract(self, make_grid):
         data = np.full((2, 3, 8, 8), 10.0)
         image = dl.Image(data, make_grid(), variance=2.0)
@@ -436,7 +427,7 @@ class TestImage:
         assert noisy.data.shape == noisy.variance.shape == data.shape
         assert noisy.fourier_transform.shape == data.shape
         assert noisy.power_spectrum.shape == data.shape
-        assert np.isfinite(noisy.log_likelihood(image, "gaussian"))
+        assert noisy.std.shape == data.shape
 
     @pytest.mark.parametrize(
         "operation",
@@ -444,19 +435,6 @@ class TestImage:
             lambda grid: dl.Image(np.ones(8), grid),
             lambda grid: dl.Image(np.ones((4, 4)), grid),
             lambda grid: dl.Image(np.ones((8, 8)), "invalid"),
-            lambda grid: dl.Image(np.ones((8, 8)), grid).log_likelihood(
-                np.ones((4, 4))
-            ),
-            lambda grid: dl.Image(np.ones((8, 8)), grid).z_score(np.ones((8, 8))),
-            lambda grid: dl.Image(
-                np.ones((8, 8)), grid, variance=1.0
-            ).z_score(np.ones((4, 4))),
-            lambda grid: dl.Image(np.ones((8, 8)), grid).log_likelihood(
-                np.ones((8, 8)), "gaussian"
-            ),
-            lambda grid: dl.Image(np.ones((8, 8)), grid, variance=1.0).log_likelihood(
-                np.ones((8, 8)), "invalid"
-            ),
         ],
     )
     def test_validation(self, operation, make_grid):

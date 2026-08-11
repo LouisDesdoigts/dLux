@@ -8,7 +8,6 @@
 classDiagram
     class dLux_builders_GridBuilder["GridBuilder"]
     class dLux_builders_OPDDef["OPDDef"]
-    class dLux_builders_ApertureData["ApertureData"]
     class dLux_builders_Norm["Norm"]
     class dLux_builders_ZernikeDef["ZernikeDef"]
     class dLux_builders_ApertureBuilder["ApertureBuilder"]
@@ -18,8 +17,6 @@ classDiagram
     click dLux_builders_GridBuilder href "#dLux.builders.GridBuilder" "Methods: validate(), build()"
     dLux_base_Base <|-- dLux_builders_OPDDef
     click dLux_builders_OPDDef href "#dLux.builders.OPDDef" "Methods: calculate()"
-    dLux_base_Base <|-- dLux_builders_ApertureData
-    click dLux_builders_ApertureData href "#dLux.builders.ApertureData" "Attributes: transmission, support, diameter, centers"
     dLux_base_Base <|-- dLux_builders_Norm
     click dLux_builders_Norm href "#dLux.builders.Norm" "Attributes: mode, scale"
     dLux_builders_OPDDef <|-- dLux_builders_ZernikeDef
@@ -35,9 +32,6 @@ classDiagram
 
 ???+ info "OPDDef"
     ::: dLux.builders.OPDDef
-
-???+ info "ApertureData"
-    ::: dLux.builders.ApertureData
 
 ???+ info "Norm"
     ::: dLux.builders.Norm

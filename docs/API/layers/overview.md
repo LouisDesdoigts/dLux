@@ -15,7 +15,7 @@ flowchart LR
     dLux_layers_optical["Optical"]
     click dLux_layers_optical href "../optical/" "Public API: BaseLayer, BaseOpticalLayer, OpticalLayer, TransmissiveLayer, AberratedLayer, Optic, Tilt"
     dLux_layers_polarised["Polarised"]
-    click dLux_layers_polarised href "../polarised/" "Public API: PolarisationLayer, PolarisingOptic, UniformPolarisingOptic, LinearPolariser, Retarder"
+    click dLux_layers_polarised href "../polarised/" "Public API: BasePolarisingOptic, PolarisationLayer, PolarisingOptic, UniformPolarisingOptic, LinearPolariser, Retarder"
     dLux_layers_propagation["Propagation"]
     click dLux_layers_propagation href "../propagation/" "Public API: ABCDElement, ABCDFreeSpace, ABCDLens, ABCDMirror, ABCDFraunhofer, Propagator, FocalPropagator, ABCDPropagator, FreeSpace, Fraunhofer, Fresnel"
     dLux_layers_refractive["Refractive"]
