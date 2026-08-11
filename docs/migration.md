@@ -22,8 +22,8 @@ resize = dl.ResizeSpec(pad=2, crop=1)
 
 `GridSpec` is multidimensional. Its `n`, `d`, and optional `c` values therefore have
 one entry per physical axis, even when constructed from scalar inputs. Coordinate
-transformations now live in `dLux.grids`; use `DistortCoords` in place of
-`DistortedCoords`.
+transformations now live in `dLux.grids`; use `Distortion` in place of
+`DistortedCoords`, and `Affine` in place of the former concrete `CoordTransform`.
 
 ## Fields
 

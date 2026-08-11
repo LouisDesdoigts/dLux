@@ -65,7 +65,7 @@ def test_coefficients_attribute_alias(parametric, migration):
     [
         (dl.CoordSpec, dl.GridSpec, {"n": 8, "d": 0.1}),
         (dl.PadSpec, dl.ResizeSpec, {"pad": 2, "crop": 1}),
-        (dl.DistortedCoords, dl.DistortCoords, {"order": 2}),
+        (dl.DistortedCoords, dl.Distortion, {"order": 2}),
     ],
 )
 def test_legacy_coordinate_interfaces(legacy, current, kwargs):
@@ -87,6 +87,25 @@ def test_legacy_coordinate_behaviour():
     assert spec.xs.shape == (8,)
     assert np.isclose(spec.fov, 0.8)
     assert transform.calculate(8, 1.0).shape == (2, 8, 8)
+
+
+def test_legacy_coord_transform_behaviour():
+    coordinates = dlu.pixel_coords(8, 1.0)
+
+    with pytest.warns(DeprecationWarning, match="CoordTransform"):
+        transform = dl.CoordTransform(
+            translation=[0.1, -0.2],
+            rotation=0.2,
+            compression=[0.9, 1.1],
+            shear=[0.05, -0.1],
+        )
+
+    expected = dlu.translate_coords(coordinates, transform.translation)
+    expected = dlu.shear_coords(expected, transform.shear)
+    expected = dlu.compress_coords(expected, transform.compression)
+    expected = dlu.rotate_coords(expected, transform.rotation)
+
+    assert np.allclose(transform(coordinates), expected)
 
 
 def test_legacy_detector_return_contract():

@@ -10,7 +10,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..base import Base
-from ..grids import CoordTransform
+from ..grids import BaseCoordTransform
 from .parametrics import Parametric
 
 __all__ = [
@@ -301,13 +301,13 @@ class TransformedShape(Shape):
     """Evaluate a shape in a transformed local coordinate frame."""
 
     shape: Shape
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
 
     def __init__(self, shape, transformation):
         if not isinstance(shape, Shape):
             raise TypeError("shape must be a Shape.")
-        if not isinstance(transformation, CoordTransform):
-            raise TypeError("transformation must be a CoordTransform.")
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
         self.shape = shape
         self.transformation = transformation
 

@@ -14,7 +14,7 @@ from jax.scipy.signal import convolve
 import dLux.utils as dlu
 
 from .base import Base
-from .grids import CoordTransform, GridSpec
+from .grids import BaseCoordTransform, GridSpec
 
 __all__ = [
     "BaseField",
@@ -64,8 +64,8 @@ def _scale_field(field, npixels, pixel_scale, method, complex):
 def _interpolate_field(field, transformation, method, complex, fill):
     """Interpolate a field through a coordinate transformation."""
     # Validate and transform the sampled coordinate grid
-    if not isinstance(transformation, CoordTransform):
-        raise TypeError("transformation must be a CoordTransform.")
+    if not isinstance(transformation, BaseCoordTransform):
+        raise TypeError("transformation must be a BaseCoordTransform.")
 
     knots = field.coordinates
     transform = np.vectorize(transformation, signature="(c,n,m)->(c,n,m)")
@@ -266,7 +266,7 @@ class ContinuousField(BaseField):
 
     def interpolate(
         self,
-        transformation: CoordTransform,
+        transformation: BaseCoordTransform,
         method: str = "linear",
         complex: bool = True,
         fill: float = 0.0,

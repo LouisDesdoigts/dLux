@@ -128,7 +128,7 @@ def distort_coords(coords: Array, coeffs: Array, pows: Array):
     """Apply a polynomial distortion to 2D coordinates.
 
     Coordinates follow ``(..., 2, ny, nx)``. Unbatched coefficients have shape
-    ``(2, n_terms)``; batching is owned by :class:`dLux.DistortCoords`.
+    ``(2, n_terms)``; batching is owned by :class:`dLux.Distortion`.
 
     Parameters
     ----------

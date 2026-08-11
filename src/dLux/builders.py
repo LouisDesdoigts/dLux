@@ -13,7 +13,7 @@ from jax import Array, vmap
 import dLux.utils as dlu
 
 from .base import Base
-from .grids import CoordTransform, GridSpec
+from .grids import BaseCoordTransform, GridSpec
 from .layers.optical import Optic
 from .layers.sparse import SparseOptic
 from .parametric import Basis, Shape
@@ -274,8 +274,8 @@ class GridBuilder(Base):
             raise ValueError("grid must have two dimensions.")
         if grid.d.ndim != 1 or (grid.c is not None and grid.c.ndim != 1):
             raise ValueError("batched grids are not yet supported by GridBuilder.")
-        if transform is not None and not isinstance(transform, CoordTransform):
-            raise TypeError("transform must be a CoordTransform or None.")
+        if transform is not None and not isinstance(transform, BaseCoordTransform):
+            raise TypeError("transform must be a BaseCoordTransform or None.")
 
     def build(self, grid, transform=None, jit=True):
         """Evaluate this builder on a grid.
@@ -284,7 +284,7 @@ class GridBuilder(Base):
         ----------
         grid : GridSpec
             Two-dimensional output sampling grid.
-        transform : CoordTransform or None
+        transform : BaseCoordTransform or None
             Optional map from grid coordinates into the builder's local frame.
         jit : bool
             Use the shared compiled construction path. Defaults to ``True``;

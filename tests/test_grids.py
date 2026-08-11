@@ -265,9 +265,9 @@ class TestTransforms:
                 scale=[0.9, 1.1],
                 shear=[0.1, -0.05],
             ),
-            dl.DistortCoords(order=2),
+            dl.Distortion(order=2),
             dl.TransformChain(
-                [dl.Affine(translation=[0.1, 0.0]), dl.DistortCoords(order=2)]
+                [dl.Affine(translation=[0.1, 0.0]), dl.Distortion(order=2)]
             ),
         ],
     )
@@ -285,7 +285,7 @@ class TestTransforms:
             lambda rotation: affine.set(rotation=rotation)(coordinates), affine.rotation
         )
 
-        distorted = dl.DistortCoords(order=2)
+        distorted = dl.Distortion(order=2)
         assert_differentiable(
             lambda distortion: distorted.set(distortion=distortion)(coordinates),
             distorted.distortion,
@@ -294,7 +294,9 @@ class TestTransforms:
     def test_transform_requires_external_grid(self, coordinates):
         transform = dl.Affine(translation=[0.1, 0.0])
 
-        assert np.allclose(transform(coordinates), transform.apply(coordinates))
+        with pytest.warns(DeprecationWarning, match="dLux 0.17.0"):
+            applied = transform.apply(coordinates)
+        assert np.allclose(transform(coordinates), applied)
         spec = dl.GridSpec(n=6, d=1 / 6, unit="m").broadcast(2)
         with pytest.raises((TypeError, ValueError)):
             transform(spec)
@@ -320,7 +322,7 @@ class TestTransforms:
         assert_jittable(chain, coordinates)
 
     def test_vectorised_distortion(self, coordinates):
-        transform = dl.DistortCoords(order=2, distortion=np.zeros((3, 2, 5)))
+        transform = dl.Distortion(order=2, distortion=np.zeros((3, 2, 5)))
 
         output = assert_jittable(lambda value: value(coordinates), transform)
         assert output.shape == (3,) + coordinates.shape
@@ -339,7 +341,7 @@ class TestTransforms:
         assert offset.shape == (2, 2)
 
     def test_paired_vectorised_distortion(self, coordinates):
-        base = dl.DistortCoords(orders=(1, 2))
+        base = dl.Distortion(orders=(1, 2))
         distortion = np.stack((base.distortion, base.distortion.at[0, 0].set(0.1)))
         transform = base.set(distortion=distortion)
         mapped_coordinates = np.stack((coordinates, coordinates + 0.1))
@@ -367,10 +369,10 @@ class TestTransforms:
             lambda: dl.AffineMap(matrix=np.ones((3, 3))),
             lambda: dl.AffineMap(offset=np.ones(3)),
             lambda: dl.Affine(translation=np.ones(3)),
-            lambda: dl.DistortCoords(powers=np.ones((3, 2))),
-            lambda: dl.DistortCoords(order=2, orders=[2]),
-            lambda: dl.DistortCoords(orders=[]),
-            lambda: dl.DistortCoords(order=2, distortion=np.ones((2, 2))),
+            lambda: dl.Distortion(powers=np.ones((3, 2))),
+            lambda: dl.Distortion(order=2, orders=[2]),
+            lambda: dl.Distortion(orders=[]),
+            lambda: dl.Distortion(order=2, distortion=np.ones((2, 2))),
         ],
     )
     def test_validation(self, constructor):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+import warnings
 
 import jax.numpy as np
 from jax import Array, core, lax, vmap
@@ -16,11 +17,11 @@ __all__ = [
     "GridSpec",
     "ResizeSpec",
     "PasteSpec",
-    "CoordTransform",
+    "BaseCoordTransform",
     "Affine",
     "AffineMap",
     "TransformChain",
-    "DistortCoords",
+    "Distortion",
 ]
 
 
@@ -476,11 +477,11 @@ class GridSpec(BaseGridSpec):
         """Return 2D coordinates after applying an optional transform."""
         if transform is None:
             return self.coordinates
-        if not isinstance(transform, CoordTransform):
-            raise TypeError("transform must be a CoordTransform or None.")
+        if not isinstance(transform, BaseCoordTransform):
+            raise TypeError("transform must be a BaseCoordTransform or None.")
         if self.ndim != 2:
             raise ValueError(
-                "CoordTransform currently supports only 2D GridSpec objects."
+                "BaseCoordTransform currently supports only 2D GridSpec objects."
             )
         return transform(self.coordinates)
 
@@ -539,7 +540,7 @@ class GridSpec(BaseGridSpec):
         return extent * grid.scale / dlu.unit_factor(unit)
 
 
-class CoordTransform(Base):
+class BaseCoordTransform(Base):
     """Base class for transforms of ``(..., 2, ny, nx)`` coordinate fields.
 
     Leading transform and coordinate dimensions use paired JAX broadcasting. An
@@ -564,17 +565,24 @@ class CoordTransform(Base):
         """Transform an array of Cartesian coordinates."""
 
     def apply(self, coordinates: Array) -> Array:
-        """Backwards-compatible alias for calling the transformation."""
+        """Deprecated alias for calling the transformation directly."""
+        warnings.warn(
+            "The `.apply()` method is deprecated and will be removed in dLux "
+            "0.17.0. Use `transform(coordinates)` instead: "
+            "`transform.apply(coordinates)` -> `transform(coordinates)`.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self(coordinates)
 
 
-class TransformChain(CoordTransform):
+class TransformChain(BaseCoordTransform):
     """Apply an ordered collection of coordinate transformations.
 
     Parameters
     ----------
     transformations : sequence or dict
-        Named or unnamed ``CoordTransform`` objects in application order.
+        Named or unnamed ``BaseCoordTransform`` objects in application order.
     """
 
     transformations: dict
@@ -585,7 +593,7 @@ class TransformChain(CoordTransform):
         else:
             transformations = list(transformations)
         self.transformations = dlu.list2dictionary(
-            transformations, True, CoordTransform
+            transformations, True, BaseCoordTransform
         )
 
     def __call__(self, coords: Array) -> Array:
@@ -596,7 +604,7 @@ class TransformChain(CoordTransform):
         return coords
 
 
-class DistortCoords(CoordTransform):
+class Distortion(BaseCoordTransform):
     """Apply a polynomial distortion to Cartesian coordinates.
 
     Polynomial coefficients have shape ``(2, n_terms)`` for output ``x`` and
@@ -652,7 +660,7 @@ class DistortCoords(CoordTransform):
         return dlu.distort_coords(coords, self.distortion, self.powers)
 
 
-class AffineMap(CoordTransform):
+class AffineMap(BaseCoordTransform):
     """Apply a direct affine coordinate map ``x' = matrix @ x + offset``.
 
     Matrix, offset, and coordinate leading dimensions use paired JAX broadcasting.
@@ -685,7 +693,7 @@ class AffineMap(CoordTransform):
         return np.einsum("...ij,...jxy->...ixy", self.matrix, coords) + shift
 
 
-class Affine(CoordTransform):
+class Affine(BaseCoordTransform):
     """An affine coordinate transform with semantic parameters.
 
     Translation, rotation, scale, and shear map coordinates into a transformed

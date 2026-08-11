@@ -8,7 +8,7 @@ from jax import Array, vmap
 
 import dLux.utils as dlu
 
-from ..grids import Affine, AffineMap, CoordTransform, DistortCoords, GridSpec
+from ..grids import Affine, AffineMap, BaseCoordTransform, Distortion, GridSpec
 from ..parametric import Parametric, ParametricBasis
 from ..fields import Wavefront
 from .dynamic import BaseDynamicLayer
@@ -76,7 +76,7 @@ class SparseOptic(Optic):
         """Select one centre from a shared or centre-vectorised object."""
         if isinstance(obj, ParametricBasis):
             params = (("coeffs", obj.shape),)
-        elif isinstance(obj, DistortCoords):
+        elif isinstance(obj, Distortion):
             params = (("distortion", obj.powers.shape),)
         elif isinstance(obj, AffineMap):
             params = (("matrix", (2, 2)), ("offset", (2,)))
@@ -110,7 +110,7 @@ class SparseOptic(Optic):
 
     def _slice_local(self, index):
         """Select parameters with a leading centre axis for one aperture."""
-        types = (ParametricBasis, DistortCoords, AffineMap, Affine)
+        types = (ParametricBasis, Distortion, AffineMap, Affine)
         is_leaf = lambda leaf: isinstance(leaf, types)
         local_transform = False
 
@@ -119,7 +119,7 @@ class SparseOptic(Optic):
             if not isinstance(leaf, types):
                 return leaf
             leaf, local = self._slice(leaf, index, self.n_apertures)
-            local_transform |= local and isinstance(leaf, CoordTransform)
+            local_transform |= local and isinstance(leaf, BaseCoordTransform)
             return leaf
 
         return jtu.map(select, self, is_leaf=is_leaf), local_transform
@@ -220,7 +220,7 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
         }
 
     coordinates: Array | GridSpec | None
-    transformation: CoordTransform | None
+    transformation: BaseCoordTransform | None
     transmission: Array | Parametric | None
     opd: Array | Parametric | None
     phase: Array | Parametric | None

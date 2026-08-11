@@ -6,7 +6,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..grids import CoordTransform
+from ..grids import BaseCoordTransform
 from ..fields import Intensity, Wavefront
 from .detector import DetectorLayer
 from .optical import OpticalLayer
@@ -76,14 +76,14 @@ class Flip(UnifiedLayer):
 class Interpolate(UnifiedLayer):
     """Interpolate a wavefront or intensity through a coordinate transformation."""
 
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
     method: str
     complex: bool
     fill: Array
 
     def __init__(self, transformation, method="linear", complex=True, fill=0.0):
-        if not isinstance(transformation, CoordTransform):
-            raise TypeError("transformation must be a CoordTransform.")
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
         self.transformation = transformation
         self.method = str(method)
         self.complex = bool(complex)

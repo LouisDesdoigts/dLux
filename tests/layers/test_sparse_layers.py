@@ -64,7 +64,7 @@ def test_shared_and_local_coeffs(centers, wavefront):
 
 
 def test_shared_and_local_distortions(centers, wavefront):
-    shared = dl.DistortCoords(order=2, shift_invariant=True)
+    shared = dl.Distortion(order=2, shift_invariant=True)
     local = shared.set(
         distortion=np.stack([shared.distortion, shared.distortion.at[0, 0].set(0.01)])
     )
@@ -79,7 +79,7 @@ def test_local_affine_and_mismatched_transform(centers, wavefront):
     affine = dl.Affine(translation=np.array([[0.0, 0.0], [0.01, -0.01]]))
     assert_jittable(dl.SparseDynamicOptic(transformation=affine, **common), wavefront)
 
-    distortion = dl.DistortCoords(order=2)
+    distortion = dl.Distortion(order=2)
     distortion = distortion.set(
         distortion=np.stack([distortion.distortion] * (len(centers) + 1))
     )

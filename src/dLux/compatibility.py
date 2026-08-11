@@ -16,7 +16,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from .grids import BaseGridSpec, CoordTransform, DistortCoords, GridSpec, ResizeSpec
+from .grids import BaseCoordTransform, BaseGridSpec, Distortion, GridSpec, ResizeSpec
 from .fields import Intensity, Wavefront
 from .layers.detector import DetectorLayer
 from .layers.propagation import (
@@ -226,12 +226,55 @@ class PadSpec(ResizeSpec):
         super().__init__(pad=pad, crop=crop, c=c)
 
 
-class DistortedCoords(DistortCoords):
-    """Deprecated compatibility wrapper for ``DistortCoords``."""
+class CoordTransform(BaseCoordTransform):
+    """Deprecated 0.15 semantic coordinate transformation."""
+
+    translation: Array | None
+    rotation: Array | None
+    compression: Array | None
+    shear: Array | None
+
+    def __init__(
+        self,
+        translation=None,
+        rotation=None,
+        compression=None,
+        shear=None,
+    ):
+        migration = "`dl.CoordTransform(...)` -> `dl.Affine(...)`"
+        warn_deprecated("CoordTransform", "Affine", migration)
+
+        self.translation = dlu.to_value(translation, optional=True)
+        self.rotation = dlu.to_value(rotation, optional=True)
+        self.compression = dlu.to_value(compression, optional=True)
+        self.shear = dlu.to_value(shear, optional=True)
+
+        for name in ("translation", "compression", "shear"):
+            value = getattr(self, name)
+            if value is not None and value.shape != (2,):
+                raise ValueError(f"{name} must have shape (2,).")
+        if self.rotation is not None and self.rotation.shape != ():
+            raise ValueError("rotation must have shape ().")
+
+    def __call__(self, coords):
+        """Apply the legacy transformation order to coordinates."""
+        if self.translation is not None:
+            coords = dlu.translate_coords(coords, self.translation)
+        if self.shear is not None:
+            coords = dlu.shear_coords(coords, self.shear)
+        if self.compression is not None:
+            coords = dlu.compress_coords(coords, self.compression)
+        if self.rotation is not None:
+            coords = dlu.rotate_coords(coords, self.rotation)
+        return coords
+
+
+class DistortedCoords(Distortion):
+    """Deprecated compatibility wrapper for ``Distortion``."""
 
     def __init__(self, order=1, distortion=None):
-        migration = "`dl.DistortedCoords(...)` -> `dl.DistortCoords(...)`"
-        warn_deprecated("DistortedCoords", "DistortCoords", migration)
+        migration = "`dl.DistortedCoords(...)` -> `dl.Distortion(...)`"
+        warn_deprecated("DistortedCoords", "Distortion", migration)
         super().__init__(order, distortion)
 
     def calculate(self, npix, diameter):
@@ -523,7 +566,6 @@ Zernike = _removed_class("Zernike", *_REMOVED["Zernike"])
 # Abstract legacy coordinate names retain aligned current contracts. The removed
 # modelling bases raise migration errors because their inheritance contracts changed.
 Spec = BaseGridSpec
-BaseCoordTransform = CoordTransform
 BaseDetector = _removed_class(
     "BaseDetector",
     "DetectorSystem or BaseDetectorLayer",
@@ -638,6 +680,7 @@ COMPATIBILITY = {
         "ApplyPixelResponse",
         "ApplySaturation",
         "CoordSpec",
+        "CoordTransform",
         "DistortedCoords",
         "LayeredDetector",
         "LayeredOpticalSystem",
@@ -652,6 +695,7 @@ COMPATIBILITY = {
                 "ApplyPixelResponse",
                 "ApplySaturation",
                 "CoordSpec",
+                "CoordTransform",
                 "DistortedCoords",
                 "FFT",
                 "FFTPropagator",
@@ -689,6 +733,7 @@ __all__ = [
     "CircularAperture",
     "CompoundAperture",
     "CoordSpec",
+    "CoordTransform",
     "DistortedCoords",
     "Dither",
     "FFT",

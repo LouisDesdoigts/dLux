@@ -12,7 +12,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..grids import CoordTransform, PasteSpec
+from ..grids import BaseCoordTransform, PasteSpec
 from .parametrics import Parametric
 
 __all__ = [
@@ -266,10 +266,10 @@ class CoordBasis(ImplicitBasis):
     def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
         """Resolve explicit coordinates or coordinates from a wavefront."""
         if coordinates is not None:
-            return CoordTransform.get_coordinates(coordinates)
+            return BaseCoordTransform.get_coordinates(coordinates)
         if wavefront is None:
             raise ValueError("Provide either wavefront or coordinates.")
-        return CoordTransform.get_coordinates(wavefront.coordinates)
+        return BaseCoordTransform.get_coordinates(wavefront.coordinates)
 
 
 class CLIMBBasis(Basis):

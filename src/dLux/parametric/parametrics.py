@@ -14,7 +14,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..base import Base
-from ..grids import CoordTransform
+from ..grids import BaseCoordTransform
 
 __all__ = [
     "Parametric",
@@ -151,13 +151,13 @@ class DynamicParametric(Parametric):
     """Evaluate any coordinate-dependent parameterisation in a transformed frame."""
 
     parametric: Parametric
-    transformation: CoordTransform
+    transformation: BaseCoordTransform
 
     def __init__(self, parametric, transformation):
         if not isinstance(parametric, Parametric):
             raise TypeError("parametric must be a Parametric.")
-        if not isinstance(transformation, CoordTransform):
-            raise TypeError("transformation must be a CoordTransform.")
+        if not isinstance(transformation, BaseCoordTransform):
+            raise TypeError("transformation must be a BaseCoordTransform.")
         self.parametric = parametric
         self.transformation = transformation
 
