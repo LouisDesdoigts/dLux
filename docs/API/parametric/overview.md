@@ -15,7 +15,7 @@ flowchart LR
     dLux_parametric_refractive["Refractive"]
     click dLux_parametric_refractive href "../refractive/" "Public API: CauchyIndex, PolynomialIndex, InterpolatedIndex"
     dLux_parametric_shapes["Shapes"]
-    click dLux_parametric_shapes href "../shapes/" "Public API: Shape, InvertibleShape, Hard, Soft, Circle, Square, Rectangle, RegularPolygon, Spider, Complement, TransformedShape"
+    click dLux_parametric_shapes href "../shapes/" "Public API: Shape, InvertibleShape, Hard, Soft, Circle, Square, Rectangle, RegularPolygon, ConvexPolygon, Spider, Complement, TransformedShape"
     dLux_parametric_spectral["Spectral"]
     click dLux_parametric_spectral href "../spectral/" "Public API: SpectralPolynomial, SpectralBasis, Blackbody"
 ```

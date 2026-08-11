@@ -2,6 +2,7 @@
 
 import jax.numpy as np
 import pytest
+from jax import grad
 
 import dLux as dl
 import dLux.utils as dlu
@@ -26,6 +27,10 @@ def context():
         (dl.Square(0.8), "width"),
         (dl.Rectangle(0.8, 0.6), "width"),
         (dl.RegularPolygon(6, 0.8), "diameter"),
+        (
+            dl.ConvexPolygon([[-0.4, -0.4], [0.4, -0.4], [0.0, 0.4]], edge=1.0),
+            None,
+        ),
         (dl.Spider(0.1, [0.0, 90.0]), None),
     ],
 )
@@ -106,3 +111,28 @@ def test_shape_extents():
 def test_validation(constructor):
     with pytest.raises((TypeError, ValueError)):
         constructor()
+
+
+@pytest.mark.parametrize(
+    "vertices",
+    [
+        [[0.0, 0.0], [1.0, 0.0]],
+        [[0.0, 0.0], [1.0, 0.0], [0.0, 0.0]],
+        [[0.0, 0.0], [1.0, 1.0], [0.0, 1.0], [1.0, 0.0]],
+        [[0.0, 0.0], [1.0, 0.0], [0.4, 0.4], [0.0, 1.0]],
+    ],
+)
+def test_convex_polygon_validation(vertices):
+    polygon = dl.ConvexPolygon(vertices)
+    with pytest.raises(ValueError):
+        polygon.validate()
+
+
+def test_soft_convex_polygon_has_vertex_gradients(context):
+    vertices = np.array([[-0.4, -0.4], [0.4, -0.4], [0.0, 0.4]])
+
+    def area(scale):
+        polygon = dl.ConvexPolygon(vertices * scale, edge=1.0)
+        return polygon.evaluate(**context).sum()
+
+    assert not np.isclose(grad(area)(1.0), 0.0)

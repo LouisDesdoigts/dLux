@@ -54,6 +54,18 @@ def test_convert_roundtrip():
     assert np.allclose(dlu.convert(converted, "rad", "arcsec"), value)
 
 
+def test_canonical_units_and_dimensions():
+    assert dlu.canonical_unit("arcseconds", dimension="angle") == "arcsec"
+    assert dlu.canonical_unit("mas", dimension="angle") == "mas"
+    assert dlu.canonical_unit("metres", dimension="length") == "m"
+
+    assert np.isclose(dlu.convert(1.0, "nm", "m"), 1e-9)
+    with pytest.raises(ValueError, match="Cannot convert"):
+        dlu.convert(1.0, "nm", "rad")
+    with pytest.raises(ValueError, match="position unit must have dimension 'angle'"):
+        dlu.unit_factor("nm", dimension="angle", name="position unit")
+
+
 @pytest.mark.parametrize("unit", [1, "", "unknown"])
 def test_invalid_unit(unit):
     with pytest.raises((TypeError, ValueError)):

@@ -17,6 +17,9 @@
 ???+ info "reg_polygon"
     ::: dLux.utils.geometry.reg_polygon
 
+???+ info "convex_polygon"
+    ::: dLux.utils.geometry.convex_polygon
+
 ???+ info "spider"
     ::: dLux.utils.geometry.spider
 
@@ -32,5 +35,11 @@
 ???+ info "soft_reg_polygon"
     ::: dLux.utils.geometry.soft_reg_polygon
 
+???+ info "soft_convex_polygon"
+    ::: dLux.utils.geometry.soft_convex_polygon
+
 ???+ info "soft_spider"
     ::: dLux.utils.geometry.soft_spider
+
+???+ info "validate_convex"
+    ::: dLux.utils.geometry.validate_convex

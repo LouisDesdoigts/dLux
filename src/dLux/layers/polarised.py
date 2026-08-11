@@ -1,7 +1,6 @@
 """Polarised optical layers and parameterised polarisation fields."""
 
 from __future__ import annotations
-import jax.numpy as np
 import dLux.utils as dlu
 from jax import Array
 
@@ -86,7 +85,7 @@ class PolarisingOptic(BasePolarisingOptic):
         jones : Array
             Jones matrix with shape `(2, 2, ...)`.
         """
-        self.jones = jones
+        self.jones = dlu.to_value(jones, dtype=None, name="jones")
 
 
 class UniformPolarisingOptic(PolarisingOptic):
@@ -116,11 +115,12 @@ class UniformPolarisingOptic(PolarisingOptic):
         orientation : Array or None = None
             Rotation angle in radians.
         """
-        self.orientation = orientation
-        jones = np.asarray(jones)
+        orientation = dlu.to_value(orientation, optional=True, name="orientation")
+        jones = dlu.to_value(jones, dtype=None, name="jones")
 
         if jones.shape != (2, 2):
             raise ValueError("UniformPolarisingOptic requires a (2, 2) Jones matrix.")
+        self.orientation = orientation
         super().__init__(jones)
 
     def apply_mono(self: UniformPolarisingOptic, wavefront: Wavefront) -> Wavefront:

@@ -2,6 +2,12 @@
 
 # Units
 
+???+ info "canonical_unit"
+    ::: dLux.utils.units.canonical_unit
+
+???+ info "unit_factor"
+    ::: dLux.utils.units.unit_factor
+
 ???+ info "convert"
     ::: dLux.utils.units.convert
 

@@ -22,6 +22,10 @@ _DEFAULT_UNITS = {
     "flux": "photon",
     "distribution": "linear",
 }
+_VALUE_MODES = {
+    "flux": ("log", "ln"),
+    "distribution": ("linear", "log", "ln"),
+}
 
 
 def __getattr__(name):
@@ -40,13 +44,38 @@ def __getattr__(name):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
+def _brightness_unit(name, unit):
+    """Resolve photon units and logarithmic value representations."""
+    if unit in _VALUE_MODES[name]:
+        return unit
+    try:
+        return dlu.canonical_unit(unit, dimension="photon", name=f"{name} unit")
+    except ValueError as error:
+        label = name.capitalize()
+        modes = ", ".join(map(repr, _VALUE_MODES[name]))
+        raise ValueError(
+            f"{label} unit must be a photon unit or one of {modes}."
+        ) from error
+
+
 def _merge_units(units=None):
     """Merge source unit overrides with canonical defaults."""
     units = {} if units is None else dict(units)
     unknown = set(units) - set(_DEFAULT_UNITS)
     if unknown:
         raise ValueError(f"Unknown source unit keys: {sorted(unknown)}.")
-    return {**_DEFAULT_UNITS, **units}
+
+    # Merge defaults and canonicalise each physical or value representation
+    units = {**_DEFAULT_UNITS, **units}
+    units["wavelengths"] = dlu.canonical_unit(
+        units["wavelengths"], dimension="length", name="wavelength unit"
+    )
+    units["position"] = dlu.canonical_unit(
+        units["position"], dimension="angle", name="position unit"
+    )
+    units["flux"] = _brightness_unit("flux", units["flux"])
+    units["distribution"] = _brightness_unit("distribution", units["distribution"])
+    return units
 
 
 def _convert_flux(flux, unit):
@@ -56,13 +85,7 @@ def _convert_flux(flux, unit):
         return 10**flux
     if unit == "ln":
         return np.exp(flux)
-    try:
-        factor = dlu.unit_factor(unit)
-    except ValueError as error:
-        raise ValueError(
-            "Flux unit must be 'photon', a supported prefixed photon unit, "
-            "'log', or 'ln'. See TODO: add units documentation link."
-        ) from error
+    factor = dlu.unit_factor(unit, dimension="photon", name="flux unit")
     return flux * factor
 
 
@@ -297,13 +320,8 @@ class Spectrum(ParametricHolder):
         wavelengths = resolve(self.wavelengths, float, spectrum=self, **context)
         wavelengths = np.atleast_1d(wavelengths)
         unit = self.units["wavelengths"]
-        try:
-            wavelengths = wavelengths * dlu.unit_factor(unit)
-        except ValueError as error:
-            raise ValueError(
-                f"Unknown wavelength unit {unit!r}. See TODO: add units "
-                "documentation link."
-            ) from error
+        factor = dlu.unit_factor(unit, dimension="length", name="wavelength unit")
+        wavelengths = wavelengths * factor
 
         # Resolve spectral weights on the wavelength samples
         weights = resolve(
@@ -391,13 +409,8 @@ class Source(BaseSource, Spectrum):
         if not valid:
             raise ValueError("position must have shape (2,) or (nsource, 2).")
         unit = self.units["position"]
-        try:
-            position = position * dlu.unit_factor_to_rad(unit)
-        except ValueError as error:
-            raise ValueError(
-                f"Unknown position unit {unit!r}. See TODO: add units "
-                "documentation link."
-            ) from error
+        factor = dlu.unit_factor(unit, dimension="angle", name="position unit")
+        position = position * factor
 
         # Resolve brightness and optional spatial distribution
         nsource = None if position.ndim == 1 else position.shape[0]
@@ -477,7 +490,9 @@ class BinarySource(BaseSource, Spectrum):
         separation = resolve(self.separation, float, source=self)
         position_angle = resolve(self.position_angle, float, source=self)
         contrast = resolve(self.contrast, float, source=self)
-        factor = dlu.unit_factor(self.units["position"])
+        factor = dlu.unit_factor(
+            self.units["position"], dimension="angle", name="position unit"
+        )
         position = dlu.positions_from_sep(
             centre * factor, separation * factor, position_angle
         )

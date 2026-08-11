@@ -186,8 +186,10 @@ Within a class, use this order:
 
 Place module-level functions after imports and `__all__`, before the first class.
 Order utility functions by dependency and public workflow; do not scatter free
-functions between classes. Keep imports at module scope unless an unavoidable
-annotation-only cycle requires `TYPE_CHECKING`.
+functions between classes. Keep related functions contiguous rather than scattering
+one domain concept across broad hard, soft, validation, or helper sections. Keep
+imports at module scope unless an unavoidable annotation-only cycle requires
+`TYPE_CHECKING`.
 
 Use `super()` to follow the MRO rather than naming a parent implementation directly.
 Prefer concise positional arguments for an established internal signature when the
@@ -210,6 +212,12 @@ whose only purpose is to call the real method.
 An abstraction should define a public extension point, encode a domain concept,
 centralise behaviour that must remain identical, or remove meaningful repetition.
 Do not extract a helper solely to shorten one caller. Search its call sites first.
+
+For registries and parsers, keep canonical data separate from aliases, prefix rules,
+validation, and error presentation. A one-off spelling exception usually indicates
+that canonicalisation has been modelled at the wrong level. Lay resolution out as a
+short sequence of direct lookup, alias resolution, optional prefix handling, and
+dimension validation rather than one nested conditional block.
 
 Keep a private helper beside its owning implementation when it depends on core dLux
 objects or represents only that module's structure. Move it into `dLux.utils` only
@@ -252,4 +260,6 @@ For every modified function, ask:
 - Are local names concise without becoming ambiguous?
 - Does the code preserve units, axes, leading dimensions, normalisation, and JAX
   behaviour?
+- Do numerical names and docstrings distinguish exact quantities from directional,
+  approximate, or boundary-coordinate constructions?
 - Does it look like the surrounding dLux module and the clearest v0.15 code?

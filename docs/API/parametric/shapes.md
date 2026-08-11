@@ -14,6 +14,7 @@ classDiagram
     class dLux_parametric_shapes_Square["Square"]
     class dLux_parametric_shapes_Rectangle["Rectangle"]
     class dLux_parametric_shapes_RegularPolygon["RegularPolygon"]
+    class dLux_parametric_shapes_ConvexPolygon["ConvexPolygon"]
     class dLux_parametric_shapes_Spider["Spider"]
     class dLux_parametric_shapes_Complement["Complement"]
     class dLux_parametric_shapes_TransformedShape["TransformedShape"]
@@ -35,6 +36,8 @@ classDiagram
     click dLux_parametric_shapes_Rectangle href "#dLux.parametric.shapes.Rectangle" "Attributes: width, height · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_RegularPolygon
     click dLux_parametric_shapes_RegularPolygon href "#dLux.parametric.shapes.RegularPolygon" "Attributes: diameter, nsides · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_ConvexPolygon
+    click dLux_parametric_shapes_ConvexPolygon href "#dLux.parametric.shapes.ConvexPolygon" "Attributes: vertices · Properties: extent · Methods: validate(), evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Spider
     click dLux_parametric_shapes_Spider href "#dLux.parametric.shapes.Spider" "Attributes: width, angles · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_Complement
@@ -66,6 +69,9 @@ classDiagram
 
 ???+ info "RegularPolygon"
     ::: dLux.parametric.shapes.RegularPolygon
+
+???+ info "ConvexPolygon"
+    ::: dLux.parametric.shapes.ConvexPolygon
 
 ???+ info "Spider"
     ::: dLux.parametric.shapes.Spider

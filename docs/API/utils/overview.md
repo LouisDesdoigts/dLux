@@ -17,9 +17,9 @@ flowchart LR
     dLux_utils_fourier["Fourier"]
     click dLux_utils_fourier href "../fourier/" "Public API: fourier_kernel_1d, fourier_kernels, eval_fourier_basis"
     dLux_utils_geometry["Geometry"]
-    click dLux_utils_geometry href "../geometry/" "Public API: combine, circle, square, rectangle, reg_polygon, spider, soft_circle, soft_square, soft_rectangle, soft_reg_polygon, soft_spider"
+    click dLux_utils_geometry href "../geometry/" "Public API: combine, circle, square, rectangle, reg_polygon, convex_polygon, spider, soft_circle, soft_square, soft_rectangle, soft_reg_polygon, soft_convex_polygon, soft_spider, validate_convex"
     dLux_utils_helpers["Helpers"]
-    click dLux_utils_helpers href "../helpers/" "Public API: map2array, list2dictionary, insert_layer, remove_layer, imshow_extent, missing_attribute_error, resolve_attr, from_complex, as_size, as_axis, to_value"
+    click dLux_utils_helpers href "../helpers/" "Public API: map2array, list2dictionary, insert_layer, remove_layer, imshow_extent, missing_attribute_error, resolve_attr, from_complex, as_size, as_axis, to_value, update"
     dLux_utils_interpolation["Interpolation"]
     click dLux_utils_interpolation href "../interpolation/" "Public API: interp, scale, rotate"
     dLux_utils_math["Math"]
@@ -39,5 +39,5 @@ flowchart LR
     dLux_utils_source["Source"]
     click dLux_utils_source href "../source/" "Public API: fluxes_from_contrast, positions_from_sep"
     dLux_utils_units["Units"]
-    click dLux_utils_units href "../units/" "Public API: convert, rad2arcsec, rad2deg, rad2arcmin, deg2rad, deg2arcmin, deg2arcsec, arcmin2rad, arcmin2deg, arcmin2arcsec, arcsec2rad, arcsec2deg, arcsec2arcmin"
+    click dLux_utils_units href "../units/" "Public API: canonical_unit, unit_factor, convert, rad2arcsec, rad2deg, rad2arcmin, deg2rad, deg2arcmin, deg2arcsec, arcmin2rad, arcmin2deg, arcmin2arcsec, arcsec2rad, arcsec2deg, arcsec2arcmin"
 ```

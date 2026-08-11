@@ -151,13 +151,13 @@ def test_distribution_flux_units():
 
 
 def test_source_unit_errors():
-    with pytest.raises(ValueError, match="Flux unit must be 'photon'"):
+    with pytest.raises(ValueError, match="Flux unit must be a photon unit"):
         dl.Source([1e-6], flux=1.0, units={"flux": "logr"}).params()
 
     with pytest.raises(ValueError, match="Unknown wavelength unit 'invalid'"):
         dl.Source([1.0], units={"wavelengths": "invalid"}).params()
 
-    with pytest.raises(ValueError, match="Unknown position unit 'm'"):
+    with pytest.raises(ValueError, match="position unit must have dimension 'angle'"):
         dl.Source([1e-6], position=[0.0, 0.0], units={"position": "m"}).params()
 
 

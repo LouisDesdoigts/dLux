@@ -315,13 +315,7 @@ class GridSpec(BaseGridSpec):
 
     @staticmethod
     def _validate_unit(unit):
-        if not isinstance(unit, str):
-            raise TypeError("unit must be a string.")
-        unit = unit.strip()
-        if not unit:
-            raise ValueError("unit cannot be empty.")
-        dlu.unit_factor(unit)
-        return unit
+        return dlu.canonical_unit(unit, name="grid unit")
 
     @property
     def ndim(self) -> int:

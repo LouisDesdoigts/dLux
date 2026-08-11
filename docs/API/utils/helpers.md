@@ -34,3 +34,6 @@
 
 ???+ info "to_value"
     ::: dLux.utils.helpers.to_value
+
+???+ info "update"
+    ::: dLux.utils.helpers.update

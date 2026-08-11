@@ -21,6 +21,7 @@ __all__ = [
     "as_size",
     "as_axis",
     "to_value",
+    "update",
 ]
 
 
@@ -60,20 +61,103 @@ def as_axis(value, ndim=None, name="axis"):
     raise ValueError(f"{name} must be scalar or have one value per axis.")
 
 
-def to_value(value, dtype=float, optional=False, types=None):
+def to_value(value, dtype=float, optional=False, types=None, name="value"):
     """Preserve allowed object types or convert a value to an array.
 
-    ``None`` is accepted only when ``optional`` is true. Instances of
-    ``types`` are returned unchanged; every other value is passed to
-    ``jax.numpy.asarray`` with the requested dtype.
+    Parameters
+    ----------
+    value : Any
+        Value to preserve or convert.
+    dtype : dtype or None
+        Requested array dtype. ``None`` preserves the inferred dtype.
+    optional : bool
+        Whether to accept ``None``.
+    types : type, tuple[type, ...], or None
+        Types to return unchanged before attempting array conversion.
+    name : str
+        Input name used in error messages.
+
+    Returns
+    -------
+    value : Any or Array
+        Preserved allowed object or converted array.
+
+    Raises
+    ------
+    TypeError
+        If ``value`` is ``None`` and ``optional`` is false.
     """
     if value is None:
         if optional:
             return None
-        raise TypeError("value cannot be None.")
+        raise TypeError(f"{name} cannot be None.")
     if types is not None and isinstance(value, types):
         return value
     return np.asarray(value, dtype=dtype)
+
+
+def update(parameters, *objects, strict=True):
+    """Immutably update parameter paths across a sequence of Zodiax objects.
+
+    Parameters
+    ----------
+    parameters : Mapping[str, Any]
+        Parameter paths and their replacement values.
+    *objects : object
+        Objects implementing the Zodiax ``get`` and ``set`` path interface.
+    strict : bool
+        Whether every path must match an object. Each path is applied to its first
+        match, so positional order determines ownership when a path exists on multiple
+        objects. If false, matching paths are applied to every object and unmatched
+        paths are ignored.
+
+    Returns
+    -------
+    objects : tuple
+        Updated objects in their original positional order.
+
+    Raises
+    ------
+    TypeError
+        If the parameter mapping, paths, or object interfaces are invalid.
+    KeyError
+        If strict mode leaves any parameter path unused.
+    """
+    if not isinstance(parameters, Mapping):
+        raise TypeError("parameters must be a mapping of paths to values.")
+    if not all(isinstance(path, str) for path in parameters):
+        raise TypeError("parameter paths must be strings.")
+
+    # Validate the minimal path-object interface
+    for obj in objects:
+        has_get = callable(getattr(obj, "get", None))
+        has_set = callable(getattr(obj, "set", None))
+        if not has_get or not has_set:
+            raise TypeError("objects must define callable get and set methods.")
+
+    # Select and apply matching parameters in object order
+    remaining = dict(parameters)
+    updated = []
+    for obj in objects:
+        candidates = remaining if strict else parameters
+        values = {}
+        for path, value in candidates.items():
+            try:
+                obj.get(path, to_array=False)
+            except (AttributeError, KeyError):
+                continue
+            values[path] = value
+
+        updated.append(obj.set(**values) if values else obj)
+        if strict:
+            for path in values:
+                remaining.pop(path)
+
+    # Reject misspelled or otherwise unused paths in strict mode
+    if strict and remaining:
+        paths = ", ".join(map(repr, remaining))
+        raise KeyError(f"Unused parameter paths: {paths}.")
+    return tuple(updated)
 
 
 def reexport(modules: tuple[object, ...], namespace: dict[str, object]) -> list[str]:

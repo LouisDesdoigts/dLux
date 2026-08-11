@@ -97,6 +97,11 @@ higher derivatives.
 
 - Convert numeric public inputs consistently, then perform semantic validation in a
   readable constructor.
+- Treat constructor validation as setup-time feedback, not a persistent invariant:
+  immutable updates can replace any leaf. Do not add compiled runtime checks merely
+  to defend against later `.set()` calls. Where a complex mutable contract benefits
+  from an explicit diagnostic, provide an opt-in `validate()` method and document
+  that users decide when to call it.
 - Resolve collection lengths, output shapes, mode groups, and other Python topology
   before tracing.
 - Keep values dynamic when they do not determine topology.

@@ -159,7 +159,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
         self.nsides = int(nsides)
         if self.nsides not in (0,) and self.nsides < 3:
             raise ValueError("nsides must be zero or greater than two.")
-        self.diameter = diameter
+        self.diameter = dlu.to_value(diameter, optional=True, name="diameter")
         if self.diameter is not None and self.diameter <= 0:
             raise ValueError("diameter must be greater than zero.")
 

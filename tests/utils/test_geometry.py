@@ -17,6 +17,7 @@ COORDS = dlu.pixel_coords(16, diameter=2)
         (dlu.square, (1.0,)),
         (dlu.rectangle, (1.0, 0.5)),
         (dlu.reg_polygon, (1.0, 6)),
+        (dlu.convex_polygon, (np.array([[-0.5, -0.5], [0.5, -0.5], [0, 0.5]]),)),
         (dlu.spider, (0.1, (0, 90))),
     ],
 )
@@ -33,6 +34,10 @@ def test_hard_shape_contract(operation, args):
         (dlu.soft_square, (1.0,)),
         (dlu.soft_rectangle, (1.0, 0.5)),
         (dlu.soft_reg_polygon, (1.0, 6)),
+        (
+            dlu.soft_convex_polygon,
+            (np.array([[-0.5, -0.5], [0.5, -0.5], [0, 0.5]]),),
+        ),
         (dlu.soft_spider, (0.1, (0, 90))),
     ],
 )
@@ -57,3 +62,18 @@ def test_inverted_shapes(operation, args):
     inverted = operation(COORDS, *args, invert=True)
 
     assert np.array_equal(inverted, 1 - regular)
+
+
+def test_convex_polygon_winding_boundary_and_batching():
+    vertices = np.array([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]])
+    coordinates = np.array([[[0.0, 0.5, 0.6]], [[0.0, 0.0, 0.0]]])
+
+    forward = dlu.convex_polygon(coordinates, vertices)
+    reverse = dlu.convex_polygon(coordinates, vertices[::-1])
+    batched = dlu.convex_polygon(COORDS, np.stack((vertices, vertices * 0.5)))
+
+    assert np.array_equal(forward, [[1.0, 1.0, 0.0]])
+    assert np.array_equal(reverse, forward)
+    assert batched.shape == (2, *COORDS.shape[-2:])
+    assert np.array_equal(batched[0], dlu.convex_polygon(COORDS, vertices))
+    assert np.array_equal(batched[1], dlu.convex_polygon(COORDS, vertices * 0.5))

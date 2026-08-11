@@ -22,6 +22,7 @@ __all__ = [
     "Square",
     "Rectangle",
     "RegularPolygon",
+    "ConvexPolygon",
     "Spider",
     "Complement",
     "TransformedShape",
@@ -206,6 +207,49 @@ class RegularPolygon(InvertibleShape):
     def evaluate_soft(self, coordinates, clip):
         """Evaluate a softened regular-polygon boundary."""
         return dlu.soft_reg_polygon(coordinates, self.diameter, self.nsides, clip)
+
+
+class ConvexPolygon(InvertibleShape):
+    """A convex polygon described by sequential ``(x, y)`` vertices.
+
+    Clockwise and anticlockwise winding are both accepted. Vertices may carry natural
+    leading batch dimensions, while the final dimensions must have shape
+    ``(nvertices, 2)``. The boundary is included by hard evaluation; numeric or
+    ``Soft`` edges use the signed distance to the nearest edge. Call ``validate()``
+    explicitly to check the current vertices outside compiled calculations.
+
+    Parameters
+    ----------
+    vertices : Array
+        At least three distinct vertices describing a convex boundary in order.
+    edge : Hard, Soft, float, or None
+        Shared hard or softened edge definition.
+    invert : bool
+        Whether to return the complement of the polygon transmission.
+    """
+
+    vertices: Array
+
+    def __init__(self, vertices, edge=None, invert=False):
+        super().__init__(edge, invert)
+        self.vertices = dlu.to_value(vertices, name="vertices")
+
+    @property
+    def extent(self) -> Array:
+        """Return the largest vertex radius."""
+        return np.linalg.norm(self.vertices, axis=-1).max(-1)
+
+    def evaluate_hard(self, coordinates):
+        """Evaluate a hard convex-polygon boundary."""
+        return dlu.convex_polygon(coordinates, self.vertices)
+
+    def evaluate_soft(self, coordinates, clip):
+        """Evaluate a softened convex-polygon boundary."""
+        return dlu.soft_convex_polygon(coordinates, self.vertices, clip)
+
+    def validate(self) -> None:
+        """Validate the current vertices as an ordered convex polygon."""
+        dlu.validate_convex(self.vertices)
 
 
 class Spider(InvertibleShape):

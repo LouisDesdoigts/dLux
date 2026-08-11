@@ -10,12 +10,15 @@ __all__ = [
     "square",
     "rectangle",
     "reg_polygon",
+    "convex_polygon",
     "spider",
     "soft_circle",
     "soft_square",
     "soft_rectangle",
     "soft_reg_polygon",
+    "soft_convex_polygon",
     "soft_spider",
+    "validate_convex",
 ]
 
 
@@ -558,3 +561,129 @@ def reg_polygon_distance(coords: Array, nsides: int, radius: float) -> Array:
     """
     m, xy = reg_polygon_edges(nsides, radius)
     return vmap(line_distance, (None, 0, 0))(coords, m, xy).max(0)
+
+
+def convex_polygon_distance(coords: Array, vertices: Array) -> Array:
+    """Return the maximum signed perpendicular distance to polygon edges.
+
+    Parameters
+    ----------
+    coords : Array
+        Coordinates with shape ``(..., 2, ny, nx)``.
+    vertices : Array
+        Sequential polygon vertices with shape ``(..., nvertices, 2)``.
+
+    Returns
+    -------
+    distances : Array
+        Maximum signed edge distance, negative inside and positive outside. This
+        half-plane measure is not the exact Euclidean distance outside a vertex.
+    """
+    vertices = np.asarray(vertices)
+
+    # Generate oriented edges and determine the polygon winding
+    ends = np.roll(vertices, -1, axis=-2)
+    edges = ends - vertices
+    area = np.sum(vertices[..., 0] * ends[..., 1], -1)
+    area -= np.sum(vertices[..., 1] * ends[..., 0], -1)
+    winding = np.where(area >= 0, 1.0, -1.0)
+
+    # Calculate the signed distance from every point to every oriented edge
+    x, y = coords[..., 0, :, :], coords[..., 1, :, :]
+    x0, y0 = vertices[..., 0], vertices[..., 1]
+    dx, dy = edges[..., 0], edges[..., 1]
+    cross = dx[..., :, None, None] * (y[..., None, :, :] - y0[..., :, None, None])
+    cross -= dy[..., :, None, None] * (x[..., None, :, :] - x0[..., :, None, None])
+    lengths = np.linalg.norm(edges, axis=-1)
+    distances = -winding[..., None, None, None] * cross
+    distances /= lengths[..., :, None, None]
+
+    # A convex polygon is bounded by its most restrictive edge
+    return distances.max(-3)
+
+
+def convex_polygon(coords: Array, vertices: Array, invert: bool = False) -> Array:
+    """Evaluate a hard convex polygon from sequential vertices.
+
+    Parameters
+    ----------
+    coords : Array
+        Coordinates with shape ``(..., 2, ny, nx)``.
+    vertices : Array
+        Sequential polygon vertices with shape ``(..., nvertices, 2)``.
+    invert : bool
+        Whether to return the complement of the polygon transmission.
+
+    Returns
+    -------
+    transmission : Array
+        Binary polygon transmission with the boundary included.
+    """
+    transmission = convex_polygon_distance(coords, vertices) <= 0
+    transmission = np.logical_not(transmission) if invert else transmission
+    return transmission.astype(float)
+
+
+def soft_convex_polygon(
+    coords: Array, vertices: Array, clip_dist: float = 0.1, invert: bool = False
+) -> Array:
+    """Evaluate a softened convex polygon from sequential vertices.
+
+    Parameters
+    ----------
+    coords : Array
+        Coordinates with shape ``(..., 2, ny, nx)``.
+    vertices : Array
+        Sequential polygon vertices with shape ``(..., nvertices, 2)``.
+    clip_dist : float
+        Physical distance over which to soften the polygon boundary.
+    invert : bool
+        Whether to return the complement of the polygon transmission.
+
+    Returns
+    -------
+    transmission : Array
+        Differentiably softened polygon transmission.
+    """
+    distances = -convex_polygon_distance(coords, vertices)
+    return soften(distances, clip_dist, invert)
+
+
+def validate_convex(vertices: Array) -> None:
+    """Validate one or more sequential convex-polygon vertex arrays.
+
+    Parameters
+    ----------
+    vertices : Array
+        Vertices with shape ``(..., nvertices, 2)`` in sequential boundary order.
+        Clockwise and anticlockwise winding are accepted.
+
+    Raises
+    ------
+    ValueError
+        If the vertices have an invalid shape, repeat, enclose zero area, or do not
+        describe a convex polygon in boundary order.
+    """
+    vertices = np.asarray(vertices)
+    if vertices.ndim < 2 or vertices.shape[-1] != 2:
+        raise ValueError("vertices must have shape (..., nvertices, 2).")
+    if vertices.shape[-2] < 3:
+        raise ValueError("vertices must contain at least three points.")
+
+    # Calculate vertex separations and the signed polygon area
+    ends = np.roll(vertices, -1, axis=-2)
+    offsets = vertices[..., :, None, :] - vertices[..., None, :, :]
+    distances = np.linalg.norm(offsets, axis=-1)
+    distances += np.eye(vertices.shape[-2])
+    area = np.sum(vertices[..., 0] * ends[..., 1], -1)
+    area -= np.sum(vertices[..., 1] * ends[..., 0], -1)
+
+    # Check that every consecutive edge turns in a consistent direction
+    edges = ends - vertices
+    following = np.roll(edges, -1, axis=-2)
+    cross = edges[..., 0] * following[..., 1]
+    cross -= edges[..., 1] * following[..., 0]
+    if np.any(distances == 0) or np.any(area == 0):
+        raise ValueError("vertices must be distinct and define a non-zero area.")
+    if np.any(np.any(cross > 0, axis=-1) & np.any(cross < 0, axis=-1)):
+        raise ValueError("vertices must define a convex polygon in boundary order.")

@@ -36,6 +36,12 @@ contract. Add Hessian or nested-transformation checks only where higher derivati
 are scientifically used or especially vulnerable to normalisation and control-flow
 choices.
 
+A transformation merely executing is not enough. Where meaningful sensitivity is
+promised, check that gradients respond to a representative perturbation rather than
+silently accepting an everywhere-zero hard boundary. For batching, compare values
+against independently evaluated scalar cases; an output-shape assertion alone does
+not establish broadcasting semantics.
+
 Keep compatibility behaviour in the dedicated deprecation tests. Assert the warning
 category, removal version, replacement, and before/after migration example as well as
 the preserved result.

@@ -102,3 +102,50 @@ def test_raised_attribute_resolution():
 def test_validation(operation):
     with pytest.raises((TypeError, ValueError)):
         operation()
+
+
+def test_update_strict_consumes_paths_once():
+    first = dl.Polynomial(1, coeffs=[1.0, 2.0])
+    second = dl.Polynomial(1, coeffs=[3.0, 4.0])
+
+    first, second = dlu.update({"coeffs": np.zeros(2)}, first, second)
+
+    assert np.allclose(first.coeffs, 0)
+    assert np.allclose(second.coeffs, np.array([3.0, 4.0]))
+
+
+def test_update_non_strict_applies_shared_paths():
+    first = dl.Polynomial(1, coeffs=[1.0, 2.0])
+    second = dl.Polynomial(1, coeffs=[3.0, 4.0])
+
+    first, second = dlu.update({"coeffs": np.zeros(2)}, first, second, strict=False)
+
+    assert np.allclose(first.coeffs, 0)
+    assert np.allclose(second.coeffs, 0)
+
+
+def test_update_rejects_unused_paths_without_mutating_mapping():
+    params = {"missing": 1.0}
+    model = dl.Polynomial(1)
+
+    with pytest.raises(KeyError, match="'missing'"):
+        dlu.update(params, model)
+
+    assert params == {"missing": 1.0}
+
+
+def test_update_nested_models_and_single_object_tuple():
+    basis = dl.Basis(np.ones((1, 4, 4)), coeffs=[1.0])
+    optics = dl.OpticalSystem(
+        [("pupil", dl.Optic(opd=basis))],
+        dl.GridSpec(4, 0.25, unit="m"),
+    )
+    source = dl.Source(1e-6, position=[0.0, 0.0])
+    params = {"pupil.coeffs": np.zeros(1), "position": np.ones(2)}
+
+    optics, source = dlu.update(params, optics, source)
+    single = dlu.update({"position": np.zeros(2)}, source)
+
+    assert np.allclose(optics.pupil.coeffs, 0)
+    assert np.allclose(source.position, 1)
+    assert isinstance(single, tuple) and len(single) == 1
