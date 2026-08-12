@@ -56,6 +56,21 @@ class SimpleCircular(ApertureBuilder):
         opd=None,
         oversample=5,
     ):
+        """Initialise a configurable circular pupil template.
+
+        Parameters
+        ----------
+        diameter : float
+            Primary diameter in the grid's physical unit.
+        secondary_diameter : float or None
+            Optional central obscuration diameter.
+        spider_width, spider_angles : ArrayLike or None
+            Radial-support width and angles in degrees; supply both or neither.
+        opd : BaseOPDDef or None
+            Optional OPD definition.
+        oversample : int or tuple[int, int]
+            Hard-edge sampling factors.
+        """
         if (spider_width is None) != (spider_angles is None):
             raise ValueError("spider_width and spider_angles must both be provided.")
 
@@ -118,6 +133,27 @@ class SegmentedHex(SparseApertureBuilder):
         oversample=5,
         paste_method="scan",
     ):
+        """Initialise an ideal hexagonally segmented pupil.
+
+        Parameters
+        ----------
+        nrings : int
+            Number of rings including the central segment.
+        segment_diameter, segment_f2f : float or None
+            Point-to-point and flat-to-flat size alternatives; supply exactly one.
+        gap : float
+            Non-negative edge-to-edge segment gap.
+        remove_center : bool
+            Whether to omit the central segment.
+        obscurations : list or tuple of Shape
+            Global obscurations applied after assembly.
+        opd : BaseOPDDef or None
+            Optional per-segment OPD definition.
+        oversample : int or tuple[int, int]
+            Hard-edge sampling factors.
+        paste_method : str
+            ``"scan"`` for lower memory or ``"scatter"`` for greater parallelism.
+        """
         # Resolve and validate the construction options
         if (segment_diameter is None) == (segment_f2f is None):
             raise ValueError("Provide exactly one of segment_diameter or segment_f2f.")
@@ -157,10 +193,22 @@ class SegmentedHex(SparseApertureBuilder):
         self.paste_method = paste_method
 
     def build(self, grid, transform=None, jit=True, return_support=False):
-        """Build a compact ideal or densely transformed segmented aperture."""
+        """Build a compact ideal or densely transformed segmented aperture.
+
+        Parameters
+        ----------
+        grid : GridSpec
+            Output pupil sampling.
+        transform : BaseCoordTransform or None
+            Optional global transform; transformed pupils use dense construction.
+        jit : bool
+            Compile the fixed-topology construction path.
+        return_support : bool
+            Return per-segment support and therefore use dense construction.
+        """
         # Promote and validate the construction grid
         grid = self._promote_grid(grid)
-        self.validate(grid, transform)
+        self._validate(grid, transform)
 
         # Use global sampling when compact ideal placement is not possible
         if transform is not None or self.opd is not None or return_support:
@@ -247,7 +295,34 @@ class SegmentedHex(SparseApertureBuilder):
         shared=False,
         coefficients=None,
     ):
-        """Materialise a global pasted optic or a genuinely sparse optic."""
+        """Materialise a global pasted optic or a genuinely sparse optic.
+
+        Parameters
+        ----------
+        grid : GridSpec
+            One-dimensional square or explicit two-dimensional pupil sampling.
+        transform : BaseCoordTransform or None
+            Optional global transform. Transformed pupils use dense construction.
+        coeffs : Array or None
+            Explicit per-segment OPD coefficients.
+        key : Array or None
+            JAX random key for standard-normal coefficient initialisation; mutually
+            exclusive with ``coeffs``.
+        normalise, jit : bool
+            Set output-optic normalisation and compiled construction respectively.
+        sparse : bool
+            Return a `SparseOptic` instead of the compactly assembled global `Optic`.
+        shared : bool
+            Share sparse OPD coefficients between segments when ``sparse=True``.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+
+        Returns
+        -------
+        optic : Optic or SparseOptic
+            Materialised ideal segmented pupil. Untransformed global OPD uses a
+            compact `PastedBasis` by default.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
 
         # Use sparse or transformed global construction when requested
@@ -258,7 +333,7 @@ class SegmentedHex(SparseApertureBuilder):
 
         # Promote and validate the ideal construction grid
         grid = self._promote_grid(grid)
-        self.validate(grid, transform)
+        self._validate(grid, transform)
 
         # Generate the compactly assembled pupil transmission
         fine, spec = self._stamp_data(grid)
@@ -301,6 +376,19 @@ class NRMLike(SparseApertureBuilder):
     """
 
     def __init__(self, centers, hole, opd=None, oversample=5):
+        """Initialise a shared-shape non-redundant mask.
+
+        Parameters
+        ----------
+        centers : ArrayLike
+            Physical hole centres with shape ``(n_holes, 2)``.
+        hole : Shape
+            Geometry shared by every hole.
+        opd : BaseOPDDef or None
+            Optional local OPD definition.
+        oversample : int or tuple[int, int]
+            Hard-edge sampling factors.
+        """
         if not isinstance(hole, Shape):
             raise TypeError("hole must be a Shape.")
 
@@ -317,7 +405,13 @@ class NRMLike(SparseApertureBuilder):
         sparse=False,
         coefficients=None,
     ):
-        """Materialise a global NRM, or independent holes with ``sparse=True``."""
+        """Materialise a global NRM or independent sparse holes.
+
+        Arguments follow `SparseApertureBuilder.__call__`, except sparse OPD
+        coefficients are always independent per hole. With ``sparse=True``, explicit
+        ``coeffs`` must therefore begin with the hole axis. Returns an `Optic` or
+        `SparseOptic` without mutating the builder.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         if sparse and coeffs is not None:
             coeffs = np.asarray(coeffs)
@@ -350,6 +444,21 @@ class HSTLike(SimpleCircular):
         opd=None,
         oversample=5,
     ):
+        """Initialise the representative HST-like pupil.
+
+        Parameters
+        ----------
+        diameter, secondary_diameter : float
+            Primary and central-obscuration diameters in the grid's physical unit.
+        spider_width : float
+            Radial-support width.
+        spider_angles : ArrayLike
+            Support angles in degrees.
+        opd : BaseOPDDef or None
+            Optional OPD definition.
+        oversample : int or tuple[int, int]
+            Hard-edge sampling factors.
+        """
         super().__init__(
             diameter, secondary_diameter, spider_width, spider_angles, opd, oversample
         )
@@ -377,6 +486,23 @@ class JWSTLike(SegmentedHex):
         oversample=5,
         paste_method="scan",
     ):
+        """Initialise the representative 18-segment JWST-like pupil.
+
+        Parameters
+        ----------
+        segment_diameter, gap : float
+            Point-to-point segment diameter and edge gap in the grid's physical unit.
+        spider_width : float
+            Simplified support-arm width.
+        spider_angles : ArrayLike
+            Support angles in degrees.
+        opd : BaseOPDDef or None
+            Optional per-segment OPD definition.
+        oversample : int or tuple[int, int]
+            Hard-edge sampling factors.
+        paste_method : str
+            Compact assembly strategy, ``"scan"`` or ``"scatter"``.
+        """
         super().__init__(
             nrings=3,
             segment_diameter=segment_diameter,
@@ -401,6 +527,19 @@ class JWSTNRMLike(NRMLike):
     """
 
     def __init__(self, centers=None, hole_f2f=0.8, opd=None, oversample=5):
+        """Initialise the representative seven-hole JWST/NIRISS mask.
+
+        Parameters
+        ----------
+        centers : ArrayLike or None
+            Physical ``(x, y)`` hole centres; defaults to the AMIGO ideal geometry.
+        hole_f2f : float
+            Shared hexagonal-hole flat-to-flat width.
+        opd : BaseOPDDef or None
+            Optional per-hole OPD definition.
+        oversample : int or tuple[int, int]
+            Hard-edge sampling factors.
+        """
         # Ideal mask coordinates used by AMIGO, excluding its fitted pupil offset.
         if centers is None:
             centers = np.asarray(
@@ -442,6 +581,21 @@ class EuclidLike(ApertureBuilder):
         opd=None,
         oversample=5,
     ):
+        """Initialise the approximate Euclid-like pupil.
+
+        Parameters
+        ----------
+        diameter, secondary_diameter : float
+            Primary and central-obscuration diameters in the grid's physical unit.
+        spider_width : float
+            Displaced support-arm width.
+        spider_angles : ArrayLike
+            Support angles in degrees.
+        opd : BaseOPDDef or None
+            Optional OPD definition.
+        oversample : int or tuple[int, int]
+            Hard-edge sampling factors.
+        """
         # Generate the displaced support-arm geometry
         shift = np.asarray((secondary_diameter / 2 - spider_width / 2, diameter / 2))
         obscurations = [Circle(secondary_diameter)]

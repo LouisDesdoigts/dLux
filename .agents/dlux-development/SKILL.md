@@ -54,6 +54,20 @@ dLux objects.
 
 ## Preserve object contracts
 
+### Public extension contracts
+
+Keep a base class public when users may reasonably implement custom behaviour at that
+level. A class is not private merely because most users instantiate its concrete
+children. Export supported extension points deliberately and document the contract
+subclasses must implement.
+
+Audit class methods with the same discipline. A method is either a supported public
+operation with a complete callable contract or an implementation detail with a
+private name. Do not retain redundant convenience routes without a concrete benefit,
+and do not privatise useful behaviour merely to avoid documenting it. Check released
+history before removing a public method; superseded released routes follow the normal
+compatibility and warning policy.
+
 ### Fields and grids
 
 Treat physical axes and array axes separately and document their ordering. Preserve
@@ -73,6 +87,11 @@ Implement the monochromatic transformation in `apply_mono`. `BaseOpticalLayer.ap
 owns recursive leading-axis vectorisation, and `__call__` provides normal callable
 syntax. Override `apply` only for complete-field behaviour such as propagation or
 semantic-axis consumption such as interference.
+
+Do not force related layer families to use cosmetically identical primitive methods.
+Optical layers use `apply_mono` because their base owns wavelength vectorisation;
+detector layers operate on a complete `Intensity` through `apply`. Shared inheritance
+should encode shared behaviour, not erase meaningful semantic differences.
 
 ### Construction and sparse evaluation
 
@@ -120,6 +139,13 @@ Only released APIs require compatibility. Keep aliases and migration warnings in
 compatibility layer where possible. A warning must name the old API, the replacement,
 an explicit before/after usage example, and the planned removal version. Do not add
 empty legacy modules when module-like compatibility can be provided centrally.
+
+## Name APIs deliberately
+
+Do not mechanically regularise the public API. Retain concise scientific acronyms and
+established short identifiers unless they create a concrete ambiguity or encode the
+wrong contract. Consistency alone is not sufficient reason to lengthen or rename an
+API, especially when doing so expands the compatibility surface.
 
 ## Prepare releases deliberately
 

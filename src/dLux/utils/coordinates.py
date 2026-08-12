@@ -256,7 +256,22 @@ def nd_axes(
     pixel_scales: float | tuple[float, ...] = 1.0,
     offsets: float | tuple[float, ...] = 0.0,
 ) -> tuple[Array, ...]:
-    """Return one regularly sampled coordinate vector per physical axis."""
+    """Return one regularly sampled vector per physical axis.
+
+    Parameters
+    ----------
+    npixels : int or tuple[int, ...]
+        Positive sample counts in physical-axis order.
+    pixel_scales : float or tuple[float, ...]
+        Sample spacing along each physical axis.
+    offsets : float or tuple[float, ...]
+        Offset subtracted from the centre of each axis.
+
+    Returns
+    -------
+    axes : tuple[Array, ...]
+        Pixel-centre axes in physical-axis order.
+    """
     npixels = dlu.as_size(npixels, name="npixels")
     pixel_scales, offsets = dlu.as_axis(pixel_scales), dlu.as_axis(offsets)
     ndim = max(len(npixels), pixel_scales.shape[-1], offsets.shape[-1])

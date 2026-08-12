@@ -23,7 +23,17 @@ class CauchyIndex(Parametric):
     scale: Array
 
     def __init__(self, coeffs: Array = None, scale: float = 1e-6, *, coefficients=None):
-        """Initialise Cauchy coefficients and their wavelength scale."""
+        """Initialise a Cauchy refractive-index model.
+
+        Parameters
+        ----------
+        coeffs : Array or None
+            Non-empty one-dimensional Cauchy coefficients.
+        scale : float
+            Wavelength scale in metres used by the polynomial terms.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``; the two cannot both be supplied.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         self.coeffs = dlu.to_value(coeffs)
         self.scale = dlu.to_value(scale)
@@ -35,7 +45,10 @@ class CauchyIndex(Parametric):
 
     @property
     def coefficients(self) -> Array:
-        """Deprecated alias for the dispersion coefficients."""
+        """Return ``coeffs`` through the deprecated attribute alias.
+
+        Access emits a migration warning and the alias will be removed in dLux 0.17.
+        """
         # Keep compatibility lazy to avoid the core/legacy import cycle.
         from ..compatibility import warn_deprecated
 
@@ -48,7 +61,11 @@ class CauchyIndex(Parametric):
         return self.coeffs
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
-        """Evaluate ``A + B/x² + C/x⁴ + ...`` at the wavefront wavelength."""
+        """Evaluate ``A + B/x² + C/x⁴ + ...`` at wavefront wavelengths.
+
+        Here ``x = wavelength / scale`` with both quantities in metres. The returned
+        refractive index has the wavelength shape and no spatial axes.
+        """
         x = wavefront.wavelength / self.scale
         powers = 2 * np.arange(self.coeffs.size)
         return np.sum(self.coeffs / x[..., None] ** powers, axis=-1)
@@ -61,6 +78,17 @@ class PolynomialIndex(Parametric):
     scale: Array
 
     def __init__(self, coeffs: Array = None, scale: float = 1e-6, *, coefficients=None):
+        """Initialise a polynomial refractive-index model.
+
+        Parameters
+        ----------
+        coeffs : Array or None
+            Non-empty one-dimensional coefficients in ascending degree order.
+        scale : float
+            Wavelength scale in metres used before polynomial evaluation.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``; the two cannot both be supplied.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         self.coeffs = dlu.to_value(coeffs)
         self.scale = dlu.to_value(scale)
@@ -72,7 +100,10 @@ class PolynomialIndex(Parametric):
 
     @property
     def coefficients(self) -> Array:
-        """Deprecated alias for the polynomial coefficients."""
+        """Return ``coeffs`` through the deprecated attribute alias.
+
+        Access emits a migration warning and the alias will be removed in dLux 0.17.
+        """
         # Keep compatibility lazy to avoid the core/legacy import cycle.
         from ..compatibility import warn_deprecated
 
@@ -85,7 +116,11 @@ class PolynomialIndex(Parametric):
         return self.coeffs
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
-        """Evaluate ``c₀ + c₁x + c₂x² + ...`` for ``x = wavelength / scale``."""
+        """Evaluate the index polynomial for ``x = wavelength / scale``.
+
+        Wavelength and scale are measured in metres. The returned refractive index has
+        the wavelength shape and no spatial axes.
+        """
         x = wavefront.wavelength / self.scale
         powers = np.arange(self.coeffs.size)
         return np.sum(self.coeffs * x[..., None] ** powers, axis=-1)
@@ -106,6 +141,19 @@ class InterpolatedIndex(Parametric):
         method: str = "linear",
         extrapolate: bool = False,
     ):
+        """Initialise an interpolated refractive-index model.
+
+        Parameters
+        ----------
+        wavelengths : Array, metres
+            One-dimensional sample wavelengths.
+        indices : Array
+            Refractive indices with shape matching ``wavelengths``.
+        method : str
+            Interpolation method accepted by Interpax.
+        extrapolate : bool
+            Permit evaluation outside the sampled wavelength interval.
+        """
         self.wavelengths = dlu.to_value(wavelengths)
         self.indices = dlu.to_value(indices)
         self.method = str(method)
@@ -121,7 +169,11 @@ class InterpolatedIndex(Parametric):
             raise ValueError("wavelengths must be strictly increasing.")
 
     def evaluate(self, *, wavefront: Wavefront, **kwargs) -> Array:
-        """Interpolate the index at the wavefront wavelength."""
+        """Interpolate refractive index at wavefront wavelengths in metres.
+
+        The returned array has the wavelength shape. Out-of-range behaviour follows
+        the configured ``extrapolate`` value.
+        """
         return ipx.interp1d(
             wavefront.wavelength,
             self.wavelengths,

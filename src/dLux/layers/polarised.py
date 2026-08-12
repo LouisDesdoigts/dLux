@@ -51,6 +51,14 @@ class PolarisationLayer(OpticalLayer):
     polarisation: dict | None
 
     def __init__(self, polarisation=None):
+        """Initialise a fixed or parametric Jones transformation.
+
+        Parameters
+        ----------
+        polarisation : Array, Parametric, or None
+            Jones matrix with leading or spatial dimensions supported by the input
+            polarised wavefront. ``None`` uses the identity transformation.
+        """
         if polarisation is None:
             self.polarisation = None
             return
@@ -62,7 +70,11 @@ class PolarisationLayer(OpticalLayer):
         self.polarisation = dlu.list2dictionary(items, True, BasePolarisingOptic)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
-        """Apply every configured polarising optic in insertion order."""
+        """Apply every configured polarising optic in insertion order.
+
+        Scalar wavefronts are promoted when the first Jones optic is applied. The
+        returned polarised wavefront retains wavelength and grid metadata.
+        """
         if self.polarisation is not None:
             for optic in self.polarisation.values():
                 wavefront = optic(wavefront)
@@ -165,11 +177,18 @@ class LinearPolariser(BasePolarisingOptic):
 
     @property
     def jones(self: LinearPolariser) -> Array:
-        """Returns the Jones matrix for context-independent angles."""
+        """Return the spatially uniform ``(2, 2)`` Jones matrix.
+
+        The configured transmission-axis angle is interpreted in radians.
+        """
         return dlu.linear_polariser(self.angle)
 
     def apply_mono(self: LinearPolariser, wavefront: Wavefront) -> Wavefront:
-        """Applies the linear polariser to the input wavefront."""
+        """Apply the linear-polariser Jones matrix to one wavefront.
+
+        Parametric angle is resolved from the wavefront context. Scalar wavefronts
+        are promoted and all sampling metadata are preserved.
+        """
         self = self.resolve(wavefront=wavefront)
         return wavefront.apply_jones(dlu.linear_polariser(self.angle))
 
@@ -208,10 +227,17 @@ class Retarder(BasePolarisingOptic):
 
     @property
     def jones(self: Retarder) -> Array:
-        """Returns the Jones matrix for context-independent parameters."""
+        """Return the spatially uniform ``(2, 2)`` retarder Jones matrix.
+
+        Retardance and fast-axis angle are interpreted in radians.
+        """
         return dlu.retarder(self.retardance, self.angle)
 
     def apply_mono(self: Retarder, wavefront: Wavefront) -> Wavefront:
-        """Applies the retarder to the input wavefront."""
+        """Apply the retarder Jones matrix to one wavefront.
+
+        Parametric retardance and angle are resolved from the wavefront context.
+        Scalar wavefronts are promoted and all sampling metadata are preserved.
+        """
         self = self.resolve(wavefront=wavefront)
         return wavefront.apply_jones(dlu.retarder(self.retardance, self.angle))

@@ -55,6 +55,15 @@ class PSF(Intensity):
     """Deprecated compatibility wrapper for ``Intensity``."""
 
     def __init__(self, data, pixel_scale):
+        """Initialise the deprecated PSF container.
+
+        Parameters
+        ----------
+        data : Array
+            Real values with shape ``(..., ny, nx)``.
+        pixel_scale : float, Array, or GridSpec
+            Legacy angular pixel scale in radians, or a transitional explicit grid.
+        """
         migration = "`dl.PSF(data, pixel_scale)` -> `dl.Intensity(data, grid)`"
         warn_deprecated("PSF", "Intensity", migration)
 
@@ -87,7 +96,18 @@ class LegacyDetectorLayer(DetectorLayer):
         """Transform an intensity using the released callable contract."""
 
     def apply(self, intensity):
-        """Delegate the compatibility method to the legacy callable implementation."""
+        """Apply the released detector-layer callable contract.
+
+        Parameters
+        ----------
+        intensity : Intensity
+            Deterministic sampled intensity accepted by the legacy layer.
+
+        Returns
+        -------
+        intensity : Intensity
+            Result returned by the subclass ``__call__`` implementation.
+        """
         return self(intensity)
 
 
@@ -97,6 +117,13 @@ class ApplyPixelResponse(LegacyDetectorLayer):
     pixel_response: Array
 
     def __init__(self, pixel_response):
+        """Initialise the deprecated pixel-response layer.
+
+        Parameters
+        ----------
+        pixel_response : Array
+            Two-dimensional multiplicative response; use `Sensitivity` in new code.
+        """
         migration = "`dl.ApplyPixelResponse(value)` -> `dl.Sensitivity(value)`"
         warn_deprecated("ApplyPixelResponse", "Sensitivity", migration)
         self.pixel_response = np.asarray(pixel_response, dtype=float)
@@ -117,6 +144,17 @@ class ApplyJitter(LegacyDetectorLayer):
     oversample: int
 
     def __init__(self, sigma, kernel_size=9, oversample=3):
+        """Initialise the deprecated scalar jitter layer.
+
+        Parameters
+        ----------
+        sigma : float
+            Circular Gaussian width in detector pixels.
+        kernel_size : int
+            Positive detector-pixel kernel width.
+        oversample : int
+            Positive sub-pixel integration factor.
+        """
         migration = "`dl.ApplyJitter(sigma)` -> `dl.Jitter(sigma)`"
         warn_deprecated("ApplyJitter", "Jitter", migration)
         self.sigma = np.asarray(sigma, dtype=float)
@@ -149,6 +187,13 @@ class ApplySaturation(LegacyDetectorLayer):
     threshold: Array
 
     def __init__(self, threshold):
+        """Initialise the deprecated saturation layer.
+
+        Parameters
+        ----------
+        threshold : ArrayLike
+            Upper retained detector value; use `Saturation` in new code.
+        """
         migration = "`dl.ApplySaturation(value)` -> `dl.Saturation(value)`"
         warn_deprecated("ApplySaturation", "Saturation", migration)
         self.threshold = np.asarray(threshold, dtype=float)
@@ -164,6 +209,13 @@ class AddConstant(LegacyDetectorLayer):
     value: Array
 
     def __init__(self, value):
+        """Initialise the deprecated additive detector layer.
+
+        Parameters
+        ----------
+        value : ArrayLike
+            Additive detector value; use `Bias` in new code.
+        """
         migration = "`dl.AddConstant(value)` -> `dl.Bias(value)`"
         warn_deprecated("AddConstant", "Bias", migration)
         self.value = np.asarray(value, dtype=float)
@@ -179,6 +231,13 @@ class LegacyDownsample(LegacyDetectorLayer):
     kernel_size: int
 
     def __init__(self, kernel_size):
+        """Initialise legacy summed-pixel downsampling.
+
+        Parameters
+        ----------
+        kernel_size : int
+            Positive square block size. Use `Downsample` in new code.
+        """
         self.kernel_size = int(kernel_size)
 
         if self.kernel_size <= 0:
@@ -193,6 +252,17 @@ class CoordSpec(GridSpec):
     """Deprecated one-dimensional compatibility wrapper for ``GridSpec``."""
 
     def __init__(self, n=None, d=None, c=0.0):
+        """Initialise the deprecated one-dimensional grid specification.
+
+        Parameters
+        ----------
+        n : int or None
+            Number of samples.
+        d : float or None
+            Pixel scale.
+        c : float
+            Grid centre.
+        """
         migration = "`dl.CoordSpec(...)` -> `dl.GridSpec(...)`"
         warn_deprecated("CoordSpec", "GridSpec", migration)
         super().__init__(n, d, c)
@@ -221,6 +291,15 @@ class PadSpec(ResizeSpec):
     """Deprecated compatibility wrapper for ``ResizeSpec``."""
 
     def __init__(self, pad=1, crop=1, c=0.0):
+        """Initialise the deprecated FFT resize specification.
+
+        Parameters
+        ----------
+        pad, crop : int
+            Integer pre-operation padding and post-operation cropping factors.
+        c : float
+            Legacy output centre.
+        """
         migration = "`dl.PadSpec(...)` -> `dl.ResizeSpec(...)`"
         warn_deprecated("PadSpec", "ResizeSpec", migration)
         super().__init__(pad=pad, crop=crop, c=c)
@@ -241,6 +320,15 @@ class CoordTransform(BaseCoordTransform):
         compression=None,
         shear=None,
     ):
+        """Initialise the deprecated semantic coordinate transformation.
+
+        Parameters
+        ----------
+        translation, compression, shear : Array or None
+            Optional two-component transformation parameters.
+        rotation : Array or None
+            Optional scalar rotation in radians.
+        """
         migration = "`dl.CoordTransform(...)` -> `dl.Affine(...)`"
         warn_deprecated("CoordTransform", "Affine", migration)
 
@@ -273,12 +361,25 @@ class DistortedCoords(Distortion):
     """Deprecated compatibility wrapper for ``Distortion``."""
 
     def __init__(self, order=1, distortion=None):
+        """Initialise the deprecated polynomial coordinate distortion.
+
+        Parameters
+        ----------
+        order : int
+            Maximum positive polynomial order.
+        distortion : Array or None
+            Coefficients matching the generated distortion terms.
+        """
         migration = "`dl.DistortedCoords(...)` -> `dl.Distortion(...)`"
         warn_deprecated("DistortedCoords", "Distortion", migration)
         super().__init__(order, distortion)
 
     def calculate(self, npix, diameter):
-        """Evaluate the legacy 0.14 coordinate-generation contract."""
+        """Evaluate the legacy 0.14 coordinate-generation contract.
+
+        ``npix`` is the square output size and ``diameter`` is its physical width in
+        metres. Returns transformed coordinates with shape ``(2, npix, npix)``.
+        """
         coordinates = GridSpec(n=(npix, npix), diam=(diameter, diameter)).coordinates
         return self(coordinates)
 
@@ -287,16 +388,32 @@ class LayeredDetector(DetectorSystem):
     """Deprecated detector system preserving the 0.15 return contract."""
 
     def __init__(self, layers):
+        """Initialise the deprecated layered detector.
+
+        Parameters
+        ----------
+        layers : mapping or sequence
+            Ordered legacy detector layers.
+        """
         migration = "`dl.LayeredDetector(layers)` -> `dl.DetectorSystem(layers)`"
         warn_deprecated("LayeredDetector", "DetectorSystem", migration)
         super().__init__(layers)
 
     def __call__(self, psf, return_psf=False):
+        """Apply legacy detector layers and select the historical output type.
+
+        ``psf`` is an `Intensity`. Returns its sampled data array by default, or the
+        transformed `Intensity` when ``return_psf=True``.
+        """
         output = super().__call__(psf)
         return output if return_psf else output.data
 
     def model(self, psf, return_psf=False):
-        """Apply the detector while preserving the legacy output selection."""
+        """Apply detector layers while preserving legacy output selection.
+
+        ``psf`` is an `Intensity`. Returns its sampled data by default or the complete
+        transformed `Intensity` when ``return_psf=True``.
+        """
         return self(psf, return_psf)
 
 
@@ -304,6 +421,17 @@ class LayeredOpticalSystem(OpticalSystem):
     """Deprecated optical system using the legacy pupil-grid constructor."""
 
     def __init__(self, wf_npixels, diameter, layers):
+        """Initialise the deprecated pupil-grid optical system.
+
+        Parameters
+        ----------
+        wf_npixels : int
+            Square pupil sample count.
+        diameter : float, metres
+            Pupil diameter.
+        layers : mapping or sequence
+            Ordered optical layers.
+        """
         old = "`dl.LayeredOpticalSystem(n, d, layers)`"
         new = "`dl.OpticalSystem(layers, GridSpec(n=n, diam=d, unit='m'))`"
         migration = f"{old} -> {new}"
@@ -332,6 +460,15 @@ class PointSource(Source):
         weights=None,
         spectrum=None,
     ):
+        """Initialise the deprecated point-source wrapper.
+
+        Parameters
+        ----------
+        wavelengths, position, flux, weights
+            Legacy source parameters forwarded to `Source`.
+        spectrum : None
+            Removed nested spectrum input; migrate its wavelengths and weights.
+        """
         if spectrum is not None:
             example = "`dl.Source(spectrum.wavelengths, weights=spectrum.weights)`"
             migration_error("PointSource(spectrum=...)", "Source", example)
@@ -354,6 +491,15 @@ class PointSources(Source):
         weights=None,
         spectrum=None,
     ):
+        """Initialise the deprecated vectorised-source wrapper.
+
+        Parameters
+        ----------
+        wavelengths, position, flux, weights
+            Legacy population parameters forwarded to `Source`.
+        spectrum : None
+            Removed nested spectrum input; migrate its wavelengths and weights.
+        """
         if spectrum is not None:
             example = "`dl.Source(spectrum.wavelengths, weights=spectrum.weights)`"
             migration_error("PointSources(spectrum=...)", "Source", example)
@@ -379,6 +525,15 @@ class ResolvedSource(Source):
         weights=None,
         spectrum=None,
     ):
+        """Initialise the deprecated resolved-source wrapper.
+
+        Parameters
+        ----------
+        wavelengths, position, flux, distribution, weights
+            Legacy source parameters forwarded to `Source`.
+        spectrum : None
+            Removed nested spectrum input; migrate its wavelengths and weights.
+        """
         if spectrum is not None:
             example = "`dl.Source(spectrum.wavelengths, distribution=image)`"
             migration_error("ResolvedSource(spectrum=...)", "Source", example)
@@ -397,6 +552,19 @@ class MFT(Fraunhofer):
     """Deprecated wrapper for the legacy direct MFT propagator."""
 
     def __init__(self, npixels, pixel_scale, focal_length=None, inverse=False):
+        """Initialise the deprecated direct MFT propagator.
+
+        Parameters
+        ----------
+        npixels : int
+            Focal-plane sample count.
+        pixel_scale : float
+            Angular or physical focal-plane pixel scale.
+        focal_length : float or None, metres
+            Omit for angular output coordinates.
+        inverse : bool
+            Use reverse Fraunhofer propagation.
+        """
         unit = "rad" if focal_length is None else "m"
         grid = GridSpec(n=npixels, d=pixel_scale, unit=unit)
         migration = "`dl.MFT(n, d, f)` -> `dl.Fraunhofer(GridSpec(n=n, d=d), f)`"
@@ -408,6 +576,19 @@ class FFT(Fraunhofer):
     """Deprecated wrapper for the legacy direct FFT propagator."""
 
     def __init__(self, focal_length=None, inverse=False, pad=1, crop=1, center=True):
+        """Initialise the deprecated direct FFT propagator.
+
+        Parameters
+        ----------
+        focal_length : float or None, metres
+            Omit for angular output coordinates.
+        inverse : bool
+            Use reverse Fraunhofer propagation.
+        pad, crop : int
+            Integer FFT padding and output-cropping factors.
+        center : bool
+            Must remain true; uncentred propagation has no compatibility route.
+        """
         if not center:
             example = "`dl.Fraunhofer(dl.ResizeSpec(...), method='fft')`"
             migration_error("FFT(center=False)", "Fraunhofer", example)
@@ -421,6 +602,15 @@ class MFTPropagator(ABCDPropagator):
     """Deprecated LCT-based ABCD propagation wrapper."""
 
     def __init__(self, ABCDs, grid):
+        """Initialise the deprecated LCT-based ABCD propagator.
+
+        Parameters
+        ----------
+        ABCDs : sequence
+            Ordered ABCD elements.
+        grid : GridSpec
+            Physical output grid.
+        """
         migration = (
             "`dl.MFTPropagator(ABCDs, grid)` -> `dl.ABCDPropagator(ABCDs, grid)`"
         )
@@ -432,6 +622,15 @@ class FFTPropagator(ABCDPropagator):
     """Deprecated FFT-based ABCD propagation wrapper."""
 
     def __init__(self, ABCDs, grid):
+        """Initialise the deprecated FFT-based ABCD propagator.
+
+        Parameters
+        ----------
+        ABCDs : sequence
+            Ordered ABCD elements.
+        grid : ResizeSpec
+            FFT resize specification.
+        """
         old = "`dl.FFTPropagator(ABCDs, grid)`"
         new = "`dl.ABCDPropagator(ABCDs, grid, method='fft')`"
         migration = f"{old} -> {new}"
@@ -443,6 +642,13 @@ class ABCDConjugatePlane(ABCDFraunhofer):
     """Deprecated name for ``ABCDFraunhofer``."""
 
     def __init__(self, focal_length):
+        """Initialise the deprecated conjugate-plane element.
+
+        Parameters
+        ----------
+        focal_length : float or Array, metres
+            Signed focal length forwarded to `ABCDFraunhofer`.
+        """
         migration = "`dl.ABCDConjugatePlane(f)` -> `dl.ABCDFraunhofer(f)`"
         warn_deprecated("ABCDConjugatePlane", "ABCDFraunhofer", migration)
         super().__init__(focal_length)

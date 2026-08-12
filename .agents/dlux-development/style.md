@@ -182,9 +182,18 @@ Within a class, use this order:
 5. secondary public methods;
 6. private implementation methods.
 
-Document the constructor of every public concrete class. Keep its docstring concise
-when the class docstring already defines the full contract, but never leave public
-construction behaviour discoverable only from type annotations or implementation.
+Document the constructor of every public concrete class. Its docstring must define
+every argument, accepted type, shape, unit, default, exclusive combination,
+broadcasting rule, validation condition, and important construction-time consequence.
+Simple constructors may be concise, but still need a useful `Parameters` section;
+"Initialise the object" is never sufficient. Keep conceptual behaviour, physical
+contracts, limitations, and complete examples on the class docstring rather than
+duplicating them in `__init__`.
+
+Preserve Equinox's default object representation. The printed tree should honestly
+show the object's leaves and structure; do not add custom representations, hidden
+fields, or declarative ordering machinery merely to make an awkward class design look
+cleaner. Improve the object model itself when its default representation is unclear.
 
 ## Module organisation
 

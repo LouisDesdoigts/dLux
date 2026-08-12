@@ -12,8 +12,8 @@ from .helpers import assert_differentiable, assert_jittable
 class TestWavefront:
     def test_construction_and_properties(self, make_wavefront):
         wavefront = make_wavefront()
-        restored = dl.Wavefront.from_phasor(
-            wavefront.phasor * np.exp(0.2j), wavefront.wavelength, wavefront.grid
+        restored = dl.Wavefront(
+            wavefront.wavelength, wavefront.grid, wavefront.phasor * np.exp(0.2j)
         )
 
         assert restored.spatial_shape == restored.grid.shape
@@ -132,10 +132,10 @@ class TestWavefront:
             wavefront.psf_from_stokes(np.asarray((2.0, 0, 0, 0))), 2 * wavefront.psf
         )
 
-    def test_polarised_from_phasor(self, make_wavefront):
+    def test_polarised_phasor_construction(self, make_wavefront):
         wavefront = make_wavefront()
-        polarised = dl.PolarisedWavefront.from_phasor(
-            wavefront.phasor, wavefront.wavelength, wavefront.grid
+        polarised = dl.PolarisedWavefront(
+            wavefront.wavelength, wavefront.grid, wavefront.phasor
         )
 
         assert polarised.phasor.shape == (2, 2) + wavefront.phasor.shape
@@ -386,9 +386,7 @@ class TestImage:
         assert np.allclose(noisy.read_noise, 2.0)
 
     def test_noise_variance_accumulates(self, make_grid):
-        image = dl.Image(
-            np.full((8, 8), 10.0), make_grid(), std=np.full((8, 8), 2.0)
-        )
+        image = dl.Image(np.full((8, 8), 10.0), make_grid(), std=np.full((8, 8), 2.0))
         poisson = image.add_poisson_noise(jr.key(0))
         noisy = poisson.add_read_noise(jr.key(1), 2.0)
 

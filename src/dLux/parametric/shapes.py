@@ -34,7 +34,10 @@ class Shape(Parametric):
 
     @property
     def extent(self) -> Array | None:
-        """Return a finite bounding radius, or ``None`` when undefined."""
+        """Return a finite physical bounding radius, or ``None`` when undefined.
+
+        Builders use this value to determine compact sampling and OPD support sizes.
+        """
         return None
 
 
@@ -48,13 +51,24 @@ class Soft(Base):
     pixels: Array
 
     def __init__(self, pixels=1.0):
+        """Initialise a differentiable edge width.
+
+        Parameters
+        ----------
+        pixels : float or Array
+            Positive full transition width measured in sampled pixels.
+        """
         self.pixels = dlu.to_value(pixels)
 
         if self.pixels <= 0:
             raise ValueError("pixels must be greater than zero.")
 
     def clip(self, pixel_scale) -> Array:
-        """Return the physical half-width used to soften the boundary."""
+        """Return the physical half-width used to soften the boundary.
+
+        ``pixel_scale`` is per-axis sampling in the same unit as the shape. The
+        largest axis scale is multiplied by half the configured pixel width.
+        """
         if pixel_scale is None:
             raise ValueError("pixel_scale is required for a softened edge.")
         pixel_scale = np.asarray(pixel_scale)
@@ -74,6 +88,16 @@ class InvertibleShape(Shape):
     invert: bool
 
     def __init__(self, edge=None, invert=False):
+        """Initialise shared edge and inversion behaviour.
+
+        Parameters
+        ----------
+        edge : Hard, Soft, float, or None
+            Edge definition. Numeric values construct `Soft`; ``None`` constructs
+            `Hard`.
+        invert : bool
+            Return the complementary transmission when true.
+        """
         if edge is None:
             edge = Hard()
         elif not isinstance(edge, (Hard, Soft)):
@@ -83,7 +107,14 @@ class InvertibleShape(Shape):
         self.invert = bool(invert)
 
     def evaluate(self, *, coordinates, pixel_scale=None, **kwargs) -> Array:
-        """Evaluate the hard or softened transmission and apply inversion."""
+        """Evaluate the shape transmission on Cartesian coordinates.
+
+        ``coordinates`` has shape ``(..., 2, ny, nx)`` and uses the same physical
+        unit as the shape parameters. Hard shapes ignore ``pixel_scale``; softened
+        shapes require per-axis sampling in that unit. The returned real array
+        preserves broadcast leading and final spatial axes and is complemented when
+        ``invert=True``.
+        """
         if isinstance(self.edge, Hard):
             transmission = self.evaluate_hard(coordinates)
         else:
@@ -92,11 +123,19 @@ class InvertibleShape(Shape):
 
     @abstractmethod
     def evaluate_hard(self, coordinates):
-        """Evaluate the hard-edged shape on Cartesian coordinates."""
+        """Evaluate a hard boundary on ``(..., 2, ny, nx)`` coordinates.
+
+        Subclasses return a real transmission preserving coordinate leading and
+        final spatial axes.
+        """
 
     @abstractmethod
     def evaluate_soft(self, coordinates, clip):
-        """Evaluate the softened shape on Cartesian coordinates."""
+        """Evaluate a softened boundary with physical half-width ``clip``.
+
+        Subclasses return a real transmission preserving coordinate leading and
+        final spatial axes.
+        """
 
 
 class Circle(InvertibleShape):
@@ -105,6 +144,17 @@ class Circle(InvertibleShape):
     diameter: Array
 
     def __init__(self, diameter, edge=None, invert=False):
+        """Initialise a circular transmission.
+
+        Parameters
+        ----------
+        diameter : float or Array
+            Positive diameter in the coordinate unit.
+        edge : Hard, Soft, float, or None
+            Hard or softened boundary definition.
+        invert : bool
+            Return the complementary transmission when true.
+        """
         super().__init__(edge, invert)
         self.diameter = dlu.to_value(diameter)
 
@@ -113,15 +163,21 @@ class Circle(InvertibleShape):
 
     @property
     def extent(self) -> Array:
-        """Return the circular bounding radius."""
+        """Return half the circle diameter in its physical input unit."""
         return self.diameter / 2
 
     def evaluate_hard(self, coordinates):
-        """Evaluate a hard circular boundary."""
+        """Return a binary circle on ``(..., 2, ny, nx)`` coordinates.
+
+        Leading coordinate axes and final spatial axes are preserved.
+        """
         return dlu.circle(coordinates, self.diameter)
 
     def evaluate_soft(self, coordinates, clip):
-        """Evaluate a softened circular boundary."""
+        """Return a circle softened across physical half-width ``clip``.
+
+        Leading coordinate axes and final spatial axes are preserved.
+        """
         return dlu.soft_circle(coordinates, self.diameter, clip)
 
 
@@ -131,6 +187,17 @@ class Square(InvertibleShape):
     width: Array
 
     def __init__(self, width, edge=None, invert=False):
+        """Initialise a square transmission.
+
+        Parameters
+        ----------
+        width : float or Array
+            Positive full width in the coordinate unit.
+        edge : Hard, Soft, float, or None
+            Hard or softened boundary definition.
+        invert : bool
+            Return the complementary transmission when true.
+        """
         super().__init__(edge, invert)
         self.width = dlu.to_value(width)
 
@@ -139,15 +206,21 @@ class Square(InvertibleShape):
 
     @property
     def extent(self) -> Array:
-        """Return the radius of the square bounding circle."""
+        """Return the square circumradius in its physical input unit."""
         return self.width / np.sqrt(2)
 
     def evaluate_hard(self, coordinates):
-        """Evaluate a hard square boundary."""
+        """Return a binary square on ``(..., 2, ny, nx)`` coordinates.
+
+        Leading coordinate axes and final spatial axes are preserved.
+        """
         return dlu.square(coordinates, self.width)
 
     def evaluate_soft(self, coordinates, clip):
-        """Evaluate a softened square boundary."""
+        """Return a square softened across physical half-width ``clip``.
+
+        Leading coordinate axes and final spatial axes are preserved.
+        """
         return dlu.soft_square(coordinates, self.width, clip)
 
 
@@ -158,6 +231,17 @@ class Rectangle(InvertibleShape):
     height: Array
 
     def __init__(self, width, height, edge=None, invert=False):
+        """Initialise a rectangular transmission.
+
+        Parameters
+        ----------
+        width, height : float or Array
+            Positive full dimensions in the coordinate unit.
+        edge : Hard, Soft, float, or None
+            Hard or softened boundary definition.
+        invert : bool
+            Return the complementary transmission when true.
+        """
         super().__init__(edge, invert)
         self.width = dlu.to_value(width)
         self.height = dlu.to_value(height)
@@ -167,15 +251,21 @@ class Rectangle(InvertibleShape):
 
     @property
     def extent(self) -> Array:
-        """Return the radius of the rectangular bounding circle."""
+        """Return the rectangle circumradius in its physical input unit."""
         return np.hypot(self.width, self.height) / 2
 
     def evaluate_hard(self, coordinates):
-        """Evaluate a hard rectangular boundary."""
+        """Return a binary rectangle on ``(..., 2, ny, nx)`` coordinates.
+
+        Leading coordinate axes and final spatial axes are preserved.
+        """
         return dlu.rectangle(coordinates, self.width, self.height)
 
     def evaluate_soft(self, coordinates, clip):
-        """Evaluate a softened rectangular boundary."""
+        """Return a rectangle softened across physical half-width ``clip``.
+
+        Leading coordinate axes and final spatial axes are preserved.
+        """
         return dlu.soft_rectangle(coordinates, self.width, self.height, clip)
 
 
@@ -186,6 +276,19 @@ class RegularPolygon(InvertibleShape):
     nsides: int
 
     def __init__(self, nsides, diameter, edge=None, invert=False):
+        """Initialise a regular polygon.
+
+        Parameters
+        ----------
+        nsides : int
+            Number of sides, at least three.
+        diameter : float or Array
+            Positive circumscribed-circle diameter.
+        edge : Hard, Soft, float, or None
+            Hard or softened boundary definition.
+        invert : bool
+            Return the complementary transmission when true.
+        """
         super().__init__(edge, invert)
         self.diameter = dlu.to_value(diameter)
         self.nsides = int(nsides)
@@ -197,15 +300,21 @@ class RegularPolygon(InvertibleShape):
 
     @property
     def extent(self) -> Array:
-        """Return the polygon circumradius."""
+        """Return the regular-polygon circumradius in its physical input unit."""
         return self.diameter / 2
 
     def evaluate_hard(self, coordinates):
-        """Evaluate a hard regular-polygon boundary."""
+        """Return a binary regular polygon on Cartesian coordinates.
+
+        Coordinates follow ``(..., 2, ny, nx)`` and all non-component axes remain.
+        """
         return dlu.reg_polygon(coordinates, self.diameter, self.nsides)
 
     def evaluate_soft(self, coordinates, clip):
-        """Evaluate a softened regular-polygon boundary."""
+        """Return a regular polygon softened across physical half-width ``clip``.
+
+        Coordinates follow ``(..., 2, ny, nx)`` and all non-component axes remain.
+        """
         return dlu.soft_reg_polygon(coordinates, self.diameter, self.nsides, clip)
 
 
@@ -231,24 +340,48 @@ class ConvexPolygon(InvertibleShape):
     vertices: Array
 
     def __init__(self, vertices, edge=None, invert=False):
+        """Initialise a convex polygon without enforcing convexity at runtime.
+
+        Parameters
+        ----------
+        vertices : Array
+            Ordered vertices with trailing shape ``(nvertices, 2)``. Call
+            `validate` explicitly when diagnostic validation is required.
+        edge : Hard, Soft, float, or None
+            Hard or softened boundary definition.
+        invert : bool
+            Return the complementary transmission when true.
+        """
         super().__init__(edge, invert)
         self.vertices = dlu.to_value(vertices, name="vertices")
 
     @property
     def extent(self) -> Array:
-        """Return the largest vertex radius."""
+        """Return the largest vertex radius in the polygon coordinate unit."""
         return np.linalg.norm(self.vertices, axis=-1).max(-1)
 
     def evaluate_hard(self, coordinates):
-        """Evaluate a hard convex-polygon boundary."""
+        """Return a binary convex polygon on Cartesian coordinates.
+
+        Vertex ordering and convexity are assumed; call `validate` explicitly when
+        construction-time diagnostics are required.
+        """
         return dlu.convex_polygon(coordinates, self.vertices)
 
     def evaluate_soft(self, coordinates, clip):
-        """Evaluate a softened convex-polygon boundary."""
+        """Return a convex polygon softened across physical half-width ``clip``.
+
+        Vertex ordering and convexity are assumed during evaluation.
+        """
         return dlu.soft_convex_polygon(coordinates, self.vertices, clip)
 
     def validate(self) -> None:
-        """Validate the current vertices as an ordered convex polygon."""
+        """Validate the current vertices as a strictly convex ordered polygon.
+
+        Raises `ValueError` when the vertices do not form a non-degenerate clockwise
+        or anticlockwise convex boundary. The method returns ``None`` and is opt-in:
+        later immutable parameter updates may change the vertices again.
+        """
         dlu.validate_convex(self.vertices)
 
 
@@ -259,6 +392,19 @@ class Spider(InvertibleShape):
     angles: Array
 
     def __init__(self, width, angles, edge=None, invert=False):
+        """Initialise radial support arms.
+
+        Parameters
+        ----------
+        width : float or Array
+            Positive support width in the coordinate unit.
+        angles : Array
+            One-dimensional support angles in degrees.
+        edge : Hard, Soft, float, or None
+            Hard or softened boundary definition.
+        invert : bool
+            Return the complementary transmission when true.
+        """
         super().__init__(edge, invert)
         self.width = dlu.to_value(width)
         self.angles = dlu.to_value(angles)
@@ -269,11 +415,17 @@ class Spider(InvertibleShape):
             raise ValueError("angles must be a one-dimensional array.")
 
     def evaluate_hard(self, coordinates):
-        """Evaluate hard radial support arms."""
+        """Return binary radial support arms on Cartesian coordinates.
+
+        Width uses the coordinate physical unit and angles are measured in degrees.
+        """
         return 1 - dlu.spider(coordinates, self.width, self.angles)
 
     def evaluate_soft(self, coordinates, clip):
-        """Evaluate softened radial support arms."""
+        """Return radial support arms softened across half-width ``clip``.
+
+        Width uses the coordinate physical unit and angles are measured in degrees.
+        """
         return dlu.soft_spider(coordinates, self.width, self.angles, clip)
 
 
@@ -283,17 +435,27 @@ class Complement(Shape):
     shape: Shape
 
     def __init__(self, shape):
+        """Initialise the complement of another shape.
+
+        Parameters
+        ----------
+        shape : Shape
+            Shape whose evaluated transmission is inverted.
+        """
         if not isinstance(shape, Shape):
             raise TypeError("shape must be a Shape.")
         self.shape = shape
 
     @property
     def extent(self) -> Array | None:
-        """Return the wrapped shape extent."""
+        """Return the wrapped shape's physical bounding radius unchanged."""
         return self.shape.extent
 
     def evaluate(self, **context) -> Array:
-        """Evaluate and invert the wrapped shape transmission."""
+        """Evaluate and complement the wrapped shape transmission.
+
+        All named context is forwarded and the result is ``1 - transmission``.
+        """
         return 1 - self.shape.evaluate(**context)
 
 
@@ -304,6 +466,15 @@ class TransformedShape(Shape):
     transformation: BaseCoordTransform
 
     def __init__(self, shape, transformation):
+        """Initialise a shape in a transformed coordinate frame.
+
+        Parameters
+        ----------
+        shape : Shape
+            Geometry evaluated after transforming the input coordinates.
+        transformation : BaseCoordTransform
+            Coordinate transformation into the shape's local frame.
+        """
         if not isinstance(shape, Shape):
             raise TypeError("shape must be a Shape.")
         if not isinstance(transformation, BaseCoordTransform):
@@ -313,11 +484,18 @@ class TransformedShape(Shape):
 
     @property
     def extent(self) -> Array | None:
-        """Return the untransformed wrapped-shape extent."""
+        """Return the wrapped shape's untransformed bounding radius.
+
+        This does not enlarge the bound for translation, scale, or distortion.
+        """
         return self.shape.extent
 
     def evaluate(self, *, coordinates, **context) -> Array:
-        """Evaluate the wrapped shape in its transformed coordinate frame."""
+        """Evaluate the wrapped shape in its transformed coordinate frame.
+
+        ``coordinates`` follows ``(..., 2, ny, nx)`` and remaining context is
+        forwarded to the wrapped shape after transformation.
+        """
         return self.shape.evaluate(
             coordinates=self.transformation(coordinates), **context
         )

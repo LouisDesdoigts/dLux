@@ -72,6 +72,13 @@ class DynamicZernike(Base):
     _k: Array
 
     def __init__(self, j: int):
+        """Initialise one dynamically evaluated Zernike mode.
+
+        Parameters
+        ----------
+        j : int
+            Positive Noll index.
+        """
         self.j = int(j)
         if self.j < 1:
             raise ValueError("The Zernike index must be greater than 0.")
@@ -82,7 +89,17 @@ class DynamicZernike(Base):
     def calculate(
         self, coordinates: Array, nsides: int = 0, diameter: float = 2.0
     ) -> Array:
-        """Evaluate the mode on circular or regular-polygon coordinates."""
+        """Evaluate the mode on circular or regular-polygon coordinates.
+
+        Parameters
+        ----------
+        coordinates : Array
+            Cartesian coordinates with leading physical-axis dimension two.
+        nsides : int
+            Polygon side count; zero selects the circular Zernike definition.
+        diameter : float
+            Pupil diameter in the coordinate unit.
+        """
         if nsides == 0:
             return dlu.zernike_fast(
                 self.n, self.m, self._c, self._k, coordinates, diameter
@@ -126,6 +143,23 @@ class ZernikeBasis(_ZernikeBasis, Basis):
         *,
         coefficients=None,
     ):
+        """Initialise an explicitly sampled Zernike expansion.
+
+        Parameters
+        ----------
+        coordinates : Array or GridSpec
+            Cartesian sampling used to evaluate the modes.
+        js : ArrayLike or None
+            Noll indices, mutually exclusive with ``radial_orders``.
+        radial_orders : ArrayLike or None
+            Radial orders expanded to complete Noll sequences.
+        coeffs : Array or None
+            Mode coefficients, defaulting to zeros.
+        diameter : float or Array
+            Zernike pupil diameter in the coordinate unit.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         js = self.get_indices(js, radial_orders)
         basis = dlu.zernike_basis(js, coordinates, diameter)
@@ -151,6 +185,23 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
         *,
         coefficients=None,
     ):
+        """Initialise a coordinate-dependent Zernike expansion.
+
+        Parameters
+        ----------
+        js : ArrayLike or None
+            Noll indices, mutually exclusive with ``radial_orders``.
+        radial_orders : ArrayLike or None
+            Radial orders expanded to complete Noll sequences.
+        coeffs : Array or None
+            Mode coefficients, defaulting to zeros.
+        nsides : int
+            Polygonal support side count; zero uses the circular definition.
+        diameter : float, Array, or None
+            Pupil diameter supplied directly or through evaluation context.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         js = self.get_indices(js, radial_orders)
         self.zernikes = [DynamicZernike(j) for j in js]
@@ -166,7 +217,19 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     def calculate_basis(
         self, *, wavefront=None, coordinates=None, diameter=None, **kwargs
     ):
-        """Evaluate every configured Zernike mode in coordinate context."""
+        """Evaluate every configured Zernike mode in coordinate context.
+
+        Parameters
+        ----------
+        wavefront : Wavefront or None
+            Optional source of coordinates and pupil diameter.
+        coordinates : Array or None
+            Explicit Cartesian coordinates overriding the wavefront grid.
+        diameter : float, Array, or None
+            Explicit diameter overriding the stored or inferred value.
+        **kwargs
+            Additional context accepted for composable parametric evaluation.
+        """
         # Resolve coordinates and the aperture diameter
         infer_diameter = coordinates is None and wavefront is not None
         coordinates = self.get_coordinates(wavefront=wavefront, coordinates=coordinates)
@@ -205,13 +268,34 @@ class Polynomial(ParametricBasis):
         *,
         coefficients=None,
     ):
+        """Initialise a general polynomial parameterisation.
+
+        Parameters
+        ----------
+        degree : int or None
+            Maximum total degree, mutually exclusive with ``degrees`` and ``powers``.
+        coeffs : Array or None
+            Coefficients matching the generated or supplied terms.
+        ndim : int
+            Number of polynomial variables.
+        powers : Array or None
+            Explicit exponents with shape ``(ndim, n_terms)``.
+        degrees : int, sequence[int], or None
+            Selected total degrees.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         powers, coeffs = _poly_params(degree, coeffs, ndim, powers, degrees)
         self.powers = powers
         self._set_coeffs(coeffs, (powers.shape[1],))
 
     def calculate_basis(self, *, variables=None, **context):
-        """Evaluate the polynomial terms at supplied variables."""
+        """Evaluate polynomial terms at supplied variables.
+
+        ``variables`` has leading variable axis ``ndim`` followed by arbitrary sample
+        axes. The result has leading term axis followed by those sample axes.
+        """
         if variables is None:
             raise ValueError("variables must be provided.")
         variables = resolve(variables, float, **context)
@@ -224,7 +308,11 @@ class Polynomial(ParametricBasis):
         return dlu.polynomial_basis(variables, self.powers)
 
     def evaluate(self, *, variables=None, **context):
-        """Evaluate the polynomial at supplied or contextual variables."""
+        """Evaluate the polynomial at supplied or contextual variables.
+
+        Terms are contracted against ``coeffs`` and all variable sample axes are
+        retained. ``variables`` follows the `calculate_basis` contract.
+        """
         if variables is None:
             basis = self.calculate_basis(**context)
         else:
@@ -232,7 +320,11 @@ class Polynomial(ParametricBasis):
         return self.evaluate_basis(basis)
 
     def solve_basis(self, value, *, variables=None, **context):
-        """Solve for coefficients representing ``value`` at the variables."""
+        """Solve for polynomial coefficients representing ``value``.
+
+        ``variables`` follows `calculate_basis` and ``value`` must match its sample
+        axes. Returned least-squares coefficients have the polynomial term shape.
+        """
         if variables is None:
             basis = self.calculate_basis(**context)
         else:
@@ -259,6 +351,25 @@ class ExplicitPolynomial(Basis):
         *,
         coefficients=None,
     ):
+        """Initialise a polynomial on fixed coordinates.
+
+        Parameters
+        ----------
+        coordinates : Array or GridSpec
+            Fixed variables used for every evaluation.
+        degree : int or None
+            Maximum total degree.
+        coeffs : Array or None
+            Polynomial coefficients.
+        ndim : int or None
+            Variable count, inferred from coordinates when omitted.
+        powers : Array or None
+            Explicit term exponents.
+        degrees : int, sequence[int], or None
+            Selected total degrees.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         coordinates, ndim = self._coordinates(coordinates, ndim)
         powers, coeffs = _poly_params(degree, coeffs, ndim, powers, degrees)
@@ -320,12 +431,31 @@ class CoordinatePolynomial(Polynomial):
         *,
         coefficients=None,
     ):
+        """Initialise a polynomial resolved from coordinate context.
+
+        Parameters
+        ----------
+        degree : int or None
+            Maximum total degree, mutually exclusive with ``degrees``.
+        coeffs : Array or None
+            Polynomial coefficients.
+        ndim : int
+            Number of coordinate variables.
+        degrees : int, sequence[int], or None
+            Selected total degrees.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         self.ndim = int(ndim)
         super().__init__(degree, coeffs, ndim, degrees=degrees)
 
     def calculate_basis(self, *, wavefront=None, coordinates=None, **kwargs):
-        """Evaluate polynomial terms on explicit or wavefront coordinates."""
+        """Evaluate polynomial terms on explicit or wavefront coordinates.
+
+        Provide ``coordinates`` with leading component axis ``ndim`` or a wavefront
+        whose SI coordinates are used. The returned leading axis enumerates terms.
+        """
         if coordinates is None:
             if wavefront is None:
                 raise ValueError("Provide either wavefront or coordinates.")

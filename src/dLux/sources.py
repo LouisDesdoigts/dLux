@@ -104,19 +104,38 @@ class BaseSource(ParametricHolder):
     units: dict
 
     def __init__(self, flux=None, distribution=None, units=None):
-        """Initialise flux and spatial-distribution source components."""
+        """Initialise source brightness and optional spatial structure.
+
+        Parameters
+        ----------
+        flux : Array, Parametric, or None
+            Photon flux in the configured scaling. ``None`` resolves to unit flux.
+        distribution : Array, Parametric, or None
+            Shared or per-source relative spatial distribution.
+        units : dict or None
+            Overrides for the source ``flux`` and ``distribution`` conventions.
+        """
         self.flux = dlu.to_value(flux, optional=True, types=Parametric)
         self.distribution = dlu.to_value(distribution, optional=True, types=Parametric)
         self.units = _merge_units(units)
 
     def source_params(self, nsource=None, **context):
-        """Resolve flux and distribution in canonical source units."""
+        """Resolve flux and optional spatial distribution into linear values.
+
+        ``nsource`` selects scalar or vectorised source validation. Additional
+        ``context`` is passed to parametric leaves. Returns ``(flux, distribution)``;
+        flux is in photons and distribution is ``None`` or a relative linear array.
+        """
         flux = self.flux_params(nsource, **context)
         distribution = self.distribution_params(nsource, **context)
         return flux, distribution
 
     def flux_params(self, nsource=None, **context):
-        """Resolve and validate flux in canonical source units."""
+        """Resolve flux into photons using the configured source unit.
+
+        A single source returns a scalar. With ``nsource`` supplied, scalar flux is
+        broadcast and vector flux must have shape ``(nsource,)``.
+        """
         flux = resolve(self.flux, float, source=self, **context)
         flux = np.asarray(1.0 if flux is None else flux, dtype=float)
         if nsource is None:
@@ -130,7 +149,12 @@ class BaseSource(ParametricHolder):
         return _convert_flux(flux, self.units["flux"])
 
     def distribution_params(self, nsource, **context):
-        """Resolve and validate optional per-source spatial distributions."""
+        """Resolve optional spatial distributions into linear relative weights.
+
+        Accepted shapes are ``(y, x)`` for a shared distribution and
+        ``(nsource, y, x)`` for per-source distributions. ``log`` and ``ln`` modes
+        are exponentiated; no sum normalisation is applied.
+        """
         distribution = resolve(self.distribution, float, source=self, **context)
         if distribution is None:
             return None
@@ -261,7 +285,12 @@ class BaseSource(ParametricHolder):
         return initialise(position, flux, weights)
 
     def model(self, optics, return_all=False):
-        """Model the source through an optical system."""
+        """Model this source through an optical system.
+
+        ``optics`` propagates every spectral and spatial component. Returns the
+        summed deterministic `Intensity`, optionally convolved by the source
+        distribution, or the complete propagation mapping when ``return_all=True``.
+        """
         # Resolve and propagate the source parameters
         params = self.params()
         result = self._propagate(optics, params)
@@ -270,9 +299,7 @@ class BaseSource(ParametricHolder):
 
         # Convolve any resolved source distributions
         if distribution is not None:
-            intensity = intensity.set(
-                data=self._convolve(intensity.data, distribution)
-            )
+            intensity = intensity.set(data=self._convolve(intensity.data, distribution))
 
         # Collapse vectorised spatial source components
         if params["position"].ndim > 1:
@@ -316,7 +343,19 @@ class Spectrum(ParametricHolder):
     units: dict
 
     def __init__(self, wavelengths, weights=None, units=None):
-        """Initialise wavelength samples and their spectral weights."""
+        """Initialise wavelength samples and their spectral weights.
+
+        Parameters
+        ----------
+        wavelengths : Array or Parametric
+            Scalar or one-dimensional samples in the configured wavelength unit.
+        weights : Array, Parametric, or None
+            Values whose trailing axis matches the wavelength axis. Omitted weights
+            default to ones for explicit wavelengths and are required for parametric
+            wavelengths.
+        units : dict or None
+            Unit overrides, including ``wavelengths``.
+        """
         self.wavelengths = dlu.to_value(wavelengths, types=Parametric)
         if weights is None:
             if isinstance(self.wavelengths, Parametric):
@@ -331,6 +370,16 @@ class Spectrum(ParametricHolder):
         """Resolve wavelengths and weights in canonical wavelength units.
 
         Scalar monochromatic inputs are promoted to a length-one spectral axis.
+        Parametric weights receive the resolved metre-valued ``wavelengths`` in
+        their context.
+
+        Returns
+        -------
+        wavelengths : Array
+            One-dimensional wavelength samples in metres.
+        weights : Array
+            Spectral weights whose trailing axis matches ``wavelengths``. Any leading
+            axes represent vectorised spectra or source components.
         """
         # Resolve wavelengths in canonical physical units
         wavelengths = resolve(self.wavelengths, float, spectrum=self, **context)
@@ -360,7 +409,11 @@ class Spectrum(ParametricHolder):
         return wavelengths, weights
 
     def model(self, optics, return_all=False):
-        """Model this spectrum as an on-axis, unit-flux point source."""
+        """Model this spectrum as an on-axis, unit-flux point source.
+
+        ``optics`` is the target `OpticalSystem`. Returns its deterministic
+        `Intensity`, or the complete propagation mapping when ``return_all=True``.
+        """
         return Source(self.wavelengths, weights=self.weights, units=self.units).model(
             optics, return_all
         )
@@ -410,13 +463,35 @@ class Source(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        """Initialise a source with spectral and spatial emission properties."""
+        """Initialise one point source or a vectorised source population.
+
+        Parameters
+        ----------
+        wavelengths : Array or Parametric
+            Scalar or one-dimensional samples in the configured wavelength unit.
+        position : Array, Parametric, or None
+            One ``(x, y)`` position or an ``(nsource, 2)`` population.
+        flux : Array, Parametric, or None
+            Scalar or ``(nsource,)`` photon flux in the configured scaling.
+        weights : Array, Parametric, or None
+            Shared ``(nwavelength,)`` or per-source
+            ``(nsource, nwavelength)`` spectral weights.
+        distribution : Array, Parametric, or None
+            Shared ``(ny, nx)`` or per-source ``(nsource, ny, nx)`` distribution.
+        units : dict or None
+            Overrides for wavelength, position, flux, and distribution conventions.
+        """
         self.position = dlu.to_value(position, optional=True, types=Parametric)
         BaseSource.__init__(self, flux, distribution, units)
         Spectrum.__init__(self, wavelengths, weights, self.units)
 
     def params(self) -> dict:
-        """Resolve all point-source parameters in canonical units."""
+        """Resolve all point-source parameters into a propagation mapping.
+
+        Returns wavelengths in metres, normalised or raw spectral weights according
+        to their parametric contract, position in radians, flux in photons, and the
+        optional linear spatial distribution.
+        """
         # Resolve spectral and position parameters
         wavelengths, weights = self.spectrum_params()
         position = resolve(self.position, float, source=self, wavelengths=wavelengths)
@@ -490,7 +565,29 @@ class BinarySource(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
-        """Initialise a binary source with two component positions and fluxes."""
+        """Initialise a binary source from relative geometry and brightness.
+
+        Parameters
+        ----------
+        wavelengths : Array or Parametric
+            Scalar or one-dimensional wavelength samples.
+        centre : Array, Parametric, or None
+            Mean ``(x, y)`` position in the configured angular unit.
+        separation : Array or Parametric
+            Component separation in the configured angular unit.
+        position_angle : Array or Parametric
+            Position angle in radians.
+        contrast : Array or Parametric
+            Secondary-to-primary flux ratio.
+        flux : Array, Parametric, or None
+            Total binary photon flux in the configured scaling.
+        weights : Array, Parametric, or None
+            Shared or component-dependent spectral weights.
+        distribution : Array, Parametric, or None
+            Shared or component-dependent resolved distributions.
+        units : dict or None
+            Overrides following the `Source` unit conventions.
+        """
         self.centre = dlu.to_value(centre, optional=True, types=Parametric)
         self.separation = dlu.to_value(separation, types=Parametric)
         self.position_angle = dlu.to_value(position_angle, types=Parametric)
@@ -499,7 +596,12 @@ class BinarySource(BaseSource, Spectrum):
         Spectrum.__init__(self, wavelengths, weights, self.units)
 
     def params(self) -> dict:
-        """Resolve all binary parameters in canonical units."""
+        """Resolve the binary into per-component propagation parameters.
+
+        Returns wavelengths in metres, spectral weights, component positions in
+        radians with shape ``(2, 2)``, component photon fluxes with shape ``(2,)``,
+        and any optional linear spatial distribution.
+        """
         # Resolve the shared spectrum and binary geometry
         wavelengths, weights = self.spectrum_params()
         centre = resolve(self.centre, float, source=self)

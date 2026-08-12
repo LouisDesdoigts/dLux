@@ -8,7 +8,14 @@ Grids define sampled coordinates and units. Builders materialise ideal sampled
 components or layers. Parametrics resolve differentiable values from context. Optical
 layers transform wavefronts, propagators move between planes, and systems order those
 operations. Sources provide wavelength, position, flux, and spatial distributions.
-Detector systems transform focal intensity into an observation.
+Detector systems apply deterministic responses and return another `Intensity`; they
+do not create an observation. Convert explicitly to `Image`, then simulate or attach
+observed data and uncertainty:
+
+`Wavefront -> Intensity -> DetectorSystem -> Intensity -> Image -> observation`
+
+This boundary keeps stochastic realisations and incomplete uncertainty propagation
+out of the differentiable deterministic model.
 
 Keep wavelength, source, aperture, exposure, filter, and parameter axes semantically
 distinct. Let dLux own ordinary vectorisation instead of manually mapping scalar

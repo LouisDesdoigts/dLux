@@ -14,7 +14,7 @@ classDiagram
     class dLux_builders_SparseApertureBuilder["SparseApertureBuilder"]
     class dLux_base_Base["Base"]
     dLux_base_Base <|-- dLux_builders_BaseBuilder
-    click dLux_builders_BaseBuilder href "#dLux.builders.BaseBuilder" "Methods: validate(), build()"
+    click dLux_builders_BaseBuilder href "#dLux.builders.BaseBuilder" "Methods: build()"
     dLux_base_Base <|-- dLux_builders_BaseOPDDef
     click dLux_builders_BaseOPDDef href "#dLux.builders.BaseOPDDef" "Methods: calculate()"
     dLux_base_Base <|-- dLux_builders_Norm
@@ -22,9 +22,9 @@ classDiagram
     dLux_builders_BaseOPDDef <|-- dLux_builders_ZernikeDef
     click dLux_builders_ZernikeDef href "#dLux.builders.ZernikeDef" "Attributes: nolls, groups, order, oversize, norm, method · Methods: calculate()"
     dLux_builders_BaseBuilder <|-- dLux_builders_ApertureBuilder
-    click dLux_builders_ApertureBuilder href "#dLux.builders.ApertureBuilder" "Attributes: primary, obscurations, opd, oversample · Methods: build(), aperture_data()"
+    click dLux_builders_ApertureBuilder href "#dLux.builders.ApertureBuilder" "Attributes: primary, obscurations, opd, oversample · Methods: build()"
     dLux_builders_ApertureBuilder <|-- dLux_builders_SparseApertureBuilder
-    click dLux_builders_SparseApertureBuilder href "#dLux.builders.SparseApertureBuilder" "Attributes: centers, global_obscurations · Methods: aperture_data()"
+    click dLux_builders_SparseApertureBuilder href "#dLux.builders.SparseApertureBuilder" "Attributes: centers, global_obscurations"
 ```
 
 ???+ info "BaseBuilder"

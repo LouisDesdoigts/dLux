@@ -38,6 +38,15 @@ class SoummerFPM(OpticalLayer):
     propagator: Fraunhofer
 
     def __init__(self, optic, propagator):
+        """Initialise a Soummer focal-plane-mask operation.
+
+        Parameters
+        ----------
+        optic : BaseOpticalLayer
+            Arbitrary focal-plane optical mask, including complex or polarising masks.
+        propagator : Fraunhofer
+            MFT-based focal propagator used forward and in reverse.
+        """
         if not isinstance(optic, BaseOpticalLayer):
             raise TypeError("optic must be a BaseOpticalLayer.")
         if not isinstance(propagator, Fraunhofer):
@@ -50,7 +59,11 @@ class SoummerFPM(OpticalLayer):
         self.propagator = propagator
 
     def context(self, wavefront):
-        """Return focal-plane context used to resolve the wrapped optic."""
+        """Return the focal-plane context used to resolve the wrapped optic.
+
+        The mapping contains the focal ``wavefront``, SI-valued ``coordinates``,
+        per-axis ``pixel_scale`` in canonical units, and the realised focal ``grid``.
+        """
         return {
             "wavefront": wavefront,
             "coordinates": wavefront.coordinates,
@@ -59,7 +72,13 @@ class SoummerFPM(OpticalLayer):
         }
 
     def apply_mono(self, wavefront):
-        """Apply the compact focal-plane optic and return to the input pupil."""
+        """Apply the compact focal-plane optic and return to the input pupil.
+
+        The input is propagated to the configured compact MFT grid, only the field
+        difference introduced by the optic is inverse propagated, and that difference
+        is subtracted from the original pupil wavefront. The returned grid therefore
+        matches the input pupil grid.
+        """
         # Propagate to and apply the compact focal-plane optic
         focal = self.propagator(wavefront)
         optic = self.optic.resolve(**self.context(focal))

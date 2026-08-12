@@ -52,6 +52,21 @@ class SpectralPolynomial(Polynomial):
         *,
         coefficients=None,
     ):
+        """Initialise polynomial spectral weights on normalised coordinates.
+
+        Parameters
+        ----------
+        degree : int or None
+            Maximum degree, mutually exclusive with ``degrees``.
+        coeffs : Array or None
+            Coefficients for the selected non-constant terms.
+        degrees : int, sequence[int], or None
+            Explicit polynomial degrees; the fixed unit baseline is separate.
+        normalise : bool
+            Normalise resolved weights to unit sum over wavelength.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         if degree is not None:
             if degrees is not None:
@@ -68,7 +83,13 @@ class SpectralPolynomial(Polynomial):
         self.normalise = bool(normalise)
 
     def evaluate(self, *, wavelengths, **context):
-        """Evaluate weights on centred, dimensionless wavelengths."""
+        """Evaluate weights on centred, dimensionless wavelengths.
+
+        ``wavelengths`` is a one-dimensional array in any consistent unit; only its
+        relative span is used. The returned trailing axis matches the wavelength
+        samples and leading coefficient axes are preserved. Unit-sum normalisation
+        is applied along the trailing axis when configured.
+        """
         # Map wavelengths onto centred dimensionless coordinates
         context.pop("variables", None)
         wavelengths = np.asarray(wavelengths, dtype=float)
@@ -106,12 +127,32 @@ class SpectralBasis(Basis):
         *,
         coefficients=None,
     ):
+        """Initialise spectral weights from an explicit basis.
+
+        Parameters
+        ----------
+        basis : Array
+            Spectral basis with trailing wavelength axis.
+        coeffs : Array or None
+            Coefficients contracting the configured basis dimensions.
+        shape : tuple[int, ...] or None
+            Coefficient dimensions represented by the leading basis axes.
+        normalise : bool
+            Normalise resolved weights to unit sum over wavelength.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         super().__init__(basis, coeffs, shape)
         self.normalise = bool(normalise)
 
     def evaluate(self, **context):
-        """Evaluate and optionally normalise the sampled spectral weights."""
+        """Evaluate and optionally normalise sampled spectral weights.
+
+        Coefficient axes are contracted against the leading basis axes. The returned
+        trailing axis is the sampled wavelength axis; any leading coefficient batch
+        axes are preserved.
+        """
         # Contract the coefficient and basis dimensions
         ndim = len(self.shape)
         b_ax = tuple(range(ndim))
@@ -141,6 +182,15 @@ class Blackbody(Parametric):
     normalise: bool
 
     def __init__(self, temperature, normalise=True):
+        """Initialise blackbody spectral weights.
+
+        Parameters
+        ----------
+        temperature : float or Array, kelvin
+            Positive effective temperature; leading axes vectorise spectra.
+        normalise : bool
+            Normalise resolved weights to unit sum over wavelength.
+        """
         temperature = dlu.to_value(temperature)
         if np.any(temperature <= 0):
             raise ValueError("temperature values must be positive.")
@@ -148,7 +198,11 @@ class Blackbody(Parametric):
         self.normalise = bool(normalise)
 
     def evaluate(self, *, wavelengths, **context):
-        """Evaluate the blackbody photon spectrum at supplied wavelengths."""
+        """Evaluate the blackbody photon spectrum at wavelengths in metres.
+
+        The returned array has temperature leading axes followed by the wavelength
+        axis. Unit-sum normalisation is applied along that final axis when configured.
+        """
         # Evaluate the dimensionless Planck exponent
         wavelengths = np.asarray(wavelengths, dtype=float)
         c2 = 1.438776877e-2

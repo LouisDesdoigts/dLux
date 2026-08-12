@@ -81,6 +81,18 @@ class ResizeSpec(BaseGridSpec):
     c: Array | None
 
     def __init__(self, n=None, pad=1, crop=1, c=None):
+        """Initialise an explicit or factor-based resize specification.
+
+        Parameters
+        ----------
+        n : int, tuple[int, ...], or None
+            Explicit physical-axis output sizes, mutually exclusive with non-unit
+            ``pad`` or ``crop``.
+        pad, crop : int or tuple[int, ...]
+            Positive integer factors applied before and after an operation.
+        c : Array or None
+            Optional output centre in the propagation output unit.
+        """
         if n is not None and (pad != 1 or crop != 1):
             raise ValueError("Specify either n or pad/crop factors, not both.")
         self.n = None if n is None else dlu.as_size(n, name="n")
@@ -89,7 +101,12 @@ class ResizeSpec(BaseGridSpec):
         self.c = dlu.to_value(c, optional=True)
 
     def broadcast(self, ndim: int) -> BaseGridSpec:
-        """Broadcast sizes and factors to ``ndim`` dimensions."""
+        """Broadcast scalar resize values to a fixed dimensionality.
+
+        ``ndim`` is the positive number of physical dimensions. The returned copy
+        has ``n``, ``pad``, and ``crop`` tuples of that length; existing non-scalar
+        tuples must already have the requested length.
+        """
         ndim = int(ndim)
         if ndim < 1:
             raise ValueError("ndim must be a positive integer.")
@@ -102,18 +119,30 @@ class ResizeSpec(BaseGridSpec):
 
     @property
     def explicit(self) -> bool:
-        """Whether this specification defines an absolute output size."""
+        """Return whether ``n`` defines an absolute output size.
+
+        When false, output sampling is determined from the input shape and the
+        configured integer pad and crop factors.
+        """
         return self.n is not None
 
     @property
-    def padding(self) -> dict:
-        """Return keyword arguments for FFT propagation utilities."""
+    def _padding(self) -> dict:
+        """Return FFT-padding keywords represented by this specification.
+
+        Explicit specifications return ``{"pad_to": n}``; factor specifications
+        return a two-dimensional ``{"pad": pad}`` mapping.
+        """
         if self.explicit:
             return {"pad_to": self.n}
         return {"pad": dlu.as_size(self.pad, 2, "pad")}
 
     def output_size(self, shape) -> tuple[int, ...]:
-        """Return the requested physical-axis size for an input array shape."""
+        """Return final physical-axis sizes for an input NumPy ``shape``.
+
+        The final spatial axes are reversed into physical order before applying the
+        configured pad and crop factors. Explicit ``n`` is returned unchanged.
+        """
         if self.explicit:
             return self.n
         ndim = max(len(self.pad), len(self.crop), 2)
@@ -123,7 +152,11 @@ class ResizeSpec(BaseGridSpec):
         return tuple(size * pad // crop for size, pad, crop in zip(sizes, pad, crop))
 
     def crop_size(self, shape) -> tuple[int, ...]:
-        """Return the size after applying only the crop factors."""
+        """Return physical-axis sizes after applying only crop factors.
+
+        ``shape`` is supplied in NumPy array order. Its final relevant axes are
+        reversed into physical order before division by ``crop``.
+        """
         if self.explicit:
             return self.n
         ndim = max(len(self.crop), 2)
@@ -132,7 +165,12 @@ class ResizeSpec(BaseGridSpec):
         return tuple(size // factor for size, factor in zip(sizes, factors))
 
     def pad_array(self, array: Array, fill: float = 0.0) -> Array:
-        """Pad an array using this specification."""
+        """Centrally pad the final spatial axes.
+
+        Explicit ``n`` sets the target size; otherwise each final axis is enlarged by
+        its pad factor. ``fill`` supplies values outside the original array and
+        leading axes are preserved.
+        """
         if self.explicit:
             return dlu.pad_to(array, self.n, fill)
         ndim = max(len(self.pad), 2)
@@ -142,13 +180,20 @@ class ResizeSpec(BaseGridSpec):
         return dlu.pad_to(array, target, fill)
 
     def crop_array(self, array: Array) -> Array:
-        """Crop an array using this specification."""
+        """Centrally crop final spatial axes to the configured output size.
+
+        Leading array axes are preserved and output spatial axes follow NumPy order.
+        """
         if self.explicit:
             return dlu.crop_to(array, self.n)
         return dlu.crop_to(array, self.crop_size(array.shape))
 
     def crop_axes(self, axes: tuple[Array, ...]) -> tuple[Array, ...]:
-        """Centrally crop physical coordinate axes to this output sampling."""
+        """Centrally crop one-dimensional coordinate axes.
+
+        ``axes`` and the returned tuple follow physical-axis order. Each vector is
+        cropped consistently with `crop_array`.
+        """
         if self.explicit:
             sizes = self.n
         else:
@@ -159,7 +204,10 @@ class ResizeSpec(BaseGridSpec):
         return tuple(crop_fn(a, n) for a, n in zip(axes, sizes))
 
     def resize(self, array: Array, fill: float = 0.0) -> Array:
-        """Resize an array to the final sampling represented by this object."""
+        """Centrally pad or crop final axes to the represented output size.
+
+        ``fill`` is used only for padded values. Leading axes are preserved.
+        """
         return dlu.resize(array, self.output_size(array.shape), fill)
 
 
@@ -179,6 +227,21 @@ class PasteSpec(BaseGridSpec):
     d: Array
 
     def __init__(self, n, shape, starts, offsets, d):
+        """Initialise fixed placement geometry for compact stamps.
+
+        Parameters
+        ----------
+        n : int or tuple[int, int]
+            Full output size in physical ``(x, y)`` order.
+        shape : int or tuple[int, int]
+            Shared stamp size in physical ``(x, y)`` order.
+        starts : Array
+            Integer lower-corner indices with shape ``(n_stamps, 2)``.
+        offsets : Array
+            Residual physical offsets matching ``starts``.
+        d : Array
+            Output pixel scales in physical ``(x, y)`` order.
+        """
         self.n = dlu.as_size(n, 2, "n")
         self.shape = dlu.as_size(shape, 2, "shape")
         self.starts = dlu.to_value(starts, int)
@@ -196,7 +259,17 @@ class PasteSpec(BaseGridSpec):
 
     @classmethod
     def from_grid(cls, grid, centers, extent):
-        """Construct compact stamp placement from a concrete two-dimensional grid."""
+        """Construct compact stamp placement from a concrete grid.
+
+        Parameters
+        ----------
+        grid : GridSpec
+            Concrete two-dimensional grid with defined size and sampling.
+        centers : Array
+            Physical stamp centres with shape ``(n_stamps, 2)``.
+        extent : float or Array
+            Local half-width required around each centre.
+        """
         if not isinstance(grid, GridSpec):
             raise TypeError("grid must be a GridSpec.")
         if grid.n is None or grid.d is None or grid.ndim != 2:
@@ -225,16 +298,39 @@ class PasteSpec(BaseGridSpec):
 
     @property
     def coordinates(self) -> Array:
-        """Return one local coordinate grid per stamp."""
+        """Return one local SI coordinate grid per stamp.
+
+        The result has shape ``(n_stamps, 2, stamp_y, stamp_x)``. Each grid is centred
+        on its requested physical centre through the stored residual offset.
+        """
         coordinates = dlu.nd_coords(self.shape, self.d)
         return coordinates[None] + self.offsets[:, :, None, None]
 
     def paste(self, arrays, method="scan") -> Array:
-        """Add compact stamp arrays into the common output grid."""
+        """Add compact stamp arrays into the common output grid.
+
+        Parameters
+        ----------
+        arrays : Array
+            Values with shape ``(n_stamps, ..., stamp_y, stamp_x)``.
+        method : {"scan", "vmap"}
+            ``"scan"`` limits intermediate memory; ``"vmap"`` evaluates placements
+            in parallel and may use more memory.
+
+        Returns
+        -------
+        array : Array
+            Summed values with shape ``(..., output_y, output_x)``. Overlapping
+            stamps are added.
+        """
         return dlu.paste(arrays, self.starts, self.n, method)
 
     def extract(self, array) -> Array:
-        """Extract one compact stamp from the output grid at every start."""
+        """Extract one compact stamp at every configured start position.
+
+        ``array`` must have shape ``(..., output_y, output_x)``. The returned array
+        has shape ``(n_stamps, ..., stamp_y, stamp_x)``.
+        """
         # Validate the full spatial shape and resolve slice geometry
         array = np.asarray(array)
         if array.shape[-2:] != self.n[::-1]:
@@ -278,6 +374,21 @@ class GridSpec(BaseGridSpec):
     unit: str | None
 
     def __init__(self, n=None, d=None, c=None, unit=None, diam=None):
+        """Initialise a regular Cartesian sampling specification.
+
+        Parameters
+        ----------
+        n : int, tuple[int, ...], or None
+            Sample counts in physical-axis order.
+        d : ArrayLike or None
+            Pixel scales in ``unit``. Mutually exclusive with ``diam``.
+        c : ArrayLike or None
+            Grid centres in ``unit``.
+        unit : str or None
+            Supported physical or angular unit for ``d`` and ``c``.
+        diam : ArrayLike or None
+            Physical extent used to derive ``d = diam / n``; requires ``n``.
+        """
         # Validate mutually dependent sampling inputs
         if d is not None and diam is not None:
             raise ValueError("Provide only one of d or diam.")
@@ -321,14 +432,22 @@ class GridSpec(BaseGridSpec):
 
     @property
     def ndim(self) -> int:
-        """Return the number of coordinate dimensions."""
+        """Return the physical dimensionality inferred from defined grid leaves.
+
+        Returns zero only when ``n``, ``d``, and ``c`` are all undefined.
+        """
         for value in (self.n, self.d, self.c):
             if value is not None:
                 return len(value) if isinstance(value, tuple) else value.shape[-1]
         return 0
 
     def broadcast(self, ndim: int) -> GridSpec:
-        """Broadcast scalar or one-axis leaves to ``ndim`` dimensions."""
+        """Broadcast scalar grid values to a fixed physical dimensionality.
+
+        ``ndim`` is the positive number of physical axes. The returned copy has
+        defined ``n``, ``d``, and ``c`` values with final axis length ``ndim``;
+        existing non-scalar values must already have that length.
+        """
         ndim = int(ndim)
         if ndim < 1:
             raise ValueError("ndim must be a positive integer.")
@@ -356,11 +475,20 @@ class GridSpec(BaseGridSpec):
         return grid
 
     def resize(self, n) -> GridSpec:
-        """Change the grid size while retaining its sampling."""
+        """Change physical-axis sample counts while retaining ``d`` and ``c``.
+
+        ``n`` is scalar or follows physical-axis order. The returned copy may have a
+        different field of view because its pixel scales are unchanged.
+        """
         return self.set(n=dlu.as_size(n, self.ndim, "n"))
 
     def downsample(self, factors) -> GridSpec:
-        """Update sampling metadata after downsampling by integer factors."""
+        """Return sampling metadata after integer spatial downsampling.
+
+        Sample counts are divided by ``factors`` and pixel scales are multiplied by
+        them, preserving the field of view and centre. Values follow physical-axis
+        order.
+        """
         if self.n is None or self.d is None:
             raise ValueError("n and d are required to downsample a GridSpec.")
         factors = dlu.as_size(factors, self.ndim, "factors")
@@ -368,7 +496,12 @@ class GridSpec(BaseGridSpec):
         return self.set(n=n, d=self.d * np.asarray(factors))
 
     def oversample(self, factors) -> GridSpec:
-        """Increase pixel counts while preserving field of view and grid centre."""
+        """Return sampling metadata after integer spatial oversampling.
+
+        Sample counts are multiplied by ``factors`` and pixel scales are divided by
+        them, preserving the field of view and centre. Values follow physical-axis
+        order.
+        """
         if self.n is None or self.d is None:
             raise ValueError("n and d are required to oversample a GridSpec.")
         factors = dlu.as_size(factors, self.ndim, "factors")
@@ -376,7 +509,11 @@ class GridSpec(BaseGridSpec):
         return self.set(n=n, d=self.d / np.asarray(factors))
 
     def resample(self, n, d) -> GridSpec:
-        """Set a new grid size and per-axis sampling."""
+        """Set new sample counts and pixel scales in the grid's stored unit.
+
+        Both values follow physical-axis order. The grid centre is retained, while
+        the field of view may change.
+        """
         n = dlu.as_size(n, self.ndim, "n")
         return self.set(n=n, d=dlu.as_axis(d, self.ndim, "d"))
 
@@ -406,39 +543,58 @@ class GridSpec(BaseGridSpec):
         return cls(n=n, d=d / scale, c=c / scale, unit=unit)
 
     def build(self, builder, **kwargs):
-        """Evaluate a ``BaseBuilder`` on this sampling specification."""
+        """Evaluate a compatible builder on this sampling specification.
+
+        Delegates to ``builder.build(self, **kwargs)`` and returns the builder-defined
+        sampled arrays or objects.
+        """
         return builder.build(self, **kwargs)
 
     @property
     def shape(self) -> tuple[int, ...]:
-        """Return the array shape associated with this coordinate grid."""
+        """Return sample counts in reversed NumPy array-axis order.
+
+        A physical ``n=(nx, ny)`` grid therefore returns ``(ny, nx)``.
+        """
         if self.n is None:
             raise ValueError("n must be specified to calculate shape.")
         return self.n[::-1]
 
     @property
     def scale(self) -> float:
-        """Return the factor converting coordinate values to canonical SI units."""
+        """Return the multiplicative conversion from the declared unit to SI."""
         return 1.0 if self.unit is None else dlu.unit_factor(self.unit)
 
     @property
     def axes(self) -> tuple[Array, ...]:
-        """Alias for the one-dimensional coordinate axes."""
+        """Return one SI pixel-centre vector per physical axis.
+
+        This is the descriptive alias of `xs`.
+        """
         return self.xs
 
     @property
     def xs(self) -> tuple[Array, ...]:
-        """Return one pixel-centre coordinate vector per physical axis."""
+        """Return one SI pixel-centre vector per physical axis.
+
+        The tuple follows physical ``(x, y, ...)`` order and preserves leading batch
+        axes carried by ``d`` or ``c``.
+        """
         if self.n is None:
             raise ValueError("n must be specified to calculate xs.")
-        return self.xs_for(self.n)
+        return self._xs_for(self.n)
 
     def axes_for(self, n: tuple[int, ...]) -> tuple[Array, ...]:
-        """Alias for coordinate axes at concrete physical-axis pixel counts."""
-        return self.xs_for(n)
+        """Return SI-valued coordinate axes for explicit sample counts.
 
-    def xs_for(self, n: tuple[int, ...]) -> tuple[Array, ...]:
-        """Return coordinate axes for concrete physical-axis pixel counts."""
+        ``n`` follows physical-axis order and must match the grid dimensionality. The
+        returned tuple contains one regularly sampled vector per physical axis; the
+        grid itself is unchanged.
+        """
+        return self._xs_for(n)
+
+    def _xs_for(self, n: tuple[int, ...]) -> tuple[Array, ...]:
+        """Generate SI-valued coordinate axes for explicit sample counts."""
         # Validate the requested physical-axis sizes
         if self.d is None:
             raise ValueError("d must be specified to calculate xs.")
@@ -468,13 +624,21 @@ class GridSpec(BaseGridSpec):
 
     @property
     def coordinates(self) -> Array:
-        """Return coordinates with shape ``(..., ndim, *shape)``."""
+        """Return SI coordinates with shape ``(..., ndim, *shape)``.
+
+        The component axis follows physical ``(x, y, ...)`` order while final sampled
+        axes follow reversed NumPy array order.
+        """
         if self.n is None:
             raise ValueError("n must be specified to calculate coordinates.")
-        return self.coordinates_for(self.n)
+        return self._coordinates_for(self.n)
 
     def transformed(self, transform=None) -> Array:
-        """Return 2D coordinates after applying an optional transform."""
+        """Return 2D SI coordinates after applying an optional transform.
+
+        The result has shape ``(..., 2, ny, nx)``. Coordinate components use
+        physical ``(x, y)`` order and sampled axes use NumPy ``(y, x)`` order.
+        """
         if transform is None:
             return self.coordinates
         if not isinstance(transform, BaseCoordTransform):
@@ -485,8 +649,8 @@ class GridSpec(BaseGridSpec):
             )
         return transform(self.coordinates)
 
-    def coordinates_for(self, n: tuple[int, ...]) -> Array:
-        """Return full coordinates for concrete physical-axis pixel counts."""
+    def _coordinates_for(self, n: tuple[int, ...]) -> Array:
+        """Generate full SI coordinate arrays for explicit sample counts."""
         # Resolve the broadcast batch and output spatial shapes
         batch = self.d.shape[:-1]
         if self.c is not None:
@@ -513,7 +677,7 @@ class GridSpec(BaseGridSpec):
 
     @property
     def fov(self):
-        """Return the field of view in the grid's declared output unit."""
+        """Return ``n * d`` in the grid's declared unit and physical-axis order."""
         if self.n is None or self.d is None:
             raise ValueError("n and d must be specified to calculate fov.")
         return np.asarray(self.n) * self.d
@@ -550,7 +714,12 @@ class BaseCoordTransform(Base):
 
     @staticmethod
     def get_coordinates(coordinates) -> Array:
-        """Validate and return a Cartesian coordinate array."""
+        """Validate and return a Cartesian coordinate array.
+
+        ``coordinates`` must have shape ``(..., 2, ny, nx)`` with its physical
+        ``(x, y)`` component axis immediately before the spatial axes. Values are not
+        converted or copied beyond standard JAX array coercion.
+        """
         if coordinates is None:
             raise ValueError("Provide coordinates when calling the transformation.")
 
@@ -562,10 +731,19 @@ class BaseCoordTransform(Base):
 
     @abstractmethod
     def __call__(self, coordinates: Array) -> Array:
-        """Transform an array of Cartesian coordinates."""
+        """Transform Cartesian coordinates with shape ``(..., 2, ny, nx)``.
+
+        Subclasses return the same coordinate convention. Leading transform and
+        coordinate axes follow the paired broadcasting contract defined by this base
+        class.
+        """
 
     def apply(self, coordinates: Array) -> Array:
-        """Deprecated alias for calling the transformation directly."""
+        """Apply the transform through its deprecated method alias.
+
+        ``coordinates`` and the returned array follow ``(..., 2, ny, nx)``. Use
+        ``transform(coordinates)`` in new code; this alias is removed in dLux 0.17.
+        """
         warnings.warn(
             "The `.apply()` method is deprecated and will be removed in dLux "
             "0.17.0. Use `transform(coordinates)` instead: "
@@ -588,6 +766,14 @@ class TransformChain(BaseCoordTransform):
     transformations: dict
 
     def __init__(self, transformations=()):
+        """Initialise an ordered coordinate-transformation chain.
+
+        Parameters
+        ----------
+        transformations : mapping or sequence
+            Named mapping, ``(name, transform)`` sequence, or transform sequence in
+            application order. Every value must derive from `BaseCoordTransform`.
+        """
         if isinstance(transformations, dict):
             transformations = list(transformations.items())
         else:
@@ -638,6 +824,21 @@ class Distortion(BaseCoordTransform):
         powers: Array | None = None,
         shift_invariant: bool = False,
     ):
+        """Initialise a polynomial coordinate distortion.
+
+        Parameters
+        ----------
+        order : int or None
+            Maximum total order, mutually exclusive with ``orders`` and ``powers``.
+        distortion : Array or None
+            Coefficients with trailing shape ``(2, n_terms)``. Defaults to zeros.
+        orders : sequence[int] or None
+            Selected positive total orders.
+        powers : Array or None
+            Explicit exponents with shape ``(2, n_terms)``.
+        shift_invariant : bool
+            Remove linear coordinate terms from generated powers.
+        """
         self.shift_invariant = bool(shift_invariant)
         self.powers = _distortion_powers(order, orders, powers, self.shift_invariant)
         if distortion is None:
@@ -677,6 +878,15 @@ class AffineMap(BaseCoordTransform):
     offset: Array
 
     def __init__(self, matrix=None, offset=None):
+        """Initialise a direct affine map.
+
+        Parameters
+        ----------
+        matrix : Array or None
+            Matrix with trailing shape ``(2, 2)``; defaults to identity.
+        offset : Array or None
+            Translation with trailing shape ``(2,)``; defaults to zero.
+        """
         matrix = np.eye(2) if matrix is None else dlu.to_value(matrix)
         offset = np.zeros(2) if offset is None else dlu.to_value(offset)
         if matrix.shape[-2:] != (2, 2):
@@ -728,6 +938,22 @@ class Affine(BaseCoordTransform):
         shear=None,
         order=("translation", "rotation", "scale", "shear"),
     ):
+        """Initialise a semantic affine coordinate transformation.
+
+        Parameters
+        ----------
+        translation : ArrayLike or None
+            Physical ``(x, y)`` translation into the object's local frame.
+        rotation : ArrayLike or None
+            Scalar or vectorised counter-clockwise angle in radians.
+        scale : ArrayLike or None
+            Non-zero scalar or ``(x, y)`` coordinate scale.
+        shear : ArrayLike or None
+            Two-component shear.
+        order : tuple[str, ...]
+            Unique composition order drawn from translation, rotation, scale, and
+            shear.
+        """
         self.translation = self._vector(translation, "translation")
         self.rotation = dlu.to_value(rotation, optional=True)
 
@@ -812,7 +1038,16 @@ class Affine(BaseCoordTransform):
 
     @property
     def coeffs(self) -> tuple[Array, Array]:
-        """Return the composed, optionally batched matrix and offset."""
+        """Return the composed affine matrix and offset.
+
+        Returns
+        -------
+        matrix : Array
+            Forward coordinate matrix with shape ``(..., 2, 2)``.
+        offset : Array
+            Translation vector with shape ``(..., 2)``. Leading parameter axes are
+            broadcast and preserved in both outputs.
+        """
         combine = lambda cumulative, operation: (operation @ cumulative, None)
         matrices = self._matrices()
         identity = np.broadcast_to(np.eye(3), matrices.shape[1:])

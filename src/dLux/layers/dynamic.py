@@ -28,6 +28,16 @@ class BaseDynamicLayer(BaseOpticalLayer):
     transformation: BaseCoordTransform | None
 
     def __init__(self, coordinates=None, transformation=None):
+        """Initialise a coordinate context for dynamic optical evaluation.
+
+        Parameters
+        ----------
+        coordinates : Array, GridSpec, or None
+            Explicit ``(..., 2, ny, nx)`` coordinates, a generating grid, or ``None``
+            to use the incident wavefront coordinates.
+        transformation : BaseCoordTransform or None
+            Optional transformation applied before resolving parametric leaves.
+        """
         if transformation is not None and not isinstance(
             transformation, BaseCoordTransform
         ):
@@ -45,7 +55,13 @@ class BaseDynamicLayer(BaseOpticalLayer):
         self.transformation = transformation
 
     def context(self, wavefront: Wavefront) -> dict[str, Any]:
-        """Return the coordinate context used to resolve parametric leaves."""
+        """Return the coordinate context used to resolve parametric leaves.
+
+        The mapping contains ``wavefront``, SI-valued ``coordinates`` with shape
+        ``(..., 2, ny, nx)``, and per-axis ``pixel_scale``. Explicit coordinates or a
+        generating grid replace the wavefront coordinates before the optional
+        transformation is applied.
+        """
         if self.coordinates is None:
             coords, d = wavefront.coordinates, wavefront.pixel_scale
         elif isinstance(self.coordinates, GridSpec):
@@ -69,6 +85,19 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
     def __init__(
         self, transmission=None, coordinates=None, transformation=None, normalise=False
     ):
+        """Initialise a coordinate-dependent transmissive layer.
+
+        Parameters
+        ----------
+        transmission : Array, Parametric, or None
+            Static transmission or parametric resolved in the coordinate context.
+        coordinates : Array, GridSpec, or None
+            Explicit coordinate source, or incident coordinates when omitted.
+        transformation : BaseCoordTransform or None
+            Optional map into the transmission's local frame.
+        normalise : bool
+            Renormalise wavefront power after application.
+        """
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         TransmissiveLayer.__init__(self, transmission, normalise)
 
@@ -82,6 +111,17 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
     phase: Array | Parametric | None
 
     def __init__(self, opd=None, phase=None, coordinates=None, transformation=None):
+        """Initialise coordinate-dependent aberrations.
+
+        Parameters
+        ----------
+        opd, phase : Array, Parametric, or None
+            Static or parametric OPD in metres and phase in radians.
+        coordinates : Array, GridSpec, or None
+            Explicit coordinate source, or incident coordinates when omitted.
+        transformation : BaseCoordTransform or None
+            Optional map into the aberration's local frame.
+        """
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         AberratedLayer.__init__(self, opd, phase)
 
@@ -105,5 +145,20 @@ class DynamicOptic(BaseDynamicLayer, Optic):
         transformation=None,
         normalise=False,
     ):
+        """Initialise a general coordinate-dependent scalar optic.
+
+        Parameters
+        ----------
+        transmission : Array, Parametric, or None
+            Static or parametric amplitude transmission.
+        opd, phase : Array, Parametric, or None
+            Static or parametric OPD in metres and phase in radians.
+        coordinates : Array, GridSpec, or None
+            Explicit coordinate source, or incident coordinates when omitted.
+        transformation : BaseCoordTransform or None
+            Optional map into the optic's local frame.
+        normalise : bool
+            Renormalise wavefront power after application.
+        """
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         Optic.__init__(self, transmission, opd, phase, normalise)

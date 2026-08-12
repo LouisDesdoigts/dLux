@@ -13,6 +13,11 @@ physically meaningful invariants over individual intermediate expressions. Selec
 smallest representative cases that expose units, axes, leading dimensions,
 normalisation, sampling, and parameter behaviour.
 
+Do not invent analytic or broadly labelled "physics correctness" regressions without
+a defined public contract, established convention, or demonstrated failure mode. A
+test should protect behaviour users rely on; speculative physical expectations make
+the suite rigid without necessarily improving correctness.
+
 During exploratory API work, wait for approval before rewriting tests. Once the
 contract is accepted:
 

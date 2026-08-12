@@ -30,7 +30,12 @@ class BaseDetectorLayer(BaseLayer):
 
     @abstractmethod
     def apply(self, intensity: Intensity) -> Intensity:
-        """Transform a sampled intensity."""
+        """Transform a complete deterministic intensity.
+
+        Implementations must return a new `Intensity`, preserve unrelated leading
+        axes, and maintain grid metadata unless the operation explicitly changes the
+        spatial sampling. Detector layers do not generate noise or uncertainty.
+        """
 
 
 class DetectorLayer(BaseDetectorLayer):
@@ -43,7 +48,11 @@ class DetectorLayer(BaseDetectorLayer):
 
     @staticmethod
     def context(intensity: Intensity) -> dict[str, Any]:
-        """Return the context used to resolve parametric attributes."""
+        """Return the standard parametric context for a detector layer.
+
+        The mapping exposes ``intensity``, its sampled ``data``, a leading-variable
+        view under ``variables``, and SI-valued ``coordinates``.
+        """
         return {
             "intensity": intensity,
             "data": intensity.data,
@@ -68,11 +77,22 @@ class Sensitivity(DetectorLayer):
     response: Array | Parametric
 
     def __init__(self, response):
-        """Initialise the multiplicative detector response."""
+        """Initialise the multiplicative detector response.
+
+        Parameters
+        ----------
+        response : Array or Parametric
+            Scalar or spatial response broadcast against the intensity data, or a
+            parametric resolved from the detector context.
+        """
         self.response = dlu.to_value(response, types=Parametric)
 
     def apply(self, intensity: Intensity) -> Intensity:
-        """Apply the resolved response."""
+        """Multiply intensity data by the resolved response.
+
+        The response follows ordinary JAX broadcasting against ``(..., ny, nx)``
+        data. The returned `Intensity` retains the input grid.
+        """
         self = self.resolve(**self.context(intensity))
         return intensity * self.response
 
@@ -93,14 +113,24 @@ class Convolve(DetectorLayer):
     kernel: Array | Parametric
 
     def __init__(self, kernel):
-        """Initialise the fixed or parametric convolution kernel."""
+        """Initialise a detector convolution.
+
+        Parameters
+        ----------
+        kernel : Array or Parametric
+            Fixed two-dimensional ``(y, x)`` kernel or a parametric resolving to one.
+            The kernel is not normalised automatically.
+        """
         self.kernel = dlu.to_value(kernel, types=Parametric)
 
         if not isinstance(self.kernel, Parametric) and self.kernel.ndim != 2:
             raise ValueError("kernel must be a 2d array.")
 
     def apply(self, intensity: Intensity) -> Intensity:
-        """Convolve the intensity with the resolved kernel."""
+        """Convolve the final two intensity axes with the resolved kernel.
+
+        Leading axes and the input grid are preserved. The kernel is not normalised.
+        """
         self = self.resolve(**self.context(intensity))
         if self.kernel.ndim != 2:
             raise ValueError("Resolved kernel must be a 2d array.")
@@ -136,7 +166,17 @@ class Jitter(DetectorLayer):
     oversample: tuple[int, ...]
 
     def __init__(self, sigma, kernel_size=9, oversample=3):
-        """Initialise the jitter distribution and sampling."""
+        """Initialise the jitter distribution and numerical sampling.
+
+        Parameters
+        ----------
+        sigma : Array or Parametric, pixels
+            Scalar width, ``(x, y)`` widths, or ``(2, 2)`` covariance matrix.
+        kernel_size : int or tuple[int, int]
+            Odd detector-pixel dimensions in physical ``(x, y)`` order.
+        oversample : int or tuple[int, int]
+            Positive sub-pixel integration factors in physical ``(x, y)`` order.
+        """
         self.sigma = dlu.to_value(sigma, types=Parametric)
         self.kernel_size = dlu.as_size(kernel_size, 2, "kernel_size")
         self.oversample = dlu.as_size(oversample, 2, "oversample")
@@ -149,7 +189,12 @@ class Jitter(DetectorLayer):
                 raise ValueError("sigma must be scalar or have shape (2,) or (2, 2).")
 
     def kernel(self, intensity=None) -> Array:
-        """Return the resolved, normalised detector-pixel jitter kernel."""
+        """Return the resolved, normalised detector-pixel jitter kernel.
+
+        Supply ``intensity`` when ``sigma`` is parametric so it can be resolved from
+        the detector context. The returned two-dimensional ``(y, x)`` kernel has unit
+        sum and is expressed directly in detector-pixel coordinates.
+        """
         if isinstance(self.sigma, Parametric) and intensity is None:
             raise ValueError("intensity is required when sigma is parametric.")
 
@@ -176,7 +221,10 @@ class Jitter(DetectorLayer):
         return dlu.downsample(density, self.oversample, mean=False)
 
     def apply(self, intensity: Intensity) -> Intensity:
-        """Apply the resolved jitter kernel."""
+        """Convolve the final two intensity axes with the resolved jitter kernel.
+
+        Leading axes and the input grid are preserved.
+        """
         return intensity.convolve(self.kernel(intensity))
 
 
@@ -192,11 +240,21 @@ class Bias(DetectorLayer):
     bias: Array | Parametric
 
     def __init__(self, bias):
-        """Initialise the additive detector signal."""
+        """Initialise the additive detector signal.
+
+        Parameters
+        ----------
+        bias : Array or Parametric
+            Scalar or spatial signal broadcast against the intensity data, or a
+            parametric resolved from the detector context.
+        """
         self.bias = dlu.to_value(bias, types=Parametric)
 
     def apply(self, intensity: Intensity) -> Intensity:
-        """Add the resolved bias."""
+        """Add the resolved scalar or broadcastable bias to intensity data.
+
+        Leading axes and grid metadata are preserved in the returned `Intensity`.
+        """
         self = self.resolve(**self.context(intensity))
         return intensity + self.bias
 
@@ -218,11 +276,22 @@ class Gain(DetectorLayer):
     gain: Array | Parametric
 
     def __init__(self, gain):
-        """Initialise the linear or parametric gain."""
+        """Initialise the linear or parametric detector gain.
+
+        Parameters
+        ----------
+        gain : Array or Parametric
+            Multiplicative response. Parametrics receive intensity data through
+            ``variables`` and may therefore describe nonlinear gain.
+        """
         self.gain = dlu.to_value(gain, types=Parametric)
 
     def apply(self, intensity: Intensity) -> Intensity:
-        """Apply the resolved linear or nonlinear gain."""
+        """Multiply ``intensity.data`` by the resolved gain.
+
+        Parametric gains may depend on the input data and therefore represent
+        nonlinear response without a separate detector-layer type.
+        """
         self = self.resolve(**self.context(intensity))
         return intensity * self.gain
 
@@ -239,10 +308,21 @@ class Saturation(DetectorLayer):
     limit: Array | Parametric
 
     def __init__(self, limit):
-        """Initialise the upper intensity limit."""
+        """Initialise the upper detector limit.
+
+        Parameters
+        ----------
+        limit : Array or Parametric
+            Scalar or spatial maximum broadcast against the intensity data, or a
+            parametric resolved from the detector context.
+        """
         self.limit = dlu.to_value(limit, types=Parametric)
 
     def apply(self, intensity: Intensity) -> Intensity:
-        """Apply the resolved upper limit."""
+        """Clip intensity data at the resolved upper limit.
+
+        The limit follows ordinary JAX broadcasting. Values below the limit and all
+        grid metadata are preserved.
+        """
         self = self.resolve(**self.context(intensity))
         return intensity.set(data=np.minimum(intensity.data, self.limit))

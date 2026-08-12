@@ -47,7 +47,22 @@ def FFT_pad(
     pad: int | tuple[int, int] | None = None,
     pad_to: int | tuple[int, int] | None = None,
 ) -> tuple[Array, tuple[Array, Array]]:
-    """Pad a field and its coordinate axes exactly once."""
+    """Pad a field and regenerate matching coordinate axes.
+
+    Parameters
+    ----------
+    phasor : Array
+        Complex field with final spatial axes ``(y, x)``.
+    spec_in : Array or tuple
+        Regular input coordinate axes in physical ``(x, y)`` order.
+    pad, pad_to : int, tuple[int, int], or None
+        Exclusive factor-based or absolute physical-axis output sizes.
+
+    Returns
+    -------
+    phasor, spec_in : tuple
+        Centred padded field and matching coordinate axes.
+    """
     spec_in, pad_to = _resolve_pad(spec_in, pad, pad_to)
     if pad_to is None:
         return phasor, spec_in
@@ -61,7 +76,17 @@ def FFT_pad(
 def FFT_spec(
     spec_in: Array | tuple, wavelength: float, ABCD: Array
 ) -> tuple[Array, Array]:
-    """Return the native FFT output coordinate axes."""
+    """Return native FFT output axes for an ABCD propagation.
+
+    Parameters
+    ----------
+    spec_in : Array or tuple
+        Regular input coordinate axes.
+    wavelength : float, metres
+        Monochromatic wavelength.
+    ABCD : Array
+        Two-by-two paraxial propagation matrix.
+    """
     return lct.lct_fft_output_spec(
         spec_in=spec_in, lam=wavelength, ABCD=ABCD, npad=None
     )
@@ -70,7 +95,20 @@ def FFT_spec(
 def FFT_shift(
     spec_out: Array | tuple, output_center: Array | None = None
 ) -> tuple[tuple[Array, Array], Array | None]:
-    """Shift FFT output axes to a requested physical centre."""
+    """Shift FFT output axes to a requested physical centre.
+
+    Parameters
+    ----------
+    spec_out : Array or tuple
+        Native regular output coordinate axes.
+    output_center : Array or None
+        Requested physical ``(x, y)`` centre.
+
+    Returns
+    -------
+    spec_out, shift : tuple
+        Shifted axes and applied two-component shift, or ``None``.
+    """
     x_out, y_out = unpack_coord_spec(spec_out)
     if output_center is None:
         return (x_out, y_out), None
@@ -93,6 +131,21 @@ def FFT_ramp(
     The output-grid piston is the constant term in
     ``|coordinate + shift|² - |coordinate|²``. It does not affect intensity, but it
     must be retained when propagated fields are coherently compared or combined.
+
+    Parameters
+    ----------
+    wavelength : float, metres
+        Monochromatic wavelength.
+    spec : Array or tuple
+        Regular coordinates for the selected plane.
+    ABCD : Array
+        Two-by-two paraxial propagation matrix.
+    shift : Array or None
+        Physical two-component output-grid shift.
+    plane : str
+        ``"input"`` or ``"output"`` phase-ramp convention.
+    inverse : bool
+        Reverse the input-plane Fourier sign.
     """
     if shift is None:
         return 1.0
@@ -123,7 +176,21 @@ def ABCD_MFT(
     ABCD: Array,
     apply_out_curv: bool = True,
 ) -> Array:
-    """Propagate through an arbitrary ABCD system onto explicit axes."""
+    """Propagate through an ABCD system onto explicit output axes.
+
+    Parameters
+    ----------
+    phasor : Array
+        Complex input field with final spatial axes ``(y, x)``.
+    wavelength : float, metres
+        Monochromatic wavelength.
+    spec_in, spec_out : Array or tuple
+        Regular input and output coordinate axes.
+    ABCD : Array
+        Two-by-two paraxial propagation matrix.
+    apply_out_curv : bool
+        Apply the output quadratic-curvature phase.
+    """
     return lct.lct_prop(
         u_in=phasor,
         spec_in=spec_in,
@@ -144,7 +211,25 @@ def ABCD_FFT(
     output_center: Array | None = None,
     apply_out_curv: bool = True,
 ) -> tuple[Array, tuple[Array, Array]]:
-    """Propagate an ABCD system onto native or shifted FFT axes."""
+    """Propagate an ABCD system onto native or shifted FFT axes.
+
+    Parameters
+    ----------
+    phasor : Array
+        Complex input field.
+    wavelength : float, metres
+        Monochromatic wavelength.
+    spec_in : Array or tuple
+        Regular input coordinate axes.
+    ABCD : Array
+        Two-by-two paraxial propagation matrix.
+    pad, pad_to : int, tuple[int, int], or None
+        Exclusive factor-based or absolute padding.
+    output_center : Array or None
+        Requested physical output centre.
+    apply_out_curv : bool
+        Apply output quadratic curvature.
+    """
     # Pad the field and calculate native and requested output axes
     ABCD = np.asarray(ABCD)
     phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
@@ -229,7 +314,25 @@ def MFT(
     inverse: bool = False,
     apply_out_curv: bool = True,
 ) -> Array:
-    """Propagate to an explicit grid using a pure MFT or defocused LCT."""
+    """Propagate to explicit axes using a pure MFT or defocused LCT.
+
+    Parameters
+    ----------
+    phasor : Array
+        Complex input field.
+    wavelength : float, metres
+        Monochromatic wavelength.
+    spec_in, spec_out : Array or tuple
+        Regular input and explicit output coordinate axes.
+    focal_length : float or None, metres
+        Omit for normalised angular focal coordinates.
+    defocus : float or None, metres
+        Axial displacement from focus; enables the LCT route.
+    inverse : bool
+        Reverse pure Fraunhofer propagation.
+    apply_out_curv : bool
+        Apply output quadratic curvature for defocused propagation.
+    """
     # Resolve normalised angular or physical focal coordinates
     focal_length = 1.0 if focal_length is None else focal_length
     field = phasor
@@ -274,7 +377,29 @@ def FFT(
     output_center: Array | None = None,
     apply_out_curv: bool = True,
 ) -> tuple[Array, tuple[Array, Array]]:
-    """Propagate using a pure FFT or a defocused FFT-based LCT."""
+    """Propagate using a pure FFT or defocused FFT-based LCT.
+
+    Parameters
+    ----------
+    phasor : Array
+        Complex input field.
+    wavelength : float, metres
+        Monochromatic wavelength.
+    spec_in : Array or tuple
+        Regular input coordinate axes.
+    pad, pad_to : int, tuple[int, int], or None
+        Exclusive factor-based or absolute padding.
+    focal_length : float or None, metres
+        Omit for normalised angular focal coordinates.
+    defocus : float or None, metres
+        Axial displacement from focus; incompatible with inverse FFT propagation.
+    inverse : bool
+        Reverse pure Fraunhofer propagation.
+    output_center : Array or None
+        Requested physical output centre.
+    apply_out_curv : bool
+        Apply output quadratic curvature for defocused propagation.
+    """
     # Validate direction and pad the input field
     focal_length = 1.0 if focal_length is None else focal_length
     if inverse and defocus is not None:
@@ -313,7 +438,23 @@ def ASM(
     pad_to: int | tuple[int, int] | None = None,
     crop: bool = True,
 ) -> Array:
-    """Propagate through free space using the angular-spectrum method."""
+    """Propagate through free space using the angular-spectrum method.
+
+    Parameters
+    ----------
+    phasor : Array
+        Complex input field.
+    wavelength : float, metres
+        Monochromatic wavelength.
+    spec_in : Array or tuple
+        Regular physical input coordinate axes.
+    distance : float, metres
+        Signed propagation distance.
+    pad, pad_to : int, tuple[int, int], or None
+        Exclusive factor-based or absolute padding.
+    crop : bool
+        Crop the result back to the original spatial shape.
+    """
     shape = phasor.shape[-2:]
     phasor, spec_in = dlu.FFT_pad(phasor, spec_in, pad, pad_to)
     kernel, nx, ny = asm.asm_kernels(

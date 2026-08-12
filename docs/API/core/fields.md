@@ -21,7 +21,7 @@ classDiagram
     dLux_fields_BaseField <|-- dLux_fields_DiscreteField
     click dLux_fields_DiscreteField href "#dLux.fields.DiscreteField" "No direct public attributes or methods"
     dLux_fields_ContinuousField <|-- dLux_fields_Wavefront
-    click dLux_fields_Wavefront href "#dLux.fields.Wavefront" "Attributes: grid, phasor, wavelength · Properties: field, real, imaginary, amplitude, phase, complex, polar, intensity, psf, wavenumber, batch_ndim, is_chromatic, is_polarised, _mapped_axis, power · Methods: from_phasor(), to_intensity(), add_phase(), add_opd(), tilt(), normalise(), apply_jones(), intensity_from_stokes(), psf_from_stokes()"
+    click dLux_fields_Wavefront href "#dLux.fields.Wavefront" "Attributes: grid, phasor, wavelength · Properties: field, real, imaginary, amplitude, phase, complex, polar, intensity, psf, wavenumber, batch_ndim, is_chromatic, is_polarised, power · Methods: from_phasor(), to_intensity(), add_phase(), add_opd(), tilt(), normalise(), apply_jones(), intensity_from_stokes(), psf_from_stokes()"
     dLux_fields_Wavefront <|-- dLux_fields_PolarisedWavefront
     click dLux_fields_PolarisedWavefront href "#dLux.fields.PolarisedWavefront" "Attributes: grid, phasor, wavelength · Properties: is_polarised, batch_ndim, intensity, psf · Methods: from_phasor(), from_wavefront(), intensity_from_stokes(), psf_from_stokes(), stokes(), apply_jones()"
     dLux_fields_DiscreteField <|-- dLux_fields_Intensity

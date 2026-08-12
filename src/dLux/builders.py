@@ -83,11 +83,11 @@ def _zernike_groups(nolls, method):
             ks = [pad_k(array, n) for array, n in zip(ks, ns)]
             coeffs = [np.pad(array, (0, width - len(array))) for array in coeffs]
 
-        groups.append(ZernikeGroup(indices, ns, ms, np.stack(coeffs), np.stack(ks)))
+        groups.append(_ZernikeGroup(indices, ns, ms, np.stack(coeffs), np.stack(ks)))
     return tuple(groups)
 
 
-class ZernikeGroup(Base):
+class _ZernikeGroup(Base):
     """A rectangular collection of jointly vectorised Zernike modes."""
 
     indices: Array
@@ -126,6 +126,15 @@ class Norm(Base):
     scale: Array
 
     def __init__(self, mode="rms", scale=1.0):
+        """Initialise support-aware basis normalisation.
+
+        Parameters
+        ----------
+        mode : str
+            One of ``"l1"``, ``"l2"``, ``"max"``, ``"rms"``, or ``"p2v"``.
+        scale : ArrayLike
+            Physical scale applied independently after normalising each mode.
+        """
         mode = str(mode).lower()
         if mode not in ("l1", "l2", "max", "rms", "p2v"):
             raise ValueError("mode must be one of l1, l2, max, rms, or p2v.")
@@ -166,7 +175,19 @@ class BaseOPDDef(Base):
 
     @abstractmethod
     def calculate(self, coordinates, support, diameter, centers=None):
-        """Return the sampled representation required by this definition."""
+        """Return the sampled representation required by this definition.
+
+        Parameters
+        ----------
+        coordinates : Array
+            Cartesian coordinates with shape ``(..., 2, ny, nx)``.
+        support : Array
+            Global or per-aperture boolean support.
+        diameter : Array
+            Local aperture diameter in the coordinate unit.
+        centers : Array or None
+            Optional ``(n_apertures, 2)`` local centres.
+        """
 
 
 class ZernikeDef(BaseOPDDef):
@@ -194,7 +215,7 @@ class ZernikeDef(BaseOPDDef):
     """
 
     nolls: Array
-    groups: tuple[ZernikeGroup, ...]
+    groups: tuple[_ZernikeGroup, ...]
     order: Array
     oversize: Array
     norm: Norm | None
@@ -203,6 +224,22 @@ class ZernikeDef(BaseOPDDef):
     def __init__(
         self, nolls=None, orders=None, oversize=0.01, norm=None, method="padded"
     ):
+        """Initialise a sampled Zernike-basis definition.
+
+        Parameters
+        ----------
+        nolls : ArrayLike or None
+            Positive Noll indices, mutually exclusive with ``orders``.
+        orders : ArrayLike or None
+            Radial orders expanded to complete Noll sequences.
+        oversize : float
+            Fractional enlargement of the aperture diameter used for sampling.
+        norm : Norm or None
+            Optional support-aware basis normalisation and physical scale.
+        method : str
+            ``"padded"`` for one padded vectorised group or ``"mapped"`` for
+            separate equal-width groups.
+        """
         # Validate and expand the requested Zernike indices
         if (nolls is None) == (orders is None):
             raise ValueError("Provide exactly one of nolls or orders.")
@@ -234,14 +271,26 @@ class ZernikeDef(BaseOPDDef):
         self.norm = norm
 
     def calculate(self, coordinates, support, diameter, centers=None):
-        """Sample, normalise, and clip the configured Zernike basis."""
+        """Sample, normalise, and clip the configured Zernike basis.
+
+        Parameters
+        ----------
+        coordinates : Array
+            Cartesian coordinates with shape ``(..., 2, ny, nx)``.
+        support : Array
+            Global or per-aperture mask used to zero and normalise every mode.
+        diameter : Array
+            Aperture diameter before applying the configured ``oversize``.
+        centers : Array or None
+            Optional centres for independently translated local bases.
+        """
         # Prepare the enlarged basis diameter
         diameter = np.asarray(diameter) * (1 + self.oversize)
 
         # Evaluate and restore the configured Noll ordering
         def calculate_basis(coords):
             calculate = lambda group: group.calculate(coords, diameter)
-            is_group = lambda value: isinstance(value, ZernikeGroup)
+            is_group = lambda value: isinstance(value, _ZernikeGroup)
             bases = jtu.map(calculate, self.groups, is_leaf=is_group)
             return np.concatenate(bases)[self.order]
 
@@ -264,7 +313,7 @@ class ZernikeDef(BaseOPDDef):
 class BaseBuilder(Base):
     """Base class for construction-time objects evaluated on a ``GridSpec``."""
 
-    def validate(self, grid, transform):
+    def _validate(self, grid, transform):
         """Validate the sampling grid and optional coordinate transformation."""
         if not isinstance(grid, GridSpec):
             raise TypeError("grid must be a GridSpec.")
@@ -295,7 +344,7 @@ class BaseBuilder(Base):
         Any
             The concrete return contract is defined by the builder subclass.
         """
-        self.validate(grid, transform)
+        self._validate(grid, transform)
         build_fn = eqx.filter_jit(self._build) if jit else self._build
         return build_fn(grid, transform)
 
@@ -341,6 +390,19 @@ class ApertureBuilder(BaseBuilder):
     oversample: tuple[int, int] = eqx.field(static=True)
 
     def __init__(self, primary, obscurations=(), opd=None, oversample=5):
+        """Initialise a dense aperture construction recipe.
+
+        Parameters
+        ----------
+        primary : Shape
+            Transmissive primary geometry.
+        obscurations : list or tuple of Shape
+            Geometries removed from the primary.
+        opd : BaseOPDDef or None
+            Optional sampled OPD definition.
+        oversample : int or tuple[int, int]
+            Positive hard-edge sampling factors in physical ``(x, y)`` order.
+        """
         # Validate the primary and obscuration geometry
         if not isinstance(primary, Shape):
             raise TypeError("primary must be a Shape.")
@@ -366,9 +428,21 @@ class ApertureBuilder(BaseBuilder):
         return grid
 
     def build(self, grid, transform=None, jit=True, return_support=False):
-        """Build on a 2D grid, optionally returning the aperture support."""
+        """Build sampled aperture data on a two-dimensional grid.
+
+        Parameters
+        ----------
+        grid : GridSpec
+            One-dimensional square or explicit two-dimensional output sampling.
+        transform : BaseCoordTransform or None
+            Optional map into the aperture's local frame.
+        jit : bool
+            Compile the fixed-topology construction path.
+        return_support : bool
+            Append the primary support to the returned arrays.
+        """
         grid = self._promote_grid(grid)
-        self.validate(grid, transform)
+        self._validate(grid, transform)
         build_fn = eqx.filter_jit(self._build) if jit else self._build
         return build_fn(grid, transform, return_support)
 
@@ -378,7 +452,7 @@ class ApertureBuilder(BaseBuilder):
         coordinates = grid.transformed(transform)
         return shape.evaluate(coordinates=coordinates, pixel_scale=grid.d * grid.scale)
 
-    def aperture_data(self, grid, transform):
+    def _aperture_data(self, grid, transform):
         """Sample the aperture and retain its native primary support."""
         # Generate the oversampled aperture components
         fine = grid.oversample(self.oversample)
@@ -403,7 +477,7 @@ class ApertureBuilder(BaseBuilder):
     def _build(self, grid, transform, return_support=False):
         """Build sampled transmission, OPD data, and optional support."""
         # Generate the aperture transmission and support
-        aperture = self.aperture_data(grid, transform)
+        aperture = self._aperture_data(grid, transform)
 
         # Return the transmission when no OPD is defined
         if self.opd is None:
@@ -440,6 +514,28 @@ class ApertureBuilder(BaseBuilder):
         explicit coefficients are used directly, a key draws standard-normal values,
         and omitting both initialises zero coefficients. ``normalise`` retains the
         existing wavefront-normalisation meaning of ``Optic.normalise``.
+
+        Parameters
+        ----------
+        grid : GridSpec
+            One-dimensional square or explicit two-dimensional sampling grid.
+        transform : BaseCoordTransform or None
+            Optional map from grid coordinates into the aperture frame.
+        coeffs : Array or None
+            Explicit coefficients matching the sampled OPD basis shape.
+        key : Array or None
+            JAX random key for standard-normal coefficient initialisation.
+        normalise : bool
+            Renormalise wavefront power after applying the returned optic.
+        jit : bool
+            Compile the fixed-topology sampling calculation.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+
+        Returns
+        -------
+        optic : Optic
+            Sampled transmission and optional explicit OPD basis.
         """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         components = self.build(grid, transform, jit)
@@ -486,6 +582,23 @@ class SparseApertureBuilder(ApertureBuilder):
         opd=None,
         oversample=5,
     ):
+        """Initialise a repeated sparse-aperture construction recipe.
+
+        Parameters
+        ----------
+        subaperture : Shape
+            Local geometry shared by every centre.
+        centers : ArrayLike
+            Physical ``(x, y)`` centres with shape ``(n_apertures, 2)``.
+        obscurations : list or tuple of Shape
+            Local obscurations repeated within each sub-aperture.
+        global_obscurations : list or tuple of Shape
+            Geometries removed after assembling the global pupil.
+        opd : BaseOPDDef or None
+            Optional shared local OPD definition.
+        oversample : int or tuple[int, int]
+            Positive hard-edge sampling factors in physical ``(x, y)`` order.
+        """
         # Validate and store the sub-aperture centres
         centers = dlu.to_value(centers)
         if centers.ndim != 2 or centers.shape[-1] != 2:
@@ -529,7 +642,7 @@ class SparseApertureBuilder(ApertureBuilder):
             coordinates=coordinates, pixel_scale=grid.d * grid.scale
         )
 
-    def aperture_data(self, grid, transform):
+    def _aperture_data(self, grid, transform):
         """Sample global component transmissions and non-redundant supports."""
         # Generate the oversampled components and primary supports
         fine = grid.oversample(self.oversample)
@@ -593,6 +706,22 @@ class SparseApertureBuilder(ApertureBuilder):
         every aperture, while ``shared=False`` adds a leading aperture axis.
         Explicit coefficients may use either representation. A supplied random key
         follows the selected layout.
+
+        Parameters
+        ----------
+        grid, transform, coeffs, key, normalise, jit, coefficients
+            Follow `ApertureBuilder.__call__`.
+        sparse : bool
+            Return a shared locally sampled `SparseOptic`; otherwise return a global
+            densely sampled `Optic`.
+        shared : bool
+            Share native OPD coefficients between apertures when sparse, or add a
+            leading independent aperture axis when false.
+
+        Returns
+        -------
+        optic : Optic or SparseOptic
+            Materialised dense or sparse pupil representation.
         """
         coeffs = _resolve_coeffs(coeffs, coefficients)
 
@@ -602,7 +731,7 @@ class SparseApertureBuilder(ApertureBuilder):
 
         # Validate sparse construction requirements
         grid = self._promote_grid(grid)
-        self.validate(grid, transform)
+        self._validate(grid, transform)
         if self.global_obscurations:
             raise ValueError(
                 "Global obscurations cannot be represented by one shared local "

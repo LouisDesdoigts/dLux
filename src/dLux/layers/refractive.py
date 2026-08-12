@@ -29,11 +29,24 @@ class RefractiveOptic(OpticalLayer):
     n: Array | Parametric
 
     def __init__(self, thickness, n):
+        """Initialise a refractive thickness profile.
+
+        Parameters
+        ----------
+        thickness : Array or Parametric
+            Material thickness in metres.
+        n : Array or Parametric
+            Refractive index evaluated at the wavefront wavelength.
+        """
         self.thickness = dlu.to_value(thickness, types=Parametric)
         self.n = dlu.to_value(n, types=Parametric)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
-        """Apply the resolved refractive optical path to a wavefront."""
+        """Apply the resolved refractive optical path to one wavefront.
+
+        Thickness is measured in metres and refractive index is resolved at the
+        wavefront wavelength. The resulting OPD is applied without mutating the input.
+        """
         self = self.resolve(wavefront=wavefront)
         n = np.asarray(self.n - 1)
         if n.ndim:
@@ -56,13 +69,26 @@ class Wedge(OpticalLayer):
     n: Array | Parametric
 
     def __init__(self, angle, n):
+        """Initialise a refractive wedge.
+
+        Parameters
+        ----------
+        angle : ArrayLike
+            Two-component wedge slope.
+        n : Array or Parametric
+            Refractive index evaluated at the wavefront wavelength.
+        """
         self.angle = dlu.to_value(angle)
         if self.angle.shape != (2,):
             raise ValueError("angle must have shape (2,).")
         self.n = dlu.to_value(n, types=Parametric)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
-        """Apply the wavelength-dependent optical path of the wedge."""
+        """Apply the wavelength-dependent optical path of the wedge.
+
+        Wedge angle is in radians, coordinates and thickness are in metres, and the
+        refractive index is resolved at each wavefront wavelength.
+        """
         # Resolve the sampled wedge thickness
         self = self.resolve(wavefront=wavefront)
         coordinates = wavefront.coordinates

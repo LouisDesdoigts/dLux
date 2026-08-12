@@ -55,7 +55,10 @@ class ParametricBasis(Parametric):
 
     @property
     def coefficients(self: ParametricBasis) -> Array:
-        """Deprecated alias for the basis coefficients."""
+        """Return ``coeffs`` through the deprecated attribute alias.
+
+        Access emits a migration warning and the alias will be removed in dLux 0.17.
+        """
         # Keep compatibility lazy to avoid the core/legacy import cycle.
         from ..compatibility import warn_deprecated
 
@@ -69,12 +72,12 @@ class ParametricBasis(Parametric):
 
     @property
     def c(self: ParametricBasis) -> Array:
-        """Return the basis coefficients using their compact alias."""
+        """Return ``coeffs`` through the compact scientific alias ``c``."""
         return self.coeffs
 
     @property
     def alpha(self: ParametricBasis) -> Array:
-        """Return the basis coefficients using their conventional alias."""
+        """Return ``coeffs`` through the conventional scientific alias ``alpha``."""
         return self.coeffs
 
     def _set_coeffs(
@@ -99,7 +102,12 @@ class ParametricBasis(Parametric):
         self.shape = shape
 
     def evaluate_basis(self, basis: Array) -> Array:
-        """Apply global or leading-axis-vectorised coefficients to a basis."""
+        """Contract stored coefficients against explicit basis vectors.
+
+        ``basis`` begins with the native coefficient ``shape`` and is followed by
+        sampled output axes. Coefficients may be shared or contain one matching
+        leading vectorisation axis; the returned array retains all uncontracted axes.
+        """
         # Evaluate coefficients shared across the complete basis
         if self.coeffs.shape == self.shape:
             return dlu.eval_basis(basis, self.coeffs)
@@ -124,7 +132,12 @@ class ParametricBasis(Parametric):
 
     @abstractmethod
     def solve_basis(self: ParametricBasis, value: Array, **kwargs: Any) -> Array:
-        """Solve for coefficients representing a supplied value."""
+        """Solve for coefficients representing ``value`` in this basis.
+
+        Concrete bases define how basis vectors are obtained. ``value`` must match
+        the sampled output shape and the return value has the native coefficient
+        ``shape``.
+        """
 
 
 class Basis(ParametricBasis):
@@ -152,6 +165,19 @@ class Basis(ParametricBasis):
         *,
         coefficients: Array = None,
     ):
+        """Initialise an explicitly sampled linear basis.
+
+        Parameters
+        ----------
+        basis : Array
+            Basis values with coefficient axes followed by sampled output axes.
+        coeffs : Array or None
+            Coefficients matching ``shape``; defaults to zeros.
+        shape : tuple[int, ...] or None
+            Number and sizes of coefficient axes, inferred when omitted.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         # Resolve coefficients and their native basis shape
         self.basis = dlu.to_value(basis)
         coeffs = _resolve_coeffs(coeffs, coefficients)
@@ -172,11 +198,20 @@ class Basis(ParametricBasis):
         self._set_coeffs(coeffs, shape)
 
     def evaluate(self: Basis, **kwargs: Any) -> Array:
-        """Contract the coefficients against the stored basis."""
+        """Contract stored coefficients against the explicit basis.
+
+        Native coefficient dimensions are removed and all sampled output dimensions
+        are retained. Additional context is accepted for parametric interoperability
+        but is not consumed.
+        """
         return self.evaluate_basis(self.basis)
 
     def solve_basis(self: Basis, value: Array, **kwargs: Any) -> Array:
-        """Solve the stored basis for coefficients representing ``value``."""
+        """Solve the explicit basis for coefficients representing ``value``.
+
+        ``value`` must match the basis sampled output shape. The returned least-squares
+        coefficients have the native basis ``shape``.
+        """
         return dlu.solve_basis(value, self.basis)
 
 
@@ -204,6 +239,21 @@ class PastedBasis(ParametricBasis):
     method: str
 
     def __init__(self, basis, spec, coeffs=None, method="scan", *, coefficients=None):
+        """Initialise compact basis stamps and their placement.
+
+        Parameters
+        ----------
+        basis : Array
+            Per-stamp basis values with final two local spatial axes.
+        spec : PasteSpec
+            Fixed placement geometry for the compact stamps.
+        coeffs : Array or None
+            Shared or per-stamp basis coefficients.
+        method : str
+            ``"scan"`` for lower memory or ``"scatter"`` for parallel placement.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         if not isinstance(spec, PasteSpec):
             raise TypeError("spec must be a PasteSpec.")
@@ -228,12 +278,20 @@ class PastedBasis(ParametricBasis):
         self.method = method
 
     def evaluate(self, **kwargs: Any) -> Array:
-        """Evaluate each compact basis and paste the local values globally."""
+        """Evaluate compact bases and paste their local values globally.
+
+        Coefficients are contracted independently per stamp. The result has the full
+        output spatial shape from `PasteSpec`; overlapping stamp values are added.
+        """
         local = jax.vmap(dlu.eval_basis)(self.basis, self.coeffs)
         return self.spec.paste(local, self.method)
 
     def solve_basis(self, value: Array, **kwargs: Any) -> Array:
-        """Solve coefficients independently from every extracted local stamp."""
+        """Solve coefficients independently from every extracted local stamp.
+
+        ``value`` must end with the global output shape. Returned coefficients have
+        shape ``(n_stamps, *basis_shape)``.
+        """
         values = self.spec.extract(value)
         solve = lambda value, basis: dlu.solve_basis(value, basis)
         return jax.vmap(solve)(values, self.basis)
@@ -247,14 +305,26 @@ class ImplicitBasis(ParametricBasis):
 
     @abstractmethod
     def calculate_basis(self: ImplicitBasis, **kwargs: Any) -> Array:
-        """Calculate basis vectors from the supplied context."""
+        """Materialise basis vectors from the supplied context.
+
+        The result must begin with the native coefficient ``shape`` and be followed
+        by the sampled output axes consumed by `evaluate_basis`.
+        """
 
     def evaluate(self: ImplicitBasis, **kwargs: Any) -> Array:
-        """Generate and evaluate the basis in the supplied context."""
+        """Generate the implicit basis and contract its coefficient dimensions.
+
+        Named context is passed to `calculate_basis`. The result retains all sampled
+        output axes after the native basis dimensions are contracted.
+        """
         return self.evaluate_basis(self.calculate_basis(**kwargs))
 
     def solve_basis(self: ImplicitBasis, value: Array, **kwargs: Any) -> Array:
-        """Generate and solve the basis for coefficients representing ``value``."""
+        """Generate the implicit basis and solve it for ``value``.
+
+        The returned least-squares coefficients have the native basis ``shape``.
+        Named context is passed to `calculate_basis`.
+        """
         return dlu.solve_basis(value, self.calculate_basis(**kwargs))
 
 
@@ -266,7 +336,12 @@ class CoordBasis(ImplicitBasis):
 
     @staticmethod
     def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
-        """Resolve explicit coordinates or coordinates from a wavefront."""
+        """Resolve explicit coordinates or coordinates from a wavefront.
+
+        Provide exactly one usable source. Returned coordinates have component axis
+        length two immediately before the final ``(y, x)`` spatial axes and are in
+        canonical SI units when obtained from a wavefront.
+        """
         if coordinates is not None:
             return BaseCoordTransform.get_coordinates(coordinates)
         if wavefront is None:
@@ -293,6 +368,23 @@ class CLIMBBasis(Basis):
         *,
         coefficients=None,
     ):
+        """Initialise a CLIMB-softened explicit basis.
+
+        Parameters
+        ----------
+        basis : Array
+            Explicit sampled basis values.
+        coeffs : Array or None
+            Basis coefficients, defaulting to zeros.
+        shape : tuple[int, ...] or None
+            Coefficient-axis shape, inferred when omitted.
+        values : tuple[float, float]
+            Lower and upper values used by soft binarisation.
+        oversample : int
+            Internal soft-binarisation oversampling factor.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         super().__init__(basis, coeffs, shape)
         output_shape = self.basis.shape[len(self.shape) :]
@@ -311,11 +403,18 @@ class CLIMBBasis(Basis):
             )
 
     def evaluate_latent(self) -> Array:
-        """Evaluate the continuous, pre-binarised latent basis."""
+        """Return the continuous explicit-basis field before CLIMB binarisation.
+
+        The result retains the oversampled latent spatial shape.
+        """
         return super().evaluate()
 
     def evaluate(self, **kwargs: Any) -> Array:
-        """Evaluate and softly binarize the latent basis."""
+        """Evaluate and softly binarise the latent field.
+
+        The result is downsampled by ``oversample`` and mapped between the configured
+        lower and upper values.
+        """
         binary = dlu.soft_binarise(self.evaluate_latent(), self.oversample)
         low, high = self.values
         return low + (high - low) * binary
@@ -331,6 +430,21 @@ class FourierBasis(ImplicitBasis):
     def __init__(
         self, npix, n_modes, coeffs=None, scale: float = 1.0, *, coefficients=None
     ):
+        """Initialise an implicit separable Fourier basis.
+
+        Parameters
+        ----------
+        npix : int or tuple[int, int]
+            Sampled output size.
+        n_modes : int or tuple[int, int]
+            Fourier-mode counts in physical-axis order.
+        coeffs : Array or None
+            Coefficient array matching the generated separable basis shape.
+        scale : float
+            Coordinate scale used to construct the Fourier kernels.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         self.kernels = dlu.fourier_kernels(n_modes, npix, scale)
         shape = tuple(kernel.shape[1] for kernel in self.kernels)
@@ -338,16 +452,29 @@ class FourierBasis(ImplicitBasis):
         self._set_coeffs(coeffs, shape)
 
     def calculate_basis(self, **kwargs: Any) -> Array:
-        """Materialise the separable Fourier basis vectors."""
+        """Materialise the complete separable real Fourier basis.
+
+        The result has shape ``(*shape, ny, nx)``. Additional context is accepted but
+        not consumed because the sampling kernels are fixed at construction.
+        """
         Kx, Ky = self.kernels
         return np.einsum("xi,yj->ijxy", Kx, Ky)
 
     def evaluate(self, **kwargs: Any) -> Array:
-        """Evaluate the separable Fourier expansion directly."""
+        """Evaluate the separable Fourier expansion without materialising its basis.
+
+        Returns a sampled ``(ny, nx)`` field, preserving any supported leading
+        coefficient axis.
+        """
         return dlu.eval_fourier_basis(self.coeffs, *self.kernels)
 
     def resize(self, npix, scale: float = 1.0):
-        """Return a copy sampled onto a resized Fourier grid."""
+        """Return a copy sampled onto a resized Fourier grid.
+
+        ``npix`` gives physical ``(x, y)`` sample counts and ``scale`` defines the
+        dimensionless Fourier coordinate extent. Coefficients are retained while the
+        separable kernels are regenerated.
+        """
         kernels = dlu.fourier_kernels(self.shape, npix, scale)
         return self.set(kernels=kernels)
 
@@ -364,6 +491,21 @@ class SplineBasis(ImplicitBasis):
     def __init__(
         self, npix, n_knots, coeffs=None, method="cubic", *, coefficients=None
     ):
+        """Initialise an implicit two-dimensional spline basis.
+
+        Parameters
+        ----------
+        npix : int or tuple[int, int]
+            Sampled output size.
+        n_knots : int or tuple[int, int]
+            At least two spline knots along each physical axis.
+        coeffs : Array or None
+            Knot coefficients, defaulting to zeros.
+        method : str
+            Interpolation method used between knots.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+        """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         npix = dlu.as_size(npix, 2, "npix")
         n_knots = dlu.as_size(n_knots, 2, "n_knots")
@@ -379,7 +521,11 @@ class SplineBasis(ImplicitBasis):
         self.method = str(method)
 
     def calculate_basis(self, **kwargs: Any) -> Array:
-        """Materialise one interpolated basis vector per spline knot."""
+        """Materialise one interpolated basis vector per spline knot.
+
+        The result has shape ``(*shape, ny, nx)`` on the configured sampled output
+        coordinates.
+        """
         # Generate impulses at every spline knot
         size = self.coeffs.size
         impulses = np.eye(size).reshape((size,) + self.shape)
@@ -394,7 +540,10 @@ class SplineBasis(ImplicitBasis):
         return basis.reshape(self.shape + self.sample_coords.shape[1:])
 
     def evaluate(self, **kwargs: Any) -> Array:
-        """Interpolate the spline coefficients onto the sampled output grid."""
+        """Interpolate spline-knot coefficients onto the sampled output grid.
+
+        Returns a real ``(ny, nx)`` field using the configured interpolation method.
+        """
         return dlu.interp(
             self.coeffs, self.knot_coords, self.sample_coords, method=self.method
         )

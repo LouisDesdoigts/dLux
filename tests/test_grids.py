@@ -17,7 +17,7 @@ class TestSpecifications:
             lambda value: (
                 value.coordinates,
                 value.axes,
-                value.xs_for((4, 4)),
+                value.axes_for((4, 4)),
                 value.fov,
                 value.extent(),
             ),
@@ -84,7 +84,6 @@ class TestSpecifications:
         array = np.ones((4, 4))
 
         assert spec.explicit
-        assert spec.padding == {"pad_to": (8, 6)}
         assert spec.output_size(array.shape) == (8, 6)
         assert spec.crop_size(array.shape) == (8, 6)
         assert spec.pad_array(array).shape == (6, 8)
@@ -179,17 +178,14 @@ class TestSpecifications:
         with pytest.raises(ValueError, match="n and d"):
             _ = size_only.fov
         with pytest.raises(ValueError, match="d must"):
-            size_only.xs_for((4,))
+            size_only.axes_for((4,))
 
     def test_axis_aliases(self):
         spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), unit="m")
 
-        assert all(
-            np.allclose(left, right)
-            for left, right in zip(spec.axes_for((4, 6)), spec.xs_for((4, 6)))
-        )
+        assert all(np.allclose(left, right) for left, right in zip(spec.axes, spec.xs))
         with pytest.raises(ValueError, match="dimensionality"):
-            spec.xs_for((4,))
+            spec.axes_for((4,))
 
     def test_units_and_differentiation(self):
         spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")

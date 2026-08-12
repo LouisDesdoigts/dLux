@@ -9,6 +9,20 @@ import dLux as dl
 import dLux.utils as dlu
 
 
+@pytest.mark.parametrize("wavefront_type", [dl.Wavefront, dl.PolarisedWavefront])
+def test_from_phasor_constructor_alias(wavefront_type):
+    grid = dl.GridSpec(n=4, d=0.1, unit="m").broadcast(2)
+    phasor = np.ones((4, 4), dtype=complex)
+
+    with pytest.warns(DeprecationWarning) as record:
+        wavefront = wavefront_type.from_phasor(phasor, 500e-9, grid)
+
+    message = str(record[0].message)
+    assert "removed in dLux 0.17.0" in message
+    assert f"{wavefront_type.__name__}(w, g, p)" in message
+    assert isinstance(wavefront, wavefront_type)
+
+
 def test_coefficients_constructor_alias():
     basis = np.ones((2, 3, 3))
 

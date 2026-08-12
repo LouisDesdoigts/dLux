@@ -18,7 +18,7 @@ classDiagram
     class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
     class dLux_parametric_polynomials__ZernikeBasis["_ZernikeBasis"]
     dLux_base_Base <|-- dLux_parametric_polynomials_DynamicZernike
-    click dLux_parametric_polynomials_DynamicZernike href "#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name, _c, _k · Methods: calculate()"
+    click dLux_parametric_polynomials_DynamicZernike href "#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name · Methods: calculate()"
     dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_ZernikeBasis
     dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
     click dLux_parametric_polynomials_ZernikeBasis href "#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coeffs, shape, basis"

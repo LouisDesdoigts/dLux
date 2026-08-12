@@ -11,8 +11,26 @@ Use five complementary forms:
 Public documentation should state units, shapes, axes, normalisation, leading
 dimensions, limitations, and relevant differentiability. Add concise executable
 examples to core classes and behaviours where the interaction is not obvious.
-Document every public concrete-class constructor, even when its concise constructor
-docstring points back to a fuller class-level contract.
+Document every public concrete-class constructor. Constructor docstrings must cover
+all arguments, accepted types, shapes, units, defaults, exclusive combinations,
+broadcasting, validation, and important construction-time effects. Simple
+constructors may be concise, but still need a useful `Parameters` section; a summary
+that merely restates "initialise" is insufficient. Keep the broader conceptual and
+physical contract on the class docstring.
+
+Apply the same ownership test to every class method: a method should either be a
+deliberate public API with a complete usable contract, or an implementation detail
+with a private name. Do not privatise useful behaviour merely to avoid documenting
+it. Public method documentation must let a user call the method without reading its
+implementation, including accepted objects, units, shapes and axis order, defaults,
+return types and containers, immutable update behaviour, and important limitations.
+One-line summaries are sufficient only for genuinely obvious properties or wrappers.
+When an override preserves an inherited contract exactly, prefer inheriting the base
+documentation over replacing it with a less informative summary.
+
+Audit convenience constructors and aliases against the canonical API. Remove
+unreleased redundant routes; retain released routes only through the compatibility
+policy, with an actionable migration warning where they are deprecated.
 
 The documentation landing page should explain these routes, expose the stable version,
 link the package and UML maps, point directly to the utilities guide, and end with

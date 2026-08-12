@@ -74,7 +74,7 @@ def _propagate_fft(
     scale = dlu.unit_factor(unit)
     center = dlu.as_axis(grid.c, 2, "c")
     center = None if center is None else center * scale
-    padding = grid.padding
+    padding = grid._padding
 
     # Configure the FFT propagation function and inputs
     if ABCD is None:
@@ -157,11 +157,18 @@ class ABCDFreeSpace(ABCDElement):
     distance: float
 
     def __init__(self, distance):
+        """Initialise free-space ABCD translation.
+
+        Parameters
+        ----------
+        distance : float or Array, metres
+            Signed propagation distance.
+        """
         self.distance = dlu.to_value(distance)
 
     @property
     def abcd(self):
-        """Return the analytic ABCD matrix for free-space propagation."""
+        """Return the ``(..., 2, 2)`` free-space ABCD matrix in metres."""
         return dlu.abcd_free_space(self.distance)
 
 
@@ -171,11 +178,21 @@ class ABCDLens(ABCDElement):
     focal_length: float
 
     def __init__(self, focal_length):
+        """Initialise a thin-lens ABCD element.
+
+        Parameters
+        ----------
+        focal_length : float or Array, metres
+            Signed lens focal length.
+        """
         self.focal_length = dlu.to_value(focal_length)
 
     @property
     def abcd(self):
-        """Return the analytic ABCD matrix for the lens."""
+        """Return the ``(..., 2, 2)`` thin-lens ABCD matrix.
+
+        Focal length is interpreted in metres and leading parameter axes are retained.
+        """
         return dlu.abcd_lens(self.focal_length)
 
 
@@ -185,11 +202,21 @@ class ABCDMirror(ABCDElement):
     radius: float
 
     def __init__(self, radius):
+        """Initialise a spherical-mirror ABCD element.
+
+        Parameters
+        ----------
+        radius : float or Array, metres
+            Signed mirror radius of curvature.
+        """
         self.radius = dlu.to_value(radius)
 
     @property
     def abcd(self):
-        """Return the analytic ABCD matrix for the mirror."""
+        """Return the ``(..., 2, 2)`` curved-mirror ABCD matrix.
+
+        Radius of curvature is interpreted in metres and leading axes are retained.
+        """
         return dlu.abcd_mirror(self.radius)
 
 
@@ -199,11 +226,21 @@ class ABCDFraunhofer(ABCDElement):
     focal_length: float
 
     def __init__(self, focal_length):
+        """Initialise an ABCD Fraunhofer element.
+
+        Parameters
+        ----------
+        focal_length : float or Array, metres
+            Signed focal length defining the conjugate planes.
+        """
         self.focal_length = dlu.to_value(focal_length)
 
     @property
     def abcd(self):
-        """Return the analytic ABCD matrix for far-field propagation."""
+        """Return the ``(..., 2, 2)`` far-field ABCD matrix.
+
+        Focal length is interpreted in metres and leading parameter axes are retained.
+        """
         return dlu.abcd_fraunhofer(self.focal_length)
 
 
@@ -213,15 +250,27 @@ class Propagator(OpticalLayer):
     grid: BaseGridSpec
 
     def __init__(self, grid):
+        """Initialise a propagation output specification.
+
+        Parameters
+        ----------
+        grid : GridSpec or ResizeSpec
+            Physical output sampling or FFT resize specification.
+        """
         if not isinstance(grid, (GridSpec, ResizeSpec)):
             raise TypeError("grid must be a GridSpec or ResizeSpec.")
         self.grid = grid.broadcast(2)
 
     def apply(self, wavefront):
-        """Propagate the complete vectorised wavefront state."""
+        """Propagate the complete wavefront without layer-level axis mapping.
+
+        Propagators natively handle wavelength and sampling leading axes, so this
+        method passes the complete `Wavefront` to `apply_mono` and returns the
+        propagated immutable object.
+        """
         return self.apply_mono(wavefront)
 
-    def validate(self, wavefront):
+    def _validate(self, wavefront):
         """Validate the input coordinate specification."""
         _validate_grid(wavefront.grid, "input", angular=False)
 
@@ -234,11 +283,22 @@ class FocalPropagator(Propagator):
     inverse: bool
 
     def __init__(self, grid, focal_length=None, inverse=False):
+        """Initialise a focal-plane propagator contract.
+
+        Parameters
+        ----------
+        grid : GridSpec or ResizeSpec
+            Output sampling appropriate to the concrete numerical method.
+        focal_length : float, Array, or None, metres
+            Optional focal length; omission uses angular focal coordinates.
+        inverse : bool
+            Propagate in the explicitly supported reverse direction.
+        """
         super().__init__(grid)
         self.focal_length = dlu.to_value(focal_length, optional=True)
         self.inverse = bool(inverse)
 
-    def validate(self, wavefront):
+    def _validate(self, wavefront):
         """Validate the input and explicitly requested output coordinates."""
         if isinstance(self.grid, ResizeSpec):
             angular = self.inverse and self.focal_length is None
@@ -249,7 +309,7 @@ class FocalPropagator(Propagator):
             _validate_grid(wavefront.grid, "input", angular=angular)
             _validate_grid(self.grid, "output", wavefront.grid.ndim, angular=False)
             return
-        super().validate(wavefront)
+        super()._validate(wavefront)
         angular = _validate_grid(self.grid, "output", wavefront.grid.ndim)
         if self.focal_length is None and not angular:
             raise ValueError(
@@ -282,13 +342,33 @@ class Fraunhofer(FocalPropagator):
     method: str
 
     def __init__(self, grid, focal_length=None, method="mft", inverse=False):
+        """Initialise Fraunhofer propagation.
+
+        Parameters
+        ----------
+        grid : GridSpec or ResizeSpec
+            `GridSpec` for MFT output or `ResizeSpec` for FFT output.
+        focal_length : float, Array, or None, metres
+            Optional focal length for physical rather than angular output sampling.
+        method : str
+            ``"mft"`` or ``"fft"``.
+        inverse : bool
+            Use the corresponding reverse Fourier propagation.
+        """
         method = _validate_method(method, grid, {"mft": GridSpec, "fft": ResizeSpec})
         super().__init__(grid, focal_length, inverse)
         self.method = method
 
     def apply_mono(self, wavefront):
-        """Propagate a wavefront between conjugate planes."""
-        self.validate(wavefront)
+        """Propagate a wavefront between conjugate planes.
+
+        MFT propagation evaluates the configured explicit focal grid. FFT propagation
+        uses the configured resize factors and its sampling-derived output grid.
+        Forward propagation produces angular coordinates without ``focal_length`` and
+        physical coordinates in metres when it is supplied; inverse propagation
+        returns to the configured physical pupil grid.
+        """
+        self._validate(wavefront)
         if self.method == "fft":
             return _propagate_fft(
                 wavefront,
@@ -333,6 +413,21 @@ class Fresnel(FocalPropagator):
         method="lct",
         inverse=False,
     ):
+        """Initialise defocused focal-plane propagation.
+
+        Parameters
+        ----------
+        grid : GridSpec or ResizeSpec
+            Output sampling appropriate to the selected method.
+        defocus : float or Array, metres
+            Signed axial displacement from the focal plane.
+        focal_length : float, Array, or None, metres
+            Optional focal length for physical rather than angular coordinates.
+        method : str
+            ``"mft"``, ``"fft"``, or ``"lct"`` where supported by the grid.
+        inverse : bool
+            Use the explicitly supported reverse propagation.
+        """
         types = {"fft": ResizeSpec, "mft": GridSpec, "lct": GridSpec}
         method = _validate_method(method, grid, types)
         if inverse and method == "fft":
@@ -344,8 +439,13 @@ class Fresnel(FocalPropagator):
         self.defocus = dlu.to_value(defocus)
 
     def apply_mono(self, wavefront):
-        """Propagate a wavefront between defocused focal planes."""
-        self.validate(wavefront)
+        """Propagate a wavefront between defocused focal planes.
+
+        The configured propagation distance and focal length are in metres. MFT uses
+        an explicit physical output grid, while FFT uses resize-derived sampling. The
+        reverse route applies the physically supported inverse Fresnel propagation.
+        """
+        self._validate(wavefront)
         if self.method == "fft":
             return _propagate_fft(
                 wavefront,
@@ -380,6 +480,17 @@ class ABCDPropagator(Propagator):
     method: str
 
     def __init__(self, ABCDs, grid, method="lct"):
+        """Initialise propagation through an ABCD optical train.
+
+        Parameters
+        ----------
+        ABCDs : sequence of BaseABCD
+            Ordered paraxial optical elements.
+        grid : GridSpec or ResizeSpec
+            Output sampling required by the selected method.
+        method : str
+            ``"lct"`` for general transforms or ``"fft"`` where supported.
+        """
         super().__init__(grid)
         method = _validate_method(
             method, self.grid, {"lct": GridSpec, "fft": ResizeSpec}
@@ -399,19 +510,27 @@ class ABCDPropagator(Propagator):
 
     @property
     def abcd(self) -> Array:
-        """Return the composed ABCD matrix."""
+        """Return the ordered product of all configured ABCD elements.
+
+        The result has shape ``(..., 2, 2)`` and preserves broadcast leading axes.
+        """
         return dlu.compose_abcd([element.abcd for element in self.ABCDs.values()])
 
-    def validate(self, wavefront):
+    def _validate(self, wavefront):
         """Validate physical ABCD input and output coordinates."""
-        Propagator.validate(self, wavefront)
+        Propagator._validate(self, wavefront)
         if isinstance(self.grid, ResizeSpec):
             return
         _validate_grid(self.grid, "output", wavefront.grid.ndim, angular=False)
 
     def apply_mono(self, wavefront):
-        """Propagate a wavefront through the composed ABCD system."""
-        self.validate(wavefront)
+        """Propagate a wavefront through the composed ABCD system.
+
+        LCT mode evaluates the configured physical output grid. FFT mode uses a
+        resize specification and is valid only for ABCD systems supported by that
+        numerical route. The returned wavefront stores the realised output sampling.
+        """
+        self._validate(wavefront)
         if self.method == "fft":
             return _propagate_fft(
                 wavefront, self.grid, unit=wavefront.grid.unit, ABCD=self.abcd
@@ -437,6 +556,17 @@ class FreeSpace(Propagator):
     crop: bool
 
     def __init__(self, distance, grid=None, crop=True):
+        """Initialise angular-spectrum free-space propagation.
+
+        Parameters
+        ----------
+        distance : float or Array, metres
+            Signed propagation distance.
+        grid : ResizeSpec or None
+            Optional padding and cropping specification.
+        crop : bool
+            Crop back to the pre-padding spatial size when true.
+        """
         if grid is None:
             grid = ResizeSpec()
         if not isinstance(grid, ResizeSpec):
@@ -446,13 +576,18 @@ class FreeSpace(Propagator):
         self.crop = bool(crop)
 
     def apply_mono(self, wavefront):
-        """Propagate a wavefront over the configured free-space distance."""
-        self.validate(wavefront)
+        """Propagate a wavefront over the configured free-space distance.
+
+        Distance is measured in metres; negative values naturally propagate in the
+        reverse axial direction. Padding occurs before angular-spectrum propagation
+        and optional cropping afterward. The returned grid records the realised size.
+        """
+        self._validate(wavefront)
 
         # Define and vectorise monochromatic angular-spectrum propagation
         wavelength, x, y = _propagation_inputs(wavefront)
         prop_fn = lambda field, lam, x, y: dlu.ASM(
-            field, lam, (x, y), self.distance, crop=False, **self.grid.padding
+            field, lam, (x, y), self.distance, crop=False, **self.grid._padding
         )
         propagate = np.vectorize(prop_fn, signature="(n,m),(),(m),(n)->(p,q)")
         field = propagate(wavefront.phasor, wavelength, x, y)

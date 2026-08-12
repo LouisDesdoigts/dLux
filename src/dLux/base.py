@@ -55,7 +55,17 @@ class Base(zdx.Base):
             _resolve_path(self, path)
 
     def get(self, parameters, as_dict=False, to_array=True):
-        """Get parameters while preserving raised-attribute diagnostics."""
+        """Get nested parameters while preserving raised-attribute diagnostics.
+
+        Parameters
+        ----------
+        parameters : str or sequence[str]
+            Zodiax paths, including attributes raised from nested dLux objects.
+        as_dict : bool
+            Return a path-keyed mapping rather than values in selection order.
+        to_array : bool
+            Stack compatible selected values using the Zodiax convention.
+        """
         try:
             return super().get(parameters, as_dict, to_array)
         except KeyError:
@@ -63,7 +73,12 @@ class Base(zdx.Base):
             raise
 
     def set(self, parameters=None, values=None, /, **updates):
-        """Set parameters while preserving raised-attribute diagnostics."""
+        """Return a copy with selected parameter paths replaced.
+
+        Paths may be supplied through the Zodiax ``parameters, values`` form or as
+        keyword updates. Raised dLux attributes are resolved consistently with direct
+        attribute access; the original object is not mutated.
+        """
         try:
             return super().set(parameters, values, **updates)
         except KeyError:
@@ -71,7 +86,11 @@ class Base(zdx.Base):
             raise
 
     def add(self, parameters=None, values=None, /, **updates):
-        """Add to parameters while preserving raised-attribute diagnostics."""
+        """Return a copy after adding values to selected parameter paths.
+
+        Accepts the same path selection forms as `set`; the original object is not
+        mutated and raised dLux attributes retain their normal diagnostics.
+        """
         try:
             return super().add(parameters, values, **updates)
         except KeyError:
@@ -79,7 +98,11 @@ class Base(zdx.Base):
             raise
 
     def multiply(self, parameters=None, values=None, /, **updates):
-        """Multiply parameters while preserving raised-attribute diagnostics."""
+        """Return a copy after multiplying selected parameter paths by values.
+
+        Accepts the same path selection forms as `set`; the original object is not
+        mutated and raised dLux attributes retain their normal diagnostics.
+        """
         try:
             return super().multiply(parameters, values, **updates)
         except KeyError:
@@ -87,7 +110,11 @@ class Base(zdx.Base):
             raise
 
     def divide(self, parameters=None, values=None, /, **updates):
-        """Divide parameters while preserving raised-attribute diagnostics."""
+        """Return a copy after dividing selected parameter paths by values.
+
+        Accepts the same path selection forms as `set`; the original object is not
+        mutated and raised dLux attributes retain their normal diagnostics.
+        """
         try:
             return super().divide(parameters, values, **updates)
         except KeyError:
@@ -95,7 +122,11 @@ class Base(zdx.Base):
             raise
 
     def power(self, parameters=None, values=None, /, **updates):
-        """Exponentiate parameters while preserving raised-attribute diagnostics."""
+        """Return a copy after raising selected parameter paths to powers.
+
+        Accepts the same path selection forms as `set`; the original object is not
+        mutated and raised dLux attributes retain their normal diagnostics.
+        """
         try:
             return super().power(parameters, values, **updates)
         except KeyError:
@@ -103,7 +134,11 @@ class Base(zdx.Base):
             raise
 
     def min(self, parameters=None, values=None, /, **updates):
-        """Limit parameters below while preserving raised-attribute diagnostics."""
+        """Return a copy after applying elementwise upper limits to parameters.
+
+        This delegates to the Zodiax ``min`` update: selected values become
+        ``minimum(current, update)``. The original object is not mutated.
+        """
         try:
             return super().min(parameters, values, **updates)
         except KeyError:
@@ -111,7 +146,11 @@ class Base(zdx.Base):
             raise
 
     def max(self, parameters=None, values=None, /, **updates):
-        """Limit parameters above while preserving raised-attribute diagnostics."""
+        """Return a copy after applying elementwise lower limits to parameters.
+
+        This delegates to the Zodiax ``max`` update: selected values become
+        ``maximum(current, update)``. The original object is not mutated.
+        """
         try:
             return super().max(parameters, values, **updates)
         except KeyError:

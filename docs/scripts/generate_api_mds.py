@@ -140,9 +140,13 @@ def class_info(module_name: str, names: list[str]) -> list[ClassInfo]:
 
 
 def class_summary(cls: type) -> str:
-    attrs = list(getattr(cls, "__annotations__", {}))
+    attrs = [
+        name for name in getattr(cls, "__annotations__", {}) if not name.startswith("_")
+    ]
     properties = [
-        name for name, value in cls.__dict__.items() if isinstance(value, property)
+        name
+        for name, value in cls.__dict__.items()
+        if not name.startswith("_") and isinstance(value, property)
     ]
     methods = [
         name

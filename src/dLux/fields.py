@@ -110,52 +110,92 @@ class BaseField(Base):
     @property
     @abstractmethod
     def field(self) -> Array:
-        """Return the stored sampled array."""
+        """Return the stored sampled array.
+
+        Concrete fields define whether this is a real data array or complex phasor.
+        Leading axes are vectorisation axes and the final two axes are spatial.
+        """
 
     @property
     def spatial_shape(self) -> tuple[int, ...]:
-        """Return the spatial array shape."""
+        """Return the final ``(ny, nx)`` sampled array shape."""
         return self.field.shape[-2:]
 
     @property
     def axes(self) -> tuple[Array, ...]:
-        """Return coordinate axes using the field's static spatial shape."""
+        """Return SI coordinate axes using the field's realised spatial shape.
+
+        Axes are returned in physical ``(x, y)`` order and may contain leading grid
+        batch dimensions.
+        """
         return self.xs
 
     @property
     def coordinates(self) -> Array:
-        """Return coordinates using the field's static spatial shape."""
-        return self.grid.coordinates_for(self.spatial_shape[::-1])
+        """Return SI coordinates using the field's realised spatial shape.
+
+        The result has shape ``(..., 2, ny, nx)`` with physical ``(x, y)`` component
+        order and NumPy ``(y, x)`` spatial-axis order.
+        """
+        return self.grid._coordinates_for(self.spatial_shape[::-1])
 
     @property
     def xs(self) -> tuple[Array, ...]:
-        """Return coordinate axes using the field's static spatial shape."""
-        return self.grid.xs_for(self.spatial_shape[::-1])
+        """Alias `axes` using the retained compact coordinate terminology."""
+        return self.grid._xs_for(self.spatial_shape[::-1])
 
     @property
     def npixels(self) -> int:
-        """Return the final spatial-axis size for square-grid compatibility."""
+        """Return ``nx`` for compatibility with square-grid APIs.
+
+        This does not assert that ``ny == nx``; use `spatial_shape` for rectangular
+        fields.
+        """
         return self.field.shape[-1]
 
     @property
     def pixel_scale(self) -> Array:
-        """Return per-axis sampling in canonical SI units."""
+        """Return per-axis pixel scales in canonical SI units.
+
+        Values follow physical ``(x, y)`` order and preserve leading grid batch axes.
+        """
         if self.d is None:
             raise ValueError("grid.d is not defined.")
         return self.d * self.scale
 
     @property
     def center(self) -> Array:
-        """Return the per-axis grid centre in canonical SI units."""
+        """Return the grid centre in canonical SI units and physical-axis order."""
         return np.zeros(len(self.n)) if self.c is None else self.c * self.scale
 
     @property
     def diameter(self) -> Array:
-        """Return the physical field width along every axis."""
+        """Return the sampled field width along each physical axis.
+
+        This aliases the grid field of view and uses the grid's declared unit rather
+        than canonical SI units.
+        """
         return self.fov
 
     def normalise(self, mode: str = "power", value: float = 1.0) -> BaseField:
-        """Return a field normalised by total power or peak value."""
+        """Return a copy normalised by total sum or peak value.
+
+        ``mode="power"`` sets ``field.sum()`` to ``value`` and ``mode="peak"``
+        sets ``field.max()`` to it. Normalisation spans every array axis, including
+        leading axes; use explicit arithmetic for independent batch normalisation.
+
+        Parameters
+        ----------
+        mode : {"power", "peak"}
+            Select total-sum or maximum-value normalisation.
+        value : float
+            Target total or peak in the field's current value unit.
+
+        Returns
+        -------
+        field : BaseField
+            Normalised immutable copy retaining the concrete type and grid.
+        """
         if mode == "power":
             scale = value / self.field.sum()
         elif mode == "peak":
@@ -167,7 +207,17 @@ class BaseField(Base):
     def convolve(
         self, other: Array, mode: str = "same", method: str = "auto"
     ) -> BaseField:
-        """Convolve the sampled field with an input array."""
+        """Convolve the final two spatial axes with a broadcastable kernel.
+
+        Parameters
+        ----------
+        other : Array
+            Kernel with final ``(ny, nx)`` axes and broadcastable leading axes.
+        mode : str
+            JAX convolution output mode; spatial grid size follows the result.
+        method : str
+            JAX convolution method such as ``"auto"``, ``"direct"``, or ``"fft"``.
+        """
         # Broadcast the field and kernel batch dimensions
         other = np.asarray(other)
         batch = np.broadcast_shapes(self.field.shape[:-2], other.shape[:-2])
@@ -204,7 +254,13 @@ class BaseField(Base):
         return self, other
 
     def resize(self, npixels: int | tuple[int, int]) -> BaseField:
-        """Resize spatial axes by centred zero-padding or cropping."""
+        """Resize spatial axes by centred zero-padding or cropping.
+
+        ``npixels`` follows physical ``(x, y)`` order. Pixel scales and centre are
+        retained, so changing the sample count changes the field of view.
+
+        Returns a new field of the same concrete type; leading axes are preserved.
+        """
         fill = 0j if np.iscomplexobj(self.field) else 0.0
         field = dlu.resize(self.field, npixels, fill)
         return self.set(field=field, grid=self.grid.resize(npixels))
@@ -212,14 +268,25 @@ class BaseField(Base):
     def downsample(
         self, n: int | tuple[int, int], mean: bool | None = None
     ) -> BaseField:
-        """Downsample spatial axes and update their sampling."""
+        """Downsample spatial axes by integer factors.
+
+        ``n`` follows physical ``(x, y)`` order. Complex fields average each block by
+        default; real fields sum it. Set ``mean`` explicitly to override this choice.
+        Pixel scales are increased to preserve the field of view.
+
+        Returns a new field of the same concrete type with leading axes preserved.
+        """
         if mean is None:
             mean = bool(np.iscomplexobj(self.field))
         field = dlu.downsample(self.field, n, mean)
         return self.set(field=field, grid=self.grid.downsample(n))
 
     def flip(self, axis: tuple[int, ...] | int) -> BaseField:
-        """Flip the sampled array about one or more array axes."""
+        """Return a copy flipped about one or more NumPy array axes.
+
+        ``axis`` follows array-axis indexing and may include leading batch axes. Grid
+        metadata are retained unchanged.
+        """
         return self.set(field=np.flip(self.field, axis))
 
     def __add__(self, other) -> BaseField:
@@ -262,7 +329,18 @@ class ContinuousField(BaseField):
         """Interpolate to a size and physical per-axis pixel scale.
 
         ``complex`` selects Cartesian or polar decomposition for complex fields and
-        has no effect on real fields such as PSFs.
+        has no effect on real fields such as intensities.
+
+        Parameters
+        ----------
+        npixels : int or tuple[int, int]
+            Output sizes in physical ``(x, y)`` order.
+        pixel_scale : float or Array
+            Output physical pixel scales in the field grid unit.
+        method : str
+            Interpolation method.
+        complex : bool
+            Select complex-aware interpolation for complex fields.
         """
         return _scale_field(self, npixels, pixel_scale, method, complex)
 
@@ -273,7 +351,19 @@ class ContinuousField(BaseField):
         complex: bool = True,
         fill: float = 0.0,
     ) -> ContinuousField:
-        """Interpolate every sampled field through a coordinate transformation."""
+        """Interpolate through a coordinate transformation.
+
+        Parameters
+        ----------
+        transformation : BaseCoordTransform
+            Map from output coordinates into the sampled input frame.
+        method : str
+            Interpolation method.
+        complex : bool
+            Select complex-aware interpolation for complex fields.
+        fill : float
+            Value outside the sampled support.
+        """
         return _interpolate_field(self, transformation, method, complex, fill)
 
     def rotate(
@@ -282,6 +372,15 @@ class ContinuousField(BaseField):
         """Rotate the sampled array clockwise through interpolation.
 
         ``complex`` has no effect when the stored sampled array is real.
+
+        Parameters
+        ----------
+        angle : float or Array
+            Clockwise rotation in radians.
+        method : str
+            Interpolation method.
+        complex : bool
+            Select complex-aware interpolation for complex fields.
         """
         return _rotate_field(self, angle, method, complex)
 
@@ -317,7 +416,20 @@ class Wavefront(ContinuousField):
         grid: GridSpec,
         phasor: Array | None = None,
     ):
-        """Initialise a complex wavefront sampled on a physical grid."""
+        """Initialise a complex wavefront sampled on a physical grid.
+
+        Parameters
+        ----------
+        wavelength : float or Array, metres
+            Scalar wavelength or array whose shape defines leading wavelength axes.
+        grid : GridSpec
+            Two-dimensional spatial grid. It must define ``n`` when ``phasor`` is
+            omitted; otherwise its spatial shape is matched to ``phasor``.
+        phasor : Array or None
+            Complex field with shape ``(..., ny, nx)``. A two-dimensional field is
+            broadcast over array-valued wavelengths. If omitted, a uniform
+            unit-power field is constructed.
+        """
         # Validate the grid and resolve the input wavelengths
         if not isinstance(grid, GridSpec):
             raise TypeError("grid must be a GridSpec.")
@@ -346,7 +458,7 @@ class Wavefront(ContinuousField):
 
     @property
     def field(self) -> Array:
-        """Return the complex phasor."""
+        """Return the complex phasor with final ``(ny, nx)`` spatial axes."""
         return self.phasor
 
     @classmethod
@@ -356,7 +468,10 @@ class Wavefront(ContinuousField):
         wavelength: float | Array,
         grid: GridSpec,
     ) -> Wavefront:
-        """Create a Wavefront from an existing phasor array.
+        """Create a wavefront from an existing phasor array.
+
+        Deprecated compatibility constructor. Pass ``phasor`` directly to
+        `Wavefront` in new code.
 
         Parameters
         ----------
@@ -375,70 +490,89 @@ class Wavefront(ContinuousField):
         wavefront : Wavefront
             A new Wavefront object with the specified phasor.
         """
+        from .compatibility import warn_deprecated
+
+        migration = "`dl.Wavefront.from_phasor(p, w, g)` -> `dl.Wavefront(w, g, p)`"
+        warn_deprecated("Wavefront.from_phasor", "Wavefront", migration, stacklevel=3)
         return cls(wavelength, grid, phasor)
 
     @property
     def real(self: Wavefront) -> Array:
-        """Return the real component of the phasor."""
+        """Return the real phasor component with the original array shape."""
         return self.phasor.real
 
     @property
     def imaginary(self: Wavefront) -> Array:
-        """Return the imaginary component of the phasor."""
+        """Return the imaginary phasor component with the original array shape."""
         return self.phasor.imag
 
     @property
     def amplitude(self: Wavefront) -> Array:
-        """Return the field amplitude."""
+        """Return the non-negative modulus of the complex phasor."""
         return np.abs(self.phasor)
 
     @property
     def phase(self: Wavefront) -> Array:
-        """Return the field phase in radians."""
+        """Return the wrapped phasor phase in radians over ``[-π, π]``."""
         return np.angle(self.phasor)
 
     @property
     def complex(self: Wavefront) -> Array:
-        """Return stacked real and imaginary field components."""
+        """Return real and imaginary components stacked on a new leading axis.
+
+        The result has shape ``(2, *phasor.shape)``.
+        """
         return np.stack([self.phasor.real, self.phasor.imag], axis=0)
 
     @property
     def polar(self: Wavefront) -> Array:
-        """Return stacked amplitude and phase field components."""
+        """Return amplitude and radian phase stacked on a new leading axis.
+
+        The result has shape ``(2, *phasor.shape)``.
+        """
         return np.stack([self.amplitude, self.phase], axis=0)
 
     @property
     def intensity(self: Wavefront) -> Array:
-        """Return the squared modulus of the complex field."""
+        """Return ``abs(phasor)**2`` with all phasor axes preserved."""
         return np.abs(self.phasor) ** 2
 
     @property
     def psf(self: Wavefront) -> Array:
-        """Return the point-spread function intensity."""
+        """Alias `intensity` using retained point-spread-function terminology."""
         return self.intensity
 
     def to_intensity(self, stokes=None) -> Intensity:
-        """Return the sampled intensity of this wavefront."""
+        """Convert the wavefront into deterministic sampled intensity.
+
+        ``stokes`` is an optional input Stokes vector with final component axis of
+        length four. For scalar wavefronts only its total-intensity component is used;
+        polarised wavefronts propagate the complete vector. The returned `Intensity`
+        retains the wavefront grid and leading output axes.
+        """
         return Intensity(self.intensity_from_stokes(stokes), self.grid)
 
     @property
     def wavenumber(self: Wavefront) -> Array:
-        """Return ``2π / wavelength`` in inverse meters."""
+        """Return ``2π / wavelength`` in inverse metres.
+
+        The result has the same shape as ``wavelength`` and no spatial axes.
+        """
         return 2 * np.pi / np.asarray(self.wavelength)
 
     @property
     def batch_ndim(self: Wavefront) -> int:
-        """Return the number of leading vectorisation dimensions."""
+        """Return the number of phasor axes preceding the final spatial axes."""
         return self.phasor.ndim - 2
 
     @property
     def is_chromatic(self: Wavefront) -> bool:
-        """Return whether wavelength has vectorised dimensions."""
+        """Return whether ``wavelength`` has one or more array dimensions."""
         return self.wavelength.ndim > 0
 
     @property
     def is_polarised(self: Wavefront) -> bool:
-        """Return whether this wavefront carries Jones-matrix axes."""
+        """Return ``False`` for a scalar wavefront without Jones-matrix axes."""
         return False
 
     @property
@@ -466,7 +600,10 @@ class Wavefront(ContinuousField):
 
     @property
     def power(self: Wavefront) -> Array:
-        """Return field power summed over the spatial axes."""
+        """Return intensity summed independently over the final spatial axes.
+
+        All wavelength, batch, and Jones-derived leading axes are preserved.
+        """
         return np.sum(self.intensity, axis=(-2, -1))
 
     def _to_phasor_shape(self: Wavefront, array: Array) -> Array:
@@ -496,19 +633,33 @@ class Wavefront(ContinuousField):
         return array
 
     def add_phase(self: Wavefront, phase: float | Array) -> Wavefront:
-        """Apply a scalar, spatial, or vectorised phase in radians."""
+        """Return a copy with a scalar, spatial, or vectorised phase applied.
+
+        ``phase`` is measured in radians and must broadcast against the wavelength,
+        Jones, and final spatial phasor axes. ``None`` leaves the wavefront unchanged.
+        """
         if phase is None:
             return self
         return self.multiply("phasor", np.exp(1j * self._to_phasor_shape(phase)))
 
     def add_opd(self: Wavefront, opd: float | Array) -> Wavefront:
-        """Apply a scalar, spatial, or vectorised optical path in meters."""
+        """Return a copy with an optical-path difference applied.
+
+        ``opd`` is measured in metres and may be scalar, spatial, or wavelength-
+        vectorised. It is converted to phase using each wavefront wavelength.
+        ``None`` leaves the wavefront unchanged.
+        """
         if opd is None:
             return self
         return self.add_phase(self.wavenumber[..., None, None] * np.asarray(opd))
 
     def tilt(self: Wavefront, angles: Array, unit: str = "rad") -> Wavefront:
-        """Apply an ``(x, y)`` angular tilt in the requested unit."""
+        """Return a copy with an angular source tilt applied.
+
+        ``angles`` has final shape ``(2,)`` in physical ``(x, y)`` order and uses
+        ``unit`` (radians by default). Leading angle axes follow utility broadcasting
+        conventions.
+        """
         return self.add_opd(dlu.tilt_opd(self.coordinates, angles, unit))
 
     def normalise(
@@ -633,11 +784,19 @@ class Wavefront(ContinuousField):
         return self, other
 
     def apply_jones(self, jones):
-        """Promote the field and apply a Jones matrix."""
+        """Promote the field and apply a Jones matrix.
+
+        ``jones`` follows the utility convention ``(2, 2, ...)``. The returned
+        `PolarisedWavefront` retains wavelength and grid metadata.
+        """
         return PolarisedWavefront.from_wavefront(self).apply_jones(jones)
 
     def intensity_from_stokes(self, stokes: Array | None = None) -> Array:
-        """Return intensity for an optional input Stokes vector."""
+        """Evaluate intensity for an optional input Stokes vector.
+
+        For a scalar wavefront, only ``stokes[0]`` contributes. With no vector the
+        unit-input intensity is returned. Spatial axes remain final.
+        """
         if stokes is None:
             return self.intensity
 
@@ -645,7 +804,11 @@ class Wavefront(ContinuousField):
         return stokes[0] * self.intensity
 
     def psf_from_stokes(self, stokes: Array | None = None) -> Array:
-        """Return the point-spread function for an optional input Stokes vector."""
+        """Alias `intensity_from_stokes` using retained PSF terminology.
+
+        ``stokes`` and the returned array follow the same contract as
+        `intensity_from_stokes`.
+        """
         return self.intensity_from_stokes(stokes)
 
 
@@ -668,6 +831,19 @@ class PolarisedWavefront(Wavefront):
         grid: GridSpec,
         phasor: Array | None = None,
     ):
+        """Initialise a scalar or Jones-matrix wavefront.
+
+        Parameters
+        ----------
+        wavelength : float or Array, metres
+            Scalar wavelength or array whose shape defines leading wavelength axes.
+        grid : GridSpec
+            Two-dimensional physical spatial grid.
+        phasor : Array or None
+            Scalar field ``(..., ny, nx)`` or Jones field
+            ``(..., 2, 2, ny, nx)``. Scalar inputs and generated uniform fields are
+            promoted to an unpolarised Jones representation.
+        """
         if phasor is None:
             super().__init__(wavelength, grid)
             self.phasor = self._promote_phasor(self.phasor)
@@ -686,7 +862,7 @@ class PolarisedWavefront(Wavefront):
 
     @property
     def is_polarised(self: PolarisedWavefront) -> bool:
-        """Return whether this wavefront carries Jones-matrix axes."""
+        """Return ``True`` for a wavefront carrying explicit Jones-matrix axes."""
         return True
 
     @staticmethod
@@ -712,7 +888,10 @@ class PolarisedWavefront(Wavefront):
         wavelength: float | Array,
         grid: GridSpec,
     ) -> PolarisedWavefront:
-        """Create a PolarisedWavefront from a regular or Jones phasor.
+        """Create a polarised wavefront from a regular or Jones phasor.
+
+        Deprecated compatibility constructor. Pass ``phasor`` directly to
+        `PolarisedWavefront` in new code.
 
         Parameters
         ----------
@@ -730,11 +909,23 @@ class PolarisedWavefront(Wavefront):
         wavefront : PolarisedWavefront
             A new polarised wavefront with phasor shape `(..., 2, 2, n, n)`.
         """
+        from .compatibility import warn_deprecated
+
+        migration = (
+            "`dl.PolarisedWavefront.from_phasor(p, w, g)` -> "
+            "`dl.PolarisedWavefront(w, g, p)`"
+        )
+        warn_deprecated(
+            "PolarisedWavefront.from_phasor",
+            "PolarisedWavefront",
+            migration,
+            stacklevel=3,
+        )
         return cls(wavelength, grid, phasor)
 
     @property
     def batch_ndim(self: PolarisedWavefront) -> int:
-        """Return leading dimensions excluding Jones and spatial axes."""
+        """Return leading dimensions excluding two Jones and two spatial axes."""
         return self.phasor.ndim - 4
 
     @staticmethod
@@ -760,34 +951,48 @@ class PolarisedWavefront(Wavefront):
 
     @property
     def intensity(self: Wavefront) -> Array:
-        """Return intensity for an unpolarised unit input."""
+        """Return output intensity for an unpolarised unit input.
+
+        Jones axes are consumed and wavelength, batch, and spatial axes are retained.
+        """
         return self.intensity_from_stokes()
 
     @property
     def psf(self: Wavefront) -> Array:
-        """Return the point-spread function intensity."""
+        """Alias `intensity` using retained point-spread-function terminology."""
         return self.intensity
 
     def intensity_from_stokes(
         self: Wavefront, input_stokes: Array | None = None
     ) -> Array:
-        """Return intensity for an optional input Stokes vector."""
+        """Evaluate output intensity for an optional input Stokes vector.
+
+        ``input_stokes`` has final component axis of length four. When omitted, an
+        unpolarised unit input is used. The result preserves leading wavelength and
+        batch axes followed by the final spatial axes.
+        """
         if input_stokes is None:
             return 0.5 * np.sum(np.abs(self.phasor) ** 2, axis=(-4, -3))
         stokes = self.stokes(input_stokes)
         return stokes[..., 0, :, :]
 
     def psf_from_stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
-        """Return the point-spread function for an optional input Stokes vector."""
+        """Alias `intensity_from_stokes` using retained PSF terminology.
+
+        ``input_stokes`` and the returned array follow the same contract as
+        `intensity_from_stokes`.
+        """
         return self.intensity_from_stokes(input_stokes)
 
     def stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
-        """Return output Stokes parameters.
+        """Return output Stokes parameters for an optional input state.
 
         The polarised wavefront stores phasors as `(..., 2, 2, n, n)`, while the
         polarisation utilities operate on `(2, 2, ...)`. We move the Jones axes to the
         front, call the utility function, then move the Stokes axis back behind any
-        leading wavefront dimensions.
+        leading wavefront dimensions. ``input_stokes`` has final component axis four;
+        when omitted an unpolarised unit input is used. The result has shape
+        ``(..., 4, ny, nx)``.
         """
         phasor = np.moveaxis(self.phasor, (-4, -3), (0, 1))
         stokes = dlu.jones_to_stokes(phasor, input_stokes)
@@ -798,7 +1003,8 @@ class PolarisedWavefront(Wavefront):
 
         The Jones matrix follows the utility convention `(2, 2, ...)`. The wavefront
         Jones axes are moved to the front before applying the utility function, then
-        moved back to preserve `(..., 2, 2, n, n)` ordering.
+        moved back to preserve `(..., 2, 2, n, n)` ordering. ``jones`` follows the
+        utility convention ``(2, 2, ...)`` and the returned wavefront is a new object.
         """
         phasor = np.moveaxis(self.phasor, (-4, -3), (0, 1))
         phasor = dlu.apply_jones(jones, phasor)
@@ -835,7 +1041,15 @@ class Intensity(DiscreteField):
     grid: GridSpec
 
     def __init__(self: Intensity, data: Array, grid: GridSpec):
-        """Initialise detector intensity data on a physical grid."""
+        """Initialise deterministic intensity data on a physical grid.
+
+        Parameters
+        ----------
+        data : Array
+            Real values with shape ``(..., ny, nx)``. Leading axes are retained.
+        grid : GridSpec
+            Spatial grid matched against the final ``(ny, nx)`` array axes.
+        """
         self.data = dlu.to_value(data)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
@@ -845,35 +1059,79 @@ class Intensity(DiscreteField):
 
     @property
     def field(self) -> Array:
-        """Return the sampled intensity."""
+        """Return deterministic intensity data with final ``(ny, nx)`` axes."""
         return self.data
 
     @property
     def batch_ndim(self: Intensity) -> int:
-        """Return the number of leading vectorisation dimensions."""
+        """Return the number of intensity axes preceding the spatial axes."""
         return self.data.ndim - 2
 
     @classmethod
     def from_wavefront(cls, wavefront, stokes=None) -> Intensity:
-        """Construct sampled intensity from a wavefront."""
+        """Construct deterministic intensity from a wavefront.
+
+        ``stokes`` optionally defines the input polarisation with final component
+        axis four. The wavefront grid is retained and the intensity has shape
+        ``(..., ny, nx)``.
+        """
         if not isinstance(wavefront, Wavefront):
             raise TypeError("wavefront must be a Wavefront.")
         return cls(wavefront.psf_from_stokes(stokes), wavefront.grid)
 
     def scale_to(self, npixels, pixel_scale, method="linear", complex=True):
-        """Interpolate to a size and physical per-axis pixel scale."""
+        """Interpolate to new spatial sizes and physical pixel scales.
+
+        Parameters
+        ----------
+        npixels : int or tuple[int, int]
+            Output sizes in physical ``(x, y)`` order.
+        pixel_scale : float or Array
+            Output scales in the intensity grid unit.
+        method : str
+            Interpolation method.
+        complex : bool
+            Accepted for field API consistency; real intensity data remain real.
+        """
         return _scale_field(self, npixels, pixel_scale, method, complex)
 
     def interpolate(self, transformation, method="linear", complex=True, fill=0.0):
-        """Interpolate through a coordinate transformation."""
+        """Interpolate through a coordinate transformation.
+
+        Parameters
+        ----------
+        transformation : BaseCoordTransform
+            Map from output coordinates into the sampled input frame.
+        method : str
+            Interpolation method.
+        complex : bool
+            Accepted for field API consistency; real intensity data remain real.
+        fill : float
+            Value outside the sampled support.
+        """
         return _interpolate_field(self, transformation, method, complex, fill)
 
     def rotate(self, angle, method="linear", complex=True):
-        """Rotate the sampled intensity clockwise through interpolation."""
+        """Rotate the sampled intensity clockwise through interpolation.
+
+        Parameters
+        ----------
+        angle : float or Array, radians
+            Clockwise rotation angle.
+        method : str
+            Interpolation method.
+        complex : bool
+            Accepted for field API consistency; real intensity data remain real.
+        """
         return _rotate_field(self, angle, method, complex)
 
     def to_image(self, std=None, read_noise=0.0) -> Image:
-        """Create an image from this deterministic intensity."""
+        """Create a realised-image container from this deterministic intensity.
+
+        ``std`` is optional standard deviation broadcastable to the intensity shape;
+        ``read_noise`` is the Gaussian standard deviation used by later simulation.
+        No noise is generated by this conversion.
+        """
         return Image(self, std=std, read_noise=read_noise)
 
 
@@ -912,7 +1170,20 @@ class Image(DiscreteField):
         std: Array | None = None,
         read_noise: float | Array = 0.0,
     ):
-        """Initialise an image with optional uncertainty and read noise."""
+        """Initialise realised detector data and optional uncertainty.
+
+        Parameters
+        ----------
+        data : Array or Intensity
+            Detector values with shape ``(..., ny, nx)``, or an intensity whose data
+            and grid are inherited.
+        grid : GridSpec or None
+            Spatial grid required for array input and forbidden for `Intensity` input.
+        std : Array or None
+            Standard deviation broadcast to the detector-data shape.
+        read_noise : float or Array
+            Gaussian read-noise standard deviation retained for simulation.
+        """
         # Unpack a sampled intensity directly into detector image data
         if isinstance(data, Intensity):
             if grid is not None:
@@ -937,39 +1208,56 @@ class Image(DiscreteField):
 
     @property
     def field(self) -> Array:
-        """Return the detector data."""
+        """Return realised detector data with final ``(ny, nx)`` spatial axes."""
         return self.data
 
     @classmethod
     def from_intensity(cls, intensity, std=None, read_noise=0.0) -> Image:
-        """Construct an image from deterministic sampled intensity."""
+        """Construct an image from deterministic sampled intensity.
+
+        Parameters
+        ----------
+        intensity : Intensity
+            Deterministic data and grid to retain.
+        std : Array or None
+            Optional standard deviation broadcast to the data shape.
+        read_noise : float or Array
+            Gaussian read-noise standard deviation retained for simulation.
+        """
         if not isinstance(intensity, Intensity):
             raise TypeError("intensity must be an Intensity.")
         return cls(intensity, std=std, read_noise=read_noise)
 
     @property
     def variance(self) -> Array | None:
-        """Return the variance implied by the stored standard deviation."""
+        """Return ``std**2``, or ``None`` when no uncertainty is stored."""
         return None if self.std is None else self.std**2
 
     @property
     def fourier_transform(self) -> Array:
-        """Return the centred two-dimensional Fourier transform."""
+        """Return the centred Fourier transform over the final two spatial axes.
+
+        Leading image axes are transformed independently.
+        """
         transformed = np.fft.fft2(self.field, axes=(-2, -1))
         return np.fft.fftshift(transformed, axes=(-2, -1))
 
     @property
     def amplitude_spectrum(self) -> Array:
-        """Return the amplitude of the centred Fourier transform."""
+        """Return the non-negative modulus of `fourier_transform`."""
         return np.abs(self.fourier_transform)
 
     @property
     def power_spectrum(self) -> Array:
-        """Return the squared amplitude of the centred Fourier transform."""
+        """Return ``amplitude_spectrum**2`` with image leading axes preserved."""
         return self.amplitude_spectrum**2
 
     def add_poisson_noise(self, key: Array) -> Image:
-        """Add a Poisson realisation and its expected variance."""
+        """Return a Poisson realisation and its expected uncertainty.
+
+        ``key`` is a JAX random key. Stored data are interpreted as non-negative
+        expected counts, and any existing variance is added to the Poisson variance.
+        """
         expectation = self.field
         data = jr.poisson(key, expectation).astype(self.field.dtype)
         variance = expectation
@@ -978,7 +1266,12 @@ class Image(DiscreteField):
         return self.set(field=data, std=np.sqrt(variance))
 
     def add_read_noise(self, key: Array, sigma: float | Array) -> Image:
-        """Add zero-mean Gaussian read noise and update its variance."""
+        """Return a Gaussian read-noise realisation with updated uncertainty.
+
+        ``key`` is a JAX random key and ``sigma`` is a standard deviation in the same
+        units as the image data. It must broadcast against the data shape. Existing
+        variance and read-noise metadata are combined in quadrature.
+        """
         sigma = np.asarray(sigma, dtype=self.field.dtype)
         noise = jr.normal(key, self.field.shape, self.field.dtype) * sigma
         variance = sigma**2
@@ -1004,6 +1297,12 @@ class Image(DiscreteField):
             JAX random key used to generate every noise realisation.
         n_frames : int
             Number of independent images to average.
+
+        Returns
+        -------
+        image : Image
+            Mean realised image. ``std`` stores the expected standard deviation of
+            the mean and ``read_noise`` stores its effective read-noise contribution.
         """
         if n_frames < 1:
             raise ValueError("n_frames must be a positive integer.")

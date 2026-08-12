@@ -21,11 +21,20 @@ class Interfere(OpticalLayer):
     """Coherently sum the leading sub-aperture axis of a Wavefront."""
 
     def apply(self, wavefront: Wavefront) -> Wavefront:
-        """Apply directly because interference consumes a leading aperture axis."""
+        """Interfere the complete wavefront without generic leading-axis mapping.
+
+        The final leading batch axis is interpreted as the sub-aperture axis and is
+        consumed coherently, so `BaseOpticalLayer.apply` vectorisation is bypassed.
+        """
         return self.apply_mono(wavefront)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
-        """Coherently collapse the leading sub-aperture dimension."""
+        """Coherently collapse the final leading sub-aperture dimension.
+
+        Complex phasors are summed along the axis immediately before intrinsic Jones
+        and spatial axes. Matching vectorised sampling metadata are collapsed to the
+        first sub-aperture value.
+        """
         # Identify the sub-aperture axis and size
         axis = wavefront.batch_ndim - 1
         size = wavefront.phasor.shape[axis]
@@ -60,6 +69,19 @@ class SparseOptic(Optic):
     def __init__(
         self, centers, transmission=None, opd=None, phase=None, normalise=False
     ):
+        """Initialise repeated locally sampled optics.
+
+        Parameters
+        ----------
+        centers : ArrayLike
+            Physical ``(x, y)`` centres with shape ``(n_apertures, 2)``.
+        transmission : Array, Parametric, or None
+            Shared or aperture-vectorised local amplitude transmission.
+        opd, phase : Array, Parametric, or None
+            Shared or aperture-vectorised OPD in metres and phase in radians.
+        normalise : bool
+            Renormalise the resulting wavefront power.
+        """
         centers = dlu.to_value(centers)
         if centers.ndim != 2 or centers.shape[-1] != 2:
             raise ValueError("centers must have shape (n, 2).")
@@ -142,8 +164,12 @@ class SparseOptic(Optic):
         optic = optic.resolve(**context)
         return optic._phasor(wavefront)
 
-    def phasor(self, wavefront: Wavefront, params: dict = None) -> Array:
-        """Return the coherent sum of every centred optic phasor."""
+    def phasor(self, wavefront: Wavefront) -> Array:
+        """Return the coherent sum of all locally centred optic phasors.
+
+        The returned complex array broadcasts against ``wavefront.phasor`` and does
+        not introduce a sub-aperture axis. Use `localise` to retain that axis.
+        """
         indices = np.arange(self.n_apertures)
         phasors = vmap(self._phasor_at, in_axes=(0, 0, None))(
             indices, self.centers, wavefront
@@ -151,7 +177,11 @@ class SparseOptic(Optic):
         return phasors.sum(0)
 
     def localise(self, wavefront: Wavefront) -> Wavefront:
-        """Evaluate the optic on one locally centred field per sub-aperture."""
+        """Evaluate one locally centred field per sub-aperture.
+
+        The returned wavefront inserts the aperture axis after existing batch axes
+        and stores per-aperture grid centres in the grid's declared unit.
+        """
         indices = np.arange(self.n_apertures)
 
         def make_wavefront(index, center):
@@ -165,7 +195,11 @@ class SparseOptic(Optic):
         return wavefront.set(phasor=phasor, c=c)
 
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
-        """Apply the optic and append its sub-aperture axis to the wavefront."""
+        """Apply the optic and append its sub-aperture axis to the wavefront.
+
+        Optional normalisation is applied after localisation. The input wavefront is
+        not mutated.
+        """
         wavefront = self.localise(wavefront)
         return wavefront.normalise() if self.normalise else wavefront
 
@@ -188,6 +222,23 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
         transformation=None,
         normalise=False,
     ):
+        """Initialise repeated coordinate-dependent local optics.
+
+        Parameters
+        ----------
+        centers : ArrayLike
+            Physical ``(x, y)`` centres with shape ``(n_apertures, 2)``.
+        transmission : Array, Parametric, or None
+            Shared or aperture-vectorised local amplitude transmission.
+        opd, phase : Array, Parametric, or None
+            Shared or aperture-vectorised OPD in metres and phase in radians.
+        coordinates : Array, GridSpec, or None
+            Explicit coordinate source, or incident coordinates when omitted.
+        transformation : BaseCoordTransform or None
+            Shared global or aperture-vectorised local coordinate transformation.
+        normalise : bool
+            Renormalise the resulting wavefront power.
+        """
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         SparseOptic.__init__(self, centers, transmission, opd, phase, normalise)
 
