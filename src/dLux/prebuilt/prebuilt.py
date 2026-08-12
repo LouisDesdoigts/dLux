@@ -7,9 +7,9 @@ from jax import vmap
 import dLux.utils as dlu
 
 from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coeffs
-from .grids import Affine, PasteSpec
-from .layers.optical import Optic
-from .parametric import (
+from ..grids import Affine, PasteSpec
+from ..layers.optical import Optic
+from ..parametric import (
     Circle,
     Rectangle,
     RegularPolygon,
@@ -18,7 +18,7 @@ from .parametric import (
     Spider,
     TransformedShape,
 )
-from .parametric.bases import _resolve_coeffs
+from ..parametric.bases import _resolve_coeffs
 
 __all__ = [
     "SimpleCircular",
@@ -43,8 +43,20 @@ class SimpleCircular(ApertureBuilder):
     spider_width, spider_angles
         Optional radial support width and one-dimensional angles in degrees. Both
         must be supplied together.
-    opd, oversample
-        As defined by ``ApertureBuilder``.
+    opd : BaseOPDDef or None
+        Optional OPD definition evaluated over the pupil support.
+    oversample : int or tuple of int
+        Sampling factor used before downsampling hard-edged geometry.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
+    pupil = dl.SimpleCircular(1.0, secondary_diameter=0.3)
+    optic = pupil(grid)
+    ```
     """
 
     def __init__(
@@ -108,8 +120,10 @@ class SegmentedHex(SparseApertureBuilder):
         memory-efficient; ``"scatter"`` uses per-pixel indices to expose more
         parallelism at higher memory cost. Benchmark both for large systems because
         performance depends on the hardware and pupil sampling.
-    opd, oversample
-        As defined by ``ApertureBuilder``.
+    opd : BaseOPDDef or None
+        Optional OPD definition evaluated independently over each segment.
+    oversample : int or tuple of int
+        Sampling factor used before downsampling hard-edged geometry.
 
     Notes
     -----
@@ -117,6 +131,16 @@ class SegmentedHex(SparseApertureBuilder):
     immutable update may trigger a separate JAX compilation. Compact OPD bases are
     evaluated directly at the output sampling and clipped by the corresponding hard
     segment support; only the transmission uses the configured oversampling.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=256, diam=7.0, unit="m")
+    pupil = dl.SegmentedHex(nrings=3, segment_f2f=1.3, gap=0.01)
+    optic = pupil(grid)
+    ```
     """
 
     paste_method: str
@@ -363,16 +387,30 @@ class NRMLike(SparseApertureBuilder):
         Hole centres with shape ``(n_holes, 2)`` in ``(x, y)`` order.
     hole : Shape
         The single local geometry shared by every hole.
-    opd, oversample
-        As defined by ``ApertureBuilder``.
+    opd : BaseOPDDef or None
+        Optional OPD definition evaluated independently over each hole.
+    oversample : int or tuple of int
+        Sampling factor used before downsampling hard-edged geometry.
 
     Returns
     -------
     Array or tuple of Array
-        ``build`` follows the ``ApertureBuilder`` global-pupil contract.
+        ``build`` returns the densely sampled global transmission, with OPD basis
+        data and aperture support appended when requested.
     SparseOptic
         Calling with ``sparse=True`` creates one local pupil per centre with
         independent OPD coefficients.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    centers = [[-0.5, 0.0], [0.5, 0.0], [0.0, 0.7]]
+    grid = dl.GridSpec(n=96, diam=0.6, unit="m")
+    pupil = dl.NRMLike(centers, dl.Circle(0.3))
+    optic = pupil(grid, sparse=True)
+    ```
     """
 
     def __init__(self, centers, hole, opd=None, oversample=5):
@@ -407,10 +445,32 @@ class NRMLike(SparseApertureBuilder):
     ):
         """Materialise a global NRM or independent sparse holes.
 
-        Arguments follow `SparseApertureBuilder.__call__`, except sparse OPD
-        coefficients are always independent per hole. With ``sparse=True``, explicit
-        ``coeffs`` must therefore begin with the hole axis. Returns an `Optic` or
-        `SparseOptic` without mutating the builder.
+        Parameters
+        ----------
+        grid : GridSpec
+            One-dimensional square or explicit two-dimensional sampling grid.
+        transform : BaseCoordTransform or None
+            Optional map into the aperture frame. Transforms require dense output.
+        coeffs : Array or None
+            Explicit OPD coefficients. Sparse coefficients must begin with an axis
+            matching the number of holes.
+        key : Array or None
+            JAX random key for standard-normal coefficient initialisation. Mutually
+            exclusive with ``coeffs``.
+        normalise : bool
+            Renormalise wavefront power after applying the returned optic.
+        jit : bool
+            Compile the fixed-topology sampling calculation.
+        sparse : bool
+            Return independent locally sampled holes as a ``SparseOptic``; otherwise
+            return one globally sampled ``Optic``.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
+
+        Returns
+        -------
+        optic : Optic or SparseOptic
+            Materialised global pupil or independent sparse-hole representation.
         """
         coeffs = _resolve_coeffs(coeffs, coefficients)
         if sparse and coeffs is not None:
@@ -433,6 +493,15 @@ class HSTLike(SimpleCircular):
 
     The primary, secondary, and support dimensions may be overridden while retaining
     the HST-like circular-pupil topology.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=256, diam=2.8, unit="m")
+    optic = dl.HSTLike()(grid)
+    ```
     """
 
     def __init__(
@@ -474,6 +543,15 @@ class JWSTLike(SegmentedHex):
 
     Segment size, gap, and simplified support geometry may be overridden while the
     18-segment JWST-like topology remains fixed.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=256, diam=7.0, unit="m")
+    optic = dl.JWSTLike()(grid)
+    ```
     """
 
     def __init__(
@@ -524,6 +602,15 @@ class JWSTNRMLike(NRMLike):
 
     ``centers`` and ``hole_f2f`` may be overridden for calibrated or deliberately
     perturbed NRM geometries while retaining a shared hexagonal hole shape.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=96, diam=1.0, unit="m")
+    optic = dl.JWSTNRMLike()(grid, sparse=True)
+    ```
     """
 
     def __init__(self, centers=None, hole_f2f=0.8, opd=None, oversample=5):
@@ -570,6 +657,15 @@ class EuclidLike(ApertureBuilder):
     Primary, secondary, and support dimensions may be overridden. Increasing
     ``spider_width`` is useful when a stronger asymmetric diffraction signature is
     desired for phase-retrieval experiments.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=256, diam=1.4, unit="m")
+    optic = dl.EuclidLike()(grid)
+    ```
     """
 
     def __init__(

@@ -10,7 +10,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..base import Base
-from ..grids import BaseCoordTransform
+from ..grids import BaseCoordTransform, GridSpec
 from .parametrics import Parametric
 
 __all__ = [
@@ -30,7 +30,34 @@ __all__ = [
 
 
 class Shape(Parametric):
-    """Base geometry that evaluates to a transmission array."""
+    """Base geometry that evaluates to a transmission array.
+
+    Call a shape with a `GridSpec` to sample it directly, or use `evaluate` when
+    supplying custom coordinates and pixel scales explicitly.
+    """
+
+    def __call__(self, grid, transform=None) -> Array:
+        """Sample the shape on a physical grid.
+
+        Parameters
+        ----------
+        grid : GridSpec
+            Complete sampling grid. Its coordinates are converted to SI units before
+            evaluation so shape dimensions retain their canonical physical units.
+        transform : BaseCoordTransform or None
+            Optional transformation applied when generating the grid coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            Sampled transmission with leading grid batch axes followed by the final
+            spatial axes.
+        """
+        if not isinstance(grid, GridSpec):
+            raise TypeError("grid must be a GridSpec.")
+        coordinates = grid.transformed(transform)
+        pixel_scale = grid.d * grid.scale
+        return self.evaluate(coordinates=coordinates, pixel_scale=pixel_scale)
 
     @property
     def extent(self) -> Array | None:

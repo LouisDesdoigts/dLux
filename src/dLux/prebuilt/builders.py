@@ -12,12 +12,12 @@ from jax import Array, vmap
 
 import dLux.utils as dlu
 
-from .base import Base
-from .grids import BaseCoordTransform, GridSpec
-from .layers.optical import Optic
-from .layers.sparse import SparseOptic
-from .parametric import Basis, Shape
-from .parametric.bases import _resolve_coeffs
+from ..base import Base
+from ..grids import BaseCoordTransform, GridSpec
+from ..layers.optical import Optic
+from ..layers.sparse import SparseOptic
+from ..parametric import Basis, Shape
+from ..parametric.bases import _resolve_coeffs
 
 __all__ = [
     "BaseBuilder",
@@ -210,8 +210,22 @@ class ZernikeDef(BaseOPDDef):
 
     Notes
     -----
-    This definition returns sampled basis data. Calling an ``ApertureBuilder``
-    performs the separate materialisation into a ``Basis`` parameterisation.
+    ``calculate`` returns the sampled basis vectors as an array. When this definition
+    is supplied to an aperture builder, calling the builder combines those vectors
+    with coefficients to construct a ``Basis`` inside the returned ``Optic``.
+
+    Examples
+    --------
+    Construct defocus through spherical aberration with an RMS scale of 10 nm:
+
+    ```python
+    import dLux as dl
+
+    zernikes = dl.ZernikeDef(
+        nolls=[4, 5, 6, 7, 8, 9, 10, 11],
+        norm=dl.Norm("rms", 10e-9),
+    )
+    ```
     """
 
     nolls: Array
@@ -382,6 +396,22 @@ class ApertureBuilder(BaseBuilder):
         Returned when ``opd`` is present.
     transmission, opd_data, support : tuple of Array
         Returned when ``opd`` is present and ``return_support=True``.
+
+    Examples
+    --------
+    Build sampled arrays or materialise the same definition as an optical layer:
+
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
+    builder = dl.ApertureBuilder(
+        primary=dl.Circle(1.0),
+        obscurations=[dl.Circle(0.3)],
+    )
+    transmission = builder.build(grid)
+    optic = builder(grid)
+    ```
     """
 
     primary: Shape
@@ -449,8 +479,7 @@ class ApertureBuilder(BaseBuilder):
     @staticmethod
     def _evaluate(shape, grid, transform):
         """Evaluate one shape on a possibly transformed grid."""
-        coordinates = grid.transformed(transform)
-        return shape.evaluate(coordinates=coordinates, pixel_scale=grid.d * grid.scale)
+        return shape(grid, transform)
 
     def _aperture_data(self, grid, transform):
         """Sample the aperture and retain its native primary support."""
@@ -559,8 +588,10 @@ class SparseApertureBuilder(ApertureBuilder):
         Local geometry repeated inside every sub-aperture.
     global_obscurations : list or tuple of Shape
         Geometry removed after assembling the full global pupil.
-    opd, oversample
-        As defined by ``ApertureBuilder``.
+    opd : BaseOPDDef or None
+        Optional OPD definition evaluated independently over each sub-aperture.
+    oversample : int or tuple of int
+        Sampling factor used before downsampling hard-edged geometry.
 
     Notes
     -----
@@ -709,8 +740,23 @@ class SparseApertureBuilder(ApertureBuilder):
 
         Parameters
         ----------
-        grid, transform, coeffs, key, normalise, jit, coefficients
-            Follow `ApertureBuilder.__call__`.
+        grid : GridSpec
+            One-dimensional square or explicit two-dimensional sampling grid.
+        transform : BaseCoordTransform or None
+            Optional map from grid coordinates into the aperture frame. Transforms
+            require dense output and cannot be used with ``sparse=True``.
+        coeffs : Array or None
+            Explicit OPD coefficients. For sparse output, the leading aperture axis
+            is present when ``shared=False`` and omitted when ``shared=True``.
+        key : Array or None
+            JAX random key for standard-normal coefficient initialisation. Mutually
+            exclusive with ``coeffs``.
+        normalise : bool
+            Renormalise wavefront power after applying the returned optic.
+        jit : bool
+            Compile the fixed-topology sampling calculation.
+        coefficients : Array or None
+            Deprecated alias for ``coeffs``.
         sparse : bool
             Return a shared locally sampled `SparseOptic`; otherwise return a global
             densely sampled `Optic`.

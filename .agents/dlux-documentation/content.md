@@ -11,6 +11,19 @@ Use five complementary forms:
 Public documentation should state units, shapes, axes, normalisation, leading
 dimensions, limitations, and relevant differentiability. Add concise executable
 examples to core classes and behaviours where the interaction is not obvious.
+A public class or method must document its complete local contract. Links may provide
+broader context, but users must not need to leave the API they are reading to learn an
+argument, return value, unit, shape, default, limitation, or basic usage. Do not use
+placeholder descriptions such as "as defined by", "arguments follow", or "see the
+base implementation" for public inputs.
+
+Examples should be minimal walkthroughs of the documented class and its principal
+behaviours. Divide multi-stage examples into short commented blocks, use realistic
+physical units, and identify important output types. Avoid unrelated package
+machinery, but include every setup step required for the example to execute on its
+own. Small components need one focused use; major system classes should show their
+distinct primary entry points.
+
 Document every public concrete-class constructor. Constructor docstrings must cover
 all arguments, accepted types, shapes, units, defaults, exclusive combinations,
 broadcasting, validation, and important construction-time effects. Simple

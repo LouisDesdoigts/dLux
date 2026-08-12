@@ -39,6 +39,16 @@ class TestWavefront:
         assert normalised.power.shape == wavelengths.shape
         assert np.allclose(normalised.power, 1)
 
+    def test_chromatic_grid_batch_contract(self, make_grid):
+        wavelengths = np.asarray((0.9e-6, 1.1e-6))
+        centers = np.asarray(((-0.2, 0.0), (0.0, 0.2), (0.2, 0.0)))
+        wavefront = dl.Wavefront(wavelengths, make_grid().set(c=centers))
+        normalised = wavefront.normalise()
+
+        assert wavefront.phasor.shape == (2, 3, 8, 8)
+        assert wavefront.power.shape == (2, 3)
+        assert np.allclose(normalised.power, 1)
+
     def test_chromatic_phasor_broadcasting(self, make_grid):
         wavelengths = np.asarray((0.9e-6, 1.1e-6))
         phasor = np.ones((8, 8), dtype=complex)

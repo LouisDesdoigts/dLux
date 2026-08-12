@@ -92,6 +92,19 @@ class TestPropagation:
         assert_jittable(layer, chromatic, rtol=1e-5, atol=1e-5)
         assert_jittable(layer, polarised, rtol=1e-5, atol=1e-5)
 
+    def test_chromatic_spatial_vectorisation(self, angular_spec, make_grid):
+        wavelengths = np.asarray((0.9e-6, 1.1e-6))
+        centers = np.asarray(((-0.2, 0.0), (0.0, 0.2), (0.2, 0.0)))
+        wavefront = dl.Wavefront(wavelengths, make_grid().set(c=centers))
+
+        propagated = assert_jittable(
+            dl.Fraunhofer(angular_spec), wavefront, rtol=1e-5, atol=1e-5
+        )
+        interfered = assert_jittable(dl.Interfere(), propagated)
+
+        assert propagated.phasor.shape == (2, 3, 8, 6)
+        assert interfered.phasor.shape == (2, 8, 6)
+
     def test_output_sampling(self, angular_spec, make_wavefront):
         requested = dl.Fraunhofer(angular_spec)(make_wavefront())
         assert_tree_allclose(requested.grid, angular_spec)

@@ -12,7 +12,6 @@ from . import (
     systems,
     sources,
     grids,
-    builders,
     prebuilt,
     compatibility,
 )
@@ -24,7 +23,6 @@ _modules = (
     sources,
     fields,
     grids,
-    builders,
     prebuilt,
     compatibility,
 )
@@ -37,7 +35,6 @@ _module_names = [
     "sources",
     "fields",
     "grids",
-    "builders",
     "prebuilt",
     "compatibility",
 ]

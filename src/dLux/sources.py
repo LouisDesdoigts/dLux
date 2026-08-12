@@ -445,6 +445,31 @@ class Source(BaseSource, Spectrum):
         ``"log"`` for base-10 photon flux, or ``"ln"`` for natural-log photon flux.
         Distributions are relative spatial scalings and accept only ``"linear"``,
         ``"log"``, or ``"ln"``.
+
+    Examples
+    --------
+    Define a polychromatic star using convenient physical units:
+
+    ```python
+    import jax.numpy as np
+    import dLux as dl
+
+    source = dl.Source(
+        wavelengths=np.linspace(600, 700, 5),
+        position=[20.0, -10.0],
+        flux=1e5,
+        units={"wavelengths": "nm", "position": "mas"},
+    )
+
+    pupil_grid = dl.GridSpec(n=64, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=32, d=25, unit="mas")
+    pupil = dl.SimpleCircular(0.9)(pupil_grid)
+    optics = dl.OpticalSystem(
+        [("pupil", pupil), ("focus", dl.Fraunhofer(focal_grid))],
+        pupil_grid,
+    )
+    intensity = source.model(optics)
+    ```
     """
 
     wavelengths: Array | Parametric

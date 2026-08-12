@@ -129,6 +129,42 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
     The input grid may use any supported length unit. Its coordinates are converted
     to canonical SI values when fields are evaluated; angular input grids are not
     accepted.
+
+    Examples
+    --------
+    Build a pupil-to-focal-plane model and use its three propagation interfaces:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+
+    # Make the grids
+    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=64, d=25, unit="mas")
+
+    # Build the optical system
+    optics = dl.OpticalSystem(
+        layers=[
+            ("pupil", dl.SimpleCircular(diameter=1.0)(pupil_grid)),
+            ("focus", dl.Fraunhofer(focal_grid)),
+        ],
+        grid=pupil_grid,
+    )
+
+    # Model a point-spread function
+    wavelengths = np.linspace(1.0e-6, 1.2e-6, 10)
+    psf = optics.propagate(wavelengths)  # Returns an intensity array
+
+    # Model a source
+    source = dl.Source(wavelengths, weights=dl.Blackbody(10_000))
+    intensity = optics.model(source)  # Returns an Intensity object
+
+    # Propagate a wavefront
+    wavefront = dl.Wavefront(wavelengths, pupil_grid)
+    wavefront = optics.apply(wavefront)  # Returns a Wavefront object
+    ```
     """
 
     layers: OrderedDict
@@ -382,7 +418,35 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
 
 
 class DetectorSystem(LayeredSystem):
-    """Apply deterministic detector transformations to an intensity."""
+    """Apply deterministic detector transformations to an intensity.
+
+    Examples
+    --------
+    Compose elementary detector effects while retaining deterministic intensity:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+
+    # Build the detector system
+    detector = dl.DetectorSystem(
+        layers=[
+            ("jitter", dl.Jitter(sigma=0.5)),
+            ("sensitivity", dl.Sensitivity(0.8)),
+            ("bias", dl.Bias(5.0)),
+        ]
+    )
+
+    # Make an input intensity
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    intensity = dl.Intensity(np.ones((64, 64)), grid)
+
+    # Apply the detector model
+    intensity = detector(intensity)  # Returns an Intensity object
+    ```
+    """
 
     layers: OrderedDict
 

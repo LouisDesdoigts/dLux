@@ -404,6 +404,17 @@ class Wavefront(ContinuousField):
     phasor : Array or None
         Complex field with shape ``(..., ny, nx)``. When omitted, a uniform
         unit-power field is generated from ``grid``.
+
+    Examples
+    --------
+    Construct a monochromatic unit-power pupil field:
+
+    ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    wavefront = dl.Wavefront(650e-9, grid)
+    ```
     """
 
     grid: GridSpec
@@ -440,7 +451,9 @@ class Wavefront(ContinuousField):
             grid = grid.broadcast(2)
             if grid.n is None:
                 raise ValueError("grid.n is required when phasor is not provided.")
-            shape = self.wavelength.shape + grid.shape
+            metadata = [x.shape[:-1] for x in (grid.d, grid.c) if x is not None]
+            batch_shape = np.broadcast_shapes(*metadata) if metadata else ()
+            shape = self.wavelength.shape + batch_shape + grid.shape
             self.phasor = np.ones(shape, dtype=complex) / prod(grid.n)
 
         # Validate and align an explicit phasor with wavelengths
@@ -686,7 +699,7 @@ class Wavefront(ContinuousField):
             scale = np.sqrt(value / self.intensity.max(axis=(-2, -1)))
         else:
             raise ValueError("mode must be 'power' or 'peak'")
-        return self.set(phasor=self.phasor * self._to_phasor_shape(scale))
+        return self.set(phasor=self.phasor * scale[..., None, None])
 
     def _binary_op(
         self: Wavefront, other: Wavefront | Array | None, op: str
@@ -806,8 +819,9 @@ class Wavefront(ContinuousField):
     def psf_from_stokes(self, stokes: Array | None = None) -> Array:
         """Alias `intensity_from_stokes` using retained PSF terminology.
 
-        ``stokes`` and the returned array follow the same contract as
-        `intensity_from_stokes`.
+        ``stokes`` is an optional four-component input Stokes vector. For a scalar
+        wavefront only its total-intensity component contributes. The returned array
+        preserves leading axes followed by the final spatial axes.
         """
         return self.intensity_from_stokes(stokes)
 
@@ -979,8 +993,9 @@ class PolarisedWavefront(Wavefront):
     def psf_from_stokes(self: Wavefront, input_stokes: Array | None = None) -> Array:
         """Alias `intensity_from_stokes` using retained PSF terminology.
 
-        ``input_stokes`` and the returned array follow the same contract as
-        `intensity_from_stokes`.
+        ``input_stokes`` has final component axis of length four. When omitted, an
+        unpolarised unit input is used. The returned intensity preserves leading
+        wavelength and batch axes followed by the final spatial axes.
         """
         return self.intensity_from_stokes(input_stokes)
 
@@ -1032,6 +1047,10 @@ class Intensity(DiscreteField):
     Convert a propagated wavefront, then explicitly begin detector-image modelling:
 
     ```python
+    import dLux as dl
+
+    grid = dl.GridSpec(n=64, diam=1.0, unit="m")
+    wavefront = dl.Wavefront(650e-9, grid)
     intensity = wavefront.to_intensity()
     image = intensity.to_image(read_noise=3.0)
     ```
@@ -1156,6 +1175,21 @@ class Image(DiscreteField):
     models should retain ``Intensity`` until an image is explicitly constructed.
     Uncertainty is optional because deterministic detector transformations generally
     do not define a complete propagation rule for it.
+
+    Examples
+    --------
+    Convert expected intensity into a noisy mean exposure:
+
+    ```python
+    import jax.numpy as np
+    import jax.random as jr
+    import dLux as dl
+
+    grid = dl.GridSpec(n=32, d=20, unit="mas")
+    intensity = dl.Intensity(np.full((32, 32), 10.0), grid)
+    image = dl.Image(intensity, read_noise=3.0)
+    exposure = image.simulate(jr.key(0), n_frames=16)
+    ```
     """
 
     data: Array

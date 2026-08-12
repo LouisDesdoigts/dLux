@@ -7,7 +7,7 @@ from jax import grad
 
 import dLux as dl
 
-from dLux.builders import SparseApertureBuilder
+from dLux.prebuilt.builders import SparseApertureBuilder
 from tests.helpers import assert_jittable
 
 

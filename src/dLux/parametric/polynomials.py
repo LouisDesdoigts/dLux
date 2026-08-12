@@ -311,7 +311,8 @@ class Polynomial(ParametricBasis):
         """Evaluate the polynomial at supplied or contextual variables.
 
         Terms are contracted against ``coeffs`` and all variable sample axes are
-        retained. ``variables`` follows the `calculate_basis` contract.
+        retained. ``variables`` has a leading polynomial-variable axis followed by
+        arbitrary sample axes.
         """
         if variables is None:
             basis = self.calculate_basis(**context)
@@ -322,8 +323,9 @@ class Polynomial(ParametricBasis):
     def solve_basis(self, value, *, variables=None, **context):
         """Solve for polynomial coefficients representing ``value``.
 
-        ``variables`` follows `calculate_basis` and ``value`` must match its sample
-        axes. Returned least-squares coefficients have the polynomial term shape.
+        ``variables`` has a leading polynomial-variable axis followed by arbitrary
+        sample axes. ``value`` must match those sample axes. Returned least-squares
+        coefficients have the polynomial term shape.
         """
         if variables is None:
             basis = self.calculate_basis(**context)

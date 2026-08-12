@@ -366,6 +366,50 @@ class GridSpec(BaseGridSpec):
         Physical or angular unit associated with ``d`` and ``c``.
     diam : ArrayLike or None
         Alternative physical extent used to calculate ``d = diam / n``.
+
+    Examples
+    --------
+    Construct and manipulate unit-aware sampling grids:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+
+    # Define a square grid from its total field of view
+    grid = dl.GridSpec(n=128, diam=6.5, unit="m")
+
+    # Equivalently, define the grid from its pixel scale
+    grid = dl.GridSpec(n=128, d=6.5 / 128, unit="m")
+
+    # Inspect its sampling
+    fov = grid.fov  # Total sampled width in metres
+    coordinates = grid.coordinates  # Shape (2, 128, 128), in SI units
+
+    # Define a non-square, anisotropic, and off-centre grid
+    grid = dl.GridSpec(
+        n=(128, 64),
+        d=(10, 15),
+        c=(50, -30),
+        unit="um",
+    )
+    coordinates = grid.coordinates  # Shape (2, 64, 128)
+
+    # Generate transformed coordinates without changing the grid
+    rotation = dl.Affine(rotation=np.deg2rad(10))
+    coordinates = grid.transformed(rotation)
+
+    # Generate plot-ready bounds in another unit
+    extent = grid.extent(unit="mm")
+
+    # Change the sampling while preserving the field of view
+    fine_grid = grid.oversample(2)
+    original_grid = fine_grid.downsample(2)
+    ```
+
+    ``diam`` is a constructor convenience for total sampled extent. ``fov`` is the
+    corresponding general property and may contain a different value for each axis.
     """
 
     n: tuple[int, ...] | None
@@ -733,9 +777,9 @@ class BaseCoordTransform(Base):
     def __call__(self, coordinates: Array) -> Array:
         """Transform Cartesian coordinates with shape ``(..., 2, ny, nx)``.
 
-        Subclasses return the same coordinate convention. Leading transform and
-        coordinate axes follow the paired broadcasting contract defined by this base
-        class.
+        Subclasses return the same coordinate convention. Leading transform axes are
+        paired with matching leading coordinate axes; singleton axes broadcast by
+        ordinary JAX rules.
         """
 
     def apply(self, coordinates: Array) -> Array:
