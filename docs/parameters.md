@@ -1,13 +1,29 @@
-# Parameters and immutable updates
+# Parameters, paths, and immutable updates
 
-dLux models are Equinox pytrees with Zodiax parameter paths. A path selects a nested
-leaf using dot-separated names, while dLux raises useful child attributes so common
-parameters can often be reached without spelling every intermediate object.
+dLux objects are immutable Equinox pytrees. Their leaves contain physical parameters,
+sampled arrays, and static model structure; changing a model means returning a new
+tree with selected leaves replaced. Zodiax paths provide a concise way to locate those
+leaves inside nested sources, systems, layers, and parametrics.
+
+For example, an optical system may contain a layer named `pupil`, whose OPD is a
+`Basis`, whose fitted leaf is `coeffs`:
+
+```text
+OpticalSystem
+└── pupil: Optic
+    └── opd: Basis
+        └── coeffs
+```
+
+The fully qualified path is `"pupil.opd.coeffs"`. dLux raises useful child attributes,
+so `"pupil.coeffs"` and sometimes simply `"coeffs"` can resolve to the same leaf.
+Short paths are convenient for simple models; qualified paths remain explicit when
+several children expose the same name.
 
 ## Inspect parameters
 
-Use direct attributes while exploring a model and `get()` when building reusable
-parameter selections:
+Use direct attributes while exploring a model and `get()` when the path itself is part
+of a reusable calculation:
 
 ```python
 coeffs = optics.pupil.coeffs
@@ -19,14 +35,14 @@ params = optics.get(
 )
 ```
 
-`as_dict=True` retains path names, which is normally the most convenient form for an
-optimiser or inference routine. Short raised paths such as `"coeffs"` are allowed when
-they resolve from the current object. If several children expose the same name, use a
-layer or collection name to make the intended path explicit.
+`as_dict=True` retains the requested path names. This is useful when paths define a
+fitted parameter set, but `get()` is also a general inspection mechanism and is not
+specific to optimisation.
 
 ## Update models immutably
 
-Updates return a new object; they do not modify the original:
+`set()` follows the same paths and returns a new object; it never modifies the
+original:
 
 ```python
 updated = optics.set("pupil.coeffs", new_coeffs)
@@ -45,6 +61,25 @@ shifted = source.add("position", offset)
 contract as `set`. Prefer the operation that states the intended initialisation or
 constraint rather than manually retrieving and replacing a leaf.
 
+## Update more than one object
+
+An inference model often has parameters split between an optical system and a source.
+`dlu.update` applies one path mapping across several top-level objects:
+
+```python
+params = {
+    "pupil.coeffs": new_coeffs,
+    "position": new_position,
+    "flux": new_flux,
+}
+optics, source = dlu.update(params, optics, source)
+```
+
+Strict mode is the default. Objects are checked in positional order, each path is
+consumed by its first match, and unused paths raise an error. This catches misspelled
+or incorrectly qualified paths. With `strict=False`, matching paths are applied to
+every object and unmatched paths are ignored.
+
 ## Select fitted and fixed leaves
 
 An optimisation parameter dictionary is an explicit filter over the model. Include
@@ -61,11 +96,6 @@ params = {
 Update the relevant model inside the objective, then evaluate the ordinary forward
 model. This keeps the parameterisation separate from the optical calculation and
 allows different parameter groups to use different scaling or optimisers.
-
-For parameters distributed across several top-level objects, apply the same mapping
-to each object and verify that every path was consumed. A shared package helper for
-this pattern is planned; until then, keep the helper local to the application and
-raise on unused paths rather than silently dropping misspelled parameters.
 
 ## Shared and derived parameters
 
@@ -88,14 +118,12 @@ import equinox as eqx
 import jax.numpy as np
 import zodiax as zdx
 
+import dLux.utils as dlu
+
 
 @eqx.filter_value_and_grad
 def loss(params, optics, source, data):
-    optics = optics.set(**{"pupil.coeffs": params["pupil.coeffs"]})
-    source = source.set(
-        position=params["position"],
-        flux=params["flux"],
-    )
+    optics, source = dlu.update(params, optics, source)
     model = optics.model(source)
     z_score = zdx.z_score(model.data, data.data, data.std)
     return np.mean(z_score**2)

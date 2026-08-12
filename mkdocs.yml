@@ -31,7 +31,7 @@ site_name: !ENV [DLUX_DOCS_SITE_NAME, "dLux"]
 docs_dir: docs/
 site_description: Documentation for dLux.
 site_author: Louis Desdoigts
-site_url: https://louisdesdoigts.github.io/dlux/
+site_url: !ENV [DLUX_DOCS_SITE_URL, "https://louisdesdoigts.github.io/dlux/"]
 repo_url: https://github.com/LouisDesdoigts/dlux
 repo_name: louisdesdoigts/dlux
 edit_uri: edit/main/docs/   # Directs where the "Edit" link points
@@ -76,6 +76,9 @@ extra_javascript:
   - https://unpkg.com/mermaid@11/dist/mermaid.min.js
   - javascripts/mermaid.js
 
+extra_css:
+  - stylesheets/api.css
+
 extra:
   version:
     provider: mike  # Tells the UI: "Look for mike's version list"
@@ -84,8 +87,6 @@ extra:
 nav:
   - Home: index.md
   - Installation: installation.md
-  - Migrating to 0.16: migration.md
-  - Parameters and Updates: parameters.md
   - Tutorials:
     - Overview: tutorials/overview.md
     - Introductory:
@@ -93,6 +94,8 @@ nav:
       - Getting Started: tutorials/introductory/getting_started.md
     - Basics:
       - Overview: tutorials/basics/overview.md
+      - Migrating to 0.16: migration.md
+      - Parameters and Updates: parameters.md
     - Advanced:
       - Overview: tutorials/advanced/overview.md
     - Old Tutorials:
@@ -111,13 +114,22 @@ nav:
     - Core API:
       - Overview: API/core/overview.md
       - Base: API/core/base.md
-      - Builders: API/core/builders.md
       - Compatibility: API/core/compatibility.md
       - Fields: API/core/fields.md
       - Grids: API/core/grids.md
-      - Prebuilt: API/core/prebuilt.md
+      - Bases: API/core/bases.md
+      - Parametrics: API/core/parametrics.md
+      - Polynomials: API/core/polynomials.md
+      - Refractive: API/core/refractive.md
+      - Shapes: API/core/shapes.md
+      - Spectral: API/core/spectral.md
       - Sources: API/core/sources.md
       - Systems: API/core/systems.md
+
+    - Prebuilt API:
+      - Overview: API/prebuilt/overview.md
+      - Builders: API/prebuilt/builders.md
+      - Prebuilt: API/prebuilt/prebuilt.md
 
     - Layers API:
       - Overview: API/layers/overview.md
@@ -130,15 +142,6 @@ nav:
       - Refractive: API/layers/refractive.md
       - Sparse: API/layers/sparse.md
       - Unified: API/layers/unified.md
-
-    - Parametric API:
-      - Overview: API/parametric/overview.md
-      - Bases: API/parametric/bases.md
-      - Parametrics: API/parametric/parametrics.md
-      - Polynomials: API/parametric/polynomials.md
-      - Refractive: API/parametric/refractive.md
-      - Shapes: API/parametric/shapes.md
-      - Spectral: API/parametric/spectral.md
 
     - Utils API:
       - Overview: API/utils/overview.md

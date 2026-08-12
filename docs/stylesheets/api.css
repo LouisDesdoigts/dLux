@@ -1,0 +1,40 @@
+/* Present each generated API member as one self-contained panel. */
+.doc-object.doc-function,
+.doc-object.doc-attribute {
+  margin: 1.5rem 0;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-left: 0.2rem solid var(--md-accent-fg-color);
+  border-radius: 0.2rem;
+  background: color-mix(in srgb, var(--md-default-fg-color) 5%, transparent);
+}
+
+.doc-object.doc-function > .doc-heading,
+.doc-object.doc-attribute > .doc-heading {
+  margin: 0;
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  font-size: 0.9rem;
+}
+
+.doc-object.doc-function > .doc-heading code,
+.doc-object.doc-attribute > .doc-heading code {
+  font-size: 1em;
+  font-weight: 700;
+}
+
+.doc-object.doc-function > .doc-contents,
+.doc-object.doc-attribute > .doc-contents {
+  margin: 0;
+  padding: 0.8rem 1rem 1rem;
+  border: 0;
+}
+
+.doc-object.doc-class > .doc-contents > .doc-object {
+  margin-top: 1.5rem;
+}
+
+.doc-object .doc-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}

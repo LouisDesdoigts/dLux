@@ -2,20 +2,20 @@
 
 # API
 
-This generated map separates the main dLux contracts at a readable scale. Select a section for its module map, then a module for local inheritance and complete API documentation.
+Select a section to inspect its module diagrams and complete public API.
 
-```mermaid
-flowchart LR
-    core["Core objects and systems"]
-    click core href "core/" "8 public modules"
-    layers["Optical and detector layers"]
-    click layers href "layers/" "9 public modules"
-    parametric["Differentiable parametrics"]
-    click parametric href "parametric/" "6 public modules"
-    utils["Numerical utilities"]
-    click utils href "utils/" "17 public modules"
-    utils --> core
-    utils --> parametric
-    core --> layers
-    parametric --> layers
-```
+## [Core objects and parametrics](core/overview.md)
+
+Base, Compatibility, Fields, Grids, Bases, Parametrics, Polynomials, Refractive, Shapes, Spectral, Sources, Systems.
+
+## [Builders and prebuilt components](prebuilt/overview.md)
+
+Builders, Prebuilt.
+
+## [Optical and detector layers](layers/overview.md)
+
+Coronagraphy, Detector, Dynamic, Optical, Polarised, Propagation, Refractive, Sparse, Unified.
+
+## [Numerical utilities](utils/overview.md)
+
+Abcd, Apertures, Array Ops, Coordinates, Fourier, Geometry, Helpers, Interpolation, Math, Misc, Norms, Optics, Polarisation, Polynomials, Propagation, Source, Units.

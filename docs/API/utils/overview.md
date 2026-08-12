@@ -2,42 +2,88 @@
 
 # Utils API
 
-This map is generated from the public API. Select a module to open its classes, functions, and local inheritance diagram.
+These maps are generated from the public API. Each module is shown separately so its complete local structure remains readable. Select a class to open its reference, or follow the module heading for functions and full documentation.
 
-```mermaid
-flowchart LR
-    dLux_utils_abcd["Abcd"]
-    click dLux_utils_abcd href "../abcd/" "Public API: abcd_surface_power, abcd_lens, abcd_mirror, abcd_free_space, abcd_fraunhofer, compose_abcd, is_surface, is_free_space, abcd_effective_focal_length, abcd_paraxial_power, abcd_geometric_magnification, abcd_angular_magnification, abcd_distance, abcd_front_focal_length, abcd_back_focal_length, abcd_unimodularity"
-    dLux_utils_apertures["Apertures"]
-    click dLux_utils_apertures href "../apertures/" "Public API: non_redundant_support, circular_aperture, segmented_aperture, sparse_aperture, hst_like, jwst_like, euclid_like"
-    dLux_utils_array_ops["Array Ops"]
-    click dLux_utils_array_ops href "../array_ops/" "Public API: pad_to, crop_to, resize, downsample, paste"
-    dLux_utils_coordinates["Coordinates"]
-    click dLux_utils_coordinates href "../coordinates/" "Public API: cart2polar, polar2cart, pixel_coords, nd_axes, nd_coords, translate_coords, compress_coords, shear_coords, rotate_coords, distort_coords"
-    dLux_utils_fourier["Fourier"]
-    click dLux_utils_fourier href "../fourier/" "Public API: fourier_kernel_1d, fourier_kernels, eval_fourier_basis"
-    dLux_utils_geometry["Geometry"]
-    click dLux_utils_geometry href "../geometry/" "Public API: combine, circle, square, rectangle, reg_polygon, convex_polygon, spider, soft_circle, soft_square, soft_rectangle, soft_reg_polygon, soft_convex_polygon, soft_spider, validate_convex"
-    dLux_utils_helpers["Helpers"]
-    click dLux_utils_helpers href "../helpers/" "Public API: map2array, list2dictionary, insert_layer, remove_layer, imshow_extent, missing_attribute_error, resolve_attr, from_complex, as_size, as_axis, to_value, update"
-    dLux_utils_interpolation["Interpolation"]
-    click dLux_utils_interpolation href "../interpolation/" "Public API: interp, scale, rotate"
-    dLux_utils_math["Math"]
-    click dLux_utils_math href "../math/" "Public API: gaussian, mv_gaussian, factorial, triangular_number, eval_basis, solve_basis, nandiv"
-    dLux_utils_misc["Misc"]
-    click dLux_utils_misc href "../misc/" "Public API: soft_binarise"
-    dLux_utils_norms["Norms"]
-    click dLux_utils_norms href "../norms/" "Public API: l1_norm, l2_norm, max_norm, rms_norm, p2v_norm"
-    dLux_utils_optics["Optics"]
-    click dLux_utils_optics href "../optics/" "Public API: wavenumber, opd2phase, phase2opd, fringe_size, tilt_opd, tilt"
-    dLux_utils_polarisation["Polarisation"]
-    click dLux_utils_polarisation href "../polarisation/" "Public API: horizontal_polariser, vertical_polariser, rhc_polariser, lhc_polariser, quarter_wave_plate, half_wave_plate, apply_jones, rotate_jones, linear_polariser, retarder, jones_to_stokes"
-    dLux_utils_polynomials["Polynomials"]
-    click dLux_utils_polynomials href "../polynomials/" "Public API: polynomial_powers, polynomial_basis, zernike_name, noll_indices, radial_orders_to_indices, zernike_factors, zernike, zernike_fast, zernike_basis, polike, polike_fast, polike_basis"
-    dLux_utils_propagation["Propagation"]
-    click dLux_utils_propagation href "../propagation/" "Public API: FFT_pad, FFT_spec, FFT_shift, FFT_ramp, FFT, MFT, ABCD_MFT, ABCD_FFT, ASM"
-    dLux_utils_source["Source"]
-    click dLux_utils_source href "../source/" "Public API: fluxes_from_contrast, positions_from_sep"
-    dLux_utils_units["Units"]
-    click dLux_utils_units href "../units/" "Public API: canonical_unit, unit_factor, convert, rad2arcsec, rad2deg, rad2arcmin, deg2rad, deg2arcmin, deg2arcsec, arcmin2rad, arcmin2deg, arcmin2arcsec, arcsec2rad, arcsec2deg, arcsec2arcmin"
-```
+## [Abcd](abcd.md)
+
+Functions: [`abcd_surface_power`](abcd.md#dLux.utils.abcd.abcd_surface_power), [`abcd_lens`](abcd.md#dLux.utils.abcd.abcd_lens), [`abcd_mirror`](abcd.md#dLux.utils.abcd.abcd_mirror), [`abcd_free_space`](abcd.md#dLux.utils.abcd.abcd_free_space), [`abcd_fraunhofer`](abcd.md#dLux.utils.abcd.abcd_fraunhofer), [`compose_abcd`](abcd.md#dLux.utils.abcd.compose_abcd), [`is_surface`](abcd.md#dLux.utils.abcd.is_surface), [`is_free_space`](abcd.md#dLux.utils.abcd.is_free_space), [`abcd_effective_focal_length`](abcd.md#dLux.utils.abcd.abcd_effective_focal_length), [`abcd_paraxial_power`](abcd.md#dLux.utils.abcd.abcd_paraxial_power), [`abcd_geometric_magnification`](abcd.md#dLux.utils.abcd.abcd_geometric_magnification), [`abcd_angular_magnification`](abcd.md#dLux.utils.abcd.abcd_angular_magnification), [`abcd_distance`](abcd.md#dLux.utils.abcd.abcd_distance), [`abcd_front_focal_length`](abcd.md#dLux.utils.abcd.abcd_front_focal_length), [`abcd_back_focal_length`](abcd.md#dLux.utils.abcd.abcd_back_focal_length), [`abcd_unimodularity`](abcd.md#dLux.utils.abcd.abcd_unimodularity).
+
+
+## [Apertures](apertures.md)
+
+Functions: [`non_redundant_support`](apertures.md#dLux.utils.apertures.non_redundant_support), [`circular_aperture`](apertures.md#dLux.utils.apertures.circular_aperture), [`segmented_aperture`](apertures.md#dLux.utils.apertures.segmented_aperture), [`sparse_aperture`](apertures.md#dLux.utils.apertures.sparse_aperture), [`hst_like`](apertures.md#dLux.utils.apertures.hst_like), [`jwst_like`](apertures.md#dLux.utils.apertures.jwst_like), [`euclid_like`](apertures.md#dLux.utils.apertures.euclid_like).
+
+
+## [Array Ops](array_ops.md)
+
+Functions: [`pad_to`](array_ops.md#dLux.utils.array_ops.pad_to), [`crop_to`](array_ops.md#dLux.utils.array_ops.crop_to), [`resize`](array_ops.md#dLux.utils.array_ops.resize), [`downsample`](array_ops.md#dLux.utils.array_ops.downsample), [`paste`](array_ops.md#dLux.utils.array_ops.paste).
+
+
+## [Coordinates](coordinates.md)
+
+Functions: [`cart2polar`](coordinates.md#dLux.utils.coordinates.cart2polar), [`polar2cart`](coordinates.md#dLux.utils.coordinates.polar2cart), [`pixel_coords`](coordinates.md#dLux.utils.coordinates.pixel_coords), [`nd_axes`](coordinates.md#dLux.utils.coordinates.nd_axes), [`nd_coords`](coordinates.md#dLux.utils.coordinates.nd_coords), [`translate_coords`](coordinates.md#dLux.utils.coordinates.translate_coords), [`compress_coords`](coordinates.md#dLux.utils.coordinates.compress_coords), [`shear_coords`](coordinates.md#dLux.utils.coordinates.shear_coords), [`rotate_coords`](coordinates.md#dLux.utils.coordinates.rotate_coords), [`distort_coords`](coordinates.md#dLux.utils.coordinates.distort_coords).
+
+
+## [Fourier](fourier.md)
+
+Functions: [`fourier_kernel_1d`](fourier.md#dLux.utils.fourier.fourier_kernel_1d), [`fourier_kernels`](fourier.md#dLux.utils.fourier.fourier_kernels), [`eval_fourier_basis`](fourier.md#dLux.utils.fourier.eval_fourier_basis).
+
+
+## [Geometry](geometry.md)
+
+Functions: [`combine`](geometry.md#dLux.utils.geometry.combine), [`circle`](geometry.md#dLux.utils.geometry.circle), [`square`](geometry.md#dLux.utils.geometry.square), [`rectangle`](geometry.md#dLux.utils.geometry.rectangle), [`reg_polygon`](geometry.md#dLux.utils.geometry.reg_polygon), [`convex_polygon`](geometry.md#dLux.utils.geometry.convex_polygon), [`spider`](geometry.md#dLux.utils.geometry.spider), [`soft_circle`](geometry.md#dLux.utils.geometry.soft_circle), [`soft_square`](geometry.md#dLux.utils.geometry.soft_square), [`soft_rectangle`](geometry.md#dLux.utils.geometry.soft_rectangle), [`soft_reg_polygon`](geometry.md#dLux.utils.geometry.soft_reg_polygon), [`soft_convex_polygon`](geometry.md#dLux.utils.geometry.soft_convex_polygon), [`soft_spider`](geometry.md#dLux.utils.geometry.soft_spider), [`validate_convex`](geometry.md#dLux.utils.geometry.validate_convex).
+
+
+## [Helpers](helpers.md)
+
+Functions: [`map2array`](helpers.md#dLux.utils.helpers.map2array), [`list2dictionary`](helpers.md#dLux.utils.helpers.list2dictionary), [`insert_layer`](helpers.md#dLux.utils.helpers.insert_layer), [`remove_layer`](helpers.md#dLux.utils.helpers.remove_layer), [`imshow_extent`](helpers.md#dLux.utils.helpers.imshow_extent), [`missing_attribute_error`](helpers.md#dLux.utils.helpers.missing_attribute_error), [`resolve_attr`](helpers.md#dLux.utils.helpers.resolve_attr), [`from_complex`](helpers.md#dLux.utils.helpers.from_complex), [`as_size`](helpers.md#dLux.utils.helpers.as_size), [`as_axis`](helpers.md#dLux.utils.helpers.as_axis), [`to_value`](helpers.md#dLux.utils.helpers.to_value), [`update`](helpers.md#dLux.utils.helpers.update).
+
+
+## [Interpolation](interpolation.md)
+
+Functions: [`interp`](interpolation.md#dLux.utils.interpolation.interp), [`scale`](interpolation.md#dLux.utils.interpolation.scale), [`rotate`](interpolation.md#dLux.utils.interpolation.rotate).
+
+
+## [Math](math.md)
+
+Functions: [`gaussian`](math.md#dLux.utils.math.gaussian), [`mv_gaussian`](math.md#dLux.utils.math.mv_gaussian), [`factorial`](math.md#dLux.utils.math.factorial), [`triangular_number`](math.md#dLux.utils.math.triangular_number), [`eval_basis`](math.md#dLux.utils.math.eval_basis), [`solve_basis`](math.md#dLux.utils.math.solve_basis), [`nandiv`](math.md#dLux.utils.math.nandiv).
+
+
+## [Misc](misc.md)
+
+Functions: [`soft_binarise`](misc.md#dLux.utils.misc.soft_binarise).
+
+
+## [Norms](norms.md)
+
+Functions: [`l1_norm`](norms.md#dLux.utils.norms.l1_norm), [`l2_norm`](norms.md#dLux.utils.norms.l2_norm), [`max_norm`](norms.md#dLux.utils.norms.max_norm), [`rms_norm`](norms.md#dLux.utils.norms.rms_norm), [`p2v_norm`](norms.md#dLux.utils.norms.p2v_norm).
+
+
+## [Optics](optics.md)
+
+Functions: [`wavenumber`](optics.md#dLux.utils.optics.wavenumber), [`opd2phase`](optics.md#dLux.utils.optics.opd2phase), [`phase2opd`](optics.md#dLux.utils.optics.phase2opd), [`fringe_size`](optics.md#dLux.utils.optics.fringe_size), [`tilt_opd`](optics.md#dLux.utils.optics.tilt_opd), [`tilt`](optics.md#dLux.utils.optics.tilt).
+
+
+## [Polarisation](polarisation.md)
+
+Functions: [`horizontal_polariser`](polarisation.md#dLux.utils.polarisation.horizontal_polariser), [`vertical_polariser`](polarisation.md#dLux.utils.polarisation.vertical_polariser), [`rhc_polariser`](polarisation.md#dLux.utils.polarisation.rhc_polariser), [`lhc_polariser`](polarisation.md#dLux.utils.polarisation.lhc_polariser), [`quarter_wave_plate`](polarisation.md#dLux.utils.polarisation.quarter_wave_plate), [`half_wave_plate`](polarisation.md#dLux.utils.polarisation.half_wave_plate), [`apply_jones`](polarisation.md#dLux.utils.polarisation.apply_jones), [`rotate_jones`](polarisation.md#dLux.utils.polarisation.rotate_jones), [`linear_polariser`](polarisation.md#dLux.utils.polarisation.linear_polariser), [`retarder`](polarisation.md#dLux.utils.polarisation.retarder), [`jones_to_stokes`](polarisation.md#dLux.utils.polarisation.jones_to_stokes).
+
+
+## [Polynomials](polynomials.md)
+
+Functions: [`polynomial_powers`](polynomials.md#dLux.utils.polynomials.polynomial_powers), [`polynomial_basis`](polynomials.md#dLux.utils.polynomials.polynomial_basis), [`zernike_name`](polynomials.md#dLux.utils.polynomials.zernike_name), [`noll_indices`](polynomials.md#dLux.utils.polynomials.noll_indices), [`radial_orders_to_indices`](polynomials.md#dLux.utils.polynomials.radial_orders_to_indices), [`zernike_factors`](polynomials.md#dLux.utils.polynomials.zernike_factors), [`zernike`](polynomials.md#dLux.utils.polynomials.zernike), [`zernike_fast`](polynomials.md#dLux.utils.polynomials.zernike_fast), [`zernike_basis`](polynomials.md#dLux.utils.polynomials.zernike_basis), [`polike`](polynomials.md#dLux.utils.polynomials.polike), [`polike_fast`](polynomials.md#dLux.utils.polynomials.polike_fast), [`polike_basis`](polynomials.md#dLux.utils.polynomials.polike_basis).
+
+
+## [Propagation](propagation.md)
+
+Functions: [`FFT_pad`](propagation.md#dLux.utils.propagation.FFT_pad), [`FFT_spec`](propagation.md#dLux.utils.propagation.FFT_spec), [`FFT_shift`](propagation.md#dLux.utils.propagation.FFT_shift), [`FFT_ramp`](propagation.md#dLux.utils.propagation.FFT_ramp), [`FFT`](propagation.md#dLux.utils.propagation.FFT), [`MFT`](propagation.md#dLux.utils.propagation.MFT), [`ABCD_MFT`](propagation.md#dLux.utils.propagation.ABCD_MFT), [`ABCD_FFT`](propagation.md#dLux.utils.propagation.ABCD_FFT), [`ASM`](propagation.md#dLux.utils.propagation.ASM).
+
+
+## [Source](source.md)
+
+Functions: [`fluxes_from_contrast`](source.md#dLux.utils.source.fluxes_from_contrast), [`positions_from_sep`](source.md#dLux.utils.source.positions_from_sep).
+
+
+## [Units](units.md)
+
+Functions: [`canonical_unit`](units.md#dLux.utils.units.canonical_unit), [`unit_factor`](units.md#dLux.utils.units.unit_factor), [`convert`](units.md#dLux.utils.units.convert), [`rad2arcsec`](units.md#dLux.utils.units.rad2arcsec), [`rad2deg`](units.md#dLux.utils.units.rad2deg), [`rad2arcmin`](units.md#dLux.utils.units.rad2arcmin), [`deg2rad`](units.md#dLux.utils.units.deg2rad), [`deg2arcmin`](units.md#dLux.utils.units.deg2arcmin), [`deg2arcsec`](units.md#dLux.utils.units.deg2arcsec), [`arcmin2rad`](units.md#dLux.utils.units.arcmin2rad), [`arcmin2deg`](units.md#dLux.utils.units.arcmin2deg), [`arcmin2arcsec`](units.md#dLux.utils.units.arcmin2arcsec), [`arcsec2rad`](units.md#dLux.utils.units.arcsec2rad), [`arcsec2deg`](units.md#dLux.utils.units.arcsec2deg), [`arcsec2arcmin`](units.md#dLux.utils.units.arcsec2arcmin).

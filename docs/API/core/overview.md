@@ -2,24 +2,297 @@
 
 # Core API
 
-This map is generated from the public API. Select a module to open its classes, functions, and local inheritance diagram.
+These maps are generated from the public API. Each module is shown separately so its complete local structure remains readable. Select a class to open its reference, or follow the module heading for functions and full documentation.
+
+## [Base](base.md)
 
 ```mermaid
-flowchart LR
-    dLux_base["Base"]
-    click dLux_base href "../base/" "Public API: Base"
-    dLux_builders["Builders"]
-    click dLux_builders href "../builders/" "Public API: BaseBuilder, BaseOPDDef, Norm, ZernikeDef, ApertureBuilder, SparseApertureBuilder"
-    dLux_compatibility["Compatibility"]
-    click dLux_compatibility href "../compatibility/" "Public API: ABCDConjugatePlane, AddConstant, ASMPropagator, AberratedAperture, AngularOpticalSystem, ApplyJitter, ApplyPixelResponse, ApplySaturation, BaseCoordTransform, BaseDetector, BaseOpticalSystem, BaseSpectrum, BasisLayer, BasisOptic, CartesianOpticalSystem, CircularAperture, CompoundAperture, CoordSpec, CoordTransform, DistortedCoords, Dither, FFT, FFTPropagator, Instrument, LayeredDetector, LayeredOpticalSystem, MFT, MFTPropagator, MultiAperture, PadSpec, ParametricOpticalSystem, ParametricLayeredOpticalSystem, PointResolvedSource, PointSource, PointSources, PSF, PolySpectrum, RectangularAperture, RegPolyAperture, ResolvedSource, Rotate, Scene, Spec, SquareAperture, Telescope, Zernike"
-    dLux_fields["Fields"]
-    click dLux_fields href "../fields/" "Public API: BaseField, ContinuousField, DiscreteField, Wavefront, PolarisedWavefront, Intensity, Image"
-    dLux_grids["Grids"]
-    click dLux_grids href "../grids/" "Public API: BaseGridSpec, GridSpec, ResizeSpec, PasteSpec, BaseCoordTransform, Affine, AffineMap, TransformChain, Distortion"
-    dLux_prebuilt["Prebuilt"]
-    click dLux_prebuilt href "../prebuilt/" "Public API: SimpleCircular, SegmentedHex, NRMLike, HSTLike, JWSTLike, JWSTNRMLike, EuclidLike"
-    dLux_sources["Sources"]
-    click dLux_sources href "../sources/" "Public API: BaseSource, Spectrum, Source, BinarySource"
-    dLux_systems["Systems"]
-    click dLux_systems href "../systems/" "Public API: LayeredSystem, OpticalSystem, DetectorSystem"
+classDiagram
+    class dLux_base_Base["Base"]
+    class zodiax_base_Base["Base"]
+    zodiax_base_Base <|-- dLux_base_Base
+    click dLux_base_Base href "../base/#dLux.base.Base" "Methods: get(), set(), add(), multiply(), divide(), power(), min(), max()"
+```
+
+
+## [Compatibility](compatibility.md)
+
+Deprecated aliases and migration errors are documented on the compatibility API page. They are omitted from the conceptual class maps because they mirror earlier APIs rather than define the current package structure.
+
+
+## [Fields](fields.md)
+
+```mermaid
+classDiagram
+    class dLux_fields_BaseField["BaseField"]
+    class dLux_fields_ContinuousField["ContinuousField"]
+    class dLux_fields_DiscreteField["DiscreteField"]
+    class dLux_fields_Wavefront["Wavefront"]
+    class dLux_fields_PolarisedWavefront["PolarisedWavefront"]
+    class dLux_fields_Intensity["Intensity"]
+    class dLux_fields_Image["Image"]
+    class dLux_base_Base["Base"]
+    dLux_base_Base <|-- dLux_fields_BaseField
+    click dLux_fields_BaseField href "../fields/#dLux.fields.BaseField" "Attributes: grid · Properties: field, spatial_shape, axes, coordinates, xs, npixels, pixel_scale, center, diameter · Methods: normalise(), convolve(), resize(), downsample(), flip()"
+    dLux_fields_BaseField <|-- dLux_fields_ContinuousField
+    click dLux_fields_ContinuousField href "../fields/#dLux.fields.ContinuousField" "Attributes: grid · Methods: scale_to(), interpolate(), rotate()"
+    dLux_fields_BaseField <|-- dLux_fields_DiscreteField
+    click dLux_fields_DiscreteField href "../fields/#dLux.fields.DiscreteField" "No direct public attributes or methods"
+    dLux_fields_ContinuousField <|-- dLux_fields_Wavefront
+    click dLux_fields_Wavefront href "../fields/#dLux.fields.Wavefront" "Attributes: grid, phasor, wavelength · Properties: field, real, imaginary, amplitude, phase, complex, polar, intensity, psf, wavenumber, batch_ndim, is_chromatic, is_polarised, power · Methods: from_phasor(), to_intensity(), add_phase(), add_opd(), tilt(), normalise(), apply_jones(), intensity_from_stokes(), psf_from_stokes()"
+    dLux_fields_Wavefront <|-- dLux_fields_PolarisedWavefront
+    click dLux_fields_PolarisedWavefront href "../fields/#dLux.fields.PolarisedWavefront" "Attributes: grid, phasor, wavelength · Properties: is_polarised, batch_ndim, intensity, psf · Methods: from_phasor(), from_wavefront(), intensity_from_stokes(), psf_from_stokes(), stokes(), apply_jones()"
+    dLux_fields_DiscreteField <|-- dLux_fields_Intensity
+    click dLux_fields_Intensity href "../fields/#dLux.fields.Intensity" "Attributes: data, grid · Properties: field, batch_ndim · Methods: from_wavefront(), scale_to(), interpolate(), rotate(), to_image()"
+    dLux_fields_DiscreteField <|-- dLux_fields_Image
+    click dLux_fields_Image href "../fields/#dLux.fields.Image" "Attributes: data, grid, std, read_noise · Properties: field, variance, fourier_transform, amplitude_spectrum, power_spectrum · Methods: from_intensity(), add_poisson_noise(), add_read_noise(), simulate()"
+```
+
+
+## [Grids](grids.md)
+
+```mermaid
+classDiagram
+    class dLux_grids_BaseGridSpec["BaseGridSpec"]
+    class dLux_grids_GridSpec["GridSpec"]
+    class dLux_grids_ResizeSpec["ResizeSpec"]
+    class dLux_grids_PasteSpec["PasteSpec"]
+    class dLux_grids_BaseCoordTransform["BaseCoordTransform"]
+    class dLux_grids_Affine["Affine"]
+    class dLux_grids_AffineMap["AffineMap"]
+    class dLux_grids_TransformChain["TransformChain"]
+    class dLux_grids_Distortion["Distortion"]
+    class dLux_base_Base["Base"]
+    dLux_base_Base <|-- dLux_grids_BaseGridSpec
+    click dLux_grids_BaseGridSpec href "../grids/#dLux.grids.BaseGridSpec" "No direct public attributes or methods"
+    dLux_grids_BaseGridSpec <|-- dLux_grids_GridSpec
+    click dLux_grids_GridSpec href "../grids/#dLux.grids.GridSpec" "Attributes: n, d, c, unit · Properties: ndim, shape, scale, axes, xs, coordinates, fov · Methods: broadcast(), match_shape(), resize(), downsample(), oversample(), resample(), from_axes(), build(), axes_for(), transformed(), extent()"
+    dLux_grids_BaseGridSpec <|-- dLux_grids_ResizeSpec
+    click dLux_grids_ResizeSpec href "../grids/#dLux.grids.ResizeSpec" "Attributes: n, pad, crop, c · Properties: explicit · Methods: broadcast(), output_size(), crop_size(), pad_array(), crop_array(), crop_axes(), resize()"
+    dLux_grids_BaseGridSpec <|-- dLux_grids_PasteSpec
+    click dLux_grids_PasteSpec href "../grids/#dLux.grids.PasteSpec" "Attributes: n, shape, starts, offsets, d · Properties: coordinates · Methods: from_grid(), paste(), extract()"
+    dLux_base_Base <|-- dLux_grids_BaseCoordTransform
+    click dLux_grids_BaseCoordTransform href "../grids/#dLux.grids.BaseCoordTransform" "Methods: get_coordinates(), apply()"
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_Affine
+    click dLux_grids_Affine href "../grids/#dLux.grids.Affine" "Attributes: translation, rotation, scale, shear, order · Properties: coeffs"
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_AffineMap
+    click dLux_grids_AffineMap href "../grids/#dLux.grids.AffineMap" "Attributes: matrix, offset"
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_TransformChain
+    click dLux_grids_TransformChain href "../grids/#dLux.grids.TransformChain" "Attributes: transformations"
+    dLux_grids_BaseCoordTransform <|-- dLux_grids_Distortion
+    click dLux_grids_Distortion href "../grids/#dLux.grids.Distortion" "Attributes: powers, distortion, shift_invariant"
+```
+
+
+## [Bases](bases.md)
+
+```mermaid
+classDiagram
+    class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
+    class dLux_parametric_bases_Basis["Basis"]
+    class dLux_parametric_bases_PastedBasis["PastedBasis"]
+    class dLux_parametric_bases_ImplicitBasis["ImplicitBasis"]
+    class dLux_parametric_bases_CoordBasis["CoordBasis"]
+    class dLux_parametric_bases_CLIMBBasis["CLIMBBasis"]
+    class dLux_parametric_bases_FourierBasis["FourierBasis"]
+    class dLux_parametric_bases_SplineBasis["SplineBasis"]
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_ParametricBasis
+    click dLux_parametric_bases_ParametricBasis href "../bases/#dLux.parametric.bases.ParametricBasis" "Attributes: coeffs, shape · Properties: coefficients, c, alpha · Methods: evaluate_basis(), solve_basis()"
+    dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_Basis
+    click dLux_parametric_bases_Basis href "../bases/#dLux.parametric.bases.Basis" "Attributes: coeffs, shape, basis · Methods: evaluate(), solve_basis()"
+    dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_PastedBasis
+    click dLux_parametric_bases_PastedBasis href "../bases/#dLux.parametric.bases.PastedBasis" "Attributes: coeffs, shape, basis, spec, method · Methods: evaluate(), solve_basis()"
+    dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ImplicitBasis
+    click dLux_parametric_bases_ImplicitBasis href "../bases/#dLux.parametric.bases.ImplicitBasis" "Attributes: coeffs, shape · Methods: calculate_basis(), evaluate(), solve_basis()"
+    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_CoordBasis
+    click dLux_parametric_bases_CoordBasis href "../bases/#dLux.parametric.bases.CoordBasis" "Attributes: coeffs, shape · Methods: get_coordinates()"
+    dLux_parametric_bases_Basis <|-- dLux_parametric_bases_CLIMBBasis
+    click dLux_parametric_bases_CLIMBBasis href "../bases/#dLux.parametric.bases.CLIMBBasis" "Attributes: coeffs, shape, basis, values, oversample · Methods: evaluate_latent(), evaluate()"
+    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_FourierBasis
+    click dLux_parametric_bases_FourierBasis href "../bases/#dLux.parametric.bases.FourierBasis" "Attributes: coeffs, shape, kernels · Methods: calculate_basis(), evaluate(), resize()"
+    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_SplineBasis
+    click dLux_parametric_bases_SplineBasis href "../bases/#dLux.parametric.bases.SplineBasis" "Attributes: coeffs, shape, knot_coords, sample_coords, method · Methods: calculate_basis(), evaluate()"
+```
+
+
+## [Parametrics](parametrics.md)
+
+```mermaid
+classDiagram
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
+    class dLux_parametric_parametrics_Transform["Transform"]
+    class dLux_parametric_parametrics_Interpolation["Interpolation"]
+    class dLux_parametric_parametrics_DynamicParametric["DynamicParametric"]
+    class dLux_parametric_parametrics_Combination["Combination"]
+    class dLux_base_Base["Base"]
+    dLux_parametric_parametrics_ParametricHolder <|-- dLux_parametric_parametrics_Parametric
+    click dLux_parametric_parametrics_Parametric href "../parametrics/#dLux.parametric.parametrics.Parametric" "Methods: evaluate(), map(), integrate()"
+    dLux_base_Base <|-- dLux_parametric_parametrics_ParametricHolder
+    click dLux_parametric_parametrics_ParametricHolder href "../parametrics/#dLux.parametric.parametrics.ParametricHolder" "Methods: resolve()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Transform
+    click dLux_parametric_parametrics_Transform href "../parametrics/#dLux.parametric.parametrics.Transform" "Attributes: parametric, transformation · Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Interpolation
+    click dLux_parametric_parametrics_Interpolation href "../parametrics/#dLux.parametric.parametrics.Interpolation" "Attributes: knots, values, method, extrapolate · Methods: evaluate(), integrate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_DynamicParametric
+    click dLux_parametric_parametrics_DynamicParametric href "../parametrics/#dLux.parametric.parametrics.DynamicParametric" "Attributes: parametric, transformation · Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Combination
+    click dLux_parametric_parametrics_Combination href "../parametrics/#dLux.parametric.parametrics.Combination" "Attributes: parametrics, operation · Methods: validate_operation(), combine(), values(), evaluate()"
+```
+
+Functions: [`resolve`](parametrics.md#dLux.parametric.parametrics.resolve).
+
+
+## [Polynomials](polynomials.md)
+
+```mermaid
+classDiagram
+    class dLux_parametric_polynomials_DynamicZernike["DynamicZernike"]
+    class dLux_parametric_polynomials_ZernikeBasis["ZernikeBasis"]
+    class dLux_parametric_polynomials_DynamicZernikeBasis["DynamicZernikeBasis"]
+    class dLux_parametric_polynomials_Polynomial["Polynomial"]
+    class dLux_parametric_polynomials_ExplicitPolynomial["ExplicitPolynomial"]
+    class dLux_parametric_polynomials_CoordinatePolynomial["CoordinatePolynomial"]
+    class dLux_base_Base["Base"]
+    class dLux_parametric_bases_Basis["Basis"]
+    class dLux_parametric_bases_CoordBasis["CoordBasis"]
+    class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
+    class dLux_parametric_polynomials__ZernikeBasis["_ZernikeBasis"]
+    dLux_base_Base <|-- dLux_parametric_polynomials_DynamicZernike
+    click dLux_parametric_polynomials_DynamicZernike href "../polynomials/#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name · Methods: calculate()"
+    dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_ZernikeBasis
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
+    click dLux_parametric_polynomials_ZernikeBasis href "../polynomials/#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coeffs, shape, basis"
+    dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
+    dLux_parametric_bases_CoordBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
+    click dLux_parametric_polynomials_DynamicZernikeBasis href "../polynomials/#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: coeffs, shape, zernikes, nsides, diameter · Methods: calculate_basis()"
+    dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_polynomials_Polynomial
+    click dLux_parametric_polynomials_Polynomial href "../polynomials/#dLux.parametric.polynomials.Polynomial" "Attributes: coeffs, shape, powers · Methods: calculate_basis(), evaluate(), solve_basis()"
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ExplicitPolynomial
+    click dLux_parametric_polynomials_ExplicitPolynomial href "../polynomials/#dLux.parametric.polynomials.ExplicitPolynomial" "Attributes: coeffs, shape, basis, powers"
+    dLux_parametric_polynomials_Polynomial <|-- dLux_parametric_polynomials_CoordinatePolynomial
+    click dLux_parametric_polynomials_CoordinatePolynomial href "../polynomials/#dLux.parametric.polynomials.CoordinatePolynomial" "Attributes: coeffs, shape, powers, ndim · Methods: calculate_basis()"
+```
+
+
+## [Refractive](refractive.md)
+
+```mermaid
+classDiagram
+    class dLux_parametric_refractive_CauchyIndex["CauchyIndex"]
+    class dLux_parametric_refractive_PolynomialIndex["PolynomialIndex"]
+    class dLux_parametric_refractive_InterpolatedIndex["InterpolatedIndex"]
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_CauchyIndex
+    click dLux_parametric_refractive_CauchyIndex href "../refractive/#dLux.parametric.refractive.CauchyIndex" "Attributes: coeffs, scale · Properties: coefficients · Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_PolynomialIndex
+    click dLux_parametric_refractive_PolynomialIndex href "../refractive/#dLux.parametric.refractive.PolynomialIndex" "Attributes: coeffs, scale · Properties: coefficients · Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_InterpolatedIndex
+    click dLux_parametric_refractive_InterpolatedIndex href "../refractive/#dLux.parametric.refractive.InterpolatedIndex" "Attributes: wavelengths, indices, method, extrapolate · Methods: evaluate()"
+```
+
+
+## [Shapes](shapes.md)
+
+```mermaid
+classDiagram
+    class dLux_parametric_shapes_Shape["Shape"]
+    class dLux_parametric_shapes_InvertibleShape["InvertibleShape"]
+    class dLux_parametric_shapes_Hard["Hard"]
+    class dLux_parametric_shapes_Soft["Soft"]
+    class dLux_parametric_shapes_Circle["Circle"]
+    class dLux_parametric_shapes_Square["Square"]
+    class dLux_parametric_shapes_Rectangle["Rectangle"]
+    class dLux_parametric_shapes_RegularPolygon["RegularPolygon"]
+    class dLux_parametric_shapes_ConvexPolygon["ConvexPolygon"]
+    class dLux_parametric_shapes_Spider["Spider"]
+    class dLux_parametric_shapes_Complement["Complement"]
+    class dLux_parametric_shapes_TransformedShape["TransformedShape"]
+    class dLux_base_Base["Base"]
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_shapes_Shape
+    click dLux_parametric_shapes_Shape href "../shapes/#dLux.parametric.shapes.Shape" "Properties: extent"
+    dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_InvertibleShape
+    click dLux_parametric_shapes_InvertibleShape href "../shapes/#dLux.parametric.shapes.InvertibleShape" "Attributes: edge, invert · Methods: evaluate(), evaluate_hard(), evaluate_soft()"
+    dLux_base_Base <|-- dLux_parametric_shapes_Hard
+    click dLux_parametric_shapes_Hard href "../shapes/#dLux.parametric.shapes.Hard" "No direct public attributes or methods"
+    dLux_base_Base <|-- dLux_parametric_shapes_Soft
+    click dLux_parametric_shapes_Soft href "../shapes/#dLux.parametric.shapes.Soft" "Attributes: pixels · Methods: clip()"
+    dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Circle
+    click dLux_parametric_shapes_Circle href "../shapes/#dLux.parametric.shapes.Circle" "Attributes: diameter · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Square
+    click dLux_parametric_shapes_Square href "../shapes/#dLux.parametric.shapes.Square" "Attributes: width · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Rectangle
+    click dLux_parametric_shapes_Rectangle href "../shapes/#dLux.parametric.shapes.Rectangle" "Attributes: width, height · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_RegularPolygon
+    click dLux_parametric_shapes_RegularPolygon href "../shapes/#dLux.parametric.shapes.RegularPolygon" "Attributes: diameter, nsides · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_ConvexPolygon
+    click dLux_parametric_shapes_ConvexPolygon href "../shapes/#dLux.parametric.shapes.ConvexPolygon" "Attributes: vertices · Properties: extent · Methods: evaluate_hard(), evaluate_soft(), validate()"
+    dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Spider
+    click dLux_parametric_shapes_Spider href "../shapes/#dLux.parametric.shapes.Spider" "Attributes: width, angles · Methods: evaluate_hard(), evaluate_soft()"
+    dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_Complement
+    click dLux_parametric_shapes_Complement href "../shapes/#dLux.parametric.shapes.Complement" "Attributes: shape · Properties: extent · Methods: evaluate()"
+    dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_TransformedShape
+    click dLux_parametric_shapes_TransformedShape href "../shapes/#dLux.parametric.shapes.TransformedShape" "Attributes: shape, transformation · Properties: extent · Methods: evaluate()"
+```
+
+
+## [Spectral](spectral.md)
+
+```mermaid
+classDiagram
+    class dLux_parametric_spectral_SpectralPolynomial["SpectralPolynomial"]
+    class dLux_parametric_spectral_SpectralBasis["SpectralBasis"]
+    class dLux_parametric_spectral_Blackbody["Blackbody"]
+    class dLux_parametric_bases_Basis["Basis"]
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    class dLux_parametric_polynomials_Polynomial["Polynomial"]
+    dLux_parametric_polynomials_Polynomial <|-- dLux_parametric_spectral_SpectralPolynomial
+    click dLux_parametric_spectral_SpectralPolynomial href "../spectral/#dLux.parametric.spectral.SpectralPolynomial" "Attributes: normalise · Methods: evaluate()"
+    dLux_parametric_bases_Basis <|-- dLux_parametric_spectral_SpectralBasis
+    click dLux_parametric_spectral_SpectralBasis href "../spectral/#dLux.parametric.spectral.SpectralBasis" "Attributes: normalise · Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_spectral_Blackbody
+    click dLux_parametric_spectral_Blackbody href "../spectral/#dLux.parametric.spectral.Blackbody" "Attributes: temperature, normalise · Methods: evaluate()"
+```
+
+
+## [Sources](sources.md)
+
+```mermaid
+classDiagram
+    class dLux_sources_BaseSource["BaseSource"]
+    class dLux_sources_Spectrum["Spectrum"]
+    class dLux_sources_Source["Source"]
+    class dLux_sources_BinarySource["BinarySource"]
+    class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
+    dLux_parametric_parametrics_ParametricHolder <|-- dLux_sources_BaseSource
+    click dLux_sources_BaseSource href "../sources/#dLux.sources.BaseSource" "Attributes: flux, distribution, units · Methods: source_params(), flux_params(), distribution_params(), wavefront(), model()"
+    dLux_parametric_parametrics_ParametricHolder <|-- dLux_sources_Spectrum
+    click dLux_sources_Spectrum href "../sources/#dLux.sources.Spectrum" "Attributes: wavelengths, weights, units · Methods: spectrum_params(), model()"
+    dLux_sources_BaseSource <|-- dLux_sources_Source
+    dLux_sources_Spectrum <|-- dLux_sources_Source
+    click dLux_sources_Source href "../sources/#dLux.sources.Source" "Attributes: wavelengths, weights, position, flux, distribution, units · Methods: params()"
+    dLux_sources_BaseSource <|-- dLux_sources_BinarySource
+    dLux_sources_Spectrum <|-- dLux_sources_BinarySource
+    click dLux_sources_BinarySource href "../sources/#dLux.sources.BinarySource" "Attributes: wavelengths, weights, centre, separation, position_angle, contrast, flux, distribution, units · Methods: params()"
+```
+
+
+## [Systems](systems.md)
+
+```mermaid
+classDiagram
+    class dLux_systems_LayeredSystem["LayeredSystem"]
+    class dLux_systems_OpticalSystem["OpticalSystem"]
+    class dLux_systems_DetectorSystem["DetectorSystem"]
+    class dLux_base_Base["Base"]
+    class dLux_layers_optical_BaseOpticalLayer["BaseOpticalLayer"]
+    dLux_base_Base <|-- dLux_systems_LayeredSystem
+    click dLux_systems_LayeredSystem href "../systems/#dLux.systems.LayeredSystem" "Attributes: layers · Methods: apply(), debug(), insert_layer(), remove_layer()"
+    dLux_systems_LayeredSystem <|-- dLux_systems_OpticalSystem
+    dLux_layers_optical_BaseOpticalLayer <|-- dLux_systems_OpticalSystem
+    click dLux_systems_OpticalSystem href "../systems/#dLux.systems.OpticalSystem" "Attributes: layers, grid · Methods: apply_mono(), apply(), initialise_wavefront(), propagate_mono(), propagate(), model(), debug_propagate_mono()"
+    dLux_systems_LayeredSystem <|-- dLux_systems_DetectorSystem
+    click dLux_systems_DetectorSystem href "../systems/#dLux.systems.DetectorSystem" "Attributes: layers · Methods: apply(), model()"
 ```

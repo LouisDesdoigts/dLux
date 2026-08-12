@@ -40,9 +40,10 @@ calibration, phase-mask design, and wavefront sensing.
 
 ## Old tutorials
 
-The [`old`](old/optical_systems.md) collection preserves the previously published
-tutorials while the new suite is developed. These examples use older APIs and are
-not the primary route for learning the new package structure.
+The [`old`](old/optical_systems.md) collection preserves migrated versions of the
+previously published tutorials while the new suite is developed. These examples use
+the current compatibility surface but retain their historical structure and are not
+the primary route for learning the package.
 
 ## How the pieces fit together
 
@@ -54,8 +55,9 @@ it:
 - **Grids** define array sampling, physical spacing, centres, dimensionality, and
   units.
 - **Fields** carry sampled data and its grid contract. A wavefront retains complex
-  optical amplitude and wavelength information; intensity represents continuous
-  image-plane power; an image represents detector-plane data.
+  optical amplitude and wavelength information; intensity represents deterministic
+  sampled optical or detector signal; an image represents realised detector data and
+  optional uncertainty.
 - **Layers** apply one optical or detector transformation to a field and return the
   resulting field with its updated sampling and physical state.
 - **Parametrics** resolve differentiable values from their stored parameters and the
@@ -92,7 +94,8 @@ Their central relationships are:
 grid + builder -> layer -> system
 prebuilt -> configured builders and layers
 source + optical system -> intensity
-intensity + detector system -> image
+intensity + detector system -> transformed intensity
+intensity -> explicitly constructed image -> simulated exposure
 ```
 
 > **UML placeholder:** sources, spectra, optical systems, detector systems, builders,

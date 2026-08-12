@@ -4,6 +4,13 @@ These tutorials explain the objects and methods that make up dLux. They are desi
 to be read independently after the getting-started tutorial, while together forming a
 complete guide to constructing, evaluating, differentiating, and fitting dLux models.
 
+Two focused explainers support that learning path:
+
+- [Migrating to dLux 0.16](../../migration.md) translates common 0.14 and 0.15
+  workflows into the new object model.
+- [Parameters and immutable updates](../../parameters.md) explains raised paths,
+  selecting fitted leaves, immutable updates, and multi-object models.
+
 - `fields_grids_layers.ipynb`: grids, fields, wavefronts, and layer interactions.
 - `systems_sources_detectors.ipynb`: optical and detector systems, sources, spectra,
   noise, and a compact inference problem.
