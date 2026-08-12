@@ -197,9 +197,11 @@ class ZernikeDef(BaseOPDDef):
     ----------
     nolls : ArrayLike or None
         One-dimensional collection of Noll indices.
+    order : int or None
+        Maximum radial order, including every order from zero through this value.
     orders : ArrayLike or None
         Radial orders expanded into their complete Noll-index sequences. Exactly one
-        of ``nolls`` or ``orders`` must be provided.
+        of ``nolls``, ``order``, or ``orders`` must be provided.
     oversize : float
         Fractional enlargement of the aperture diameter used to sample the modes.
     norm : Norm or None
@@ -236,16 +238,24 @@ class ZernikeDef(BaseOPDDef):
     method: str = eqx.field(static=True)
 
     def __init__(
-        self, nolls=None, orders=None, oversize=0.01, norm=None, method="padded"
+        self,
+        nolls=None,
+        order=None,
+        orders=None,
+        oversize=0.01,
+        norm=None,
+        method="padded",
     ):
         """Initialise a sampled Zernike-basis definition.
 
         Parameters
         ----------
         nolls : ArrayLike or None
-            Positive Noll indices, mutually exclusive with ``orders``.
+            Positive Noll indices, mutually exclusive with ``order`` and ``orders``.
+        order : int or None
+            Maximum radial order, including every order from zero through this value.
         orders : ArrayLike or None
-            Radial orders expanded to complete Noll sequences.
+            Selected radial orders expanded to complete Noll sequences.
         oversize : float
             Fractional enlargement of the aperture diameter used for sampling.
         norm : Norm or None
@@ -255,9 +265,11 @@ class ZernikeDef(BaseOPDDef):
             separate equal-width groups.
         """
         # Validate and expand the requested Zernike indices
-        if (nolls is None) == (orders is None):
-            raise ValueError("Provide exactly one of nolls or orders.")
-        if orders is not None:
+        if sum(value is not None for value in (nolls, order, orders)) != 1:
+            raise ValueError("Provide exactly one of nolls, order, or orders.")
+        if order is not None:
+            orders = range(int(order) + 1)
+        if nolls is None:
             orders = np.atleast_1d(dlu.to_value(orders, int))
             if orders.ndim != 1 or orders.size == 0:
                 raise ValueError("orders must contain at least one radial order.")

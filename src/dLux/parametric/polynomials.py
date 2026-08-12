@@ -111,14 +111,16 @@ class DynamicZernike(Base):
 
 class _ZernikeBasis:
     @staticmethod
-    def get_indices(js=None, radial_orders=None) -> list[int]:
-        """Resolve explicit Noll indices or complete radial orders."""
-        if (js is None) == (radial_orders is None):
-            raise ValueError("Provide exactly one of js or radial_orders.")
+    def get_indices(js=None, order=None, orders=None) -> list[int]:
+        """Resolve individual modes or complete radial orders."""
+        if sum(value is not None for value in (js, order, orders)) != 1:
+            raise ValueError("Provide exactly one of js, order, or orders.")
+
         if js is not None:
             indices = [int(j) for j in js]
         else:
-            indices = dlu.radial_orders_to_indices(radial_orders)
+            orders = range(int(order) + 1) if order is not None else orders
+            indices = dlu.radial_orders_to_indices(orders)
         if not indices:
             raise ValueError("At least one Zernike mode must be selected.")
         if any(j < 1 for j in indices):
@@ -137,7 +139,8 @@ class ZernikeBasis(_ZernikeBasis, Basis):
         self,
         coordinates,
         js=None,
-        radial_orders=None,
+        order=None,
+        orders=None,
         coeffs=None,
         diameter=2.0,
         *,
@@ -150,9 +153,11 @@ class ZernikeBasis(_ZernikeBasis, Basis):
         coordinates : Array or GridSpec
             Cartesian sampling used to evaluate the modes.
         js : ArrayLike or None
-            Noll indices, mutually exclusive with ``radial_orders``.
-        radial_orders : ArrayLike or None
-            Radial orders expanded to complete Noll sequences.
+            Noll indices, mutually exclusive with ``order`` and ``orders``.
+        order : int or None
+            Maximum radial order, including every order from zero through this value.
+        orders : ArrayLike or None
+            Selected radial orders expanded to complete Noll sequences.
         coeffs : Array or None
             Mode coefficients, defaulting to zeros.
         diameter : float or Array
@@ -161,7 +166,7 @@ class ZernikeBasis(_ZernikeBasis, Basis):
             Deprecated alias for ``coeffs``.
         """
         coeffs = _resolve_coeffs(coeffs, coefficients)
-        js = self.get_indices(js, radial_orders)
+        js = self.get_indices(js, order, orders)
         basis = dlu.zernike_basis(js, coordinates, diameter)
         super().__init__(basis, coeffs, (len(js),))
 
@@ -178,7 +183,8 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     def __init__(
         self,
         js=None,
-        radial_orders=None,
+        order=None,
+        orders=None,
         coeffs=None,
         nsides=0,
         diameter=None,
@@ -190,9 +196,11 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
         Parameters
         ----------
         js : ArrayLike or None
-            Noll indices, mutually exclusive with ``radial_orders``.
-        radial_orders : ArrayLike or None
-            Radial orders expanded to complete Noll sequences.
+            Noll indices, mutually exclusive with ``order`` and ``orders``.
+        order : int or None
+            Maximum radial order, including every order from zero through this value.
+        orders : ArrayLike or None
+            Selected radial orders expanded to complete Noll sequences.
         coeffs : Array or None
             Mode coefficients, defaulting to zeros.
         nsides : int
@@ -203,7 +211,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
             Deprecated alias for ``coeffs``.
         """
         coeffs = _resolve_coeffs(coeffs, coefficients)
-        js = self.get_indices(js, radial_orders)
+        js = self.get_indices(js, order, orders)
         self.zernikes = [DynamicZernike(j) for j in js]
         coeffs = np.zeros(len(js)) if coeffs is None else coeffs
         self._set_coeffs(coeffs, (len(js),))

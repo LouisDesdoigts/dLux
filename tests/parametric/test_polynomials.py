@@ -91,14 +91,25 @@ def test_dynamic_zernike_contract(nsides, coordinates):
     assert output.shape == coordinates.shape[-2:]
 
 
+def test_zernike_order_selection(coordinates):
+    explicit = dl.ZernikeBasis(coordinates, order=3)
+    dynamic = dl.DynamicZernikeBasis(order=3)
+
+    assert explicit.coeffs.shape == (10,)
+    assert dynamic.coeffs.shape == (10,)
+
+    with pytest.raises(ValueError, match="exactly one"):
+        dl.DynamicZernikeBasis(order=3, orders=[2, 3])
+
+
 @pytest.mark.parametrize(
     "make_basis",
     [
         lambda coordinates: dl.ZernikeBasis(
-            coordinates, radial_orders=[2], coeffs=np.linspace(-0.2, 0.2, 3)
+            coordinates, orders=[2], coeffs=np.linspace(-0.2, 0.2, 3)
         ),
         lambda coordinates: dl.DynamicZernikeBasis(
-            radial_orders=[2], coeffs=np.linspace(-0.2, 0.2, 3)
+            orders=[2], coeffs=np.linspace(-0.2, 0.2, 3)
         ),
         lambda coordinates: dl.DynamicZernikeBasis(
             js=[4, 5], coeffs=np.asarray([0.1, -0.1]), nsides=6
@@ -122,7 +133,7 @@ def test_polynomial_basis_contract(make_basis, coordinates):
 
 
 @pytest.mark.parametrize(
-    "basis", [dl.DynamicZernikeBasis(radial_orders=[2]), dl.CoordinatePolynomial(2)]
+    "basis", [dl.DynamicZernikeBasis(orders=[2]), dl.CoordinatePolynomial(2)]
 )
 def test_dynamic_basis_context(basis, coordinates, make_wavefront):
     calculated = assert_jittable(

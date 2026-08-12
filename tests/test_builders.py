@@ -96,6 +96,10 @@ def test_zernike_definition_methods():
     with pytest.raises(ValueError, match="padded.*mapped"):
         dl.ZernikeDef(nolls=1, method="invalid")
 
+    assert dl.ZernikeDef(order=3).nolls.shape == (10,)
+    with pytest.raises(ValueError, match="exactly one"):
+        dl.ZernikeDef(order=3, orders=[2, 3])
+
 
 def test_sparse_builder_contract():
     grid = dl.GridSpec(n=24, d=0.1, unit="m")
