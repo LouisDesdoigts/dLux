@@ -35,6 +35,7 @@ def _resolve_coeffs(coeffs, coefficients):
         return coeffs
     if coeffs is not None:
         raise ValueError("Provide only one of coeffs or coefficients.")
+    # Keep compatibility lazy: it imports the parametric package for legacy aliases.
     from ..compatibility import warn_deprecated
 
     warn_deprecated(
@@ -55,6 +56,7 @@ class ParametricBasis(Parametric):
     @property
     def coefficients(self: ParametricBasis) -> Array:
         """Deprecated alias for the basis coefficients."""
+        # Keep compatibility lazy to avoid the core/legacy import cycle.
         from ..compatibility import warn_deprecated
 
         warn_deprecated(

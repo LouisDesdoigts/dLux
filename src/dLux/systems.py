@@ -25,6 +25,7 @@ class LayeredSystem(Base):
     layers: OrderedDict
 
     def __init__(self, layers, layer_type=BaseLayer):
+        """Initialise an ordered collection of compatible layers."""
         self.layers = dlu.list2dictionary(layers, True, layer_type)
 
     def __getattr__(self, key: str) -> Any:
@@ -71,6 +72,7 @@ class OpticalSystem(LayeredSystem, BaseOpticalLayer):
     grid: GridSpec
 
     def __init__(self, layers, grid: GridSpec):
+        """Initialise an optical system on the supplied output grid."""
         if not isinstance(grid, GridSpec):
             raise TypeError("grid must be a GridSpec.")
         grid = grid.broadcast(2)
@@ -209,6 +211,7 @@ class DetectorSystem(LayeredSystem):
     layers: OrderedDict
 
     def __init__(self, layers):
+        """Initialise an ordered detector-layer system."""
         super().__init__(layers, BaseDetectorLayer)
 
     def apply(self, intensity: Intensity) -> Intensity:

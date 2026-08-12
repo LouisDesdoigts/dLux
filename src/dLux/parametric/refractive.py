@@ -36,6 +36,7 @@ class CauchyIndex(Parametric):
     @property
     def coefficients(self) -> Array:
         """Deprecated alias for the dispersion coefficients."""
+        # Keep compatibility lazy to avoid the core/legacy import cycle.
         from ..compatibility import warn_deprecated
 
         warn_deprecated(
@@ -72,6 +73,7 @@ class PolynomialIndex(Parametric):
     @property
     def coefficients(self) -> Array:
         """Deprecated alias for the polynomial coefficients."""
+        # Keep compatibility lazy to avoid the core/legacy import cycle.
         from ..compatibility import warn_deprecated
 
         warn_deprecated(

@@ -1,6 +1,7 @@
 """Regularly sampled optical fields and operations."""
 
 from __future__ import annotations
+
 from abc import abstractmethod
 from math import prod
 import operator
@@ -37,6 +38,7 @@ _ops = {
 def __getattr__(name):
     """Resolve field names retained by the compatibility layer."""
     if name == "PSF":
+        # Keep the legacy module lazy: compatibility imports Intensity.
         from . import compatibility
 
         return compatibility.PSF
@@ -315,6 +317,7 @@ class Wavefront(ContinuousField):
         grid: GridSpec,
         phasor: Array | None = None,
     ):
+        """Initialise a complex wavefront sampled on a physical grid."""
         # Validate the grid and resolve the input wavelengths
         if not isinstance(grid, GridSpec):
             raise TypeError("grid must be a GridSpec.")
@@ -832,6 +835,7 @@ class Intensity(DiscreteField):
     grid: GridSpec
 
     def __init__(self: Intensity, data: Array, grid: GridSpec):
+        """Initialise detector intensity data on a physical grid."""
         self.data = dlu.to_value(data)
         if self.data.ndim < 2:
             raise ValueError("data must have at least two spatial dimensions.")
@@ -908,6 +912,7 @@ class Image(DiscreteField):
         std: Array | None = None,
         read_noise: float | Array = 0.0,
     ):
+        """Initialise an image with optional uncertainty and read noise."""
         # Unpack a sampled intensity directly into detector image data
         if isinstance(data, Intensity):
             if grid is not None:

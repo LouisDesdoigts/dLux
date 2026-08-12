@@ -38,6 +38,7 @@ def __getattr__(name):
         "Scene",
     }
     if name in legacy:
+        # Keep the legacy module lazy: compatibility imports Source and Spectrum.
         from . import compatibility
 
         return getattr(compatibility, name)
@@ -103,6 +104,7 @@ class BaseSource(ParametricHolder):
     units: dict
 
     def __init__(self, flux=None, distribution=None, units=None):
+        """Initialise flux and spatial-distribution source components."""
         self.flux = dlu.to_value(flux, optional=True, types=Parametric)
         self.distribution = dlu.to_value(distribution, optional=True, types=Parametric)
         self.units = _merge_units(units)
@@ -314,6 +316,7 @@ class Spectrum(ParametricHolder):
     units: dict
 
     def __init__(self, wavelengths, weights=None, units=None):
+        """Initialise wavelength samples and their spectral weights."""
         self.wavelengths = dlu.to_value(wavelengths, types=Parametric)
         if weights is None:
             if isinstance(self.wavelengths, Parametric):
@@ -407,6 +410,7 @@ class Source(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
+        """Initialise a source with spectral and spatial emission properties."""
         self.position = dlu.to_value(position, optional=True, types=Parametric)
         BaseSource.__init__(self, flux, distribution, units)
         Spectrum.__init__(self, wavelengths, weights, self.units)
@@ -486,6 +490,7 @@ class BinarySource(BaseSource, Spectrum):
         distribution=None,
         units=None,
     ):
+        """Initialise a binary source with two component positions and fluxes."""
         self.centre = dlu.to_value(centre, optional=True, types=Parametric)
         self.separation = dlu.to_value(separation, types=Parametric)
         self.position_angle = dlu.to_value(position_angle, types=Parametric)
