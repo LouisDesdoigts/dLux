@@ -26,7 +26,13 @@ __all__ = [
 
 
 class BaseDetectorLayer(BaseLayer):
-    """Base class for transformations from one deterministic intensity to another."""
+    """Base contract for deterministic transformations of an `Intensity`.
+
+    Detector layers operate on expected sampled signals and return another
+    `Intensity`; they do not realise noise or construct an `Image`. Parameter axes
+    follow ordinary JAX broadcasting and differentiability follows the underlying
+    numerical operation.
+    """
 
     @abstractmethod
     def apply(self, intensity: Intensity) -> Intensity:
@@ -44,6 +50,8 @@ class DetectorLayer(BaseDetectorLayer):
     Implementations receive an ``Intensity`` and must return an ``Intensity`` while
     preserving unrelated leading axes and consistent grid metadata. Resolve
     Parametric leaves against :meth:`context` before applying the transformation.
+    Custom layers should change sampling only when that behaviour is part of their
+    explicit public contract.
     """
 
     @staticmethod

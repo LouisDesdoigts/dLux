@@ -83,6 +83,10 @@ class RefractiveOptic(OpticalLayer):
 class Wedge(OpticalLayer):
     """Apply the optical path of a thin refractive wedge.
 
+    The two wedge angles define a linear thickness ramp. A constant or parametric
+    refractive index is resolved at the incident wavelength and converted into OPD
+    before being applied to the wavefront.
+
     Parameters
     ----------
     angle : ArrayLike

@@ -97,7 +97,12 @@ def _convert_flux(flux, unit):
 
 
 class BaseSource(ParametricHolder):
-    """Source brightness and optional resolved distribution."""
+    """Base contract for source brightness and optional resolved distribution.
+
+    Flux is resolved from the configured linear or logarithmic representation before
+    modelling. A resolved distribution describes relative angular brightness and is
+    convolved with the optical response by concrete source models.
+    """
 
     flux: Array | Parametric | None
     distribution: Array | Parametric | None
@@ -326,6 +331,9 @@ class Spectrum(ParametricHolder):
     Explicit weights are consumed exactly as supplied. Spectral parametrics may
     optionally normalise each spectrum to unit sum along its trailing wavelength
     axis. Realised weights must be positive with a finite, non-zero sum.
+
+    Wavelengths are converted to metres internally. Leading weight axes may represent
+    vectorised source spectra; the final axis always corresponds to wavelength.
 
     Parameters
     ----------

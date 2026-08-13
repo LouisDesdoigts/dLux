@@ -148,11 +148,20 @@ def _validate_method(method, grid, types):
 
 
 class ABCDElement(Base):
-    """Base class for elements represented by an ABCD matrix."""
+    """Base contract for a paraxial element represented by an ABCD matrix.
+
+    Matrices act on physical ray coordinates and angles and compose algebraically in
+    `ABCDPropagator`. Inverting a matrix is distinct from reverse propagation through
+    an arbitrary optical system.
+    """
 
 
 class ABCDFreeSpace(ABCDElement):
-    """A free-space propagation element represented by an ABCD matrix."""
+    """Represent paraxial free-space propagation over a distance in metres.
+
+    Positive and negative distances describe opposite directions within the ABCD
+    system definition.
+    """
 
     distance: float
 
@@ -173,7 +182,11 @@ class ABCDFreeSpace(ABCDElement):
 
 
 class ABCDLens(ABCDElement):
-    """A thin lens represented by an ABCD matrix."""
+    """Represent an ideal paraxial thin lens with focal length in metres.
+
+    The element changes angular slope while leaving the transverse coordinate
+    continuous at the lens plane.
+    """
 
     focal_length: float
 
@@ -197,7 +210,11 @@ class ABCDLens(ABCDElement):
 
 
 class ABCDMirror(ABCDElement):
-    """A curved mirror represented by an ABCD matrix."""
+    """Represent an ideal paraxial spherical mirror by its radius in metres.
+
+    The radius sign follows the package ABCD convention and determines the surface's
+    focusing or defocusing power.
+    """
 
     radius: float
 
@@ -221,7 +238,11 @@ class ABCDMirror(ABCDElement):
 
 
 class ABCDFraunhofer(ABCDElement):
-    """A far-field transform represented by an ABCD matrix."""
+    """Represent a focal Fourier transform with focal length in metres.
+
+    This supplies the canonical mapping between conjugate pupil and focal coordinates
+    inside `ABCDPropagator`.
+    """
 
     focal_length: float
 
@@ -245,7 +266,12 @@ class ABCDFraunhofer(ABCDElement):
 
 
 class Propagator(OpticalLayer):
-    """Base propagation layer holding an output sampling specification."""
+    """Base contract for propagation to an explicit output sampling specification.
+
+    Concrete propagators transform the complex field and its grid metadata together.
+    Output units determine whether sampling is angular or physical; physical focal
+    grids require the relevant focal length.
+    """
 
     grid: BaseGridSpec
 
@@ -276,7 +302,11 @@ class Propagator(OpticalLayer):
 
 
 class FocalPropagator(Propagator):
-    """Base focal propagation layer with an explicit propagation direction."""
+    """Base contract for reversible propagation between pupil and focal planes.
+
+    The `inverse` leaf selects the physical direction implemented by the concrete
+    Fourier algorithm. It does not invert arbitrary intervening optical layers.
+    """
 
     grid: BaseGridSpec
     focal_length: Array | None

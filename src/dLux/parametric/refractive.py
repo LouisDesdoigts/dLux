@@ -17,7 +17,24 @@ __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 
 
 class CauchyIndex(Parametric):
-    """A refractive index represented by a Cauchy dispersion relation."""
+    """Represent refractive index with a Cauchy dispersion relation.
+
+    Coefficients define ``A + B/x² + C/x⁴ + ...`` for
+    ``x = wavelength / scale``. Wavelength and scale are in metres and the output is
+    dimensionless. The model is evaluated from wavefront context and can be supplied
+    directly to `RefractiveOptic` or `Wedge`.
+
+    Examples
+    --------
+    Construct a simple dispersive refractive optic:
+
+    ```python
+    import dLux as dl
+
+    index = dl.CauchyIndex(coeffs=[1.5, 0.004])
+    optic = dl.RefractiveOptic(thickness=1e-3, n=index)
+    ```
+    """
 
     coeffs: Array
     scale: Array
@@ -72,7 +89,24 @@ class CauchyIndex(Parametric):
 
 
 class PolynomialIndex(Parametric):
-    """A refractive index polynomial in normalised wavelength."""
+    """Represent refractive index as a polynomial in normalised wavelength.
+
+    Coefficients are ordered from constant to increasing degree and evaluated at
+    ``x = wavelength / scale``. Wavelength and scale are in metres and the output is
+    dimensionless. This flexible model does not enforce a physically causal material
+    dispersion relation.
+
+    Examples
+    --------
+    Apply a polynomial index through a refractive layer:
+
+    ```python
+    import dLux as dl
+
+    index = dl.PolynomialIndex(coeffs=[1.5, 0.01, -0.002])
+    optic = dl.RefractiveOptic(thickness=1e-3, n=index)
+    ```
+    """
 
     coeffs: Array
     scale: Array
@@ -127,7 +161,26 @@ class PolynomialIndex(Parametric):
 
 
 class InterpolatedIndex(Parametric):
-    """A refractive index interpolated from wavelength-index samples."""
+    """Interpolate refractive index from tabulated wavelength samples.
+
+    Sample wavelengths are strictly increasing and measured in metres; indices are
+    dimensionless. Evaluation uses the incident wavefront wavelength. Extrapolation
+    is disabled by default because behaviour outside measured material data is
+    generally model-dependent.
+
+    Examples
+    --------
+    Construct an index model from sampled material data:
+
+    ```python
+    import dLux as dl
+
+    wavelengths = [500e-9, 600e-9, 700e-9]
+    indices = [1.52, 1.51, 1.50]
+    index = dl.InterpolatedIndex(wavelengths, indices)
+    optic = dl.RefractiveOptic(thickness=1e-3, n=index)
+    ```
+    """
 
     wavelengths: Array
     indices: Array

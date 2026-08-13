@@ -44,7 +44,12 @@ def resolve(value: Any, dtype: Any = None, **context: Any) -> Any:
 
 
 class ParametricHolder(Base):
-    """Base class for objects containing context-dependent parameters."""
+    """Base contract for objects containing context-dependent parameters.
+
+    `resolve` traverses the object tree, evaluates every `Parametric` leaf against a
+    shared named context, and returns a new object. Ordinary arrays and structural
+    leaves are retained unchanged.
+    """
 
     def resolve(self, **context):
         """Return a copy with every `Parametric` leaf evaluated.
@@ -59,7 +64,12 @@ class ParametricHolder(Base):
 
 
 class Parametric(ParametricHolder):
-    """A contextual parameterisation consumed by another dLux object."""
+    """Extension contract for a value generated from compact model parameters.
+
+    A parametric stores differentiable leaves and implements `evaluate(**context)` to
+    realise an array only when consumed by a layer, source, or other model. Concrete
+    classes define required context keys, output units, axes, and normalisation.
+    """
 
     @abstractmethod
     def evaluate(self, **kwargs: Any) -> Array:
@@ -90,7 +100,12 @@ class Parametric(ParametricHolder):
 
 
 class Transform(Parametric):
-    """Apply a callable transformation to a realised parameterisation."""
+    """Apply a callable to the realised value of another parameterisation.
+
+    The complete named context is forwarded to the wrapped `Parametric` before the
+    callable is evaluated. Output shape, units, differentiability, and JIT behaviour
+    are therefore determined by the wrapped value and callable together.
+    """
 
     parametric: Parametric
     transformation: Any
@@ -122,7 +137,13 @@ class Transform(Parametric):
 
 
 class Interpolation(Parametric):
-    """A one-dimensional parameterisation defined by sampled values."""
+    """Interpolate sampled values along one strictly increasing coordinate axis.
+
+    The leading axis of `values` corresponds to `knots`; trailing value axes are
+    preserved. Evaluation coordinates use the same units as the knots. Exact
+    integration is available for scalar piecewise-linear values with zero
+    extrapolation.
+    """
 
     knots: Array
     values: Array
@@ -211,7 +232,12 @@ class Interpolation(Parametric):
 
 
 class DynamicParametric(Parametric):
-    """Evaluate any coordinate-dependent parameterisation in a transformed frame."""
+    """Evaluate a coordinate-dependent parameterisation in a transformed frame.
+
+    The supplied coordinate transform is applied to ``(..., 2, ny, nx)`` context
+    coordinates before the wrapped `Parametric` is evaluated. This composes dynamic
+    geometry without resampling a realised output array.
+    """
 
     parametric: Parametric
     transformation: BaseCoordTransform
@@ -245,7 +271,12 @@ class DynamicParametric(Parametric):
 
 
 class Combination(Parametric):
-    """Combine an ordered collection of parameterisations with one operation."""
+    """Evaluate several parameterisations and reduce them with one operation.
+
+    Every child receives the same context. Sum and product provide arithmetic
+    composition; union and intersection provide transmission-like composition.
+    Shapes must be mutually broadcastable and insertion order is retained.
+    """
 
     parametrics: dict
     operation: str = eqx.field(static=True)

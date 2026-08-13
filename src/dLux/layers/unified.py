@@ -28,11 +28,18 @@ class UnifiedLayer(OpticalLayer, DetectorLayer):
     Unified operations implement :meth:`apply_mono`. Optical-layer dispatch maps that
     operation over wavefront axes, while natively batched intensity methods consume
     the complete intensity in one call.
+
+    Custom unified layers must preserve the concrete input field type and keep grid
+    metadata consistent with any change to spatial sampling.
     """
 
 
 class Resize(UnifiedLayer):
-    """Resize a wavefront or intensity by padding or cropping."""
+    """Centrally pad or crop a wavefront or intensity to explicit sample counts.
+
+    Final spatial axes are resized while leading axes are preserved. Pixel scales do
+    not change, so padding expands and cropping reduces the represented field of view.
+    """
 
     npixels: tuple[int, ...]
 
@@ -56,7 +63,11 @@ class Resize(UnifiedLayer):
 
 
 class Downsample(UnifiedLayer):
-    """Downsample a wavefront or intensity by an integer factor."""
+    """Downsample spatial axes by integer factors in physical-axis order.
+
+    Wavefront and intensity reduction semantics are delegated to their field methods,
+    and pixel scales increase so the represented field of view remains unchanged.
+    """
 
     n: tuple[int, ...]
 
@@ -80,7 +91,11 @@ class Downsample(UnifiedLayer):
 
 
 class Flip(UnifiedLayer):
-    """Flip a wavefront or intensity about one or more array axes."""
+    """Reverse a wavefront or intensity along selected NumPy array axes.
+
+    Values are flipped without changing their `GridSpec`; use a coordinate transform
+    and `Interpolate` when a physical resampling operation is required instead.
+    """
 
     axes: tuple[int, ...] | int
 
@@ -106,7 +121,12 @@ class Flip(UnifiedLayer):
 
 
 class Interpolate(UnifiedLayer):
-    """Interpolate a wavefront or intensity through a coordinate transformation."""
+    """Resample a wavefront or intensity through a coordinate transformation.
+
+    The transform maps output-grid coordinates into the sampled input frame. Output
+    size and grid metadata remain fixed while values are interpolated, with explicit
+    handling for complex fields and samples outside the original support.
+    """
 
     transformation: BaseCoordTransform
     method: str
@@ -149,7 +169,12 @@ class Interpolate(UnifiedLayer):
 
 
 class Normalise(UnifiedLayer):
-    """Normalise a wavefront or intensity to unit total power."""
+    """Normalise a wavefront or intensity to a configured total value.
+
+    The field owns the meaning of each mode: wavefront power is computed from the
+    complex phasor, while real intensities operate on sampled values. Sampling and
+    concrete field type are preserved.
+    """
 
     mode: str
     value: Array
@@ -177,7 +202,11 @@ class Normalise(UnifiedLayer):
 
 
 class Lambda(UnifiedLayer):
-    """Return a wavefront or intensity unchanged."""
+    """Identity layer returning a wavefront or intensity unchanged.
+
+    This provides a named no-op inside immutable system topologies, for example when
+    swapping optional branches without changing the layer structure used by JIT.
+    """
 
     def apply_mono(self, target: Wavefront | Intensity) -> Wavefront | Intensity:
         """Return the input wavefront or intensity unchanged.

@@ -48,7 +48,13 @@ def _resolve_coeffs(coeffs, coefficients):
 
 
 class ParametricBasis(Parametric):
-    """Base contract for coefficient-weighted basis parameterisations."""
+    """Base contract for coefficient-weighted linear parameterisations.
+
+    `shape` records the native coefficient axes contracted during evaluation. Leading
+    coefficient axes may vectorise one matching leading basis axis. Concrete classes
+    define whether vectors are stored, generated from context, or evaluated through a
+    specialised implicit operation.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -242,6 +248,10 @@ class Basis(ParametricBasis):
 class PastedBasis(ParametricBasis):
     """Parameterise compact local bases pasted into a common output grid.
 
+    This representation is normally produced by segmented aperture builders. It is
+    public so specialised builders can retain dense local modes and avoid storing a
+    global mostly-zero basis.
+
     Parameters
     ----------
     basis : Array
@@ -322,7 +332,12 @@ class PastedBasis(ParametricBasis):
 
 
 class ImplicitBasis(ParametricBasis):
-    """Base class for bases generated or evaluated indirectly at runtime."""
+    """Extension contract for bases generated or evaluated at runtime.
+
+    Subclasses implement `calculate_basis(**context)` or override `evaluate` with a
+    mathematically equivalent implicit contraction. This avoids retaining large
+    sampled arrays while keeping coefficient leaves explicit and differentiable.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -353,7 +368,12 @@ class ImplicitBasis(ParametricBasis):
 
 
 class CoordBasis(ImplicitBasis):
-    """Base class for implicit bases evaluated at Cartesian coordinates."""
+    """Base contract for implicit bases evaluated on Cartesian coordinates.
+
+    Coordinates can be supplied explicitly or resolved from a wavefront and follow
+    ``(..., 2, ny, nx)`` with physical ``(x, y)`` component order. Concrete bases
+    document their coordinate units and support convention.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -374,7 +394,12 @@ class CoordBasis(ImplicitBasis):
 
 
 class CLIMBBasis(Basis):
-    """A continuous latent basis mapped through the CLIMB binarisation."""
+    """Map a continuous explicit-basis field through CLIMB soft binarisation.
+
+    Coefficients first generate an oversampled latent two-dimensional field. It is
+    softly binarised, downsampled by `oversample`, and mapped between two configured
+    output values for differentiable binary-mask design.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)

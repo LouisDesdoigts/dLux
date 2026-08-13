@@ -22,7 +22,12 @@ __all__ = [
 
 
 class BaseDynamicLayer(BaseOpticalLayer):
-    """Base class for optical layers evaluated in a coordinate context."""
+    """Base contract for optical layers evaluated from coordinate context.
+
+    Dynamic leaves are resolved on explicit coordinates or the incoming wavefront
+    grid, optionally after a coordinate transform. This retains compact
+    differentiable geometry in the model rather than storing sampled arrays.
+    """
 
     coordinates: Array | GridSpec | None
     transformation: BaseCoordTransform | None
@@ -75,7 +80,11 @@ class BaseDynamicLayer(BaseOpticalLayer):
 
 
 class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
-    """Apply a static or coordinate-dependent transmission."""
+    """Apply a static or coordinate-dependent scalar transmission.
+
+    A `Parametric` transmission is evaluated from the active coordinates; an array
+    is applied directly. The resolved value broadcasts to the wavefront phasor.
+    """
 
     coordinates: Array | GridSpec | None
     transformation: BaseCoordTransform | None
@@ -103,7 +112,12 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
 
 
 class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
-    """Apply static or coordinate-dependent OPD and phase aberrations."""
+    """Apply static or coordinate-dependent OPD and phase aberrations.
+
+    OPD is measured in metres and converted using the wavefront wavenumber; phase is
+    measured directly in radians. Either value may be an array or a `Parametric`
+    evaluated on the active coordinates.
+    """
 
     coordinates: Array | GridSpec | None
     transformation: BaseCoordTransform | None

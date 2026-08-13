@@ -26,7 +26,12 @@ __all__ = [
 
 
 class BaseLayer(ParametricHolder):
-    """Base class for callable transformations of dLux objects."""
+    """Base contract for callable immutable transformations of dLux objects.
+
+    Concrete layer families define the target accepted by `apply`. Layers contain
+    their differentiable parameters and return transformed objects without mutating
+    their inputs.
+    """
 
     @abstractmethod
     def apply(self, target: Any) -> Any:
@@ -42,7 +47,12 @@ class BaseLayer(ParametricHolder):
 
 
 class BaseOpticalLayer(BaseLayer):
-    """Base class for layers that transform wavefronts."""
+    """Base contract for layers that transform scalar or polarised wavefronts.
+
+    Subclasses implement the monochromatic `apply_mono` operation. `apply` maps it
+    over wavelength and compatible leading axes, while `__call__` provides concise
+    layer syntax with the same vectorisation contract.
+    """
 
     @abstractmethod
     def apply_mono(self, wavefront: Wavefront) -> Wavefront:
@@ -102,7 +112,12 @@ class BaseOpticalLayer(BaseLayer):
 
 
 class OpticalLayer(BaseOpticalLayer):
-    """Public contract for layers that transform wavefronts."""
+    """Public extension point for user-defined monochromatic optical layers.
+
+    Implement `apply_mono(wavefront)` for one monochromatic `Wavefront`; inherited
+    application handles chromatic and otherwise vectorised wavefronts. The result
+    must retain physically consistent wavelength and grid metadata.
+    """
 
     @staticmethod
     def context(wavefront: Wavefront) -> dict[str, Any]:
@@ -116,6 +131,10 @@ class OpticalLayer(BaseOpticalLayer):
 
 class TransmissiveLayer(OpticalLayer):
     """Apply a transmission with optional output normalisation.
+
+    Real values describe amplitude transmission. Complex values can encode amplitude
+    and phase together. Values broadcast to the incoming phasor while preserving its
+    wavelength, polarisation, and other leading axes.
 
     Parameters
     ----------
@@ -159,6 +178,10 @@ class TransmissiveLayer(OpticalLayer):
 
 class AberratedLayer(OpticalLayer):
     """Apply optical-path and phase aberrations to a wavefront.
+
+    OPD is converted to phase using the wavefront wavelength, while phase is applied
+    directly. Values broadcast to the incoming phasor and may be arrays or contextual
+    `Parametric` objects in concrete layers.
 
     Parameters
     ----------

@@ -184,7 +184,12 @@ class _ApertureData(Base):
 
 
 class BaseOPDDef(Base):
-    """Define sampled OPD data from coordinates and aperture geometry."""
+    """Extension contract for setup-time OPD basis definitions.
+
+    Definitions receive coordinates, aperture support, characteristic diameter, and
+    optional sparse centres. They return sampled basis data for a builder to
+    materialise into a layer and are not themselves runtime parametrics.
+    """
 
     @abstractmethod
     def calculate(self, coordinates, support, diameter, centers=None):
@@ -363,7 +368,12 @@ class ZernikeDef(BaseOPDDef):
 
 
 class BaseBuilder(Base):
-    """Base class for construction-time objects evaluated on a ``GridSpec``."""
+    """Base contract for construction-time objects evaluated on a `GridSpec`.
+
+    Builders sample ideal geometry and optional basis definitions into arrays or
+    ready-to-use layers. They remain outside the compiled optical model: rebuild when
+    construction geometry changes, then optimise the resulting layer's parametrics.
+    """
 
     def _validate(self, grid, transform):
         """Validate the sampling grid and optional coordinate transformation."""

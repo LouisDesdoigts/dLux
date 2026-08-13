@@ -99,7 +99,13 @@ def _rotate_field(field, angle, method, complex):
 
 
 class BaseField(Base):
-    """Base class for regularly sampled real or complex fields."""
+    """Base contract for regularly sampled real or complex fields.
+
+    A field couples an array to a `GridSpec`. The final axes are spatial axes in
+    NumPy order, while grid values use physical-axis order; all preceding axes are
+    preserved as vectorisation axes. Field operations are immutable and return a new
+    object carrying sampling consistent with the transformed data.
+    """
 
     grid: GridSpec
 
@@ -315,7 +321,13 @@ class BaseField(Base):
 
 
 class ContinuousField(BaseField):
-    """Base class for fields representing a continuously sampled quantity."""
+    """Base contract for fields representing a continuously sampled quantity.
+
+    Padding, cropping, interpolation, and downsampling update both the sampled array
+    and its grid. Concrete subclasses define how values combine during resampling;
+    complex wavefronts and real intensities therefore retain different physical
+    semantics while sharing the coordinate machinery.
+    """
 
     grid: GridSpec
 
@@ -386,7 +398,12 @@ class ContinuousField(BaseField):
 
 
 class DiscreteField(BaseField):
-    """Base class for real-valued fields sampled on a discrete grid."""
+    """Base contract for real-valued quantities defined per detector sample.
+
+    Unlike continuous fields, discrete samples are not assumed to describe a
+    continuously resampleable optical field. Concrete subclasses own observation
+    metadata and stochastic behaviour appropriate to detector images.
+    """
 
 
 class Wavefront(ContinuousField):

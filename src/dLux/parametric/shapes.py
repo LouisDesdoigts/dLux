@@ -74,11 +74,19 @@ class Shape(Parametric):
 
 
 class Hard(Base):
-    """Evaluate an exact hard boundary without dynamic edge softening."""
+    """Select exact binary evaluation for a shape boundary.
+
+    Hard edges ignore pixel scale and are generally nondifferentiable with respect to
+    geometric boundary parameters at sampled transition pixels.
+    """
 
 
 class Soft(Base):
-    """Differentiate a shape boundary over a width measured in pixels."""
+    """Soften a shape boundary over a transition width measured in pixels.
+
+    The pixel width is converted to physical distance from the evaluation sampling,
+    allowing gradients with respect to geometric parameters near the boundary.
+    """
 
     pixels: Array
 
@@ -171,7 +179,11 @@ class InvertibleShape(Shape):
 
 
 class Circle(InvertibleShape):
-    """A circular transmission described by its diameter."""
+    """Represent a centred circular transmission by its full diameter.
+
+    Diameter uses the coordinate unit supplied during evaluation. Edge softening and
+    inversion follow the common `InvertibleShape` contract.
+    """
 
     diameter: Array
 
@@ -214,7 +226,11 @@ class Circle(InvertibleShape):
 
 
 class Square(InvertibleShape):
-    """A square transmissive aperture."""
+    """Represent a centred axis-aligned square transmission.
+
+    Width uses the coordinate unit supplied during evaluation. Edge softening and
+    inversion follow the common `InvertibleShape` contract.
+    """
 
     width: Array
 
@@ -257,7 +273,11 @@ class Square(InvertibleShape):
 
 
 class Rectangle(InvertibleShape):
-    """A rectangular transmissive aperture."""
+    """Represent a centred axis-aligned rectangular transmission.
+
+    Width and height use the coordinate unit supplied during evaluation and follow
+    physical ``(x, y)`` orientation. Use `TransformedShape` to rotate or translate it.
+    """
 
     width: Array
     height: Array
@@ -302,7 +322,11 @@ class Rectangle(InvertibleShape):
 
 
 class RegularPolygon(InvertibleShape):
-    """A regular polygon described by its circumscribed-circle diameter."""
+    """Represent a centred regular polygon by its circumscribed-circle diameter.
+
+    The first vertex follows the utility geometry convention. Diameter uses the
+    evaluation coordinate unit, with common edge softening and inversion behavior.
+    """
 
     diameter: Array
     nsides: int
@@ -418,7 +442,12 @@ class ConvexPolygon(InvertibleShape):
 
 
 class Spider(InvertibleShape):
-    """A general set of occulting radial support arms with angles in degrees."""
+    """Represent centred radial support arms as a transmissive spider mask.
+
+    Width uses the coordinate unit and angles are measured in degrees. By default the
+    returned transmission is one away from the occulting arms; inversion complements
+    that convention.
+    """
 
     width: Array
     angles: Array
@@ -462,7 +491,11 @@ class Spider(InvertibleShape):
 
 
 class Complement(Shape):
-    """Invert any shape transmission independently of its edge model."""
+    """Return one minus another shape's evaluated transmission.
+
+    This composes with every `Shape`, including those without an intrinsic `invert`
+    option, while retaining the wrapped shape's sampling and differentiability.
+    """
 
     shape: Shape
 
@@ -492,7 +525,12 @@ class Complement(Shape):
 
 
 class TransformedShape(Shape):
-    """Evaluate a shape in a transformed local coordinate frame."""
+    """Evaluate a shape after mapping coordinates into a transformed local frame.
+
+    The coordinate transform is applied before shape evaluation, so geometric
+    parameters remain defined in the shape's local coordinates. No sampled array is
+    interpolated or transformed after evaluation.
+    """
 
     shape: Shape
     transformation: BaseCoordTransform

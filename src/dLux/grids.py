@@ -58,7 +58,12 @@ def _distortion_powers(order, orders, powers, shift_invariant):
 
 
 class BaseGridSpec(Base):
-    """Base class for coordinate and sampling specifications."""
+    """Base contract for immutable coordinate and sampling specifications.
+
+    Concrete specifications describe either a physical grid or a construction-time
+    resize/placement operation. Tuple values follow physical-axis order, which is the
+    reverse of the final NumPy array-axis order.
+    """
 
 
 class ResizeSpec(BaseGridSpec):
@@ -241,6 +246,10 @@ class PasteSpec(BaseGridSpec):
     for equally sized stamps. Construction is deliberately separate from evaluation:
     stamp and output shapes are fixed before JIT compilation, while coordinates and
     pasted values remain ordinary JAX calculations.
+
+    This class is normally constructed by segmented aperture builders. It remains
+    public so custom builders can reuse compact JIT-compatible placement without
+    materialising full-size intermediate arrays.
     """
 
     n: tuple[int, int]
@@ -772,11 +781,13 @@ class GridSpec(BaseGridSpec):
 
 
 class BaseCoordTransform(Base):
-    """Base class for transforms of ``(..., 2, ny, nx)`` coordinate fields.
+    """Extension contract for transforms of ``(..., 2, ny, nx)`` coordinates.
 
     Leading transform and coordinate dimensions use paired JAX broadcasting. An
     unbatched coordinate field may therefore be expanded by batched transform
-    parameters, while matching batches are transformed element-by-element.
+    parameters, while matching batches are transformed element-by-element. Subclasses
+    preserve the physical ``(x, y)`` component axis and final spatial axes. A
+    transform changes where an object is evaluated; it does not resample an array.
     """
 
     @staticmethod
@@ -973,6 +984,8 @@ class AffineMap(BaseCoordTransform):
     """Apply a direct affine coordinate map ``x' = matrix @ x + offset``.
 
     Matrix, offset, and coordinate leading dimensions use paired JAX broadcasting.
+    This is the low-level direct representation; use `Affine` for semantic
+    translation, rotation, scale, and shear parameters.
 
     Parameters
     ----------

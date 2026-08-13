@@ -62,7 +62,12 @@ def _poly_params(degree, coeffs, ndim, powers, degrees=None):
 
 
 class DynamicZernike(Base):
-    """A dynamically evaluable Zernike polynomial."""
+    """Store compact radial data required to evaluate one Zernike mode.
+
+    The object is constructed from a Noll index and evaluates that mode on runtime
+    coordinates. It is primarily a leaf of `DynamicZernikeBasis`, keeping modes
+    JIT-compatible without retaining sampled basis arrays.
+    """
 
     j: int = eqx.field(static=True)
     n: int = eqx.field(static=True)
@@ -129,7 +134,12 @@ class _ZernikeBasis:
 
 
 class ZernikeBasis(_ZernikeBasis, Basis):
-    """An explicitly sampled Zernike basis."""
+    """Sample and parameterise Zernike modes on fixed Cartesian coordinates.
+
+    Modes can be selected by individual Noll indices, a maximum radial order, or
+    explicit radial orders. Vectors are evaluated once and retained explicitly; use
+    `DynamicZernikeBasis` when coordinates change at runtime.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -172,7 +182,12 @@ class ZernikeBasis(_ZernikeBasis, Basis):
 
 
 class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
-    """A Zernike basis evaluated dynamically from coordinate context."""
+    """Evaluate a Zernike expansion dynamically from coordinate context.
+
+    Modes are selected by Noll index or radial order and evaluated on explicit or
+    wavefront coordinates. `diameter` defines the physical pupil scale and may be
+    inferred from wavefront context when omitted.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -362,7 +377,12 @@ class Polynomial(ParametricBasis):
 
 
 class ExplicitPolynomial(Basis):
-    """A polynomial represented by basis vectors sampled on fixed coordinates."""
+    """Represent a multivariate polynomial on fixed sampled coordinates.
+
+    Polynomial terms are generated once and stored as an explicit basis. Coefficients
+    remain differentiable while coordinates stay fixed; use `CoordinatePolynomial`
+    when the coordinate field changes during evaluation.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -444,7 +464,12 @@ class ExplicitPolynomial(Basis):
 
 
 class CoordinatePolynomial(Polynomial):
-    """A polynomial evaluated dynamically from Cartesian coordinate context."""
+    """Evaluate a multivariate polynomial from Cartesian coordinate context.
+
+    The leading coordinate component axis must match `ndim`. Coordinates may be
+    supplied explicitly or resolved from a wavefront, so coefficients can follow
+    coordinate transforms without rebuilding a sampled basis.
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)

@@ -20,7 +20,12 @@ __all__ = ["LayeredSystem", "OpticalSystem", "DetectorSystem"]
 
 
 class LayeredSystem(Base):
-    """Apply an ordered collection of layers to a compatible dLux object."""
+    """Base contract for an ordered immutable collection of compatible layers.
+
+    Layer names provide raised parameter paths for inspection and optimisation. A
+    system applies layers in insertion order and can return the final object or
+    labelled intermediate states for debugging and analysis.
+    """
 
     layers: OrderedDict
 

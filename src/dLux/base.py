@@ -35,7 +35,13 @@ def _resolve_path(obj, path):
 
 
 class Base(zdx.Base):
-    """Unify raised attribute and Zodiax path error behaviour."""
+    """Base object for immutable dLux models with raised parameter paths.
+
+    dLux objects are Equinox pytrees extended with Zodiax path operations. Nested
+    public leaves can therefore be inspected and updated from a containing source,
+    system, or layer using concise attribute paths. Failed attribute and path lookups
+    share the same diagnostic behaviour.
+    """
 
     def __getattr__(self, key):
         """Raise the first matching attribute from stored child objects."""

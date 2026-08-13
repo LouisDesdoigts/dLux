@@ -18,7 +18,11 @@ __all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
 
 
 class Interfere(OpticalLayer):
-    """Coherently sum the leading sub-aperture axis of a Wavefront."""
+    """Coherently sum the leading sub-aperture axis of a `Wavefront`.
+
+    Complex phasors are added before intensity is formed, retaining interference
+    between apertures. Inputs must have compatible wavelength and sampling metadata.
+    """
 
     def apply(self, wavefront: Wavefront) -> Wavefront:
         """Interfere the complete wavefront without generic leading-axis mapping.
@@ -236,6 +240,10 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
     A shared transformation acts in the global coordinate frame before aperture
     placement. A transformation with a leading aperture axis acts independently in
     each aperture's local frame.
+
+    Transmission, OPD, and phase may be contextual `Parametric` objects evaluated on
+    the local grids, allowing differentiable sparse geometry without materialising a
+    global pupil.
     """
 
     def __init__(

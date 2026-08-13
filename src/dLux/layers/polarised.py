@@ -26,6 +26,9 @@ class BasePolarisingOptic(OpticalLayer):
     polarisation utility convention. The trailing axes may be empty for global
     optics or spatial for spatially varying optics. Context-dependent layers resolve
     their Jones matrices when applied to a wavefront.
+
+    Scalar inputs are promoted to `PolarisedWavefront`. Leading wavelength or
+    parameter axes follow ordinary JAX broadcasting around the Jones axes.
     """
 
     def apply_mono(self: PolarisingOptic, wavefront: Wavefront) -> Wavefront:
@@ -46,7 +49,12 @@ class BasePolarisingOptic(OpticalLayer):
 
 
 class PolarisationLayer(OpticalLayer):
-    """Apply an ordered collection of polarising optics."""
+    """Apply an ordered collection of polarising optics as one layer.
+
+    The first optic promotes a scalar input to `PolarisedWavefront` when required.
+    Subsequent Jones operations are applied in insertion order while preserving
+    wavelength and spatial vectorisation.
+    """
 
     polarisation: dict | None
 
@@ -143,8 +151,9 @@ class PolarisingOptic(BasePolarisingOptic):
 class UniformPolarisingOptic(PolarisingOptic):
     """A spatially uniform Jones matrix optic.
 
-    The input Jones matrix must have shape `(2, 2)`. If `orientation` is provided, the
-    Jones matrix is rotated when the layer is applied.
+    The input Jones matrix must have trailing shape `(2, 2)` and broadcasts across
+    every spatial sample. Leading axes can represent wavelength-dependent or batched
+    matrices. If `orientation` is provided, the matrix is rotated when applied.
 
     Attributes
     ----------
