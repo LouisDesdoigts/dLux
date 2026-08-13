@@ -46,6 +46,16 @@ def test_shape_contract(shape, parameter, context):
         )
 
 
+def test_shape_grid_contract():
+    shape = dl.Circle(0.8)
+    grid = dl.GridSpec(n=12, diam=1.0, unit="m")
+
+    assert shape(grid).shape == (12, 12)
+
+    with pytest.raises(ValueError, match="one or two spatial dimensions"):
+        shape(grid.broadcast(3))
+
+
 @pytest.mark.parametrize(
     "shape",
     [

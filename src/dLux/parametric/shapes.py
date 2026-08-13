@@ -42,8 +42,8 @@ class Shape(Parametric):
         Parameters
         ----------
         grid : GridSpec
-            Complete sampling grid. Its coordinates are converted to SI units before
-            evaluation so shape dimensions retain their canonical physical units.
+            One-dimensional square or explicit two-dimensional sampling grid. Scalar
+            square-grid values are promoted to two spatial axes before evaluation.
         transform : BaseCoordTransform or None
             Optional transformation applied when generating the grid coordinates.
 
@@ -55,6 +55,11 @@ class Shape(Parametric):
         """
         if not isinstance(grid, GridSpec):
             raise TypeError("grid must be a GridSpec.")
+        if grid.ndim == 1:
+            grid = grid.broadcast(2)
+        if grid.ndim != 2:
+            raise ValueError("grid must define one or two spatial dimensions.")
+
         coordinates = grid.transformed(transform)
         pixel_scale = grid.d * grid.scale
         return self.evaluate(coordinates=coordinates, pixel_scale=pixel_scale)
