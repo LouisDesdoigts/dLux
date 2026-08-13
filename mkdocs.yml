@@ -162,6 +162,7 @@ nav:
       - Polynomials: API/utils/polynomials.md
       - Propagation: API/utils/propagation.md
       - Source: API/utils/source.md
+      - Source Estimation: API/utils/source_estimation.md
       - Units: API/utils/units.md
   - Publications: publications.md
   - Contributors: contributors.md

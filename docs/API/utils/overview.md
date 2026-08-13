@@ -26,7 +26,7 @@ Functions: [`cart2polar`](coordinates.md#dLux.utils.coordinates.cart2polar), [`p
 
 ## [Fourier](fourier.md)
 
-Functions: [`fourier_kernel_1d`](fourier.md#dLux.utils.fourier.fourier_kernel_1d), [`fourier_kernels`](fourier.md#dLux.utils.fourier.fourier_kernels), [`eval_fourier_basis`](fourier.md#dLux.utils.fourier.eval_fourier_basis).
+Functions: [`fourier_shift`](fourier.md#dLux.utils.fourier.fourier_shift), [`fourier_kernel_1d`](fourier.md#dLux.utils.fourier.fourier_kernel_1d), [`fourier_kernels`](fourier.md#dLux.utils.fourier.fourier_kernels), [`eval_fourier_basis`](fourier.md#dLux.utils.fourier.eval_fourier_basis).
 
 
 ## [Geometry](geometry.md)
@@ -82,6 +82,11 @@ Functions: [`FFT_pad`](propagation.md#dLux.utils.propagation.FFT_pad), [`FFT_spe
 ## [Source](source.md)
 
 Functions: [`fluxes_from_contrast`](source.md#dLux.utils.source.fluxes_from_contrast), [`positions_from_sep`](source.md#dLux.utils.source.positions_from_sep).
+
+
+## [Source Estimation](source_estimation.md)
+
+Functions: [`estimate_sources`](source_estimation.md#dLux.utils.source_estimation.estimate_sources).
 
 
 ## [Units](units.md)

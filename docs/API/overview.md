@@ -18,4 +18,4 @@ Coronagraphy, Detector, Dynamic, Optical, Polarised, Propagation, Refractive, Sp
 
 ## [Numerical utilities](utils/overview.md)
 
-Abcd, Apertures, Array Ops, Coordinates, Fourier, Geometry, Helpers, Interpolation, Math, Misc, Norms, Optics, Polarisation, Polynomials, Propagation, Source, Units.
+Abcd, Apertures, Array Ops, Coordinates, Fourier, Geometry, Helpers, Interpolation, Math, Misc, Norms, Optics, Polarisation, Polynomials, Propagation, Source, Source Estimation, Units.

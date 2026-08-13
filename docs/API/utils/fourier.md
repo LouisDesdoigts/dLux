@@ -2,6 +2,9 @@
 
 # Fourier
 
+???+ info "fourier_shift"
+    ::: dLux.utils.fourier.fourier_shift
+
 ???+ info "fourier_kernel_1d"
     ::: dLux.utils.fourier.fourier_kernel_1d
 

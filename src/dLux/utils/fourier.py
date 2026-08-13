@@ -4,7 +4,76 @@ from jax import Array
 import jax.numpy as np
 from abcdLux.mft import mft_kernels
 
-__all__ = ["fourier_kernel_1d", "fourier_kernels", "eval_fourier_basis"]
+__all__ = [
+    "fourier_shift",
+    "fourier_kernel_1d",
+    "fourier_kernels",
+    "eval_fourier_basis",
+]
+
+
+def fourier_shift(array: Array, shift: Array, pad: bool = True) -> Array:
+    """Shift an array by a subpixel offset using Fourier interpolation.
+
+    The final two axes are interpreted as ``(y, x)``, while ``shift`` is
+    supplied in physical ``(x, y)`` order. Leading dimensions are preserved and
+    receive the same shift. By default, the spatial axes are zero-padded before
+    interpolation and cropped afterwards to suppress periodic wrapping.
+
+    Parameters
+    ----------
+    array : Array
+        Real or complex array with shape ``(..., ny, nx)``.
+    shift : Array
+        Length-two ``(x, y)`` shift measured in pixels. Positive values move
+        samples towards increasing indices.
+    pad : bool
+        Whether to zero-pad each spatial axis by half its length at both ends.
+        Disable this only when periodic boundary conditions are intended.
+
+    Returns
+    -------
+    shifted : Array
+        Fourier-interpolated array with the same shape and dtype kind as ``array``.
+
+    Examples
+    --------
+    Shift an image half a pixel along the x-axis:
+
+    >>> image = np.eye(5)
+    >>> shifted = fourier_shift(image, np.array([0.5, 0.0]))
+
+    Notes
+    -----
+    The operation is differentiable with respect to both the array and shift.
+    Vectorise over ``shift`` with ``jax.vmap`` when different shifts are
+    required for a batch.
+    """
+    # Convert and validate the array contract
+    array = np.asarray(array)
+    shift = np.asarray(shift)
+    if array.ndim < 2:
+        raise ValueError("array must have at least two dimensions.")
+    if shift.shape != (2,):
+        raise ValueError("shift must have shape (2,).")
+    if not isinstance(pad, bool):
+        raise TypeError("pad must be a bool.")
+
+    # Pad the spatial axes to suppress periodic wrapping
+    ny, nx = array.shape[-2:]
+    py, px = (ny // 2, nx // 2) if pad else (0, 0)
+    padding = [(0, 0)] * (array.ndim - 2) + [(py, py), (px, px)]
+    padded = np.pad(array, padding)
+
+    # Apply the Fourier-shift phase ramp over the final two axes
+    ny, nx = padded.shape[-2:]
+    fy, fx = np.fft.fftfreq(ny), np.fft.fftfreq(nx)
+    phase = np.exp(-2j * np.pi * (fy[:, None] * shift[1] + fx[None, :] * shift[0]))
+    shifted = np.fft.ifft2(np.fft.fft2(padded, axes=(-2, -1)) * phase, axes=(-2, -1))
+
+    # Restore real inputs and crop back to the original spatial extent
+    shifted = shifted if np.iscomplexobj(array) else shifted.real
+    return shifted[..., py : py + array.shape[-2], px : px + array.shape[-1]]
 
 
 def _to_xy(value: int | tuple[int], name: str) -> tuple[int]:

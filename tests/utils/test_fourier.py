@@ -2,10 +2,67 @@
 
 import jax.numpy as np
 import pytest
+from jax import grad, vmap
 
 import dLux.utils as dlu
 
 from tests.helpers import assert_jittable
+
+
+def test_fourier_shift_matches_periodic_mode():
+    y, x = np.mgrid[:12, :16]
+    image = np.cos(2 * np.pi * (2 * x / 16 + y / 12))
+    shift = np.array([0.4, -0.25])
+    expected = np.cos(2 * np.pi * (2 * (x - shift[0]) / 16 + (y - shift[1]) / 12))
+
+    shifted = assert_jittable(dlu.fourier_shift, image, shift, pad=False)
+
+    assert np.allclose(shifted, expected, atol=1e-5)
+
+
+def test_fourier_shift_preserves_batches_and_complex_values():
+    image = np.zeros((2, 7, 9), dtype=complex)
+    image = image.at[:, 3, 4].set(np.array([1 + 2j, 3 - 1j]))
+    expected = np.zeros_like(image).at[:, 2, 6].set(image[:, 3, 4])
+
+    shifted = dlu.fourier_shift(image, np.array([2.0, -1.0]))
+
+    assert np.issubdtype(shifted.dtype, np.complexfloating)
+    assert np.allclose(shifted, expected, atol=1e-6)
+
+
+def test_fourier_shift_avoids_edge_wrapping_and_differentiates():
+    image = np.zeros((9, 9)).at[4, 7].set(1.0)
+    shifted = dlu.fourier_shift(image, np.array([2.0, 0.0]))
+    derivative = grad(lambda dx: dlu.fourier_shift(image, np.array([dx, 0.0]))[4, 7])(
+        0.2
+    )
+
+    assert np.allclose(shifted, 0, atol=1e-6)
+    assert np.isfinite(derivative)
+    assert not np.isclose(derivative, 0)
+
+
+def test_fourier_shift_vectorises_over_shifts():
+    image = np.zeros((7, 7)).at[3, 3].set(1.0)
+    shifts = np.array([[1.0, 0.0], [0.0, -1.0]])
+    shifted = vmap(dlu.fourier_shift, in_axes=(None, 0))(image, shifts)
+
+    assert np.allclose(shifted[0, 3, 4], 1)
+    assert np.allclose(shifted[1, 2, 3], 1)
+
+
+@pytest.mark.parametrize(
+    "array, shift, pad, message",
+    [
+        (np.ones(3), np.zeros(2), True, "at least two dimensions"),
+        (np.ones((3, 3)), np.zeros(1), True, "shape"),
+        (np.ones((3, 3)), np.zeros(2), 1, "bool"),
+    ],
+)
+def test_fourier_shift_validates_inputs(array, shift, pad, message):
+    with pytest.raises((TypeError, ValueError), match=message):
+        dlu.fourier_shift(array, shift, pad)
 
 
 @pytest.mark.parametrize("n_modes", [4, 5])
