@@ -160,6 +160,11 @@ small examples modelled on Equinox documentation: one complete interaction, with
 turning the docstring into a tutorial. Keep private documentation concise unless a
 hidden numerical contract needs explanation.
 
+Review class concepts, constructors, public methods, and module workflows as separate
+documentation surfaces. Abstract classes should state the extension contract and
+vectorisation ownership; compatibility aliases should remain concise and direct users
+to the canonical replacement.
+
 Edit tutorial notebooks, not exported tutorial Markdown. Use the
 `dlux-documentation` skill for documentation structure, generated API pages, UML
 diagrams, and tutorial publishing.
@@ -175,3 +180,6 @@ committing those artefacts. After approval:
 4. run the full suite;
 5. inspect the complete diff for generated files and unrelated changes;
 6. commit only when explicitly requested.
+
+Use the checked-out source for validation. Confirm the interpreter and import path,
+and do not silently fall back to a system Python or installed dLux release.

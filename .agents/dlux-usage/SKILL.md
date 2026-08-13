@@ -25,3 +25,9 @@ Build the deterministic forward model before adding noise, optimisation, or infe
 Prefer public dLux objects and concise parameter paths. Use utilities directly when
 they are the intended public numerical interface, not to recreate core object
 behaviour manually.
+
+Keep the core contracts explicit: physical coordinates use `(x, y)` order while
+sampled arrays follow NumPy spatial-axis order; objects update immutably; optical
+layers preserve native vectorisation; detector layers transform `Intensity`
+deterministically, while uncertainty and noise belong to an explicitly constructed
+`Image`.

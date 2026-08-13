@@ -17,12 +17,28 @@ argument, return value, unit, shape, default, limitation, or basic usage. Do not
 placeholder descriptions such as "as defined by", "arguments follow", or "see the
 base implementation" for public inputs.
 
+Treat documentation coverage as four separate responsibilities:
+
+- the class docstring explains the concept, physical meaning, limitations, and main
+  interactions;
+- the constructor docstring defines every construction argument and its contract;
+- each public method documents its complete local calling and return contract;
+- the module overview explains how its related objects form a normal workflow.
+
+Completing one responsibility does not establish the others. Audit them separately.
+
 Examples should be minimal walkthroughs of the documented class and its principal
 behaviours. Divide multi-stage examples into short commented blocks, use realistic
 physical units, and identify important output types. Avoid unrelated package
 machinery, but include every setup step required for the example to execute on its
 own. Small components need one focused use; major system classes should show their
 distinct primary entry points.
+
+Add examples to principal user entry points and behaviour whose interaction is not
+obvious. Do not add them mechanically to abstract extension points, compatibility
+aliases, obvious wrappers or shapes, or internal construction objects. Develop
+substantial examples one class at a time, review their narrative, and execute them
+against the checked-out source.
 
 Document every public concrete-class constructor. Constructor docstrings must cover
 all arguments, accepted types, shapes, units, defaults, exclusive combinations,

@@ -50,3 +50,12 @@ not establish broadcasting semantics.
 Keep compatibility behaviour in the dedicated deprecation tests. Assert the warning
 category, removal version, replacement, and before/after migration example as well as
 the preserved result.
+
+Run examples and tests against the checked-out package rather than an unrelated
+installed release. Verify the interpreter and import path first; use the project
+environment with `PYTHONPATH=src` when needed. Never install dependencies into the
+system or base Python merely because the intended environment is incomplete.
+
+Treat public documentation examples as lightweight executable contracts. Check that
+they run and return the documented container and representative shape without turning
+every example into a separate physics regression.
