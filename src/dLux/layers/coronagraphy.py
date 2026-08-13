@@ -32,6 +32,36 @@ class SoummerFPM(OpticalLayer):
     Soummer, R., Pueyo, L., Sivaramakrishnan, A., & Vanderbei, R. J. (2007),
     "Fast computation of Lyot-style coronagraph propagation", Optics Express,
     15(24), 15935--15951. https://doi.org/10.1364/OE.15.015935
+
+    Examples
+    --------
+    Apply an opaque mask on a compact focal grid and return to the pupil:
+
+    ```python
+    import dLux as dl
+
+    # Construct the pupil and compact focal-plane grids
+    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=64, d=5, unit="mas")
+
+    # Make the focal-plane mask
+    fpm_diam = 100 * focal_grid.scale  # 100 mas in radians
+    fpm = dl.Complement(dl.Circle(diameter=fpm_diam))
+
+    # Construct the Soummer propagation layer
+    propagation = dl.SoummerFPM(
+        optic=dl.Optic(transmission=fpm),
+        propagator=dl.Fraunhofer(focal_grid),
+    )
+
+    # Construct the entrance pupil and wavefront
+    pupil = dl.SimpleCircular(diameter=0.9)(pupil_grid)
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=pupil_grid)
+    wavefront = pupil(wavefront)
+
+    # Apply the focal-plane mask and return to the pupil
+    wavefront = propagation(wavefront)
+    ```
     """
 
     optic: BaseOpticalLayer

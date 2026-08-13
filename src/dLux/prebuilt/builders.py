@@ -120,6 +120,19 @@ class Norm(Base):
         One of ``"l1"``, ``"l2"``, ``"max"``, ``"rms"``, or ``"p2v"``.
     scale : ArrayLike
         Physical scale applied after each mode is normalised.
+
+    Examples
+    --------
+    Configure a Zernike basis with an RMS scale of 10 nm:
+
+    ```python
+    import dLux as dl
+
+    zernikes = dl.ZernikeDef(
+        nolls=[4, 5, 6],
+        norm=dl.Norm(mode="rms", scale=10e-9),
+    )
+    ```
     """
 
     mode: str = eqx.field(static=True)
@@ -218,15 +231,28 @@ class ZernikeDef(BaseOPDDef):
 
     Examples
     --------
-    Construct defocus through spherical aberration with an RMS scale of 10 nm:
+    Reuse one Zernike definition across different aperture builders:
 
     ```python
+    import jax.random as jr
+
     import dLux as dl
 
+    # Define a reusable Zernike OPD model
     zernikes = dl.ZernikeDef(
-        nolls=[4, 5, 6, 7, 8, 9, 10, 11],
-        norm=dl.Norm("rms", 10e-9),
+        orders=[2, 3],  # Skip piston, tip, and tilt
+        oversize=0.01,
+        norm=dl.Norm(mode="rms", scale=10e-9),
     )
+
+    # Apply the definition over a circular aperture
+    grid = dl.GridSpec(n=256, diam=7.0, unit="m")
+    circular = dl.SimpleCircular(diameter=6.5, opd=zernikes)
+    circular_optic = circular(grid=grid, key=jr.key(0))
+
+    # Apply the same definition independently over the JWST segments
+    jwst = dl.JWSTLike(opd=zernikes)
+    jwst_optic = jwst(grid=grid, key=jr.key(1))
     ```
     """
 
@@ -411,18 +437,37 @@ class ApertureBuilder(BaseBuilder):
 
     Examples
     --------
-    Build sampled arrays or materialise the same definition as an optical layer:
+    Compose an aperture, build its sampled arrays, or materialise it as an optic:
 
     ```python
+    import jax.numpy as np
+
     import dLux as dl
 
-    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
+    # Construct a reusable aperture builder
     builder = dl.ApertureBuilder(
-        primary=dl.Circle(1.0),
-        obscurations=[dl.Circle(0.3)],
+        primary=dl.Circle(diameter=1.0),
+        obscurations=[
+            dl.Circle(diameter=0.3),
+            dl.Spider(width=0.02, angles=[0, 90]),
+        ],
+        opd=dl.ZernikeDef(
+            orders=[2, 3],  # Skip piston, tip, and tilt
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+        oversample=5,
     )
-    transmission = builder.build(grid)
+
+    # Build the sampled aperture and OPD basis directly
+    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
+    transmission, basis = builder.build(grid)
+
+    # Materialise the same definition as an optical layer
     optic = builder(grid)
+
+    # Build a transformed version of the aperture
+    transform = dl.Affine(rotation=np.deg2rad(10))
+    rotated_optic = builder(grid, transform=transform)
     ```
     """
 
@@ -611,6 +656,38 @@ class SparseApertureBuilder(ApertureBuilder):
     Passing ``sparse=True`` instead returns one local transmission plus explicit
     centres. Global obscurations cannot be represented by that shared local
     transmission.
+
+    Examples
+    --------
+    Materialise the same repeated aperture globally or as a compact sparse optic:
+
+    ```python
+    import dLux as dl
+
+    # Construct a repeated sparse-aperture builder
+    builder = dl.SparseApertureBuilder(
+        subaperture=dl.Circle(diameter=0.2),
+        centers=[
+            [-0.3, 0.0],
+            [0.0, 0.3],
+            [0.3, 0.0],
+        ],
+        opd=dl.ZernikeDef(
+            orders=[1, 2],
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+        oversample=5,
+    )
+
+    # Build the complete aperture on one global grid
+    global_grid = dl.GridSpec(n=256, diam=1.0, unit="m")
+    transmission, basis = builder.build(global_grid)
+    optic = builder(global_grid)
+
+    # Build one compact local aperture and retain its explicit centres
+    local_grid = dl.GridSpec(n=64, diam=0.25, unit="m")
+    sparse_optic = builder(local_grid, sparse=True)
+    ```
     """
 
     centers: Array

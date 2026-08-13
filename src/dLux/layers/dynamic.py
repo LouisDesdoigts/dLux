@@ -127,7 +127,29 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
 
 
 class DynamicOptic(BaseDynamicLayer, Optic):
-    """A scalar optic with independently static or coordinate-dependent leaves."""
+    """A scalar optic with independently static or coordinate-dependent leaves.
+
+    Examples
+    --------
+    Evaluate a Zernike OPD on polynomially distorted wavefront coordinates:
+
+    ```python
+    import dLux as dl
+
+    # Construct a coordinate-dependent optic
+    optic = dl.DynamicOptic(
+        transmission=dl.Circle(diameter=1.0, edge=1.0),
+        opd=dl.DynamicZernikeBasis(orders=[2, 3], diameter=1.0),
+        transformation=dl.Distortion(order=3),
+        normalise=True,
+    )
+
+    # Evaluate and apply the optic on the incident wavefront grid
+    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+    wavefront = optic(wavefront)
+    ```
+    """
 
     coordinates: Array | GridSpec | None
     transformation: BaseCoordTransform | None

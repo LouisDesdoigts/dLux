@@ -407,13 +407,62 @@ class Wavefront(ContinuousField):
 
     Examples
     --------
-    Construct a monochromatic unit-power pupil field:
+    Construct, manipulate, and propagate monochromatic, chromatic, and spatially
+    vectorised wavefronts:
 
     ```python
+    import jax.numpy as np
+
     import dLux as dl
 
+
+    # Construct a monochromatic wavefront
     grid = dl.GridSpec(n=128, diam=1.0, unit="m")
-    wavefront = dl.Wavefront(650e-9, grid)
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+
+    # Generate a simple circular aperture
+    builder = dl.SimpleCircular(diameter=1.0)
+    optic = builder(grid)  # Generate the optic on the grid
+    wavefront = optic(wavefront)  # Apply it to the wavefront
+
+    # Apply common optical transformations
+    wavefront = wavefront.tilt([1e-6, -2e-6])  # Angular (x, y) offset in radians
+    wavefront = wavefront.normalise()  # Renormalise the total field power to one
+
+    # Generate a propagator to the focal plane and propagate the wavefront
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
+    propagator = dl.Fraunhofer(focal_grid)
+    wavefront = propagator(wavefront)
+
+    # Access the Wavefront values
+    amplitude = wavefront.amplitude
+    phase = wavefront.phase
+    intensity = wavefront.intensity
+    power = wavefront.power
+
+    # Construct a chromatic wavefront, reusing the same grid
+    wavelengths = np.linspace(600e-9, 700e-9, 5)
+    wavefront = dl.Wavefront(wavelength=wavelengths, grid=grid)
+
+    # We can use the same optical layers to manipulate the wavefront
+    wavefront = optic(wavefront)
+    wavefront = propagator(wavefront)
+
+    # Get the wavefront intensity
+    intensity = wavefront.intensity
+
+    # Construct a chromatic sparse wavefront
+    centers = np.array([[-1.0, 0.0], [1.0, 0.0]])
+    grid = dl.GridSpec(n=128, c=centers, diam=1.0, unit="m")
+    wavefront = dl.Wavefront(wavelength=wavelengths, grid=grid)
+
+    # Reuse the same optic and propagator and interfere the output
+    wavefront = optic(wavefront)
+    wavefront = propagator(wavefront)
+    wavefront = dl.Interfere()(wavefront)
+
+    # Get the wavefront intensity
+    intensity = wavefront.intensity
     ```
     """
 
@@ -833,6 +882,60 @@ class PolarisedWavefront(Wavefront):
     tracking a 2x2 complex coherence matrix. Phasors have shape
     ``(..., 2, 2, ny, nx)`` with leading vectorisation dimensions, Jones axes,
     and final spatial axes.
+
+    Examples
+    --------
+    Construct and propagate a Jones field through polarising optical elements:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+
+    # Construct an unpolarised wavefront in the Jones representation
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    wavefront = dl.PolarisedWavefront(wavelength=650e-9, grid=grid)
+
+    # Generate and apply a circular aperture
+    builder = dl.SimpleCircular(diameter=1.0)
+    optic = builder(grid)
+    wavefront = optic(wavefront)
+
+    # Apply polarising optical elements
+    polariser = dl.LinearPolariser(angle=np.pi / 4)
+    retarder = dl.Retarder(retardance=np.pi / 2, angle=0.0)
+    wavefront = polariser(wavefront)
+    wavefront = retarder(wavefront)
+
+    # Propagate the Jones field to the focal plane
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
+    propagator = dl.Fraunhofer(focal_grid)
+    wavefront = propagator(wavefront)
+
+    # Access the polarised field values
+    jones = wavefront.phasor
+    stokes = wavefront.stokes()
+    intensity = wavefront.intensity
+    ```
+
+    Applying a polarising layer to a scalar wavefront promotes it automatically:
+
+    ```python
+    # Construct a regular wavefront
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+    wavefront = optic(wavefront)
+
+    # Applying a polarising layer returns a PolarisedWavefront
+    wavefront = polariser(wavefront)
+    wavefront = retarder(wavefront)
+    wavefront = propagator(wavefront)
+
+    # Evaluate the output for horizontally polarised input light
+    input_stokes = np.array([1.0, 1.0, 0.0, 0.0])
+    stokes = wavefront.stokes(input_stokes)
+    intensity = wavefront.intensity_from_stokes(input_stokes)
+    ```
     """
 
     grid: GridSpec
@@ -1044,15 +1147,46 @@ class Intensity(DiscreteField):
 
     Examples
     --------
-    Convert a propagated wavefront, then explicitly begin detector-image modelling:
+    Construct an intensity and apply deterministic detector transformations:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct deterministic intensity data on a detector grid
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    intensity = dl.Intensity(data=data, grid=grid)
+
+    # Apply individual detector layers
+    intensity = dl.Jitter(sigma=0.5)(intensity)
+    intensity = dl.Sensitivity(response=0.8)(intensity)
+    intensity = dl.Bias(bias=5.0)(intensity)
+
+    # Apply common deterministic field operations
+    intensity = intensity.normalise(value=1e5)
+    intensity = intensity.rotate(np.deg2rad(5))
+    intensity = intensity.downsample(2)
+    ```
+
+    Convert a propagated wavefront into an intensity:
 
     ```python
     import dLux as dl
 
-    grid = dl.GridSpec(n=64, diam=1.0, unit="m")
-    wavefront = dl.Wavefront(650e-9, grid)
+    # Construct and propagate a wavefront
+    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=pupil_grid)
+
+    optic = dl.SimpleCircular(diameter=1.0)(pupil_grid)
+    propagator = dl.Fraunhofer(focal_grid)
+    wavefront = propagator(optic(wavefront))
+
+    # Convert the wavefront into deterministic intensity
     intensity = wavefront.to_intensity()
-    image = intensity.to_image(read_noise=3.0)
     ```
     """
 
@@ -1178,17 +1312,34 @@ class Image(DiscreteField):
 
     Examples
     --------
-    Convert expected intensity into a noisy mean exposure:
+    Construct an image and simulate a noisy mean exposure:
 
     ```python
-    import jax.numpy as np
     import jax.random as jr
-    import dLux as dl
 
-    grid = dl.GridSpec(n=32, d=20, unit="mas")
-    intensity = dl.Intensity(np.full((32, 32), 10.0), grid)
-    image = dl.Image(intensity, read_noise=3.0)
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct an image model with Gaussian read noise
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    image = dl.Image(data=data, grid=grid, read_noise=3.0)
+
+    # Simulate and average multiple noisy frames
     exposure = image.simulate(jr.key(0), n_frames=16)
+
+    # Access the realised data and its uncertainty
+    data = exposure.data
+    std = exposure.std
+    variance = exposure.variance
+    ```
+
+    Convert deterministic intensity into an image model:
+
+    ```python
+    # Convert deterministic intensity into an image model
+    intensity = dl.Intensity(data=data, grid=grid)
+    image = intensity.to_image(read_noise=3.0)
     ```
     """
 

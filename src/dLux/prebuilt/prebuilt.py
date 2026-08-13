@@ -50,11 +50,25 @@ class SimpleCircular(ApertureBuilder):
 
     Examples
     --------
+    Construct a circular pupil with a secondary, supports, and low-order OPD:
+
     ```python
     import dLux as dl
 
+    # Construct a circular pupil with a secondary and radial supports
+    pupil = dl.SimpleCircular(
+        diameter=1.0,
+        secondary_diameter=0.3,
+        spider_width=0.02,
+        spider_angles=[0, 120, 240],
+        opd=dl.ZernikeDef(
+            orders=[2, 3],  # Skip piston, tip, and tilt
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+    )
+
+    # Materialise the pupil as an optical layer
     grid = dl.GridSpec(n=128, diam=1.2, unit="m")
-    pupil = dl.SimpleCircular(1.0, secondary_diameter=0.3)
     optic = pupil(grid)
     ```
     """
@@ -134,12 +148,27 @@ class SegmentedHex(SparseApertureBuilder):
 
     Examples
     --------
+    Construct a segmented pupil with independent low-order segment errors:
+
     ```python
+    import jax.random as jr
+
     import dLux as dl
 
+    # Construct a segmented pupil with independent low-order segment errors
+    pupil = dl.SegmentedHex(
+        nrings=3,
+        segment_f2f=1.3,
+        gap=0.01,
+        opd=dl.ZernikeDef(
+            orders=[1, 2],
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+    )
+
+    # Materialise the segmented pupil as an optic
     grid = dl.GridSpec(n=256, diam=7.0, unit="m")
-    pupil = dl.SegmentedHex(nrings=3, segment_f2f=1.3, gap=0.01)
-    optic = pupil(grid)
+    optic = pupil(grid=grid, key=jr.key(0))
     ```
     """
 
@@ -403,13 +432,34 @@ class NRMLike(SparseApertureBuilder):
 
     Examples
     --------
+    Materialise the same hexagonal-hole mask globally or as a sparse optic:
+
     ```python
+    import jax.random as jr
+
     import dLux as dl
 
-    centers = [[-0.5, 0.0], [0.5, 0.0], [0.0, 0.7]]
-    grid = dl.GridSpec(n=96, diam=0.6, unit="m")
-    pupil = dl.NRMLike(centers, dl.Circle(0.3))
-    optic = pupil(grid, sparse=True)
+    # Construct a non-redundant mask with per-hole aberrations
+    pupil = dl.NRMLike(
+        centers=[
+            [-0.4, 0.0],
+            [0.0, 0.3],
+            [0.4, 0.0],
+        ],
+        hole=dl.RegularPolygon(nsides=6, diameter=0.2),
+        opd=dl.ZernikeDef(
+            orders=[1, 2],
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+    )
+
+    # Materialise the complete mask on a global grid
+    global_grid = dl.GridSpec(n=256, diam=1.2, unit="m")
+    optic = pupil(grid=global_grid, key=jr.key(0))
+
+    # Materialise independent holes on a compact local grid
+    local_grid = dl.GridSpec(n=64, diam=0.25, unit="m")
+    sparse_optic = pupil(grid=local_grid, key=jr.key(0), sparse=True)
     ```
     """
 
@@ -496,11 +546,28 @@ class HSTLike(SimpleCircular):
 
     Examples
     --------
+    Materialise the representative pupil or override its principal geometry:
+
     ```python
+    import jax.random as jr
+
     import dLux as dl
 
+    # Construct an HST-like pupil with low-order aberrations
+    pupil = dl.HSTLike(
+        opd=dl.ZernikeDef(
+            orders=[2, 3],  # Skip piston, tip, and tilt
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+    )
+
+    # Materialise the standard pupil as an optic
     grid = dl.GridSpec(n=256, diam=2.8, unit="m")
-    optic = dl.HSTLike()(grid)
+    optic = pupil(grid=grid, key=jr.key(0))
+
+    # Override the support width while retaining the HST-like geometry
+    wide_supports = dl.HSTLike(spider_width=0.06)
+    wide_supports_optic = wide_supports(grid)
     ```
     """
 
@@ -546,11 +613,24 @@ class JWSTLike(SegmentedHex):
 
     Examples
     --------
+    Construct the representative pupil with independent segment aberrations:
+
     ```python
+    import jax.random as jr
+
     import dLux as dl
 
+    # Construct a JWST-like pupil with independent segment aberrations
+    pupil = dl.JWSTLike(
+        opd=dl.ZernikeDef(
+            orders=[1, 2],
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+    )
+
+    # Materialise the standard pupil as an optic
     grid = dl.GridSpec(n=256, diam=7.0, unit="m")
-    optic = dl.JWSTLike()(grid)
+    optic = pupil(grid=grid, key=jr.key(0))
     ```
     """
 
@@ -605,11 +685,24 @@ class JWSTNRMLike(NRMLike):
 
     Examples
     --------
+    Materialise the ideal mask with independent low-order hole aberrations:
+
     ```python
+    import jax.random as jr
+
     import dLux as dl
 
+    # Construct the seven-hole JWST/NIRISS mask with per-hole aberrations
+    pupil = dl.JWSTNRMLike(
+        opd=dl.ZernikeDef(
+            orders=[0, 1],
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+    )
+
+    # Materialise the holes on a compact local grid
     grid = dl.GridSpec(n=96, diam=1.0, unit="m")
-    optic = dl.JWSTNRMLike()(grid, sparse=True)
+    sparse_optic = pupil(grid=grid, key=jr.key(0), sparse=True)
     ```
     """
 
@@ -660,11 +753,25 @@ class EuclidLike(ApertureBuilder):
 
     Examples
     --------
+    Widen the asymmetric supports for a stronger phase-retrieval signature:
+
     ```python
+    import jax.random as jr
+
     import dLux as dl
 
+    # Construct a Euclid-like pupil with widened asymmetric supports
+    pupil = dl.EuclidLike(
+        spider_width=0.03,
+        opd=dl.ZernikeDef(
+            orders=[2, 3],  # Skip piston, tip, and tilt
+            norm=dl.Norm(mode="rms", scale=10e-9),
+        ),
+    )
+
+    # Materialise the pupil as an optic
     grid = dl.GridSpec(n=256, diam=1.4, unit="m")
-    optic = dl.EuclidLike()(grid)
+    optic = pupil(grid=grid, key=jr.key(0))
     ```
     """
 

@@ -260,6 +260,25 @@ class Polynomial(ParametricBasis):
     Pass ``degree`` to include every total degree from zero through that value, or
     pass ``degrees`` to select total degrees explicitly. For example,
     ``degrees=[1]`` constructs only the linear terms and omits the constant term.
+
+    Examples
+    --------
+    Construct and evaluate a quadratic polynomial:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    polynomial = dl.Polynomial(degree=2, coeffs=[1.0, 0.5, -0.2])
+
+    # Evaluate the polynomial
+    variables = np.linspace(-1.0, 1.0, 100)
+    values = polynomial.evaluate(variables=variables)
+
+    # Recover the coefficients representing the evaluated values
+    coeffs = polynomial.solve_basis(values, variables=variables)
+    ```
     """
 
     coeffs: Array

@@ -334,6 +334,36 @@ class Fraunhofer(FocalPropagator):
         Numerical propagation method.
     inverse : bool
         Propagate from the focal plane back to a physical pupil plane.
+
+    Examples
+    --------
+    Propagate with explicit MFT sampling, in reverse, or at native FFT sampling:
+
+    ```python
+    import dLux as dl
+
+    # Construct the pupil and focal-plane grids
+    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
+
+    # Construct the forward and inverse MFT propagators
+    forward = dl.Fraunhofer(focal_grid)
+    inverse = dl.Fraunhofer(pupil_grid, inverse=True)
+
+    # Construct an apertured pupil wavefront
+    pupil = dl.SimpleCircular(diameter=0.9)(pupil_grid)
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=pupil_grid)
+    wavefront = pupil(wavefront)
+
+    # Propagate to the focal plane and back to the pupil
+    focal_wavefront = forward(wavefront)
+    pupil_wavefront = inverse(focal_wavefront)
+
+    # Alternatively, use native FFT sampling with two-times padding
+    pad_spec = dl.ResizeSpec(pad=2)
+    fft = dl.Fraunhofer(pad_spec, method="fft")
+    fft_wavefront = fft(wavefront)
+    ```
     """
 
     grid: BaseGridSpec
@@ -397,6 +427,36 @@ class Fresnel(FocalPropagator):
     inverse : bool
         Reverse MFT or LCT propagation direction. Inverse FFT propagation is not
         currently supported.
+
+    Examples
+    --------
+    Propagate to symmetric defocus planes with explicit or native FFT sampling:
+
+    ```python
+    import dLux as dl
+
+    # Construct the pupil and defocused focal-plane grids
+    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
+
+    # Construct propagators to either side of focus
+    positive_defocus = dl.Fresnel(focal_grid, defocus=1e-3)
+    negative_defocus = dl.Fresnel(focal_grid, defocus=-1e-3)
+
+    # Construct an apertured pupil wavefront
+    pupil = dl.SimpleCircular(diameter=0.9)(pupil_grid)
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=pupil_grid)
+    wavefront = pupil(wavefront)
+
+    # Propagate to the two defocused focal planes
+    positive_wavefront = positive_defocus(wavefront)
+    negative_wavefront = negative_defocus(wavefront)
+
+    # Alternatively, use native FFT sampling with two-times padding
+    pad_spec = dl.ResizeSpec(pad=2)
+    fft = dl.Fresnel(pad_spec, defocus=1e-3, method="fft")
+    fft_wavefront = fft(wavefront)
+    ```
     """
 
     grid: BaseGridSpec
@@ -473,6 +533,40 @@ class ABCDPropagator(Propagator):
         Explicit LCT output grid or FFT resizing specification.
     method : {"lct", "fft"}
         Numerical propagation method.
+
+    Examples
+    --------
+    Compose and propagate through a slightly defocused optical relay:
+
+    ```python
+    import dLux as dl
+
+    # Construct the pupil and focal-plane sampling grids
+    pupil_grid = dl.GridSpec(n=128, diam=0.01, unit="m")
+    focal_grid = dl.GridSpec(n=128, diam=0.01, unit="m")
+
+    # Construct a slightly defocused optical relay
+    propagator = dl.ABCDPropagator(
+        ABCDs=[
+            ("space_in", dl.ABCDFreeSpace(distance=1.0)),
+            ("lens", dl.ABCDLens(focal_length=0.5)),
+            ("space_out", dl.ABCDFreeSpace(distance=1.0)),
+            ("defocus", dl.ABCDFreeSpace(distance=0.01)),
+        ],
+        grid=focal_grid,
+    )
+
+    # Construct an apertured pupil wavefront
+    pupil = dl.SimpleCircular(diameter=0.008)(pupil_grid)
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=pupil_grid)
+    wavefront = pupil(wavefront)
+
+    # Propagate through the composed optical train
+    wavefront = propagator(wavefront)
+
+    # Access the combined ABCD matrix
+    abcd = propagator.abcd
+    ```
     """
 
     grid: BaseGridSpec
@@ -549,6 +643,29 @@ class FreeSpace(Propagator):
         Optional padding, cropping, or output-size specification.
     crop : bool
         Crop the propagated array according to ``grid``.
+
+    Examples
+    --------
+    Propagate forwards and backwards with padded angular-spectrum calculations:
+
+    ```python
+    import dLux as dl
+
+    # Construct padded forward and reverse free-space propagators
+    resize = dl.ResizeSpec(pad=4, crop=4)
+    forward = dl.FreeSpace(distance=100.0, grid=resize)
+    reverse = dl.FreeSpace(distance=-100.0, grid=resize)
+
+    # Construct an apertured wavefront
+    grid = dl.GridSpec(n=128, diam=0.01, unit="m")
+    pupil = dl.SimpleCircular(diameter=0.008)(grid)
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+    wavefront = pupil(wavefront)
+
+    # Propagate forwards and then in the reverse axial direction
+    wavefront = forward(wavefront)
+    wavefront = reverse(wavefront)
+    ```
     """
 
     grid: BaseGridSpec

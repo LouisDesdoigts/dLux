@@ -208,6 +208,34 @@ class Optic(TransmissiveLayer, AberratedLayer):
         Additional phase in radians.
     normalise : bool
         Normalise the resulting wavefront to unit power.
+
+    Examples
+    --------
+    Combine amplitude transmission, OPD, and phase in one optical layer:
+
+    ```python
+    import jax.random as jr
+
+    import dLux as dl
+
+    # Construct the sampled optical components
+    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
+    transmission = dl.Circle(diameter=1.0)(grid)
+    opd = 10e-9 * jr.normal(jr.key(0), transmission.shape)
+    phase = 0.1 * jr.normal(jr.key(1), transmission.shape)
+
+    # Combine the transmission, OPD, and phase into one optic
+    optic = dl.Optic(
+        transmission=transmission,
+        opd=opd,
+        phase=phase,
+        normalise=True,
+    )
+
+    # Apply the optic to a wavefront
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+    wavefront = optic(wavefront)
+    ```
     """
 
     transmission: Array | Parametric | None
@@ -280,6 +308,25 @@ class Tilt(OpticalLayer):
         Two angular offsets in ``(x, y)`` order.
     unit : str
         Angular unit associated with ``angles``.
+
+    Examples
+    --------
+    Apply one physical angular offset across a chromatic wavefront:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    # Construct a chromatic wavefront
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    wavelengths = np.linspace(600e-9, 700e-9, 5)
+    wavefront = dl.Wavefront(wavelength=wavelengths, grid=grid)
+
+    # Apply an angular offset in convenient physical units
+    tilt = dl.Tilt(angles=[20.0, -10.0], unit="mas")
+    wavefront = tilt(wavefront)
+    ```
     """
 
     angles: Array

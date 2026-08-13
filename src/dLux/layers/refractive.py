@@ -23,6 +23,32 @@ class RefractiveOptic(OpticalLayer):
         Scalar or sampled material thickness in meters.
     n : Array or Parametric
         Wavelength-dependent or fixed refractive index.
+
+    Examples
+    --------
+    Apply a dispersive refractive thickness profile to a chromatic wavefront:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct a sampled refractive thickness profile
+    thickness = 1e-3 * dlu.gaussian(std=20, npixels=(128, 128), extent=64)
+    optic = dl.RefractiveOptic(
+        thickness=thickness,
+        n=dl.CauchyIndex(coeffs=[1.5, 0.01]),
+    )
+
+    # Construct a chromatic wavefront
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    wavelengths = np.linspace(600e-9, 700e-9, 5)
+    wavefront = dl.Wavefront(wavelength=wavelengths, grid=grid)
+
+    # Apply the wavelength-dependent optical path
+    wavefront = optic(wavefront)
+    ```
     """
 
     thickness: Array | Parametric

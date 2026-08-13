@@ -72,6 +72,29 @@ class Sensitivity(DetectorLayer):
     response : Array or Parametric
         Multiplicative detector response. Parametric values are evaluated against
         the input intensity.
+
+    Examples
+    --------
+    Apply a spatially varying pixel-response map:
+
+    ```python
+    import jax.random as jr
+
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct a spatially varying detector sensitivity
+    response = jr.uniform(jr.key(0), (64, 64), minval=0.95, maxval=1.0)
+    sensitivity = dl.Sensitivity(response=response)
+
+    # Construct an input detector intensity
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    intensity = dl.Intensity(data=data, grid=grid)
+
+    # Apply the pixel sensitivity
+    intensity = sensitivity(intensity)
+    ```
     """
 
     response: Array | Parametric
@@ -108,6 +131,27 @@ class Convolve(DetectorLayer):
     ----------
     kernel : Array or Parametric
         Two-dimensional convolution kernel in array ``(y, x)`` order.
+
+    Examples
+    --------
+    Convolve detector intensity with a compact Gaussian kernel:
+
+    ```python
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct a detector convolution kernel
+    kernel = dlu.gaussian(std=1.0, npixels=(9, 9), extent=4)
+    convolution = dl.Convolve(kernel=kernel)
+
+    # Construct an input detector intensity
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    intensity = dl.Intensity(data=data, grid=grid)
+
+    # Convolve the final two spatial axes
+    intensity = convolution(intensity)
+    ```
     """
 
     kernel: Array | Parametric
@@ -159,6 +203,33 @@ class Jitter(DetectorLayer):
         Odd detector-pixel kernel dimensions in physical ``(x, y)`` order.
     oversample : int or tuple[int, int]
         Sub-pixel integration factors in physical ``(x, y)`` order.
+
+    Examples
+    --------
+    Apply anisotropic detector-pixel jitter and inspect its sampled kernel:
+
+    ```python
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct anisotropic jitter in physical (x, y) pixel order
+    jitter = dl.Jitter(
+        sigma=[0.5, 1.0],
+        kernel_size=9,
+        oversample=3,
+    )
+
+    # Construct an input detector intensity
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    intensity = dl.Intensity(data=data, grid=grid)
+
+    # Apply the normalised jitter kernel
+    intensity = jitter(intensity)
+
+    # Access the kernel directly
+    kernel = jitter.kernel()
+    ```
     """
 
     sigma: Array | Parametric
@@ -235,6 +306,29 @@ class Bias(DetectorLayer):
     ----------
     bias : Array or Parametric
         Additive detector signal broadcast against the input intensity.
+
+    Examples
+    --------
+    Add a spatially varying detector background:
+
+    ```python
+    import jax.random as jr
+
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct a spatially varying detector bias
+    bias = jr.uniform(jr.key(0), (64, 64), minval=5.0, maxval=10.0)
+    bias_layer = dl.Bias(bias=bias)
+
+    # Construct an input detector intensity
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    intensity = dl.Intensity(data=data, grid=grid)
+
+    # Add the detector bias
+    intensity = bias_layer(intensity)
+    ```
     """
 
     bias: Array | Parametric
@@ -271,6 +365,32 @@ class Gain(DetectorLayer):
     ----------
     gain : Array or Parametric
         Multiplicative gain or context-dependent nonlinear response.
+
+    Examples
+    --------
+    Apply fixed and intensity-dependent detector gain:
+
+    ```python
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct a fixed detector gain
+    gain = dl.Gain(gain=2.0)
+
+    # Construct an input detector intensity
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    intensity = dl.Intensity(data=data, grid=grid)
+
+    # Apply the fixed detector gain
+    intensity = gain(intensity)
+
+    # Construct and apply a second-order intensity-dependent gain
+    nonlinear_gain = dl.Gain(
+        gain=dl.Polynomial(degrees=[1, 2], coeffs=[1.0, 1e-6])
+    )
+    intensity = nonlinear_gain(intensity)
+    ```
     """
 
     gain: Array | Parametric
@@ -303,6 +423,33 @@ class Saturation(DetectorLayer):
     ----------
     limit : Array or Parametric
         Maximum retained intensity, broadcast over the input data.
+
+    Examples
+    --------
+    Apply fixed and spatially varying detector limits:
+
+    ```python
+    import jax.random as jr
+
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct a fixed detector saturation limit
+    saturation = dl.Saturation(limit=5e3)
+
+    # Construct an input detector intensity
+    grid = dl.GridSpec(n=64, d=10, unit="um")
+    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
+    intensity = dl.Intensity(data=data, grid=grid)
+
+    # Apply the fixed saturation limit
+    intensity = saturation(intensity)
+
+    # Apply a spatially varying saturation limit
+    limit = jr.uniform(jr.key(0), (64, 64), minval=4e3, maxval=6e3)
+    saturation = dl.Saturation(limit=limit)
+    intensity = saturation(intensity)
+    ```
     """
 
     limit: Array | Parametric

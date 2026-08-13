@@ -39,6 +39,26 @@ class SpectralPolynomial(Polynomial):
     trailing wavelength axis. Realised weights must remain positive with a finite,
     non-zero sum. Equal normalisation weights every wavelength sample equally, so it
     represents equal-width bins and is not quadrature for nonuniform sampling.
+
+    Examples
+    --------
+    Use polynomial spectral weights directly in a source:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    # Construct polynomial spectral weights around a flat baseline
+    spectrum = dl.SpectralPolynomial(degree=2, coeffs=[0.5, -0.2])
+
+    # Use the parameterisation directly in a source
+    wavelengths = np.linspace(600e-9, 700e-9, 10)
+    source = dl.Source(wavelengths, weights=spectrum)
+
+    # Evaluate the unit-sum spectral weights
+    weights = spectrum.evaluate(wavelengths=wavelengths)
+    ```
     """
 
     normalise: bool
@@ -176,6 +196,26 @@ class Blackbody(Parametric):
     occupies the trailing wavelength axis. Equal normalisation weights every
     wavelength sample equally, so it represents equal-width bins and is not
     quadrature for nonuniform sampling.
+
+    Examples
+    --------
+    Use a blackbody photon spectrum directly in a source:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    # Construct a blackbody photon spectrum
+    spectrum = dl.Blackbody(temperature=6000)
+
+    # Use the parameterisation directly in a source
+    wavelengths = np.linspace(400e-9, 900e-9, 20)
+    source = dl.Source(wavelengths, weights=spectrum)
+
+    # Evaluate the unit-sum spectral weights
+    weights = spectrum.evaluate(wavelengths=wavelengths)
+    ```
     """
 
     temperature: Array

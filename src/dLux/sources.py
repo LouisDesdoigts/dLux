@@ -448,26 +448,51 @@ class Source(BaseSource, Spectrum):
 
     Examples
     --------
-    Define a polychromatic star using convenient physical units:
+    Define and model a polychromatic point source using physical units:
 
     ```python
     import jax.numpy as np
+
     import dLux as dl
 
+    # Construct a polychromatic point source
+    wavelengths = np.linspace(1.0, 1.2, 10)
     source = dl.Source(
-        wavelengths=np.linspace(600, 700, 5),
+        wavelengths=wavelengths,
+        weights=dl.Blackbody(temperature=6000),
         position=[20.0, -10.0],
         flux=1e5,
-        units={"wavelengths": "nm", "position": "mas"},
+        units={"wavelengths": "um", "position": "mas"},
     )
 
-    pupil_grid = dl.GridSpec(n=64, diam=1.0, unit="m")
-    focal_grid = dl.GridSpec(n=32, d=25, unit="mas")
-    pupil = dl.SimpleCircular(0.9)(pupil_grid)
+    # Build a simple optical system
+    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
     optics = dl.OpticalSystem(
-        [("pupil", pupil), ("focus", dl.Fraunhofer(focal_grid))],
-        pupil_grid,
+        layers=[
+            ("pupil", dl.SimpleCircular(diameter=1.0)(pupil_grid)),
+            ("focus", dl.Fraunhofer(focal_grid)),
+        ],
+        grid=pupil_grid,
     )
+
+    # Model the source through the optical system
+    intensity = source.model(optics)
+    ```
+
+    Construct and model a vectorised field of point sources:
+
+    ```python
+    # Construct a vectorised field of point sources
+    source = dl.Source(
+        wavelengths=wavelengths,
+        weights=dl.Blackbody(temperature=[4000, 6000, 8000]),
+        position=[[-30.0, 10.0], [0.0, 0.0], [25.0, -20.0]],
+        flux=[2e4, 1e5, 5e4],
+        units={"wavelengths": "um", "position": "mas"},
+    )
+
+    # Model and sum every source component
     intensity = source.model(optics)
     ```
     """
@@ -566,6 +591,43 @@ class BinarySource(BaseSource, Spectrum):
     units : dict or None
         Unit overrides for wavelength, angular position, photon flux, and resolved
         distributions, following the same conventions as :class:`Source`.
+
+    Examples
+    --------
+    Construct and model a binary whose components have distinct spectra:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    # Construct a polychromatic binary source
+    wavelengths = np.linspace(1.0, 1.2, 10)
+    source = dl.BinarySource(
+        wavelengths=wavelengths,
+        weights=dl.Blackbody(temperature=[6000, 4500]),
+        centre=[10.0, -5.0],
+        separation=40.0,
+        position_angle=np.deg2rad(30),
+        contrast=0.2,
+        flux=1e5,
+        units={"wavelengths": "um", "position": "mas"},
+    )
+
+    # Build a simple optical system
+    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
+    optics = dl.OpticalSystem(
+        layers=[
+            ("pupil", dl.SimpleCircular(diameter=1.0)(pupil_grid)),
+            ("focus", dl.Fraunhofer(focal_grid)),
+        ],
+        grid=pupil_grid,
+    )
+
+    # Model both components into one intensity
+    intensity = source.model(optics)
+    ```
     """
 
     wavelengths: Array | Parametric

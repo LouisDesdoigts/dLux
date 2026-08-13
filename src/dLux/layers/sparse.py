@@ -58,6 +58,32 @@ class SparseOptic(Optic):
     Parameter coefficients are shared when they retain their native shape. A leading
     axis matching the number of centers gives each sub-aperture independent
     coefficients. The same convention applies to polynomial distortion arrays.
+
+    Examples
+    --------
+    Propagate locally sampled apertures and coherently interfere their fields:
+
+    ```python
+    import dLux as dl
+
+    # Construct a sparse optic from one locally sampled aperture
+    grid = dl.GridSpec(n=64, diam=0.25, unit="m")
+    optic = dl.SparseOptic(
+        centers=[[-0.3, 0.0], [0.0, 0.3], [0.3, 0.0]],
+        transmission=dl.Circle(diameter=0.2)(grid),
+        opd=dl.DynamicZernikeBasis(order=4, diameter=0.2),
+        normalise=True,
+    )
+
+    # Apply the optic to generate one field per aperture
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+    wavefront = optic(wavefront)
+
+    # Propagate each aperture independently and interfere the fields
+    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
+    wavefront = dl.Fraunhofer(focal_grid)(wavefront)
+    wavefront = dl.Interfere()(wavefront)
+    ```
     """
 
     transmission: Array | Parametric | None

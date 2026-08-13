@@ -88,6 +88,45 @@ class PolarisingOptic(BasePolarisingOptic):
     ----------
     jones : Array
         Jones matrix with shape `(2, 2, ...)`.
+
+    Examples
+    --------
+    Apply uniform and spatially varying Jones matrices:
+
+    ```python
+    import jax.numpy as np
+    import jax.random as jr
+
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Construct a polarising optic from a uniform Jones matrix
+    jones = np.array(
+        [
+            [1.0, 0.0],
+            [0.0, 1.0j],
+        ]
+    )
+    optic = dl.PolarisingOptic(jones=jones)
+
+    # Apply it to a scalar wavefront
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+    wavefront = optic(wavefront)
+
+    # The output is promoted to a polarised wavefront
+    stokes = wavefront.stokes()
+    intensity = wavefront.intensity
+
+    # Construct a spatially varying linear polariser
+    angle = jr.uniform(jr.key(0), (128, 128), minval=0, maxval=np.pi)
+    jones = dlu.linear_polariser(angle)
+    optic = dl.PolarisingOptic(jones=jones)
+
+    # Apply the spatial Jones field to a wavefront
+    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
+    wavefront = optic(wavefront)
+    ```
     """
 
     jones: Array

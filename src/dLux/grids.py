@@ -64,6 +64,29 @@ class BaseGridSpec(Base):
 class ResizeSpec(BaseGridSpec):
     """Define output sampling by an explicit size or integer resize factors.
 
+    Examples
+    --------
+    Apply factor-based or explicit resizing to an array:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    # Define padding and cropping around an operation
+    resize = dl.ResizeSpec(pad=2, crop=2)
+    array = np.ones((64, 64))
+
+    # Apply the resizing operations
+    padded = resize.pad_array(array)
+    cropped = resize.crop_array(padded)
+    output_size = resize.output_size(array.shape)
+
+    # Alternatively, resize directly to an explicit output size
+    resize = dl.ResizeSpec(n=96)
+    resized = resize.resize(array)
+    ```
+
     Parameters
     ----------
     n : int, tuple[int, ...], or None
@@ -801,6 +824,28 @@ class BaseCoordTransform(Base):
 class TransformChain(BaseCoordTransform):
     """Apply an ordered collection of coordinate transformations.
 
+    Examples
+    --------
+    Apply an ordered rotation and polynomial distortion to a grid:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    # Construct an ordered rotation and polynomial distortion
+    transform = dl.TransformChain(
+        [
+            ("rotation", dl.Affine(rotation=np.deg2rad(15))),
+            ("distortion", dl.Distortion(order=3)),
+        ]
+    )
+
+    # Apply the complete transformation chain to a grid
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    coordinates = grid.transformed(transform)
+    ```
+
     Parameters
     ----------
     transformations : sequence or dict
@@ -840,6 +885,25 @@ class Distortion(BaseCoordTransform):
     Polynomial coefficients have shape ``(2, n_terms)`` for output ``x`` and
     ``y``. Leading coefficient axes vectorise independent distortions; matching
     coordinate batches are transformed element-by-element.
+
+    Examples
+    --------
+    Construct and apply a shift-invariant polynomial distortion:
+
+    ```python
+    import dLux as dl
+
+    # Construct a third-order shift-invariant polynomial distortion
+    transform = dl.Distortion(order=3, shift_invariant=True)
+
+    # Apply the distortion to a grid
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    coordinates = grid.transformed(transform)
+
+    # Inspect the polynomial terms and their coefficients
+    powers = transform.powers
+    coeffs = transform.distortion
+    ```
 
     Parameters
     ----------
@@ -953,6 +1017,30 @@ class Affine(BaseCoordTransform):
     Translation, rotation, scale, and shear map coordinates into a transformed
     object's local frame. Operations are composed in the order supplied by ``order``.
     Parameter and coordinate leading dimensions use paired JAX broadcasting.
+
+    Examples
+    --------
+    Transform a grid using semantic affine parameters:
+
+    ```python
+    import jax.numpy as np
+
+    import dLux as dl
+
+    # Construct a semantic affine transformation
+    transform = dl.Affine(
+        translation=[0.1, -0.1],
+        rotation=np.deg2rad(15),
+        scale=[1.0, 0.8],
+    )
+
+    # Apply the transformation to grid coordinates
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    coordinates = grid.transformed(transform)
+
+    # Access the equivalent affine matrix and offset
+    matrix, offset = transform.coeffs
+    ```
 
     Parameters
     ----------

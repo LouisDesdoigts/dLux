@@ -143,6 +143,30 @@ class ParametricBasis(Parametric):
 class Basis(ParametricBasis):
     """Parameterise an explicitly sampled basis array.
 
+    Examples
+    --------
+    Generate and evaluate an explicit Zernike basis:
+
+    ```python
+    import jax.random as jr
+
+    import dLux as dl
+    import dLux.utils as dlu
+
+    # Generate an explicit Zernike basis
+    grid = dl.GridSpec(n=128, diam=1.0, unit="m").broadcast(2)
+    vectors = dlu.zernike_basis([4, 5, 6], grid.coordinates, diameter=0.9)
+
+    # Parameterise the basis with random coefficients
+    basis = dl.Basis(vectors, coeffs=1e-9 * jr.normal(jr.key(0), (3,)))
+
+    # Evaluate the parameterisation
+    values = basis.evaluate()
+
+    # Recover the coefficients representing the evaluated array
+    coeffs = basis.solve_basis(values)
+    ```
+
     Parameters
     ----------
     basis : Array
@@ -421,7 +445,24 @@ class CLIMBBasis(Basis):
 
 
 class FourierBasis(ImplicitBasis):
-    """A parameterisation over a separable real Fourier basis."""
+    """A parameterisation over a separable real Fourier basis.
+
+    Examples
+    --------
+    Construct and evaluate the basis without materialising its vectors:
+
+    ```python
+    import dLux as dl
+
+    # Construct and evaluate an implicit Fourier basis
+    basis = dl.FourierBasis(npix=128, n_modes=8)
+    values = basis.evaluate()
+
+    # Evaluate the same basis at a different resolution
+    resized = basis.resize(npix=256)
+    resized_values = resized.evaluate()
+    ```
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
@@ -480,7 +521,19 @@ class FourierBasis(ImplicitBasis):
 
 
 class SplineBasis(ImplicitBasis):
-    """A fixed 2D array represented by a lower-resolution grid of spline knots."""
+    """A fixed 2D array represented by a lower-resolution grid of spline knots.
+
+    Examples
+    --------
+    Construct and evaluate an implicit spline basis:
+
+    ```python
+    import dLux as dl
+
+    basis = dl.SplineBasis(npix=128, n_knots=8)
+    values = basis.evaluate()
+    ```
+    """
 
     coeffs: Array
     shape: tuple[int, ...] = eqx.field(static=True)
