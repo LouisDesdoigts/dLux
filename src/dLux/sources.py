@@ -99,9 +99,10 @@ def _convert_flux(flux, unit):
 class BaseSource(ParametricHolder):
     """Base contract for source brightness and optional resolved distribution.
 
-    Flux is resolved from the configured linear or logarithmic representation before
-    modelling. A resolved distribution describes relative angular brightness and is
-    convolved with the optical response by concrete source models.
+    Flux is resolved from the configured linear or logarithmic representation and
+    represents total brightness across wavelength. A resolved distribution describes
+    relative angular brightness and is convolved with the optical response by
+    concrete source models.
     """
 
     flux: Array | Parametric | None
@@ -114,7 +115,8 @@ class BaseSource(ParametricHolder):
         Parameters
         ----------
         flux : Array, Parametric, or None
-            Photon flux in the configured scaling. ``None`` resolves to unit flux.
+            Total photon flux across wavelength in the configured scaling. ``None``
+            resolves to unit flux.
         distribution : Array, Parametric, or None
             Shared or per-source relative spatial distribution.
         units : dict or None
@@ -129,14 +131,15 @@ class BaseSource(ParametricHolder):
 
         ``nsource`` selects scalar or vectorised source validation. Additional
         ``context`` is passed to parametric leaves. Returns ``(flux, distribution)``;
-        flux is in photons and distribution is ``None`` or a relative linear array.
+        flux is total across wavelength in photons and distribution is ``None`` or a
+        relative linear array.
         """
         flux = self.flux_params(nsource, **context)
         distribution = self.distribution_params(nsource, **context)
         return flux, distribution
 
     def flux_params(self, nsource=None, **context):
-        """Resolve flux into photons using the configured source unit.
+        """Resolve total flux across wavelength into photons.
 
         A single source returns a scalar. With ``nsource`` supplied, scalar flux is
         broadcast and vector flux must have shape ``(nsource,)``.
@@ -328,9 +331,10 @@ class BaseSource(ParametricHolder):
 class Spectrum(ParametricHolder):
     """Wavelength samples and their corresponding spectral weights.
 
-    Explicit weights are consumed exactly as supplied. Spectral parametrics may
-    optionally normalise each spectrum to unit sum along its trailing wavelength
-    axis. Realised weights must be positive with a finite, non-zero sum.
+    Resolved weights are normalised to unit sum along their trailing wavelength
+    axis. Explicit arrays therefore define relative spectral weights, while omitted
+    weights define a flat spectrum. Realised weights must be positive with a finite,
+    non-zero sum.
 
     Wavelengths are converted to metres internally. Leading weight axes may represent
     vectorised source spectra; the final axis always corresponds to wavelength.
@@ -358,9 +362,9 @@ class Spectrum(ParametricHolder):
         wavelengths : Array or Parametric
             Scalar or one-dimensional samples in the configured wavelength unit.
         weights : Array, Parametric, or None
-            Values whose trailing axis matches the wavelength axis. Omitted weights
-            default to ones for explicit wavelengths and are required for parametric
-            wavelengths.
+            Relative values whose trailing axis matches the wavelength axis. Omitted
+            weights define a flat spectrum for explicit wavelengths and are required
+            for parametric wavelengths.
         units : dict or None
             Unit overrides, including ``wavelengths``.
         """
@@ -375,7 +379,7 @@ class Spectrum(ParametricHolder):
         self.units = _merge_units(units)
 
     def spectrum_params(self, **context: Any) -> tuple[Array, Array]:
-        """Resolve wavelengths and weights in canonical wavelength units.
+        """Resolve wavelengths and unit-sum weights in canonical wavelength units.
 
         Scalar monochromatic inputs are promoted to a length-one spectral axis.
         Parametric weights receive the resolved metre-valued ``wavelengths`` in
@@ -386,8 +390,8 @@ class Spectrum(ParametricHolder):
         wavelengths : Array
             One-dimensional wavelength samples in metres.
         weights : Array
-            Spectral weights whose trailing axis matches ``wavelengths``. Any leading
-            axes represent vectorised spectra or source components.
+            Unit-sum spectral weights whose trailing axis matches ``wavelengths``.
+            Any leading axes represent vectorised spectra or source components.
         """
         # Resolve wavelengths in canonical physical units
         wavelengths = resolve(self.wavelengths, float, spectrum=self, **context)
@@ -414,10 +418,13 @@ class Spectrum(ParametricHolder):
             raise ValueError("weights must be a 1d or 2d array.")
         if weights.shape[-1] != wavelengths.shape[0]:
             raise ValueError("weights trailing axis must match the wavelength axis.")
+
+        # Normalise every spectrum so source flux is total across wavelength
+        weights = weights / weights.sum(-1, keepdims=True)
         return wavelengths, weights
 
     def model(self, optics, return_all=False):
-        """Model this spectrum as an on-axis, unit-flux point source.
+        """Model this spectrum as an on-axis point source with unit total flux.
 
         ``optics`` is the target `OpticalSystem`. Returns its deterministic
         `Intensity`, or the complete propagation mapping when ``return_all=True``.
@@ -438,7 +445,7 @@ class Source(BaseSource, Spectrum):
         One on-sky position with shape ``(2,)``, or multiple positions with shape
         ``(nsource, 2)``, in the configured position unit.
     flux : Array, Parametric, or None
-        Scalar or per-source flux in the configured flux unit.
+        Scalar or per-source total flux across wavelength in the configured flux unit.
     weights : Array, Parametric, or None
         Shared weights with shape ``(nwavelength,)`` or per-source weights with
         shape ``(nsource, nwavelength)``.
@@ -530,7 +537,8 @@ class Source(BaseSource, Spectrum):
         position : Array, Parametric, or None
             One ``(x, y)`` position or an ``(nsource, 2)`` population.
         flux : Array, Parametric, or None
-            Scalar or ``(nsource,)`` photon flux in the configured scaling.
+            Scalar or ``(nsource,)`` total photon flux across wavelength in the
+            configured scaling.
         weights : Array, Parametric, or None
             Shared ``(nwavelength,)`` or per-source
             ``(nsource, nwavelength)`` spectral weights.
@@ -546,9 +554,9 @@ class Source(BaseSource, Spectrum):
     def params(self) -> dict:
         """Resolve all point-source parameters into a propagation mapping.
 
-        Returns wavelengths in metres, normalised or raw spectral weights according
-        to their parametric contract, position in radians, flux in photons, and the
-        optional linear spatial distribution.
+        Returns wavelengths in metres, unit-sum spectral weights, position in
+        radians, total flux across wavelength in photons, and the optional linear
+        spatial distribution.
         """
         # Resolve spectral and position parameters
         wavelengths, weights = self.spectrum_params()

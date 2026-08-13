@@ -10,13 +10,13 @@ from tests.helpers import assert_differentiable, assert_jittable
 
 
 def test_array_spectrum_contract():
-    spectrum = dl.Spectrum([0.9e-6, 1.1e-6], [0.25, 0.75])
+    spectrum = dl.Spectrum([0.9e-6, 1.1e-6], [1.0, 3.0])
 
     wavelengths, weights = assert_jittable(
         lambda value: value.spectrum_params(), spectrum
     )
     assert np.allclose(wavelengths, spectrum.wavelengths)
-    assert np.allclose(weights, spectrum.weights)
+    assert np.allclose(weights, np.array([0.25, 0.75]))
 
 
 def test_parametric_spectrum_contract():
@@ -28,7 +28,8 @@ def test_parametric_spectrum_contract():
         lambda value: value.spectrum_params(), spectrum
     )
     assert np.allclose(resolved_wavelengths, wavelengths)
-    assert np.allclose(resolved_weights, 1 + 2e5 * wavelengths)
+    expected = 1 + 2e5 * wavelengths
+    assert np.allclose(resolved_weights, expected / expected.sum())
     assert_differentiable(
         lambda coeffs: spectrum.set("weights.coeffs", coeffs).spectrum_params()[1],
         weights.coeffs,
@@ -59,7 +60,7 @@ def test_spectrum_and_source_parameters():
     wavelengths, weights = spectrum.spectrum_params()
     parameters = source.params()
     assert np.allclose(wavelengths, np.array([0.9e-6, 1.1e-6]))
-    assert np.allclose(weights, np.ones(2))
+    assert np.allclose(weights, np.full(2, 0.5))
     assert np.allclose(parameters["position"], np.array([1, -2]) * dlu.arcsec2rad(1))
     assert np.allclose(parameters["flux"], 2000)
     assert parameters["distribution"] is None
@@ -88,6 +89,38 @@ def test_vectorised_source_parameters():
     assert parameters["flux"].shape == (2,)
     assert parameters["weights"].shape == (2, 5)
     assert np.allclose(parameters["weights"].sum(-1), np.ones(2))
+
+
+@pytest.mark.parametrize(
+    "weights",
+    [
+        None,
+        np.array([1.0, 2.0, 3.0]),
+        dl.Blackbody(5000.0),
+    ],
+)
+def test_source_flux_is_total_across_wavelength(weights, make_grid):
+    source = dl.Source(
+        np.linspace(0.8e-6, 1.2e-6, 3),
+        flux=5.0,
+        weights=weights,
+    )
+
+    parameters = source.params()
+    wavefront = source.wavefront(make_grid())
+
+    assert np.allclose(parameters["weights"].sum(), 1)
+    assert np.allclose(wavefront.power.sum(), 5)
+
+
+@pytest.mark.parametrize("n_wavelength", [1, 3, 7])
+def test_flat_source_flux_is_sample_count_invariant(n_wavelength, make_grid):
+    source = dl.Source(
+        np.linspace(0.8e-6, 1.2e-6, n_wavelength),
+        flux=5.0,
+    )
+
+    assert np.allclose(source.wavefront(make_grid()).power.sum(), 5)
 
 
 def test_binary_source_parameters():
