@@ -6,7 +6,7 @@ Select a section to inspect its module diagrams and complete public API.
 
 ## [Core objects and parametrics](core/overview.md)
 
-Base, Compatibility, Fields, Grids, Bases, Parametrics, Polynomials, Refractive, Shapes, Spectral, Sources, Systems.
+Base, Compatibility, Fields, Grids, Bases, Parametrics, Parametrisations, Polynomials, Refractive, Shapes, Spectral, Sources, Systems.
 
 ## [Builders and prebuilt components](prebuilt/overview.md)
 

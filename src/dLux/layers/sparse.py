@@ -9,7 +9,13 @@ from jax import Array, vmap
 import dLux.utils as dlu
 
 from ..grids import Affine, AffineMap, BaseCoordTransform, Distortion, GridSpec
-from ..parametric import Parametric, ParametricBasis
+from ..parametric import (
+    Parametric,
+    ParametricBasis,
+    Reparametrisation,
+    Selection,
+    resolve,
+)
 from ..fields import Wavefront
 from .dynamic import BaseDynamicLayer
 from .optical import OpticalLayer, Optic
@@ -143,6 +149,8 @@ class SparseOptic(Optic):
         values, local = {}, False
         for name, shape in params:
             value = getattr(obj, name)
+            if isinstance(value, (Reparametrisation, Selection)):
+                value = resolve(value)
             if value is None or value.shape == shape:
                 values[name] = value
                 continue

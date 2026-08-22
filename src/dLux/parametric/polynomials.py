@@ -10,7 +10,7 @@ import dLux.utils as dlu
 from ..base import Base
 from ..grids import GridSpec
 from .bases import Basis, CoordBasis, ParametricBasis, _resolve_coeffs
-from .parametrics import resolve
+from .parametrics import Parametric, resolve
 
 __all__ = [
     "DynamicZernike",
@@ -55,8 +55,11 @@ def _poly_params(degree, coeffs, ndim, powers, degrees=None):
 
     # Initialise and validate the polynomial coefficients
     coeffs = np.zeros(powers.shape[1]) if coeffs is None else coeffs
-    coeffs = dlu.to_value(coeffs)
-    if coeffs.ndim < 1 or coeffs.shape[-1] != powers.shape[1]:
+    coeffs = dlu.to_value(coeffs, types=Parametric)
+    if isinstance(coeffs, Parametric) and not hasattr(coeffs, "shape"):
+        raise TypeError("Parametric coeffs must define their physical shape.")
+    coeff_shape = tuple(coeffs.shape)
+    if len(coeff_shape) < 1 or coeff_shape[-1] != powers.shape[1]:
         raise ValueError("coeffs must have trailing shape (n_terms,).")
     return powers, coeffs
 
@@ -141,7 +144,7 @@ class ZernikeBasis(_ZernikeBasis, Basis):
     `DynamicZernikeBasis` when coordinates change at runtime.
     """
 
-    coeffs: Array
+    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
 
@@ -168,7 +171,7 @@ class ZernikeBasis(_ZernikeBasis, Basis):
             Maximum radial order, including every order from zero through this value.
         orders : ArrayLike or None
             Selected radial orders expanded to complete Noll sequences.
-        coeffs : Array or None
+        coeffs : Array, Parametric, or None
             Mode coefficients, defaulting to zeros.
         diameter : float or Array
             Zernike pupil diameter in the coordinate unit.
@@ -189,7 +192,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     inferred from wavefront context when omitted.
     """
 
-    coeffs: Array
+    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
@@ -216,7 +219,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
             Maximum radial order, including every order from zero through this value.
         orders : ArrayLike or None
             Selected radial orders expanded to complete Noll sequences.
-        coeffs : Array or None
+        coeffs : Array, Parametric, or None
             Mode coefficients, defaulting to zeros.
         nsides : int
             Polygonal support side count; zero uses the circular definition.
@@ -296,7 +299,7 @@ class Polynomial(ParametricBasis):
     ```
     """
 
-    coeffs: Array
+    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     powers: Array
 
@@ -316,7 +319,7 @@ class Polynomial(ParametricBasis):
         ----------
         degree : int or None
             Maximum total degree, mutually exclusive with ``degrees`` and ``powers``.
-        coeffs : Array or None
+        coeffs : Array, Parametric, or None
             Coefficients matching the generated or supplied terms.
         ndim : int
             Number of polynomial variables.
@@ -360,7 +363,7 @@ class Polynomial(ParametricBasis):
             basis = self.calculate_basis(**context)
         else:
             basis = self.calculate_basis(variables=variables, **context)
-        return self.evaluate_basis(basis)
+        return self.evaluate_basis(basis, variables=variables, **context)
 
     def solve_basis(self, value, *, variables=None, **context):
         """Solve for polynomial coefficients representing ``value``.
@@ -384,7 +387,7 @@ class ExplicitPolynomial(Basis):
     when the coordinate field changes during evaluation.
     """
 
-    coeffs: Array
+    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
     powers: Array
@@ -408,7 +411,7 @@ class ExplicitPolynomial(Basis):
             Fixed variables used for every evaluation.
         degree : int or None
             Maximum total degree.
-        coeffs : Array or None
+        coeffs : Array, Parametric, or None
             Polynomial coefficients.
         ndim : int or None
             Variable count, inferred from coordinates when omitted.
@@ -428,7 +431,7 @@ class ExplicitPolynomial(Basis):
             )
         self.powers = powers
         basis = dlu.polynomial_basis(coordinates, powers)
-        super().__init__(basis, coeffs)
+        super().__init__(basis, coeffs, (powers.shape[1],))
 
     @staticmethod
     def _coordinates(coordinates, ndim):
@@ -471,7 +474,7 @@ class CoordinatePolynomial(Polynomial):
     coordinate transforms without rebuilding a sampled basis.
     """
 
-    coeffs: Array
+    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     powers: Array
     ndim: int = eqx.field(static=True)
@@ -491,7 +494,7 @@ class CoordinatePolynomial(Polynomial):
         ----------
         degree : int or None
             Maximum total degree, mutually exclusive with ``degrees``.
-        coeffs : Array or None
+        coeffs : Array, Parametric, or None
             Polynomial coefficients.
         ndim : int
             Number of coordinate variables.

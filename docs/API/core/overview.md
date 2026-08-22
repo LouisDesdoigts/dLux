@@ -144,6 +144,20 @@ classDiagram
 Functions: [`resolve`](parametrics.md#dLux.parametric.parametrics.resolve).
 
 
+## [Parametrisations](parametrisations.md)
+
+```mermaid
+classDiagram
+    class dLux_parametric_parametrisations_Reparametrisation["Reparametrisation"]
+    class dLux_parametric_parametrisations_Selection["Selection"]
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrisations_Reparametrisation
+    click dLux_parametric_parametrisations_Reparametrisation href "../parametrisations/#dLux.parametric.parametrisations.Reparametrisation" "Attributes: origin, matrix, latent · Properties: shape, size, ndim · Methods: to_coeffs(), to_latent(), initialise(), project(), evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrisations_Selection
+    click dLux_parametric_parametrisations_Selection href "../parametrisations/#dLux.parametric.parametrisations.Selection" "Attributes: origin, indices, latent · Properties: shape, size, ndim, mask, matrix · Methods: to_coeffs(), to_latent(), initialise(), project(), evaluate()"
+```
+
+
 ## [Polynomials](polynomials.md)
 
 ```mermaid

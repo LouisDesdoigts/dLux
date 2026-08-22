@@ -119,6 +119,7 @@ nav:
       - Grids: API/core/grids.md
       - Bases: API/core/bases.md
       - Parametrics: API/core/parametrics.md
+      - Parametrisations: API/core/parametrisations.md
       - Polynomials: API/core/polynomials.md
       - Refractive: API/core/refractive.md
       - Shapes: API/core/shapes.md
