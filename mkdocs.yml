@@ -123,6 +123,7 @@ nav:
       - Refractive: API/core/refractive.md
       - Shapes: API/core/shapes.md
       - Spectral: API/core/spectral.md
+      - Serialisation: API/core/serialisation.md
       - Sources: API/core/sources.md
       - Systems: API/core/systems.md
 
