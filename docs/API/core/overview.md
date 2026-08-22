@@ -11,7 +11,7 @@ classDiagram
     class dLux_base_Base["Base"]
     class zodiax_base_Base["Base"]
     zodiax_base_Base <|-- dLux_base_Base
-    click dLux_base_Base href "../base/#dLux.base.Base" "Methods: get(), set(), add(), multiply(), divide(), power(), min(), max()"
+    click dLux_base_Base href "../base/#dLux.base.Base" "Methods: save(), load(), get(), set(), add(), multiply(), divide(), power(), min(), max()"
 ```
 
 
@@ -255,6 +255,17 @@ classDiagram
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_spectral_Blackbody
     click dLux_parametric_spectral_Blackbody href "../spectral/#dLux.parametric.spectral.Blackbody" "Attributes: temperature, normalise · Methods: evaluate()"
 ```
+
+
+## [Serialisation](serialisation.md)
+
+```mermaid
+classDiagram
+    class dLux_serialisation_definition_ObjectDefinition["ObjectDefinition"]
+    click dLux_serialisation_definition_ObjectDefinition href "../serialisation/#dLux.serialisation.definition.ObjectDefinition" "Properties: root · Methods: from_object(), from_dict(), to_dict(), to_json(), validate(), build_template()"
+```
+
+Functions: [`save`](serialisation.md#dLux.serialisation.serialisation.save), [`load`](serialisation.md#dLux.serialisation.serialisation.load).
 
 
 ## [Sources](sources.md)

@@ -56,6 +56,10 @@
 - **Optical systems:** added a single layered `OpticalSystem`, a dedicated
   `DetectorSystem`, intermediate-state debugging, and optional wavefront returns
   from propagation.
+- **Serialisation:** added `Base.save(...)`, template-based `Base.load(...)`, and
+  functional `dLux.save(...)`/`dLux.load(...)` interfaces for validated `.dlux`
+  archives of realised JAX PyTrees. Imported Equinox classes are reconstructed
+  automatically; `like=` remains available as a structural and local-class resolver.
 - **Detector modelling:** added deterministic `Sensitivity`, `Convolve`, `Jitter`,
   `Bias`, `Gain`, and `Saturation` layers. Responses may be fixed arrays or
   parametrics, allowing spatial and nonlinear detector models to use the same layer

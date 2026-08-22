@@ -5,6 +5,8 @@ from collections.abc import Mapping
 import zodiax as zdx
 
 import dLux.utils as dlu
+from dLux.serialisation import load as _deserialise
+from dLux.serialisation import save as _serialise
 
 __all__ = ["Base"]
 
@@ -53,6 +55,57 @@ class Base(zdx.Base):
             except AttributeError:
                 pass
         return dlu.resolve_attr(self, key, *children)
+
+    def save(self, file_or_path) -> None:
+        """Save this object to a validated dLux archive.
+
+        Parameters
+        ----------
+        file_or_path : str, pathlib.Path, or binary file
+            Destination for the archive. Paths without a suffix receive ``.dlux``.
+            Binary files remain open after saving.
+
+        Raises
+        ------
+        TypeError
+            If any leaf or static value cannot be represented losslessly.
+
+        Notes
+        -----
+        The archive records a generated JSON object definition alongside the JAX
+        array payload, including diagnostic Python and package versions. Python
+        numerical values, literals, static values, and array metadata live in the
+        definition so `dLux.load` can rebuild a template without a caller-supplied
+        object.
+
+        NumPy array and scalar leaves are intentionally outside this initial
+        contract. Callables, opaque objects, weakly typed JAX arrays, and unsupported
+        JAX dtypes cannot be saved losslessly. Python integers must fit in signed 64
+        bits, and non-finite Python float and complex values are unsupported.
+        """
+        _serialise(file_or_path, self)
+
+    def load(self, file_or_path):
+        """Load a dLux archive using this object as its structural template.
+
+        Parameters
+        ----------
+        file_or_path : str, pathlib.Path, or binary file
+            Archive to read. Paths without a suffix receive ``.dlux``. Binary files
+            must be readable and seekable and remain open after loading.
+
+        Returns
+        -------
+        object : Base
+            Reconstructed object whose class and structure match this template. The
+            template itself is not modified, and archived values replace its values.
+
+        Notes
+        -----
+        This is equivalent to ``dLux.load(file_or_path, like=self)`` and is useful
+        for local or custom classes that cannot be resolved from an imported module.
+        """
+        return _deserialise(file_or_path, like=self)
 
     def _check_paths(self, parameters, updates=None):
         """Replay failed paths to recover their raised attribute errors."""

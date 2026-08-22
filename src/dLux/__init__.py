@@ -13,6 +13,7 @@ from . import (
     sources,
     grids,
     prebuilt,
+    serialisation,
     compatibility,
 )
 
@@ -24,6 +25,7 @@ _modules = (
     fields,
     grids,
     prebuilt,
+    serialisation,
     compatibility,
 )
 
@@ -36,6 +38,7 @@ _module_names = [
     "fields",
     "grids",
     "prebuilt",
+    "serialisation",
     "compatibility",
 ]
 __all__ = _module_names + reexport(_modules, globals())
