@@ -29,7 +29,9 @@
 - **Parametrics:** added general explicit and implicit bases, dynamic coordinate
   evaluation, interpolation, arbitrary-dimensional polynomial models, refractive
   index models, selected polynomial degrees, and reusable hard or softened shape
-  definitions. `Basis` replaces the former `ExplicitBasis` name.
+  definitions. Added dense and masked coefficient reparametrisations with batched
+  latent coordinates, reversible logarithmic coordinate transforms, and transform
+  composition. `Basis` replaces the former `ExplicitBasis` name.
 - **Spectral parametrics:** added normalised `SpectralPolynomial`, `SpectralBasis`,
   and `Blackbody` models for wavelength-dependent source weights.
 - **Aperture construction:** added grid-aware builders for dense and sparse optics,

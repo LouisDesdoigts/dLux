@@ -6,14 +6,39 @@
 
 ```mermaid
 classDiagram
+    class dLux_parametric_parametrisations_ParameterTransform["ParameterTransform"]
+    class dLux_parametric_parametrisations_IdentityTransform["IdentityTransform"]
+    class dLux_parametric_parametrisations_LogTransform["LogTransform"]
+    class dLux_parametric_parametrisations_CompositeTransform["CompositeTransform"]
     class dLux_parametric_parametrisations_Reparametrisation["Reparametrisation"]
     class dLux_parametric_parametrisations_Selection["Selection"]
+    class dLux_base_Base["Base"]
     class dLux_parametric_parametrics_Parametric["Parametric"]
+    dLux_base_Base <|-- dLux_parametric_parametrisations_ParameterTransform
+    click dLux_parametric_parametrisations_ParameterTransform href "#dLux.parametric.parametrisations.ParameterTransform" "Methods: encode(), decode(), validate()"
+    dLux_parametric_parametrisations_ParameterTransform <|-- dLux_parametric_parametrisations_IdentityTransform
+    click dLux_parametric_parametrisations_IdentityTransform href "#dLux.parametric.parametrisations.IdentityTransform" "Methods: encode(), decode()"
+    dLux_parametric_parametrisations_ParameterTransform <|-- dLux_parametric_parametrisations_LogTransform
+    click dLux_parametric_parametrisations_LogTransform href "#dLux.parametric.parametrisations.LogTransform" "Methods: encode(), decode(), validate()"
+    dLux_parametric_parametrisations_ParameterTransform <|-- dLux_parametric_parametrisations_CompositeTransform
+    click dLux_parametric_parametrisations_CompositeTransform href "#dLux.parametric.parametrisations.CompositeTransform" "Attributes: transforms · Methods: encode(), decode(), validate()"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrisations_Reparametrisation
-    click dLux_parametric_parametrisations_Reparametrisation href "#dLux.parametric.parametrisations.Reparametrisation" "Attributes: origin, matrix, latent · Properties: shape, size, ndim · Methods: to_coeffs(), to_latent(), initialise(), project(), evaluate()"
+    click dLux_parametric_parametrisations_Reparametrisation href "#dLux.parametric.parametrisations.Reparametrisation" "Attributes: origin, matrix, latent, transform · Properties: shape, size, ndim · Methods: to_coeffs(), to_latent(), initialise(), project(), evaluate()"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrisations_Selection
-    click dLux_parametric_parametrisations_Selection href "#dLux.parametric.parametrisations.Selection" "Attributes: origin, indices, latent · Properties: shape, size, ndim, mask, matrix · Methods: to_coeffs(), to_latent(), initialise(), project(), evaluate()"
+    click dLux_parametric_parametrisations_Selection href "#dLux.parametric.parametrisations.Selection" "Attributes: origin, indices, latent, transform · Properties: shape, size, ndim, mask, matrix · Methods: to_coeffs(), to_latent(), initialise(), project(), evaluate()"
 ```
+
+???+ info "ParameterTransform"
+    ::: dLux.parametric.parametrisations.ParameterTransform
+
+???+ info "IdentityTransform"
+    ::: dLux.parametric.parametrisations.IdentityTransform
+
+???+ info "LogTransform"
+    ::: dLux.parametric.parametrisations.LogTransform
+
+???+ info "CompositeTransform"
+    ::: dLux.parametric.parametrisations.CompositeTransform
 
 ???+ info "Reparametrisation"
     ::: dLux.parametric.parametrisations.Reparametrisation
