@@ -1,11 +1,28 @@
-"""Parametric bases, shapes, polynomials, and physical-property models."""
+"""Parametric bases, reparametrisations, and physical-property models."""
 
 from ..utils.helpers import reexport
-from . import bases, parametrics, polynomials, shapes, refractive, spectral
+from . import (
+    bases,
+    parametrics,
+    parametrisations,
+    polynomials,
+    shapes,
+    refractive,
+    spectral,
+)
 
-_modules = (parametrics, bases, polynomials, shapes, refractive, spectral)
+_modules = (
+    parametrics,
+    parametrisations,
+    bases,
+    polynomials,
+    shapes,
+    refractive,
+    spectral,
+)
 _module_names = [
     "parametrics",
+    "parametrisations",
     "bases",
     "polynomials",
     "shapes",

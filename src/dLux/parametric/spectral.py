@@ -16,7 +16,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from .bases import Basis, _resolve_coeffs
-from .parametrics import Parametric
+from .parametrics import Parametric, resolve
 from .polynomials import Polynomial
 
 __all__ = ["SpectralPolynomial", "SpectralBasis", "Blackbody"]
@@ -78,7 +78,7 @@ class SpectralPolynomial(Polynomial):
         ----------
         degree : int or None
             Maximum degree, mutually exclusive with ``degrees``.
-        coeffs : Array or None
+        coeffs : Array, Parametric, or None
             Coefficients for the selected non-constant terms.
         degrees : int, sequence[int], or None
             Explicit polynomial degrees; the fixed unit baseline is separate.
@@ -120,7 +120,8 @@ class SpectralPolynomial(Polynomial):
 
         # Evaluate perturbations around a fixed flat baseline
         basis = self.calculate_basis(variables=variables, **context)
-        weights = 1 + np.tensordot(self.coeffs, basis, axes=((-1,), (0,)))
+        coeffs = resolve(self.coeffs, wavelengths=wavelengths, **context)
+        weights = 1 + np.tensordot(coeffs, basis, axes=((-1,), (0,)))
 
         # Apply the shared spectral normalisation contract
         return _normalise(weights, self.normalise)
@@ -153,7 +154,7 @@ class SpectralBasis(Basis):
         ----------
         basis : Array
             Spectral basis with trailing wavelength axis.
-        coeffs : Array or None
+        coeffs : Array, Parametric, or None
             Coefficients contracting the configured basis dimensions.
         shape : tuple[int, ...] or None
             Coefficient dimensions represented by the leading basis axes.
@@ -176,7 +177,7 @@ class SpectralBasis(Basis):
         # Contract the coefficient and basis dimensions
         ndim = len(self.shape)
         b_ax = tuple(range(ndim))
-        coeffs = self.coeffs
+        coeffs = resolve(self.coeffs, **context)
         c_ax = tuple(range(coeffs.ndim - ndim, coeffs.ndim))
         weights = np.tensordot(coeffs, self.basis, axes=(c_ax, b_ax))
 
