@@ -103,10 +103,10 @@ class ResizeSpec(BaseGridSpec):
         Optional output centre in the associated propagation unit.
     """
 
-    n: tuple[int, ...] | None
+    n: tuple[int, ...] | None = None
     pad: tuple[int, ...]
     crop: tuple[int, ...]
-    c: Array | None
+    c: Array | None = None
 
     def __init__(self, n=None, pad=1, crop=1, c=None):
         """Initialise an explicit or factor-based resize specification.
@@ -444,10 +444,10 @@ class GridSpec(BaseGridSpec):
     corresponding general property and may contain a different value for each axis.
     """
 
-    n: tuple[int, ...] | None
-    d: Array | None
-    c: Array | None
-    unit: str | None
+    n: tuple[int, ...] | None = None
+    d: Array | None = None
+    c: Array | None = None
+    unit: str | None = None
 
     def __init__(self, n=None, d=None, c=None, unit=None, diam=None):
         """Initialise a regular Cartesian sampling specification.
@@ -1069,10 +1069,10 @@ class Affine(BaseCoordTransform):
         Order in which the supplied transformations are composed.
     """
 
-    translation: Array | None
-    rotation: Array | None
-    scale: Array | None
-    shear: Array | None
+    translation: Array | None = None
+    rotation: Array | None = None
+    scale: Array | None = None
+    shear: Array | None = None
     order: tuple[str, ...]
 
     def __init__(

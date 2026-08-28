@@ -196,7 +196,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
     shape: tuple[int, ...] = eqx.field(static=True)
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
-    diameter: Array | None
+    diameter: Array | None = None
 
     def __init__(
         self,

@@ -105,8 +105,8 @@ class BaseSource(ParametricHolder):
     concrete source models.
     """
 
-    flux: Array | Parametric | None
-    distribution: Array | Parametric | None
+    flux: Array | Parametric | None = None
+    distribution: Array | Parametric | None = None
     units: dict
 
     def __init__(self, flux=None, distribution=None, units=None):
@@ -514,9 +514,9 @@ class Source(BaseSource, Spectrum):
 
     wavelengths: Array | Parametric
     weights: Array | Parametric
-    position: Array | Parametric | None
-    flux: Array | Parametric | None
-    distribution: Array | Parametric | None
+    position: Array | Parametric | None = None
+    flux: Array | Parametric | None = None
+    distribution: Array | Parametric | None = None
     units: dict
 
     def __init__(
@@ -648,12 +648,12 @@ class BinarySource(BaseSource, Spectrum):
 
     wavelengths: Array | Parametric
     weights: Array | Parametric
-    centre: Array | Parametric | None
+    centre: Array | Parametric | None = None
     separation: Array | Parametric
     position_angle: Array | Parametric
     contrast: Array | Parametric
-    flux: Array | Parametric | None
-    distribution: Array | Parametric | None
+    flux: Array | Parametric | None = None
+    distribution: Array | Parametric | None = None
     units: dict
 
     def __init__(

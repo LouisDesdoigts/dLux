@@ -29,8 +29,8 @@ class BaseDynamicLayer(BaseOpticalLayer):
     differentiable geometry in the model rather than storing sampled arrays.
     """
 
-    coordinates: Array | GridSpec | None
-    transformation: BaseCoordTransform | None
+    coordinates: Array | GridSpec | None = None
+    transformation: BaseCoordTransform | None = None
 
     def __init__(self, coordinates=None, transformation=None):
         """Initialise a coordinate context for dynamic optical evaluation.
@@ -86,9 +86,9 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
     is applied directly. The resolved value broadcasts to the wavefront phasor.
     """
 
-    coordinates: Array | GridSpec | None
-    transformation: BaseCoordTransform | None
-    transmission: Array | Parametric | None
+    coordinates: Array | GridSpec | None = None
+    transformation: BaseCoordTransform | None = None
+    transmission: Array | Parametric | None = None
     normalise: bool
 
     def __init__(
@@ -119,10 +119,10 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
     evaluated on the active coordinates.
     """
 
-    coordinates: Array | GridSpec | None
-    transformation: BaseCoordTransform | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    coordinates: Array | GridSpec | None = None
+    transformation: BaseCoordTransform | None = None
+    opd: Array | Parametric | None = None
+    phase: Array | Parametric | None = None
 
     def __init__(self, opd=None, phase=None, coordinates=None, transformation=None):
         """Initialise coordinate-dependent aberrations.
@@ -165,11 +165,11 @@ class DynamicOptic(BaseDynamicLayer, Optic):
     ```
     """
 
-    coordinates: Array | GridSpec | None
-    transformation: BaseCoordTransform | None
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    coordinates: Array | GridSpec | None = None
+    transformation: BaseCoordTransform | None = None
+    transmission: Array | Parametric | None = None
+    opd: Array | Parametric | None = None
+    phase: Array | Parametric | None = None
     normalise: bool
 
     def __init__(

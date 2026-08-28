@@ -1362,7 +1362,7 @@ class Image(DiscreteField):
 
     data: Array
     grid: GridSpec
-    std: Array | None
+    std: Array | None = None
     read_noise: Array
 
     def __init__(

@@ -308,10 +308,10 @@ class PadSpec(ResizeSpec):
 class CoordTransform(BaseCoordTransform):
     """Deprecated 0.15 semantic coordinate transformation."""
 
-    translation: Array | None
-    rotation: Array | None
-    compression: Array | None
-    shear: Array | None
+    translation: Array | None = None
+    rotation: Array | None = None
+    compression: Array | None = None
+    shear: Array | None = None
 
     def __init__(
         self,

@@ -56,7 +56,7 @@ class PolarisationLayer(OpticalLayer):
     wavelength and spatial vectorisation.
     """
 
-    polarisation: dict | None
+    polarisation: dict | None = None
 
     def __init__(self, polarisation=None):
         """Initialise a fixed or parametric Jones transformation.
@@ -164,7 +164,7 @@ class UniformPolarisingOptic(PolarisingOptic):
     """
 
     jones: Array
-    orientation: Array | None
+    orientation: Array | None = None
 
     def __init__(
         self: UniformPolarisingOptic, jones: Array, orientation: Array | None = None

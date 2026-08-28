@@ -174,7 +174,7 @@ class _ApertureData(Base):
     transmission: Array
     support: Array
     diameter: Array
-    centers: Array | None
+    centers: Array | None = None
 
     def __init__(self, transmission, support, diameter, centers=None):
         self.transmission = dlu.to_value(transmission, dtype=None)
@@ -265,7 +265,7 @@ class ZernikeDef(BaseOPDDef):
     groups: tuple[_ZernikeGroup, ...]
     order: Array
     oversize: Array
-    norm: Norm | None
+    norm: Norm | None = None
     method: str = eqx.field(static=True)
 
     def __init__(
@@ -483,7 +483,7 @@ class ApertureBuilder(BaseBuilder):
 
     primary: Shape
     obscurations: tuple
-    opd: BaseOPDDef | None
+    opd: BaseOPDDef | None = None
     oversample: tuple[int, int] = eqx.field(static=True)
 
     def __init__(self, primary, obscurations=(), opd=None, oversample=5):

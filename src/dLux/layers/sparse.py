@@ -96,9 +96,9 @@ class SparseOptic(Optic):
     ```
     """
 
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    transmission: Array | Parametric | None = None
+    opd: Array | Parametric | None = None
+    phase: Array | Parametric | None = None
     normalise: bool
     centers: Array
 
@@ -312,10 +312,10 @@ class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
             "pixel_scale": pixel_scale,
         }
 
-    coordinates: Array | GridSpec | None
-    transformation: BaseCoordTransform | None
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    coordinates: Array | GridSpec | None = None
+    transformation: BaseCoordTransform | None = None
+    transmission: Array | Parametric | None = None
+    opd: Array | Parametric | None = None
+    phase: Array | Parametric | None = None
     normalise: bool
     centers: Array

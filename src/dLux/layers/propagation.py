@@ -309,7 +309,7 @@ class FocalPropagator(Propagator):
     """
 
     grid: BaseGridSpec
-    focal_length: Array | None
+    focal_length: Array | None = None
     inverse: bool
 
     def __init__(self, grid, focal_length=None, inverse=False):
@@ -397,7 +397,7 @@ class Fraunhofer(FocalPropagator):
     """
 
     grid: BaseGridSpec
-    focal_length: Array | None
+    focal_length: Array | None = None
     inverse: bool
     method: str
 
@@ -490,7 +490,7 @@ class Fresnel(FocalPropagator):
     """
 
     grid: BaseGridSpec
-    focal_length: Array | None
+    focal_length: Array | None = None
     inverse: bool
     defocus: Array
     method: str

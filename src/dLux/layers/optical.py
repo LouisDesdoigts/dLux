@@ -144,7 +144,7 @@ class TransmissiveLayer(OpticalLayer):
         Normalise the resulting wavefront to unit power.
     """
 
-    transmission: Array | Parametric | None
+    transmission: Array | Parametric | None = None
     normalise: bool
 
     def __init__(self, transmission=None, normalise=False):
@@ -191,8 +191,8 @@ class AberratedLayer(OpticalLayer):
         Additional phase in radians.
     """
 
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    opd: Array | Parametric | None = None
+    phase: Array | Parametric | None = None
 
     def __init__(self, opd=None, phase=None):
         """Initialise optical-path and phase aberrations.
@@ -261,9 +261,9 @@ class Optic(TransmissiveLayer, AberratedLayer):
     ```
     """
 
-    transmission: Array | Parametric | None
-    opd: Array | Parametric | None
-    phase: Array | Parametric | None
+    transmission: Array | Parametric | None = None
+    opd: Array | Parametric | None = None
+    phase: Array | Parametric | None = None
     normalise: bool
 
     def __init__(self, transmission=None, opd=None, phase=None, normalise=False):
