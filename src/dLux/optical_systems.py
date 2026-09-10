@@ -772,4 +772,4 @@ class CartesianOpticalSystem(ParametricLayeredOpticalSystem):
         true_pixel_scale = self.psf_pixel_scale / self.oversample
         pixel_scale = 1e-6 * true_pixel_scale
         psf_npixels = self.psf_npixels * self.oversample
-        return wavefront.propagate(psf_npixels, pixel_scale)
+        return wavefront.propagate(psf_npixels, pixel_scale, self.focal_length)
