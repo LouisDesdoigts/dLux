@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2095,15 +2095,15 @@ weighting over configured wavelengths.</p>
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseSpectrum</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Abstract base class for spectral parameterisations.</span>
 
 <span class="sd">    Concrete spectrum classes must provide `normalise(...)` and expose spectral</span>
 <span class="sd">    weighting over configured wavelengths.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BaseSpectrum.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseSpectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseSpectrum</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
@@ -2265,10 +2265,10 @@ weighting over configured wavelengths.</p>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Spectrum</span><span class="p">(</span><span class="n">SimpleSpectrum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A simple spectrum class using wavelengths and weights.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Spectrum.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2277,12 +2277,12 @@ weighting over configured wavelengths.</p>
 <span class="sd">        The array of wavelengths at which the spectrum is defined.</span>
 <span class="sd">    weights : Array</span>
 <span class="sd">        The relative weights of each wavelength.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelengths : Array, metres</span>
@@ -2290,7 +2290,7 @@ weighting over configured wavelengths.</p>
 <span class="sd">        weights : Array = None</span>
 <span class="sd">            The relative weights of each wavelength. Input weights</span>
 <span class="sd">            are automatically normalised to a sum of 1.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span>
@@ -2304,15 +2304,15 @@ weighting over configured wavelengths.</p>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wavelengths and weights must have the same shape.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"wavelengths and weights must have the same shape."</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;wavelengths and weights must have the same trailing shape.&quot;</span>
+                    <span class="s2">"wavelengths and weights must have the same trailing shape."</span>
                 <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Spectrum</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns a normalised spectrum object, where the weights are normalised to a</span>
 <span class="sd">        sum of 1.</span>
 
@@ -2320,12 +2320,12 @@ weighting over configured wavelengths.</p>
 <span class="sd">        -------</span>
 <span class="sd">        spectrum : Spectrum</span>
 <span class="sd">            The spectrum object with the normalised spectrum.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">weight_sum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">weight_sum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">,</span> <span class="n">weight_sum</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s2">"weights"</span><span class="p">,</span> <span class="n">weight_sum</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2434,7 +2434,7 @@ are automatically normalised to a sum of 1.</p>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelengths : Array, metres</span>
@@ -2442,7 +2442,7 @@ are automatically normalised to a sum of 1.</p>
 <span class="sd">    weights : Array = None</span>
 <span class="sd">        The relative weights of each wavelength. Input weights</span>
 <span class="sd">        are automatically normalised to a sum of 1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">in_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span>
@@ -2456,11 +2456,11 @@ are automatically normalised to a sum of 1.</p>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wavelengths and weights must have the same shape.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"wavelengths and weights must have the same shape."</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;wavelengths and weights must have the same trailing shape.&quot;</span>
+                <span class="s2">"wavelengths and weights must have the same trailing shape."</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2523,7 +2523,7 @@ sum of 1.</p>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Spectrum</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns a normalised spectrum object, where the weights are normalised to a</span>
 <span class="sd">    sum of 1.</span>
 
@@ -2531,12 +2531,12 @@ sum of 1.</p>
 <span class="sd">    -------</span>
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum object with the normalised spectrum.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">weight_sum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">weight_sum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s2">&quot;weights&quot;</span><span class="p">,</span> <span class="n">weight_sum</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s2">"weights"</span><span class="p">,</span> <span class="n">weight_sum</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2723,12 +2723,12 @@ polynomial weights evaluated at each wavelength.</p>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PolySpectrum</span><span class="p">(</span><span class="n">SimpleSpectrum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Implements a generic polynomial spectrum, such as a linear spectrum.</span>
 
 <span class="sd">    This implements a polynomial as follows: f(x) = c0 + c1*x + c2*x^2 + ... + cn*x^n</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/PolySpectrum.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2740,27 +2740,27 @@ polynomial weights evaluated at each wavelength.</p>
 <span class="sd">    weights : Array, property</span>
 <span class="sd">        Derived property from `wavelengths` and `coefficients`; normalised</span>
 <span class="sd">        polynomial weights evaluated at each wavelength.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PolySpectrum</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelengths : Array, metres</span>
 <span class="sd">            The array of wavelengths at which the spectrum is defined.</span>
 <span class="sd">        coefficients : Array</span>
 <span class="sd">            The array of polynomial coefficient values.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Coefficients must be a 1d array.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Coefficients must be a 1d array."</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_eval_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PolySpectrum</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Evaluates the polynomial function at the supplied wavelength.</span>
 
 <span class="sd">        Parameters</span>
@@ -2772,7 +2772,7 @@ polynomial weights evaluated at each wavelength.</p>
 <span class="sd">        -------</span>
 <span class="sd">        weight : Array</span>
 <span class="sd">            The relative weight of the supplied wavelength.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">wavelength</span><span class="o">**</span><span class="n">i</span>
@@ -2782,7 +2782,7 @@ polynomial weights evaluated at each wavelength.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PolySpectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Gets the relative spectral weights by evaluating the polynomial function at the</span>
 <span class="sd">        internal wavelengths. Output weights are automatically normalised to a sum of</span>
 <span class="sd">        1.</span>
@@ -2791,12 +2791,12 @@ polynomial weights evaluated at each wavelength.</p>
 <span class="sd">        -------</span>
 <span class="sd">        weights : Array</span>
 <span class="sd">            The normalised relative weights of each wavelength.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_eval_weight</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PolySpectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PolySpectrum</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        The calculated weights are automatically normalised, so this method</span>
 <span class="sd">        simply returns an unmodified object.</span>
 
@@ -2804,7 +2804,7 @@ polynomial weights evaluated at each wavelength.</p>
 <span class="sd">        --------</span>
 <span class="sd">        spectrum : PolySpectrum</span>
 <span class="sd">            The unmodified spectrum object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2945,19 +2945,19 @@ internal wavelengths. Output weights are automatically normalised to a sum of
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PolySpectrum</span><span class="p">,</span> <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelengths : Array, metres</span>
 <span class="sd">        The array of wavelengths at which the spectrum is defined.</span>
 <span class="sd">    coefficients : Array</span>
 <span class="sd">        The array of polynomial coefficient values.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Coefficients must be a 1d array.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Coefficients must be a 1d array."</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3015,7 +3015,7 @@ simply returns an unmodified object.</p>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PolySpectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PolySpectrum</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The calculated weights are automatically normalised, so this method</span>
 <span class="sd">    simply returns an unmodified object.</span>
 
@@ -3023,7 +3023,7 @@ simply returns an unmodified object.</p>
 <span class="sd">    --------</span>
 <span class="sd">    spectrum : PolySpectrum</span>
 <span class="sd">        The unmodified spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3098,7 +3098,7 @@ simply returns an unmodified object.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

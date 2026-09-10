@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2172,20 +2172,20 @@ modelling interface via <code>normalise(...)</code> and <code>model(...)</code>.
 <span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseSource</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Abstract base class for source models.</span>
 
 <span class="sd">    Concrete source classes define normalisation behavior and the optical</span>
 <span class="sd">    modelling interface via `normalise(...)` and `model(...)`.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BaseSource.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inherit docstrings from parent classes for model method.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Inherit docstrings from parent classes for model method."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">])</span>
+        <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">"model"</span><span class="p">])</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseSource</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseSource</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
@@ -2198,7 +2198,7 @@ modelling interface via <code>normalise(...)</code> and <code>model(...)</code>.
         <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Models the source object through the provided optics.</span>
 
 <span class="sd">        Parameters</span>
@@ -2217,7 +2217,7 @@ modelling interface via <code>normalise(...)</code> and <code>model(...)</code>.
 <span class="sd">            If `return_wf` is True and `return_psf` is False, returns the Wavefront</span>
 <span class="sd">                object.</span>
 <span class="sd">            If `return_wf` is False and `return_psf` is True, returns the PSF object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2254,9 +2254,9 @@ modelling interface via <code>normalise(...)</code> and <code>model(...)</code>.
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inherit docstrings from parent classes for model method.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Inherit docstrings from parent classes for model method."""</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">])</span>
+    <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">"model"</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2405,7 +2405,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
     <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Models the source object through the provided optics.</span>
 
 <span class="sd">    Parameters</span>
@@ -2424,7 +2424,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="sd">        If `return_wf` is True and `return_psf` is False, returns the Wavefront</span>
 <span class="sd">            object.</span>
 <span class="sd">        If `return_wf` is False and `return_psf` is True, returns the PSF object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2580,10 +2580,10 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PointSource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A simple point source with a spectrum, position and flux.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/PointSource.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2594,7 +2594,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="sd">        The flux of the object.</span>
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">position</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">flux</span><span class="p">:</span> <span class="nb">float</span>
@@ -2607,7 +2607,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
         <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelengths : Array, metres = None</span>
@@ -2619,7 +2619,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="sd">            The flux of the object.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Position and Flux</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">_as_position_2d</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
@@ -2782,7 +2782,7 @@ ignored if a Spectrum object is provided.</p>
     <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelengths : Array, metres = None</span>
@@ -2794,7 +2794,7 @@ ignored if a Spectrum object is provided.</p>
 <span class="sd">        The flux of the object.</span>
 <span class="sd">    spectrum : Spectrum = None</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Position and Flux</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">_as_position_2d</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
@@ -2978,10 +2978,10 @@ ignored if a Spectrum object is provided.</p>
 <span class="normal">409</span>
 <span class="normal">410</span>
 <span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PointSources</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A set of point sources with the same spectrum, but different positions and fluxes.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/PointSources.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2992,7 +2992,7 @@ ignored if a Spectrum object is provided.</p>
 <span class="sd">        The fluxes of the sources.</span>
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">position</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">flux</span><span class="p">:</span> <span class="n">Array</span>
@@ -3005,7 +3005,7 @@ ignored if a Spectrum object is provided.</p>
         <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelengths : Array, metres</span>
@@ -3018,13 +3018,13 @@ ignored if a Spectrum object is provided.</p>
 <span class="sd">            The spectral weights of the object.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 
         <span class="c1"># More complex parameter checks here because of extra dims</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;position must be a 2d array.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"position must be a 2d array."</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">flux</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">))</span>
@@ -3032,11 +3032,11 @@ ignored if a Spectrum object is provided.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;flux must be a 1d array.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"flux must be a 1d array."</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Length of flux must be equal to length of &quot;</span> <span class="s2">&quot;positions.&quot;</span>
+                    <span class="s2">"Length of flux must be equal to length of "</span> <span class="s2">"positions."</span>
                 <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span>
@@ -3233,7 +3233,7 @@ ignored if a Spectrum object is provided.</p>
     <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelengths : Array, metres</span>
@@ -3246,13 +3246,13 @@ ignored if a Spectrum object is provided.</p>
 <span class="sd">        The spectral weights of the object.</span>
 <span class="sd">    spectrum : Spectrum = None</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 
     <span class="c1"># More complex parameter checks here because of extra dims</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;position must be a 2d array.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"position must be a 2d array."</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">flux</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">))</span>
@@ -3260,11 +3260,11 @@ ignored if a Spectrum object is provided.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;flux must be a 1d array.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"flux must be a 1d array."</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Length of flux must be equal to length of &quot;</span> <span class="s2">&quot;positions.&quot;</span>
+                <span class="s2">"Length of flux must be equal to length of "</span> <span class="s2">"positions."</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3509,11 +3509,11 @@ vertical axis.</p>
 <span class="normal">633</span>
 <span class="normal">634</span>
 <span class="normal">635</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BinarySource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A binary source parameterised by the position, flux, separation, position_angle,</span>
 <span class="sd">    and contrast between the two sources.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BinarySource.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3531,7 +3531,7 @@ vertical axis.</p>
 <span class="sd">        The contrast ratio between the two sources.</span>
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">position</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">mean_flux</span><span class="p">:</span> <span class="nb">float</span>
@@ -3550,7 +3550,7 @@ vertical axis.</p>
         <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelengths : Array, metres = None</span>
@@ -3568,7 +3568,7 @@ vertical axis.</p>
 <span class="sd">            The contrast ratio between the two sources.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">wavelengths</span> <span class="o">=</span> <span class="n">_as_wavelengths_1d</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">n_wavelengths</span> <span class="o">=</span> <span class="n">_infer_n_wavelengths</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
@@ -3838,7 +3838,7 @@ vertical axis.</p>
     <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelengths : Array, metres = None</span>
@@ -3856,7 +3856,7 @@ vertical axis.</p>
 <span class="sd">        The contrast ratio between the two sources.</span>
 <span class="sd">    spectrum : Spectrum = None</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">wavelengths</span> <span class="o">=</span> <span class="n">_as_wavelengths_1d</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">n_wavelengths</span> <span class="o">=</span> <span class="n">_infer_n_wavelengths</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
@@ -4092,11 +4092,11 @@ that represents the resolved component.</p>
 <span class="normal">519</span>
 <span class="normal">520</span>
 <span class="normal">521</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ResolvedSource</span><span class="p">(</span><span class="n">PointSource</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A single resolved source with a spectrum, position, flux, and distribution array</span>
 <span class="sd">    that represents the resolved component.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ResolvedSource.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -4109,7 +4109,7 @@ that represents the resolved component.</p>
 <span class="sd">        The array of intensities representing the resolved source.</span>
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">distribution</span><span class="p">:</span> <span class="n">Array</span>
 
@@ -4122,7 +4122,7 @@ that represents the resolved component.</p>
         <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelengths : Array, metres</span>
@@ -4137,12 +4137,12 @@ that represents the resolved component.</p>
 <span class="sd">            The spectral weights of the object.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution</span> <span class="o">/</span> <span class="n">distribution</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;distribution must be a 2d array.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"distribution must be a 2d array."</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
@@ -4153,7 +4153,7 @@ that represents the resolved component.</p>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ResolvedSource</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResolvedSource</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Method for returning a new source object with a normalised total</span>
 <span class="sd">        spectrum and source distribution.</span>
 
@@ -4161,11 +4161,11 @@ that represents the resolved component.</p>
 <span class="sd">        -------</span>
 <span class="sd">        source : Source</span>
 <span class="sd">            The source object with the normalised spectrum and distribution.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="n">distribution_floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution_floor</span> <span class="o">/</span> <span class="n">distribution_floor</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span> <span class="s2">&quot;distribution&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">distribution</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">"spectrum"</span><span class="p">,</span> <span class="s2">"distribution"</span><span class="p">],</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">distribution</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">ResolvedSource</span><span class="p">,</span>
@@ -4186,14 +4186,14 @@ that represents the resolved component.</p>
         <span class="c1"># Returning wf is a special case</span>
         <span class="k">if</span> <span class="n">return_wf</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;Wavefront information cannot be preserved through convolution. &quot;</span>
-                <span class="s2">&quot;Convolution can only operate on PSFs (incoherent light). &quot;</span>
-                <span class="s2">&quot;Please use return_wf=False to get the PSF array or return_psf=True &quot;</span>
-                <span class="s2">&quot;to get a PSF object.&quot;</span>
+                <span class="s2">"Wavefront information cannot be preserved through convolution. "</span>
+                <span class="s2">"Convolution can only operate on PSFs (incoherent light). "</span>
+                <span class="s2">"Please use return_wf=False to get the PSF array or return_psf=True "</span>
+                <span class="s2">"to get a PSF object."</span>
             <span class="p">)</span>
 
         <span class="c1"># Return PSF object</span>
-        <span class="n">conv_psf</span> <span class="o">=</span> <span class="n">jsp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">psf</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+        <span class="n">conv_psf</span> <span class="o">=</span> <span class="n">jsp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">psf</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"same"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">return_psf</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">PSF</span><span class="p">(</span><span class="n">conv_psf</span><span class="p">,</span> <span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
@@ -4387,7 +4387,7 @@ that represents the resolved component.</p>
     <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelengths : Array, metres</span>
@@ -4402,12 +4402,12 @@ that represents the resolved component.</p>
 <span class="sd">        The spectral weights of the object.</span>
 <span class="sd">    spectrum : Spectrum = None</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution</span> <span class="o">/</span> <span class="n">distribution</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;distribution must be a 2d array.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"distribution must be a 2d array."</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
@@ -4476,7 +4476,7 @@ spectrum and source distribution.</p>
 <span class="normal">486</span>
 <span class="normal">487</span>
 <span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ResolvedSource</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResolvedSource</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Method for returning a new source object with a normalised total</span>
 <span class="sd">    spectrum and source distribution.</span>
 
@@ -4484,11 +4484,11 @@ spectrum and source distribution.</p>
 <span class="sd">    -------</span>
 <span class="sd">    source : Source</span>
 <span class="sd">        The source object with the normalised spectrum and distribution.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
     <span class="n">distribution_floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution_floor</span> <span class="o">/</span> <span class="n">distribution_floor</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span> <span class="s2">&quot;distribution&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">distribution</span><span class="p">])</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">"spectrum"</span><span class="p">,</span> <span class="s2">"distribution"</span><span class="p">],</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">distribution</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4724,7 +4724,7 @@ the resolved distribution.</p>
 <span class="normal">746</span>
 <span class="normal">747</span>
 <span class="normal">748</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PointResolvedSource</span><span class="p">(</span><span class="n">ResolvedSource</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A class for modelling a point source and a resolved source that is defined</span>
 <span class="sd">    relative to the point source. An example would be an unresolved star with</span>
 <span class="sd">    a resolved dust shell or debris disk. These two objects share the same</span>
@@ -4733,7 +4733,7 @@ the resolved distribution.</p>
 <span class="sd">    resolved component is defined by an array of intensities that represent</span>
 <span class="sd">    the resolved distribution.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/PointResolvedSource.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -4748,7 +4748,7 @@ the resolved distribution.</p>
 <span class="sd">        The contrast ratio between the point source and the resolved source.</span>
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">contrast</span><span class="p">:</span> <span class="nb">float</span>
 
@@ -4762,7 +4762,7 @@ the resolved distribution.</p>
         <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PointResolvedSource</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelengths : Array, metres = None</span>
@@ -4779,7 +4779,7 @@ the resolved distribution.</p>
 <span class="sd">            The spectral weights of the object.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">wavelengths</span> <span class="o">=</span> <span class="n">_as_wavelengths_1d</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">n_wavelengths</span> <span class="o">=</span> <span class="n">_infer_n_wavelengths</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
@@ -4818,16 +4818,16 @@ the resolved distribution.</p>
         <span class="c1"># Returning wf is a special case</span>
         <span class="k">if</span> <span class="n">return_wf</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;Wavefront information cannot be preserved through convolution. &quot;</span>
-                <span class="s2">&quot;Convolution can only operate on PSFs (incoherent light). &quot;</span>
-                <span class="s2">&quot;Please use return_wf=False to get the PSF array or return_psf=True &quot;</span>
-                <span class="s2">&quot;to get a PSF object.&quot;</span>
+                <span class="s2">"Wavefront information cannot be preserved through convolution. "</span>
+                <span class="s2">"Convolution can only operate on PSFs (incoherent light). "</span>
+                <span class="s2">"Please use return_wf=False to get the PSF array or return_psf=True "</span>
+                <span class="s2">"to get a PSF object."</span>
             <span class="p">)</span>
 
         <span class="c1"># Create single PSF-array object</span>
         <span class="n">point_psf</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">resolved_psf</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">conv_psf</span> <span class="o">=</span> <span class="n">jsp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">resolved_psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+        <span class="n">conv_psf</span> <span class="o">=</span> <span class="n">jsp</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">resolved_psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"same"</span><span class="p">)</span>
         <span class="n">psf</span> <span class="o">=</span> <span class="n">point_psf</span> <span class="o">+</span> <span class="n">conv_psf</span>
         <span class="k">if</span> <span class="n">return_psf</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">PSF</span><span class="p">(</span><span class="n">psf</span><span class="p">,</span> <span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
@@ -5044,7 +5044,7 @@ the resolved distribution.</p>
     <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectra</span><span class="o">.</span><span class="n">BaseSpectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PointResolvedSource</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelengths : Array, metres = None</span>
@@ -5061,7 +5061,7 @@ the resolved distribution.</p>
 <span class="sd">        The spectral weights of the object.</span>
 <span class="sd">    spectrum : Spectrum = None</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">wavelengths</span> <span class="o">=</span> <span class="n">_as_wavelengths_1d</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">n_wavelengths</span> <span class="o">=</span> <span class="n">_infer_n_wavelengths</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
@@ -5251,27 +5251,27 @@ the resolved distribution.</p>
 <span class="normal">848</span>
 <span class="normal">849</span>
 <span class="normal">850</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Scene</span><span class="p">(</span><span class="n">BaseSource</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A source object that holds a set of sources that are model simultaneously.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Scene.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    sources : dict</span>
 <span class="sd">        A dictionary of source objects to model simultaneously.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">sources</span><span class="p">:</span> <span class="nb">dict</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Source</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        sources : list[Source]</span>
 <span class="sd">            A list of source objects to model simultaneously.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="n">BaseSource</span><span class="p">):</span>
             <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">sources</span><span class="p">]</span>
@@ -5280,21 +5280,21 @@ the resolved distribution.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list2dictionary</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">BaseSource</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Scene</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Method for returning a new scene with normalised source objects.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        scene : Scene</span>
 <span class="sd">            The normalised scene object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">is_source</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">BaseSource</span><span class="p">)</span>
         <span class="n">norm_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">source</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="n">sources</span> <span class="o">=</span> <span class="n">jtu</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">norm_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_source</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;sources&quot;</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"sources"</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Raises the individual sources via their keys.</span>
 
 <span class="sd">        Parameters</span>
@@ -5306,7 +5306,7 @@ the resolved distribution.</p>
 <span class="sd">        -------</span>
 <span class="sd">        item : Any</span>
 <span class="sd">            The item corresponding to the supplied key in the sub-dictionaries.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">raise</span> <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">missing_attribute_error</span><span class="p">(</span>
@@ -5457,7 +5457,7 @@ the resolved distribution.</p>
 <span class="normal">812</span>
 <span class="normal">813</span>
 <span class="normal">814</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Raises the individual sources via their keys.</span>
 
 <span class="sd">    Parameters</span>
@@ -5469,7 +5469,7 @@ the resolved distribution.</p>
 <span class="sd">    -------</span>
 <span class="sd">    item : Any</span>
 <span class="sd">        The item corresponding to the supplied key in the sub-dictionaries.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
     <span class="k">raise</span> <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">missing_attribute_error</span><span class="p">(</span>
@@ -5542,12 +5542,12 @@ the resolved distribution.</p>
 <span class="normal">776</span>
 <span class="normal">777</span>
 <span class="normal">778</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Source</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    sources : list[Source]</span>
 <span class="sd">        A list of source objects to model simultaneously.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="n">BaseSource</span><span class="p">):</span>
         <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">sources</span><span class="p">]</span>
@@ -5612,18 +5612,18 @@ the resolved distribution.</p>
 <span class="normal">790</span>
 <span class="normal">791</span>
 <span class="normal">792</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Scene</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Scene</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Method for returning a new scene with normalised source objects.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    scene : Scene</span>
 <span class="sd">        The normalised scene object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">is_source</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">BaseSource</span><span class="p">)</span>
     <span class="n">norm_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">source</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
     <span class="n">sources</span> <span class="o">=</span> <span class="n">jtu</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">norm_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_source</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;sources&quot;</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"sources"</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5697,7 +5697,7 @@ the resolved distribution.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

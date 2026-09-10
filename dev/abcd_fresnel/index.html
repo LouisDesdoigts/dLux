@@ -25,23 +25,23 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
-        <title>Fresnel Propagation with abcdLux - dLux documentation</title>
+        <title>ABCD Fresnel - dLux documentation</title>
       
     
     
       
         
       
-      <link rel="stylesheet" href="../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -125,7 +125,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Fresnel Propagation with abcdLux
+              ABCD Fresnel
             
           </span>
         </div>
@@ -2050,16 +2050,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">CenteredNorm</span>
 
 <span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;image.cmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;inferno&#39;</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;serif&quot;</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;image.origin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lower&#39;</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.dpi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">120</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'image.cmap'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'inferno'</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">"font.family"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"serif"</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">"image.origin"</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'lower'</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'figure.dpi'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">120</span>
 
 <span class="c1"># Nan friendly colormapping</span>
-<span class="n">inferno</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colormaps</span><span class="p">[</span><span class="s2">&quot;inferno&quot;</span><span class="p">]</span>
-<span class="n">seismic</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colormaps</span><span class="p">[</span><span class="s2">&quot;seismic&quot;</span><span class="p">]</span>
-<span class="n">inferno</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-<span class="n">seismic</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">inferno</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colormaps</span><span class="p">[</span><span class="s2">"inferno"</span><span class="p">]</span>
+<span class="n">seismic</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colormaps</span><span class="p">[</span><span class="s2">"seismic"</span><span class="p">]</span>
+<span class="n">inferno</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="s2">"k"</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">seismic</span><span class="o">.</span><span class="n">set_bad</span><span class="p">(</span><span class="s2">"k"</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 </code></pre></div>
 <hr />
 <h2 id="constructing-the-optical-system">Constructing the Optical System<a class="headerlink" href="#constructing-the-optical-system" title="Permanent link">¤</a></h2>
@@ -2077,8 +2077,8 @@
 <span class="c1"># Propagate to focus using an MFT Fresnel propagator</span>
 <span class="n">to_focal</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">MFTPropagator</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;ThinLens&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">ABCDConjugatePlane</span><span class="p">(</span><span class="n">focal_length</span><span class="p">)),</span>  <span class="c1"># Pupil -&gt; Focal</span>
-        <span class="p">(</span><span class="s2">&quot;FreeSpace&quot;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">ABCDFreeSpace</span><span class="p">(</span><span class="o">-</span><span class="n">defocus</span><span class="p">)),</span>  <span class="c1"># Focal -&gt; Defocused Detector</span>
+        <span class="p">(</span><span class="s2">"ThinLens"</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">ABCDConjugatePlane</span><span class="p">(</span><span class="n">focal_length</span><span class="p">)),</span>  <span class="c1"># Pupil -&gt; Focal</span>
+        <span class="p">(</span><span class="s2">"FreeSpace"</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">ABCDFreeSpace</span><span class="p">(</span><span class="o">-</span><span class="n">defocus</span><span class="p">)),</span>  <span class="c1"># Focal -&gt; Defocused Detector</span>
     <span class="p">],</span>
     <span class="n">dl</span><span class="o">.</span><span class="n">CoordSpec</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">psf_npix</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">psf_pixel_scale</span><span class="p">),</span>
 <span class="p">)</span>
@@ -2090,9 +2090,9 @@
 
 <span class="c1"># Define the optical layers</span>
 <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">(</span><span class="s2">&quot;aperture&quot;</span><span class="p">,</span> <span class="n">aperture</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;aberrations&quot;</span><span class="p">,</span> <span class="n">aberrations</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;to_focal&quot;</span><span class="p">,</span> <span class="n">to_focal</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"aperture"</span><span class="p">,</span> <span class="n">aperture</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"aberrations"</span><span class="p">,</span> <span class="n">aberrations</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"to_focal"</span><span class="p">,</span> <span class="n">to_focal</span><span class="p">),</span>
 <span class="p">]</span>
 
 <span class="c1"># Construct the optics object</span>
@@ -2141,18 +2141,18 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pupil</span><span class="p">,</span> <span class="n">seismic</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">CenteredNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ap_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;OPD [nm]&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [m]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [m]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Pupil OPD&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"OPD [nm]"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [m]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [m]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Pupil OPD"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf_pos</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">inferno</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Sqrt Intensity&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;+ Defocused PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"Sqrt Intensity"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"+ Defocused PSF"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf_neg</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">inferno</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Sqrt Intensity&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;- Defocused PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"Sqrt Intensity"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"- Defocused PSF"</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -2194,7 +2194,7 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">psf_pos</span><span class="p">,</span> <span class="n">psf_neg</span><span class="p">])</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">eval_wfs_data</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">optics</span><span class="p">):</span>
-    <span class="n">optics</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="mf">1e-9</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;coeffs&quot;</span><span class="p">])</span>
+    <span class="n">optics</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="mf">1e-9</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="s2">"coeffs"</span><span class="p">])</span>
     <span class="k">return</span> <span class="mf">1e6</span> <span class="o">*</span> <span class="n">eval_wfs_psfs</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">z_score_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">optics</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
@@ -2206,7 +2206,7 @@
 
 <span class="c1"># Re-initialise our guess of parameters</span>
 <span class="n">keys</span> <span class="o">=</span> <span class="n">jr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
-<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;coeffs&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">optics</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)}</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"coeffs"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">optics</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)}</span>
 
 <span class="c1"># Apply the optimiser</span>
 <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">optics</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
@@ -2215,8 +2215,8 @@
 
 <span class="c1"># Check the final reduced chi-squared statistic</span>
 <span class="n">chi2r</span> <span class="o">=</span> <span class="n">zdx</span><span class="o">.</span><span class="n">chi2r</span><span class="p">(</span><span class="n">eval_wfs_data</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">optics</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">zdx</span><span class="o">.</span><span class="n">ddof</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final reduced chi-squared:&quot;</span><span class="p">,</span> <span class="n">chi2r</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Steps:&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;num_steps&quot;</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Final reduced chi-squared:"</span><span class="p">,</span> <span class="n">chi2r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Steps:"</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s2">"num_steps"</span><span class="p">]))</span>
 </code></pre></div>
 <pre><code>Final reduced chi-squared: 1.0526975
 Steps: 206
@@ -2224,7 +2224,7 @@ Steps: 206
 <details class="info">
 <summary>Plotting code</summary>
 <div class="highlight"><pre><span></span><code><span class="n">true_opd</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">()</span>
-<span class="n">recovered_opd</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="mf">1e-9</span> <span class="o">*</span> <span class="n">sol</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;coeffs&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">()</span>
+<span class="n">recovered_opd</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="mf">1e-9</span> <span class="o">*</span> <span class="n">sol</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="s2">"coeffs"</span><span class="p">])</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">()</span>
 <span class="n">residual_opd</span> <span class="o">=</span> <span class="n">recovered_opd</span> <span class="o">-</span> <span class="n">true_opd</span>
 
 <span class="n">true_pupil</span> <span class="o">=</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">true_opd</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">aper</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
@@ -2235,18 +2235,18 @@ Steps: 206
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">true_pupil</span><span class="p">,</span> <span class="n">seismic</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">CenteredNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ap_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;OPD [nm]&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [m]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [m]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Pupil OPD&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"OPD [nm]"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [m]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [m]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Pupil OPD"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">recovered_pupil</span><span class="p">,</span> <span class="n">seismic</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">CenteredNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ap_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;OPD [nm]&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [m]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [m]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Recovered OPD&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"OPD [nm]"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [m]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [m]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Recovered OPD"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">residual_pupil</span><span class="p">,</span> <span class="n">seismic</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">CenteredNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="n">ap_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;OPD [nm]&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [m]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [m]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;OPD Residual&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"OPD [nm]"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [m]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [m]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"OPD Residual"</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -2260,44 +2260,44 @@ Steps: 206
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="c1"># plt.title(&quot;+Defocus Image&quot;)</span>
+<span class="c1"># plt.title("+Defocus Image")</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">inferno</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;+ Defocused Image&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"Counts"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"+ Defocused Image"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="c1"># plt.title(&quot;Predicted +Defocus Image&quot;)</span>
+<span class="c1"># plt.title("Predicted +Defocus Image")</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">inferno</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted + Defocused Image&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"Counts"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Predicted + Defocused Image"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="c1"># plt.title(&quot;z-score&quot;)</span>
+<span class="c1"># plt.title("z-score")</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">seismic</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">CenteredNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;z-score&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;z-score&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"z-score"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"z-score"</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="c1"># plt.title(&quot;-Defocus Image&quot;)</span>
+<span class="c1"># plt.title("-Defocus Image")</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">inferno</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;- Defocused Image&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"Counts"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"- Defocused Image"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="c1"># plt.title(&quot;Predicted -Defocus Image&quot;)</span>
+<span class="c1"># plt.title("Predicted -Defocus Image")</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">inferno</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted - Defocused Image&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"Counts"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Predicted - Defocused Image"</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="c1"># plt.title(&quot;z-score&quot;)</span>
+<span class="c1"># plt.title("z-score")</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">seismic</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">CenteredNorm</span><span class="p">(),</span> <span class="n">extent</span><span class="o">=</span><span class="n">psf_ext</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;z-score&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;x [mm]&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;y [mm]&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;z-score&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"z-score"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"x [mm]"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"y [mm]"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"z-score"</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -2367,7 +2367,7 @@ Steps: 206
       <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2268,7 +2268,7 @@
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">use_sum</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Combines multiple arrays by multiplying them together, and downsampling the output.</span>
 
 <span class="sd">    Parameters</span>
@@ -2284,7 +2284,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    array : Array</span>
 <span class="sd">        The combined array, optionally downsampled by `oversample`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span> <span class="k">if</span> <span class="n">use_sum</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span>
     <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">oversample</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -2423,7 +2423,7 @@
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">circle</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates a hard-edged circle. This function is not differentiable.</span>
 
 <span class="sd">    Parameters</span>
@@ -2439,7 +2439,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    circle : Array</span>
 <span class="sd">        The circle.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">circ_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
@@ -2576,7 +2576,7 @@
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">square</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates a hard-edged square. This function is not differentiable.</span>
 
 <span class="sd">    Parameters</span>
@@ -2592,7 +2592,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    square : Array</span>
 <span class="sd">        The square.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">square_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">square_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
@@ -2750,7 +2750,7 @@
 <span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rectangle</span><span class="p">(</span>
     <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates a hard-edged rectangle. This function is not differentiable.</span>
 
 <span class="sd">    Parameters</span>
@@ -2768,7 +2768,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    rectangle : Array</span>
 <span class="sd">        The rectangle.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">rectangle_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">rectangle_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
@@ -2923,7 +2923,7 @@
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reg_polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">rmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates a hard-edged regular polygon. This function is not differentiable.</span>
 
 <span class="sd">    Parameters</span>
@@ -2941,7 +2941,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    polygon : Array</span>
 <span class="sd">        The polygon.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">reg_polygon_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">nsides</span><span class="p">,</span> <span class="n">rmax</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
@@ -3079,7 +3079,7 @@
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">spider</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates a hard-edged spider. This function is not differentiable.</span>
 
 <span class="sd">    Parameters</span>
@@ -3095,7 +3095,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    spider : Array</span>
 <span class="sd">        The spider.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">angles</span>
     <span class="n">calc_fn</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">angle</span><span class="p">:</span> <span class="n">spider_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">spiders</span> <span class="o">=</span> <span class="o">~</span><span class="n">lax</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">calc_fn</span><span class="p">(</span><span class="n">angles</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="n">lax</span><span class="o">.</span><span class="n">bitwise_or</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,))</span>
@@ -3259,9 +3259,9 @@ a very hard edge.</p>
 <span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">soft_circle</span><span class="p">(</span>
     <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">clip_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates a soft-edged circle differentiably. The &#39;clip_dist&#39; parameter defines</span>
-<span class="sd">    the distance from the edge to &#39;soften&#39; up to. A large clip_dist will result in a</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculates a soft-edged circle differentiably. The 'clip_dist' parameter defines</span>
+<span class="sd">    the distance from the edge to 'soften' up to. A large clip_dist will result in a</span>
 <span class="sd">    circle with a very soft edge, while a small clip_dist will result in a circle with</span>
 <span class="sd">    a very hard edge.</span>
 
@@ -3272,7 +3272,7 @@ a very hard edge.</p>
 <span class="sd">    radius : float</span>
 <span class="sd">        The radius of the circle.</span>
 <span class="sd">    clip_dist : float = 0.1</span>
-<span class="sd">        The distance from the edge to &#39;soften&#39; up to.</span>
+<span class="sd">        The distance from the edge to 'soften' up to.</span>
 <span class="sd">    invert : bool = False</span>
 <span class="sd">        Whether to invert the circle.</span>
 
@@ -3280,7 +3280,7 @@ a very hard edge.</p>
 <span class="sd">    -------</span>
 <span class="sd">    circle : Array</span>
 <span class="sd">        The softened circle.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">circ_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">soften</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">clip_dist</span><span class="p">,</span> <span class="n">invert</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3442,9 +3442,9 @@ a very hard edge.</p>
 <span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">soft_square</span><span class="p">(</span>
     <span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">clip_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates a soft-edged square differentiably. The &#39;clip_dist&#39; parameter defines</span>
-<span class="sd">    the distance from the edge to &#39;soften&#39; up to. A large clip_dist will result in a</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculates a soft-edged square differentiably. The 'clip_dist' parameter defines</span>
+<span class="sd">    the distance from the edge to 'soften' up to. A large clip_dist will result in a</span>
 <span class="sd">    square with a very soft edge, while a small clip_dist will result in a square with</span>
 <span class="sd">    a very hard edge.</span>
 
@@ -3455,7 +3455,7 @@ a very hard edge.</p>
 <span class="sd">    width : float</span>
 <span class="sd">        The width of the square.</span>
 <span class="sd">    clip_dist : float = 0.1</span>
-<span class="sd">        The distance from the edge to &#39;soften&#39; up to.</span>
+<span class="sd">        The distance from the edge to 'soften' up to.</span>
 <span class="sd">    invert : bool = False</span>
 <span class="sd">        Whether to invert the square.</span>
 
@@ -3463,7 +3463,7 @@ a very hard edge.</p>
 <span class="sd">    -------</span>
 <span class="sd">    square : Array</span>
 <span class="sd">        The softened square.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">square_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">soften</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">clip_dist</span><span class="p">,</span> <span class="n">invert</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3651,9 +3651,9 @@ with a very hard edge.</p>
     <span class="n">clip_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates a soft-edged rectangle differentiably. The &#39;clip_dist&#39; parameter defines</span>
-<span class="sd">    the distance from the edge to &#39;soften&#39; up to. A large clip_dist will result in a</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculates a soft-edged rectangle differentiably. The 'clip_dist' parameter defines</span>
+<span class="sd">    the distance from the edge to 'soften' up to. A large clip_dist will result in a</span>
 <span class="sd">    rectangle with a very soft edge, while a small clip_dist will result in a rectangle</span>
 <span class="sd">    with a very hard edge.</span>
 
@@ -3666,7 +3666,7 @@ with a very hard edge.</p>
 <span class="sd">    height : float</span>
 <span class="sd">        The height of the rectangle.</span>
 <span class="sd">    clip_dist : float = 0.1</span>
-<span class="sd">        The distance from the edge to &#39;soften&#39; up to.</span>
+<span class="sd">        The distance from the edge to 'soften' up to.</span>
 <span class="sd">    invert : bool = False</span>
 <span class="sd">        Whether to invert the rectangle.</span>
 
@@ -3674,7 +3674,7 @@ with a very hard edge.</p>
 <span class="sd">    -------</span>
 <span class="sd">    rectangle : Array</span>
 <span class="sd">        The softened rectangle.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">rectangle_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">soften</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">clip_dist</span><span class="p">,</span> <span class="n">invert</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3862,9 +3862,9 @@ with a very hard edge.</p>
     <span class="n">clip_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates a soft-edged regular polygon differentiably. The &#39;clip_dist&#39; parameter</span>
-<span class="sd">    defines the distance from the edge to &#39;soften&#39; up to. A large clip_dist will result</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculates a soft-edged regular polygon differentiably. The 'clip_dist' parameter</span>
+<span class="sd">    defines the distance from the edge to 'soften' up to. A large clip_dist will result</span>
 <span class="sd">    in a polygon with a very soft edge, while a small clip_dist will result in a polygon</span>
 <span class="sd">    with a very hard edge.</span>
 
@@ -3877,7 +3877,7 @@ with a very hard edge.</p>
 <span class="sd">    nsides : int</span>
 <span class="sd">        The number of sides of the polygon.</span>
 <span class="sd">    clip_dist : float = 0.1</span>
-<span class="sd">        The distance from the edge to &#39;soften&#39; up to.</span>
+<span class="sd">        The distance from the edge to 'soften' up to.</span>
 <span class="sd">    invert : bool = False</span>
 <span class="sd">        Whether to invert the polygon.</span>
 
@@ -3885,7 +3885,7 @@ with a very hard edge.</p>
 <span class="sd">    -------</span>
 <span class="sd">    polygon : Array</span>
 <span class="sd">        The softened polygon.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">reg_polygon_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">nsides</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">soften</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">clip_dist</span><span class="p">,</span> <span class="n">invert</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -4075,9 +4075,9 @@ a very hard edge.</p>
     <span class="n">clip_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates a soft-edged spider differentiably. The &#39;clip_dist&#39; parameter defines</span>
-<span class="sd">    the distance from the edge to &#39;soften&#39; up to. A large clip_dist will result in a</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Calculates a soft-edged spider differentiably. The 'clip_dist' parameter defines</span>
+<span class="sd">    the distance from the edge to 'soften' up to. A large clip_dist will result in a</span>
 <span class="sd">    spider with a very soft edge, while a small clip_dist will result in a spider with</span>
 <span class="sd">    a very hard edge.</span>
 
@@ -4090,7 +4090,7 @@ a very hard edge.</p>
 <span class="sd">    angles : Array</span>
 <span class="sd">        The angles of the spider.</span>
 <span class="sd">    clip_dist : float = 0.1</span>
-<span class="sd">        The distance from the edge to &#39;soften&#39; up to.</span>
+<span class="sd">        The distance from the edge to 'soften' up to.</span>
 <span class="sd">    invert : bool = False</span>
 <span class="sd">        Whether to invert the spider.</span>
 
@@ -4098,7 +4098,7 @@ a very hard edge.</p>
 <span class="sd">    -------</span>
 <span class="sd">    spider : Array</span>
 <span class="sd">        The softened spider.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">angles</span>
     <span class="n">spider_fn</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">angle</span><span class="p">:</span> <span class="n">spider_distance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span>
     <span class="n">spiders</span> <span class="o">=</span> <span class="o">-</span><span class="n">spider_fn</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -4168,7 +4168,7 @@ a very hard edge.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

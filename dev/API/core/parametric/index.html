@@ -25,23 +25,23 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
-        <title>Parametric Models - dLux documentation</title>
+        <title>Parametric - dLux documentation</title>
       
     
     
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -125,7 +125,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Parametric Models
+              Parametric
             
           </span>
         </div>
@@ -2144,11 +2144,11 @@
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Parametric</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract parameterisation that evaluates to a value when consumed.</span>
+<span class="w">    </span><span class="sd">"""Abstract parameterisation that evaluates to a value when consumed.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Parametric.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Parametric</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
@@ -2255,11 +2255,11 @@
 <span class="normal">80</span>
 <span class="normal">81</span>
 <span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParametricBasis</span><span class="p">(</span><span class="n">Parametric</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for coefficient-weighted basis parameterisations.</span>
+<span class="w">    </span><span class="sd">"""Base class for coefficient-weighted basis parameterisations.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ParametricBasis.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span>
 
@@ -2287,8 +2287,8 @@
         <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">coefficient_shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Coefficient shape must match the leading basis dimensions. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">coefficient_shape</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="s2">"Coefficient shape must match the leading basis dimensions. "</span>
+                <span class="sa">f</span><span class="s2">"Expected </span><span class="si">{</span><span class="n">coefficient_shape</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">coefficients</span>
 
@@ -2391,11 +2391,11 @@
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExplicitBasis</span><span class="p">(</span><span class="n">ParametricBasis</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A parameterisation over an explicitly sampled basis array.</span>
+<span class="w">    </span><span class="sd">"""A parameterisation over an explicitly sampled basis array.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ExplicitBasis.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span>
 
@@ -2408,7 +2408,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">coefficients</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">coefficient_shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide either coefficients or coefficient_shape.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Provide either coefficients or coefficient_shape."</span><span class="p">)</span>
             <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">coefficient_shape</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -2416,7 +2416,7 @@
                 <span class="n">coefficient_shape</span> <span class="o">=</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">coefficient_shape</span><span class="p">)]</span> <span class="o">!=</span> <span class="n">coefficient_shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The leading basis dimensions must match the coefficient shape.&quot;</span>
+                <span class="s2">"The leading basis dimensions must match the coefficient shape."</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_coefficients</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">coefficient_shape</span><span class="p">)</span>
 
@@ -2502,11 +2502,11 @@
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImplicitBasis</span><span class="p">(</span><span class="n">ParametricBasis</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for bases generated or evaluated indirectly at runtime.</span>
+<span class="w">    </span><span class="sd">"""Base class for bases generated or evaluated indirectly at runtime.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ImplicitBasis.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_basis</span><span class="p">(</span>
@@ -2592,18 +2592,18 @@
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CoordBasis</span><span class="p">(</span><span class="n">ImplicitBasis</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for implicit bases evaluated at Cartesian coordinates.</span>
+<span class="w">    </span><span class="sd">"""Base class for implicit bases evaluated at Cartesian coordinates.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/CoordBasis.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_coordinates</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">coordinates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">coordinates</span>
         <span class="k">if</span> <span class="n">wavefront</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide either wavefront or coordinates.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Provide either wavefront or coordinates."</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2706,11 +2706,11 @@
 <span class="normal">197</span>
 <span class="normal">198</span>
 <span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CLIMBBasis</span><span class="p">(</span><span class="n">ExplicitBasis</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A continuous latent basis mapped through the CLIMB binarisation.</span>
+<span class="w">    </span><span class="sd">"""A continuous latent basis mapped through the CLIMB binarisation.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/CLIMBBasis.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">values</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">eqx</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2726,21 +2726,21 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">coefficient_shape</span><span class="p">)</span>
         <span class="n">output_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefficient_shape</span><span class="p">)</span> <span class="p">:]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">output_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">output_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The CLIMB latent output must be a square 2D array.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The CLIMB latent output must be a square 2D array."</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;values must contain exactly two output values.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"values must contain exactly two output values."</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">oversample</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;oversample must be a positive integer.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"oversample must be a positive integer."</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">output_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The CLIMB latent output size must be divisible by oversample.&quot;</span>
+                <span class="s2">"The CLIMB latent output size must be divisible by oversample."</span>
             <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the continuous, pre-binarised latent basis.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Evaluate the continuous, pre-binarised latent basis."""</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
@@ -2782,7 +2782,7 @@
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
 <span class="normal">193</span>
 <span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">evaluate_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate the continuous, pre-binarised latent basis.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Evaluate the continuous, pre-binarised latent basis."""</span>
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2858,11 +2858,11 @@
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FourierBasis</span><span class="p">(</span><span class="n">ImplicitBasis</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A parameterisation over a separable real Fourier basis.</span>
+<span class="w">    </span><span class="sd">"""A parameterisation over a separable real Fourier basis.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/FourierBasis.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">kernels</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">Array</span><span class="p">]</span>
 
@@ -2874,7 +2874,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
         <span class="n">Kx</span><span class="p">,</span> <span class="n">Ky</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernels</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;xi,yj-&gt;ijxy&quot;</span><span class="p">,</span> <span class="n">Kx</span><span class="p">,</span> <span class="n">Ky</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"xi,yj-&gt;ijxy"</span><span class="p">,</span> <span class="n">Kx</span><span class="p">,</span> <span class="n">Ky</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dlu</span><span class="o">.</span><span class="n">eval_fourier_basis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">kernels</span><span class="p">)</span>
@@ -2986,29 +2986,29 @@
 <span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SplineBasis</span><span class="p">(</span><span class="n">ImplicitBasis</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A fixed 2D array represented by a lower-resolution grid of spline knots.</span>
+<span class="w">    </span><span class="sd">"""A fixed 2D array represented by a lower-resolution grid of spline knots.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/SplineBasis.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">knot_coords</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">sample_coords</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">eqx</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npix</span><span class="p">,</span> <span class="n">n_knots</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npix</span><span class="p">,</span> <span class="n">n_knots</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"cubic"</span><span class="p">):</span>
         <span class="n">npix</span> <span class="o">=</span> <span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">npix</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">npix</span><span class="p">)</span>
         <span class="n">n_knots</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_knots</span><span class="p">,</span> <span class="n">n_knots</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_knots</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">n_knots</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">npix</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_knots</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;npix and n_knots must be integers or length-two tuples.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"npix and n_knots must be integers or length-two tuples."</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">npix</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;npix must contain positive integers.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"npix must contain positive integers."</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">n_knots</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_knots must contain values greater than one.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_knots must contain values greater than one."</span><span class="p">)</span>
         <span class="n">knot_axes</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">n_knots</span><span class="p">]</span>
         <span class="n">sample_axes</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">npix</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">knot_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">knot_axes</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sample_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">sample_axes</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">knot_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">knot_axes</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">"xy"</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">sample_axes</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">"xy"</span><span class="p">))</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">knot_coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="k">if</span> <span class="n">coefficients</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">coefficients</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_coefficients</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
@@ -3113,7 +3113,7 @@
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

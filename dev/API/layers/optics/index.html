@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2207,11 +2207,11 @@ the input wavefront, with optional normalisation afterward.</p>
 <span class="normal">94</span>
 <span class="normal">95</span>
 <span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Optic</span><span class="p">(</span><span class="n">TransmissiveLayer</span><span class="p">,</span> <span class="n">AberratedLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A basic &#39;Optic&#39; class, which optionally applies a transmission, OPD and phase to</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    A basic 'Optic' class, which optionally applies a transmission, OPD and phase to</span>
 <span class="sd">    the input wavefront, with optional normalisation afterward.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Optic.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2224,7 +2224,7 @@ the input wavefront, with optional normalisation afterward.</p>
 <span class="sd">        The Array of phase values to be applied to the input wavefront.</span>
 <span class="sd">    normalise: bool</span>
 <span class="sd">        Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">Optic</span><span class="p">,</span>
@@ -2233,7 +2233,7 @@ the input wavefront, with optional normalisation afterward.</p>
         <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        transmission: Array = None</span>
@@ -2244,7 +2244,7 @@ the input wavefront, with optional normalisation afterward.</p>
 <span class="sd">            The Array of phase values to be applied to the input wavefront.</span>
 <span class="sd">        normalise: bool = False</span>
 <span class="sd">            Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span>
             <span class="n">opd</span><span class="o">=</span><span class="n">opd</span><span class="p">,</span>
@@ -2256,18 +2256,18 @@ the input wavefront, with optional normalisation afterward.</p>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;transmission and opd must have the same shape. Got &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="s2">"transmission and opd must have the same shape. Got "</span>
+                        <span class="sa">f</span><span class="s2">"shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
                     <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;transmission and phase must have the same shape. Got &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="s2">"transmission and phase must have the same shape. Got "</span>
+                        <span class="sa">f</span><span class="s2">"shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
                     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Optic</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Applies the layer to the wavefront.</span>
 
 <span class="sd">        Parameters</span>
@@ -2279,7 +2279,7 @@ the input wavefront, with optional normalisation afterward.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The transformed wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">wavefront</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">)</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_opd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">))</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_phase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">))</span>
@@ -2392,7 +2392,7 @@ the input wavefront, with optional normalisation afterward.</p>
 <span class="normal">94</span>
 <span class="normal">95</span>
 <span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Optic</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Applies the layer to the wavefront.</span>
 
 <span class="sd">    Parameters</span>
@@ -2404,7 +2404,7 @@ the input wavefront, with optional normalisation afterward.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The transformed wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">wavefront</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">)</span>
     <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_opd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">))</span>
     <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_phase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">))</span>
@@ -2556,7 +2556,7 @@ the input wavefront, with optional normalisation afterward.</p>
     <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    transmission: Array = None</span>
@@ -2567,7 +2567,7 @@ the input wavefront, with optional normalisation afterward.</p>
 <span class="sd">        The Array of phase values to be applied to the input wavefront.</span>
 <span class="sd">    normalise: bool = False</span>
 <span class="sd">        Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span>
         <span class="n">opd</span><span class="o">=</span><span class="n">opd</span><span class="p">,</span>
@@ -2579,14 +2579,14 @@ the input wavefront, with optional normalisation afterward.</p>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;transmission and opd must have the same shape. Got &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="s2">"transmission and opd must have the same shape. Got "</span>
+                    <span class="sa">f</span><span class="s2">"shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
                 <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;transmission and phase must have the same shape. Got &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="s2">"transmission and phase must have the same shape. Got "</span>
+                    <span class="sa">f</span><span class="s2">"shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
                 <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2785,12 +2785,12 @@ optionally applies a transmission and normalisation.</p>
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BasisOptic</span><span class="p">(</span><span class="n">TransmissiveLayer</span><span class="p">,</span> <span class="n">BasisLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A basic &#39;BasisOptic&#39; class, with aberrations applied through a set of basis-vector</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    A basic 'BasisOptic' class, with aberrations applied through a set of basis-vector</span>
 <span class="sd">    coefficients. The evaluated basis is applied according to ``effect``. Also</span>
 <span class="sd">    optionally applies a transmission and normalisation.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BasisOptic.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2802,10 +2802,10 @@ optionally applies a transmission and normalisation.</p>
 <span class="sd">    coefficients: Array</span>
 <span class="sd">        The Array of coefficients to be applied to each basis vector.</span>
 <span class="sd">    effect : str</span>
-<span class="sd">        How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
+<span class="sd">        How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.</span>
 <span class="sd">    normalise : bool</span>
 <span class="sd">        Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">BasisOptic</span><span class="p">,</span>
@@ -2813,10 +2813,10 @@ optionally applies a transmission and normalisation.</p>
         <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;opd&quot;</span><span class="p">,</span>
+        <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"opd"</span><span class="p">,</span>
         <span class="n">coefficient_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        basis: Array, metres</span>
@@ -2825,11 +2825,11 @@ optionally applies a transmission and normalisation.</p>
 <span class="sd">            The Array of coefficients to be applied to each basis vector.</span>
 <span class="sd">        transmission: Array = None</span>
 <span class="sd">            The Array of transmission values to be applied to the input wavefront.</span>
-<span class="sd">        effect : str = &quot;opd&quot;</span>
-<span class="sd">            How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
+<span class="sd">        effect : str = "opd"</span>
+<span class="sd">            How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.</span>
 <span class="sd">        normalise : bool = False</span>
 <span class="sd">            Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span>
             <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span>
@@ -2840,7 +2840,7 @@ optionally applies a transmission and normalisation.</p>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BasisOptic</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Applies the layer to the wavefront.</span>
 
 <span class="sd">        Parameters</span>
@@ -2852,7 +2852,7 @@ optionally applies a transmission and normalisation.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The transformed wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">transmission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">)</span>
         <span class="n">wavefront</span> <span class="o">*=</span> <span class="n">transmission</span>
 
@@ -2969,7 +2969,7 @@ optionally applies a transmission and normalisation.</p>
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BasisOptic</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Applies the layer to the wavefront.</span>
 
 <span class="sd">    Parameters</span>
@@ -2981,7 +2981,7 @@ optionally applies a transmission and normalisation.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The transformed wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">transmission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="p">,</span> <span class="n">wavefront</span><span class="o">=</span><span class="n">wavefront</span><span class="p">)</span>
     <span class="n">wavefront</span> <span class="o">*=</span> <span class="n">transmission</span>
 
@@ -3000,7 +3000,7 @@ optionally applies a transmission and normalisation.</p>
 
 
 <h3 id="dLux.layers.optics.BasisOptic.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">transmission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="s1">&#39;opd&#39;</span><span class="p">,</span> <span class="n">coefficient_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">transmission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="s1">'opd'</span><span class="p">,</span> <span class="n">coefficient_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dLux.layers.optics.BasisOptic.__init__" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -3142,10 +3142,10 @@ optionally applies a transmission and normalisation.</p>
     <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;opd&quot;</span><span class="p">,</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"opd"</span><span class="p">,</span>
     <span class="n">coefficient_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    basis: Array, metres</span>
@@ -3154,11 +3154,11 @@ optionally applies a transmission and normalisation.</p>
 <span class="sd">        The Array of coefficients to be applied to each basis vector.</span>
 <span class="sd">    transmission: Array = None</span>
 <span class="sd">        The Array of transmission values to be applied to the input wavefront.</span>
-<span class="sd">    effect : str = &quot;opd&quot;</span>
-<span class="sd">        How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
+<span class="sd">    effect : str = "opd"</span>
+<span class="sd">        How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.</span>
 <span class="sd">    normalise : bool = False</span>
 <span class="sd">        Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span>
         <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span>
@@ -3240,7 +3240,7 @@ optionally applies a transmission and normalisation.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

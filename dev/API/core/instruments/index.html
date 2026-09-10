@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2097,15 +2097,15 @@ array or PSF object from their configured components.</p>
 <span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Instrument</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Abstract base class for instrument models.</span>
 
 <span class="sd">    Concrete instrument classes must implement `model(...)` to produce an image</span>
 <span class="sd">    array or PSF object from their configured components.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Instrument.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span>
@@ -2359,7 +2359,7 @@ instrument.</p>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Telescope</span><span class="p">(</span><span class="n">Instrument</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Class that represents a telescope instrument, holding an optical system, a source</span>
 <span class="sd">    object and (optionally) a detector object, automating the process of modelling</span>
 <span class="sd">    all three in conjunction.</span>
@@ -2367,7 +2367,7 @@ instrument.</p>
 <span class="sd">    To generate more complex instruments or a set of observations, the `Telescope`</span>
 <span class="sd">    class can be inherited and modified to suit the needs of the user.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Telescope.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2380,7 +2380,7 @@ instrument.</p>
 <span class="sd">    detector : Detector</span>
 <span class="sd">        A `Detector` object that defines the detector transformations of the</span>
 <span class="sd">        instrument.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">optics</span><span class="p">:</span> <span class="n">OpticalSystem</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Source</span>
@@ -2392,7 +2392,7 @@ instrument.</p>
         <span class="n">source</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Source</span><span class="p">]</span> <span class="o">|</span> <span class="n">Source</span><span class="p">,</span>
         <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        optics : OpticalSystem</span>
@@ -2406,13 +2406,13 @@ instrument.</p>
 <span class="sd">        detector : Detector = None</span>
 <span class="sd">            A `Detector` object that defines the detector transformations of the</span>
 <span class="sd">            instrument.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Optics</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optics</span><span class="p">,</span> <span class="n">OpticalSystem</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;optics must be an OpticalSystem instance, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="s2">&quot;Use a dLux optics type from dLux.optical_systems.&quot;</span>
+                <span class="sa">f</span><span class="s2">"optics must be an OpticalSystem instance, "</span>
+                <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
+                <span class="s2">"Use a dLux optics type from dLux.optical_systems."</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optics</span> <span class="o">=</span> <span class="n">optics</span>
 
@@ -2422,8 +2422,8 @@ instrument.</p>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Source</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;source tuple must be of the form (key: str, Source: Source), &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> with length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"source tuple must be of the form (key: str, Source: Source), "</span>
+                    <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> with length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2432,13 +2432,13 @@ instrument.</p>
         <span class="c1"># Detector</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">Detector</span><span class="p">)</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;detector must be a Detector instance, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="s2">&quot;Use a dLux detector type from dLux.detectors.&quot;</span>
+                <span class="sa">f</span><span class="s2">"detector must be a Detector instance, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
+                <span class="s2">"Use a dLux detector type from dLux.detectors."</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Telescope</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Raises the attributes from the optics, source and detector to the top level of</span>
 <span class="sd">        the class.</span>
 
@@ -2451,7 +2451,7 @@ instrument.</p>
 <span class="sd">        -------</span>
 <span class="sd">        item : Any</span>
 <span class="sd">            The item corresponding to the supplied key in the sub-dictionaries.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -2462,7 +2462,7 @@ instrument.</p>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Telescope</span><span class="p">,</span> <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Models the source objects through the optical system and detector.</span>
 
 <span class="sd">        Parameters</span>
@@ -2476,7 +2476,7 @@ instrument.</p>
 <span class="sd">            If `return_psf` is False, the PSF array is returned.</span>
 <span class="sd">            If `return_psf` is True, the PSF object is returned.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Model optics: return_psf=True for more efficient source calculations</span>
         <span class="n">psfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optics</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">return_psf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -2603,7 +2603,7 @@ the class.</p>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Telescope</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Raises the attributes from the optics, source and detector to the top level of</span>
 <span class="sd">    the class.</span>
 
@@ -2616,7 +2616,7 @@ the class.</p>
 <span class="sd">    -------</span>
 <span class="sd">    item : Any</span>
 <span class="sd">        The item corresponding to the supplied key in the sub-dictionaries.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -2769,7 +2769,7 @@ instrument.</p>
     <span class="n">source</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Source</span><span class="p">]</span> <span class="o">|</span> <span class="n">Source</span><span class="p">,</span>
     <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    optics : OpticalSystem</span>
@@ -2783,13 +2783,13 @@ instrument.</p>
 <span class="sd">    detector : Detector = None</span>
 <span class="sd">        A `Detector` object that defines the detector transformations of the</span>
 <span class="sd">        instrument.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Optics</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optics</span><span class="p">,</span> <span class="n">OpticalSystem</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;optics must be an OpticalSystem instance, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. &quot;</span>
-            <span class="s2">&quot;Use a dLux optics type from dLux.optical_systems.&quot;</span>
+            <span class="sa">f</span><span class="s2">"optics must be an OpticalSystem instance, "</span>
+            <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
+            <span class="s2">"Use a dLux optics type from dLux.optical_systems."</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">optics</span> <span class="o">=</span> <span class="n">optics</span>
 
@@ -2799,8 +2799,8 @@ instrument.</p>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Source</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;source tuple must be of the form (key: str, Source: Source), &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> with length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">"source tuple must be of the form (key: str, Source: Source), "</span>
+                <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> with length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2809,8 +2809,8 @@ instrument.</p>
     <span class="c1"># Detector</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">Detector</span><span class="p">)</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;detector must be a Detector instance, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. &quot;</span>
-            <span class="s2">&quot;Use a dLux detector type from dLux.detectors.&quot;</span>
+            <span class="sa">f</span><span class="s2">"detector must be a Detector instance, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
+            <span class="s2">"Use a dLux detector type from dLux.detectors."</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span>
 </code></pre></div></td></tr></table></div>
@@ -2922,7 +2922,7 @@ If <code>return_psf</code> is True, the PSF object is returned.</p>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Telescope</span><span class="p">,</span> <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Models the source objects through the optical system and detector.</span>
 
 <span class="sd">    Parameters</span>
@@ -2936,7 +2936,7 @@ If <code>return_psf</code> is True, the PSF object is returned.</p>
 <span class="sd">        If `return_psf` is False, the PSF array is returned.</span>
 <span class="sd">        If `return_psf` is True, the PSF object is returned.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Model optics: return_psf=True for more efficient source calculations</span>
     <span class="n">psfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optics</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">return_psf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -3145,13 +3145,13 @@ array should be (ndithers, 2).</p>
 <span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Dither</span><span class="p">(</span><span class="n">Telescope</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Simple extension of the `Telescope` class that applies a series of dithers to the</span>
 <span class="sd">    source positions before modelling the instrument. Serves both as a demonstration</span>
 <span class="sd">    of how to extend the `Telescope` class and as a useful tool for modelling</span>
 <span class="sd">    dithered observations.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Dither.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3167,7 +3167,7 @@ array should be (ndithers, 2).</p>
 <span class="sd">    dithers : Array, radians</span>
 <span class="sd">        The array of dithers to apply to the source positions. The shape of the</span>
 <span class="sd">        array should be (ndithers, 2).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">dithers</span><span class="p">:</span> <span class="n">Array</span>
 
@@ -3178,7 +3178,7 @@ array should be (ndithers, 2).</p>
         <span class="n">source</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Source</span><span class="p">]</span> <span class="o">|</span> <span class="n">Source</span><span class="p">,</span>
         <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        dithers : Array, radians</span>
@@ -3195,14 +3195,14 @@ array should be (ndithers, 2).</p>
 <span class="sd">        detector : Detector = None</span>
 <span class="sd">            A `Detector` object that defines the detector transformations of the</span>
 <span class="sd">            instrument.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dithers</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dithers must be an array of shape (ndithers, 2)&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"dithers must be an array of shape (ndithers, 2)"</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">optics</span><span class="o">=</span><span class="n">optics</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">detector</span><span class="o">=</span><span class="n">detector</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Models the source objects through the optical system and detector, while also</span>
 <span class="sd">        applying the dithers to the source positions.</span>
 
@@ -3216,10 +3216,10 @@ array should be (ndithers, 2).</p>
 <span class="sd">        result : Array | PSF</span>
 <span class="sd">            If `return_psf` is False, the PSF array is returned.</span>
 <span class="sd">            If `return_psf` is True, the PSF object is returned.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">dither_and_model</span><span class="p">(</span><span class="n">dither</span><span class="p">,</span> <span class="n">instrument</span><span class="p">):</span>
-            <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;source.position&quot;</span><span class="p">,</span> <span class="n">dither</span><span class="p">)</span>
+            <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"source.position"</span><span class="p">,</span> <span class="n">dither</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instrument</span><span class="p">),</span> <span class="n">instrument</span><span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">return_psf</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">vmap</span><span class="p">(</span><span class="n">dither_and_model</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -3374,7 +3374,7 @@ instrument.</p>
     <span class="n">source</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Source</span><span class="p">]</span> <span class="o">|</span> <span class="n">Source</span><span class="p">,</span>
     <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dithers : Array, radians</span>
@@ -3391,10 +3391,10 @@ instrument.</p>
 <span class="sd">    detector : Detector = None</span>
 <span class="sd">        A `Detector` object that defines the detector transformations of the</span>
 <span class="sd">        instrument.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dithers</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dithers must be an array of shape (ndithers, 2)&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"dithers must be an array of shape (ndithers, 2)"</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">optics</span><span class="o">=</span><span class="n">optics</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">detector</span><span class="o">=</span><span class="n">detector</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3496,7 +3496,7 @@ If <code>return_psf</code> is True, the PSF object is returned.</p>
 <span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Models the source objects through the optical system and detector, while also</span>
 <span class="sd">    applying the dithers to the source positions.</span>
 
@@ -3510,10 +3510,10 @@ If <code>return_psf</code> is True, the PSF object is returned.</p>
 <span class="sd">    result : Array | PSF</span>
 <span class="sd">        If `return_psf` is False, the PSF array is returned.</span>
 <span class="sd">        If `return_psf` is True, the PSF object is returned.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">dither_and_model</span><span class="p">(</span><span class="n">dither</span><span class="p">,</span> <span class="n">instrument</span><span class="p">):</span>
-        <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;source.position&quot;</span><span class="p">,</span> <span class="n">dither</span><span class="p">)</span>
+        <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"source.position"</span><span class="p">,</span> <span class="n">dither</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instrument</span><span class="p">),</span> <span class="n">instrument</span><span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">return_psf</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">vmap</span><span class="p">(</span><span class="n">dither_and_model</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -3590,7 +3590,7 @@ If <code>return_psf</code> is True, the PSF object is returned.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2156,13 +2156,13 @@ base class for such elements, and should not be used directly.</p>
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ABCDElement</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    An ABCD element is a layer that can be represented by an ABCD matrix. This is a</span>
 <span class="sd">    base class for such elements, and should not be used directly.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ABCDElement.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
@@ -2282,10 +2282,10 @@ base class for such elements, and should not be used directly.</p>
 <span class="normal">67</span>
 <span class="normal">68</span>
 <span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ABCDFreeSpace</span><span class="p">(</span><span class="n">ABCDElement</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A free space propagation element represented by an ABCD matrix.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ABCDFreeSpace.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2294,27 +2294,27 @@ base class for such elements, and should not be used directly.</p>
 <span class="sd">        The free-space propagation distance.</span>
 <span class="sd">    abcd : Array, property</span>
 <span class="sd">        The analytic ABCD matrix for free-space propagation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        distance : float</span>
 <span class="sd">            The free-space propagation distance.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">abcd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        matrix : Array</span>
 <span class="sd">            The analytic ABCD matrix for free-space propagation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">abcd</span><span class="o">.</span><span class="n">abcd_free_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2430,12 +2430,12 @@ base class for such elements, and should not be used directly.</p>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    distance : float</span>
 <span class="sd">        The free-space propagation distance.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2569,14 +2569,14 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ABCDLens</span><span class="p">(</span><span class="n">ABCDElement</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A lens element represented by an ABCD matrix. Note this element alone does not</span>
-<span class="sd">    produce the standard &#39;pupil-focal Fourier relationship&#39; as that is between the front</span>
+<span class="sd">    produce the standard 'pupil-focal Fourier relationship' as that is between the front</span>
 <span class="sd">    and back focal planes. To represent a true pupil-focal plane propagation, apply a</span>
 <span class="sd">    free space propagation of the focal length both before _and_ after the lens, or use</span>
 <span class="sd">    the ABCDConjugatePlane element.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ABCDLens.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2585,27 +2585,27 @@ the ABCDConjugatePlane element.</p>
 <span class="sd">        The lens focal length.</span>
 <span class="sd">    abcd : Array, property</span>
 <span class="sd">        The analytic ABCD matrix for the lens.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">focal_length</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">focal_length</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        focal_length : float</span>
 <span class="sd">            The lens focal length.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">abcd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        matrix : Array</span>
 <span class="sd">            The analytic ABCD matrix for a lens.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">abcd</span><span class="o">.</span><span class="n">abcd_lens</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2721,12 +2721,12 @@ the ABCDConjugatePlane element.</p>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
 <span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">focal_length</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    focal_length : float</span>
 <span class="sd">        The lens focal length.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2852,10 +2852,10 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ABCDMirror</span><span class="p">(</span><span class="n">ABCDElement</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A mirror element represented by an ABCD matrix.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ABCDMirror.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2864,27 +2864,27 @@ the ABCDConjugatePlane element.</p>
 <span class="sd">        The mirror radius of curvature.</span>
 <span class="sd">    abcd : Array, property</span>
 <span class="sd">        The analytic ABCD matrix for the mirror.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        radius : float</span>
 <span class="sd">            The mirror radius of curvature.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">abcd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        matrix : Array</span>
 <span class="sd">            The analytic ABCD matrix for a mirror.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">abcd</span><span class="o">.</span><span class="n">abcd_mirror</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -3000,12 +3000,12 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    radius : float</span>
 <span class="sd">        The mirror radius of curvature.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3133,11 +3133,11 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ABCDConjugatePlane</span><span class="p">(</span><span class="n">ABCDElement</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A conjugate plane element represented by an ABCD matrix. This produces the classic</span>
-<span class="sd">    &#39;pupil-focal Fourier relationship&#39; seen in fourier/physical optics.</span>
+<span class="sd">    'pupil-focal Fourier relationship' seen in fourier/physical optics.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ABCDConjugatePlane.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3146,27 +3146,27 @@ the ABCDConjugatePlane element.</p>
 <span class="sd">        The effective focal length of the conjugate-plane transform.</span>
 <span class="sd">    abcd : Array, property</span>
 <span class="sd">        The analytic ABCD matrix for conjugate-plane propagation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">focal_length</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">focal_length</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        focal_length : float</span>
 <span class="sd">            The effective focal length that defines the conjugate-plane transform.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">abcd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        matrix : Array</span>
 <span class="sd">            The analytic ABCD matrix for a conjugate-plane propagation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">abcd</span><span class="o">.</span><span class="n">abcd_fraunhofer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -3282,12 +3282,12 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">focal_length</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    focal_length : float</span>
 <span class="sd">        The effective focal length that defines the conjugate-plane transform.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3441,10 +3441,10 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">240</span>
 <span class="normal">241</span>
 <span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ABCDPropagator</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagator defined by a composition of ABCD elements.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ABCDPropagator.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3455,25 +3455,25 @@ the ABCDConjugatePlane element.</p>
 <span class="sd">        Output coordinate specification.</span>
 <span class="sd">    abcd : Array, property</span>
 <span class="sd">        The composed ABCD matrix for this propagator.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">ABCDs</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="n">spec</span><span class="p">:</span> <span class="n">CoordSpec</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ABCDs</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ABCDs : list[ABCDElement] | dict[str, ABCDElement]</span>
 <span class="sd">            ABCD elements to compose into a single propagation transform.</span>
 <span class="sd">        spec : CoordSpec | PadSpec</span>
 <span class="sd">            Output coordinate specification.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ABCDs</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list2dictionary</span><span class="p">(</span><span class="n">ABCDs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">allowed_types</span><span class="o">=</span><span class="p">(</span><span class="n">ABCDElement</span><span class="p">,))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve missing attributes via `spec` or child ABCD elements.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Resolve missing attributes via `spec` or child ABCD elements."""</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ABCDs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -3485,12 +3485,12 @@ the ABCDConjugatePlane element.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">abcd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        matrix : Array</span>
 <span class="sd">            The composed ABCD matrix for this propagator.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">abcd</span><span class="o">.</span><span class="n">compose_abcd</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">abcd</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ABCDs</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -3578,7 +3578,7 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve missing attributes via `spec` or child ABCD elements.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve missing attributes via `spec` or child ABCD elements."""</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ABCDs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -3666,14 +3666,14 @@ the ABCDConjugatePlane element.</p>
 <span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ABCDs</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    ABCDs : list[ABCDElement] | dict[str, ABCDElement]</span>
 <span class="sd">        ABCD elements to compose into a single propagation transform.</span>
 <span class="sd">    spec : CoordSpec | PadSpec</span>
 <span class="sd">        Output coordinate specification.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ABCDs</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list2dictionary</span><span class="p">(</span><span class="n">ABCDs</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">allowed_types</span><span class="o">=</span><span class="p">(</span><span class="n">ABCDElement</span><span class="p">,))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
 </code></pre></div></td></tr></table></div>
@@ -3823,14 +3823,14 @@ propagation.</p>
 <span class="normal">291</span>
 <span class="normal">292</span>
 <span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MFTPropagator</span><span class="p">(</span><span class="n">ABCDPropagator</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A matrix Fourier transform (MFT) propagator represented by an ABCD matrix.</span>
 
-<span class="sd">    Note: Always returns a wavefront in an &#39;Intermediate&#39; plane, even if the</span>
+<span class="sd">    Note: Always returns a wavefront in an 'Intermediate' plane, even if the</span>
 <span class="sd">    propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane</span>
 <span class="sd">    tracking, but the present Wavefront class is not compatible with this formulation.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/MFTPropagator.png)</span>
 
 <span class="sd">    Parameters</span>
@@ -3840,10 +3840,10 @@ propagation.</p>
 <span class="sd">        propagation.</span>
 <span class="sd">    spec: CoordSpec</span>
 <span class="sd">        The coordinate specification of the output wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagate a wavefront using an LCT-based matrix Fourier transform.</span>
 
 <span class="sd">        Parameters</span>
@@ -3855,7 +3855,7 @@ propagation.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            Propagated wavefront with updated field and output specification.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Define input-output coordinates</span>
         <span class="n">spec_in</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">spec</span>
         <span class="n">spec_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
@@ -3986,7 +3986,7 @@ propagation.</p>
 <span class="normal">291</span>
 <span class="normal">292</span>
 <span class="normal">293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagate a wavefront using an LCT-based matrix Fourier transform.</span>
 
 <span class="sd">    Parameters</span>
@@ -3998,7 +3998,7 @@ propagation.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        Propagated wavefront with updated field and output specification.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Define input-output coordinates</span>
     <span class="n">spec_in</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">spec</span>
     <span class="n">spec_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
@@ -4201,14 +4201,14 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="normal">381</span>
 <span class="normal">382</span>
 <span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FFTPropagator</span><span class="p">(</span><span class="n">ABCDPropagator</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    FFT-based ABCD propagator with optional padding and cropping.</span>
 
-<span class="sd">    Note: Always returns a wavefront in an &#39;Intermediate&#39; plane, even if the</span>
+<span class="sd">    Note: Always returns a wavefront in an 'Intermediate' plane, even if the</span>
 <span class="sd">    propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane</span>
 <span class="sd">    tracking, but the present Wavefront class is not compatible with this formulation.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/FFTPropagator.png)</span>
 
 <span class="sd">    Parameters</span>
@@ -4217,10 +4217,10 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="sd">        ABCD elements to compose into a single propagation transform.</span>
 <span class="sd">    spec : CoordSpec | PadSpec</span>
 <span class="sd">        Output coordinate specification. If `CoordSpec` is provided, `d` must be None.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ABCDs</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ABCDs : list[ABCDElement] | dict[str, ABCDElement]</span>
@@ -4228,13 +4228,13 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="sd">        spec : CoordSpec | PadSpec</span>
 <span class="sd">            Output coordinate specification. If `CoordSpec` is provided, `d` must be</span>
 <span class="sd">            None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">CoordSpec</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;FFTPropagator CoordSpec can not specify d.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"FFTPropagator CoordSpec can not specify d."</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ABCDs</span><span class="o">=</span><span class="n">ABCDs</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagate a wavefront using an FFT-based LCT approximation.</span>
 
 <span class="sd">        Parameters</span>
@@ -4246,7 +4246,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            Propagated wavefront with updated field and sampling metadata.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="c1"># Get the input spec</span>
         <span class="n">spec_in</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">spec</span>
@@ -4429,7 +4429,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="normal">381</span>
 <span class="normal">382</span>
 <span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagate a wavefront using an FFT-based LCT approximation.</span>
 
 <span class="sd">    Parameters</span>
@@ -4441,7 +4441,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        Propagated wavefront with updated field and sampling metadata.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Get the input spec</span>
     <span class="n">spec_in</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">spec</span>
@@ -4565,7 +4565,7 @@ None.</p>
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ABCDs</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    ABCDs : list[ABCDElement] | dict[str, ABCDElement]</span>
@@ -4573,9 +4573,9 @@ None.</p>
 <span class="sd">    spec : CoordSpec | PadSpec</span>
 <span class="sd">        Output coordinate specification. If `CoordSpec` is provided, `d` must be</span>
 <span class="sd">        None.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">CoordSpec</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;FFTPropagator CoordSpec can not specify d.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"FFTPropagator CoordSpec can not specify d."</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ABCDs</span><span class="o">=</span><span class="n">ABCDs</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -4703,43 +4703,43 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ASMPropagator</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Angular Spectrum Method (ASM) propagator.</span>
 
-<span class="sd">    Note: Always returns a wavefront in an &#39;Intermediate&#39; plane, even if the</span>
+<span class="sd">    Note: Always returns a wavefront in an 'Intermediate' plane, even if the</span>
 <span class="sd">    propagation is to a conjugate plane. Future ABCDWavefronts may enable better plane</span>
 <span class="sd">    tracking, but the present Wavefront class is not compatible with this formulation.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ASMPropagator.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">spec</span><span class="p">:</span> <span class="n">CoordSpec</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        distance : float</span>
 <span class="sd">            Propagation distance.</span>
 <span class="sd">        spec : CoordSpec | PadSpec</span>
 <span class="sd">            Output specification. If `CoordSpec` is provided, `d` and `c` must be None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">CoordSpec</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ASMPropagator CoordSpec can not specify d or c.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"ASMPropagator CoordSpec can not specify d or c."</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve missing attributes via `spec`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Resolve missing attributes via `spec`."""</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">raise</span> <span class="n">dlu</span><span class="o">.</span><span class="n">missing_attribute_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagate a wavefront using the angular spectrum method.</span>
 
 <span class="sd">        Parameters</span>
@@ -4751,7 +4751,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            Propagated wavefront with updated field.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="c1"># Get padding</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">CoordSpec</span><span class="p">):</span>
@@ -4900,7 +4900,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagate a wavefront using the angular spectrum method.</span>
 
 <span class="sd">    Parameters</span>
@@ -4912,7 +4912,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        Propagated wavefront with updated field.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Get padding</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">CoordSpec</span><span class="p">):</span>
@@ -4964,7 +4964,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="normal">418</span>
 <span class="normal">419</span>
 <span class="normal">420</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve missing attributes via `spec`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve missing attributes via `spec`."""</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">dlu</span><span class="o">.</span><span class="n">missing_attribute_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -5050,18 +5050,18 @@ tracking, but the present Wavefront class is not compatible with this formulatio
 <span class="normal">412</span>
 <span class="normal">413</span>
 <span class="normal">414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    distance : float</span>
 <span class="sd">        Propagation distance.</span>
 <span class="sd">    spec : CoordSpec | PadSpec</span>
 <span class="sd">        Output specification. If `CoordSpec` is provided, `d` and `c` must be None.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">CoordSpec</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ASMPropagator CoordSpec can not specify d or c.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"ASMPropagator CoordSpec can not specify d or c."</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5136,7 +5136,7 @@ tracking, but the present Wavefront class is not compatible with this formulatio
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

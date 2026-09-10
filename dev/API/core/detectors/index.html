@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2098,15 +2098,15 @@ detector-space outputs.</p>
 <span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseDetector</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Abstract base class for detector models.</span>
 
 <span class="sd">    Concrete detectors implement `model(...)` to transform input PSFs into</span>
 <span class="sd">    detector-space outputs.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BaseDetector.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
@@ -2119,11 +2119,11 @@ detector-space outputs.</p>
         <span class="n">psf</span><span class="p">:</span> <span class="n">PSF</span><span class="p">,</span>
         <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Backwards compatibility method that invokes __call__.</span>
 
 <span class="sd">        Delegates to the __call__ method.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">psf</span><span class="p">,</span> <span class="n">return_psf</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2173,11 +2173,11 @@ detector-space outputs.</p>
     <span class="n">psf</span><span class="p">:</span> <span class="n">PSF</span><span class="p">,</span>
     <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Backwards compatibility method that invokes __call__.</span>
 
 <span class="sd">    Delegates to the __call__ method.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">psf</span><span class="p">,</span> <span class="n">return_psf</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2380,17 +2380,17 @@ detector-space outputs.</p>
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayeredDetector</span><span class="p">(</span><span class="n">BaseDetector</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Applies a series of detector layers to an input PSF.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/LayeredDetector.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    layers: OrderedDict</span>
 <span class="sd">        A series of `DetectorLayer` transformations to apply to the input PSF.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">layers</span><span class="p">:</span> <span class="n">OrderedDict</span>
 
@@ -2398,19 +2398,19 @@ detector-space outputs.</p>
         <span class="bp">self</span><span class="p">:</span> <span class="n">LayeredDetector</span><span class="p">,</span>
         <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DetectorLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">]],</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        layers : list[DetectorLayer | tuple[str, DetectorLayer]]</span>
 <span class="sd">            A list of DetectorLayer objects to apply to the input PSF. List entries</span>
 <span class="sd">            can be tuples of (key, layer) to specify a key, else the key is taken as</span>
 <span class="sd">            the class name of the layer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list2dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredDetector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Raises the individual layers via their keys.</span>
 
 <span class="sd">        Parameters</span>
@@ -2423,7 +2423,7 @@ detector-space outputs.</p>
 <span class="sd">        item : Any</span>
 <span class="sd">            The item corresponding to the supplied key in the layers</span>
 <span class="sd">            dictionary.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
@@ -2440,7 +2440,7 @@ detector-space outputs.</p>
         <span class="n">psf</span><span class="p">:</span> <span class="n">PSF</span><span class="p">,</span>
         <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Applies the detector layers to the input PSF.</span>
 
 <span class="sd">        Parameters</span>
@@ -2455,7 +2455,7 @@ detector-space outputs.</p>
 <span class="sd">        result : Array | PSF</span>
 <span class="sd">            If `return_psf` is False, returns the PSF array.</span>
 <span class="sd">            If `return_psf` is True, returns the PSF object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">psf</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">return_psf</span><span class="p">:</span>
@@ -2467,11 +2467,11 @@ detector-space outputs.</p>
         <span class="n">layer</span><span class="p">:</span> <span class="n">DetectorLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">],</span>
         <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayeredDetector</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Inserts a layer into the layers dictionary at a specified index. This function</span>
 <span class="sd">        calls the list2dictionary function to ensure all keys remain unique. Note that</span>
 <span class="sd">        this can result in some keys being modified if they are duplicates. The input</span>
-<span class="sd">        &#39;layer&#39; can be a tuple of (key, layer) to specify a key, else the key is taken</span>
+<span class="sd">        'layer' can be a tuple of (key, layer) to specify a key, else the key is taken</span>
 <span class="sd">        as the class name of the layer.</span>
 
 <span class="sd">        Parameters</span>
@@ -2485,14 +2485,14 @@ detector-space outputs.</p>
 <span class="sd">        -------</span>
 <span class="sd">        detector : LayeredDetector</span>
 <span class="sd">            The updated detector.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-            <span class="s2">&quot;layers&quot;</span><span class="p">,</span>
+            <span class="s2">"layers"</span><span class="p">,</span>
             <span class="n">dlu</span><span class="o">.</span><span class="n">insert_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredDetector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayeredDetector</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Removes a layer from the layers dictionary, specified by its key.</span>
 
 <span class="sd">        Parameters</span>
@@ -2504,8 +2504,8 @@ detector-space outputs.</p>
 <span class="sd">        -------</span>
 <span class="sd">        detector : LayeredDetector</span>
 <span class="sd">            The updated detector.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"layers"</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2639,7 +2639,7 @@ If <code>return_psf</code> is True, returns the PSF object.</p>
     <span class="n">psf</span><span class="p">:</span> <span class="n">PSF</span><span class="p">,</span>
     <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Applies the detector layers to the input PSF.</span>
 
 <span class="sd">    Parameters</span>
@@ -2654,7 +2654,7 @@ If <code>return_psf</code> is True, returns the PSF object.</p>
 <span class="sd">    result : Array | PSF</span>
 <span class="sd">        If `return_psf` is False, returns the PSF array.</span>
 <span class="sd">        If `return_psf` is True, returns the PSF object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">psf</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">return_psf</span><span class="p">:</span>
@@ -2762,7 +2762,7 @@ dictionary.</p>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredDetector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Raises the individual layers via their keys.</span>
 
 <span class="sd">    Parameters</span>
@@ -2775,7 +2775,7 @@ dictionary.</p>
 <span class="sd">    item : Any</span>
 <span class="sd">        The item corresponding to the supplied key in the layers</span>
 <span class="sd">        dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
@@ -2857,14 +2857,14 @@ the class name of the layer.</p>
     <span class="bp">self</span><span class="p">:</span> <span class="n">LayeredDetector</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DetectorLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">]],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    layers : list[DetectorLayer | tuple[str, DetectorLayer]]</span>
 <span class="sd">        A list of DetectorLayer objects to apply to the input PSF. List entries</span>
 <span class="sd">        can be tuples of (key, layer) to specify a key, else the key is taken as</span>
 <span class="sd">        the class name of the layer.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list2dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -2995,11 +2995,11 @@ as the class name of the layer.</p>
     <span class="n">layer</span><span class="p">:</span> <span class="n">DetectorLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">],</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayeredDetector</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inserts a layer into the layers dictionary at a specified index. This function</span>
 <span class="sd">    calls the list2dictionary function to ensure all keys remain unique. Note that</span>
 <span class="sd">    this can result in some keys being modified if they are duplicates. The input</span>
-<span class="sd">    &#39;layer&#39; can be a tuple of (key, layer) to specify a key, else the key is taken</span>
+<span class="sd">    'layer' can be a tuple of (key, layer) to specify a key, else the key is taken</span>
 <span class="sd">    as the class name of the layer.</span>
 
 <span class="sd">    Parameters</span>
@@ -3013,9 +3013,9 @@ as the class name of the layer.</p>
 <span class="sd">    -------</span>
 <span class="sd">    detector : LayeredDetector</span>
 <span class="sd">        The updated detector.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="s2">&quot;layers&quot;</span><span class="p">,</span>
+        <span class="s2">"layers"</span><span class="p">,</span>
         <span class="n">dlu</span><span class="o">.</span><span class="n">insert_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">),</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3109,7 +3109,7 @@ as the class name of the layer.</p>
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredDetector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayeredDetector</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Removes a layer from the layers dictionary, specified by its key.</span>
 
 <span class="sd">    Parameters</span>
@@ -3121,8 +3121,8 @@ as the class name of the layer.</p>
 <span class="sd">    -------</span>
 <span class="sd">    detector : LayeredDetector</span>
 <span class="sd">        The updated detector.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"layers"</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3196,7 +3196,7 @@ as the class name of the layer.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

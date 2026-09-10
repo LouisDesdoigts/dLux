@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2143,7 +2143,7 @@
 <span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">wavenumber</span><span class="p">(</span><span class="n">wavelength</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the wavenumber of a given wavelength.</span>
 
 <span class="sd">    Parameters</span>
@@ -2155,7 +2155,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    wavenumber : Array, radians/meter</span>
 <span class="sd">        The wavenumber of the input wavelength.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2271,7 +2271,7 @@ units of radians for the given wavelength.</p>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">opd2phase</span><span class="p">(</span><span class="n">opd</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Converts the input Optical Path Difference (opd) in units of meters to phases in</span>
 <span class="sd">    units of radians for the given wavelength.</span>
 
@@ -2286,7 +2286,7 @@ units of radians for the given wavelength.</p>
 <span class="sd">    -------</span>
 <span class="sd">    phase : Array, radians</span>
 <span class="sd">        The equivalent phase value for the given opd and wavelength.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">wavenumber</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span> <span class="o">*</span> <span class="n">opd</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2402,7 +2402,7 @@ Difference (OPD) in metres for the given wavelength.</p>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">phase2opd</span><span class="p">(</span><span class="n">phase</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Converts the input phase in units of radians to the equivalent Optical Path</span>
 <span class="sd">    Difference (OPD) in metres for the given wavelength.</span>
 
@@ -2417,7 +2417,7 @@ Difference (OPD) in metres for the given wavelength.</p>
 <span class="sd">    -------</span>
 <span class="sd">    opd : Array, metres</span>
 <span class="sd">        The equivalent opd value for the given phase and wavelength.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">phase</span> <span class="o">/</span> <span class="n">wavenumber</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2558,7 +2558,7 @@ size is given in units of radians, else it is given in units of metres.</p>
 <span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fringe_size</span><span class="p">(</span>
     <span class="n">wavelength</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">focal_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the linear size of the diffraction fringes.</span>
 
 <span class="sd">    Parameters</span>
@@ -2575,7 +2575,7 @@ size is given in units of radians, else it is given in units of metres.</p>
 <span class="sd">    -------</span>
 <span class="sd">    fringe_size : Array, radians, meters</span>
 <span class="sd">        The fringe size. Has units of radians of focal length is None, else meters.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wavelength</span> <span class="o">/</span> <span class="n">diameter</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2645,7 +2645,7 @@ size is given in units of radians, else it is given in units of metres.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

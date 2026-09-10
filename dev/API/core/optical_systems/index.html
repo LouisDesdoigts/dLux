@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2209,22 +2209,22 @@ concrete optical-system implementations.</p>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseOpticalSystem</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Abstract base class for optical-system models.</span>
 
 <span class="sd">    Defines the required propagation and source-modelling interfaces used by</span>
 <span class="sd">    concrete optical-system implementations.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BaseOpticalSystem.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Automatically inherit method docstrings from parent class.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;propagate_mono&quot;</span><span class="p">,</span> <span class="s2">&quot;propagate&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">])</span>
+        <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">"propagate_mono"</span><span class="p">,</span> <span class="s2">"propagate"</span><span class="p">,</span> <span class="s2">"model"</span><span class="p">])</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate_mono</span><span class="p">(</span>
@@ -2233,7 +2233,7 @@ concrete optical-system implementations.</p>
         <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">        Parameters</span>
@@ -2250,7 +2250,7 @@ concrete optical-system implementations.</p>
 <span class="sd">        result : Array | Wavefront</span>
 <span class="sd">            If `return_wf` is False, returns the PSF array.</span>
 <span class="sd">            If `return_wf` is True, returns the Wavefront object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate</span><span class="p">(</span>
@@ -2261,7 +2261,7 @@ concrete optical-system implementations.</p>
         <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagates a Polychromatic point source through the optics.</span>
 
 <span class="sd">        Parameters</span>
@@ -2285,7 +2285,7 @@ concrete optical-system implementations.</p>
 <span class="sd">                object.</span>
 <span class="sd">            If `return_wf` is False and `return_psf` is True, returns the PSF object.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span>
@@ -2294,7 +2294,7 @@ concrete optical-system implementations.</p>
         <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Models the input Source object through the optics.</span>
 
 <span class="sd">        Parameters</span>
@@ -2313,7 +2313,7 @@ concrete optical-system implementations.</p>
 <span class="sd">            If `return_wf` is True and `return_psf` is False, returns the Wavefront</span>
 <span class="sd">                object.</span>
 <span class="sd">            If `return_wf` is False and `return_psf` is True, returns the PSF object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2352,11 +2352,11 @@ concrete optical-system implementations.</p>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Automatically inherit method docstrings from parent class.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;propagate_mono&quot;</span><span class="p">,</span> <span class="s2">&quot;propagate&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">])</span>
+    <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">"propagate_mono"</span><span class="p">,</span> <span class="s2">"propagate"</span><span class="p">,</span> <span class="s2">"model"</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2505,7 +2505,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
     <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Models the input Source object through the optics.</span>
 
 <span class="sd">    Parameters</span>
@@ -2524,7 +2524,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="sd">        If `return_wf` is True and `return_psf` is False, returns the Wavefront</span>
 <span class="sd">            object.</span>
 <span class="sd">        If `return_wf` is False and `return_psf` is True, returns the PSF object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2714,7 +2714,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
     <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">return_psf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">PSF</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagates a Polychromatic point source through the optics.</span>
 
 <span class="sd">    Parameters</span>
@@ -2738,7 +2738,7 @@ If <code>return_wf</code> is False and <code>return_psf</code> is True, returns 
 <span class="sd">            object.</span>
 <span class="sd">        If `return_wf` is False and `return_psf` is True, returns the PSF object.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2883,7 +2883,7 @@ If <code>return_wf</code> is True, returns the Wavefront object.</p>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">    Parameters</span>
@@ -2900,7 +2900,7 @@ If <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="sd">    result : Array | Wavefront</span>
 <span class="sd">        If `return_wf` is False, returns the PSF array.</span>
 <span class="sd">        If `return_wf` is True, returns the Wavefront object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3073,11 +3073,11 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">290</span>
 <span class="normal">291</span>
 <span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParametricOpticalSystem</span><span class="p">(</span><span class="n">OpticalSystem</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Implements the attributes required for an optical system with a specific output</span>
 <span class="sd">    pixel scale and number of pixels.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/ParametricOpticalSystem.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3091,7 +3091,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        The pixel scale of the final PSF.</span>
 <span class="sd">    fov : float, property</span>
 <span class="sd">        Derived field of view of the optical system in pixel-scale units.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">psf_npixels</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span>
@@ -3104,7 +3104,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        psf_npixels : int</span>
@@ -3114,7 +3114,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        oversample : int = 1.</span>
 <span class="sd">            The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">            parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">psf_npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">psf_npixels</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">oversample</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
@@ -3122,14 +3122,14 @@ parameter while increasing the psf_npixels parameter.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fov</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ParametricOpticalSystem</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Field of view of the optical system in the units of the pixel scale.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        fov : float</span>
 <span class="sd">            Field of view, equal to ``psf_npixels * psf_pixel_scale``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_npixels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -3299,7 +3299,7 @@ parameter while increasing the psf_npixels parameter.</p>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    psf_npixels : int</span>
@@ -3309,7 +3309,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">    oversample : int = 1.</span>
 <span class="sd">        The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">        parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">psf_npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">psf_npixels</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">oversample</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
@@ -3529,11 +3529,11 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">678</span>
 <span class="normal">679</span>
 <span class="normal">680</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AngularOpticalSystem</span><span class="p">(</span><span class="n">ParametricLayeredOpticalSystem</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    An extension to the LayeredOpticalSystem class that propagates a wavefront to an</span>
 <span class="sd">    image plane with `psf_pixel_scale` in units of arcseconds.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/AngularOpticalSystem.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3551,7 +3551,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">    oversample : int</span>
 <span class="sd">        The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">        parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">AngularOpticalSystem</span><span class="p">,</span>
@@ -3562,7 +3562,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wf_npixels : int</span>
@@ -3580,7 +3580,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        oversample : int</span>
 <span class="sd">            The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">            parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span>
             <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
@@ -3594,7 +3594,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="bp">self</span><span class="p">:</span> <span class="n">AngularOpticalSystem</span><span class="p">,</span>
         <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagate the wavefront to the focal plane.</span>
 
 <span class="sd">        Parameters</span>
@@ -3606,7 +3606,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        -------</span>
 <span class="sd">        result : Wavefront</span>
 <span class="sd">            The propagated wavefront at the focal plane.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Propagate</span>
         <span class="n">true_pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span>
         <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">arcsec2rad</span><span class="p">(</span><span class="n">true_pixel_scale</span><span class="p">)</span>
@@ -3801,7 +3801,7 @@ parameter while increasing the psf_npixels parameter.</p>
     <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
@@ -3819,7 +3819,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">    oversample : int</span>
 <span class="sd">        The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">        parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span>
         <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
@@ -3929,7 +3929,7 @@ parameter while increasing the psf_npixels parameter.</p>
     <span class="bp">self</span><span class="p">:</span> <span class="n">AngularOpticalSystem</span><span class="p">,</span>
     <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagate the wavefront to the focal plane.</span>
 
 <span class="sd">    Parameters</span>
@@ -3941,7 +3941,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">    -------</span>
 <span class="sd">    result : Wavefront</span>
 <span class="sd">        The propagated wavefront at the focal plane.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Propagate</span>
     <span class="n">true_pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span>
     <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">arcsec2rad</span><span class="p">(</span><span class="n">true_pixel_scale</span><span class="p">)</span>
@@ -4182,11 +4182,11 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">773</span>
 <span class="normal">774</span>
 <span class="normal">775</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CartesianOpticalSystem</span><span class="p">(</span><span class="n">ParametricLayeredOpticalSystem</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    An extension to the LayeredOpticalSystem class that propagates a wavefront to an</span>
 <span class="sd">    image plane with `psf_pixel_scale` in units of microns.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/CartesianOpticalSystem.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -4206,7 +4206,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">    oversample : int</span>
 <span class="sd">        The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">        parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">focal_length</span><span class="p">:</span> <span class="nb">float</span>
 
@@ -4220,7 +4220,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wf_npixels : int</span>
@@ -4240,7 +4240,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        oversample : int</span>
 <span class="sd">            The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">            parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -4256,7 +4256,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="bp">self</span><span class="p">:</span> <span class="n">CartesianOpticalSystem</span><span class="p">,</span>
         <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagate the wavefront to the focal plane.</span>
 
 <span class="sd">        Parameters</span>
@@ -4268,12 +4268,12 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        -------</span>
 <span class="sd">        result : Wavefront</span>
 <span class="sd">            The propagated wavefront at the focal plane.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Propagate</span>
         <span class="n">true_pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span>
         <span class="n">pixel_scale</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">true_pixel_scale</span>
         <span class="n">psf_npixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_npixels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -4485,7 +4485,7 @@ parameter while increasing the psf_npixels parameter.</p>
     <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
@@ -4505,7 +4505,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">    oversample : int</span>
 <span class="sd">        The oversampling factor of the final PSF. Decreases the psf_pixel_scale</span>
 <span class="sd">        parameter while increasing the psf_npixels parameter.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -4617,7 +4617,7 @@ parameter while increasing the psf_npixels parameter.</p>
     <span class="bp">self</span><span class="p">:</span> <span class="n">CartesianOpticalSystem</span><span class="p">,</span>
     <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagate the wavefront to the focal plane.</span>
 
 <span class="sd">    Parameters</span>
@@ -4629,12 +4629,12 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">    -------</span>
 <span class="sd">    result : Wavefront</span>
 <span class="sd">        The propagated wavefront at the focal plane.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Propagate</span>
     <span class="n">true_pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span>
     <span class="n">pixel_scale</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">true_pixel_scale</span>
     <span class="n">psf_npixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_npixels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span>
-    <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4941,10 +4941,10 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayeredOpticalSystem</span><span class="p">(</span><span class="n">OpticalSystem</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A flexible optical system that allows for the arbitrary chaining of OpticalLayers.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/LayeredOpticalSystem.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -4955,7 +4955,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        The diameter of the wavefront to propagate.</span>
 <span class="sd">    layers : OrderedDict</span>
 <span class="sd">        A series of `OpticalLayer` transformations to apply to wavefronts.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span>
@@ -4967,7 +4967,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OpticalLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">]],</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wf_npixels : int</span>
@@ -4978,13 +4978,13 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">            A list of `OpticalLayer` transformations to apply to wavefronts. The list</span>
 <span class="sd">            entries can be either `OpticalLayer` objects or tuples of (key, layer) to</span>
 <span class="sd">            specify a key for the layer in the layers dictionary.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wf_npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">diameter</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list2dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredOpticalSystem</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Raises both the individual layers and the attributes of the layers via</span>
 <span class="sd">        their keys.</span>
 
@@ -4997,7 +4997,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        -------</span>
 <span class="sd">        item : Any</span>
 <span class="sd">            The item corresponding to the supplied key in the layers dictionary.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
@@ -5008,7 +5008,7 @@ parameter while increasing the psf_npixels parameter.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialise_wavefront</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">LayeredOpticalSystem</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Initialises the wavefront for the propagate_mono method. and applies the offset</span>
 <span class="sd">        as a tilt to the wavefront.</span>
 
@@ -5024,7 +5024,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The initialised wavefront with the offset applied as a tilt.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
@@ -5039,7 +5039,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">        Parameters</span>
@@ -5056,7 +5056,7 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        result : Array | Wavefront</span>
 <span class="sd">            If `return_wf` is False, returns the PSF array.</span>
 <span class="sd">            If `return_wf` is True, returns the Wavefront object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Initialise wavefront</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialise_wavefront</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
 
@@ -5074,7 +5074,7 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
         <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagates a monochromatic wavefront through the layers, returning</span>
 <span class="sd">        intermediate wavefront states for debugging.</span>
 
@@ -5091,13 +5091,13 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">            The final propagated wavefront.</span>
 <span class="sd">        outputs : dict</span>
 <span class="sd">            Dictionary mapping layer names to their output wavefronts.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Outputs dictionary</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Initialise wavefront</span>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialise_wavefront</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;initial_wavefront&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefront</span>
+        <span class="n">outputs</span><span class="p">[</span><span class="s2">"initial_wavefront"</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefront</span>
 
         <span class="c1"># Apply layers, storing the outputs</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -5112,11 +5112,11 @@ parameter while increasing the psf_npixels parameter.</p>
         <span class="n">layer</span><span class="p">:</span> <span class="n">OpticalLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">],</span>
         <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalSystem</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Inserts a layer into the layers dictionary at a specified index. This function</span>
 <span class="sd">        calls the list2dictionary function to ensure all keys remain unique. Note that</span>
 <span class="sd">        this can result in some keys being modified if they are duplicates. The input</span>
-<span class="sd">        &#39;layer&#39; can be a tuple of (key, layer) to specify a key, else the key is taken</span>
+<span class="sd">        'layer' can be a tuple of (key, layer) to specify a key, else the key is taken</span>
 <span class="sd">        as the class name of the layer.</span>
 
 <span class="sd">        Parameters</span>
@@ -5130,13 +5130,13 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        -------</span>
 <span class="sd">        optical_system : OpticalSystem</span>
 <span class="sd">            The updated optical system.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-            <span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">insert_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">)</span>
+            <span class="s2">"layers"</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">insert_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredOpticalSystem</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalSystem</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Removes a layer from the layers dictionary, specified by its key.</span>
 
 <span class="sd">        Parameters</span>
@@ -5148,8 +5148,8 @@ parameter while increasing the psf_npixels parameter.</p>
 <span class="sd">        -------</span>
 <span class="sd">        optical_system : OpticalSystem</span>
 <span class="sd">            The updated optical system.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"layers"</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5258,7 +5258,7 @@ their keys.</p>
 <span class="normal">359</span>
 <span class="normal">360</span>
 <span class="normal">361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredOpticalSystem</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Raises both the individual layers and the attributes of the layers via</span>
 <span class="sd">    their keys.</span>
 
@@ -5271,7 +5271,7 @@ their keys.</p>
 <span class="sd">    -------</span>
 <span class="sd">    item : Any</span>
 <span class="sd">        The item corresponding to the supplied key in the layers dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
@@ -5390,7 +5390,7 @@ specify a key for the layer in the layers dictionary.</p>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OpticalLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">]],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
@@ -5401,7 +5401,7 @@ specify a key for the layer in the layers dictionary.</p>
 <span class="sd">        A list of `OpticalLayer` transformations to apply to wavefronts. The list</span>
 <span class="sd">        entries can be either `OpticalLayer` objects or tuples of (key, layer) to</span>
 <span class="sd">        specify a key for the layer in the layers dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">wf_npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">diameter</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list2dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">)</span>
@@ -5549,7 +5549,7 @@ intermediate wavefront states for debugging.</p>
     <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagates a monochromatic wavefront through the layers, returning</span>
 <span class="sd">    intermediate wavefront states for debugging.</span>
 
@@ -5566,13 +5566,13 @@ intermediate wavefront states for debugging.</p>
 <span class="sd">        The final propagated wavefront.</span>
 <span class="sd">    outputs : dict</span>
 <span class="sd">        Dictionary mapping layer names to their output wavefronts.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Outputs dictionary</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Initialise wavefront</span>
     <span class="n">wavefront</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialise_wavefront</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-    <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;initial_wavefront&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefront</span>
+    <span class="n">outputs</span><span class="p">[</span><span class="s2">"initial_wavefront"</span><span class="p">]</span> <span class="o">=</span> <span class="n">wavefront</span>
 
     <span class="c1"># Apply layers, storing the outputs</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -5704,7 +5704,7 @@ radians.</p>
 <span class="normal">389</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">initialise_wavefront</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">LayeredOpticalSystem</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Initialises the wavefront for the propagate_mono method. and applies the offset</span>
 <span class="sd">    as a tilt to the wavefront.</span>
 
@@ -5720,7 +5720,7 @@ radians.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The initialised wavefront with the offset applied as a tilt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
@@ -5855,11 +5855,11 @@ as the class name of the layer.</p>
     <span class="n">layer</span><span class="p">:</span> <span class="n">OpticalLayer</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">],</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalSystem</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inserts a layer into the layers dictionary at a specified index. This function</span>
 <span class="sd">    calls the list2dictionary function to ensure all keys remain unique. Note that</span>
 <span class="sd">    this can result in some keys being modified if they are duplicates. The input</span>
-<span class="sd">    &#39;layer&#39; can be a tuple of (key, layer) to specify a key, else the key is taken</span>
+<span class="sd">    'layer' can be a tuple of (key, layer) to specify a key, else the key is taken</span>
 <span class="sd">    as the class name of the layer.</span>
 
 <span class="sd">    Parameters</span>
@@ -5873,9 +5873,9 @@ as the class name of the layer.</p>
 <span class="sd">    -------</span>
 <span class="sd">    optical_system : OpticalSystem</span>
 <span class="sd">        The updated optical system.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">insert_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">)</span>
+        <span class="s2">"layers"</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">insert_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6026,7 +6026,7 @@ If <code>return_wf</code> is True, returns the Wavefront object.</p>
     <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">    Parameters</span>
@@ -6043,7 +6043,7 @@ If <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="sd">    result : Array | Wavefront</span>
 <span class="sd">        If `return_wf` is False, returns the PSF array.</span>
 <span class="sd">        If `return_wf` is True, returns the Wavefront object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Initialise wavefront</span>
     <span class="n">wavefront</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialise_wavefront</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
 
@@ -6146,7 +6146,7 @@ If <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LayeredOpticalSystem</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalSystem</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Removes a layer from the layers dictionary, specified by its key.</span>
 
 <span class="sd">    Parameters</span>
@@ -6158,8 +6158,8 @@ If <code>return_wf</code> is True, returns the Wavefront object.</p>
 <span class="sd">    -------</span>
 <span class="sd">    optical_system : OpticalSystem</span>
 <span class="sd">        The updated optical system.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"layers"</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6233,7 +6233,7 @@ If <code>return_wf</code> is True, returns the Wavefront object.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

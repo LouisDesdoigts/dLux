@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2217,7 +2217,7 @@ array.</p>
 <span class="normal">88</span>
 <span class="normal">89</span>
 <span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">map2array</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">leaf_fn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Maps a function across a pytree, flattening it and turning it into an</span>
 <span class="sd">    array.</span>
 
@@ -2234,7 +2234,7 @@ array.</p>
 <span class="sd">    -------</span>
 <span class="sd">    array : Array</span>
 <span class="sd">        The flattened array of the pytree.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">leaf_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jtu</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">jtu</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">leaf_fn</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2425,14 +2425,14 @@ and 'layer_1' respectively, depending on their input order in the list.</p>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">list2dictionary</span><span class="p">(</span><span class="n">list_in</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">ordered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">allowed_types</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Converts some input list to a dictionary. The input list entries can either be</span>
 <span class="sd">    objects, in which case the keys are taken as the class name, else a (key, object)</span>
 <span class="sd">    tuple can be used to specify a key.</span>
 
 <span class="sd">    If any duplicate keys are found, the key is appended with an index value. i.e. if</span>
-<span class="sd">    two of the list entries have the same key &#39;layer&#39;, they will be assigned &#39;layer_0&#39;</span>
-<span class="sd">    and &#39;layer_1&#39; respectively, depending on their input order in the list.</span>
+<span class="sd">    two of the list entries have the same key 'layer', they will be assigned 'layer_0'</span>
+<span class="sd">    and 'layer_1' respectively, depending on their input order in the list.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2447,7 +2447,7 @@ and 'layer_1' respectively, depending on their input order in the list.</p>
 <span class="sd">    -------</span>
 <span class="sd">    dictionary : dict</span>
 <span class="sd">        The equivalent dictionary or ordered dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Construct names list and identify repeats</span>
     <span class="n">names</span><span class="p">,</span> <span class="n">repeats</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">list_in</span><span class="p">:</span>
@@ -2460,7 +2460,7 @@ and 'layer_1' respectively, depending on their input order in the list.</p>
 
         <span class="c1"># Check input types</span>
         <span class="k">if</span> <span class="n">allowed_types</span> <span class="o">!=</span> <span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">allowed_types</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is not an allowed type, got &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Item </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is not an allowed type, got "</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># Check for Repeats</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
@@ -2476,15 +2476,15 @@ and 'layer_1' respectively, depending on their input order in the list.</p>
         <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">repeats</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
-                <span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"_</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
                 <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="c1"># Turn list into Dictionary</span>
     <span class="n">dict_out</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">ordered</span> <span class="k">else</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)):</span>
         <span class="c1"># Check for spaces in names</span>
-        <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">in</span> <span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Names cannot contain spaces, got </span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">" "</span> <span class="ow">in</span> <span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Names cannot contain spaces, got </span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># Add to dict</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_in</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -2662,10 +2662,10 @@ class name of the layer.</p>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">allowed_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inserts a layer into a dictionary of layers at a specified index. This function</span>
 <span class="sd">    calls the list2dictionary function to ensure all keys remain unique. Note that this</span>
-<span class="sd">    can result in some keys being modified if they are duplicates. The input &#39;layer&#39;</span>
+<span class="sd">    can result in some keys being modified if they are duplicates. The input 'layer'</span>
 <span class="sd">    can be a tuple of (key, layer) to specify a key, else the key is taken as the</span>
 <span class="sd">    class name of the layer.</span>
 
@@ -2684,7 +2684,7 @@ class name of the layer.</p>
 <span class="sd">    -------</span>
 <span class="sd">    layers : dict</span>
 <span class="sd">        The updated dictionary of layers.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">layers_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
     <span class="n">layers_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">list2dictionary</span><span class="p">(</span><span class="n">layers_list</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">allowed_type</span><span class="p">)</span>
@@ -2801,7 +2801,7 @@ class name of the layer.</p>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_layer</span><span class="p">(</span><span class="n">layers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Removes a layer from a dictionary of layers, specified by its key.</span>
 
 <span class="sd">    Parameters</span>
@@ -2815,7 +2815,7 @@ class name of the layer.</p>
 <span class="sd">    -------</span>
 <span class="sd">    layers : dict</span>
 <span class="sd">        The updated dictionary of layers.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">layers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">layers</span>
 </code></pre></div></td></tr></table></div>
@@ -2913,7 +2913,7 @@ class name of the layer.</p>
 <span class="normal">232</span>
 <span class="normal">233</span>
 <span class="normal">234</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">imshow_extent</span><span class="p">(</span><span class="n">size</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns a square imshow extent in [xmin, xmax, ymin, ymax] order.</span>
 
 <span class="sd">    Parameters</span>
@@ -2925,7 +2925,7 @@ class name of the layer.</p>
 <span class="sd">    -------</span>
 <span class="sd">    extent : Array</span>
 <span class="sd">        The extent array to pass directly to matplotlib imshow.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">half_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">half_size</span><span class="p">,</span> <span class="n">half_size</span><span class="p">,</span> <span class="o">-</span><span class="n">half_size</span><span class="p">,</span> <span class="n">half_size</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
@@ -3074,7 +3074,7 @@ If None, only '<strong>call</strong>' is checked.</p>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">method_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inherit docstrings and annotations from parent classes for specified methods.</span>
 
 <span class="sd">    This function walks the MRO to find the first parent class with a docstring</span>
@@ -3086,15 +3086,15 @@ If None, only '<strong>call</strong>' is checked.</p>
 <span class="sd">        The class being created via __init_subclass__.</span>
 <span class="sd">    method_names : list[str] | None</span>
 <span class="sd">        List of method names to inherit docstrings/annotations for.</span>
-<span class="sd">        If None, only &#39;__call__&#39; is checked.</span>
+<span class="sd">        If None, only '__call__' is checked.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    None</span>
 <span class="sd">        Modifies cls in place.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">method_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">method_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;__call__&quot;</span><span class="p">]</span>
+        <span class="n">method_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"__call__"</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">method_name</span> <span class="ow">in</span> <span class="n">method_names</span><span class="p">:</span>
         <span class="c1"># Only process if method is defined in this class</span>
@@ -3112,10 +3112,10 @@ If None, only '<strong>call</strong>' is checked.</p>
                         <span class="k">break</span>
 
             <span class="c1"># Inherit annotations if missing</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">method</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s2">"__annotations__"</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">method</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
                     <span class="k">if</span> <span class="n">method_name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
-                        <span class="n">base</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">method_name</span><span class="p">],</span> <span class="s2">&quot;__annotations__&quot;</span>
+                        <span class="n">base</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">method_name</span><span class="p">],</span> <span class="s2">"__annotations__"</span>
                     <span class="p">):</span>
                         <span class="n">method</span><span class="o">.</span><span class="vm">__annotations__</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span>
                             <span class="n">method_name</span>
@@ -3287,7 +3287,7 @@ If None, only '<strong>call</strong>' is checked.</p>
     <span class="n">valid_attrs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">hint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">AttributeError</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Builds a consistent AttributeError message for missing attributes.</span>
 
 <span class="sd">    Parameters</span>
@@ -3305,15 +3305,15 @@ If None, only '<strong>call</strong>' is checked.</p>
 <span class="sd">    -------</span>
 <span class="sd">    error : AttributeError</span>
 <span class="sd">        The formatted AttributeError instance.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">owner</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">owner</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute '</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">'."</span>
     <span class="k">if</span> <span class="n">valid_attrs</span><span class="p">:</span>
         <span class="n">attrs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">valid_attrs</span><span class="p">)</span>
-        <span class="n">attrs_str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">attrs</span><span class="p">[:</span><span class="mi">6</span><span class="p">])</span>
-        <span class="n">ellipsis</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Valid attributes: </span><span class="si">{</span><span class="n">attrs_str</span><span class="si">}{</span><span class="n">ellipsis</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">attrs_str</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">attrs</span><span class="p">[:</span><span class="mi">6</span><span class="p">])</span>
+        <span class="n">ellipsis</span> <span class="o">=</span> <span class="s2">"..."</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" Valid attributes: </span><span class="si">{</span><span class="n">attrs_str</span><span class="si">}{</span><span class="n">ellipsis</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">if</span> <span class="n">hint</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">return</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3380,7 +3380,7 @@ If None, only '<strong>call</strong>' is checked.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

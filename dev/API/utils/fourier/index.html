@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2230,7 +2230,7 @@ angular to linear units.</p>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fft_spec</span><span class="p">(</span><span class="n">npixels_in</span><span class="p">,</span> <span class="n">pixel_scale_in</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the native FFT output sampling and center offset.</span>
 
 <span class="sd">    Parameters</span>
@@ -2251,7 +2251,7 @@ angular to linear units.</p>
 <span class="sd">        Output pixel scale.</span>
 <span class="sd">    c_out : float</span>
 <span class="sd">        Output coordinate center offset.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Output pixel scale - fl * lambda / D</span>
     <span class="n">d_out</span> <span class="o">=</span> <span class="n">wavelength</span> <span class="o">/</span> <span class="p">(</span><span class="n">npixels_in</span> <span class="o">*</span> <span class="n">pixel_scale_in</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2437,7 +2437,7 @@ backward-transform phase sign convention.</p>
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fft_phase_ramp</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the 2D complex phase ramp for FFT coordinate shifting.</span>
 
 <span class="sd">    Parameters</span>
@@ -2459,7 +2459,7 @@ backward-transform phase sign convention.</p>
 <span class="sd">    -------</span>
 <span class="sd">    ramp : Array</span>
 <span class="sd">        Two-dimensional complex phase ramp.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Sign convention: positive for forward transform, negative for inverse transform</span>
     <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">inverse</span> <span class="k">else</span> <span class="mi">1</span>
 
@@ -2610,7 +2610,7 @@ backward-transform phase sign convention.</p>
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fourier_kernel_1d</span><span class="p">(</span><span class="n">n_modes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">npix</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates a cached 1D Fourier basis evaluation kernel.</span>
 
 <span class="sd">    A unit-amplitude mode with `scale=1` evaluates to values between `-1` and `+1`.</span>
@@ -2628,7 +2628,7 @@ backward-transform phase sign convention.</p>
 <span class="sd">    -------</span>
 <span class="sd">    kernel : Array</span>
 <span class="sd">        The cached Fourier kernel.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Calculate the Fourier mode indices.</span>
     <span class="n">modes</span> <span class="o">=</span> <span class="n">_fourier_mode_order</span><span class="p">(</span><span class="n">n_modes</span><span class="p">)</span>
 
@@ -2811,7 +2811,7 @@ integer is provided it is cast to <code>(value, value)</code>. The returned kern
     <span class="n">npix</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">Array</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the cached 2D Fourier basis evaluation kernels.</span>
 
 <span class="sd">    The input `n_modes` and `npix` are interpreted in `(x, y)` order. If an</span>
@@ -2837,10 +2837,10 @@ integer is provided it is cast to <code>(value, value)</code>. The returned kern
 <span class="sd">        The x-axis Fourier kernel.</span>
 <span class="sd">    Ky : Array</span>
 <span class="sd">        The y-axis Fourier kernel.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Unpack the number of modes and pixels for each dimension.</span>
-    <span class="n">n_modes_x</span><span class="p">,</span> <span class="n">n_modes_y</span> <span class="o">=</span> <span class="n">_to_xy</span><span class="p">(</span><span class="n">n_modes</span><span class="p">,</span> <span class="s2">&quot;n_modes&quot;</span><span class="p">)</span>
-    <span class="n">npix_x</span><span class="p">,</span> <span class="n">npix_y</span> <span class="o">=</span> <span class="n">_to_xy</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="s2">&quot;npix&quot;</span><span class="p">)</span>
+    <span class="n">n_modes_x</span><span class="p">,</span> <span class="n">n_modes_y</span> <span class="o">=</span> <span class="n">_to_xy</span><span class="p">(</span><span class="n">n_modes</span><span class="p">,</span> <span class="s2">"n_modes"</span><span class="p">)</span>
+    <span class="n">npix_x</span><span class="p">,</span> <span class="n">npix_y</span> <span class="o">=</span> <span class="n">_to_xy</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="s2">"npix"</span><span class="p">)</span>
 
     <span class="c1"># Calculate the Fourier kernels for each dimension.</span>
     <span class="n">Kx</span> <span class="o">=</span> <span class="n">fourier_kernel_1d</span><span class="p">(</span><span class="n">n_modes_x</span><span class="p">,</span> <span class="n">npix_x</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
@@ -2984,7 +2984,7 @@ with shape <code>(npix_x, npix_y)</code>.</p>
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">eval_fourier_basis</span><span class="p">(</span><span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Kx</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Ky</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Evaluates a 2D real Fourier basis using cached kernels.</span>
 
 <span class="sd">    The coefficient array is assumed to be ordered as `(x, y)`, with shape</span>
@@ -3004,7 +3004,7 @@ with shape <code>(npix_x, npix_y)</code>.</p>
 <span class="sd">    -------</span>
 <span class="sd">    output : Array</span>
 <span class="sd">        The evaluated Fourier basis.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Kx</span> <span class="o">@</span> <span class="n">coefficients</span> <span class="o">@</span> <span class="n">Ky</span><span class="o">.</span><span class="n">T</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3071,7 +3071,7 @@ with shape <code>(npix_x, npix_y)</code>.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2185,22 +2185,22 @@ object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</p>
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseLayer</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Abstract base class for all dLux layers.</span>
 
 <span class="sd">    Layer objects define a callable transform interface that maps one target</span>
 <span class="sd">    object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BaseLayer.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseLayer</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseLayer</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Backwards compatibility alias for `__call__`.</span>
 
 <span class="sd">        Parameters</span>
@@ -2212,27 +2212,27 @@ object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</p>
 <span class="sd">        -------</span>
 <span class="sd">        result : Any</span>
 <span class="sd">            The transformed object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate a parametric leaf, or return an ordinary value unchanged.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Evaluate a parametric leaf, or return an ordinary value unchanged."""</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Parametric</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">value</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">as_parametric</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Preserve parametric leaves and convert ordinary values to arrays.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Preserve parametric leaves and convert ordinary values to arrays."""</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Parametric</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatically inherit __call__ docstring from parent if child has none.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Automatically inherit __call__ docstring from parent if child has none."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;__call__&quot;</span><span class="p">])</span>
+        <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">"__call__"</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2269,9 +2269,9 @@ object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</p>
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically inherit __call__ docstring from parent if child has none.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Automatically inherit __call__ docstring from parent if child has none."""</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;__call__&quot;</span><span class="p">])</span>
+    <span class="n">dlu</span><span class="o">.</span><span class="n">helpers</span><span class="o">.</span><span class="n">inherit_docstrings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="p">[</span><span class="s2">"__call__"</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2363,7 +2363,7 @@ object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</p>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseLayer</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Backwards compatibility alias for `__call__`.</span>
 
 <span class="sd">    Parameters</span>
@@ -2375,7 +2375,7 @@ object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</p>
 <span class="sd">    -------</span>
 <span class="sd">    result : Any</span>
 <span class="sd">        The transformed object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2410,7 +2410,7 @@ object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</p>
 <span class="normal">71</span>
 <span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">as_parametric</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Preserve parametric leaves and convert ordinary values to arrays.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Preserve parametric leaves and convert ordinary values to arrays."""</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Parametric</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">value</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
@@ -2447,7 +2447,7 @@ object to another (for example Wavefront -&gt; Wavefront or PSF -&gt; PSF).</p>
 <span class="normal">64</span>
 <span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate a parametric leaf, or return an ordinary value unchanged.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Evaluate a parametric leaf, or return an ordinary value unchanged."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Parametric</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">value</span>
@@ -2527,19 +2527,19 @@ through their <code>apply</code> method, and are stored by the <code>OpticalSyst
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OpticalLayer</span><span class="p">(</span><span class="n">BaseLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    The base optical layer class. Optical layer classes operate on `Wavefront` objects</span>
 <span class="sd">    through their `apply` method, and are stored by the `OpticalSystem` classes.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/OpticalLayer.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Applies the layer to the wavefront.</span>
 
 <span class="sd">        Parameters</span>
@@ -2551,7 +2551,7 @@ through their <code>apply</code> method, and are stored by the <code>OpticalSyst
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The transformed wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2662,7 +2662,7 @@ through their <code>apply</code> method, and are stored by the <code>OpticalSyst
 <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Applies the layer to the wavefront.</span>
 
 <span class="sd">    Parameters</span>
@@ -2674,7 +2674,7 @@ through their <code>apply</code> method, and are stored by the <code>OpticalSyst
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The transformed wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2758,11 +2758,11 @@ through their <code>apply</code> method, and are stored by the <code>OpticalSyst
 <span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Interpolate</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate a wavefront through a coordinate transformation.</span>
+<span class="w">    </span><span class="sd">"""Interpolate a wavefront through a coordinate transformation.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Interpolate.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">transformation</span><span class="p">:</span> <span class="n">BaseCoordTransform</span>
     <span class="n">method</span><span class="p">:</span> <span class="nb">str</span>
@@ -2772,13 +2772,13 @@ through their <code>apply</code> method, and are stored by the <code>OpticalSyst
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">transformation</span><span class="p">:</span> <span class="n">BaseCoordTransform</span><span class="p">,</span>
-        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"linear"</span><span class="p">,</span>
         <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">fill</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transformation</span><span class="p">,</span> <span class="n">BaseCoordTransform</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;transformation must be a BaseCoordTransform.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"transformation must be a BaseCoordTransform."</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transformation</span> <span class="o">=</span> <span class="n">transformation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">complex</span><span class="p">)</span>
@@ -2930,11 +2930,11 @@ normalise parameter.</p>
 <span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TransmissiveLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Base class to hold transmissive layers imbuing them with a transmission and</span>
 <span class="sd">    normalise parameter.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/TransmissiveLayer.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -2943,7 +2943,7 @@ normalise parameter.</p>
 <span class="sd">        The Array of transmission values to be applied to the input wavefront.</span>
 <span class="sd">    normalise: bool</span>
 <span class="sd">        Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span>
@@ -2954,14 +2954,14 @@ normalise parameter.</p>
         <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        transmission: Array = None</span>
 <span class="sd">            The array of transmission values to be applied to the input wavefront.</span>
 <span class="sd">        normalise : bool = False</span>
 <span class="sd">            Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_parametric</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">normalise</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -3072,14 +3072,14 @@ normalise parameter.</p>
     <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    transmission: Array = None</span>
 <span class="sd">        The array of transmission values to be applied to the input wavefront.</span>
 <span class="sd">    normalise : bool = False</span>
 <span class="sd">        Whether to normalise the wavefront after passing through the optic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_parametric</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">normalise</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -3217,11 +3217,11 @@ a phase or OPD, or both.</p>
 <span class="normal">234</span>
 <span class="normal">235</span>
 <span class="normal">236</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AberratedLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Optical layer for holding static aberrations. Aberrations can be applied as either</span>
 <span class="sd">    a phase or OPD, or both.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/AberratedLayer.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3230,7 +3230,7 @@ a phase or OPD, or both.</p>
 <span class="sd">        The Array of OPD values to be applied to the input wavefront.</span>
 <span class="sd">    phase : Array, radians</span>
 <span class="sd">        The Array of phase values to be applied to the input wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span>
     <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span>
@@ -3241,22 +3241,22 @@ a phase or OPD, or both.</p>
         <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        opd : Array, metres = None</span>
 <span class="sd">            The Array of OPD values to be applied to the input wavefront.</span>
 <span class="sd">        phase : Array, radians = None</span>
 <span class="sd">            The Array of phase values to be applied to the input wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_parametric</span><span class="p">(</span><span class="n">opd</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_parametric</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="p">,</span> <span class="n">Array</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;opd and phase must have the same shape. Got &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="s2">"opd and phase must have the same shape. Got "</span>
+                    <span class="sa">f</span><span class="s2">"shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
                 <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -3371,22 +3371,22 @@ a phase or OPD, or both.</p>
     <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Parametric</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    opd : Array, metres = None</span>
 <span class="sd">        The Array of OPD values to be applied to the input wavefront.</span>
 <span class="sd">    phase : Array, radians = None</span>
 <span class="sd">        The Array of phase values to be applied to the input wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">opd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_parametric</span><span class="p">(</span><span class="n">opd</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_parametric</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="p">,</span> <span class="n">Array</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;opd and phase must have the same shape. Got &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="s2">"opd and phase must have the same shape. Got "</span>
+                <span class="sa">f</span><span class="s2">"shapes </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">opd</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3576,12 +3576,12 @@ an OPD, phase, or amplitude transmission according to <code>effect</code>.</p>
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BasisLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    An OpticalLayer class that holds a set of basis vectors and coefficients, which are</span>
 <span class="sd">    dot-producted at run time to produce the output. The basis can be applied as either</span>
 <span class="sd">    an OPD, phase, or amplitude transmission according to ``effect``.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/BasisLayer.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3590,9 +3590,9 @@ an OPD, phase, or amplitude transmission according to <code>effect</code>.</p>
 <span class="sd">        The object that evaluates coefficients into an array.</span>
 <span class="sd">    coefficients: Array</span>
 <span class="sd">        The array of coefficients to be applied to each basis vector.</span>
-<span class="sd">    effect: str = &quot;opd&quot;</span>
-<span class="sd">        How to apply the evaluated basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    effect: str = "opd"</span>
+<span class="sd">        How to apply the evaluated basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.</span>
+<span class="sd">    """</span>
 
     <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span>
@@ -3603,11 +3603,11 @@ an OPD, phase, or amplitude transmission according to <code>effect</code>.</p>
         <span class="bp">self</span><span class="p">:</span> <span class="n">BasisLayer</span><span class="p">,</span>
         <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;opd&quot;</span><span class="p">,</span>
+        <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"opd"</span><span class="p">,</span>
         <span class="n">coefficient_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        basis: Array = None</span>
@@ -3615,9 +3615,9 @@ an OPD, phase, or amplitude transmission according to <code>effect</code>.</p>
 <span class="sd">        coefficients: Array = None</span>
 <span class="sd">            The Array of coefficients to be applied to each basis vector. Defaults</span>
 <span class="sd">            to zeros if `basis` is provided and `coefficients` is None.</span>
-<span class="sd">        effect: str = &quot;opd&quot;</span>
-<span class="sd">            How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        effect: str = "opd"</span>
+<span class="sd">            How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">basis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -3631,35 +3631,35 @@ an OPD, phase, or amplitude transmission according to <code>effect</code>.</p>
                 <span class="n">coefficient_shape</span> <span class="o">=</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span>
             <span class="k">if</span> <span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">coefficient_shape</span><span class="p">)]</span> <span class="o">!=</span> <span class="n">coefficient_shape</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;The coefficient shape must match the leading basis dimensions.&quot;</span>
+                    <span class="s2">"The coefficient shape must match the leading basis dimensions."</span>
                 <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">coefficients</span>
-        <span class="k">if</span> <span class="n">effect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;opd&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;effect must be &#39;opd&#39;, &#39;phase&#39;, or &#39;amplitude&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">effect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"opd"</span><span class="p">,</span> <span class="s2">"phase"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"effect must be 'opd', 'phase', or 'amplitude'."</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">=</span> <span class="n">effect</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BasisLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Calculates the dot product of the basis vectors and coefficients.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        output : Array</span>
 <span class="sd">            The output of the dot product between the basis vectors and coefficients.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">dlu</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">solve_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BasisLayer</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Solve for coefficients representing ``value`` over this layer&#39;s basis.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Solve for coefficients representing ``value`` over this layer's basis."""</span>
         <span class="k">return</span> <span class="n">dlu</span><span class="o">.</span><span class="n">solve_basis</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BasisLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">&quot;phase&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">"phase"</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_phase</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">&quot;opd&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">==</span> <span class="s2">"opd"</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">add_opd</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">output</span>
@@ -3684,7 +3684,7 @@ an OPD, phase, or amplitude transmission according to <code>effect</code>.</p>
 
 
 <h3 id="dLux.layers.optical_layers.BasisLayer.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="s1">&#39;opd&#39;</span><span class="p">,</span> <span class="n">coefficient_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effect</span><span class="o">=</span><span class="s1">'opd'</span><span class="p">,</span> <span class="n">coefficient_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#dLux.layers.optical_layers.BasisLayer.__init__" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -3802,11 +3802,11 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
     <span class="bp">self</span><span class="p">:</span> <span class="n">BasisLayer</span><span class="p">,</span>
     <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;opd&quot;</span><span class="p">,</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"opd"</span><span class="p">,</span>
     <span class="n">coefficient_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    basis: Array = None</span>
@@ -3814,9 +3814,9 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
 <span class="sd">    coefficients: Array = None</span>
 <span class="sd">        The Array of coefficients to be applied to each basis vector. Defaults</span>
 <span class="sd">        to zeros if `basis` is provided and `coefficients` is None.</span>
-<span class="sd">    effect: str = &quot;opd&quot;</span>
-<span class="sd">        How to apply the basis: ``&quot;opd&quot;``, ``&quot;phase&quot;``, or ``&quot;amplitude&quot;``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    effect: str = "opd"</span>
+<span class="sd">        How to apply the basis: ``"opd"``, ``"phase"``, or ``"amplitude"``.</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">basis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -3830,13 +3830,13 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
             <span class="n">coefficient_shape</span> <span class="o">=</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">if</span> <span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">coefficient_shape</span><span class="p">)]</span> <span class="o">!=</span> <span class="n">coefficient_shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The coefficient shape must match the leading basis dimensions.&quot;</span>
+                <span class="s2">"The coefficient shape must match the leading basis dimensions."</span>
             <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">coefficients</span>
-    <span class="k">if</span> <span class="n">effect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;opd&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude&quot;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;effect must be &#39;opd&#39;, &#39;phase&#39;, or &#39;amplitude&#39;.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">effect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"opd"</span><span class="p">,</span> <span class="s2">"phase"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"effect must be 'opd', 'phase', or 'amplitude'."</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">effect</span> <span class="o">=</span> <span class="n">effect</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3893,14 +3893,14 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
 <span class="normal">311</span>
 <span class="normal">312</span>
 <span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BasisLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculates the dot product of the basis vectors and coefficients.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    output : Array</span>
 <span class="sd">        The output of the dot product between the basis vectors and coefficients.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">dlu</span><span class="o">.</span><span class="n">eval_basis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3927,7 +3927,7 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
 <span class="normal">316</span>
 <span class="normal">317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">solve_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BasisLayer</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve for coefficients representing ``value`` over this layer&#39;s basis.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Solve for coefficients representing ``value`` over this layer's basis."""</span>
     <span class="k">return</span> <span class="n">dlu</span><span class="o">.</span><span class="n">solve_basis</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -4033,32 +4033,32 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
 <span class="normal">357</span>
 <span class="normal">358</span>
 <span class="normal">359</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Tilt</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Tilts the wavefront by the input (x, y) angles.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Tilt.png)</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    angles : Array, radians</span>
 <span class="sd">        The (x, y) angles by which to tilt the wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Tilt</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        angles : Array, radians</span>
 <span class="sd">            The (x, y) angles by which to tilt the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angles must be a 1d array of shape (2,).&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"angles must be a 1d array of shape (2,)."</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Tilt</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">tilt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span>
@@ -4136,17 +4136,17 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
 <span class="normal">354</span>
 <span class="normal">355</span>
 <span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Tilt</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    angles : Array, radians</span>
 <span class="sd">        The (x, y) angles by which to tilt the wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angles must be a 1d array of shape (2,).&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"angles must be a 1d array of shape (2,)."</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4206,12 +4206,12 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
 <span class="normal">369</span>
 <span class="normal">370</span>
 <span class="normal">371</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Normalise</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Normalises the wavefront to unit intensity.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Normalise.png)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Normalise</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
@@ -4298,7 +4298,7 @@ to zeros if <code>basis</code> is provided and <code>coefficients</code> is None
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

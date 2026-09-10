@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2253,7 +2253,7 @@
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
     <span class="n">extent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generates a normalized n-dimensional Gaussian function.</span>
 
 <span class="sd">    Parameters</span>
@@ -2271,12 +2271,12 @@
 <span class="sd">    -------</span>
 <span class="sd">    kernel : Array</span>
 <span class="sd">        The normalized n-dimensional Gaussian kernel.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Check inputs and cast to tuples</span>
-    <span class="n">npixels</span> <span class="o">=</span> <span class="n">_cast_tuple</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="s2">&quot;npixels&quot;</span><span class="p">)</span>
-    <span class="n">ndim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">))</span>
-    <span class="n">mean</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">)</span>
-    <span class="n">std</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">)</span>
+    <span class="n">npixels</span> <span class="o">=</span> <span class="n">_cast_tuple</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="s2">"npixels"</span><span class="p">)</span>
+    <span class="n">ndim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="s2">"mean"</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="s2">"std"</span><span class="p">))</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">"mean"</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">"std"</span><span class="p">)</span>
 
     <span class="c1"># Make sure npix is the right dimensionality</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ndim</span><span class="p">:</span>
@@ -2295,7 +2295,7 @@
     <span class="p">)</span>
 
     <span class="c1"># Construct nD separable Gaussian kernel from 1D marginals</span>
-    <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">one_d_gauss</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">one_d_gauss</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">"xy"</span><span class="p">))</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">kernel</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2492,7 +2492,7 @@
     <span class="n">npix</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
     <span class="n">extent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generates a normalized multivariate Gaussian function.</span>
 
 <span class="sd">    Parameters</span>
@@ -2510,8 +2510,8 @@
 <span class="sd">    -------</span>
 <span class="sd">    kernel : Array</span>
 <span class="sd">        The normalized multivariate Gaussian kernel.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Multivariate Gaussian generation is under development.&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"Multivariate Gaussian generation is under development."</span><span class="p">)</span>
 
     <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -2537,7 +2537,7 @@
     <span class="n">linspaces</span> <span class="o">=</span> <span class="n">jtu</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">make_axis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ndim</span><span class="p">))</span>
 
     <span class="c1"># Create meshgrid</span>
-    <span class="n">grids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">linspaces</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">)</span>
+    <span class="n">grids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">linspaces</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">"xy"</span><span class="p">)</span>
 
     <span class="c1"># Stack grids into points array and reshape for computation</span>
     <span class="n">grid_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span> <span class="k">for</span> <span class="n">ls</span> <span class="ow">in</span> <span class="n">linspaces</span><span class="p">)</span>
@@ -2649,7 +2649,7 @@
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate n! in a JAX-friendly way.</span>
 
 <span class="sd">    Parameters</span>
@@ -2661,7 +2661,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    n! : float</span>
 <span class="sd">        The factorial of the value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
         <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
@@ -2763,7 +2763,7 @@
 <span class="normal">172</span>
 <span class="normal">173</span>
 <span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">triangular_number</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the nth triangular number.</span>
 
 <span class="sd">    Parameters</span>
@@ -2775,7 +2775,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    n : int</span>
 <span class="sd">        The nth triangular number.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2869,7 +2869,7 @@
 <span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">eval_basis</span><span class="p">(</span><span class="n">basis</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Performs an n-dimensional dot-product between the basis and coefficients arrays.</span>
 
 <span class="sd">    Parameters</span>
@@ -2878,12 +2878,12 @@
 <span class="sd">        The basis to use.</span>
 <span class="sd">    coefficients: Array</span>
 <span class="sd">        The Array of coefficients to be applied to each basis vector.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">coefficient_shape</span> <span class="o">=</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span>
     <span class="k">if</span> <span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">ndim</span><span class="p">]</span> <span class="o">!=</span> <span class="n">coefficient_shape</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;The leading basis dimensions must match the coefficient shape, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;received </span><span class="si">{</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">coefficient_shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="s2">"The leading basis dimensions must match the coefficient shape, "</span>
+            <span class="sa">f</span><span class="s2">"received </span><span class="si">{</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">coefficient_shape</span><span class="si">}</span><span class="s2">."</span>
         <span class="p">)</span>
 
     <span class="n">axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">coefficients</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
@@ -3021,7 +3021,7 @@
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">nandiv</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">fill</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Divides two arrays, replacing any NaNs with a fill value.</span>
 
 <span class="sd">    Parameters</span>
@@ -3037,7 +3037,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    a / b : Array</span>
 <span class="sd">        The result of the division.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Avoid evaluating a/0 under jax_debug_nans by dividing through a safe denominator</span>
     <span class="n">safe_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">safe_b</span>
@@ -3107,7 +3107,7 @@
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

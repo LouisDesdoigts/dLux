@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -3236,11 +3236,11 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="normal">920</span>
 <span class="normal">921</span>
 <span class="normal">922</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Wavefront</span><span class="p">(</span><span class="n">zdx</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Holds the state of a wavefront as it is transformed and propagated</span>
 <span class="sd">    through an optical system. All wavefronts assume square arrays.</span>
 
-<span class="sd">    ??? abstract &quot;UML&quot;</span>
+<span class="sd">    ??? abstract "UML"</span>
 <span class="sd">        ![UML](../assets/uml/Wavefront.png)</span>
 
 <span class="sd">    Attributes</span>
@@ -3281,7 +3281,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        Derived coordinate specification for the current wavefront sampling.</span>
 <span class="sd">    xs : Array, property</span>
 <span class="sd">        Derived pixel-centre coordinates along one axis, in metres.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">phasor</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="nb">complex</span><span class="p">]</span>
     <span class="n">wavelength</span><span class="p">:</span> <span class="nb">float</span>
@@ -3296,7 +3296,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="n">pixel_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">center</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wavelength : float, meters</span>
@@ -3311,16 +3311,16 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">            must be provided.</span>
 <span class="sd">        center : Array = None</span>
 <span class="sd">            The centre coordinate of the wavefront grid, in metres. Defaults to zero.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Handle diameter vs pixel_scale</span>
         <span class="k">if</span> <span class="n">diameter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pixel_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide one: diameter or pixel_scale.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Provide one: diameter or pixel_scale."</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">diameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pixel_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot specify both &#39;diameter&#39; and &#39;pixel_scale&#39; - they are &quot;</span>
-                <span class="s2">&quot;interdependent (diameter = pixel_scale × npixels). Choose one: &quot;</span>
-                <span class="s2">&quot;use &#39;diameter&#39; for wavefront diameter, or &#39;pixel_scale&#39; for &quot;</span>
-                <span class="s2">&quot;wavefront sampling.&quot;</span>
+                <span class="s2">"Cannot specify both 'diameter' and 'pixel_scale' - they are "</span>
+                <span class="s2">"interdependent (diameter = pixel_scale × npixels). Choose one: "</span>
+                <span class="s2">"use 'diameter' for wavefront diameter, or 'pixel_scale' for "</span>
+                <span class="s2">"wavefront sampling."</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
@@ -3338,7 +3338,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 
             <span class="c1"># NOTE: only 1d offsets are presently supported</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;center must have shape (1,).&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"center must have shape (1,)."</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
@@ -3351,7 +3351,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">center</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a Wavefront from an existing phasor array.</span>
 
 <span class="sd">        Parameters</span>
@@ -3373,7 +3373,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            A new Wavefront object with the specified phasor.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Infer npixels from phasor shape</span>
         <span class="n">phasor_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phasor</span><span class="p">,</span> <span class="nb">complex</span><span class="p">)</span>
         <span class="n">npixels</span> <span class="o">=</span> <span class="n">phasor_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -3389,7 +3389,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">diameter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the current wavefront diameter calculated using the pixel scale and</span>
 <span class="sd">        number of pixels.</span>
 
@@ -3397,12 +3397,12 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        diameter : Array, meters or radians</span>
 <span class="sd">            The current diameter of the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">npixels</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the side length of the arrays currently representing the wavefront.</span>
 <span class="sd">        Taken from the last axis of the amplitude array.</span>
 
@@ -3410,72 +3410,72 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        pixels : int</span>
 <span class="sd">            The number of pixels that represent the `Wavefront`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">real</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the real component of the `Wavefront`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Array</span>
 <span class="sd">            The real component of the `Wavefront` phasor.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="o">.</span><span class="n">real</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">imaginary</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the imaginary component of the `Wavefront`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Array</span>
 <span class="sd">            The imaginary component of the `Wavefront` phasor.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="o">.</span><span class="n">imag</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">amplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the amplitude component of the `Wavefront`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Array</span>
 <span class="sd">            The amplitude component of the `Wavefront` phasor.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">phase</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the phase component of the `Wavefront`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Array</span>
 <span class="sd">            The phase component of the `Wavefront` phasor.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">complex</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the complex phasor of the `Wavefront`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Array</span>
 <span class="sd">            The complex phasor of the `Wavefront`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="o">.</span><span class="n">imag</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">polar</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the polar representation (amplitude, phase) of the `Wavefront`.</span>
 
 <span class="sd">        Returns</span>
@@ -3483,12 +3483,12 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        wavefront : Array</span>
 <span class="sd">            The polar representation of the `Wavefront` as a stack of amplitude and</span>
 <span class="sd">            phase.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">amplitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">psf</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Calculates the Point Spread Function (PSF), i.e. the squared modulus</span>
 <span class="sd">        of the complex wavefront.</span>
 
@@ -3496,11 +3496,11 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        psf : Array</span>
 <span class="sd">            The PSF of the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Converts the wavefront to a dLux PSF object.</span>
 
 <span class="sd">        Returns</span>
@@ -3508,25 +3508,25 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        psf : PSF</span>
 <span class="sd">            A PSF object containing the current wavefront intensity and</span>
 <span class="sd">            pixel scale.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">PSF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">wavenumber</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the wavenumber of the wavefront (2 * pi / wavelength).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavenumber : Array, 1/meters</span>
 <span class="sd">            The wavenumber of the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the number of &#39;dimensions&#39; of the wavefront. This is used to track the</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Returns the number of 'dimensions' of the wavefront. This is used to track the</span>
 <span class="sd">        vectorised version of the wavefront returned from vmapping.</span>
 
 <span class="sd">        NOTE: May clash with future polarised wavefront.</span>
@@ -3534,24 +3534,24 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        ndim : int</span>
-<span class="sd">            The &#39;dimensionality&#39; of dimensions of the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            The 'dimensionality' of dimensions of the wavefront.</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="o">.</span><span class="n">ndim</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">power</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the total power of the wavefront (sum of |E|^2 over pixels).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        power : Array</span>
 <span class="sd">            The total power of the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">add_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Applies a phase (in radians) to the wavefront by multiplying the phasor</span>
 <span class="sd">        by exp(1j * phase). Supports broadcasting.</span>
 
@@ -3564,13 +3564,13 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            New wavefront whose phasor is self.phasor * exp(1j * phase).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">phase</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">add_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Applies an optical path difference (in meters) by multiplying the phasor</span>
 <span class="sd">        by exp(1j * k * opd), where k = 2*pi / wavelength. Supports broadcasting.</span>
 
@@ -3583,13 +3583,13 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            New wavefront with phasor multiplied by exp(1j * k * opd).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_phase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavenumber</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">opd</span><span class="p">))</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">tilt</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rad&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tilt</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"rad"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Tilts the wavefront by the (x, y) angles.</span>
 
 <span class="sd">        Parameters</span>
@@ -3597,17 +3597,17 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        angles : Array</span>
 <span class="sd">            The (x, y) angles by which to tilt the wavefront, in `unit`.</span>
 <span class="sd">        unit : str</span>
-<span class="sd">            The units of the angles, e.g. &quot;rad&quot;, &quot;deg&quot;, &quot;arcmin&quot;, &quot;arcsec&quot;, and</span>
-<span class="sd">            prefixed forms like &quot;mrad&quot;, &quot;mas&quot;, etc (as supported by utils/units.py).</span>
+<span class="sd">            The units of the angles, e.g. "rad", "deg", "arcmin", "arcsec", and</span>
+<span class="sd">            prefixed forms like "mrad", "mas", etc (as supported by utils/units.py).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The tilted wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angles must be a 1d array of shape (2,).&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"angles must be a 1d array of shape (2,)."</span><span class="p">)</span>
 
         <span class="c1"># Calculate scaled coordinates</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">dlu</span><span class="o">.</span><span class="n">unit_factor_to_rad</span><span class="p">(</span><span class="n">unit</span><span class="p">))</span>
@@ -3617,17 +3617,17 @@ through an optical system. All wavefronts assume square arrays.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
-        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;power&quot;</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"power"</span><span class="p">,</span>
         <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Normalise the wavefront.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        mode : {&quot;power&quot;,&quot;peak&quot;} = &quot;power&quot;</span>
-<span class="sd">            - &quot;power&quot;: scales so sum(|E|^2) == value (discrete sum over pixels).</span>
-<span class="sd">            - &quot;peak&quot; : scales so max(|E|^2) == value.</span>
+<span class="sd">        mode : {"power","peak"} = "power"</span>
+<span class="sd">            - "power": scales so sum(|E|^2) == value (discrete sum over pixels).</span>
+<span class="sd">            - "peak" : scales so max(|E|^2) == value.</span>
 <span class="sd">        value : float = 1.0</span>
 <span class="sd">            Target value for the selected mode.</span>
 
@@ -3635,17 +3635,17 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            New wavefront with phasor scaled to achieve the normalisation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;power&quot;</span><span class="p">:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"power"</span><span class="p">:</span>
             <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;peak&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"peak"</span><span class="p">:</span>
             <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mode must be &#39;power&#39; or &#39;peak&#39;&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"mode must be 'power' or 'peak'"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">flip</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Flip the complex phasor along one or more axes (ij indexing: 0=y, 1=x).</span>
 
 <span class="sd">        Parameters</span>
@@ -3657,7 +3657,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            New wavefront with phasor flipped.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">phasor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">scale_to</span><span class="p">(</span>
@@ -3666,7 +3666,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
         <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Interpolates the wavefront to a given npixels and pixel_scale. Can be done on</span>
 <span class="sd">        the real and imaginary components by passing in complex=True.</span>
 
@@ -3684,7 +3684,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The new interpolated wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
         <span class="c1"># Get field in either (amplitude, phase) or (real, imaginary)</span>
@@ -3706,17 +3706,17 @@ through an optical system. All wavefronts assume square arrays.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
         <span class="n">transformation</span><span class="p">:</span> <span class="n">BaseCoordTransform</span><span class="p">,</span>
-        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"linear"</span><span class="p">,</span>
         <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">fill</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate the wavefront through a coordinate transformation.</span>
+<span class="w">        </span><span class="sd">"""Interpolate the wavefront through a coordinate transformation.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        transformation : BaseCoordTransform</span>
 <span class="sd">            Transformation applied to the wavefront sampling coordinates.</span>
-<span class="sd">        method : str = &quot;linear&quot;</span>
+<span class="sd">        method : str = "linear"</span>
 <span class="sd">            Interpolation method passed to ``interpax``.</span>
 <span class="sd">        complex : bool = True</span>
 <span class="sd">            Interpolate real and imaginary components if True, otherwise amplitude</span>
@@ -3728,9 +3728,9 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The interpolated wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transformation</span><span class="p">,</span> <span class="n">BaseCoordTransform</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;transformation must be a BaseCoordTransform.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"transformation must be a BaseCoordTransform."</span><span class="p">)</span>
         <span class="n">knot_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span>
         <span class="n">sample_coords</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">(</span><span class="n">knot_coords</span><span class="p">)</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="k">if</span> <span class="nb">complex</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">polar</span>
@@ -3747,10 +3747,10 @@ through an optical system. All wavefronts assume square arrays.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
         <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"linear"</span><span class="p">,</span>
         <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Rotates the wavefront by a given angle via interpolation. Can be done on the</span>
 <span class="sd">        real and imaginary components by passing in complex=True.</span>
 
@@ -3759,7 +3759,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        angle : Array, radians</span>
 <span class="sd">            The angle by which to rotate the wavefront in a clockwise</span>
 <span class="sd">            direction.</span>
-<span class="sd">        method : str = &quot;linear&quot;</span>
+<span class="sd">        method : str = "linear"</span>
 <span class="sd">            The interpolation method.</span>
 <span class="sd">        complex : bool = True</span>
 <span class="sd">            If True, rotate the real and imaginary components. If False, rotate the</span>
@@ -3769,7 +3769,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The new wavefront rotated by angle in the clockwise direction.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Get field in either (amplitude, phase) or (real, imaginary)</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="k">if</span> <span class="nb">complex</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">polar</span>
 
@@ -3787,7 +3787,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">phasor</span><span class="o">=</span><span class="n">phasor</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Resizes the wavefront via a zero-padding or cropping operation.</span>
 
 <span class="sd">        Parameters</span>
@@ -3799,7 +3799,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The resized wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">phasor</span><span class="o">=</span><span class="n">dlu</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span> <span class="n">npixels</span><span class="p">,</span> <span class="mi">0</span><span class="n">j</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">coordinates</span><span class="p">(</span>
@@ -3807,7 +3807,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">polar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the physical positions of the wavefront pixels in meters, with an</span>
 <span class="sd">        optional scaling factor for numerical stability.</span>
 
@@ -3822,7 +3822,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        coordinates : Array</span>
 <span class="sd">            The coordinates of the centers of each pixel representing the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span> <span class="o">*</span> <span class="n">scale</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">xs</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">polar</span><span class="p">:</span>
@@ -3831,7 +3831,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns the current wavefront sampling as a `CoordSpec`.</span>
 
 <span class="sd">        Returns</span>
@@ -3839,23 +3839,23 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        spec : CoordSpec</span>
 <span class="sd">            Coordinate specification with `n`, `d`, and `c` set from the</span>
 <span class="sd">            current wavefront state.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">CoordSpec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        1D array of pixel centre coordinates along one axis.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        xs : Array</span>
 <span class="sd">            Coordinates of pixel centres, in metres.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">xs</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">CoordSpec</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Updates the wavefront pixel scale and centre from a `CoordSpec`.</span>
 
 <span class="sd">        Parameters</span>
@@ -3867,7 +3867,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            New wavefront with updated `pixel_scale` and `center`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">pixel_scale</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
         <span class="n">center</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
@@ -3879,7 +3879,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="n">spec_out</span><span class="p">:</span> <span class="n">CoordSpec</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagates the wavefront using an FFT-based method.</span>
 
 <span class="sd">        Parameters</span>
@@ -3900,7 +3900,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            Propagated wavefront with updated phasor and sampling metadata.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Input spec</span>
         <span class="n">spec_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
         <span class="n">wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span>
@@ -3912,11 +3912,11 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="c1"># Get the phase ramp and the output center</span>
         <span class="k">if</span> <span class="n">spec_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">spec_out</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Output spec cannot specify d; FFT output d is fixed.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Output spec cannot specify d; FFT output d is fixed."</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">spec_out</span><span class="o">.</span><span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Output spec cannot specify n; FFT output n is determined by the &quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;pad parameter.&quot;</span><span class="p">,</span>
+                    <span class="s2">"Output spec cannot specify n; FFT output n is determined by the "</span><span class="p">,</span>
+                    <span class="s2">"pad parameter."</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="c1"># Calculate the input phase ramp for the FFT propagation</span>
@@ -3954,7 +3954,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="n">focal_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Legacy MFT propagation function without CoordSpec.</span>
 
 <span class="sd">        Parameters</span>
@@ -3979,7 +3979,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -----</span>
 <span class="sd">        - Ideal for generating PSFs at arbitrary sampling.</span>
 <span class="sd">        - For broadband propagation, vmap this function over wavelength and pixel_scale.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Propagate</span>
         <span class="n">phasor</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span>
             <span class="n">phasor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span>
@@ -3993,7 +3993,7 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">phasor</span><span class="o">=</span><span class="n">phasor</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate_MFT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_out</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Propagates the wavefront using an MFT-based method with a `CoordSpec`.</span>
 
 <span class="sd">        Parameters</span>
@@ -4012,7 +4012,7 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            Propagated wavefront with updated phasor and pixel scale.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Propagate</span>
         <span class="n">phasor</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span>
             <span class="n">phasor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span>
@@ -4029,33 +4029,33 @@ through an optical system. All wavefronts assume square arrays.</p>
     <span class="c1">### New Propagators ###</span>
     <span class="c1">#######################</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate_ASM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Angular spectrum free-space propagation&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Angular spectrum free-space propagation"""</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate_fresnel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;LCT-based MFT Fresnel propagation&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""LCT-based MFT Fresnel propagation"""</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate_fresnel_fft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;LCT-based FFT Fresnel propagation&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""LCT-based FFT Fresnel propagation"""</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate_fraunhofer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Fraunhofer propagation via MFT (same as propagate MFT, but with abcdLux backend)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">propagate_fraunhofer_fft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Fraunhofer propagation via FFT (same as propagate FFT, but with abcdLux backend)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_magic_unified_op</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">op</span><span class="p">:</span> <span class="nb">str</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Internal helper function to unify the logic of the magic methods for addition,</span>
 <span class="sd">        subtraction, multiplication and division.</span>
 
@@ -4064,13 +4064,13 @@ through an optical system. All wavefronts assume square arrays.</p>
 <span class="sd">        other : Wavefront | Array | None</span>
 <span class="sd">            The object to operate with. Can be a complex array, a Wavefront, or None.</span>
 <span class="sd">        op : str</span>
-<span class="sd">            The operation to perform: &#39;add&#39;, &#39;subtract&#39;, &#39;multiply&#39;, or &#39;divide&#39;.</span>
+<span class="sd">            The operation to perform: 'add', 'subtract', 'multiply', or 'divide'.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The resulting wavefront after applying the operation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Nones always return unchanged</span>
         <span class="k">if</span> <span class="n">other</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
@@ -4078,8 +4078,8 @@ through an optical system. All wavefronts assume square arrays.</p>
         <span class="c1"># Check for supported types</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Wavefront</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">complex</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unsupported type for </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">. Must be an array, &quot;</span>
-                <span class="s2">&quot;Wavefront, or None.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Unsupported type for </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">. Must be an array, "</span>
+                <span class="s2">"Wavefront, or None."</span>
             <span class="p">)</span>
 
         <span class="c1"># Extract phasor if other is a Wavefront</span>
@@ -4087,59 +4087,59 @@ through an optical system. All wavefronts assume square arrays.</p>
             <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">phasor</span>
 
         <span class="c1"># Apply the operation</span>
-        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;add&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;subtract&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">other</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;multiply&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;divide&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"add"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"subtract"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="o">-</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"multiply"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"divide"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported operation &#39;</span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported operation '</span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Allows complex phasors or Wavefront objects to be added together. None values</span>
 <span class="sd">        are ignored.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;add&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"add"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Allows complex phasors or Wavefront objects to be subtracted. None values are</span>
 <span class="sd">        ignored.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;subtract&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"subtract"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Allows complex phasors or Wavefront objects to be multiplied. None values are</span>
 <span class="sd">        ignored.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;multiply&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"multiply"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Allows complex phasors or Wavefront objects to be divided. None values are</span>
 <span class="sd">        ignored.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;divide&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"divide"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;In-place addition.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""In-place addition."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;In-place subtraction.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""In-place subtraction."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__sub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;In-place multiplication.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""In-place multiplication."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__itruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;In-place division.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""In-place division."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__truediv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -4817,11 +4817,11 @@ are ignored.</p>
 <span class="normal">883</span>
 <span class="normal">884</span>
 <span class="normal">885</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Allows complex phasors or Wavefront objects to be added together. None values</span>
 <span class="sd">    are ignored.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;add&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"add"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4847,7 +4847,7 @@ are ignored.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">908</span>
 <span class="normal">909</span>
 <span class="normal">910</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;In-place addition.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""In-place addition."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -4874,7 +4874,7 @@ are ignored.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">916</span>
 <span class="normal">917</span>
 <span class="normal">918</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;In-place multiplication.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""In-place multiplication."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5054,7 +5054,7 @@ must be provided.</p>
     <span class="n">pixel_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">center</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wavelength : float, meters</span>
@@ -5069,16 +5069,16 @@ must be provided.</p>
 <span class="sd">        must be provided.</span>
 <span class="sd">    center : Array = None</span>
 <span class="sd">        The centre coordinate of the wavefront grid, in metres. Defaults to zero.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Handle diameter vs pixel_scale</span>
     <span class="k">if</span> <span class="n">diameter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pixel_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide one: diameter or pixel_scale.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Provide one: diameter or pixel_scale."</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">diameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pixel_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Cannot specify both &#39;diameter&#39; and &#39;pixel_scale&#39; - they are &quot;</span>
-            <span class="s2">&quot;interdependent (diameter = pixel_scale × npixels). Choose one: &quot;</span>
-            <span class="s2">&quot;use &#39;diameter&#39; for wavefront diameter, or &#39;pixel_scale&#39; for &quot;</span>
-            <span class="s2">&quot;wavefront sampling.&quot;</span>
+            <span class="s2">"Cannot specify both 'diameter' and 'pixel_scale' - they are "</span>
+            <span class="s2">"interdependent (diameter = pixel_scale × npixels). Choose one: "</span>
+            <span class="s2">"use 'diameter' for wavefront diameter, or 'pixel_scale' for "</span>
+            <span class="s2">"wavefront sampling."</span>
         <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
@@ -5096,7 +5096,7 @@ must be provided.</p>
 
         <span class="c1"># NOTE: only 1d offsets are presently supported</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;center must have shape (1,).&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"center must have shape (1,)."</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -5124,7 +5124,7 @@ must be provided.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">912</span>
 <span class="normal">913</span>
 <span class="normal">914</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;In-place subtraction.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""In-place subtraction."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__sub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5151,7 +5151,7 @@ must be provided.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">920</span>
 <span class="normal">921</span>
 <span class="normal">922</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__itruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;In-place division.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""In-place division."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__truediv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5182,11 +5182,11 @@ ignored.</p>
 <span class="normal">897</span>
 <span class="normal">898</span>
 <span class="normal">899</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Allows complex phasors or Wavefront objects to be multiplied. None values are</span>
 <span class="sd">    ignored.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;multiply&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"multiply"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5216,11 +5216,11 @@ ignored.</p>
 <span class="normal">890</span>
 <span class="normal">891</span>
 <span class="normal">892</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Allows complex phasors or Wavefront objects to be subtracted. None values are</span>
 <span class="sd">    ignored.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;subtract&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"subtract"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5250,11 +5250,11 @@ ignored.</p>
 <span class="normal">904</span>
 <span class="normal">905</span>
 <span class="normal">906</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Wavefront</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Allows complex phasors or Wavefront objects to be divided. None values are</span>
 <span class="sd">    ignored.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;divide&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic_unified_op</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"divide"</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5350,7 +5350,7 @@ by exp(1j * k * opd), where k = 2*pi / wavelength. Supports broadcasting.</p>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Applies an optical path difference (in meters) by multiplying the phasor</span>
 <span class="sd">    by exp(1j * k * opd), where k = 2*pi / wavelength. Supports broadcasting.</span>
 
@@ -5363,7 +5363,7 @@ by exp(1j * k * opd), where k = 2*pi / wavelength. Supports broadcasting.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        New wavefront with phasor multiplied by exp(1j * k * opd).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">opd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_phase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavenumber</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">opd</span><span class="p">))</span>
@@ -5462,7 +5462,7 @@ by exp(1j * phase). Supports broadcasting.</p>
 <span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Applies a phase (in radians) to the wavefront by multiplying the phasor</span>
 <span class="sd">    by exp(1j * phase). Supports broadcasting.</span>
 
@@ -5475,10 +5475,10 @@ by exp(1j * phase). Supports broadcasting.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        New wavefront whose phasor is self.phasor * exp(1j * phase).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">phase</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">phase</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5602,7 +5602,7 @@ optional scaling factor for numerical stability.</p>
     <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">polar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns the physical positions of the wavefront pixels in meters, with an</span>
 <span class="sd">    optional scaling factor for numerical stability.</span>
 
@@ -5617,7 +5617,7 @@ optional scaling factor for numerical stability.</p>
 <span class="sd">    -------</span>
 <span class="sd">    coordinates : Array</span>
 <span class="sd">        The coordinates of the centers of each pixel representing the wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span> <span class="o">*</span> <span class="n">scale</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">xs</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">polar</span><span class="p">:</span>
@@ -5714,7 +5714,7 @@ optional scaling factor for numerical stability.</p>
 <span class="normal">438</span>
 <span class="normal">439</span>
 <span class="normal">440</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">flip</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Flip the complex phasor along one or more axes (ij indexing: 0=y, 1=x).</span>
 
 <span class="sd">    Parameters</span>
@@ -5726,7 +5726,7 @@ optional scaling factor for numerical stability.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        New wavefront with phasor flipped.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">phasor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5930,7 +5930,7 @@ optional scaling factor for numerical stability.</p>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">center</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Create a Wavefront from an existing phasor array.</span>
 
 <span class="sd">    Parameters</span>
@@ -5952,7 +5952,7 @@ optional scaling factor for numerical stability.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        A new Wavefront object with the specified phasor.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Infer npixels from phasor shape</span>
     <span class="n">phasor_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phasor</span><span class="p">,</span> <span class="nb">complex</span><span class="p">)</span>
     <span class="n">npixels</span> <span class="o">=</span> <span class="n">phasor_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -5975,7 +5975,7 @@ optional scaling factor for numerical stability.</p>
 
 
 <h3 id="dLux.wavefronts.Wavefront.interpolate" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">interpolate</span><span class="p">(</span><span class="n">transformation</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">interpolate</span><span class="p">(</span><span class="n">transformation</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'linear'</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
 
 <a href="#dLux.wavefronts.Wavefront.interpolate" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -6132,17 +6132,17 @@ and phase components.</p>
 <span class="normal">524</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
     <span class="n">transformation</span><span class="p">:</span> <span class="n">BaseCoordTransform</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"linear"</span><span class="p">,</span>
     <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">fill</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate the wavefront through a coordinate transformation.</span>
+<span class="w">    </span><span class="sd">"""Interpolate the wavefront through a coordinate transformation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    transformation : BaseCoordTransform</span>
 <span class="sd">        Transformation applied to the wavefront sampling coordinates.</span>
-<span class="sd">    method : str = &quot;linear&quot;</span>
+<span class="sd">    method : str = "linear"</span>
 <span class="sd">        Interpolation method passed to ``interpax``.</span>
 <span class="sd">    complex : bool = True</span>
 <span class="sd">        Interpolate real and imaginary components if True, otherwise amplitude</span>
@@ -6154,9 +6154,9 @@ and phase components.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The interpolated wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transformation</span><span class="p">,</span> <span class="n">BaseCoordTransform</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;transformation must be a BaseCoordTransform.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"transformation must be a BaseCoordTransform."</span><span class="p">)</span>
     <span class="n">knot_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span>
     <span class="n">sample_coords</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">(</span><span class="n">knot_coords</span><span class="p">)</span>
     <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="k">if</span> <span class="nb">complex</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">polar</span>
@@ -6179,7 +6179,7 @@ and phase components.</p>
 
 
 <h3 id="dLux.wavefronts.Wavefront.normalise" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">normalise</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">normalise</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">'power'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span></code>
 
 <a href="#dLux.wavefronts.Wavefront.normalise" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -6293,17 +6293,17 @@ and phase components.</p>
 <span class="normal">423</span>
 <span class="normal">424</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalise</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;power&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"power"</span><span class="p">,</span>
     <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Normalise the wavefront.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    mode : {&quot;power&quot;,&quot;peak&quot;} = &quot;power&quot;</span>
-<span class="sd">        - &quot;power&quot;: scales so sum(|E|^2) == value (discrete sum over pixels).</span>
-<span class="sd">        - &quot;peak&quot; : scales so max(|E|^2) == value.</span>
+<span class="sd">    mode : {"power","peak"} = "power"</span>
+<span class="sd">        - "power": scales so sum(|E|^2) == value (discrete sum over pixels).</span>
+<span class="sd">        - "peak" : scales so max(|E|^2) == value.</span>
 <span class="sd">    value : float = 1.0</span>
 <span class="sd">        Target value for the selected mode.</span>
 
@@ -6311,14 +6311,14 @@ and phase components.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        New wavefront with phasor scaled to achieve the normalisation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;power&quot;</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"power"</span><span class="p">:</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;peak&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"peak"</span><span class="p">:</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mode must be &#39;power&#39; or &#39;peak&#39;&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;phasor&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"mode must be 'power' or 'peak'"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">"phasor"</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6503,7 +6503,7 @@ backward through the system.</p>
     <span class="n">focal_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Legacy MFT propagation function without CoordSpec.</span>
 
 <span class="sd">    Parameters</span>
@@ -6528,7 +6528,7 @@ backward through the system.</p>
 <span class="sd">    -----</span>
 <span class="sd">    - Ideal for generating PSFs at arbitrary sampling.</span>
 <span class="sd">    - For broadband propagation, vmap this function over wavelength and pixel_scale.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Propagate</span>
     <span class="n">phasor</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span>
         <span class="n">phasor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span>
@@ -6565,7 +6565,7 @@ backward through the system.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">810</span>
 <span class="normal">811</span>
 <span class="normal">812</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_ASM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Angular spectrum free-space propagation&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Angular spectrum free-space propagation"""</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6774,7 +6774,7 @@ backward through the system.</p>
     <span class="n">spec_out</span><span class="p">:</span> <span class="n">CoordSpec</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagates the wavefront using an FFT-based method.</span>
 
 <span class="sd">    Parameters</span>
@@ -6795,7 +6795,7 @@ backward through the system.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        Propagated wavefront with updated phasor and sampling metadata.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Input spec</span>
     <span class="n">spec_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
     <span class="n">wl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span>
@@ -6807,11 +6807,11 @@ backward through the system.</p>
     <span class="c1"># Get the phase ramp and the output center</span>
     <span class="k">if</span> <span class="n">spec_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">spec_out</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Output spec cannot specify d; FFT output d is fixed.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Output spec cannot specify d; FFT output d is fixed."</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">spec_out</span><span class="o">.</span><span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Output spec cannot specify n; FFT output n is determined by the &quot;</span><span class="p">,</span>
-                <span class="s2">&quot;pad parameter.&quot;</span><span class="p">,</span>
+                <span class="s2">"Output spec cannot specify n; FFT output n is determined by the "</span><span class="p">,</span>
+                <span class="s2">"pad parameter."</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Calculate the input phase ramp for the FFT propagation</span>
@@ -6984,7 +6984,7 @@ propagate backward through the system.</p>
 <span class="normal">803</span>
 <span class="normal">804</span>
 <span class="normal">805</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_MFT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_out</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Propagates the wavefront using an MFT-based method with a `CoordSpec`.</span>
 
 <span class="sd">    Parameters</span>
@@ -7003,7 +7003,7 @@ propagate backward through the system.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        Propagated wavefront with updated phasor and pixel scale.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Propagate</span>
     <span class="n">phasor</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span>
         <span class="n">phasor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span>
@@ -7042,9 +7042,9 @@ propagate backward through the system.</p>
 <span class="normal">824</span>
 <span class="normal">825</span>
 <span class="normal">826</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_fraunhofer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Fraunhofer propagation via MFT (same as propagate MFT, but with abcdLux backend)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7073,9 +7073,9 @@ propagate backward through the system.</p>
 <span class="normal">830</span>
 <span class="normal">831</span>
 <span class="normal">832</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_fraunhofer_fft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Fraunhofer propagation via FFT (same as propagate FFT, but with abcdLux backend)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7102,7 +7102,7 @@ propagate backward through the system.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">814</span>
 <span class="normal">815</span>
 <span class="normal">816</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_fresnel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;LCT-based MFT Fresnel propagation&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""LCT-based MFT Fresnel propagation"""</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7129,7 +7129,7 @@ propagate backward through the system.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">818</span>
 <span class="normal">819</span>
 <span class="normal">820</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">propagate_fresnel_fft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;LCT-based FFT Fresnel propagation&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""LCT-based FFT Fresnel propagation"""</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7222,7 +7222,7 @@ propagate backward through the system.</p>
 <span class="normal">580</span>
 <span class="normal">581</span>
 <span class="normal">582</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Resizes the wavefront via a zero-padding or cropping operation.</span>
 
 <span class="sd">    Parameters</span>
@@ -7234,7 +7234,7 @@ propagate backward through the system.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The resized wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">phasor</span><span class="o">=</span><span class="n">dlu</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phasor</span><span class="p">,</span> <span class="n">npixels</span><span class="p">,</span> <span class="mi">0</span><span class="n">j</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7246,7 +7246,7 @@ propagate backward through the system.</p>
 
 
 <h3 id="dLux.wavefronts.Wavefront.rotate" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">rotate</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">rotate</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'linear'</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 <a href="#dLux.wavefronts.Wavefront.rotate" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -7390,10 +7390,10 @@ amplitude and phase components.</p>
 <span class="normal">566</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
     <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"linear"</span><span class="p">,</span>
     <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Rotates the wavefront by a given angle via interpolation. Can be done on the</span>
 <span class="sd">    real and imaginary components by passing in complex=True.</span>
 
@@ -7402,7 +7402,7 @@ amplitude and phase components.</p>
 <span class="sd">    angle : Array, radians</span>
 <span class="sd">        The angle by which to rotate the wavefront in a clockwise</span>
 <span class="sd">        direction.</span>
-<span class="sd">    method : str = &quot;linear&quot;</span>
+<span class="sd">    method : str = "linear"</span>
 <span class="sd">        The interpolation method.</span>
 <span class="sd">    complex : bool = True</span>
 <span class="sd">        If True, rotate the real and imaginary components. If False, rotate the</span>
@@ -7412,7 +7412,7 @@ amplitude and phase components.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The new wavefront rotated by angle in the clockwise direction.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Get field in either (amplitude, phase) or (real, imaginary)</span>
     <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="k">if</span> <span class="nb">complex</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">polar</span>
 
@@ -7585,7 +7585,7 @@ interpolate the amplitude and phase components.</p>
     <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Interpolates the wavefront to a given npixels and pixel_scale. Can be done on</span>
 <span class="sd">    the real and imaginary components by passing in complex=True.</span>
 
@@ -7603,7 +7603,7 @@ interpolate the amplitude and phase components.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The new interpolated wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
     <span class="c1"># Get field in either (amplitude, phase) or (real, imaginary)</span>
@@ -7714,7 +7714,7 @@ interpolate the amplitude and phase components.</p>
 <span class="normal">650</span>
 <span class="normal">651</span>
 <span class="normal">652</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">CoordSpec</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Updates the wavefront pixel scale and centre from a `CoordSpec`.</span>
 
 <span class="sd">    Parameters</span>
@@ -7726,7 +7726,7 @@ interpolate the amplitude and phase components.</p>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        New wavefront with updated `pixel_scale` and `center`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">pixel_scale</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
     <span class="n">center</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
@@ -7740,7 +7740,7 @@ interpolate the amplitude and phase components.</p>
 
 
 <h3 id="dLux.wavefronts.Wavefront.tilt" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">tilt</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">tilt</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'rad'</span><span class="p">)</span></code>
 
 <a href="#dLux.wavefronts.Wavefront.tilt" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -7848,8 +7848,8 @@ prefixed forms like "mrad", "mas", etc (as supported by utils/units.py).</p>
 <span class="normal">392</span>
 <span class="normal">393</span>
 <span class="normal">394</span>
-<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">tilt</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rad&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">tilt</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"rad"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Tilts the wavefront by the (x, y) angles.</span>
 
 <span class="sd">    Parameters</span>
@@ -7857,17 +7857,17 @@ prefixed forms like "mrad", "mas", etc (as supported by utils/units.py).</p>
 <span class="sd">    angles : Array</span>
 <span class="sd">        The (x, y) angles by which to tilt the wavefront, in `unit`.</span>
 <span class="sd">    unit : str</span>
-<span class="sd">        The units of the angles, e.g. &quot;rad&quot;, &quot;deg&quot;, &quot;arcmin&quot;, &quot;arcsec&quot;, and</span>
-<span class="sd">        prefixed forms like &quot;mrad&quot;, &quot;mas&quot;, etc (as supported by utils/units.py).</span>
+<span class="sd">        The units of the angles, e.g. "rad", "deg", "arcmin", "arcsec", and</span>
+<span class="sd">        prefixed forms like "mrad", "mas", etc (as supported by utils/units.py).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The tilted wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angles must be a 1d array of shape (2,).&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"angles must be a 1d array of shape (2,)."</span><span class="p">)</span>
 
     <span class="c1"># Calculate scaled coordinates</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">dlu</span><span class="o">.</span><span class="n">unit_factor_to_rad</span><span class="p">(</span><span class="n">unit</span><span class="p">))</span>
@@ -7931,7 +7931,7 @@ pixel scale.</p>
 <span class="normal">289</span>
 <span class="normal">290</span>
 <span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PSF</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Converts the wavefront to a dLux PSF object.</span>
 
 <span class="sd">    Returns</span>
@@ -7939,7 +7939,7 @@ pixel scale.</p>
 <span class="sd">    psf : PSF</span>
 <span class="sd">        A PSF object containing the current wavefront intensity and</span>
 <span class="sd">        pixel scale.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">PSF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8014,7 +8014,7 @@ pixel scale.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

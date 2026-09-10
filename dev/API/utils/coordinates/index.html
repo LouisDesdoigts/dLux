@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.53">
+      <meta name="generator" content="zensical-0.0.60">
     
     
       
@@ -36,12 +36,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -2216,7 +2216,7 @@ coordinates.</p>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cart2polar</span><span class="p">(</span><span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Converts the input (x, y) Cartesian coordinates into (r, phi) polar</span>
 <span class="sd">    coordinates.</span>
 
@@ -2231,7 +2231,7 @@ coordinates.</p>
 <span class="sd">    coordinates : Array</span>
 <span class="sd">        The input Cartesian coordinates converted into (r, phi) polar</span>
 <span class="sd">        coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
@@ -2335,7 +2335,7 @@ coordinates.</p>
 <span class="normal">203</span>
 <span class="normal">204</span>
 <span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">polar2cart</span><span class="p">(</span><span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Converts the input (r, phi) polar coordinates into (x, y) Cartesian</span>
 <span class="sd">    coordinates.</span>
 
@@ -2350,7 +2350,7 @@ coordinates.</p>
 <span class="sd">    coordinates : Array</span>
 <span class="sd">        The input polar coordinates converted into (x, y) Cartesian</span>
 <span class="sd">        coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">r</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">coordinates</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
@@ -2579,7 +2579,7 @@ centered coordinates. For odd npixels this is identical to the default.</p>
     <span class="n">polar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">fft_style</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns a paraxial set of 2d coordinates for each pixel center.</span>
 
 <span class="sd">    Parameters</span>
@@ -2602,11 +2602,11 @@ centered coordinates. For odd npixels this is identical to the default.</p>
 <span class="sd">    -------</span>
 <span class="sd">    coordinates : Array</span>
 <span class="sd">        The array of pixel center coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">supplied</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">diameter</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">supplied</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Exactly one of diameter, radius, or pixel_scale must be provided.&quot;</span>
+            <span class="s2">"Exactly one of diameter, radius, or pixel_scale must be provided."</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">diameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2624,7 +2624,7 @@ centered coordinates. For odd npixels this is identical to the default.</p>
         <span class="n">offsets</span> <span class="o">=</span> <span class="p">(</span><span class="n">pixscale</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">pixscale</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
 
     <span class="c1"># Generate the coordinates</span>
-    <span class="n">coords</span> <span class="o">=</span> <span class="n">nd_coords</span><span class="p">((</span><span class="n">npixels</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">pixscale</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="n">offsets</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">nd_coords</span><span class="p">((</span><span class="n">npixels</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">pixscale</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="n">offsets</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">"xy"</span><span class="p">)</span>
 
     <span class="c1"># Convert to polar if requested</span>
     <span class="k">if</span> <span class="n">polar</span><span class="p">:</span>
@@ -2643,7 +2643,7 @@ centered coordinates. For odd npixels this is identical to the default.</p>
 
 
 <h2 id="dLux.utils.coordinates.nd_coords" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">dLux</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">coordinates</span><span class="o">.</span><span class="n">nd_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">pixel_scales</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">dLux</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">coordinates</span><span class="o">.</span><span class="n">nd_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">pixel_scales</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">'xy'</span><span class="p">)</span></code>
 
 <a href="#dLux.utils.coordinates.nd_coords" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -2849,9 +2849,9 @@ more details.</p>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
     <span class="n">pixel_scales</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">offsets</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">indexing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xy&quot;</span><span class="p">,</span>
+    <span class="n">indexing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"xy"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns a set of nd pixel center coordinates, with an optional offset. Each</span>
 <span class="sd">    dimension can have a different number of pixels, pixel scale and offset by passing</span>
 <span class="sd">    in tuples of values: `nd_coords((10, 10), (1, 2), (0, 1))`. pixel scale and offset</span>
@@ -2878,29 +2878,29 @@ more details.</p>
 <span class="sd">        length of the tuple must match the number of dimensions. If a float,</span>
 <span class="sd">        the same offset is applied to all dimensions.</span>
 <span class="sd">        set to 0.</span>
-<span class="sd">    indexing : str = &#39;xy&#39;</span>
-<span class="sd">        The indexing of the output. Default is &#39;xy&#39;. See numpy.meshgrid for</span>
+<span class="sd">    indexing : str = 'xy'</span>
+<span class="sd">        The indexing of the output. Default is 'xy'. See numpy.meshgrid for</span>
 <span class="sd">        more details.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    coordinates : Array</span>
 <span class="sd">        The positions of the pixel centers in the given dimensions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">indexing</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="s2">&quot;ij&quot;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;indexing must be either &#39;xy&#39; or &#39;ij&#39;.&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">indexing</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"xy"</span><span class="p">,</span> <span class="s2">"ij"</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"indexing must be either 'xy' or 'ij'."</span><span class="p">)</span>
 
     <span class="c1"># Validate npixels and ensure tuple</span>
-    <span class="n">npixels</span> <span class="o">=</span> <span class="n">_cast_tuple</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="s2">&quot;npixels&quot;</span><span class="p">)</span>
+    <span class="n">npixels</span> <span class="o">=</span> <span class="n">_cast_tuple</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="s2">"npixels"</span><span class="p">)</span>
 
     <span class="c1"># Get the number of dimensions</span>
     <span class="n">ndim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
-        <span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">pixel_scales</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">)</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">pixel_scales</span><span class="p">,</span> <span class="s2">"mean"</span><span class="p">),</span> <span class="n">_input_len</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="s2">"std"</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># Validate and ensure tuples</span>
-    <span class="n">pixel_scales</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">pixel_scales</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">&quot;pixel_scales&quot;</span><span class="p">)</span>
-    <span class="n">offsets</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">)</span>
+    <span class="n">pixel_scales</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">pixel_scales</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">"pixel_scales"</span><span class="p">)</span>
+    <span class="n">offsets</span> <span class="o">=</span> <span class="n">_cast_scalar</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="s2">"offsets"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ndim</span><span class="p">:</span>
         <span class="n">npixels</span> <span class="o">*=</span> <span class="n">ndim</span>
@@ -3030,7 +3030,7 @@ more details.</p>
 <span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">translate_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">translation</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Translates the coordinates by to a new centre. Translation must have shape (2,).</span>
 
 <span class="sd">    Parameters</span>
@@ -3044,7 +3044,7 @@ more details.</p>
 <span class="sd">    -------</span>
 <span class="sd">    coords : Array</span>
 <span class="sd">        The translated coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">coords</span> <span class="o">-</span> <span class="n">translation</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3158,7 +3158,7 @@ more details.</p>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compress_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">compress</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compresses the coordinates by a given factor. Compress must have shape (2,).</span>
 
 <span class="sd">    Parameters</span>
@@ -3172,7 +3172,7 @@ more details.</p>
 <span class="sd">    -------</span>
 <span class="sd">    coords : Array</span>
 <span class="sd">        The compressed coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">coords</span> <span class="o">*</span> <span class="n">compress</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3287,7 +3287,7 @@ more details.</p>
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">shear_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">shear</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Shears the coordinates by a given factor. Shear must have shape (2,).</span>
 
 <span class="sd">    Parameters</span>
@@ -3301,7 +3301,7 @@ more details.</p>
 <span class="sd">    -------</span>
 <span class="sd">    coords : Array</span>
 <span class="sd">        The sheared coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">trans_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">coords</span> <span class="o">+</span> <span class="n">trans_coords</span> <span class="o">*</span> <span class="n">shear</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
@@ -3420,7 +3420,7 @@ more details.</p>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rotate_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">rotation</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Rotates the coordinates by a given angle.</span>
 
 <span class="sd">    Parameters</span>
@@ -3434,7 +3434,7 @@ more details.</p>
 <span class="sd">    -------</span>
 <span class="sd">    coords : Array</span>
 <span class="sd">        The rotated coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coords</span>
     <span class="n">new_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="o">-</span><span class="n">rotation</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="o">-</span><span class="n">rotation</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
@@ -3559,7 +3559,7 @@ more details.</p>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">gen_powers</span><span class="p">(</span><span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Generates the powers required for a 2d polynomial</span>
 
 <span class="sd">    Parameters</span>
@@ -3573,7 +3573,7 @@ more details.</p>
 <span class="sd">        x axis powers</span>
 <span class="sd">    ypows : Array</span>
 <span class="sd">        y axis powers</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">triangular_number</span><span class="p">(</span><span class="n">degree</span><span class="p">)</span>
     <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
@@ -3720,7 +3720,7 @@ more details.</p>
 <span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">distort_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">pows</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Apply a 2D polynomial distortion to some coordinates</span>
 
 <span class="sd">    Parameters</span>
@@ -3736,7 +3736,7 @@ more details.</p>
 <span class="sd">    -------</span>
 <span class="sd">    distorted_coords : Array</span>
 <span class="sd">        Coords with the distortion applied</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">pow_base</span> <span class="o">=</span> <span class="n">polynomial_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">pows</span><span class="p">)</span>
     <span class="n">distortion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">pow_base</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">coords</span> <span class="o">+</span> <span class="n">distortion</span>
@@ -3805,7 +3805,7 @@ more details.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.69c251d7.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
