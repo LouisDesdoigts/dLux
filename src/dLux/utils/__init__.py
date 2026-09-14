@@ -19,6 +19,7 @@ from . import (
     norms,
     apertures,
     fourier,
+    polarisation,
 )
 
 _modules = (
@@ -37,6 +38,7 @@ _modules = (
     norms,
     apertures,
     fourier,
+    polarisation,
 )
 
 _module_names = [
@@ -55,5 +57,6 @@ _module_names = [
     "norms",
     "apertures",
     "fourier",
+    "polarisation",
 ]
 __all__ = _module_names + reexport(_modules, globals())
