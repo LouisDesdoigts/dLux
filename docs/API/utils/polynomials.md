@@ -8,6 +8,12 @@
 ???+ info "polynomial_basis"
     ::: dLux.utils.polynomials.polynomial_basis
 
+???+ info "eval_polynomial"
+    ::: dLux.utils.polynomials.eval_polynomial
+
+???+ info "solve_polynomial"
+    ::: dLux.utils.polynomials.solve_polynomial
+
 ???+ info "zernike_name"
     ::: dLux.utils.polynomials.zernike_name
 

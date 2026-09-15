@@ -5,7 +5,40 @@ from jax import Array, vmap
 import interpax as ipx
 import dLux.utils as dlu
 
-__all__ = ["interp", "scale", "rotate"]
+__all__ = ["interpolate", "interp", "scale", "rotate"]
+
+
+def interpolate(x, knots, values, *, method="linear", extrapolate=0.0, period=None):
+    """Interpolate one-dimensional samples at arbitrary-shaped query coordinates.
+
+    ``knots`` is a finite, strictly increasing vector with at least two samples.
+    ``values`` starts with its knot axis and can retain trailing value axes. The
+    returned shape is ``x.shape + values.shape[1:]``; queries and knots use the
+    same unit. ``extrapolate`` follows Interpax: False returns NaN, True
+    extrapolates, a finite scalar fills, and a pair configures each boundary.
+    ``period`` optionally supplies a positive period in the knot unit.
+
+    Values and coordinates remain differentiable. Monotonic knots, finite inputs,
+    and positive periods are caller contracts; shapes are checked before evaluation.
+    """
+    x, knots, values = np.asarray(x), np.asarray(knots), np.asarray(values)
+    if knots.ndim != 1 or knots.size < 2:
+        raise ValueError(
+            "knots must be a one-dimensional vector of at least two samples."
+        )
+    if values.ndim == 0 or values.shape[0] != knots.size:
+        raise ValueError("values must start with an axis matching knots.")
+    if np.iscomplexobj(x) or np.iscomplexobj(knots):
+        raise TypeError("Queries and knots must be real.")
+    output = ipx.interp1d(
+        x.reshape(-1),
+        knots,
+        values,
+        method=method,
+        extrap=extrapolate,
+        period=period,
+    )
+    return output.reshape(x.shape + values.shape[1:])
 
 
 def interp(

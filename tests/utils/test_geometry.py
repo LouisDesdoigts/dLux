@@ -8,6 +8,8 @@ import dLux.utils as dlu
 from tests.helpers import assert_jittable
 
 COORDS = dlu.pixel_coords(16, diameter=2)
+BATCH_OFFSETS = np.array([[0.0, 0.0], [0.2, -0.1], [-0.15, 0.25]])
+BATCHED_COORDS = COORDS[None] + BATCH_OFFSETS[:, :, None, None]
 
 
 @pytest.mark.parametrize(
@@ -46,6 +48,29 @@ def test_soft_shape_contract(operation, args):
     assert output.shape == COORDS.shape[1:]
     assert np.all(np.isfinite(output))
     assert np.all((output >= 0) & (output <= 1))
+
+
+@pytest.mark.parametrize(
+    ("operation", "args"),
+    [
+        (dlu.circle, (1.0,)),
+        (dlu.square, (1.0,)),
+        (dlu.rectangle, (1.0, 0.5)),
+        (dlu.reg_polygon, (1.0, 6)),
+        (dlu.spider, (0.1, (0, 90))),
+        (dlu.soft_circle, (1.0,)),
+        (dlu.soft_square, (1.0,)),
+        (dlu.soft_rectangle, (1.0, 0.5)),
+        (dlu.soft_reg_polygon, (1.0, 6)),
+        (dlu.soft_spider, (0.1, (0, 90))),
+    ],
+)
+def test_shapes_preserve_coordinate_batches(operation, args):
+    output = assert_jittable(operation, BATCHED_COORDS, *args)
+    expected = np.stack([operation(coords, *args) for coords in BATCHED_COORDS])
+
+    assert output.shape == BATCHED_COORDS.shape[:-3] + COORDS.shape[-2:]
+    assert np.allclose(output, expected)
 
 
 def test_combine():

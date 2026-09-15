@@ -6,32 +6,26 @@
 
 ```mermaid
 classDiagram
+    class dLux_parametric_polynomials_Polynomial["Polynomial"]
     class dLux_parametric_polynomials_DynamicZernike["DynamicZernike"]
     class dLux_parametric_polynomials_ZernikeBasis["ZernikeBasis"]
     class dLux_parametric_polynomials_DynamicZernikeBasis["DynamicZernikeBasis"]
-    class dLux_parametric_polynomials_Polynomial["Polynomial"]
-    class dLux_parametric_polynomials_ExplicitPolynomial["ExplicitPolynomial"]
-    class dLux_parametric_polynomials_CoordinatePolynomial["CoordinatePolynomial"]
-    class dLux_base_Base["Base"]
     class dLux_parametric_bases_Basis["Basis"]
-    class dLux_parametric_bases_CoordBasis["CoordBasis"]
     class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
-    class dLux_parametric_polynomials__ZernikeBasis["_ZernikeBasis"]
-    dLux_base_Base <|-- dLux_parametric_polynomials_DynamicZernike
-    click dLux_parametric_polynomials_DynamicZernike href "#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name · Methods: calculate()"
-    dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_ZernikeBasis
-    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
-    click dLux_parametric_polynomials_ZernikeBasis href "#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coeffs, shape, basis"
-    dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
-    dLux_parametric_bases_CoordBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
-    click dLux_parametric_polynomials_DynamicZernikeBasis href "#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: coeffs, shape, zernikes, nsides, diameter · Methods: calculate_basis()"
+    class dLux_parametric_bases_SpatialBasis["SpatialBasis"]
+    class dLux_parametric_parametrics_SpatialExpression["SpatialExpression"]
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_polynomials_Polynomial
-    click dLux_parametric_polynomials_Polynomial href "#dLux.parametric.polynomials.Polynomial" "Attributes: coeffs, shape, powers · Methods: calculate_basis(), evaluate(), solve_basis()"
-    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ExplicitPolynomial
-    click dLux_parametric_polynomials_ExplicitPolynomial href "#dLux.parametric.polynomials.ExplicitPolynomial" "Attributes: coeffs, shape, basis, powers"
-    dLux_parametric_polynomials_Polynomial <|-- dLux_parametric_polynomials_CoordinatePolynomial
-    click dLux_parametric_polynomials_CoordinatePolynomial href "#dLux.parametric.polynomials.CoordinatePolynomial" "Attributes: coeffs, shape, powers, ndim · Methods: calculate_basis()"
+    click dLux_parametric_polynomials_Polynomial href "#dLux.parametric.polynomials.Polynomial" "Attributes: powers · Methods: calculate_basis(), evaluate(), solve()"
+    dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_polynomials_DynamicZernike
+    click dLux_parametric_polynomials_DynamicZernike href "#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name · Methods: evaluate()"
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
+    click dLux_parametric_polynomials_ZernikeBasis href "#dLux.parametric.polynomials.ZernikeBasis" "No direct public attributes or methods"
+    dLux_parametric_bases_SpatialBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
+    click dLux_parametric_polynomials_DynamicZernikeBasis href "#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: shape, zernikes, nsides, diameter · Methods: evaluate(), calculate_basis()"
 ```
+
+???+ info "Polynomial"
+    ::: dLux.parametric.polynomials.Polynomial
 
 ???+ info "DynamicZernike"
     ::: dLux.parametric.polynomials.DynamicZernike
@@ -41,12 +35,3 @@ classDiagram
 
 ???+ info "DynamicZernikeBasis"
     ::: dLux.parametric.polynomials.DynamicZernikeBasis
-
-???+ info "Polynomial"
-    ::: dLux.parametric.polynomials.Polynomial
-
-???+ info "ExplicitPolynomial"
-    ::: dLux.parametric.polynomials.ExplicitPolynomial
-
-???+ info "CoordinatePolynomial"
-    ::: dLux.parametric.polynomials.CoordinatePolynomial

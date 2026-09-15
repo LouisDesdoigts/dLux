@@ -1,7 +1,9 @@
 """Tests for dLux.parametric.parametrics."""
 
 import jax.numpy as np
+import jax
 import pytest
+import zodiax as zdx
 
 import dLux as dl
 
@@ -13,11 +15,6 @@ class CoordinateValue(dl.Parametric):
 
     def evaluate(self, *, coordinates, **kwargs):
         return coordinates[0]
-
-
-class Square:
-    def __call__(self, value):
-        return value**2
 
 
 @pytest.fixture
@@ -42,9 +39,20 @@ def test_dynamic_parametric_contract(coordinates):
     assert np.array_equal(parametric.get("translation"), [0.1, 0.0])
     assert np.array_equal(raised.transformation.translation, [0.2, -0.1])
 
+    resolved = assert_jittable(
+        lambda value: value.resolve(coordinates=coordinates), parametric
+    )
+    assert np.allclose(resolved, coordinates[0] - 0.1)
+    gradient = jax.grad(
+        lambda shift: parametric.set("translation", shift)
+        .resolve(coordinates=coordinates)
+        .sum()
+    )(parametric.transformation.translation)
+    assert np.allclose(gradient, np.asarray([-16.0, 0.0]))
+
 
 def test_value_transform_contract(coordinates):
-    parametric = CoordinateValue().map(Square())
+    parametric = zdx.Pow(CoordinateValue(), p=2)
     output = assert_jittable(
         lambda value: value.evaluate(coordinates=coordinates), parametric
     )
@@ -55,27 +63,28 @@ def test_conversion_and_resolution(coordinates):
     parametric = CoordinateValue()
 
     assert np.array_equal(
-        dl.resolve(parametric, float, coordinates=coordinates), coordinates[0]
+        zdx.resolve(parametric, coordinates=coordinates), coordinates[0]
     )
 
 
-def test_interpolation_evaluation_and_integration():
+def test_interpolation_evaluation_and_sample_gradients():
     interpolation = dl.Interpolation(
         knots=np.asarray([0.0, 1.0, 2.0]), values=np.asarray([0.0, 1.0, 0.0])
     )
     variables = np.asarray([0.5, 1.5])
 
     values = assert_jittable(
-        lambda model: model.evaluate(variables=variables), interpolation
+        lambda model: model.evaluate(coordinates=variables), interpolation
     )
-    integral = assert_jittable(lambda model: model.integrate(0.0, 2.0), interpolation)
 
     assert np.allclose(values, 0.5)
-    assert np.allclose(integral, 1.0)
-    assert_differentiable(
-        lambda samples: interpolation.set(values=samples).integrate(0.25, 1.75),
+    gradient = assert_differentiable(
+        lambda samples: interpolation.set(values=samples).evaluate(
+            coordinates=variables
+        ),
         interpolation.values,
     )
+    assert np.allclose(gradient, np.asarray([0.5, 1.0, 0.5]))
 
 
 @pytest.mark.parametrize("operation", ["sum", "product", "union", "intersection"])

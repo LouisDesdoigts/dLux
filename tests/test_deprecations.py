@@ -23,57 +23,6 @@ def test_from_phasor_constructor_alias(wavefront_type):
     assert isinstance(wavefront, wavefront_type)
 
 
-def test_coefficients_constructor_alias():
-    basis = np.ones((2, 3, 3))
-
-    with pytest.warns(DeprecationWarning) as record:
-        parametric = dl.Basis(basis, coefficients=[1.0, 2.0])
-
-    message = str(record[0].message)
-    assert "removed in dLux 0.17.0" in message
-    assert "Class(coefficients=value)` -> `Class(coeffs=value)" in message
-    assert np.allclose(parametric.coeffs, np.array([1.0, 2.0]))
-
-
-@pytest.mark.parametrize(
-    "constructor",
-    [
-        lambda: dl.Polynomial(degree=1, coefficients=[1.0, 2.0]),
-        lambda: dl.SpectralPolynomial(degree=1, coefficients=[0.2]),
-        lambda: dl.CauchyIndex(coefficients=[1.5, 0.01]),
-    ],
-)
-def test_coefficients_constructor_aliases(constructor):
-    with pytest.warns(DeprecationWarning, match="Class\\(coefficients=value\\)"):
-        parametric = constructor()
-
-    assert hasattr(parametric, "coeffs")
-
-
-@pytest.mark.parametrize(
-    "parametric, migration",
-    [
-        (
-            dl.Basis(np.ones((2, 3, 3)), coeffs=[1.0, 2.0]),
-            "basis.coefficients` -> `basis.coeffs",
-        ),
-        (
-            dl.CauchyIndex(coeffs=[1.5, 0.01]),
-            "model.coefficients` -> `model.coeffs",
-        ),
-    ],
-)
-def test_coefficients_attribute_alias(parametric, migration):
-
-    with pytest.warns(DeprecationWarning) as record:
-        coeffs = parametric.coefficients
-
-    message = str(record[0].message)
-    assert "removed in dLux 0.17.0" in message
-    assert migration in message
-    assert np.allclose(coeffs, parametric.coeffs)
-
-
 @pytest.mark.parametrize(
     "legacy, current, kwargs",
     [

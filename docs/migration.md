@@ -134,8 +134,8 @@ types. Any layer value that accepts a `Parametric` can be generated from compact
 parameters and evaluation context—for example explicit or implicit bases,
 polynomials, interpolation, spectral models, shapes, and custom parameterisations.
 
-Use `Basis` instead of `ExplicitBasis`, and use `coeffs` for parameter leaves and
-constructor keywords:
+Use `dl.Basis` for explicit expansions. Numerical basis evaluation and fitting live
+in `dLux.utils`; the dLux parametric owns coefficients and contextual operands:
 
 ```python
 # dLux 0.14/0.15
@@ -146,20 +146,162 @@ optic = dl.BasisOptic(
 )
 
 # dLux 0.16
-opd = dl.Basis(basis, coeffs=np.zeros(7))
+import zodiax as zdx
+
+opd = dl.Basis(basis, coeffs=np.zeros(7), axes=1)
 optic = dl.Optic(transmission=aperture, opd=opd)
 ```
 
-The `coefficients` aliases warn and remain available until dLux 0.17. Descriptive
-scientific prose still uses the word “coefficients”; only public identifiers and
-parameter paths use `coeffs`.
+Bases store their physical coefficients in `coeffs`, which can itself be a
+Zodiax expression. dLux's `Parametric` inherits `zdx.Expression`; Zodiax no longer
+exports a `Parametric` class. Basis families implement `evaluate` and `solve`,
+without inheriting Transform chaining methods.
+
+`ZernikeBasis` subclasses `dl.Basis`. `DynamicZernikeBasis` combines the spatial
+and `ImplicitBasis` contracts. Spatial definitions use `evaluate(grid=...)` or
+`evaluate(coordinates=...)`, replacing the separate `sample` entry point.
+Generated basis and coefficient batches are
+independent populations; use explicit `jax.vmap` to pair them.
+
+Use `solve` for a linear expansion's minimum-norm coefficients. CLIMB owns its
+linear basis as `expansion`; `expansion.solve` operates on the continuous latent
+field, and the final binarised output has no inverse. `PastedBasis.solve`
+projects each extracted stamp independently and is not a global inverse when
+stamps overlap.
 
 Specialised basis and aperture layers were therefore replaced by parametrics placed
 directly in general optical layers:
 
 ```python
-optic = dl.Optic(transmission=aperture, opd=dl.Basis(basis, coeffs=coeffs))
+optic = dl.Optic(transmission=aperture, opd=dl.Basis(basis, coeffs, axes=1))
 ```
+
+### Polynomials and interpolation
+
+Use `dl.Polynomial` and `dl.Interpolation` directly. They share dLux's numerical
+kernels and use the public Zodiax expression protocol for stored parameters, aliases,
+external state, and composition:
+
+```python
+polynomial = dl.Polynomial(degree=2, coeffs=[1.0, 2.0, 3.0])
+coordinates = np.array([0.0, 1.0, 2.0])
+values = polynomial.resolve(coordinates=coordinates)
+coeffs = polynomial.solve(values, coordinates=coordinates)
+
+response = dl.Interpolation([0.0, 1.0, 2.0], [0.0, 1.0, 0.0])
+samples = response.resolve(coordinates=[0.5, 1.5])
+```
+
+Polynomial term topology comes from exactly one of `degree`, selected `degrees`,
+or explicit integer `powers`. Coefficients are stored in `coeffs`, and `solve`
+returns minimum-norm least-squares coefficients. No coordinate centring or
+normalisation is implicit.
+
+Interpolation accepts explicit `coordinates` through `evaluate` or `resolve`.
+The stored table uses `knots` and `values`; the output has the query shape followed
+by trailing value axes.
+The default is linear interpolation with zero fill
+outside the knots; interpolation defines no inverse or representative solve.
+
+### Normalisation
+
+Use `dlu.normalise` for array normalisation:
+
+```python
+import dLux.utils as dlu
+
+weights = dlu.normalise(np.array([1.0, 2.0, 3.0]), mode="sum", axis=-1)
+```
+
+It supports `sum`, `mean`, `rms`, `l1`, `l2`, `max`, and `p2v`, with explicit
+`scale`, `weights`, and reduction `axis`. Weights affect the measured normalisation;
+they do not mask the returned array. Normalisation is generally non-injective and
+defines no inverse or solve.
+
+Physical ownership remains with the consumer: spectra normalise along wavelength,
+builders measure modes on their support, and field layers own optical power.
+`dl.Norm` remains the support-aware builder policy and delegates to the same kernel;
+`dl.Normalise` remains the optical field layer.
+
+### Composing contextual values
+
+`Combination` broadcasts child values before stacking them. A scalar, a row and a
+column can therefore contribute to one image. At least one child is required.
+Sum and product reduce arithmetically; union clips the sum to `[0, 1]`, and
+intersection multiplies transmissions.
+
+`DynamicParametric` remains the adapter for evaluating an expression on transformed
+coordinates. It resolves transform parameters in the incident frame, then passes
+the transformed coordinates and external state to the child. A numerical
+`zdx.Map` transforms values; it does not replace a child's coordinate context.
+
+### Selected coefficient updates
+
+The unreleased `Selection` factory and `parametrisations` module have been removed.
+Compose Zodiax transforms directly for selected coefficient displacements:
+
+```python
+import jax.numpy as np
+import zodiax as zdx
+
+origin = np.array([1.0, 0.0, 2.0])
+mask = np.array([True, False, True])
+latent = np.zeros(2)
+coeffs = zdx.Map(
+    x=zdx.Mask(x=latent, mask=mask),
+    b=origin,
+    alias={"latent": "x.x", "origin": "b"},
+)
+updated = coeffs.set(latent=np.array([0.1, -0.2]))
+values = updated.resolve()  # [1.1, 0.0, 1.8]
+recovered = updated.apply(values, inverse=True)  # [0.1, -0.2]
+```
+
+For logarithmic displacements, apply the decoder only to active entries. This
+allows inactive entries to remain zero without taking their logarithm:
+
+```python
+encoded = zdx.Map(x=latent, b=np.log(origin[mask]))
+selected = zdx.Mask(x=zdx.Exp(x=encoded), mask=mask)
+coeffs = zdx.Map(
+    x=selected,
+    b=origin.at[mask].set(0),
+    alias={"latent": "x.x.x.x"},
+)
+```
+
+Mask topology is fixed during construction. The latent array may have leading
+batch axes or be a `StateRef`; evaluation and reversal belong to Zodiax.
+
+### Spectral and refractive wrappers
+
+`SpectralBasis` infers coefficient dimensions from every basis axis except the
+final wavelength axis. Leading coefficient batches no longer interfere with this
+inference, and coefficient expressions can use it too. Explicit `shape` still
+selects a contraction prefix. Normalisation acts along the final wavelength axis;
+zero default coefficients must be set before normalised evaluation.
+
+`PolynomialIndex` owns its coefficients and integer powers directly, using the same
+dLux polynomial kernel. `CauchyIndex` specialises its coordinates to inverse-square
+wavelength. Coefficients are stored directly in `coeffs`. Explicit wavelengths
+and dispersion scales are in metres; optical layers supply the incident wavelength
+context. An expression providing coefficients requires `degree` to fix polynomial
+topology at construction:
+
+```python
+import dLux as dl
+
+index = dl.CauchyIndex(zdx.StateRef("index_coeffs"), degree=1)
+state = zdx.State(index_coeffs=np.array([1.5, 0.004]))
+indices = index.resolve(wavelengths=np.array([500e-9, 600e-9]), state=state)
+```
+
+`InterpolatedIndex` subclasses `dl.Interpolation`. Its constructor accepts
+`wavelengths` and `indices`, stored as `knots` and `values` for parameter updates.
+`extrapolate=False` gives the default NaN outside the sampled interval.
+`Blackbody` retains the stable photon-number Planck spectrum, with temperature in
+kelvin and optional external-state resolution. Spectral normalisation remains an
+equal-sample convention, not wavelength quadrature.
 
 ## Apertures and shapes
 

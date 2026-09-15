@@ -19,6 +19,17 @@ def test_polynomial_basis_contract(degree, ndim, nterms):
     assert basis.shape == (nterms, 4, 3)
 
 
+def test_zero_polynomial_samples_have_zero_minimum_norm_coefficients():
+    # Sampling x and x**2 at the origin provides no information about either term.
+    coordinates = np.zeros(3)
+    powers = np.asarray([[1, 2]])
+    coefficients = assert_jittable(
+        dlu.solve_polynomial, np.ones(3), coordinates, powers
+    )
+
+    assert np.array_equal(coefficients, np.zeros(2))
+
+
 @pytest.mark.parametrize(("index", "orders"), [(1, (0, 0)), (2, (1, 1)), (4, (2, 0))])
 def test_noll_indices(index, orders):
     assert dlu.noll_indices(index) == orders

@@ -53,6 +53,17 @@ def test_basis_roundtrip():
     assert np.allclose(recovered, coeffs, rtol=1e-5, atol=1e-5)
 
 
+@pytest.mark.parametrize("dtype", [float, complex])
+def test_zero_basis_has_zero_minimum_norm_coefficients(dtype):
+    basis = np.zeros((2, 3), dtype=dtype)
+    values = np.ones((4, 3), dtype=dtype)
+    coefficients = assert_jittable(
+        lambda data: dlu.solve_basis(data, basis, axes=1), values
+    )
+
+    assert np.array_equal(coefficients, np.zeros((4, 2)))
+
+
 @pytest.mark.parametrize(
     ("function", "value", "expected"),
     [(dlu.factorial, 5.0, 120.0), (dlu.triangular_number, 4, 10)],

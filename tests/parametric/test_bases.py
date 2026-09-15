@@ -43,9 +43,7 @@ def test_basis_solution_contract(index, bases):
     basis = bases[index]
     value = basis.evaluate()
 
-    output = assert_jittable(
-        lambda item, data: item.apply(data, inverse=True), basis, value
-    )
+    output = assert_jittable(lambda item, data: item.solve(data), basis, value)
     assert output.shape == basis.coeffs.shape
 
 
@@ -59,7 +57,7 @@ def test_implicit_basis_contract(index, bases):
 
 def test_basis_specific_operations(bases):
     climb = bases[1]
-    latent = assert_jittable(lambda value: value.evaluate_latent(), climb)
+    latent = assert_jittable(lambda value: value.expansion.resolve(), climb)
     output = climb.evaluate()
 
     assert latent.shape == (6, 6)
@@ -69,18 +67,11 @@ def test_basis_specific_operations(bases):
     assert resized.evaluate().shape == (7, 5)
 
 
-def test_principal_input_is_stored_coefficients(bases):
-    basis = bases[0]
-
-    assert basis.input is basis.coeffs
-
-
-def test_omitted_explicit_coeffs_leave_basis_unbound():
+def test_omitted_explicit_coeffs_start_at_zero():
     basis = dl.Basis(np.ones((2, 3, 4)))
-
-    assert basis.coeffs is None
-    assert isinstance(basis.resolve(), dl.Basis)
-    assert np.allclose(basis.apply(np.array([1.0, 2.0])), 3.0)
+    assert np.array_equal(basis.coeffs, np.zeros(2))
+    assert np.array_equal(basis.evaluate(), np.zeros((3, 4)))
+    assert np.allclose(basis.set(coeffs=np.array([1.0, 2.0])).evaluate(), 3.0)
 
 
 def test_vectorised_basis_coeffs():
@@ -120,7 +111,7 @@ def test_pasted_basis_contract(method):
     pasted = dl.PastedBasis(basis, spec, coeffs, method)
 
     output = assert_jittable(lambda value: value.evaluate(), pasted)
-    recovered = assert_jittable(lambda value: pasted.solve_basis(value), output)
+    recovered = assert_jittable(lambda value: pasted.solve(value), output)
     assert_differentiable(lambda values: pasted.set(coeffs=values).evaluate(), coeffs)
 
     assert output.shape == (4, 6)
@@ -160,9 +151,11 @@ def test_validation(constructor):
 def test_basis_rank_deficient_solve_returns_minimum_norm_representative():
     basis = dl.Basis(np.asarray([[1.0, 0.0], [1.0, 0.0]]))
     value = np.asarray([4.0, 3.0])
-    coeffs = assert_jittable(lambda model: model.apply(value, inverse=True), basis)
+    coeffs = assert_jittable(lambda model: model.solve(value), basis)
     assert np.allclose(coeffs, np.asarray([2.0, 2.0]), atol=1e-6)
-    assert np.allclose(basis.apply(coeffs), np.asarray([4.0, 0.0]), atol=1e-6)
+    assert np.allclose(
+        basis.set(coeffs=coeffs).evaluate(), np.asarray([4.0, 0.0]), atol=1e-6
+    )
 
 
 def test_fourier_rectangular_image_axes_and_compact_evaluation():

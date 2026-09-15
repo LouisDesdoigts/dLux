@@ -1,70 +1,171 @@
-"""Polynomial and Zernike basis parameterisations."""
+"""Polynomial and Zernike parameterisations with explicit coefficient ownership."""
 
 import equinox as eqx
 import jax.numpy as np
 import jax.tree as jtu
+import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
-from ..base import Base
-from ..grids import GridSpec
-from .bases import Basis, CoordBasis, ParametricBasis, _resolve_coeffs
-from .parametrics import Parametric, resolve
+from ..utils.grids import GridSpec
+from .bases import Basis, SpatialBasis, ParametricBasis, _coefficients
+from .parametrics import SpatialExpression, _spatial_context
 
 __all__ = [
+    "Polynomial",
     "DynamicZernike",
     "ZernikeBasis",
     "DynamicZernikeBasis",
-    "Polynomial",
-    "ExplicitPolynomial",
-    "CoordinatePolynomial",
 ]
 
 
-def _poly_params(degree, coeffs, ndim, powers, degrees=None):
-    """Validate polynomial powers and coefficients."""
-    # Validate the polynomial term selection
-    if degree is not None and degrees is not None:
-        raise ValueError("Provide only one of degree or degrees.")
+def _powers(degree=None, ndim=1, powers=None, degrees=None):
+    """Resolve one static polynomial term definition."""
+    if sum(value is not None for value in (degree, powers, degrees)) != 1:
+        raise ValueError("Provide exactly one of degree, degrees, or powers.")
+    if powers is not None:
+        powers = np.asarray(powers)
+        powers = powers[None, :] if powers.ndim == 1 else powers
+        if powers.ndim != 2 or 0 in powers.shape:
+            raise ValueError("powers must have shape (n_variables, n_terms).")
+        if not np.issubdtype(powers.dtype, np.integer):
+            raise TypeError("powers must have an integer dtype.")
+        if np.any(powers < 0):
+            raise ValueError("powers must be non-negative.")
+        return powers
+    if degree is not None:
+        return dlu.polynomial_powers(degree, ndim)
 
-    # Generate powers from a maximum or selected total degrees
-    if powers is None:
-        if degree is None and degrees is None:
-            raise ValueError("Provide either degree, degrees, or powers.")
-        if degrees is None:
-            powers = dlu.polynomial_powers(degree, ndim)
-        else:
-            degrees = np.atleast_1d(dlu.to_value(degrees, int))
-            if degrees.ndim != 1 or degrees.size == 0:
-                raise ValueError("degrees must contain at least one degree.")
-            if np.any(degrees < 0):
-                raise ValueError("degrees must be non-negative.")
-            powers = dlu.polynomial_powers(int(degrees.max()), ndim)
-            powers = powers[:, np.isin(powers.sum(0), degrees)]
-    elif degrees is not None:
-        raise ValueError("degrees and powers are mutually exclusive.")
-
-    # Standardize and validate the polynomial powers
-    powers = dlu.to_value(powers, int)
-    powers = powers[None, :] if powers.ndim == 1 else powers
-    if powers.ndim != 2:
-        raise ValueError("powers must have shape (n_variables, n_terms).")
-    if np.any(powers < 0):
-        raise ValueError("powers must be non-negative.")
-
-    # Initialise and validate the polynomial coefficients
-    coeffs = np.zeros(powers.shape[1]) if coeffs is None else coeffs
-    coeffs = dlu.to_value(coeffs, types=Parametric)
-    if isinstance(coeffs, Parametric) and not hasattr(coeffs, "shape"):
-        raise TypeError("Parametric coeffs must define their physical shape.")
-    coeff_shape = tuple(coeffs.shape)
-    if len(coeff_shape) < 1 or coeff_shape[-1] != powers.shape[1]:
-        raise ValueError("coeffs must have trailing shape (n_terms,).")
-    return powers, coeffs
+    degrees = np.atleast_1d(np.asarray(degrees))
+    if degrees.ndim != 1 or not degrees.size:
+        raise ValueError("degrees must contain at least one total degree.")
+    if not np.issubdtype(degrees.dtype, np.integer):
+        raise TypeError("degrees must have an integer dtype.")
+    if np.any(degrees < 0):
+        raise ValueError("degrees must be non-negative.")
+    powers = dlu.polynomial_powers(int(degrees.max()), ndim)
+    return powers[:, np.isin(powers.sum(0), degrees)]
 
 
-class DynamicZernike(Base):
+def _zernike_indices(js=None, order=None, orders=None) -> list[int]:
+    """Resolve individual modes or complete radial orders."""
+    if sum(value is not None for value in (js, order, orders)) != 1:
+        raise ValueError("Provide exactly one of js, order, or orders.")
+
+    if js is not None:
+        indices = [int(j) for j in js]
+    else:
+        orders = range(int(order) + 1) if order is not None else orders
+        indices = dlu.radial_orders_to_indices(orders)
+    if not indices:
+        raise ValueError("At least one Zernike mode must be selected.")
+    if any(j < 1 for j in indices):
+        raise ValueError("Zernike indices must be greater than zero.")
+    return indices
+
+
+class Polynomial(ParametricBasis):
+    """Expand coefficients over monomials at contextual coordinates.
+
+    A D-variable coordinate field has shape ``(..., D, *spatial_shape)`` with D
+    sampled axes. Leading coefficient and coordinate batches broadcast together.
+    One-variable polynomials also accept a bare scalar or array of samples. The
+    coefficient order is increasing total degree, with the first variable's power
+    descending within each degree. Coordinates and coefficients use caller-defined
+    units; no normalisation or centring is implicit.
+
+    Local ``solve`` returns minimum-norm least-squares coefficients at the supplied
+    samples. ``solve`` returns physical coefficients without reversing their
+    transforms.
+    Integer monomials retain finite derivatives at zero, including higher
+    derivatives. Coefficients may be contextual Zodiax expressions.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    polynomial = dl.Polynomial(degree=2, coeffs=[1., 2., 3.])
+    values = polynomial.resolve(coordinates=[0., 1., 2.])
+    ```
+    """
+
+    powers: Array
+
+    def __init__(
+        self,
+        degree=None,
+        coeffs=None,
+        *,
+        ndim=1,
+        degrees=None,
+        powers=None,
+        alias=None,
+    ):
+        """Initialise coefficients and fixed polynomial term topology.
+
+        Parameters
+        ----------
+        degree : int or None
+            Maximum non-negative total degree, including the constant term.
+        coeffs : Array, zodiax.Expression, or None
+            Coefficients ending in the selected term count, defaulting to zeros.
+            Leading axes broadcast with leading coordinate batches.
+        ndim : int
+            Positive variable count, default one; explicit powers determine it
+            directly when supplied.
+        degrees : int or sequence[int], optional
+            Selected non-negative total degrees, ordered canonically.
+        powers : integer Array, optional
+            Explicit non-negative exponents of shape ``(ndim, n_terms)``; a vector
+            is accepted for one variable. Supply exactly one term definition.
+        alias : mapping or None
+            Optional parameter aliases.
+        """
+        self.powers = _powers(degree, ndim, powers, degrees)
+        self.coeffs = _coefficients(coeffs, (self.powers.shape[1],))
+        self.alias = alias
+
+    def calculate_basis(self, *, grid=None, coordinates=None, **context):
+        """Return sampled terms from a spatial grid or general variable coordinates."""
+        if grid is not None:
+            local = _spatial_context(grid, coordinates=coordinates, **context)
+            coordinates = local["coordinates"]
+        if coordinates is None:
+            raise zdx.Unresolved("Polynomial requires grid or coordinates.")
+        return dlu.polynomial_basis(
+            zdx.resolve(coordinates, **context), self.powers, axis=None
+        )
+
+    def evaluate(self, *, grid=None, coordinates=None, **context) -> Array:
+        """Expand stored coefficients on a grid or general variable coordinates.
+
+        Grid and coordinates are mutually exclusive. A grid supplies two spatial
+        variables; explicit coordinates can describe arbitrary polynomial variables.
+        Missing both inputs defers during resolution.
+        """
+        if grid is not None:
+            local = _spatial_context(grid, coordinates=coordinates, **context)
+            coordinates = local["coordinates"]
+        if coordinates is None:
+            raise zdx.Unresolved("Polynomial requires grid or coordinates.")
+        coordinates = zdx.resolve(coordinates, **context)
+        coeffs = zdx.resolve(self.coeffs, coordinates=coordinates, **context)
+        return dlu.eval_polynomial(coordinates, coeffs, self.powers)
+
+    def solve(self, y: Array, *, grid=None, coordinates=None, **context) -> Array:
+        """Recover coefficients on a grid or general variable coordinates."""
+        if grid is not None:
+            local = _spatial_context(grid, coordinates=coordinates, **context)
+            coordinates = local["coordinates"]
+        if coordinates is None:
+            raise zdx.Unresolved("Polynomial requires grid or coordinates.")
+        coordinates = zdx.resolve(coordinates, **context)
+        return dlu.solve_polynomial(y, coordinates, self.powers)
+
+
+class DynamicZernike(SpatialExpression):
     """Store compact radial data required to evaluate one Zernike mode.
 
     The object is constructed from a Noll index and evaluates that mode on runtime
@@ -79,13 +180,15 @@ class DynamicZernike(Base):
     _c: Array
     _k: Array
 
-    def __init__(self, j: int):
+    def __init__(self, j: int, *, alias=None):
         """Initialise one dynamically evaluated Zernike mode.
 
         Parameters
         ----------
         j : int
             Positive Noll index.
+        alias : mapping or None
+            Optional user-defined parameter aliases.
         """
         self.j = int(j)
         if self.j < 1:
@@ -94,20 +197,46 @@ class DynamicZernike(Base):
         self.n, self.m = dlu.noll_indices(self.j)
         self._c, self._k = dlu.zernike_factors(self.j)
 
-    def calculate(
-        self, coordinates: Array, nsides: int = 0, diameter: float = 2.0
-    ) -> Array:
-        """Evaluate the mode on circular or regular-polygon coordinates.
+        self.alias = alias
+
+    def evaluate(
+        self,
+        *,
+        grid=None,
+        coordinates=None,
+        transform=None,
+        nsides=0,
+        diameter=2.0,
+        **context,
+    ):
+        """Evaluate one Zernike or polygonal mode on explicit spatial sampling.
 
         Parameters
         ----------
-        coordinates : Array
-            Cartesian coordinates with leading physical-axis dimension two.
+        grid : GridSpec or None
+            Sampling grid in SI units, mutually exclusive with coordinates.
+        coordinates : Array or None
+            One Cartesian grid with shape (2, ny, nx). Use explicit vmap for batches.
+        transform : BaseCoordTransform or None
+            Optional coordinate map; source pixel scale is retained.
         nsides : int
-            Polygon side count; zero selects the circular Zernike definition.
-        diameter : float
-            Pupil diameter in the coordinate unit.
+            Polygon side count, at least three; zero selects a circular Zernike.
+        diameter : float or Array
+            Positive pupil diameter in coordinate units, default 2.0.
+        **context
+            Context used for grid and transform preparation.
+
+        Returns
+        -------
+        Array
+            Dimensionless mode with shape (ny, nx). Missing both spatial inputs raises
+            Unresolved; supplying both raises ValueError. Origin coordinate derivatives
+            can be singular in the underlying radial kernels.
         """
+        context = _spatial_context(
+            grid, coordinates=coordinates, transform=transform, **context
+        )
+        coordinates = context.pop("coordinates")
         if nsides == 0:
             return dlu.zernike_fast(
                 self.n, self.m, self._c, self._k, coordinates, diameter
@@ -117,36 +246,18 @@ class DynamicZernike(Base):
         )
 
 
-class _ZernikeBasis:
-    @staticmethod
-    def get_indices(js=None, order=None, orders=None) -> list[int]:
-        """Resolve individual modes or complete radial orders."""
-        if sum(value is not None for value in (js, order, orders)) != 1:
-            raise ValueError("Provide exactly one of js, order, or orders.")
-
-        if js is not None:
-            indices = [int(j) for j in js]
-        else:
-            orders = range(int(order) + 1) if order is not None else orders
-            indices = dlu.radial_orders_to_indices(orders)
-        if not indices:
-            raise ValueError("At least one Zernike mode must be selected.")
-        if any(j < 1 for j in indices):
-            raise ValueError("Zernike indices must be greater than zero.")
-        return indices
-
-
-class ZernikeBasis(_ZernikeBasis, Basis):
+class ZernikeBasis(Basis):
     """Sample and parameterise Zernike modes on fixed Cartesian coordinates.
 
     Modes can be selected by individual Noll indices, a maximum radial order, or
     explicit radial orders. Vectors are evaluated once and retained explicitly; use
-    `DynamicZernikeBasis` when coordinates change at runtime.
+    `DynamicZernikeBasis` when coordinates change at runtime. This is a
+    ``Basis``: coefficients are stored in ``coeffs`` and sampled modes in ``basis``.
+    Leading coefficient axes are independent batches. Use explicit ``jax.vmap``
+    for paired coordinates and coefficients. Local ``solve`` returns minimum-norm
+    least-squares coefficients;
+    ``solve`` returns physical coefficients without reversing their transforms.
     """
-
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-    basis: Array
 
     def __init__(
         self,
@@ -157,7 +268,7 @@ class ZernikeBasis(_ZernikeBasis, Basis):
         coeffs=None,
         diameter=2.0,
         *,
-        coefficients=None,
+        alias=None,
     ):
         """Initialise an explicitly sampled Zernike expansion.
 
@@ -171,28 +282,29 @@ class ZernikeBasis(_ZernikeBasis, Basis):
             Maximum radial order, including every order from zero through this value.
         orders : ArrayLike or None
             Selected radial orders expanded to complete Noll sequences.
-        coeffs : Array, Parametric, or None
+        coeffs : Array, zodiax.Expression, or None
             Mode coefficients, defaulting to zeros.
         diameter : float or Array
             Zernike pupil diameter in the coordinate unit.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
+        alias : mapping or None
+            Optional parameter aliases.
         """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        js = self.get_indices(js, order, orders)
+        js = _zernike_indices(js, order, orders)
+        if isinstance(coordinates, GridSpec):
+            coordinates = coordinates.broadcast(2).coordinates
         basis = dlu.zernike_basis(js, coordinates, diameter)
-        super().__init__(basis, coeffs, (len(js),))
+        super().__init__(basis, _coefficients(coeffs, (len(js),)), alias=alias)
 
 
-class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
+class DynamicZernikeBasis(SpatialBasis):
     """Evaluate a Zernike expansion dynamically from coordinate context.
 
-    Modes are selected by Noll index or radial order and evaluated on explicit or
-    wavefront coordinates. `diameter` defines the physical pupil scale and may be
-    inferred from wavefront context when omitted.
+    Modes are selected by Noll index or radial order and evaluated on a grid or
+    explicit coordinates. The pupil diameter comes from explicit context, the
+    stored value, or the default 2.0 in coordinate units; it is never inferred from
+    a wavefront or the grid extent.
     """
 
-    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)
@@ -207,7 +319,7 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
         nsides=0,
         diameter=None,
         *,
-        coefficients=None,
+        alias=None,
     ):
         """Initialise a coordinate-dependent Zernike expansion.
 
@@ -219,306 +331,96 @@ class DynamicZernikeBasis(_ZernikeBasis, CoordBasis):
             Maximum radial order, including every order from zero through this value.
         orders : ArrayLike or None
             Selected radial orders expanded to complete Noll sequences.
-        coeffs : Array, Parametric, or None
+        coeffs : Array, zodiax.Expression, or None
             Mode coefficients, defaulting to zeros.
         nsides : int
             Polygonal support side count; zero uses the circular definition.
         diameter : float, Array, or None
-            Pupil diameter supplied directly or through evaluation context.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
+            Stored pupil diameter in coordinate units. An evaluation-context
+            diameter overrides it; if both are None, use 2.0.
+        alias : mapping or None
+            Optional parameter aliases.
         """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        js = self.get_indices(js, order, orders)
+        js = _zernike_indices(js, order, orders)
         self.zernikes = [DynamicZernike(j) for j in js]
         coeffs = np.zeros(len(js)) if coeffs is None else coeffs
-        self._set_coeffs(coeffs, (len(js),))
+        super().__init__(coeffs, (len(js),), alias=alias)
         self.nsides = int(nsides)
         if self.nsides not in (0,) and self.nsides < 3:
             raise ValueError("nsides must be zero or greater than two.")
-        self.diameter = dlu.to_value(diameter, optional=True, name="diameter")
-        if self.diameter is not None and self.diameter <= 0:
+        self.diameter = zdx.as_array(diameter, dtype=float)
+        if (
+            self.diameter is not None
+            and not isinstance(self.diameter, zdx.Expression)
+            and self.diameter <= 0
+        ):
             raise ValueError("diameter must be greater than zero.")
 
+    def evaluate(self, *, grid=None, coordinates=None, transform=None, **context):
+        """Expand generated Zernike modes using the stored coefficients.
+
+
+        Parameters
+        ----------
+        grid : GridSpec or None
+            Spatial sampling in SI units, or native unitless units. A one-dimensional
+            grid is promoted to a square. Mutually exclusive with coordinates.
+        coordinates : Array or None
+            Samples with shape (..., 2, ny, nx), in physical (x, y) order and the same
+            units as the geometric parameters. Supply exactly one spatial input.
+        transform : BaseCoordTransform or None
+            Optional coordinate mapping applied before this definition's calculation.
+        **context
+            Inputs for stored expressions. Explicit coordinates require pixel_scale
+            for soft edges; a grid supplies its own scale. Coordinate transforms
+            preserve that scale. Missing spatial inputs raise Unresolved and defer
+            during resolution; ambiguous inputs raise ValueError.
+
+            A diameter in context overrides the stored diameter; if both are None,
+            use 2.0 in coordinate units. No wavefront or grid-extent inference occurs.
+
+        Returns
+        -------
+        Array
+            Array with final shape (ny, nx), preceded by independent coefficient
+            batches. Units follow the coefficients. Modes are not flux-normalised.
+        """
+        local = _spatial_context(
+            grid, coordinates=coordinates, transform=transform, **context
+        )
+        basis = self.calculate_basis(**local)
+        coeffs = zdx.resolve(self.coeffs, **local)
+        return dlu.eval_basis(basis, coeffs, len(self.shape))
+
     def calculate_basis(
-        self, *, wavefront=None, coordinates=None, diameter=None, **kwargs
+        self, *, grid=None, coordinates=None, transform=None, diameter=None, **context
     ):
         """Evaluate every configured Zernike mode in coordinate context.
 
         Parameters
         ----------
-        wavefront : Wavefront or None
-            Optional source of coordinates and pupil diameter.
+        grid : GridSpec or None
+            Sampling grid, used when explicit coordinates are absent.
         coordinates : Array or None
-            Explicit Cartesian coordinates overriding the wavefront grid.
+            Explicit Cartesian coordinates, mutually exclusive with grid.
         diameter : float, Array, or None
-            Explicit diameter overriding the stored or inferred value.
-        **kwargs
+            Explicit diameter overriding the stored value; both None gives 2.0.
+        transform : BaseCoordTransform or None
+            Map sampling coordinates before generating modes.
+        **context
             Additional context accepted for composable parametric evaluation.
         """
-        # Resolve coordinates and the aperture diameter
-        infer_diameter = coordinates is None and wavefront is not None
-        coordinates = self.get_coordinates(wavefront=wavefront, coordinates=coordinates)
-        if diameter is None:
-            diameter = self.diameter
-        if diameter is None:
-            diameter = wavefront.diameter if infer_diameter else 2.0
+        # Use one explicit spatial input and one explicit or stored pupil scale.
+        local = _spatial_context(
+            grid, coordinates=coordinates, transform=transform, **context
+        )
+        coordinates = local["coordinates"]
+        diameter = self.diameter if diameter is None else diameter
+        diameter = 2.0 if diameter is None else zdx.resolve(diameter, **local)
 
         # Evaluate every dynamic Zernike mode
         is_zernike = lambda leaf: isinstance(leaf, DynamicZernike)
-        calculate = lambda zernike: zernike.calculate(
-            coordinates, self.nsides, diameter
+        calculate = lambda zernike: zernike.evaluate(
+            coordinates=coordinates, nsides=self.nsides, diameter=diameter
         )
         return np.array(jtu.map(calculate, self.zernikes, is_leaf=is_zernike))
-
-
-class Polynomial(ParametricBasis):
-    """A general polynomial in one or more supplied variables.
-
-    Pass ``degree`` to include every total degree from zero through that value, or
-    pass ``degrees`` to select total degrees explicitly. For example,
-    ``degrees=[1]`` constructs only the linear terms and omits the constant term.
-
-    Examples
-    --------
-    Construct and evaluate a quadratic polynomial:
-
-    ```python
-    import jax.numpy as np
-
-    import dLux as dl
-
-    polynomial = dl.Polynomial(degree=2, coeffs=[1.0, 0.5, -0.2])
-
-    # Evaluate the polynomial
-    variables = np.linspace(-1.0, 1.0, 100)
-    values = polynomial.evaluate(variables=variables)
-
-    # Recover the coefficients representing the evaluated values
-    coeffs = polynomial.solve_basis(values, variables=variables)
-    ```
-    """
-
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-    powers: Array
-
-    def __init__(
-        self,
-        degree=None,
-        coeffs=None,
-        ndim=1,
-        powers=None,
-        degrees=None,
-        *,
-        coefficients=None,
-    ):
-        """Initialise a general polynomial parameterisation.
-
-        Parameters
-        ----------
-        degree : int or None
-            Maximum total degree, mutually exclusive with ``degrees`` and ``powers``.
-        coeffs : Array, Parametric, or None
-            Coefficients matching the generated or supplied terms.
-        ndim : int
-            Number of polynomial variables.
-        powers : Array or None
-            Explicit exponents with shape ``(ndim, n_terms)``.
-        degrees : int, sequence[int], or None
-            Selected total degrees.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
-        """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        powers, coeffs = _poly_params(degree, coeffs, ndim, powers, degrees)
-        self.powers = powers
-        self._set_coeffs(coeffs, (powers.shape[1],))
-
-    def calculate_basis(self, *, variables=None, **context):
-        """Evaluate polynomial terms at supplied variables.
-
-        ``variables`` has leading variable axis ``ndim`` followed by arbitrary sample
-        axes. The result has leading term axis followed by those sample axes.
-        """
-        if variables is None:
-            raise ValueError("variables must be provided.")
-        variables = resolve(variables, float, **context)
-        if self.powers.shape[0] == 1 and variables.ndim == 1:
-            variables = variables[None, :]
-        if variables.shape[0] != self.powers.shape[0]:
-            raise ValueError(
-                "variables leading axis must match the number of polynomial variables."
-            )
-        return dlu.polynomial_basis(variables, self.powers)
-
-    def evaluate(self, *, variables=None, **context):
-        """Evaluate the polynomial at supplied or contextual variables.
-
-        Terms are contracted against ``coeffs`` and all variable sample axes are
-        retained. ``variables`` has a leading polynomial-variable axis followed by
-        arbitrary sample axes.
-        """
-        if variables is None:
-            basis = self.calculate_basis(**context)
-        else:
-            basis = self.calculate_basis(variables=variables, **context)
-        return self.evaluate_basis(basis, variables=variables, **context)
-
-    def solve_basis(self, value, *, variables=None, **context):
-        """Solve for polynomial coefficients representing ``value``.
-
-        ``variables`` has a leading polynomial-variable axis followed by arbitrary
-        sample axes. ``value`` must match those sample axes. Returned least-squares
-        coefficients have the polynomial term shape.
-        """
-        if variables is None:
-            basis = self.calculate_basis(**context)
-        else:
-            basis = self.calculate_basis(variables=variables, **context)
-        return dlu.solve_basis(value, basis)
-
-
-class ExplicitPolynomial(Basis):
-    """Represent a multivariate polynomial on fixed sampled coordinates.
-
-    Polynomial terms are generated once and stored as an explicit basis. Coefficients
-    remain differentiable while coordinates stay fixed; use `CoordinatePolynomial`
-    when the coordinate field changes during evaluation.
-    """
-
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-    basis: Array
-    powers: Array
-
-    def __init__(
-        self,
-        coordinates: Array | GridSpec,
-        degree=None,
-        coeffs=None,
-        ndim=None,
-        powers=None,
-        degrees=None,
-        *,
-        coefficients=None,
-    ):
-        """Initialise a polynomial on fixed coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array or GridSpec
-            Fixed variables used for every evaluation.
-        degree : int or None
-            Maximum total degree.
-        coeffs : Array, Parametric, or None
-            Polynomial coefficients.
-        ndim : int or None
-            Variable count, inferred from coordinates when omitted.
-        powers : Array or None
-            Explicit term exponents.
-        degrees : int, sequence[int], or None
-            Selected total degrees.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
-        """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        coordinates, ndim = self._coordinates(coordinates, ndim)
-        powers, coeffs = _poly_params(degree, coeffs, ndim, powers, degrees)
-        if coordinates.shape[0] != powers.shape[0]:
-            raise ValueError(
-                "coordinate dimensionality must match the polynomial powers."
-            )
-        self.powers = powers
-        basis = dlu.polynomial_basis(coordinates, powers)
-        super().__init__(basis, coeffs, (powers.shape[1],))
-
-    @staticmethod
-    def _coordinates(coordinates, ndim):
-        """Resolve explicit polynomial coordinates and dimensionality."""
-        # Resolve coordinates from a grid specification
-        if isinstance(coordinates, GridSpec):
-            ndim = coordinates.ndim if ndim is None else int(ndim)
-            if coordinates.ndim == 1 and ndim > 1:
-                coordinates = coordinates.broadcast(ndim)
-            if coordinates.ndim < ndim:
-                raise ValueError(
-                    "GridSpec dimensionality must be greater than or equal to ndim."
-                )
-            if coordinates.n is None or coordinates.d is None:
-                raise ValueError("GridSpec must define n and d.")
-            coordinates = coordinates.coordinates
-
-        # Resolve explicit coordinate arrays
-        else:
-            coordinates = dlu.to_value(coordinates)
-            ndim = 1 if ndim is None and coordinates.ndim == 1 else ndim
-            ndim = coordinates.shape[0] if ndim is None else int(ndim)
-
-        # Validate and return the requested coordinate dimensions
-        if ndim < 1:
-            raise ValueError("ndim must be positive.")
-        coordinates = coordinates[None, :] if coordinates.ndim == 1 else coordinates
-        if coordinates.shape[0] < ndim:
-            raise ValueError(
-                "coordinates must contain at least ndim coordinate arrays."
-            )
-        return coordinates[:ndim], ndim
-
-
-class CoordinatePolynomial(Polynomial):
-    """Evaluate a multivariate polynomial from Cartesian coordinate context.
-
-    The leading coordinate component axis must match `ndim`. Coordinates may be
-    supplied explicitly or resolved from a wavefront, so coefficients can follow
-    coordinate transforms without rebuilding a sampled basis.
-    """
-
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-    powers: Array
-    ndim: int = eqx.field(static=True)
-
-    def __init__(
-        self,
-        degree=None,
-        coeffs=None,
-        ndim: int = 2,
-        degrees=None,
-        *,
-        coefficients=None,
-    ):
-        """Initialise a polynomial resolved from coordinate context.
-
-        Parameters
-        ----------
-        degree : int or None
-            Maximum total degree, mutually exclusive with ``degrees``.
-        coeffs : Array, Parametric, or None
-            Polynomial coefficients.
-        ndim : int
-            Number of coordinate variables.
-        degrees : int, sequence[int], or None
-            Selected total degrees.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
-        """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        self.ndim = int(ndim)
-        super().__init__(degree, coeffs, ndim, degrees=degrees)
-
-    def calculate_basis(self, *, wavefront=None, coordinates=None, **kwargs):
-        """Evaluate polynomial terms on explicit or wavefront coordinates.
-
-        Provide ``coordinates`` with leading component axis ``ndim`` or a wavefront
-        whose SI coordinates are used. The returned leading axis enumerates terms.
-        """
-        if coordinates is None:
-            if wavefront is None:
-                raise ValueError("Provide either wavefront or coordinates.")
-            coordinates = wavefront.coordinates
-        if coordinates.shape[0] != self.ndim:
-            raise ValueError(
-                "coordinates leading axis must match the polynomial dimensionality."
-            )
-        return super().calculate_basis(variables=coordinates, **kwargs)

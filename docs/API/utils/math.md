@@ -2,6 +2,12 @@
 
 # Math
 
+???+ info "gaussian_profile"
+    ::: dLux.utils.math.gaussian_profile
+
+???+ info "mv_gaussian_profile"
+    ::: dLux.utils.math.mv_gaussian_profile
+
 ???+ info "gaussian"
     ::: dLux.utils.math.gaussian
 

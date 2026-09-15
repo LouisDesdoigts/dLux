@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 from itertools import product
+from math import prod
+from operator import index
 
 import jax.numpy as np
-from jax import lax, vmap, Array
+from jax import lax, vmap, Array, custom_jvp
 import dLux.utils as dlu
 import equinox as eqx
 
 __all__ = [
     "polynomial_powers",
     "polynomial_basis",
+    "eval_polynomial",
+    "solve_polynomial",
     "zernike_name",
     "noll_indices",
     "radial_orders_to_indices",
@@ -28,9 +32,16 @@ __all__ = [
 
 
 def polynomial_powers(degree: int, ndim: int = 1) -> Array:
-    """Generate total-degree polynomial powers in one or more dimensions."""
-    degree = int(degree)
-    ndim = int(ndim)
+    """Generate integer exponents in ascending total-degree order.
+
+    The result has shape ``(ndim, n_terms)``. Within each total degree the first
+    variable's exponent decreases first, preserving dLux's coefficient ordering.
+    ``degree`` is a non-negative integer and ``ndim`` is a positive integer.
+    """
+    if isinstance(degree, bool) or isinstance(ndim, bool):
+        raise TypeError("degree and ndim must be integers.")
+    degree = index(degree)
+    ndim = index(ndim)
     if degree < 0:
         raise ValueError("degree must be non-negative.")
     if ndim < 1:
@@ -44,12 +55,123 @@ def polynomial_powers(degree: int, ndim: int = 1) -> Array:
     return np.asarray(powers, dtype=int).T
 
 
-def polynomial_basis(variables: Array, powers: Array) -> Array:
-    """Evaluate multivariate polynomial monomials."""
-    variables = np.asarray(variables)
-    powers = np.asarray(powers)
-    shape = powers.shape + (1,) * (variables.ndim - 1)
-    return np.prod(variables[:, None] ** powers.reshape(shape), axis=0)
+@custom_jvp
+def _monomial(value, power):
+    """Evaluate integer powers without singular constant-term derivatives at zero."""
+    return np.power(value, power)
+
+
+@_monomial.defjvp
+def _monomial_jvp(primals, tangents):
+    value, power = primals
+    tangent, _ = tangents
+    slope = power * _monomial(value, np.maximum(power - 1, 0))
+    return _monomial(value, power), slope * tangent
+
+
+def _polynomial_layout(coordinates, powers):
+    """Return monomial samples and their sampled-axis count."""
+    coordinates, powers = np.asarray(coordinates), np.asarray(powers)
+    powers = powers[None, :] if powers.ndim == 1 else powers
+    if powers.ndim != 2 or 0 in powers.shape:
+        raise ValueError("powers must have shape (n_variables, n_terms).")
+    if not np.issubdtype(powers.dtype, np.integer):
+        raise TypeError("powers must have an integer dtype.")
+    ndim = powers.shape[0]
+
+    # A scalar polynomial accepts arbitrary bare samples, including one scalar.
+    if ndim == 1 and (coordinates.ndim < 2 or coordinates.shape[-2] != 1):
+        return polynomial_basis(coordinates[None, ...], powers), coordinates.ndim
+
+    # Sampled fields have a physical component axis before D sampled axes.
+    component = coordinates.ndim - ndim - 1
+    if component < 0 or coordinates.shape[component] != ndim:
+        raise ValueError(f"coordinates must have shape (..., {ndim}, *spatial_shape).")
+    return polynomial_basis(coordinates, powers, axis=component), ndim
+
+
+def polynomial_basis(coordinates: Array, powers: Array, axis: int | None = 0) -> Array:
+    """Evaluate monomials by replacing a coordinate component axis with a term axis.
+
+    ``powers`` is a non-negative integer array of shape ``(D, n_terms)``.
+    ``axis`` identifies the component axis of size D, defaulting to the first axis;
+    all other axes are preserved. Variables can be sampled over any array shape,
+    independently of their count. With ``axis=None``, use dLux's sampled field
+    convention ``(..., D, *spatial_shape)`` with D final spatial axes. This mode
+    also accepts bare scalar/array samples for one-variable polynomials, returning
+    ``(n_terms, *samples.shape)``.
+    Integer powers have finite derivatives at zero, including higher derivatives.
+    """
+    if axis is None:
+        return _polynomial_layout(coordinates, powers)[0]
+    coordinates, powers = np.asarray(coordinates), np.asarray(powers)
+    powers = powers[None, :] if powers.ndim == 1 else powers
+    if powers.ndim != 2 or 0 in powers.shape:
+        raise ValueError("powers must have shape (n_variables, n_terms).")
+    if not np.issubdtype(powers.dtype, np.integer):
+        raise TypeError("powers must have an integer dtype.")
+    axis = index(axis)
+    if not -coordinates.ndim <= axis < coordinates.ndim:
+        raise ValueError("axis must identify a coordinate component axis.")
+    axis %= coordinates.ndim
+    if coordinates.shape[axis] != powers.shape[0]:
+        raise ValueError(
+            "The component axis must match the number of polynomial variables."
+        )
+    shape = (1,) * axis + powers.shape + (1,) * (coordinates.ndim - axis - 1)
+    terms = _monomial(np.expand_dims(coordinates, axis + 1), powers.reshape(shape))
+    return np.prod(terms, axis=axis)
+
+
+def eval_polynomial(coordinates: Array, coeffs: Array, powers: Array) -> Array:
+    """Expand sampled polynomial terms with paired leading coefficient batches.
+
+    ``coeffs`` ends in the term count defined by ``powers``. Leading coefficient
+    and coordinate batches broadcast together, followed by the sampled output
+    axes. Coordinates and powers follow :func:`polynomial_basis`.
+    """
+    terms, spatial_ndim = _polynomial_layout(coordinates, powers)
+    coeffs = np.asarray(coeffs)
+    term_axis = terms.ndim - spatial_ndim - 1
+    n_terms = terms.shape[term_axis]
+    if coeffs.ndim == 0 or coeffs.shape[-1] != n_terms:
+        raise ValueError(f"coeffs must end in a term axis of size {n_terms}.")
+
+    leading = np.broadcast_shapes(coeffs.shape[:-1], terms.shape[:term_axis])
+    spatial_shape = terms.shape[-spatial_ndim:] if spatial_ndim else ()
+    coeffs = np.broadcast_to(coeffs, leading + (n_terms,))
+    coeffs = coeffs.reshape(leading + (n_terms,) + (1,) * spatial_ndim)
+    terms = np.broadcast_to(terms, leading + (n_terms,) + spatial_shape)
+    return np.sum(coeffs * terms, axis=len(leading))
+
+
+def solve_polynomial(values: Array, coordinates: Array, powers: Array) -> Array:
+    """Return minimum-norm polynomial coefficients for paired sampled batches.
+
+    ``values`` ends in the coordinate sampling shape. Leading value and coordinate
+    batches broadcast together; the output ends in a coefficient term axis. This
+    solve represents the sampled values and is not necessarily a unique inverse.
+    """
+    terms, spatial_ndim = _polynomial_layout(coordinates, powers)
+    values = np.asarray(values)
+    term_axis = terms.ndim - spatial_ndim - 1
+    n_terms = terms.shape[term_axis]
+    spatial_shape = terms.shape[-spatial_ndim:] if spatial_ndim else ()
+    if spatial_ndim and values.shape[-spatial_ndim:] != spatial_shape:
+        raise ValueError(f"values must end in the coordinate shape {spatial_shape}.")
+
+    leading = values.shape[:-spatial_ndim] if spatial_ndim else values.shape
+    leading = np.broadcast_shapes(leading, terms.shape[:term_axis])
+    terms = np.broadcast_to(terms, leading + (n_terms,) + spatial_shape)
+    values = np.broadcast_to(values, leading + spatial_shape)
+    dtype = np.result_type(values.dtype, terms.dtype, np.float32)
+    matrices = terms.reshape((-1, n_terms, prod(spatial_shape))).astype(dtype)
+    values = values.reshape((-1, prod(spatial_shape))).astype(dtype)
+
+    # Solve each independent sampled system without mixing its batch axes.
+    solve = lambda matrix, value: value @ np.linalg.pinv(matrix)
+    coeffs = vmap(solve)(matrices, values)
+    return coeffs.reshape(leading + (n_terms,))
 
 
 zernike_names = {

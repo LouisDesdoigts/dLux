@@ -10,22 +10,26 @@ classDiagram
     class dLux_parametric_bases_Basis["Basis"]
     class dLux_parametric_bases_PastedBasis["PastedBasis"]
     class dLux_parametric_bases_ImplicitBasis["ImplicitBasis"]
+    class dLux_parametric_bases_SpatialBasis["SpatialBasis"]
     class dLux_parametric_bases_CLIMBBasis["CLIMBBasis"]
     class dLux_parametric_bases_FourierBasis["FourierBasis"]
-    class zodiax_numerics_expressions_Expression["Expression"]
-    class zodiax_numerics_transforms_Parametric["Parametric"]
-    zodiax_numerics_transforms_Parametric <|-- dLux_parametric_bases_ParametricBasis
-    click dLux_parametric_bases_ParametricBasis href "#dLux.parametric.bases.ParametricBasis" "Attributes: coeffs · Properties: input"
+    class dLux_parametric_parametrics_Parametric["Parametric"]
+    class dLux_parametric_parametrics_SpatialExpression["SpatialExpression"]
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_ParametricBasis
+    click dLux_parametric_bases_ParametricBasis href "#dLux.parametric.bases.ParametricBasis" "Attributes: coeffs · Methods: solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_Basis
-    click dLux_parametric_bases_Basis href "#dLux.parametric.bases.Basis" "Attributes: basis, axes · Methods: fwd(), inv()"
+    click dLux_parametric_bases_Basis href "#dLux.parametric.bases.Basis" "Attributes: basis, axes · Methods: evaluate(), solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_PastedBasis
-    click dLux_parametric_bases_PastedBasis href "#dLux.parametric.bases.PastedBasis" "Attributes: shape, basis, spec, method · Methods: fwd(), solve_basis()"
+    click dLux_parametric_bases_PastedBasis href "#dLux.parametric.bases.PastedBasis" "Attributes: shape, basis, spec, method · Methods: evaluate(), solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ImplicitBasis
-    click dLux_parametric_bases_ImplicitBasis href "#dLux.parametric.bases.ImplicitBasis" "Attributes: shape · Methods: calculate_basis(), fwd(), inv()"
-    zodiax_numerics_expressions_Expression <|-- dLux_parametric_bases_CLIMBBasis
-    click dLux_parametric_bases_CLIMBBasis href "#dLux.parametric.bases.CLIMBBasis" "Attributes: expansion, values, oversample · Methods: evaluate_latent(), evaluate()"
+    click dLux_parametric_bases_ImplicitBasis href "#dLux.parametric.bases.ImplicitBasis" "Attributes: shape · Methods: calculate_basis(), solve()"
+    dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_bases_SpatialBasis
+    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_SpatialBasis
+    click dLux_parametric_bases_SpatialBasis href "#dLux.parametric.bases.SpatialBasis" "Methods: solve()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_CLIMBBasis
+    click dLux_parametric_bases_CLIMBBasis href "#dLux.parametric.bases.CLIMBBasis" "Attributes: expansion, values, oversample · Methods: evaluate()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_FourierBasis
-    click dLux_parametric_bases_FourierBasis href "#dLux.parametric.bases.FourierBasis" "Attributes: shape, kernels · Methods: calculate_basis(), fwd(), inv(), resize()"
+    click dLux_parametric_bases_FourierBasis href "#dLux.parametric.bases.FourierBasis" "Attributes: shape, kernels · Methods: calculate_basis(), evaluate(), solve(), resize()"
 ```
 
 ???+ info "ParametricBasis"
@@ -39,6 +43,9 @@ classDiagram
 
 ???+ info "ImplicitBasis"
     ::: dLux.parametric.bases.ImplicitBasis
+
+???+ info "SpatialBasis"
+    ::: dLux.parametric.bases.SpatialBasis
 
 ???+ info "CLIMBBasis"
     ::: dLux.parametric.bases.CLIMBBasis

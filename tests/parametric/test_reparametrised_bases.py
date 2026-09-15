@@ -148,12 +148,11 @@ def test_reparametrised_basis_evaluation_jit_and_gradient(basis_pair):
     assert np.any(np.abs(gradient) > 0)
 
 
-def test_principal_input_retains_parametrisation_identity():
+def test_stored_coefficients_retain_parametrisation_identity():
     coeffs = _reparametrise([0.2, -0.1])
     basis = dl.Basis(np.arange(24.0).reshape(2, 3, 4), coeffs)
 
     assert basis.coeffs is coeffs
-    assert basis.input is coeffs
 
 
 def test_nested_latent_paths_support_get_set_and_add():
@@ -261,3 +260,16 @@ def test_sparse_optic_defers_context_dependent_coefficients():
     output = assert_jittable(optic, wavefront)
 
     assert output.phasor.shape[0] == len(centers)
+
+
+def test_basis_solve_returns_physical_coefficients_without_reversing_transform():
+    latent = np.array([0.2, -0.1])
+    coefficients = zdx.Map(latent, s=np.array([2.0, 4.0]), b=np.array([1.0, 2.0]))
+    basis = dl.Basis(np.eye(2), coeffs=coefficients)
+
+    values = assert_jittable(lambda model: model.evaluate(), basis)
+    recovered = assert_jittable(lambda model: model.solve(values), basis)
+    assert np.allclose(recovered, np.array([1.4, 1.6]))
+    assert np.allclose(coefficients(recovered, inverse=True), latent)
+    assert basis.coeffs is coefficients
+    assert not hasattr(type(basis), "apply")

@@ -16,3 +16,6 @@
 
 ???+ info "p2v_norm"
     ::: dLux.utils.norms.p2v_norm
+
+???+ info "normalise"
+    ::: dLux.utils.norms.normalise

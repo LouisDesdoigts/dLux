@@ -546,7 +546,7 @@ class ApertureBuilder(BaseBuilder):
     @staticmethod
     def _evaluate(shape, grid, transform):
         """Evaluate one shape on a possibly transformed grid."""
-        return shape(grid, transform)
+        return shape(grid, transform=transform)
 
     def _aperture_data(self, grid, transform):
         """Sample the aperture and retain its native primary support."""

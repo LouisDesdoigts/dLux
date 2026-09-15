@@ -59,7 +59,9 @@ def shift_and_scale(array: Array) -> Array:
     array : Array
         The shifted and scaled array.
     """
-    return dlu.math.nandiv(array - array.min(), array.max() - array.min(), fill=0)
+    minimum = array.min(axis=(-2, -1), keepdims=True)
+    maximum = array.max(axis=(-2, -1), keepdims=True)
+    return dlu.math.nandiv(array - minimum, maximum - minimum, fill=0)
 
 
 def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
@@ -83,8 +85,11 @@ def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
     # TODO: Possibly clip from -clip_dist:0 to ensure zernikes have full pupil support
     if invert:
         distances *= -1
-    distances = np.clip(distances, -clip_dist, clip_dist)
-    cond = distances.max() == distances.min()
+    # Normalise by the local width before clipping; widths may vary over a grid.
+    distances = np.clip(distances / clip_dist, -1.0, 1.0)
+    maximum = distances.max(axis=(-2, -1), keepdims=True)
+    minimum = distances.min(axis=(-2, -1), keepdims=True)
+    cond = maximum == minimum
     constant_support = (distances > 0).astype(distances.dtype)
     return np.where(cond, constant_support, shift_and_scale(distances))
 
@@ -403,7 +408,7 @@ def circ_distance(coords: Array, radius: float) -> Array:
     distance : Array
         The distance from the edge of the circle.
     """
-    return dlu.cart2polar(coords)[0] - radius
+    return dlu.cart2polar(coords)[..., 0, :, :] - radius
 
 
 def square_distance(coords: Array, width: float) -> Array:
@@ -421,7 +426,7 @@ def square_distance(coords: Array, width: float) -> Array:
     distance : Array
         The distance from the edge of the square.
     """
-    return np.max(np.abs(coords), axis=0) - width / 2
+    return np.max(np.abs(coords), axis=-3) - width / 2
 
 
 def rectangle_distance(coords: Array, width: float, height: float) -> Array:
@@ -441,8 +446,8 @@ def rectangle_distance(coords: Array, width: float, height: float) -> Array:
     distance : Array
         The distance from the edge of the rectangle.
     """
-    dist_from_vert = np.abs(coords[0]) - width / 2
-    dist_from_horz = np.abs(coords[1]) - height / 2
+    dist_from_vert = np.abs(coords[..., 0, :, :]) - width / 2
+    dist_from_horz = np.abs(coords[..., 1, :, :]) - height / 2
     return np.maximum(dist_from_vert, dist_from_horz)
 
 
@@ -464,8 +469,8 @@ def spider_distance(coords: Array, width: float, angle: float) -> Array:
         The distance from the edge of the spider.
     """
     coords = dlu.rotate_coords(coords, dlu.deg2rad(angle))
-    dist_from_vert = np.abs(coords[0]) - width / 2
-    dist_from_horz = coords[1]
+    dist_from_vert = np.abs(coords[..., 0, :, :]) - width / 2
+    dist_from_horz = coords[..., 1, :, :]
     return np.maximum(dist_from_vert, dist_from_horz)
 
 
@@ -489,7 +494,7 @@ def line_distance(coords: Array, m: float, xy: Array) -> Array:
         The distance from the edge of the line.
     """
     # Extract x and y coordinates from the input array
-    x, y = coords
+    x, y = coords[..., 0, :, :], coords[..., 1, :, :]
 
     # First determine the case: horizontal, vertical or regular
     case = (m == 0) * 0 + (m == np.inf) * 1 + (m != 0) * (m != np.inf) * 2

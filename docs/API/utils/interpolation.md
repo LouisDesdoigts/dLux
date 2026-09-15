@@ -2,6 +2,9 @@
 
 # Interpolation
 
+???+ info "interpolate"
+    ::: dLux.utils.interpolation.interpolate
+
 ???+ info "interp"
     ::: dLux.utils.interpolation.interp
 

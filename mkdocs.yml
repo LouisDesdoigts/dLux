@@ -96,6 +96,7 @@ nav:
       - Overview: tutorials/basics/overview.md
       - Migrating to 0.16: migration.md
       - Parameters and Updates: parameters.md
+      - Parametric Values: parametrics.md
     - Advanced:
       - Overview: tutorials/advanced/overview.md
     - Old Tutorials:
@@ -118,8 +119,8 @@ nav:
       - Fields: API/core/fields.md
       - Grids: API/core/grids.md
       - Bases: API/core/bases.md
+      - Gaussians: API/core/gaussians.md
       - Parametrics: API/core/parametrics.md
-      - Parametrisations: API/core/parametrisations.md
       - Polynomials: API/core/polynomials.md
       - Refractive: API/core/refractive.md
       - Shapes: API/core/shapes.md

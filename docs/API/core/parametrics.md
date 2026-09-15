@@ -7,37 +7,28 @@
 ```mermaid
 classDiagram
     class dLux_parametric_parametrics_Parametric["Parametric"]
-    class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
-    class dLux_parametric_parametrics_Transform["Transform"]
+    class dLux_parametric_parametrics_SpatialExpression["SpatialExpression"]
     class dLux_parametric_parametrics_Interpolation["Interpolation"]
     class dLux_parametric_parametrics_DynamicParametric["DynamicParametric"]
     class dLux_parametric_parametrics_Combination["Combination"]
-    class dLux_base_Base["Base"]
-    dLux_parametric_parametrics_ParametricHolder <|-- dLux_parametric_parametrics_Parametric
-    click dLux_parametric_parametrics_Parametric href "#dLux.parametric.parametrics.Parametric" "Methods: evaluate(), map(), integrate()"
-    dLux_base_Base <|-- dLux_parametric_parametrics_ParametricHolder
-    click dLux_parametric_parametrics_ParametricHolder href "#dLux.parametric.parametrics.ParametricHolder" "Methods: resolve()"
-    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Transform
-    click dLux_parametric_parametrics_Transform href "#dLux.parametric.parametrics.Transform" "Attributes: parametric, transformation · Methods: evaluate()"
+    class zodiax_numerics_expressions_Expression["Expression"]
+    zodiax_numerics_expressions_Expression <|-- dLux_parametric_parametrics_Parametric
+    click dLux_parametric_parametrics_Parametric href "#dLux.parametric.parametrics.Parametric" "Methods: evaluate()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_SpatialExpression
+    click dLux_parametric_parametrics_SpatialExpression href "#dLux.parametric.parametrics.SpatialExpression" "No direct public attributes or methods"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Interpolation
-    click dLux_parametric_parametrics_Interpolation href "#dLux.parametric.parametrics.Interpolation" "Attributes: knots, values, method, extrapolate · Methods: evaluate(), integrate()"
-    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_DynamicParametric
+    click dLux_parametric_parametrics_Interpolation href "#dLux.parametric.parametrics.Interpolation" "Attributes: knots, values, method, extrapolate, period · Methods: evaluate()"
+    dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_parametrics_DynamicParametric
     click dLux_parametric_parametrics_DynamicParametric href "#dLux.parametric.parametrics.DynamicParametric" "Attributes: parametric, transformation · Methods: evaluate()"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_parametrics_Combination
-    click dLux_parametric_parametrics_Combination href "#dLux.parametric.parametrics.Combination" "Attributes: parametrics, operation · Methods: validate_operation(), combine(), values(), evaluate()"
+    click dLux_parametric_parametrics_Combination href "#dLux.parametric.parametrics.Combination" "Attributes: parametrics, operation · Methods: evaluate()"
 ```
 
 ???+ info "Parametric"
     ::: dLux.parametric.parametrics.Parametric
 
-???+ info "ParametricHolder"
-    ::: dLux.parametric.parametrics.ParametricHolder
-
-???+ info "resolve"
-    ::: dLux.parametric.parametrics.resolve
-
-???+ info "Transform"
-    ::: dLux.parametric.parametrics.Transform
+???+ info "SpatialExpression"
+    ::: dLux.parametric.parametrics.SpatialExpression
 
 ???+ info "Interpolation"
     ::: dLux.parametric.parametrics.Interpolation

@@ -26,17 +26,15 @@ def test_spectral_polynomial_contract():
         polynomial.coeffs,
     )
 
-    raw = dl.SpectralPolynomial(
-        degrees=1, coeffs=[0.5], normalise=False
-    ).evaluate(wavelengths=wavelengths)
+    raw = dl.SpectralPolynomial(degrees=1, coeffs=[0.5], normalise=False).evaluate(
+        wavelengths=wavelengths
+    )
     assert np.allclose(raw, np.linspace(0.75, 1.25, 5))
 
 
 def test_vectorized_spectral_models():
     wavelengths = np.linspace(0.8e-6, 1.2e-6, 7)
-    polynomial = dl.SpectralPolynomial(
-        degree=1, coeffs=[[0.2], [-0.2]]
-    )
+    polynomial = dl.SpectralPolynomial(degree=1, coeffs=[[0.2], [-0.2]])
     basis = dl.SpectralBasis(
         np.stack([np.ones(7), np.linspace(-0.2, 0.2, 7)]),
         coeffs=[[1.0, 0.5], [1.0, -0.5]],
@@ -71,9 +69,9 @@ def test_blackbody_temperature_derivatives():
         ),
         blackbody.temperature,
     )
-    evaluate = lambda temperature: blackbody.set(
-        temperature=temperature
-    ).evaluate(wavelengths=wavelengths)
+    evaluate = lambda temperature: blackbody.set(temperature=temperature).evaluate(
+        wavelengths=wavelengths
+    )
     jacobian = jax.jacrev(evaluate)(blackbody.temperature)
     hessian = jax.jacrev(jax.jacrev(evaluate))(blackbody.temperature)
     assert np.all(np.isfinite(jacobian))
@@ -86,18 +84,18 @@ def test_blackbody_temperature_derivatives():
 
 
 def test_spectral_source_unit_invariance():
-    nanometres = dl.Source(
+    nanometres = dl.Spectrum(
         np.linspace(600, 700, 5),
         weights=dl.SpectralPolynomial(degree=1, coeffs=[0.5]),
         units={"wavelengths": "nm"},
     )
-    metres = dl.Source(
+    metres = dl.Spectrum(
         np.linspace(600e-9, 700e-9, 5),
         weights=dl.SpectralPolynomial(degree=1, coeffs=[0.5]),
     )
 
-    assert np.allclose(nanometres.params()["weights"], metres.params()["weights"])
-    assert dl.Source(650e-9).params()["wavelengths"].shape == (1,)
+    assert np.allclose(nanometres.spectrum_params()[1], metres.spectrum_params()[1])
+    assert dl.Spectrum(650e-9).spectrum_params()[0].shape == (1,)
 
 
 @pytest.mark.parametrize(

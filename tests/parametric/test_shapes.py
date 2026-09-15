@@ -1,6 +1,7 @@
 """Tests for dLux.parametric.shapes."""
 
 import jax.numpy as np
+import zodiax as zdx
 import pytest
 from jax import grad
 
@@ -46,6 +47,33 @@ def test_shape_contract(shape, parameter, context):
         )
 
 
+@pytest.mark.parametrize("edge", [None, 1.0])
+@pytest.mark.parametrize(
+    "shape_type,args",
+    [
+        (dl.Circle, (0.8,)),
+        (dl.Square, (0.8,)),
+        (dl.Rectangle, (0.8, 0.6)),
+        (dl.RegularPolygon, (6, 0.8)),
+        (dl.Spider, (0.1, [0.0, 90.0])),
+    ],
+)
+def test_shape_preserves_coordinate_batches(shape_type, args, edge, context):
+    offsets = np.array([[0.0, 0.0], [0.123, -0.077], [-0.119, 0.217]])
+    coordinates = context["coordinates"][None] + offsets[:, :, None, None]
+    shape = shape_type(*args, edge=edge)
+    evaluate = lambda coords: shape.evaluate(
+        coordinates=coords,
+        pixel_scale=context["pixel_scale"],
+    )
+
+    output = assert_jittable(evaluate, coordinates)
+    expected = np.stack([evaluate(coords) for coords in coordinates])
+
+    assert output.shape == coordinates.shape[:-3] + coordinates.shape[-2:]
+    assert np.allclose(output, expected)
+
+
 def test_shape_grid_contract():
     shape = dl.Circle(0.8)
     grid = dl.GridSpec(n=12, diam=1.0, unit="m")
@@ -54,6 +82,20 @@ def test_shape_grid_contract():
 
     with pytest.raises(ValueError, match="one or two spatial dimensions"):
         shape(grid.broadcast(3))
+
+
+@pytest.mark.parametrize("npix", [(4, 3), (2, 3)])
+def test_soft_shape_batched_pixel_scales_match_individual_grids(npix):
+    # nx=2 also catches accidental pairing of the batch width with image columns.
+    spacing = np.asarray([[0.2, 0.2], [0.1, 0.1]])
+    grid = dl.GridSpec(n=npix, d=spacing)
+    shape = dl.Circle(0.5, edge=dl.Soft(1.0))
+
+    output = assert_jittable(lambda model, sampling: model(sampling), shape, grid)
+    expected = np.stack([shape(dl.GridSpec(n=npix, d=d)) for d in spacing])
+
+    assert output.shape == (2,) + npix[::-1]
+    assert np.allclose(output, expected)
 
 
 @pytest.mark.parametrize(
@@ -146,3 +188,37 @@ def test_soft_convex_polygon_has_vertex_gradients(context):
         return polygon.evaluate(**context).sum()
 
     assert not np.isclose(grad(area)(1.0), 0.0)
+
+
+def test_shape_resolves_state_in_its_transformed_coordinate_frame(context):
+    transform = dl.Affine().set(translation=zdx.StateRef("shift"))
+    shape = dl.TransformedShape(
+        dl.Circle(zdx.StateRef("diameter"), edge=1.0), transform
+    )
+    state = zdx.State(diameter=0.7, shift=[0.1, -0.05])
+    result = assert_jittable(lambda model: model.resolve(state=state, **context), shape)
+    expected = dl.TransformedShape(
+        dl.Circle(0.7, edge=1.0), dl.Affine(translation=[0.1, -0.05])
+    )
+    assert np.allclose(result, expected.resolve(**context))
+
+
+@pytest.mark.parametrize("edge", [None, 1.0])
+@pytest.mark.parametrize(
+    "constructor",
+    [
+        lambda size, edge: dl.Circle(size, edge),
+        lambda size, edge: dl.Square(size, edge),
+        lambda size, edge: dl.Rectangle(size, size * 0.8, edge),
+        lambda size, edge: dl.RegularPolygon(6, size, edge),
+        lambda size, edge: dl.Spider(size / 10, [0.0, 90.0], edge),
+    ],
+)
+def test_shape_dimension_batches_match_independent_models(constructor, edge):
+    grid = dl.GridSpec(n=(7, 5), d=0.2, unit="m")
+    sizes = np.array([0.6, 0.9, 1.2])
+    shape = constructor(sizes, edge)
+    output = assert_jittable(lambda model: model.evaluate(grid=grid), shape)
+    expected = np.stack([constructor(size, edge).evaluate(grid=grid) for size in sizes])
+    assert output.shape == (3, 5, 7)
+    assert np.allclose(output, expected, atol=1e-6)
