@@ -1,258 +1,130 @@
-"""Core parameterisation and non-polynomial basis implementations."""
+"""Explicit, generated, and compact optical basis expansions."""
 
 from __future__ import annotations
 
 from abc import abstractmethod
-from math import prod
+from operator import index
 from typing import Any
 
 import equinox as eqx
 import jax
 import jax.numpy as np
+import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
-from ..grids import BaseCoordTransform, PasteSpec
-from .parametrics import Parametric, resolve
+from ..utils.grids import PasteSpec
 
 __all__ = [
     "ParametricBasis",
     "Basis",
     "PastedBasis",
     "ImplicitBasis",
-    "CoordBasis",
     "CLIMBBasis",
     "FourierBasis",
-    "SplineBasis",
 ]
 
-# TODO: Add Gaussian
+
+def _coefficients(coeffs, shape):
+    """Initialise coefficients, deferring expression shapes until evaluation."""
+    coeffs = np.zeros(shape) if coeffs is None else zdx.as_array(coeffs)
+    if isinstance(coeffs, Array) and coeffs.shape[-len(shape) :] != tuple(shape):
+        raise ValueError(f"coeffs must end in the shape {shape}.")
+    return coeffs
 
 
-def _resolve_coeffs(coeffs, coefficients):
-    """Resolve the deprecated ``coefficients`` constructor keyword."""
-    if coefficients is None:
-        return coeffs
-    if coeffs is not None:
-        raise ValueError("Provide only one of coeffs or coefficients.")
-    # Keep compatibility lazy: it imports the parametric package for legacy aliases.
-    from ..compatibility import warn_deprecated
+class ParametricBasis(zdx.Parametric):
+    """A parameterisation whose principal stored input is its coefficients.
 
-    warn_deprecated(
-        "coefficients argument",
-        "coeffs",
-        "`Class(coefficients=value)` -> `Class(coeffs=value)`",
-        stacklevel=4,
-    )
-    return coefficients
-
-
-class ParametricBasis(Parametric):
-    """Base contract for coefficient-weighted linear parameterisations.
-
-    `shape` records the native coefficient axes contracted during evaluation. Leading
-    coefficient axes may vectorise one matching leading basis axis. Concrete classes
-    define whether vectors are stored, generated from context, or evaluated through a
-    specialised implicit operation. ``coeffs`` may be an array or a shape-declaring
-    `Parametric`; a nested parameterisation remains stored for path updates and is
-    resolved to its physical array only during evaluation.
+    Subclasses assign ``coeffs`` and implement ``fwd`` for their own basis
+    representation. Zodiax provides resolution, chaining, and initialisation;
+    each subclass owns its coefficient shape and optional ``inv`` calculation.
     """
 
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
+    coeffs: Array | zdx.Expression | None
 
     @property
-    def coefficients(self: ParametricBasis) -> Array | Parametric:
-        """Return ``coeffs`` through the deprecated attribute alias.
-
-        Access emits a migration warning and the alias will be removed in dLux 0.17.
-        """
-        # Keep compatibility lazy to avoid the core/legacy import cycle.
-        from ..compatibility import warn_deprecated
-
-        warn_deprecated(
-            ".coefficients attribute",
-            ".coeffs",
-            "`basis.coefficients` -> `basis.coeffs`",
-            stacklevel=3,
-        )
+    def input(self) -> Array | zdx.Expression | None:
+        """Return stored coefficients unchanged so immutable updates can find them."""
         return self.coeffs
-
-    @property
-    def c(self: ParametricBasis) -> Array | Parametric:
-        """Return ``coeffs`` through the compact scientific alias ``c``."""
-        return self.coeffs
-
-    @property
-    def alpha(self: ParametricBasis) -> Array | Parametric:
-        """Return ``coeffs`` through the conventional scientific alias ``alpha``."""
-        return self.coeffs
-
-    def _set_coeffs(
-        self: ParametricBasis, coeffs: Array | Parametric, shape: tuple[int, ...]
-    ) -> None:
-        """Validate and assign coefficients with a native basis shape."""
-        # Standardise coefficients and their native shape
-        coeffs = dlu.to_value(coeffs, types=Parametric)
-        shape = tuple(shape)
-        if isinstance(coeffs, Parametric) and not hasattr(coeffs, "shape"):
-            raise TypeError("Parametric coeffs must define their physical shape.")
-        coeff_shape = tuple(coeffs.shape)
-        coeff_ndim = len(coeff_shape)
-
-        # Validate trailing basis dimensions while allowing compact vectors
-        compact = shape == (1,) and coeff_ndim == 1
-        if not compact and coeff_shape[-len(shape) :] != shape:
-            raise ValueError(
-                "Coefficient shape trailing dimensions must match the basis "
-                "dimensions. "
-                f"Expected {shape}, got {coeff_shape}."
-            )
-
-        # Store the coefficients and native contraction shape
-        self.coeffs = coeffs
-        self.shape = shape
-
-    def evaluate_basis(self, basis: Array, **context: Any) -> Array:
-        """Contract stored coefficients against explicit basis vectors.
-
-        ``basis`` begins with the native coefficient ``shape`` and is followed by
-        sampled output axes. Coefficients may be shared or contain one matching
-        leading vectorisation axis; the returned array retains all uncontracted axes.
-        """
-        # Resolve nested coefficient parameterisations at their point of use
-        coeffs = resolve(self.coeffs, **context)
-
-        # Evaluate coefficients shared across the complete basis
-        if coeffs.shape == self.shape:
-            return dlu.eval_basis(basis, coeffs)
-
-        # Vectorise a compact single-mode basis over coefficients
-        if self.shape == (1,) and coeffs.ndim == 1:
-            evaluate = lambda coefficient: dlu.eval_basis(basis, coefficient[None])
-            return jax.vmap(evaluate)(coeffs)
-
-        # Validate one leading coefficient axis
-        if coeffs.ndim != len(self.shape) + 1:
-            raise ValueError("Only one leading coefficient axis is supported.")
-        axis = len(self.shape)
-        if basis.shape[axis] != coeffs.shape[0]:
-            raise ValueError(
-                "The leading coefficient axis must match the leading basis axis."
-            )
-
-        # Align and vectorise matching coefficient and basis axes
-        basis = np.moveaxis(basis, axis, 0)
-        return jax.vmap(dlu.eval_basis)(basis, coeffs)
-
-    @abstractmethod
-    def solve_basis(self: ParametricBasis, value: Array, **kwargs: Any) -> Array:
-        """Solve for coefficients representing ``value`` in this basis.
-
-        Concrete bases define how basis vectors are obtained. ``value`` must match
-        the sampled output shape and the return value has the native coefficient
-        ``shape``.
-        """
 
 
 class Basis(ParametricBasis):
-    """Parameterise an explicitly sampled basis array.
+    """Expand coefficients over an explicit or context-generated sampled basis.
+
+    ``basis`` has leading coefficient axes followed by arbitrary output axes.
+    ``coeffs`` ends in the same coefficient shape; preceding axes are independent
+    batches. Use ``jax.vmap`` for paired basis and coefficient batches. Evaluation
+    does not normalise basis vectors or their output. Local ``inv`` returns a
+    minimum-norm least-squares representative, including for rank-deficient bases.
+    ``apply(..., inverse=True)`` also reverses any stored coefficient transforms.
+
+    Coefficients are stored in ``coeffs``, the principal ``input``.
+    Either the coefficients or basis can be a Zodiax expression. Numerical leaves
+    remain differentiable through evaluation, resolution, and the linear solve.
 
     Examples
     --------
-    Generate and evaluate an explicit Zernike basis:
-
     ```python
-    import jax.random as jr
-
     import dLux as dl
-    import dLux.utils as dlu
+    import jax.numpy as jnp
 
-    # Generate an explicit Zernike basis
-    grid = dl.GridSpec(n=128, diam=1.0, unit="m").broadcast(2)
-    vectors = dlu.zernike_basis([4, 5, 6], grid.coordinates, diameter=0.9)
-
-    # Parameterise the basis with random coefficients
-    basis = dl.Basis(vectors, coeffs=1e-9 * jr.normal(jr.key(0), (3,)))
-
-    # Evaluate the parameterisation
-    values = basis.evaluate()
-
-    # Recover the coefficients representing the evaluated array
-    coeffs = basis.solve_basis(values)
+    basis = dl.Basis(jnp.eye(3), coeffs=[1., 2., 3.])
+    values = basis.resolve()
+    coefficients = basis.apply(values, inverse=True)
     ```
-
-    Parameters
-    ----------
-    basis : Array
-        Basis vectors stored along the leading ``shape`` dimensions.
-    coeffs : Array, Parametric, or None
-        Coefficients contracted against the basis dimensions.
-    shape : tuple[int, ...] or None
-        Native basis dimensions. Required when ``coeffs`` is omitted.
     """
 
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-    basis: Array
+    basis: Array | zdx.Expression
+    axes: int = eqx.field(static=True)
 
-    def __init__(
-        self: Basis,
-        basis: Array,
-        coeffs: Array | Parametric = None,
-        shape: tuple[int, ...] = None,
-        *,
-        coefficients: Array = None,
-    ):
-        """Initialise an explicitly sampled linear basis.
+    def __init__(self, basis, coeffs=None, *, axes=1, alias=None):
+        """Initialise a sampled linear expansion.
 
         Parameters
         ----------
-        basis : Array
-            Basis values with coefficient axes followed by sampled output axes.
-        coeffs : Array, Parametric, or None
-            Coefficients matching ``shape``; defaults to zeros.
-        shape : tuple[int, ...] or None
-            Number and sizes of coefficient axes, inferred when omitted.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
+        basis : Array or zodiax.Expression
+            Non-empty tensor whose first ``axes`` dimensions are coefficient axes.
+            Remaining dimensions are output axes, with no assumed physical units.
+        coeffs : Array, zodiax.Expression, or None
+            Coefficients ending in the leading basis shape. Leading coefficient
+            batches are retained. None leaves the parameterisation unbound; supply
+            explicit coefficients through ``apply`` or bind them with ``initialise``.
+        axes : int
+            Positive number of coefficient axes, fixed at construction; default one.
+        alias : mapping or None
+            Optional parameter aliases.
         """
-        # Resolve coefficients and their native basis shape
-        self.basis = dlu.to_value(basis)
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        if coeffs is None:
-            if shape is None:
-                raise ValueError("Provide either coeffs or shape.")
-            coeffs = np.zeros(shape)
-        else:
-            coeffs = dlu.to_value(coeffs, types=Parametric)
-            if shape is None:
-                shape = coeffs.shape
+        if isinstance(axes, bool):
+            raise TypeError("axes must be a positive integer.")
+        self.axes = index(axes)
+        if self.axes < 1:
+            raise ValueError("axes must be a positive integer.")
+        self.basis = zdx.as_array(basis)
+        self.coeffs = zdx.as_array(coeffs)
+        self.alias = alias
 
-        # Validate and store the explicit basis contract
-        if self.basis.shape[: len(shape)] != shape:
-            raise ValueError(
-                "The leading basis dimensions must match the coefficient shape."
-            )
-        self._set_coeffs(coeffs, shape)
+        # Check sampled arrays now. A generator declares its context in evaluate;
+        # its output dimensions are checked by the contraction after resolution.
+        if isinstance(self.basis, Array):
+            if self.basis.ndim < self.axes or 0 in self.basis.shape:
+                raise ValueError("basis must contain non-empty coefficient axes.")
+            if isinstance(self.coeffs, Array):
+                basis_shape = self.basis.shape[: self.axes]
+                coeff_shape = self.coeffs.shape[-self.axes :]
+                if coeff_shape != basis_shape:
+                    raise ValueError(f"coeffs must end in the shape {basis_shape}.")
 
-    def evaluate(self: Basis, **kwargs: Any) -> Array:
-        """Contract stored coefficients against the explicit basis.
+    def fwd(self, coeffs: Array, **context: Any) -> Array:
+        """Expand explicit coefficients, retaining independent leading batches."""
+        basis = zdx.resolve(self.basis, **context)
+        return dlu.eval_basis(basis, coeffs, self.axes)
 
-        Native coefficient dimensions are removed and all sampled output dimensions
-        are retained. Additional context is accepted for parametric interoperability
-        but is not consumed.
-        """
-        return self.evaluate_basis(self.basis, **kwargs)
-
-    def solve_basis(self: Basis, value: Array, **kwargs: Any) -> Array:
-        """Solve the explicit basis for coefficients representing ``value``.
-
-        ``value`` must match the basis sampled output shape. The returned least-squares
-        coefficients have the native basis ``shape``.
-        """
-        return dlu.solve_basis(value, self.basis)
+    def inv(self, y: Array, **context: Any) -> Array:
+        """Recover minimum-norm coefficients for the supplied sampled output."""
+        basis = zdx.resolve(self.basis, **context)
+        return dlu.solve_basis(y, basis, self.axes)
 
 
 class PastedBasis(ParametricBasis):
@@ -276,13 +148,20 @@ class PastedBasis(ParametricBasis):
         placement using flattened pixel indices.
     """
 
-    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
     spec: PasteSpec
     method: str
 
-    def __init__(self, basis, spec, coeffs=None, method="scan", *, coefficients=None):
+    def __init__(
+        self,
+        basis,
+        spec,
+        coeffs=None,
+        method="scan",
+        *,
+        alias=None,
+    ):
         """Initialise compact basis stamps and their placement.
 
         Parameters
@@ -292,17 +171,16 @@ class PastedBasis(ParametricBasis):
         spec : PasteSpec
             Fixed placement geometry for the compact stamps.
         coeffs : Array, Parametric, or None
-            Shared or per-stamp basis coefficients.
+            Per-stamp coefficients of shape ``(n_stamps, *basis_shape)``.
         method : str
             ``"scan"`` for lower memory or ``"scatter"`` for parallel placement.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
+        alias : mapping or None
+            Optional parameter aliases.
         """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
         if not isinstance(spec, PasteSpec):
             raise TypeError("spec must be a PasteSpec.")
 
-        basis = dlu.to_value(basis)
+        basis = zdx.as_array(basis, dtype=float)
         if basis.ndim < 4:
             raise ValueError("basis must have shape (n_stamps, ..., ny, nx).")
         if basis.shape[0] != len(spec.starts):
@@ -316,105 +194,92 @@ class PastedBasis(ParametricBasis):
 
         shape = basis.shape[:-2]
         coeffs = np.zeros(shape) if coeffs is None else coeffs
-        self._set_coeffs(coeffs, shape)
+        self.coeffs = _coefficients(coeffs, shape)
+        self.shape = shape
         self.basis = basis
         self.spec = spec
         self.method = method
 
-    def evaluate(self, **kwargs: Any) -> Array:
-        """Evaluate compact bases and paste their local values globally.
+        self.alias = alias
 
-        Coefficients are contracted independently per stamp. The result has the full
-        output spatial shape from `PasteSpec`; overlapping stamp values are added.
-        """
-        coeffs = resolve(self.coeffs, **kwargs)
-        local = jax.vmap(dlu.eval_basis)(self.basis, coeffs)
+    def fwd(self, coeffs: Array, **context: Any) -> Array:
+        """Expand per-stamp coefficients and add overlapping stamps globally."""
+        if coeffs.shape != self.shape:
+            raise ValueError(f"coeffs must have shape {self.shape}.")
+        expand = lambda b, c: dlu.eval_basis(b, c, axes=len(self.shape) - 1)
+        local = jax.vmap(expand)(self.basis, coeffs)
         return self.spec.paste(local, self.method)
 
     def solve_basis(self, value: Array, **kwargs: Any) -> Array:
         """Solve coefficients independently from every extracted local stamp.
 
         ``value`` must end with the global output shape. Returned coefficients have
-        shape ``(n_stamps, *basis_shape)``.
+        shape ``(n_stamps, *basis_shape)``. This is a local projection, not a
+        global inverse: overlapping stamps contain contributions from their
+        neighbours. ``inv`` is intentionally unavailable.
         """
         values = self.spec.extract(value)
-        solve = lambda value, basis: dlu.solve_basis(value, basis)
+        solve = lambda value, basis: dlu.solve_basis(value, basis, len(self.shape) - 1)
         return jax.vmap(solve)(values, self.basis)
 
 
 class ImplicitBasis(ParametricBasis):
-    """Extension contract for bases generated or evaluated at runtime.
+    """Extension point for linear bases generated from runtime context.
 
-    Subclasses implement `calculate_basis(**context)` or override `evaluate` with a
-    mathematically equivalent implicit contraction. This avoids retaining large
-    sampled arrays while keeping coefficient leaves explicit and differentiable.
+    Subclasses store ``coeffs`` and their native contraction ``shape``,
+    then implement ``calculate_basis(**context)``. Basis arrays begin with ``shape``;
+    remaining axes are sampled outputs. Leading coefficient axes produce independent
+    batches, following ``Basis``. Use ``jax.vmap`` for paired coefficient and
+    coordinate batches. Local ``inv`` returns minimum-norm least-squares
+    coefficients; ``apply(..., inverse=True)`` also reverses coefficient transforms.
     """
 
-    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
+
+    def __init__(self, coeffs, shape, *, alias=None):
+        """Initialise the coefficient input for a generated basis.
+
+        Parameters
+        ----------
+        coeffs : Array, Expression, or None
+            Coefficients ending in ``shape``; omission initialises zeros.
+        shape : tuple[int, ...]
+            Native coefficient axes, fixed at construction.
+        alias : mapping or None
+            Optional parameter aliases.
+        """
+        self.shape = tuple(shape)
+        if not self.shape or any(n < 1 for n in self.shape):
+            raise ValueError("shape must contain positive coefficient dimensions.")
+        self.coeffs = _coefficients(coeffs, self.shape)
+        self.alias = alias
 
     @abstractmethod
-    def calculate_basis(self: ImplicitBasis, **kwargs: Any) -> Array:
-        """Materialise basis vectors from the supplied context.
+    def calculate_basis(self, **context: Any) -> Array:
+        """Return basis vectors with coefficient axes followed by output axes."""
 
-        The result must begin with the native coefficient ``shape`` and be followed
-        by the sampled output axes consumed by `evaluate_basis`.
-        """
+    def fwd(self, coeffs: Array, **context: Any) -> Array:
+        """Generate the basis and expand independent coefficient batches."""
+        basis = self.calculate_basis(**context)
+        return dlu.eval_basis(basis, coeffs, len(self.shape))
 
-    def evaluate(self: ImplicitBasis, **kwargs: Any) -> Array:
-        """Generate the implicit basis and contract its coefficient dimensions.
-
-        Named context is passed to `calculate_basis`. The result retains all sampled
-        output axes after the native basis dimensions are contracted.
-        """
-        return self.evaluate_basis(self.calculate_basis(**kwargs), **kwargs)
-
-    def solve_basis(self: ImplicitBasis, value: Array, **kwargs: Any) -> Array:
-        """Generate the implicit basis and solve it for ``value``.
-
-        The returned least-squares coefficients have the native basis ``shape``.
-        Named context is passed to `calculate_basis`.
-        """
-        return dlu.solve_basis(value, self.calculate_basis(**kwargs))
+    def inv(self, y: Array, **context: Any) -> Array:
+        """Generate the basis and recover minimum-norm coefficients for ``y``."""
+        basis = self.calculate_basis(**context)
+        return dlu.solve_basis(y, basis, len(self.shape))
 
 
-class CoordBasis(ImplicitBasis):
-    """Base contract for implicit bases evaluated on Cartesian coordinates.
-
-    Coordinates can be supplied explicitly or resolved from a wavefront and follow
-    ``(..., 2, ny, nx)`` with physical ``(x, y)`` component order. Concrete bases
-    document their coordinate units and support convention.
-    """
-
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-
-    @staticmethod
-    def get_coordinates(*, wavefront: Any = None, coordinates: Array = None) -> Array:
-        """Resolve explicit coordinates or coordinates from a wavefront.
-
-        Provide exactly one usable source. Returned coordinates have component axis
-        length two immediately before the final ``(y, x)`` spatial axes and are in
-        canonical SI units when obtained from a wavefront.
-        """
-        if coordinates is not None:
-            return BaseCoordTransform.get_coordinates(coordinates)
-        if wavefront is None:
-            raise ValueError("Provide either wavefront or coordinates.")
-        return BaseCoordTransform.get_coordinates(wavefront.coordinates)
-
-
-class CLIMBBasis(Basis):
+class CLIMBBasis(zdx.Expression):
     """Map a continuous explicit-basis field through CLIMB soft binarisation.
 
     Coefficients first generate an oversampled latent two-dimensional field. It is
     softly binarised, downsampled by `oversample`, and mapped between two configured
-    output values for differentiable binary-mask design.
+    output values for differentiable binary-mask design. The nonlinear result has
+    no coefficient inverse; ``expansion.apply(..., inverse=True)`` only reverses
+    the latent linear field.
     """
 
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-    basis: Array
+    expansion: Basis
     values: Array
     oversample: int = eqx.field(static=True)
 
@@ -426,7 +291,7 @@ class CLIMBBasis(Basis):
         values=(0.0, 1.0),
         oversample=3,
         *,
-        coefficients=None,
+        alias=None,
     ):
         """Initialise a CLIMB-softened explicit basis.
 
@@ -437,20 +302,28 @@ class CLIMBBasis(Basis):
         coeffs : Array, Parametric, or None
             Basis coefficients, defaulting to zeros.
         shape : tuple[int, ...] or None
-            Coefficient-axis shape, inferred when omitted.
+            Coefficient-axis shape, inferred from concrete coefficients. Required
+            if coefficients are omitted or have no known shape.
         values : tuple[float, float]
             Lower and upper values used by soft binarisation.
         oversample : int
             Internal soft-binarisation oversampling factor.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
+        alias : mapping or None
+            Optional parameter aliases.
         """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        super().__init__(basis, coeffs, shape)
-        output_shape = self.basis.shape[len(self.shape) :]
+        basis = zdx.as_array(basis, dtype=float)
+        if coeffs is not None:
+            coeffs = zdx.as_array(coeffs, dtype=float)
+        if shape is None and isinstance(coeffs, Array):
+            shape = coeffs.shape
+        if shape is None:
+            raise ValueError("shape is required when coeffs has no known shape.")
+        shape = tuple(shape)
+        self.expansion = Basis(basis, _coefficients(coeffs, shape), axes=len(shape))
+        output_shape = basis.shape[len(shape) :]
         if len(output_shape) != 2 or output_shape[0] != output_shape[1]:
             raise ValueError("The CLIMB latent output must be a square 2D array.")
-        values = dlu.to_value(values)
+        values = zdx.as_array(values, dtype=float)
         if values.shape != (2,):
             raise ValueError("values must contain exactly two output values.")
         self.values = values
@@ -462,12 +335,14 @@ class CLIMBBasis(Basis):
                 "The CLIMB latent output size must be divisible by oversample."
             )
 
+        self.alias = alias
+
     def evaluate_latent(self, **kwargs: Any) -> Array:
         """Return the continuous explicit-basis field before CLIMB binarisation.
 
         The result retains the oversampled latent spatial shape.
         """
-        return super().evaluate(**kwargs)
+        return zdx.resolve(self.expansion, **kwargs)
 
     def evaluate(self, **kwargs: Any) -> Array:
         """Evaluate and softly binarise the latent field.
@@ -476,12 +351,17 @@ class CLIMBBasis(Basis):
         lower and upper values.
         """
         binary = dlu.soft_binarise(self.evaluate_latent(**kwargs), self.oversample)
-        low, high = self.values
+        low, high = zdx.resolve(self.values, **kwargs)
         return low + (high - low) * binary
 
 
-class FourierBasis(ImplicitBasis):
+class FourierBasis(ParametricBasis):
     """A parameterisation over a separable real Fourier basis.
+
+    Coefficients are stored in ``coeffs``. Evaluation returns
+    dLux image axes ``(ny, nx)`` while coefficient axes remain in physical ``(x, y)``
+    order. The forward operation retains
+    compact kernels. Only ``calculate_basis`` and ``inv`` materialise the basis.
 
     Examples
     --------
@@ -500,12 +380,17 @@ class FourierBasis(ImplicitBasis):
     ```
     """
 
-    coeffs: Array | Parametric
     shape: tuple[int, ...] = eqx.field(static=True)
     kernels: tuple[Array, Array]
 
     def __init__(
-        self, npix, n_modes, coeffs=None, scale: float = 1.0, *, coefficients=None
+        self,
+        npix,
+        n_modes,
+        coeffs=None,
+        scale: float = 1.0,
+        *,
+        alias=None,
     ):
         """Initialise an implicit separable Fourier basis.
 
@@ -519,32 +404,39 @@ class FourierBasis(ImplicitBasis):
             Coefficient array matching the generated separable basis shape.
         scale : float
             Coordinate scale used to construct the Fourier kernels.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
+        alias : mapping or None
+            Optional parameter aliases.
         """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
         self.kernels = dlu.fourier_kernels(n_modes, npix, scale)
         shape = tuple(kernel.shape[1] for kernel in self.kernels)
         coeffs = np.zeros(shape) if coeffs is None else coeffs
-        self._set_coeffs(coeffs, shape)
+        self.coeffs = _coefficients(coeffs, shape)
+        self.shape = shape
+
+        self.alias = alias
 
     def calculate_basis(self, **kwargs: Any) -> Array:
         """Materialise the complete separable real Fourier basis.
 
-        The result has shape ``(*shape, ny, nx)``. Additional context is accepted but
-        not consumed because the sampling kernels are fixed at construction.
+        The result has shape ``(*shape, ny, nx)``, matching dLux image conventions.
+        Additional context is accepted but not consumed because the sampling
+        kernels are fixed at construction.
         """
         Kx, Ky = self.kernels
-        return np.einsum("xi,yj->ijxy", Kx, Ky)
+        return np.einsum("xi,yj->ijyx", Kx, Ky)
 
-    def evaluate(self, **kwargs: Any) -> Array:
+    def fwd(self, coeffs: Array, **kwargs: Any) -> Array:
         """Evaluate the separable Fourier expansion without materialising its basis.
 
-        Returns a sampled ``(ny, nx)`` field, preserving any supported leading
-        coefficient axis.
+        Returns a sampled ``(ny, nx)`` image with leading coefficient batches
+        retained, without materialising the full basis tensor.
         """
-        coeffs = resolve(self.coeffs, **kwargs)
-        return dlu.eval_fourier_basis(coeffs, *self.kernels)
+        return np.swapaxes(dlu.eval_fourier_basis(coeffs, *self.kernels), -1, -2)
+
+    def inv(self, y: Array, **context: Any) -> Array:
+        """Recover minimum-norm coefficients, materialising the basis for the solve."""
+        basis = self.calculate_basis()
+        return dlu.solve_basis(y, basis, axes=2)
 
     def resize(self, npix, scale: float = 1.0):
         """Return a copy sampled onto a resized Fourier grid.
@@ -555,86 +447,3 @@ class FourierBasis(ImplicitBasis):
         """
         kernels = dlu.fourier_kernels(self.shape, npix, scale)
         return self.set(kernels=kernels)
-
-
-class SplineBasis(ImplicitBasis):
-    """A fixed 2D array represented by a lower-resolution grid of spline knots.
-
-    Examples
-    --------
-    Construct and evaluate an implicit spline basis:
-
-    ```python
-    import dLux as dl
-
-    basis = dl.SplineBasis(npix=128, n_knots=8)
-    values = basis.evaluate()
-    ```
-    """
-
-    coeffs: Array | Parametric
-    shape: tuple[int, ...] = eqx.field(static=True)
-    knot_coords: Array
-    sample_coords: Array
-    method: str = eqx.field(static=True)
-
-    def __init__(
-        self, npix, n_knots, coeffs=None, method="cubic", *, coefficients=None
-    ):
-        """Initialise an implicit two-dimensional spline basis.
-
-        Parameters
-        ----------
-        npix : int or tuple[int, int]
-            Sampled output size.
-        n_knots : int or tuple[int, int]
-            At least two spline knots along each physical axis.
-        coeffs : Array, Parametric, or None
-            Knot coefficients, defaulting to zeros.
-        method : str
-            Interpolation method used between knots.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
-        """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        npix = dlu.as_size(npix, 2, "npix")
-        n_knots = dlu.as_size(n_knots, 2, "n_knots")
-        if any(n < 2 for n in n_knots):
-            raise ValueError("n_knots must contain values greater than one.")
-        knot_axes = [np.linspace(-1.0, 1.0, n) for n in n_knots]
-        sample_axes = [np.linspace(-1.0, 1.0, n) for n in npix]
-        self.knot_coords = np.array(np.meshgrid(*knot_axes, indexing="xy"))
-        self.sample_coords = np.array(np.meshgrid(*sample_axes, indexing="xy"))
-        shape = self.knot_coords.shape[1:]
-        coeffs = np.zeros(shape) if coeffs is None else coeffs
-        self._set_coeffs(coeffs, shape)
-        self.method = str(method)
-
-    def calculate_basis(self, **kwargs: Any) -> Array:
-        """Materialise one interpolated basis vector per spline knot.
-
-        The result has shape ``(*shape, ny, nx)`` on the configured sampled output
-        coordinates.
-        """
-        # Generate impulses at every spline knot
-        size = prod(self.shape)
-        impulses = np.eye(size).reshape((size,) + self.shape)
-
-        # Interpolate every impulse onto the sampled output grid
-        interpolate = lambda values: dlu.interp(
-            values, self.knot_coords, self.sample_coords, method=self.method
-        )
-        basis = jax.vmap(interpolate)(impulses)
-
-        # Restore the native coefficient and sampled output dimensions
-        return basis.reshape(self.shape + self.sample_coords.shape[1:])
-
-    def evaluate(self, **kwargs: Any) -> Array:
-        """Interpolate spline-knot coefficients onto the sampled output grid.
-
-        Returns a real ``(ny, nx)`` field using the configured interpolation method.
-        """
-        coeffs = resolve(self.coeffs, **kwargs)
-        return dlu.interp(
-            coeffs, self.knot_coords, self.sample_coords, method=self.method
-        )

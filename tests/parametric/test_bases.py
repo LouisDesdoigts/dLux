@@ -1,6 +1,7 @@
 """Tests for dLux.parametric.bases."""
 
 import jax.numpy as np
+import jax
 import pytest
 
 import dLux as dl
@@ -14,6 +15,7 @@ def bases():
         dl.Basis(
             np.arange(120.0).reshape(2, 3, 4, 5),
             np.linspace(-0.2, 0.2, 6).reshape(2, 3),
+            axes=2,
         ),
         dl.CLIMBBasis(
             np.arange(4 * 6 * 6.0).reshape(4, 6, 6),
@@ -21,13 +23,10 @@ def bases():
             oversample=3,
         ),
         dl.FourierBasis((8, 10), (3, 4), np.linspace(-0.2, 0.2, 12).reshape(3, 4)),
-        dl.SplineBasis(
-            (8, 10), (2, 3), np.linspace(-0.2, 0.2, 6).reshape(3, 2), method="linear"
-        ),
     ]
 
 
-@pytest.mark.parametrize("index", range(4))
+@pytest.mark.parametrize("index", range(3))
 def test_basis_evaluation_contract(index, bases):
     basis = bases[index]
     assert_jittable(lambda value: value.evaluate(), basis, rtol=1e-5, atol=1e-5)
@@ -39,16 +38,18 @@ def test_basis_evaluation_contract(index, bases):
     )
 
 
-@pytest.mark.parametrize("index", [0, 2, 3])
+@pytest.mark.parametrize("index", [0, 2])
 def test_basis_solution_contract(index, bases):
     basis = bases[index]
     value = basis.evaluate()
 
-    output = assert_jittable(lambda item, data: item.solve_basis(data), basis, value)
-    assert output.shape == basis.shape
+    output = assert_jittable(
+        lambda item, data: item.apply(data, inverse=True), basis, value
+    )
+    assert output.shape == basis.coeffs.shape
 
 
-@pytest.mark.parametrize("index", [2, 3])
+@pytest.mark.parametrize("index", [2])
 def test_implicit_basis_contract(index, bases):
     basis = bases[index]
     calculated = assert_jittable(lambda value: value.calculate_basis(), basis)
@@ -65,41 +66,38 @@ def test_basis_specific_operations(bases):
     assert np.all((output >= climb.values[0]) & (output <= climb.values[1]))
 
     resized = assert_jittable(lambda value: value.resize((5, 7)), bases[2])
-    assert resized.evaluate().shape == (5, 7)
+    assert resized.evaluate().shape == (7, 5)
 
 
-def test_coefficient_aliases(bases):
+def test_principal_input_is_stored_coefficients(bases):
     basis = bases[0]
 
-    assert basis.c is basis.coeffs
-    assert basis.alpha is basis.coeffs
+    assert basis.input is basis.coeffs
 
 
-def test_default_explicit_coeffs():
-    basis = dl.Basis(np.ones((2, 3, 4)), shape=(2,))
+def test_omitted_explicit_coeffs_leave_basis_unbound():
+    basis = dl.Basis(np.ones((2, 3, 4)))
 
-    assert basis.shape == (2,)
-    assert np.allclose(basis.coeffs, 0)
-    assert np.allclose(basis.evaluate(), 0)
+    assert basis.coeffs is None
+    assert isinstance(basis.resolve(), dl.Basis)
+    assert np.allclose(basis.apply(np.array([1.0, 2.0])), 3.0)
 
 
 def test_vectorised_basis_coeffs():
     shared_basis = np.arange(12.0).reshape(1, 3, 4)
-    shared = dl.Basis(shared_basis, [1.0, 2.0, 3.0], shape=(1,))
+    shared = dl.Basis(shared_basis, [[1.0], [2.0], [3.0]])
     local_basis = np.arange(48.0).reshape(2, 2, 3, 4)
     local_coeffs = np.asarray([[1.0, 0.0], [0.0, 1.0]])
-    local = dl.Basis(local_basis, local_coeffs, shape=(2,))
+    local = dl.Basis(local_basis, local_coeffs)
 
     shared_output = assert_jittable(lambda value: value.evaluate(), shared)
     local_output = assert_jittable(lambda value: value.evaluate(), local)
 
     assert shared_output.shape == (3, 3, 4)
-    assert np.allclose(
-        shared_output, shared.coeffs[:, None, None] * shared_basis[0]
-    )
-    assert local_output.shape == (2, 3, 4)
-    assert np.allclose(local_output[0], local_basis[0, 0])
-    assert np.allclose(local_output[1], local_basis[1, 1])
+    assert np.allclose(shared_output, shared.coeffs[:, 0, None, None] * shared_basis[0])
+    assert local_output.shape == (2, 2, 3, 4)
+    assert np.allclose(local_output[0], local_basis[0])
+    assert np.allclose(local_output[1], local_basis[1])
 
 
 @pytest.mark.parametrize("method", ["scan", "scatter"])
@@ -123,9 +121,7 @@ def test_pasted_basis_contract(method):
 
     output = assert_jittable(lambda value: value.evaluate(), pasted)
     recovered = assert_jittable(lambda value: pasted.solve_basis(value), output)
-    assert_differentiable(
-        lambda values: pasted.set(coeffs=values).evaluate(), coeffs
-    )
+    assert_differentiable(lambda values: pasted.set(coeffs=values).evaluate(), coeffs)
 
     assert output.shape == (4, 6)
     assert np.allclose(recovered, coeffs)
@@ -149,15 +145,37 @@ def test_pasted_basis_validation(constructor):
 @pytest.mark.parametrize(
     "constructor",
     [
-        lambda: dl.Basis(np.ones((2, 3, 4))),
-        lambda: dl.Basis(np.ones((2, 3, 4)), np.ones((3, 2))),
+        lambda: dl.Basis(np.ones((2, 3, 4)), axes=0),
+        lambda: dl.Basis(np.ones((2, 3, 4)), np.ones((2, 3))),
         lambda: dl.CLIMBBasis(np.ones((4, 6, 6)), np.ones(4), values=(0.0, 0.5, 1.0)),
         lambda: dl.CLIMBBasis(np.ones((4, 5, 5)), np.ones(4), oversample=3),
         lambda: dl.FourierBasis(8, 3, np.ones((2, 3))),
-        lambda: dl.SplineBasis((8, 10, 12), 2),
-        lambda: dl.SplineBasis(8, 1),
     ],
 )
 def test_validation(constructor):
     with pytest.raises((TypeError, ValueError)):
         constructor()
+
+
+def test_basis_rank_deficient_solve_returns_minimum_norm_representative():
+    basis = dl.Basis(np.asarray([[1.0, 0.0], [1.0, 0.0]]))
+    value = np.asarray([4.0, 3.0])
+    coeffs = assert_jittable(lambda model: model.apply(value, inverse=True), basis)
+    assert np.allclose(coeffs, np.asarray([2.0, 2.0]), atol=1e-6)
+    assert np.allclose(basis.apply(coeffs), np.asarray([4.0, 0.0]), atol=1e-6)
+
+
+def test_fourier_rectangular_image_axes_and_compact_evaluation():
+    coeffs = np.arange(6.0).reshape(2, 3)
+    fourier = dl.FourierBasis((7, 5), (2, 3), coeffs)
+    explicit = dl.Basis(fourier.calculate_basis(), coeffs, axes=2)
+    assert fourier.resolve().shape == (5, 7)
+    assert np.allclose(fourier.resolve(), explicit.resolve(), atol=1e-5)
+
+
+def test_basis_coefficients_batch_like_independent_models():
+    vectors = np.arange(24.0).reshape(2, 3, 4)
+    coeffs = np.asarray([[1.0, 2.0], [3.0, 4.0]])
+    basis = dl.Basis(vectors, coeffs)
+    expected = jax.vmap(lambda values: dl.Basis(vectors, values).resolve())(coeffs)
+    assert np.allclose(basis.resolve(), expected)

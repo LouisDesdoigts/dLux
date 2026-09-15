@@ -2,13 +2,14 @@
 
 import jax.numpy as np
 import pytest
+import zodiax as zdx
 
 import dLux as dl
 
 from tests.helpers import assert_differentiable, assert_jittable
 
 
-class _CoordinateCoeffs(dl.Parametric):
+class _CoordinateCoeffs(zdx.Expression):
     """Coefficient value requiring local coordinate context."""
 
     @property
@@ -22,11 +23,8 @@ class _CoordinateCoeffs(dl.Parametric):
 
 
 def _reparametrise(coeffs):
-    """Represent an array exactly through an identity latent map."""
-    coeffs = np.asarray(coeffs, dtype=float)
-    origin = np.zeros_like(coeffs)
-    matrix = np.eye(coeffs.size, dtype=coeffs.dtype)
-    return dl.Reparametrisation(origin, matrix, coeffs.reshape(-1))
+    """Represent native coefficient axes through a public Zodiax transform."""
+    return zdx.Map(np.asarray(coeffs), s=1.0, alias={"latent": "x"})
 
 
 def _explicit_case():
@@ -71,15 +69,6 @@ def _pasted_case():
     )
 
 
-def _spline_case():
-    coeffs = np.linspace(-0.2, 0.3, 6).reshape(3, 2)
-    return (
-        dl.SplineBasis((6, 5), (2, 3), coeffs, method="linear"),
-        dl.SplineBasis((6, 5), (2, 3), _reparametrise(coeffs), method="linear"),
-        {},
-    )
-
-
 def _spectral_polynomial_case():
     coeffs = np.asarray([0.2, -0.1])
     context = {"wavelengths": np.linspace(500e-9, 700e-9, 5)}
@@ -102,7 +91,7 @@ def _spectral_basis_case():
 
 def _polynomial_case():
     coeffs = np.asarray([0.7, -0.2, 0.1])
-    context = {"variables": np.linspace(-1.0, 1.0, 7)}
+    context = {"coordinates": np.linspace(-1.0, 1.0, 7)}
     return (
         dl.Polynomial(degree=2, coeffs=coeffs),
         dl.Polynomial(degree=2, coeffs=_reparametrise(coeffs)),
@@ -125,7 +114,6 @@ _CASES = {
     "basis": _explicit_case,
     "fourier": _fourier_case,
     "pasted": _pasted_case,
-    "spline": _spline_case,
     "spectral-polynomial": _spectral_polynomial_case,
     "spectral-basis": _spectral_basis_case,
     "polynomial": _polynomial_case,
@@ -160,15 +148,12 @@ def test_reparametrised_basis_evaluation_jit_and_gradient(basis_pair):
     assert np.any(np.abs(gradient) > 0)
 
 
-def test_coefficient_aliases_retain_parametrisation_identity():
+def test_principal_input_retains_parametrisation_identity():
     coeffs = _reparametrise([0.2, -0.1])
     basis = dl.Basis(np.arange(24.0).reshape(2, 3, 4), coeffs)
 
     assert basis.coeffs is coeffs
-    assert basis.c is coeffs
-    assert basis.alpha is coeffs
-    with pytest.warns(DeprecationWarning):
-        assert basis.coefficients is coeffs
+    assert basis.input is coeffs
 
 
 def test_nested_latent_paths_support_get_set_and_add():
@@ -200,40 +185,21 @@ def test_setting_coeffs_replaces_parametrisation_without_mutation():
     replaced = basis.set("coeffs", replacement)
     expected = dl.Basis(vectors, replacement)
 
-    assert isinstance(basis.coeffs, dl.Reparametrisation)
+    assert isinstance(basis.coeffs, zdx.Transform)
     assert basis.coeffs is coeffs
     assert np.array_equal(basis.coeffs.latent, np.asarray([0.2, -0.1]))
     assert np.array_equal(replaced.coeffs, replacement)
     assert np.allclose(replaced.evaluate(), expected.evaluate())
 
 
-def test_single_mode_reparametrisation_preserves_paired_vectorisation():
+def test_single_mode_reparametrisation_retains_independent_batches():
     vectors = np.arange(12.0).reshape(1, 3, 2, 2)
-    latent = np.asarray([[1.0], [2.0], [3.0]])
-    coeffs = dl.Reparametrisation(np.zeros(1), np.ones((1, 1)), latent)
-    basis = dl.Basis(vectors, coeffs, shape=(1,))
-
-    output = assert_jittable(lambda model: model.evaluate(), basis)
-    expected = latent[:, 0, None, None] * vectors[0]
-
-    assert output.shape == (3, 2, 2)
+    coeffs = _reparametrise(np.asarray([[1.0], [2.0], [3.0]]))
+    basis = dl.Basis(vectors, coeffs)
+    output = assert_jittable(lambda model: model.resolve(), basis)
+    expected = coeffs.resolve()[:, 0, None, None, None] * vectors[0]
+    assert output.shape == (3, 3, 2, 2)
     assert np.allclose(output, expected)
-
-
-def test_selection_is_a_settable_coefficient_leaf():
-    origin = np.arange(6.0).reshape(2, 3) / 10
-    mask = np.asarray([[True, False, True], [False, True, False]])
-    selection = dl.Selection(origin, mask)
-    basis = dl.FourierBasis((6, 5), (2, 3), selection)
-    latent = np.asarray([0.2, -0.1, 0.3])
-
-    updated = basis.set("latent", latent)
-    expected = basis.set("coeffs", selection.to_coeffs(latent))
-    output = assert_jittable(lambda model: model.evaluate(), updated)
-
-    assert isinstance(basis.coeffs, dl.Selection)
-    assert np.array_equal(updated.get("coeffs.latent"), latent)
-    assert np.allclose(output, expected.evaluate())
 
 
 def test_optical_system_raised_latent_propagation():
@@ -244,17 +210,17 @@ def test_optical_system_raised_latent_propagation():
     delta = np.asarray([1e-8, -2e-8])
 
     baseline = assert_jittable(
-        lambda model: model.propagate_mono(1e-6, return_wf=True), system
+        lambda model: model(model.initialise_wavefront(1e-6)), system
     )
     updated = system.add("latent", delta)
     qualified = system.set("pupil.opd.coeffs.latent", coeffs.latent + delta)
-    output = updated.propagate_mono(1e-6, return_wf=True)
+    output = updated(updated.initialise_wavefront(1e-6))
 
     assert np.array_equal(system.get("latent"), coeffs.latent)
     assert np.array_equal(system.get("pupil.opd.coeffs.latent"), coeffs.latent)
     assert np.array_equal(updated.get("latent"), coeffs.latent + delta)
     assert np.array_equal(qualified.get("latent"), coeffs.latent + delta)
-    qualified_output = qualified.propagate_mono(1e-6, return_wf=True)
+    qualified_output = qualified(qualified.initialise_wavefront(1e-6))
     assert np.allclose(output.phasor, qualified_output.phasor)
     assert not np.allclose(output.phasor, baseline.phasor)
 
@@ -263,7 +229,7 @@ def test_sparse_optic_resolves_local_reparametrised_coeffs():
     grid = dl.GridSpec(n=12, d=0.04, unit="m")
     wavefront = dl.Wavefront(1e-6, grid)
     centers = np.asarray([[-0.15, 0.0], [0.15, 0.0]])
-    values = np.asarray([1e-8, -2e-8])
+    values = np.asarray([[1e-8], [-2e-8]])
     array_opd = dl.DynamicZernikeBasis(js=[4], coeffs=values, diameter=0.2)
     latent_opd = dl.DynamicZernikeBasis(
         js=[4], coeffs=_reparametrise(values), diameter=0.2
