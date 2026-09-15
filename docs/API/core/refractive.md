@@ -12,11 +12,11 @@ classDiagram
     class dLux_parametric_parametrics_Interpolation["Interpolation"]
     class dLux_parametric_parametrics_Parametric["Parametric"]
     dLux_parametric_refractive_PolynomialIndex <|-- dLux_parametric_refractive_CauchyIndex
-    click dLux_parametric_refractive_CauchyIndex href "#dLux.parametric.refractive.CauchyIndex" "No direct public attributes or methods"
+    click dLux_parametric_refractive_CauchyIndex href "#dLux.parametric.refractive.CauchyIndex" "Attributes: coeffs, powers, scale"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_PolynomialIndex
     click dLux_parametric_refractive_PolynomialIndex href "#dLux.parametric.refractive.PolynomialIndex" "Attributes: coeffs, powers, scale · Methods: evaluate()"
     dLux_parametric_parametrics_Interpolation <|-- dLux_parametric_refractive_InterpolatedIndex
-    click dLux_parametric_refractive_InterpolatedIndex href "#dLux.parametric.refractive.InterpolatedIndex" "Methods: evaluate()"
+    click dLux_parametric_refractive_InterpolatedIndex href "#dLux.parametric.refractive.InterpolatedIndex" "Attributes: knots, values, method, extrapolate, period · Methods: evaluate()"
 ```
 
 ???+ info "CauchyIndex"

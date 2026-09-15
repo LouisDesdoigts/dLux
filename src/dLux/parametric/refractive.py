@@ -8,6 +8,7 @@ must be positive.
 
 from __future__ import annotations
 
+import equinox as eqx
 import jax.numpy as np
 import zodiax as zdx
 from jax import Array
@@ -16,6 +17,7 @@ import dLux.utils as dlu
 
 from .bases import _coefficients
 from .parametrics import Interpolation, Parametric
+
 
 __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 
@@ -128,6 +130,10 @@ class CauchyIndex(PolynomialIndex):
     ```
     """
 
+    coeffs: Array | zdx.Expression
+    powers: Array
+    scale: Array | zdx.Expression
+
     def __init__(
         self,
         coeffs=None,
@@ -175,6 +181,14 @@ class InterpolatedIndex(Interpolation):
     values = index.evaluate(wavelengths=[500e-9, 600e-9])
     ```
     """
+
+    knots: Array | zdx.Expression
+    values: Array | zdx.Expression
+    method: str = eqx.field(static=True)
+    extrapolate: bool | float | tuple[bool | float, bool | float] = eqx.field(
+        static=True
+    )
+    period: float | None = eqx.field(static=True)
 
     def __init__(
         self,

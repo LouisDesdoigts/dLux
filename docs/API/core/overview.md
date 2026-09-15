@@ -92,27 +92,26 @@ classDiagram
     class dLux_parametric_bases_Basis["Basis"]
     class dLux_parametric_bases_PastedBasis["PastedBasis"]
     class dLux_parametric_bases_ImplicitBasis["ImplicitBasis"]
-    class dLux_parametric_bases_CoordBasis["CoordBasis"]
+    class dLux_parametric_bases_SpatialBasis["SpatialBasis"]
     class dLux_parametric_bases_CLIMBBasis["CLIMBBasis"]
     class dLux_parametric_bases_FourierBasis["FourierBasis"]
-    class dLux_parametric_bases_SplineBasis["SplineBasis"]
     class dLux_parametric_parametrics_Parametric["Parametric"]
+    class dLux_parametric_parametrics_SpatialExpression["SpatialExpression"]
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_ParametricBasis
-    click dLux_parametric_bases_ParametricBasis href "../bases/#dLux.parametric.bases.ParametricBasis" "Attributes: coeffs, shape · Properties: coefficients, c, alpha · Methods: evaluate_basis(), solve_basis()"
+    click dLux_parametric_bases_ParametricBasis href "../bases/#dLux.parametric.bases.ParametricBasis" "Attributes: coeffs · Methods: solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_Basis
-    click dLux_parametric_bases_Basis href "../bases/#dLux.parametric.bases.Basis" "Attributes: coeffs, shape, basis · Methods: evaluate(), solve_basis()"
+    click dLux_parametric_bases_Basis href "../bases/#dLux.parametric.bases.Basis" "Attributes: coeffs, basis, axes · Methods: evaluate(), solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_PastedBasis
-    click dLux_parametric_bases_PastedBasis href "../bases/#dLux.parametric.bases.PastedBasis" "Attributes: coeffs, shape, basis, spec, method · Methods: evaluate(), solve_basis()"
+    click dLux_parametric_bases_PastedBasis href "../bases/#dLux.parametric.bases.PastedBasis" "Attributes: coeffs, shape, basis, spec, method · Methods: evaluate(), solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ImplicitBasis
-    click dLux_parametric_bases_ImplicitBasis href "../bases/#dLux.parametric.bases.ImplicitBasis" "Attributes: coeffs, shape · Methods: calculate_basis(), evaluate(), solve_basis()"
-    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_CoordBasis
-    click dLux_parametric_bases_CoordBasis href "../bases/#dLux.parametric.bases.CoordBasis" "Attributes: coeffs, shape · Methods: get_coordinates()"
-    dLux_parametric_bases_Basis <|-- dLux_parametric_bases_CLIMBBasis
-    click dLux_parametric_bases_CLIMBBasis href "../bases/#dLux.parametric.bases.CLIMBBasis" "Attributes: coeffs, shape, basis, values, oversample · Methods: evaluate_latent(), evaluate()"
-    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_FourierBasis
-    click dLux_parametric_bases_FourierBasis href "../bases/#dLux.parametric.bases.FourierBasis" "Attributes: coeffs, shape, kernels · Methods: calculate_basis(), evaluate(), resize()"
-    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_SplineBasis
-    click dLux_parametric_bases_SplineBasis href "../bases/#dLux.parametric.bases.SplineBasis" "Attributes: coeffs, shape, knot_coords, sample_coords, method · Methods: calculate_basis(), evaluate()"
+    click dLux_parametric_bases_ImplicitBasis href "../bases/#dLux.parametric.bases.ImplicitBasis" "Attributes: coeffs, shape · Methods: calculate_basis(), solve()"
+    dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_bases_SpatialBasis
+    dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_SpatialBasis
+    click dLux_parametric_bases_SpatialBasis href "../bases/#dLux.parametric.bases.SpatialBasis" "Attributes: coeffs, shape · Methods: solve()"
+    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_CLIMBBasis
+    click dLux_parametric_bases_CLIMBBasis href "../bases/#dLux.parametric.bases.CLIMBBasis" "Attributes: expansion, values, oversample · Methods: evaluate()"
+    dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_FourierBasis
+    click dLux_parametric_bases_FourierBasis href "../bases/#dLux.parametric.bases.FourierBasis" "Attributes: coeffs, shape, kernels · Methods: calculate_basis(), evaluate(), solve(), resize()"
 ```
 
 
@@ -175,31 +174,22 @@ classDiagram
 
 ```mermaid
 classDiagram
+    class dLux_parametric_polynomials_Polynomial["Polynomial"]
     class dLux_parametric_polynomials_DynamicZernike["DynamicZernike"]
     class dLux_parametric_polynomials_ZernikeBasis["ZernikeBasis"]
     class dLux_parametric_polynomials_DynamicZernikeBasis["DynamicZernikeBasis"]
-    class dLux_parametric_polynomials_Polynomial["Polynomial"]
-    class dLux_parametric_polynomials_ExplicitPolynomial["ExplicitPolynomial"]
-    class dLux_parametric_polynomials_CoordinatePolynomial["CoordinatePolynomial"]
-    class dLux_base_Base["Base"]
     class dLux_parametric_bases_Basis["Basis"]
-    class dLux_parametric_bases_CoordBasis["CoordBasis"]
     class dLux_parametric_bases_ParametricBasis["ParametricBasis"]
-    class dLux_parametric_polynomials__ZernikeBasis["_ZernikeBasis"]
-    dLux_base_Base <|-- dLux_parametric_polynomials_DynamicZernike
-    click dLux_parametric_polynomials_DynamicZernike href "../polynomials/#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name · Methods: calculate()"
-    dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_ZernikeBasis
-    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
-    click dLux_parametric_polynomials_ZernikeBasis href "../polynomials/#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coeffs, shape, basis"
-    dLux_parametric_polynomials__ZernikeBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
-    dLux_parametric_bases_CoordBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
-    click dLux_parametric_polynomials_DynamicZernikeBasis href "../polynomials/#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: coeffs, shape, zernikes, nsides, diameter · Methods: calculate_basis()"
+    class dLux_parametric_bases_SpatialBasis["SpatialBasis"]
+    class dLux_parametric_parametrics_SpatialExpression["SpatialExpression"]
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_polynomials_Polynomial
-    click dLux_parametric_polynomials_Polynomial href "../polynomials/#dLux.parametric.polynomials.Polynomial" "Attributes: coeffs, shape, powers · Methods: calculate_basis(), evaluate(), solve_basis()"
-    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ExplicitPolynomial
-    click dLux_parametric_polynomials_ExplicitPolynomial href "../polynomials/#dLux.parametric.polynomials.ExplicitPolynomial" "Attributes: coeffs, shape, basis, powers"
-    dLux_parametric_polynomials_Polynomial <|-- dLux_parametric_polynomials_CoordinatePolynomial
-    click dLux_parametric_polynomials_CoordinatePolynomial href "../polynomials/#dLux.parametric.polynomials.CoordinatePolynomial" "Attributes: coeffs, shape, powers, ndim · Methods: calculate_basis()"
+    click dLux_parametric_polynomials_Polynomial href "../polynomials/#dLux.parametric.polynomials.Polynomial" "Attributes: coeffs, powers · Methods: calculate_basis(), evaluate(), solve()"
+    dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_polynomials_DynamicZernike
+    click dLux_parametric_polynomials_DynamicZernike href "../polynomials/#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name · Methods: evaluate()"
+    dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
+    click dLux_parametric_polynomials_ZernikeBasis href "../polynomials/#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coeffs, basis, axes"
+    dLux_parametric_bases_SpatialBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
+    click dLux_parametric_polynomials_DynamicZernikeBasis href "../polynomials/#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: coeffs, shape, zernikes, nsides, diameter · Methods: evaluate(), calculate_basis()"
 ```
 
 
@@ -210,13 +200,14 @@ classDiagram
     class dLux_parametric_refractive_CauchyIndex["CauchyIndex"]
     class dLux_parametric_refractive_PolynomialIndex["PolynomialIndex"]
     class dLux_parametric_refractive_InterpolatedIndex["InterpolatedIndex"]
+    class dLux_parametric_parametrics_Interpolation["Interpolation"]
     class dLux_parametric_parametrics_Parametric["Parametric"]
-    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_CauchyIndex
-    click dLux_parametric_refractive_CauchyIndex href "../refractive/#dLux.parametric.refractive.CauchyIndex" "Attributes: coeffs, scale · Properties: coefficients · Methods: evaluate()"
+    dLux_parametric_refractive_PolynomialIndex <|-- dLux_parametric_refractive_CauchyIndex
+    click dLux_parametric_refractive_CauchyIndex href "../refractive/#dLux.parametric.refractive.CauchyIndex" "Attributes: coeffs, powers, scale"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_PolynomialIndex
-    click dLux_parametric_refractive_PolynomialIndex href "../refractive/#dLux.parametric.refractive.PolynomialIndex" "Attributes: coeffs, scale · Properties: coefficients · Methods: evaluate()"
-    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_refractive_InterpolatedIndex
-    click dLux_parametric_refractive_InterpolatedIndex href "../refractive/#dLux.parametric.refractive.InterpolatedIndex" "Attributes: wavelengths, indices, method, extrapolate · Methods: evaluate()"
+    click dLux_parametric_refractive_PolynomialIndex href "../refractive/#dLux.parametric.refractive.PolynomialIndex" "Attributes: coeffs, powers, scale · Methods: evaluate()"
+    dLux_parametric_parametrics_Interpolation <|-- dLux_parametric_refractive_InterpolatedIndex
+    click dLux_parametric_refractive_InterpolatedIndex href "../refractive/#dLux.parametric.refractive.InterpolatedIndex" "Attributes: knots, values, method, extrapolate, period · Methods: evaluate()"
 ```
 
 
@@ -236,28 +227,28 @@ classDiagram
     class dLux_parametric_shapes_Spider["Spider"]
     class dLux_parametric_shapes_Complement["Complement"]
     class dLux_parametric_shapes_TransformedShape["TransformedShape"]
-    class dLux_base_Base["Base"]
-    class dLux_parametric_parametrics_Parametric["Parametric"]
-    dLux_parametric_parametrics_Parametric <|-- dLux_parametric_shapes_Shape
+    class dLux_parametric_parametrics_SpatialExpression["SpatialExpression"]
+    class zodiax_module_Module["Module"]
+    dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_shapes_Shape
     click dLux_parametric_shapes_Shape href "../shapes/#dLux.parametric.shapes.Shape" "Properties: extent"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_InvertibleShape
     click dLux_parametric_shapes_InvertibleShape href "../shapes/#dLux.parametric.shapes.InvertibleShape" "Attributes: edge, invert · Methods: evaluate(), evaluate_hard(), evaluate_soft()"
-    dLux_base_Base <|-- dLux_parametric_shapes_Hard
+    zodiax_module_Module <|-- dLux_parametric_shapes_Hard
     click dLux_parametric_shapes_Hard href "../shapes/#dLux.parametric.shapes.Hard" "No direct public attributes or methods"
-    dLux_base_Base <|-- dLux_parametric_shapes_Soft
+    zodiax_module_Module <|-- dLux_parametric_shapes_Soft
     click dLux_parametric_shapes_Soft href "../shapes/#dLux.parametric.shapes.Soft" "Attributes: pixels · Methods: clip()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Circle
-    click dLux_parametric_shapes_Circle href "../shapes/#dLux.parametric.shapes.Circle" "Attributes: diameter · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Circle href "../shapes/#dLux.parametric.shapes.Circle" "Attributes: edge, invert, diameter · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Square
-    click dLux_parametric_shapes_Square href "../shapes/#dLux.parametric.shapes.Square" "Attributes: width · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Square href "../shapes/#dLux.parametric.shapes.Square" "Attributes: edge, invert, width · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Rectangle
-    click dLux_parametric_shapes_Rectangle href "../shapes/#dLux.parametric.shapes.Rectangle" "Attributes: width, height · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Rectangle href "../shapes/#dLux.parametric.shapes.Rectangle" "Attributes: edge, invert, width, height · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_RegularPolygon
-    click dLux_parametric_shapes_RegularPolygon href "../shapes/#dLux.parametric.shapes.RegularPolygon" "Attributes: diameter, nsides · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_RegularPolygon href "../shapes/#dLux.parametric.shapes.RegularPolygon" "Attributes: edge, invert, diameter, nsides · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_ConvexPolygon
-    click dLux_parametric_shapes_ConvexPolygon href "../shapes/#dLux.parametric.shapes.ConvexPolygon" "Attributes: vertices · Properties: extent · Methods: evaluate_hard(), evaluate_soft(), validate()"
+    click dLux_parametric_shapes_ConvexPolygon href "../shapes/#dLux.parametric.shapes.ConvexPolygon" "Attributes: edge, invert, vertices · Properties: extent · Methods: evaluate_hard(), evaluate_soft(), validate()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Spider
-    click dLux_parametric_shapes_Spider href "../shapes/#dLux.parametric.shapes.Spider" "Attributes: width, angles · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Spider href "../shapes/#dLux.parametric.shapes.Spider" "Attributes: edge, invert, width, angles · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_Complement
     click dLux_parametric_shapes_Complement href "../shapes/#dLux.parametric.shapes.Complement" "Attributes: shape · Properties: extent · Methods: evaluate()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_TransformedShape

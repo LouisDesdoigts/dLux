@@ -29,17 +29,17 @@ classDiagram
     zodiax_module_Module <|-- dLux_parametric_shapes_Soft
     click dLux_parametric_shapes_Soft href "#dLux.parametric.shapes.Soft" "Attributes: pixels · Methods: clip()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Circle
-    click dLux_parametric_shapes_Circle href "#dLux.parametric.shapes.Circle" "Attributes: diameter · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Circle href "#dLux.parametric.shapes.Circle" "Attributes: edge, invert, diameter · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Square
-    click dLux_parametric_shapes_Square href "#dLux.parametric.shapes.Square" "Attributes: width · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Square href "#dLux.parametric.shapes.Square" "Attributes: edge, invert, width · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Rectangle
-    click dLux_parametric_shapes_Rectangle href "#dLux.parametric.shapes.Rectangle" "Attributes: width, height · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Rectangle href "#dLux.parametric.shapes.Rectangle" "Attributes: edge, invert, width, height · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_RegularPolygon
-    click dLux_parametric_shapes_RegularPolygon href "#dLux.parametric.shapes.RegularPolygon" "Attributes: diameter, nsides · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_RegularPolygon href "#dLux.parametric.shapes.RegularPolygon" "Attributes: edge, invert, diameter, nsides · Properties: extent · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_ConvexPolygon
-    click dLux_parametric_shapes_ConvexPolygon href "#dLux.parametric.shapes.ConvexPolygon" "Attributes: vertices · Properties: extent · Methods: evaluate_hard(), evaluate_soft(), validate()"
+    click dLux_parametric_shapes_ConvexPolygon href "#dLux.parametric.shapes.ConvexPolygon" "Attributes: edge, invert, vertices · Properties: extent · Methods: evaluate_hard(), evaluate_soft(), validate()"
     dLux_parametric_shapes_InvertibleShape <|-- dLux_parametric_shapes_Spider
-    click dLux_parametric_shapes_Spider href "#dLux.parametric.shapes.Spider" "Attributes: width, angles · Methods: evaluate_hard(), evaluate_soft()"
+    click dLux_parametric_shapes_Spider href "#dLux.parametric.shapes.Spider" "Attributes: edge, invert, width, angles · Methods: evaluate_hard(), evaluate_soft()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_Complement
     click dLux_parametric_shapes_Complement href "#dLux.parametric.shapes.Complement" "Attributes: shape · Properties: extent · Methods: evaluate()"
     dLux_parametric_shapes_Shape <|-- dLux_parametric_shapes_TransformedShape

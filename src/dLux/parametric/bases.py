@@ -77,6 +77,7 @@ class Basis(ParametricBasis):
     ```
     """
 
+    coeffs: Array | zdx.Expression | None
     basis: Array | zdx.Expression
     axes: int = eqx.field(static=True)
 
@@ -161,6 +162,7 @@ class PastedBasis(ParametricBasis):
         placement using flattened pixel indices.
     """
 
+    coeffs: Array | zdx.Expression | None
     shape: tuple[int, ...] = eqx.field(static=True)
     basis: Array
     spec: PasteSpec
@@ -249,6 +251,7 @@ class ImplicitBasis(ParametricBasis):
     coefficients; stored coefficient transforms are not reversed by ``solve``.
     """
 
+    coeffs: Array | zdx.Expression | None
     shape: tuple[int, ...] = eqx.field(static=True)
 
     def __init__(self, coeffs, shape, *, alias=None):
@@ -300,6 +303,9 @@ class SpatialBasis(SpatialExpression, ImplicitBasis):
     ``evaluate`` and ``solve`` accept a grid or coordinates and optional transform;
     ``calculate_basis`` generates the modes; concrete evaluation owns contraction.
     """
+
+    coeffs: Array | zdx.Expression | None
+    shape: tuple[int, ...] = eqx.field(static=True)
 
     def __init__(self, coeffs, shape, *, alias=None):
         """Store coefficients and the static mode-axis shape.
@@ -451,6 +457,7 @@ class FourierBasis(ParametricBasis):
     ```
     """
 
+    coeffs: Array | zdx.Expression | None
     shape: tuple[int, ...] = eqx.field(static=True)
     kernels: tuple[Array, Array]
 

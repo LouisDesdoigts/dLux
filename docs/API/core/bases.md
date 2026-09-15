@@ -18,18 +18,18 @@ classDiagram
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_ParametricBasis
     click dLux_parametric_bases_ParametricBasis href "#dLux.parametric.bases.ParametricBasis" "Attributes: coeffs · Methods: solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_Basis
-    click dLux_parametric_bases_Basis href "#dLux.parametric.bases.Basis" "Attributes: basis, axes · Methods: evaluate(), solve()"
+    click dLux_parametric_bases_Basis href "#dLux.parametric.bases.Basis" "Attributes: coeffs, basis, axes · Methods: evaluate(), solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_PastedBasis
-    click dLux_parametric_bases_PastedBasis href "#dLux.parametric.bases.PastedBasis" "Attributes: shape, basis, spec, method · Methods: evaluate(), solve()"
+    click dLux_parametric_bases_PastedBasis href "#dLux.parametric.bases.PastedBasis" "Attributes: coeffs, shape, basis, spec, method · Methods: evaluate(), solve()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_ImplicitBasis
-    click dLux_parametric_bases_ImplicitBasis href "#dLux.parametric.bases.ImplicitBasis" "Attributes: shape · Methods: calculate_basis(), solve()"
+    click dLux_parametric_bases_ImplicitBasis href "#dLux.parametric.bases.ImplicitBasis" "Attributes: coeffs, shape · Methods: calculate_basis(), solve()"
     dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_bases_SpatialBasis
     dLux_parametric_bases_ImplicitBasis <|-- dLux_parametric_bases_SpatialBasis
-    click dLux_parametric_bases_SpatialBasis href "#dLux.parametric.bases.SpatialBasis" "Methods: solve()"
+    click dLux_parametric_bases_SpatialBasis href "#dLux.parametric.bases.SpatialBasis" "Attributes: coeffs, shape · Methods: solve()"
     dLux_parametric_parametrics_Parametric <|-- dLux_parametric_bases_CLIMBBasis
     click dLux_parametric_bases_CLIMBBasis href "#dLux.parametric.bases.CLIMBBasis" "Attributes: expansion, values, oversample · Methods: evaluate()"
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_bases_FourierBasis
-    click dLux_parametric_bases_FourierBasis href "#dLux.parametric.bases.FourierBasis" "Attributes: shape, kernels · Methods: calculate_basis(), evaluate(), solve(), resize()"
+    click dLux_parametric_bases_FourierBasis href "#dLux.parametric.bases.FourierBasis" "Attributes: coeffs, shape, kernels · Methods: calculate_basis(), evaluate(), solve(), resize()"
 ```
 
 ???+ info "ParametricBasis"

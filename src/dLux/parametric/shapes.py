@@ -203,6 +203,8 @@ class Circle(InvertibleShape):
     inversion follow the common `InvertibleShape` contract.
     """
 
+    edge: Hard | Soft
+    invert: bool
     diameter: Array | zdx.Expression
 
     def __init__(self, diameter, edge=None, invert=False, *, alias=None):
@@ -258,6 +260,8 @@ class Square(InvertibleShape):
     inversion follow the common `InvertibleShape` contract.
     """
 
+    edge: Hard | Soft
+    invert: bool
     width: Array | zdx.Expression
 
     def __init__(self, width, edge=None, invert=False, *, alias=None):
@@ -313,6 +317,8 @@ class Rectangle(InvertibleShape):
     physical ``(x, y)`` orientation. Use `TransformedShape` to rotate or translate it.
     """
 
+    edge: Hard | Soft
+    invert: bool
     width: Array | zdx.Expression
     height: Array | zdx.Expression
 
@@ -377,6 +383,8 @@ class RegularPolygon(InvertibleShape):
     evaluation coordinate unit, with common edge softening and inversion behaviour.
     """
 
+    edge: Hard | Soft
+    invert: bool
     diameter: Array | zdx.Expression
     nsides: int
 
@@ -446,6 +454,8 @@ class ConvexPolygon(InvertibleShape):
 
     """
 
+    edge: Hard | Soft
+    invert: bool
     vertices: Array | zdx.Expression
 
     def __init__(self, vertices, edge=None, invert=False, *, alias=None):
@@ -508,6 +518,8 @@ class Spider(InvertibleShape):
     that convention.
     """
 
+    edge: Hard | Soft
+    invert: bool
     width: Array | zdx.Expression
     angles: Array | zdx.Expression
 

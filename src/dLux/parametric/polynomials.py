@@ -91,6 +91,7 @@ class Polynomial(ParametricBasis):
     ```
     """
 
+    coeffs: Array | zdx.Expression | None
     powers: Array
 
     def __init__(
@@ -259,6 +260,10 @@ class ZernikeBasis(Basis):
     ``solve`` returns physical coefficients without reversing their transforms.
     """
 
+    coeffs: Array | zdx.Expression | None
+    basis: Array | zdx.Expression
+    axes: int = eqx.field(static=True)
+
     def __init__(
         self,
         coordinates,
@@ -305,6 +310,7 @@ class DynamicZernikeBasis(SpatialBasis):
     a wavefront or the grid extent.
     """
 
+    coeffs: Array | zdx.Expression | None
     shape: tuple[int, ...] = eqx.field(static=True)
     zernikes: list[DynamicZernike]
     nsides: int = eqx.field(static=True)

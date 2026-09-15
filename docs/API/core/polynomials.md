@@ -15,13 +15,13 @@ classDiagram
     class dLux_parametric_bases_SpatialBasis["SpatialBasis"]
     class dLux_parametric_parametrics_SpatialExpression["SpatialExpression"]
     dLux_parametric_bases_ParametricBasis <|-- dLux_parametric_polynomials_Polynomial
-    click dLux_parametric_polynomials_Polynomial href "#dLux.parametric.polynomials.Polynomial" "Attributes: powers · Methods: calculate_basis(), evaluate(), solve()"
+    click dLux_parametric_polynomials_Polynomial href "#dLux.parametric.polynomials.Polynomial" "Attributes: coeffs, powers · Methods: calculate_basis(), evaluate(), solve()"
     dLux_parametric_parametrics_SpatialExpression <|-- dLux_parametric_polynomials_DynamicZernike
     click dLux_parametric_polynomials_DynamicZernike href "#dLux.parametric.polynomials.DynamicZernike" "Attributes: j, n, m, name · Methods: evaluate()"
     dLux_parametric_bases_Basis <|-- dLux_parametric_polynomials_ZernikeBasis
-    click dLux_parametric_polynomials_ZernikeBasis href "#dLux.parametric.polynomials.ZernikeBasis" "No direct public attributes or methods"
+    click dLux_parametric_polynomials_ZernikeBasis href "#dLux.parametric.polynomials.ZernikeBasis" "Attributes: coeffs, basis, axes"
     dLux_parametric_bases_SpatialBasis <|-- dLux_parametric_polynomials_DynamicZernikeBasis
-    click dLux_parametric_polynomials_DynamicZernikeBasis href "#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: shape, zernikes, nsides, diameter · Methods: evaluate(), calculate_basis()"
+    click dLux_parametric_polynomials_DynamicZernikeBasis href "#dLux.parametric.polynomials.DynamicZernikeBasis" "Attributes: coeffs, shape, zernikes, nsides, diameter · Methods: evaluate(), calculate_basis()"
 ```
 
 ???+ info "Polynomial"
