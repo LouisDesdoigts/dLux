@@ -1,6 +1,8 @@
 """Coronagraph-specific optical propagation layers."""
 
-from .optical import BaseOpticalLayer, OpticalLayer
+import zodiax as zdx
+
+from .optical import OpticalLayer
 from .propagation import Fraunhofer
 
 __all__ = ["SoummerFPM"]
@@ -21,9 +23,10 @@ class SoummerFPM(OpticalLayer):
 
     Parameters
     ----------
-    optic : BaseOpticalLayer
-        Optical layer applied on the sampled focal-plane grid. It should act as the
-        identity outside the compact region represented by ``focal_spec``.
+    optic : zodiax.Module
+        Callable optical layer or composition, such as ``Sequential``, applied on
+        the sampled focal grid. It must return a wavefront on that same grid and
+        act as the identity outside the compact region represented by the grid.
     propagator : Fraunhofer
         Forward ``Fraunhofer`` propagator configured with ``method="mft"``.
 
@@ -64,21 +67,24 @@ class SoummerFPM(OpticalLayer):
     ```
     """
 
-    optic: BaseOpticalLayer
+    optic: zdx.Module
     propagator: Fraunhofer
 
-    def __init__(self, optic, propagator):
+    def __init__(self, optic, propagator, *, alias=None):
         """Initialise a Soummer focal-plane-mask operation.
 
         Parameters
         ----------
-        optic : BaseOpticalLayer
-            Arbitrary focal-plane optical mask, including complex or polarising masks.
+        optic : zodiax.Module
+            Callable optical mask or composition with ``apply(wavefront, **context)``.
+            It must preserve focal sampling; complex and Jones masks are supported.
         propagator : Fraunhofer
             MFT-based focal propagator used forward and in reverse.
         """
-        if not isinstance(optic, BaseOpticalLayer):
-            raise TypeError("optic must be a BaseOpticalLayer.")
+        if not isinstance(optic, zdx.Module) or not callable(
+            getattr(optic, "apply", None)
+        ):
+            raise TypeError("optic must be a callable optical layer or composition.")
         if not isinstance(propagator, Fraunhofer):
             raise TypeError("propagator must be a Fraunhofer layer.")
         if propagator.method != "mft":
@@ -88,20 +94,9 @@ class SoummerFPM(OpticalLayer):
         self.optic = optic
         self.propagator = propagator
 
-    def context(self, wavefront):
-        """Return the focal-plane context used to resolve the wrapped optic.
+        self.alias = alias
 
-        The mapping contains the focal ``wavefront``, SI-valued ``coordinates``,
-        per-axis ``pixel_scale`` in canonical units, and the realised focal ``grid``.
-        """
-        return {
-            "wavefront": wavefront,
-            "coordinates": wavefront.coordinates,
-            "pixel_scale": wavefront.grid.d * wavefront.grid.scale,
-            "grid": wavefront.grid,
-        }
-
-    def apply_mono(self, wavefront):
+    def apply_mono(self, wavefront, **context):
         """Apply the compact focal-plane optic and return to the input pupil.
 
         The input is propagated to the configured compact MFT grid, only the field
@@ -110,13 +105,12 @@ class SoummerFPM(OpticalLayer):
         matches the input pupil grid.
         """
         # Propagate to and apply the compact focal-plane optic
-        focal = self.propagator(wavefront)
-        optic = self.optic.resolve(**self.context(focal))
-        difference = focal - optic(focal)
+        focal = self.propagator(wavefront, **context)
+        difference = focal - self.optic(focal, **context)
 
         # Inverse propagate only the field introduced by the optic
         inverse = self.propagator.set(grid=wavefront.grid, inverse=True)
-        pupil_difference = inverse(difference)
+        pupil_difference = inverse(difference, **context)
 
         # Subtract the focal-plane modification from the original pupil
         return wavefront - pupil_difference

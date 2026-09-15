@@ -13,8 +13,8 @@ classDiagram
     class dLux_layers_optical_AberratedLayer["AberratedLayer"]
     class dLux_layers_optical_Optic["Optic"]
     class dLux_layers_optical_Tilt["Tilt"]
-    class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
-    dLux_parametric_parametrics_ParametricHolder <|-- dLux_layers_optical_BaseLayer
+    class zodiax_module_Module["Module"]
+    zodiax_module_Module <|-- dLux_layers_optical_BaseLayer
     click dLux_layers_optical_BaseLayer href "#dLux.layers.optical.BaseLayer" "Methods: apply()"
     dLux_layers_optical_BaseLayer <|-- dLux_layers_optical_BaseOpticalLayer
     click dLux_layers_optical_BaseOpticalLayer href "#dLux.layers.optical.BaseOpticalLayer" "Methods: apply_mono(), apply()"
@@ -26,7 +26,7 @@ classDiagram
     click dLux_layers_optical_AberratedLayer href "#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase · Methods: apply_mono()"
     dLux_layers_optical_TransmissiveLayer <|-- dLux_layers_optical_Optic
     dLux_layers_optical_AberratedLayer <|-- dLux_layers_optical_Optic
-    click dLux_layers_optical_Optic href "#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, normalise · Methods: phasor(), apply_mono()"
+    click dLux_layers_optical_Optic href "#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, amplitude, jones, thickness, n, propagator, normalise · Methods: phasor(), apply(), apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
     click dLux_layers_optical_Tilt href "#dLux.layers.optical.Tilt" "Attributes: angles, unit · Methods: apply_mono()"
 ```

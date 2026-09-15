@@ -24,11 +24,11 @@ classDiagram
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Convolve
     click dLux_layers_detector_Convolve href "#dLux.layers.detector.Convolve" "Attributes: kernel · Methods: apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Jitter
-    click dLux_layers_detector_Jitter href "#dLux.layers.detector.Jitter" "Attributes: sigma, kernel_size, oversample · Methods: kernel(), apply()"
+    click dLux_layers_detector_Jitter href "#dLux.layers.detector.Jitter" "Attributes: profile, kernel_size, oversample · Methods: kernel(), apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Bias
     click dLux_layers_detector_Bias href "#dLux.layers.detector.Bias" "Attributes: bias · Methods: apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Gain
-    click dLux_layers_detector_Gain href "#dLux.layers.detector.Gain" "Attributes: gain · Methods: apply()"
+    click dLux_layers_detector_Gain href "#dLux.layers.detector.Gain" "Attributes: gain · Methods: context(), apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Saturation
     click dLux_layers_detector_Saturation href "#dLux.layers.detector.Saturation" "Attributes: limit · Methods: apply()"
 ```

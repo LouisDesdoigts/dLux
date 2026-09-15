@@ -24,7 +24,7 @@ classDiagram
     click dLux_layers_dynamic_DynamicAberratedLayer href "#dLux.layers.dynamic.DynamicAberratedLayer" "Attributes: coordinates, transformation, opd, phase"
     dLux_layers_dynamic_BaseDynamicLayer <|-- dLux_layers_dynamic_DynamicOptic
     dLux_layers_optical_Optic <|-- dLux_layers_dynamic_DynamicOptic
-    click dLux_layers_dynamic_DynamicOptic href "#dLux.layers.dynamic.DynamicOptic" "Attributes: coordinates, transformation, transmission, opd, phase, normalise"
+    click dLux_layers_dynamic_DynamicOptic href "#dLux.layers.dynamic.DynamicOptic" "Attributes: amplitude, jones, thickness, n, propagator, coordinates, transformation, transmission, opd, phase, normalise"
 ```
 
 ???+ info "BaseDynamicLayer"

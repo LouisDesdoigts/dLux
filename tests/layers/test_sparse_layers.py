@@ -1,11 +1,24 @@
 """Tests for dLux.layers.sparse_layers."""
 
+import equinox as eqx
 import jax.numpy as np
 import pytest
+import zodiax as zdx
+from jax import Array
 
 import dLux as dl
 
 from tests.helpers import assert_differentiable, assert_jittable
+
+
+class LocalCoefficients(dl.Parametric):
+    """Shared or aperture-vectorised coefficients requiring local context."""
+
+    scale: Array
+    weights: Array
+
+    def evaluate(self, *, coordinates, state, **context):
+        return self.weights * (self.scale * coordinates[0, 0, 0] + state.time)
 
 
 @pytest.fixture
@@ -16,6 +29,17 @@ def centers():
 @pytest.fixture
 def wavefront(make_wavefront, make_grid):
     return make_wavefront(grid=make_grid(n=16, d=0.05))
+
+
+@pytest.mark.parametrize("optic_type", [dl.SparseOptic, dl.SparseDynamicOptic])
+@pytest.mark.parametrize("method", ["__call__", "localise", "phasor"])
+@pytest.mark.parametrize("jones", [np.eye(2), zdx.StateRef("matrix")])
+def test_sparse_rejects_local_jones(optic_type, method, jones, centers, wavefront):
+    optic = optic_type(centers).set(jones=jones)
+    apply = getattr(optic, method)
+    for evaluate in (apply, eqx.filter_jit(apply)):
+        with pytest.raises(ValueError, match="do not support local Jones terms"):
+            evaluate(wavefront)
 
 
 @pytest.mark.parametrize("dynamic", [False, True])
@@ -44,7 +68,7 @@ def test_interfere(centers, wavefront):
 def test_shared_and_local_coeffs(centers, wavefront):
     shared = dl.DynamicZernikeBasis(js=[4], coeffs=[1e-7], diameter=0.2)
     local = dl.DynamicZernikeBasis(
-        js=[4], coeffs=np.array([1e-7, 2e-7]), diameter=0.2
+        js=[4], coeffs=np.array([[1e-7], [2e-7]]), diameter=0.2
     )
     common = {"centers": centers, "transmission": dl.Circle(0.2, edge=0.01)}
     shared_optic = dl.SparseDynamicOptic(opd=shared, **common)
@@ -56,9 +80,7 @@ def test_shared_and_local_coeffs(centers, wavefront):
         shared_optic(wavefront).phasor, local_optic(wavefront).phasor
     )
     assert_differentiable(
-        lambda coeffs: np.real(
-            local_optic.set("opd.coeffs", coeffs)(wavefront).phasor
-        ),
+        lambda coeffs: np.real(local_optic.set("opd.coeffs", coeffs)(wavefront).phasor),
         local.coeffs,
     )
 
@@ -104,6 +126,83 @@ def test_center_gradients(centers, wavefront):
     optic = dl.SparseDynamicOptic(centers, transmission=dl.Circle(0.2, edge=0.01))
 
     assert_differentiable(lambda value: optic.set(centers=value)(wavefront), centers)
+
+
+@pytest.mark.parametrize("basis_type", ["explicit", "implicit"])
+@pytest.mark.parametrize("frame", ["plain", "global", "local"])
+@pytest.mark.parametrize("per_aperture", [False, True])
+@pytest.mark.parametrize("operation", ["phasor", "localise"])
+def test_sparse_coefficients_use_local_context(
+    basis_type, frame, per_aperture, operation, centers, wavefront
+):
+    weights = np.asarray([0.4, -0.2])
+    if per_aperture:
+        weights = np.stack((weights, -2 * weights))
+    coeffs = LocalCoefficients(scale=np.asarray(0.7), weights=weights)
+    if basis_type == "explicit":
+        modes = np.stack((np.ones(wavefront.shape), wavefront.coordinates[0]))
+        phase = dl.Basis(modes, coeffs=coeffs, axes=1)
+    else:
+        phase = dl.DynamicZernikeBasis(js=[1, 4], coeffs=coeffs, diameter=1.0)
+
+    matrices = np.asarray([[1.2, 0.1], [0.0, 0.8]])
+    offsets = np.asarray([0.07, -0.03])
+    if frame == "local":
+        matrices = np.stack((matrices, 0.7 * matrices))
+        offsets = np.stack((offsets, -2 * offsets))
+    if frame == "plain":
+        optic = dl.SparseOptic(centers, phase=phase)
+    else:
+        optic = dl.SparseDynamicOptic(
+            centers, phase=phase, transformation=dl.AffineMap(matrices, offsets)
+        )
+    state = zdx.State(time=0.13)
+
+    # Caller coordinates must not replace the authoritative aperture frame.
+    context = {
+        "state": state,
+        "coordinates": np.full_like(wavefront.coordinates, 99.0),
+        "coords": np.full_like(wavefront.coordinates, -99.0),
+    }
+
+    def evaluate(scale):
+        model = optic.set("phase.coeffs.scale", scale)
+        result = getattr(model, operation)(wavefront, **context)
+        return result.phasor if operation == "localise" else result
+
+    def reference(scale):
+        phasors = []
+        for index, center in enumerate(centers):
+            incident = wavefront
+            if operation == "localise":
+                incident = wavefront.set(c=center / wavefront.grid.scale)
+            coordinates = incident.coordinates
+            if frame == "global":
+                coordinates = np.einsum("ij,jxy->ixy", matrices, coordinates)
+                coordinates = coordinates + offsets[:, None, None]
+            coordinates = coordinates - center[:, None, None]
+            if frame == "local":
+                coordinates = np.einsum("ij,jxy->ixy", matrices[index], coordinates)
+                coordinates = coordinates + offsets[index, :, None, None]
+
+            selected = weights[index] if per_aperture else weights
+            values = selected * (scale * coordinates[0, 0, 0] + state.time)
+            resolved = phase.set(coeffs=values).resolve(coordinates=coordinates)
+            phasor = np.exp(1j * resolved)
+            if operation == "localise":
+                phasor = incident.phasor * phasor
+            phasors.append(phasor)
+        return np.stack(phasors) if operation == "localise" else sum(phasors)
+
+    output = assert_jittable(evaluate, coeffs.scale, rtol=1e-5, atol=1e-6)
+    assert np.allclose(output, reference(coeffs.scale), rtol=1e-5, atol=1e-6)
+    assert optic.phase.coeffs is coeffs
+
+    if frame == "local" and per_aperture and basis_type == "implicit":
+        gradient = assert_differentiable(evaluate, coeffs.scale)
+        expected = assert_differentiable(reference, coeffs.scale)
+        assert np.allclose(gradient, expected, rtol=1e-5, atol=1e-6)
+        assert np.abs(gradient) > 0
 
 
 def test_sparse_phasor_and_coordinate_sources(centers, wavefront):
@@ -191,7 +290,7 @@ def test_sparse_optical_system_contract(polarise_input, centers, make_grid):
     system = dl.OpticalSystem(layers, spec_in)
     wavelengths = np.asarray([1e-6, 1.1e-6])
 
-    output = system.propagate(wavelengths, return_wf=True)
+    output = system(system.initialise_wavefront(wavelengths))
     _, states = system.debug(system.initialise_wavefront(wavelengths))
 
     assert output.phasor.shape == (2, 2, 2, 8, 6)
@@ -204,3 +303,22 @@ def test_sparse_optical_system_contract(polarise_input, centers, make_grid):
 def test_center_validation():
     with pytest.raises(ValueError, match="centers"):
         dl.SparseOptic([0.0, 1.0])
+
+
+@pytest.mark.parametrize("apertures", [2, 3])
+@pytest.mark.parametrize("polarised", [False, True])
+def test_interference_collapses_shared_aperture_metadata_axis(apertures, polarised):
+    wavelengths = np.asarray([5e-4, 6e-4])
+    spacing = np.asarray([[0.02, 0.03], [0.025, 0.035]])[:, None, :]
+    centers = np.asarray([[0.001, -0.002], [0.003, -0.001]])[:, None, :]
+    grid = dl.GridSpec((5, 6), spacing, centers, "m")
+    intrinsic = (2, 2) if polarised else ()
+    field = np.ones((2, apertures) + intrinsic + (6, 5), dtype=complex)
+    wavefront_type = dl.PolarisedWavefront if polarised else dl.Wavefront
+    wavefront = wavefront_type(wavelengths, grid, field)
+    output = assert_jittable(dl.Interfere(), wavefront)
+    assert np.allclose(output.phasor, field.sum(axis=1))
+    assert output.grid.d.shape == (2, 2)
+    assert output.grid.c.shape == (2, 2)
+    assert np.allclose(output.grid.d, spacing[:, 0])
+    assert np.allclose(output.grid.c, centers[:, 0])

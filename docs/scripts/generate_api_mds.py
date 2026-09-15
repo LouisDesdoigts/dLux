@@ -225,11 +225,18 @@ def render_section_overview(section: str, entries: list[tuple[str, str]]) -> str
         "",
         f"# {section_title(section)}",
         "",
-        "These maps are generated from the public API. Each module is shown "
-        "separately so its complete local structure remains readable. Select a "
-        "class to open its reference, or follow the module heading for functions "
-        "and full documentation.",
     ]
+    overview = PKG_ROOT / section / "overview.md"
+    if overview.is_file():
+        out.extend([overview.read_text(encoding="utf-8").strip(), ""])
+    out.extend(
+        [
+            "These maps are generated from the public API. Each module is shown "
+            "separately so its complete local structure remains readable. Select a "
+            "class to open its reference, or follow the module heading for functions "
+            "and full documentation.",
+        ]
+    )
 
     for stem, module in entries:
         names = exported_api_items(module)

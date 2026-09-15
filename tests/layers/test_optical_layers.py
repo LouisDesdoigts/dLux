@@ -18,6 +18,7 @@ def wavefront(make_wavefront):
     [
         dl.TransmissiveLayer(),
         dl.TransmissiveLayer(0.5),
+        dl.TransmissiveLayer(0.5, normalise=False),
         dl.TransmissiveLayer(0.5, normalise=True),
         dl.AberratedLayer(),
         dl.AberratedLayer(opd=1e-7, phase=0.2),
@@ -62,12 +63,30 @@ def test_monochromatic_layer_mapping(make_grid):
 
 def test_transmissive_layer_contract(wavefront):
     unchanged = dl.TransmissiveLayer()(wavefront)
-    attenuated = dl.TransmissiveLayer(0.5)(wavefront)
+    layer = dl.TransmissiveLayer(0.5)
+    attenuated = layer(wavefront)
+    disabled = dl.TransmissiveLayer(0.5, normalise=False)(wavefront)
     normalised = dl.TransmissiveLayer(0.5, normalise=True)(wavefront)
 
+    assert layer.normalise is None
     assert np.allclose(unchanged.phasor, wavefront.phasor)
     assert np.allclose(attenuated.power, 0.25 * wavefront.power)
+    assert np.allclose(disabled.phasor, attenuated.phasor)
     assert np.allclose(normalised.power, 1)
+
+
+def test_optic_normalisation_update(wavefront):
+    optic = dl.Optic(transmission=0.5)
+    normalised = optic.set(normalise=True)
+    unconfigured = normalised.set(normalise=None)
+
+    assert optic.normalise is None
+    assert normalised.normalise is True
+    assert unconfigured.normalise is None
+    assert np.allclose(assert_jittable(normalised, wavefront).power, 1)
+    assert np.allclose(
+        assert_jittable(unconfigured, wavefront).power, 0.25 * wavefront.power
+    )
 
 
 def test_aberrated_layer_contract(wavefront):
@@ -79,9 +98,12 @@ def test_aberrated_layer_contract(wavefront):
 
 def test_optic_phasor_contract(wavefront):
     optic = dl.Optic(transmission=0.5, opd=1e-7, phase=0.2)
-    resolved = optic.resolve(wavefront=wavefront)
+    resolved = optic.resolve(**optic.context(wavefront))
 
-    assert optic.context(wavefront) == {"wavefront": wavefront}
+    context = optic.context(wavefront)
+    assert context["grid"] is wavefront.grid
+    assert set(context) == {"grid", "wavelengths"}
+    assert np.allclose(context["wavelengths"], wavefront.wavelength)
     assert optic.phasor(wavefront).shape == (1, 1)
     assert np.allclose(optic.phasor(wavefront), resolved.phasor(wavefront))
 
@@ -114,15 +136,13 @@ def test_parametric_optic(wavefront):
         opd=dl.DynamicZernikeBasis(js=[4], coeffs=[1e-7], diameter=0.5),
     )
 
-    resolved = optic.resolve(wavefront=wavefront)
+    resolved = optic.resolve(**optic.context(wavefront))
     assert isinstance(resolved, dl.Optic)
     assert isinstance(optic.opd, dl.Parametric)
     assert not isinstance(resolved.opd, dl.Parametric)
     assert_jittable(optic, wavefront)
     assert_differentiable(
-        lambda coeffs: np.real(
-            optic.set("opd.coeffs", coeffs)(wavefront).phasor
-        ),
+        lambda coeffs: np.real(optic.set("opd.coeffs", coeffs)(wavefront).phasor),
         optic.opd.coeffs,
     )
 
@@ -194,9 +214,9 @@ class TestSoummerFPM:
         assert isinstance(layer.optic.transmission, dl.Parametric)
         assert_jittable(layer, wavefront, rtol=1e-5, atol=1e-5)
         assert_differentiable(
-            lambda diameter: layer.set(
-                "optic.transmission.shape.diameter", diameter
-            )(wavefront),
+            lambda diameter: layer.set("optic.transmission.shape.diameter", diameter)(
+                wavefront
+            ),
             layer.optic.transmission.shape.diameter,
             rtol=1e-5,
             atol=1e-5,
@@ -204,9 +224,7 @@ class TestSoummerFPM:
 
     def test_polarising_optic(self, focal_spec, make_wavefront):
         wavefront = make_wavefront()
-        layer = dl.SoummerFPM(
-            dl.LinearPolariser(np.pi / 4), dl.Fraunhofer(focal_spec)
-        )
+        layer = dl.SoummerFPM(dl.LinearPolariser(np.pi / 4), dl.Fraunhofer(focal_spec))
 
         output = assert_jittable(layer, wavefront, rtol=1e-5, atol=1e-5)
 
@@ -228,9 +246,7 @@ class TestSoummerFPM:
         )
 
     def test_vectorised_wavefronts(self, focal_spec, make_wavefront):
-        layer = dl.SoummerFPM(
-            dl.Optic(transmission=0.5), dl.Fraunhofer(focal_spec)
-        )
+        layer = dl.SoummerFPM(dl.Optic(transmission=0.5), dl.Fraunhofer(focal_spec))
         chromatic = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
         polarised = make_wavefront(polarised=True)
 
@@ -238,13 +254,11 @@ class TestSoummerFPM:
         assert_jittable(layer, polarised, rtol=1e-5, atol=1e-5)
 
     def test_validation(self, focal_spec, make_wavefront):
-        with pytest.raises(TypeError, match="BaseOpticalLayer"):
+        with pytest.raises(TypeError, match="callable optical layer"):
             dl.SoummerFPM(np.ones(focal_spec.shape), dl.Fraunhofer(focal_spec))
         with pytest.raises(TypeError, match="Fraunhofer"):
             dl.SoummerFPM(dl.Optic(), dl.FreeSpace(0.1))
         with pytest.raises(ValueError, match="MFT"):
-            dl.SoummerFPM(
-                dl.Optic(), dl.Fraunhofer(dl.ResizeSpec(), method="fft")
-            )
+            dl.SoummerFPM(dl.Optic(), dl.Fraunhofer(dl.ResizeSpec(), method="fft"))
         with pytest.raises(ValueError, match="forward"):
             dl.SoummerFPM(dl.Optic(), dl.Fraunhofer(focal_spec, inverse=True))

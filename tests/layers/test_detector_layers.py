@@ -40,7 +40,7 @@ def test_detector_layer_contract(layer, intensity):
     [
         (dl.Sensitivity(np.ones((8, 8))), "response"),
         (dl.Convolve(np.ones((3, 3)) / 9), "kernel"),
-        (dl.Jitter(0.5, kernel_size=5), "sigma"),
+        (dl.Jitter(0.5, kernel_size=5), "std"),
         (dl.Bias(1), "bias"),
         (dl.Gain(2), "gain"),
         (dl.Saturation(32), "limit"),
@@ -59,13 +59,13 @@ def test_parametric_detector_layers(intensity):
     spatial = dl.Basis(np.ones((1, 8, 8)), [2.0])
     kernel = dl.Basis(np.ones((1, 3, 3)) / 9, [1.0])
     scalar = dl.Basis(np.ones(1), [2.0])
-    sigma = dl.Basis(np.ones(1), [0.5])
+    std = dl.Basis(np.ones(1), [0.5])
     polynomial = dl.Polynomial(degree=1, coeffs=[1.0, 0.5])
 
     layers = [
         dl.Sensitivity(spatial),
         dl.Convolve(kernel),
-        dl.Jitter(sigma, kernel_size=5),
+        dl.Jitter(dl.Gaussian(std), kernel_size=5),
         dl.Bias(spatial),
         dl.Gain(polynomial),
         dl.Saturation(scalar),
@@ -82,15 +82,15 @@ def test_parametric_detector_layers(intensity):
 
 
 @pytest.mark.parametrize(
-    ("sigma", "shape"),
+    ("profile", "shape"),
     [
         (0.5, (5, 5)),
         ([0.5, 1.0], (5, 7)),
         ([[0.25, 0.1], [0.1, 1.0]], (5, 7)),
     ],
 )
-def test_jitter_kernel(sigma, shape):
-    layer = dl.Jitter(sigma, kernel_size=shape[::-1], oversample=(2, 3))
+def test_jitter_kernel(profile, shape):
+    layer = dl.Jitter(profile, kernel_size=shape[::-1], oversample=(2, 3))
     kernel = assert_jittable(layer.kernel)
 
     assert kernel.shape == shape

@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import jax.numpy as np
+import zodiax as zdx
 from jax import Array
 
-import dLux.utils as dlu
-
-from ..parametric import Parametric
 from ..fields import Wavefront
 from .optical import OpticalLayer
 
@@ -51,10 +49,10 @@ class RefractiveOptic(OpticalLayer):
     ```
     """
 
-    thickness: Array | Parametric
-    n: Array | Parametric
+    thickness: Array | zdx.Expression
+    n: Array | zdx.Expression
 
-    def __init__(self, thickness, n):
+    def __init__(self, thickness, n, *, alias=None):
         """Initialise a refractive thickness profile.
 
         Parameters
@@ -64,16 +62,18 @@ class RefractiveOptic(OpticalLayer):
         n : Array or Parametric
             Refractive index evaluated at the wavefront wavelength.
         """
-        self.thickness = dlu.to_value(thickness, types=Parametric)
-        self.n = dlu.to_value(n, types=Parametric)
+        self.thickness = zdx.as_array(thickness, dtype=float)
+        self.n = zdx.as_array(n, dtype=float)
 
-    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
+        self.alias = alias
+
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
         """Apply the resolved refractive optical path to one wavefront.
 
         Thickness is measured in metres and refractive index is resolved at the
         wavefront wavelength. The resulting OPD is applied without mutating the input.
         """
-        self = self.resolve(wavefront=wavefront)
+        self = self.resolve(**self.context(wavefront, **context))
         n = np.asarray(self.n - 1)
         if n.ndim:
             n = n[..., None, None]
@@ -96,9 +96,9 @@ class Wedge(OpticalLayer):
     """
 
     angle: Array
-    n: Array | Parametric
+    n: Array | zdx.Expression
 
-    def __init__(self, angle, n):
+    def __init__(self, angle, n, *, alias=None):
         """Initialise a refractive wedge.
 
         Parameters
@@ -108,19 +108,21 @@ class Wedge(OpticalLayer):
         n : Array or Parametric
             Refractive index evaluated at the wavefront wavelength.
         """
-        self.angle = dlu.to_value(angle)
+        self.angle = zdx.as_array(angle, dtype=float)
         if self.angle.shape != (2,):
             raise ValueError("angle must have shape (2,).")
-        self.n = dlu.to_value(n, types=Parametric)
+        self.n = zdx.as_array(n, dtype=float)
 
-    def apply_mono(self, wavefront: Wavefront) -> Wavefront:
+        self.alias = alias
+
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
         """Apply the wavelength-dependent optical path of the wedge.
 
         Wedge angle is in radians, coordinates and thickness are in metres, and the
         refractive index is resolved at each wavefront wavelength.
         """
         # Resolve the sampled wedge thickness
-        self = self.resolve(wavefront=wavefront)
+        self = self.resolve(**self.context(wavefront, **context))
         coordinates = wavefront.coordinates
         x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
         thickness = x * np.tan(self.angle[0]) + y * np.tan(self.angle[1])

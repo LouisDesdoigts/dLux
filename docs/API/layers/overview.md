@@ -2,6 +2,62 @@
 
 # Layers API
 
+## Layer contracts
+
+Layers transform fields. Calling `layer(field, **context)` invokes `apply` and
+returns a new field. Numerical attributes can hold arrays or expressions; the layer
+supplies the context needed to resolve those expressions before using their values.
+
+| Class | Input and output | Subclass contract |
+| --- | --- | --- |
+| `BaseLayer` | Defined by the concrete layer | Implement `apply(target, **context)`. |
+| `OpticalLayer` | `Wavefront → Wavefront` | Implement `apply_mono(wavefront, **context)`; inherited application maps over wavelength and batch axes. |
+| `DetectorLayer` | `Intensity → Intensity` | Implement `apply(intensity, **context)`, preserving compatible leading axes. |
+| `UnifiedLayer` | `Wavefront → Wavefront` or `Intensity → Intensity` | Implement `apply_mono(target, **context)` for both field types. |
+
+### Resolving numerical attributes
+
+A parametric's `evaluate` method computes its value from the supplied inputs.
+`resolve` returns that value when its context is available and retains the
+expression when required context is missing. Layers resolve their numerical
+attributes at application time, when the incident field is known. Those attributes
+must resolve to values suitable for the operation being applied.
+
+| Layer or operation | Context supplied to expressions |
+| --- | --- |
+| Ordinary optical layers | Incident `grid` and metre-valued `wavelengths`. |
+| Dynamic and sparse optical layers | Local `coordinates`, source `pixel_scale`, and metre-valued `wavelengths`. |
+| Ordinary detector layers | Incident `grid`. |
+| `Gain` | Incident intensity data as the query `coordinates`. |
+| `Jitter.kernel` | Local `coordinates` and `pixel_scale` in detector-pixel units; incident `data` when an intensity is supplied. |
+
+Explicit caller context, including `state`, is forwarded. Spatial definitions
+derive coordinates and pixel sampling from a supplied grid. Supplying both a grid
+and coordinates to a spatial definition raises an error.
+
+### Optical composition
+
+`Optic` combines real amplitude transmission, amplitude scaling, OPD, phase,
+material thickness and refractive index, and Jones terms. Its local operands resolve
+together, allowing `Linked` and `Deferred` expressions to share values across those
+attributes. Scalar modulation precedes the Jones operation and optional
+normalisation. An optional outgoing propagator acts on the complete resulting field.
+`phasor` returns the scalar complex multiplier.
+
+`DynamicOptic` adds a coordinate source and transformation. Coordinate transforms
+preserve the source pixel scale used for soft edges. `SparseOptic` produces one
+locally sampled field per aperture; `SparseDynamicOptic` also supports transformed
+sampling. These remain distinct classes with explicit geometric roles. Sparse
+optics reject local Jones terms; apply a separate polarising layer before or after
+them. Their scalar modulation preserves already polarised wavefronts.
+
+Sparse optics support shared or per-aperture coefficients for `Basis`,
+`ImplicitBasis` (including `DynamicZernikeBasis`), `FourierBasis`, and `Polynomial`.
+One leading coefficient axis matching the number of apertures selects independent
+coefficients. Other array and expression attributes are shared.
+
+## Class maps
+
 These maps are generated from the public API. Each module is shown separately so its complete local structure remains readable. Select a class to open its reference, or follow the module heading for functions and full documentation.
 
 ## [Coronagraphy](coronagraphy.md)
@@ -11,7 +67,7 @@ classDiagram
     class dLux_layers_coronagraphy_SoummerFPM["SoummerFPM"]
     class dLux_layers_optical_OpticalLayer["OpticalLayer"]
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_coronagraphy_SoummerFPM
-    click dLux_layers_coronagraphy_SoummerFPM href "../coronagraphy/#dLux.layers.coronagraphy.SoummerFPM" "Attributes: optic, propagator · Methods: context(), apply_mono()"
+    click dLux_layers_coronagraphy_SoummerFPM href "../coronagraphy/#dLux.layers.coronagraphy.SoummerFPM" "Attributes: optic, propagator · Methods: apply_mono()"
 ```
 
 
@@ -37,11 +93,11 @@ classDiagram
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Convolve
     click dLux_layers_detector_Convolve href "../detector/#dLux.layers.detector.Convolve" "Attributes: kernel · Methods: apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Jitter
-    click dLux_layers_detector_Jitter href "../detector/#dLux.layers.detector.Jitter" "Attributes: sigma, kernel_size, oversample · Methods: kernel(), apply()"
+    click dLux_layers_detector_Jitter href "../detector/#dLux.layers.detector.Jitter" "Attributes: profile, kernel_size, oversample · Methods: kernel(), apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Bias
     click dLux_layers_detector_Bias href "../detector/#dLux.layers.detector.Bias" "Attributes: bias · Methods: apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Gain
-    click dLux_layers_detector_Gain href "../detector/#dLux.layers.detector.Gain" "Attributes: gain · Methods: apply()"
+    click dLux_layers_detector_Gain href "../detector/#dLux.layers.detector.Gain" "Attributes: gain · Methods: context(), apply()"
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Saturation
     click dLux_layers_detector_Saturation href "../detector/#dLux.layers.detector.Saturation" "Attributes: limit · Methods: apply()"
 ```
@@ -69,7 +125,7 @@ classDiagram
     click dLux_layers_dynamic_DynamicAberratedLayer href "../dynamic/#dLux.layers.dynamic.DynamicAberratedLayer" "Attributes: coordinates, transformation, opd, phase"
     dLux_layers_dynamic_BaseDynamicLayer <|-- dLux_layers_dynamic_DynamicOptic
     dLux_layers_optical_Optic <|-- dLux_layers_dynamic_DynamicOptic
-    click dLux_layers_dynamic_DynamicOptic href "../dynamic/#dLux.layers.dynamic.DynamicOptic" "Attributes: coordinates, transformation, transmission, opd, phase, normalise"
+    click dLux_layers_dynamic_DynamicOptic href "../dynamic/#dLux.layers.dynamic.DynamicOptic" "Attributes: amplitude, jones, thickness, n, propagator, coordinates, transformation, transmission, opd, phase, normalise"
 ```
 
 
@@ -84,8 +140,8 @@ classDiagram
     class dLux_layers_optical_AberratedLayer["AberratedLayer"]
     class dLux_layers_optical_Optic["Optic"]
     class dLux_layers_optical_Tilt["Tilt"]
-    class dLux_parametric_parametrics_ParametricHolder["ParametricHolder"]
-    dLux_parametric_parametrics_ParametricHolder <|-- dLux_layers_optical_BaseLayer
+    class zodiax_module_Module["Module"]
+    zodiax_module_Module <|-- dLux_layers_optical_BaseLayer
     click dLux_layers_optical_BaseLayer href "../optical/#dLux.layers.optical.BaseLayer" "Methods: apply()"
     dLux_layers_optical_BaseLayer <|-- dLux_layers_optical_BaseOpticalLayer
     click dLux_layers_optical_BaseOpticalLayer href "../optical/#dLux.layers.optical.BaseOpticalLayer" "Methods: apply_mono(), apply()"
@@ -97,7 +153,7 @@ classDiagram
     click dLux_layers_optical_AberratedLayer href "../optical/#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase · Methods: apply_mono()"
     dLux_layers_optical_TransmissiveLayer <|-- dLux_layers_optical_Optic
     dLux_layers_optical_AberratedLayer <|-- dLux_layers_optical_Optic
-    click dLux_layers_optical_Optic href "../optical/#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, normalise · Methods: phasor(), apply_mono()"
+    click dLux_layers_optical_Optic href "../optical/#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, amplitude, jones, thickness, n, propagator, normalise · Methods: phasor(), apply(), apply_mono()"
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
     click dLux_layers_optical_Tilt href "../optical/#dLux.layers.optical.Tilt" "Attributes: angles, unit · Methods: apply_mono()"
 ```
@@ -198,10 +254,10 @@ classDiagram
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_sparse_Interfere
     click dLux_layers_sparse_Interfere href "../sparse/#dLux.layers.sparse.Interfere" "Methods: apply(), apply_mono()"
     dLux_layers_optical_Optic <|-- dLux_layers_sparse_SparseOptic
-    click dLux_layers_sparse_SparseOptic href "../sparse/#dLux.layers.sparse.SparseOptic" "Attributes: transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise(), apply_mono()"
+    click dLux_layers_sparse_SparseOptic href "../sparse/#dLux.layers.sparse.SparseOptic" "Attributes: amplitude, jones, thickness, n, propagator, transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise(), apply_mono()"
     dLux_layers_dynamic_BaseDynamicLayer <|-- dLux_layers_sparse_SparseDynamicOptic
     dLux_layers_sparse_SparseOptic <|-- dLux_layers_sparse_SparseDynamicOptic
-    click dLux_layers_sparse_SparseDynamicOptic href "../sparse/#dLux.layers.sparse.SparseDynamicOptic" "Attributes: coordinates, transformation, transmission, opd, phase, normalise, centers"
+    click dLux_layers_sparse_SparseDynamicOptic href "../sparse/#dLux.layers.sparse.SparseDynamicOptic" "Attributes: amplitude, jones, thickness, n, propagator, coordinates, transformation, transmission, opd, phase, normalise, centers"
 ```
 
 

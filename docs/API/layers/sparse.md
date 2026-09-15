@@ -15,10 +15,10 @@ classDiagram
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_sparse_Interfere
     click dLux_layers_sparse_Interfere href "#dLux.layers.sparse.Interfere" "Methods: apply(), apply_mono()"
     dLux_layers_optical_Optic <|-- dLux_layers_sparse_SparseOptic
-    click dLux_layers_sparse_SparseOptic href "#dLux.layers.sparse.SparseOptic" "Attributes: transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise(), apply_mono()"
+    click dLux_layers_sparse_SparseOptic href "#dLux.layers.sparse.SparseOptic" "Attributes: amplitude, jones, thickness, n, propagator, transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise(), apply_mono()"
     dLux_layers_dynamic_BaseDynamicLayer <|-- dLux_layers_sparse_SparseDynamicOptic
     dLux_layers_sparse_SparseOptic <|-- dLux_layers_sparse_SparseDynamicOptic
-    click dLux_layers_sparse_SparseDynamicOptic href "#dLux.layers.sparse.SparseDynamicOptic" "Attributes: coordinates, transformation, transmission, opd, phase, normalise, centers"
+    click dLux_layers_sparse_SparseDynamicOptic href "#dLux.layers.sparse.SparseDynamicOptic" "Attributes: amplitude, jones, thickness, n, propagator, coordinates, transformation, transmission, opd, phase, normalise, centers"
 ```
 
 ???+ info "Interfere"

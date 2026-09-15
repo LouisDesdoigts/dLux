@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
+import zodiax as zdx
 from jax import Array
 
-import dLux.utils as dlu
-
-from ..grids import BaseCoordTransform, GridSpec
-from ..parametric import Parametric
+from ..utils.grids import BaseCoordTransform, GridSpec
 from ..fields import Wavefront
 from .optical import AberratedLayer, BaseOpticalLayer, Optic, TransmissiveLayer
 
@@ -32,7 +30,7 @@ class BaseDynamicLayer(BaseOpticalLayer):
     coordinates: Array | GridSpec | None = None
     transformation: BaseCoordTransform | None = None
 
-    def __init__(self, coordinates=None, transformation=None):
+    def __init__(self, coordinates=None, transformation=None, *, alias=None):
         """Initialise a coordinate context for dynamic optical evaluation.
 
         Parameters
@@ -48,7 +46,8 @@ class BaseDynamicLayer(BaseOpticalLayer):
         ):
             raise TypeError("transformation must be a BaseCoordTransform or None.")
 
-        coordinates = dlu.to_value(coordinates, optional=True, types=GridSpec)
+        if not isinstance(coordinates, GridSpec):
+            coordinates = zdx.as_array(coordinates, dtype=float)
         if (
             coordinates is not None
             and not isinstance(coordinates, GridSpec)
@@ -59,24 +58,41 @@ class BaseDynamicLayer(BaseOpticalLayer):
         self.coordinates = coordinates
         self.transformation = transformation
 
-    def context(self, wavefront: Wavefront) -> dict[str, Any]:
+        self.alias = alias
+
+    def context(self, wavefront: Wavefront, **context) -> dict[str, Any]:
         """Return the coordinate context used to resolve parametric leaves.
 
-        The mapping contains ``wavefront``, SI-valued ``coordinates`` with shape
-        ``(..., 2, ny, nx)``, and per-axis ``pixel_scale``. Explicit coordinates or a
-        generating grid replace the wavefront coordinates before the optional
+        The mapping contains local ``coordinates`` with shape ``(..., 2, ny, nx)``,
+        source ``pixel_scale``, and incident ``wavelengths``. Grid-derived coordinates
+        are in SI units; explicit arrays use the caller's physical units. Explicit
+        coordinates or a generating grid replace the wavefront coordinates before
+        the optional
         transformation is applied.
         """
         if self.coordinates is None:
             coords, d = wavefront.coordinates, wavefront.pixel_scale
         elif isinstance(self.coordinates, GridSpec):
-            coords, d = self.coordinates.coordinates, self.coordinates.d
+            grid = self.coordinates.sampled(**context)
+            coords, d = grid.coordinates, grid.d_si
         else:
             coords, d = self.coordinates, wavefront.pixel_scale
 
         if self.transformation is not None:
-            coords = self.transformation(coords)
-        return {"wavefront": wavefront, "coordinates": coords, "pixel_scale": d}
+            local = {
+                **context,
+                "coordinates": coords,
+                "wavelengths": wavefront.wavelength,
+                "pixel_scale": d,
+            }
+            transformation = zdx.resolve(self.transformation, **local)
+            coords = transformation(coords)
+        return {
+            **context,
+            "coordinates": coords,
+            "wavelengths": wavefront.wavelength,
+            "pixel_scale": d,
+        }
 
 
 class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
@@ -88,11 +104,17 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
 
     coordinates: Array | GridSpec | None = None
     transformation: BaseCoordTransform | None = None
-    transmission: Array | Parametric | None = None
-    normalise: bool
+    transmission: Array | zdx.Expression | None = None
+    normalise: bool | None = None
 
     def __init__(
-        self, transmission=None, coordinates=None, transformation=None, normalise=False
+        self,
+        transmission=None,
+        coordinates=None,
+        transformation=None,
+        normalise=None,
+        *,
+        alias=None,
     ):
         """Initialise a coordinate-dependent transmissive layer.
 
@@ -104,11 +126,14 @@ class DynamicTransmissiveLayer(BaseDynamicLayer, TransmissiveLayer):
             Explicit coordinate source, or incident coordinates when omitted.
         transformation : BaseCoordTransform or None
             Optional map into the transmission's local frame.
-        normalise : bool
-            Renormalise wavefront power after application.
+        normalise : bool or None
+            Renormalise wavefront power after application when true. Omit to leave
+            normalisation unconfigured.
         """
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         TransmissiveLayer.__init__(self, transmission, normalise)
+
+        self.alias = alias
 
 
 class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
@@ -121,10 +146,18 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
 
     coordinates: Array | GridSpec | None = None
     transformation: BaseCoordTransform | None = None
-    opd: Array | Parametric | None = None
-    phase: Array | Parametric | None = None
+    opd: Array | zdx.Expression | None = None
+    phase: Array | zdx.Expression | None = None
 
-    def __init__(self, opd=None, phase=None, coordinates=None, transformation=None):
+    def __init__(
+        self,
+        opd=None,
+        phase=None,
+        coordinates=None,
+        transformation=None,
+        *,
+        alias=None,
+    ):
         """Initialise coordinate-dependent aberrations.
 
         Parameters
@@ -138,6 +171,8 @@ class DynamicAberratedLayer(BaseDynamicLayer, AberratedLayer):
         """
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         AberratedLayer.__init__(self, opd, phase)
+
+        self.alias = alias
 
 
 class DynamicOptic(BaseDynamicLayer, Optic):
@@ -165,12 +200,17 @@ class DynamicOptic(BaseDynamicLayer, Optic):
     ```
     """
 
+    amplitude: Array | zdx.Expression | None = None
+    jones: Array | zdx.Expression | None = None
+    thickness: Array | zdx.Expression | None = None
+    n: Array | zdx.Expression | None = None
+    propagator: BaseOpticalLayer | None = None
     coordinates: Array | GridSpec | None = None
     transformation: BaseCoordTransform | None = None
-    transmission: Array | Parametric | None = None
-    opd: Array | Parametric | None = None
-    phase: Array | Parametric | None = None
-    normalise: bool
+    transmission: Array | zdx.Expression | None = None
+    opd: Array | zdx.Expression | None = None
+    phase: Array | zdx.Expression | None = None
+    normalise: bool | None = None
 
     def __init__(
         self,
@@ -179,7 +219,9 @@ class DynamicOptic(BaseDynamicLayer, Optic):
         phase=None,
         coordinates=None,
         transformation=None,
-        normalise=False,
+        normalise=None,
+        *,
+        alias=None,
     ):
         """Initialise a general coordinate-dependent scalar optic.
 
@@ -193,8 +235,11 @@ class DynamicOptic(BaseDynamicLayer, Optic):
             Explicit coordinate source, or incident coordinates when omitted.
         transformation : BaseCoordTransform or None
             Optional map into the optic's local frame.
-        normalise : bool
-            Renormalise wavefront power after application.
+        normalise : bool or None
+            Renormalise wavefront power after application when true. Omit to leave
+            normalisation unconfigured.
         """
         BaseDynamicLayer.__init__(self, coordinates, transformation)
         Optic.__init__(self, transmission, opd, phase, normalise)
+
+        self.alias = alias
