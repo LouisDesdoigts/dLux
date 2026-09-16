@@ -15,7 +15,7 @@ from jax.scipy.signal import convolve
 import dLux.utils as dlu
 
 from .base import Base
-from .grids import BaseCoordTransform, GridSpec
+from .utils.grids import BaseCoordTransform, GridSpec
 
 __all__ = [
     "BaseField",

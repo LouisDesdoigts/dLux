@@ -1,285 +1,125 @@
-"""Tests for dLux.utils.propagation."""
+"""Released functional FFT/MFT contracts; numerical classes have their own tests."""
 
 import jax
 import jax.numpy as np
 import pytest
 
 import dLux.utils as dlu
-from tests.helpers import assert_differentiable, assert_jittable
+from tests.helpers import assert_jittable
 
 
-def _field(spec):
-    x, y = spec
-    X, Y = np.meshgrid(x, y, indexing="xy")
-    return np.exp(-20 * (X**2 + Y**2)) * np.exp(0.2j * X - 0.1j * Y)
+def _field(n):
+    """A complex square field with neither reflection nor translation symmetry."""
+    y, x = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
+    return (1 + x / n + 0.2 * y / n) * np.exp(0.17j * x - 0.31j * y)
 
 
-def _assert_field_close(actual, expected):
-    """Assert agreement within the floating-point accumulation budget."""
-    error = np.max(np.abs(actual - expected)) / np.max(np.abs(expected))
-    tolerance = actual.size * np.finfo(actual.real.dtype).eps
-    assert error < tolerance, f"Relative field error {error} exceeds {tolerance}."
-
-
-@pytest.mark.parametrize(
-    ("shape", "center"),
-    [((8, 6), (0.0, 0.0)), ((8, 6), (0.07, -0.04)), ((7, 9), (0.07, -0.04))],
-)
-@pytest.mark.parametrize("inverse", [False, True])
-def test_fft_matches_native_mft(shape, center, inverse):
-    spec_in = dlu.nd_axes(shape, (0.1, 0.13), offsets=tuple(-c for c in center))
-    phasor = _field(spec_in)
-    ABCD = dlu.abcd_fraunhofer(2.0)
-    spec_out = dlu.FFT_spec(spec_in, 0.5, ABCD)
-
-    actual, resolved = dlu.FFT(phasor, 0.5, spec_in, focal_length=2.0, inverse=inverse)
-    expected = dlu.MFT(
-        phasor, 0.5, spec_in, spec_out, focal_length=2.0, inverse=inverse
+@pytest.mark.parametrize("n,pad", [(6, 1), (6, 2), (7, 1), (7, 3)])
+@pytest.mark.parametrize("focal_length", [None, 0.7])
+def test_fft_padding_sampling_power_and_inverse_roundtrip(n, pad, focal_length):
+    field = _field(n)
+    wavelength, spacing = 5e-4, 0.02
+    focal, output_spacing = dlu.FFT(
+        field, wavelength, spacing, focal_length=focal_length, pad=pad
     )
+    expected_spacing = wavelength / (spacing * n * pad)
+    if focal_length is not None:
+        expected_spacing *= focal_length
+    assert focal.shape == (n * pad, n * pad)
+    assert np.allclose(output_spacing, expected_spacing)
+    assert np.allclose(np.sum(np.abs(focal) ** 2), np.sum(np.abs(field) ** 2))
 
-    _assert_field_close(actual, expected)
-    assert all(np.allclose(a, b) for a, b in zip(resolved, spec_out))
-
-
-def test_fft_inverse_roundtrip():
-    spec_in = dlu.nd_axes((8, 6), (0.1, 0.13))
-    phasor = _field(spec_in)
-    focal, spec_focal = dlu.FFT(
-        phasor, 0.5, spec_in, pad=(2, 2), output_center=np.zeros(2)
-    )
-    recovered, spec_recovered = dlu.FFT(
-        focal, 0.5, spec_focal, inverse=True, output_center=np.zeros(2)
-    )
-
-    expected = dlu.pad_to(phasor, (16, 12))
-    _assert_field_close(recovered, expected)
-    centers = np.stack([axis.mean() for axis in spec_recovered])
-    assert np.max(np.abs(centers)) < np.finfo(centers.dtype).eps
-
-
-def test_shifted_fft_inverse_roundtrip():
-    spec_in = dlu.nd_axes((8, 6), (0.1, 0.13), offsets=(-0.07, 0.04))
-    phasor = _field(spec_in)
-    focal, spec_focal = dlu.FFT(
-        phasor,
-        0.5,
-        spec_in,
-        pad=(2, 3),
-        output_center=np.asarray((0.17, -0.11)),
-    )
-    recovered, spec_recovered = dlu.FFT(
+    recovered, recovered_spacing = dlu.FFT(
         focal,
-        0.5,
-        spec_focal,
+        wavelength,
+        output_spacing,
+        focal_length=focal_length,
+        pad=1,
         inverse=True,
-        output_center=np.asarray((0.07, -0.04)),
     )
-
-    expected = dlu.pad_to(phasor, (16, 18))
-    _assert_field_close(recovered, expected)
-    centers = np.stack([axis.mean() for axis in spec_recovered])
-    assert np.allclose(centers, np.asarray((0.07, -0.04)), atol=1e-7)
+    padded = np.pad(field, n * (pad - 1) // 2)
+    assert np.allclose(recovered, padded, rtol=2e-6, atol=2e-6)
+    assert np.allclose(recovered_spacing, spacing)
 
 
-def test_mft_inverse_roundtrip():
-    spec_in = dlu.nd_axes((8, 6), (0.1, 0.13))
-    phasor = _field(spec_in)
-    spec_out = dlu.FFT_spec(spec_in, 0.5, dlu.abcd_fraunhofer(2.0))
-
-    focal = dlu.MFT(phasor, 0.5, spec_in, spec_out, focal_length=2.0)
-    recovered = dlu.MFT(focal, 0.5, spec_out, spec_in, focal_length=2.0, inverse=True)
-
-    _assert_field_close(recovered, phasor)
+@pytest.mark.parametrize("inverse", [False, True])
+def test_fft_centred_point_has_flat_complex_output(inverse):
+    n = 8
+    field = np.zeros((n, n), dtype=complex).at[n // 2, n // 2].set(1 + 2j)
+    result, _ = dlu.FFT(field, 5e-4, 0.02, pad=1, inverse=inverse)
+    assert np.allclose(result, (1 + 2j) / n)
 
 
-@pytest.mark.parametrize(
-    ("shape", "padding"),
-    [((8, 8), (1, 1)), ((7, 7), (1, 1)), ((8, 6), (3, 5)), ((7, 5), (3, 5))],
-)
-def test_fourier_transform_identities(shape, padding):
-    spec = dlu.nd_axes(shape, (0.1, 0.13))
-    phasor = _field(spec)
-    pad_to = tuple(n * p for n, p in zip(shape, padding))
-    expected = dlu.pad_to(phasor, pad_to)
-    padded_spec = dlu.FFT_pad(phasor, spec, pad=padding)[1]
-
-    focal, focal_spec = dlu.FFT(
-        phasor, 0.5, spec, pad=padding, output_center=np.zeros(2)
+@pytest.mark.parametrize("n", [6, 7])
+@pytest.mark.parametrize("focal_length", [None, 0.7])
+def test_mft_native_sampling_preserves_power_and_inverts(n, focal_length):
+    field = _field(n)
+    wavelength, spacing = 5e-4, 0.02
+    output_spacing = wavelength / (n * spacing)
+    if focal_length is not None:
+        output_spacing *= focal_length
+    focal = dlu.MFT(
+        field, wavelength, spacing, n, output_spacing, focal_length=focal_length
     )
-    fft_inverse = dlu.FFT(
-        focal, 0.5, focal_spec, inverse=True, output_center=np.zeros(2)
-    )[0]
-    mft_inverse = dlu.MFT(focal, 0.5, focal_spec, padded_spec, inverse=True)
-    mft_forward = dlu.MFT(expected, 0.5, padded_spec, focal_spec)
-    mixed_inverse = dlu.FFT(
-        mft_forward, 0.5, focal_spec, inverse=True, output_center=np.zeros(2)
-    )[0]
-    twice_forward = dlu.FFT(focal, 0.5, focal_spec, output_center=np.zeros(2))[0]
-
-    _assert_field_close(fft_inverse, expected)
-    _assert_field_close(mft_inverse, expected)
-    _assert_field_close(mixed_inverse, expected)
-    _assert_field_close(twice_forward, -np.flip(expected))
-    assert np.allclose(np.sum(np.abs(focal) ** 2), np.sum(np.abs(expected) ** 2))
-
-
-@pytest.mark.parametrize("center", [(0.0, 0.0), (0.17, -0.11)])
-def test_shifted_fft_matches_mft(center):
-    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
-    phasor = _field(spec)
-    actual, spec_out = dlu.FFT(
-        phasor, 0.5, spec, pad=(3, 5), output_center=np.asarray(center)
+    recovered = dlu.MFT(
+        focal,
+        wavelength,
+        output_spacing,
+        n,
+        spacing,
+        focal_length=focal_length,
+        inverse=True,
     )
-    padded_spec = dlu.FFT_pad(phasor, spec, pad=(3, 5))[1]
-    expected = dlu.MFT(
-        phasor=dlu.pad_to(phasor, (24, 30)),
-        wavelength=0.5,
-        spec_in=padded_spec,
-        spec_out=spec_out,
+    assert np.allclose(np.sum(np.abs(focal) ** 2), np.sum(np.abs(field) ** 2))
+    assert np.allclose(recovered, field, rtol=2e-6, atol=2e-6)
+
+
+@pytest.mark.parametrize("inverse", [False, True])
+def test_mft_centred_point_has_flat_complex_output(inverse):
+    n, n_out = 7, 9
+    wavelength, spacing, output_spacing = 5e-4, 0.02, 0.003
+    field = np.zeros((n, n), dtype=complex).at[n // 2, n // 2].set(1 + 2j)
+    result = dlu.MFT(field, wavelength, spacing, n_out, output_spacing, inverse=inverse)
+    # The MFT samples the Fourier integral with the input/output pixel-area factor.
+    expected = (1 + 2j) * spacing * output_spacing / wavelength
+    assert result.shape == (n_out, n_out)
+    assert np.allclose(result, expected)
+
+
+def test_mft_shift_uses_the_declared_units():
+    field = _field(7)
+    output_spacing = 0.003
+    shift = np.array([1.3, -0.7])
+    pixels = dlu.MFT(field, 5e-4, 0.02, 9, output_spacing, shift=shift)
+    physical = dlu.MFT(
+        field,
+        5e-4,
+        0.02,
+        9,
+        output_spacing,
+        shift=shift * output_spacing,
+        pixel=False,
     )
-
-    _assert_field_close(actual, expected)
-
-
-def test_integer_fft_shift_matches_roll_interior():
-    spec = dlu.nd_axes((8, 6), (0.1, 0.13), offsets=(-0.07, 0.04))
-    phasor = _field(spec)
-    native, spec_out = dlu.FFT(phasor, 0.5, spec, pad=(3, 5), output_center=np.zeros(2))
-    dx, dy = (axis[1] - axis[0] for axis in spec_out)
-    shifted = dlu.FFT(
-        phasor, 0.5, spec, pad=(3, 5), output_center=np.asarray((2 * dx, -dy))
-    )[0]
-    rolled = np.roll(native, (1, -2), axis=(-2, -1))
-
-    shifted = np.abs(shifted[1:, :-2]) ** 2
-    rolled = np.abs(rolled[1:, :-2]) ** 2
-    _assert_field_close(shifted, rolled)
+    centred = dlu.MFT(field, 5e-4, 0.02, 9, output_spacing)
+    assert np.allclose(pixels, physical, rtol=2e-6, atol=2e-6)
+    assert not np.allclose(pixels, centred)
 
 
-def test_shifted_abcd_fft_matches_mft():
-    spec_in = dlu.nd_axes((8, 6), (0.1, 0.13), offsets=(-0.07, 0.04))
-    phasor = _field(spec_in)
-    ABCD = dlu.compose_abcd([dlu.abcd_fraunhofer(2.0), dlu.abcd_free_space(0.3)])
-    actual, spec_out = dlu.ABCD_FFT(
-        phasor, 0.5, spec_in, ABCD, output_center=np.asarray((0.2, -0.1))
-    )
-    expected = dlu.ABCD_MFT(phasor, 0.5, spec_in, spec_out, ABCD)
-
-    _assert_field_close(actual, expected)
-
-
-def test_fraunhofer_matches_abcd():
-    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
-    phasor = _field(spec)
-    ABCD = dlu.abcd_fraunhofer(2.0)
-    spec_out = dlu.FFT_spec(spec, 0.5, ABCD)
-
-    direct = dlu.MFT(phasor, 0.5, spec, spec_out, focal_length=2.0)
-    abcd = dlu.ABCD_MFT(phasor, 0.5, spec, spec_out, ABCD)
-    direct_fft, fft_spec = dlu.FFT(phasor, 0.5, spec, focal_length=2.0)
-    abcd_fft, abcd_spec = dlu.ABCD_FFT(phasor, 0.5, spec, ABCD)
-
-    _assert_field_close(direct, abcd)
-    _assert_field_close(direct_fft, abcd_fft)
-    assert all(np.allclose(a, b) for a, b in zip(fft_spec, abcd_spec))
-
-
-def test_fresnel_fft_mft_abcd_agree():
-    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
-    phasor = _field(spec)
-    padded, padded_spec = dlu.FFT_pad(phasor, spec, pad=(2, 3))
-    kwargs = {"focal_length": 2.0, "defocus": 0.1}
-
-    fft, spec_out = dlu.FFT(phasor, 0.5, spec, pad=(2, 3), **kwargs)
-    mft = dlu.MFT(padded, 0.5, padded_spec, spec_out, **kwargs)
-    ABCD = dlu.compose_abcd((dlu.abcd_fraunhofer(2.0), dlu.abcd_free_space(0.1)))
-    abcd = dlu.ABCD_MFT(padded, 0.5, padded_spec, spec_out, ABCD)
-
-    _assert_field_close(fft, mft)
-    _assert_field_close(mft, abcd)
-
-
-@pytest.mark.parametrize("padding", [1, (2, 3)])
-def test_asm_roundtrip(padding):
-    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
-    phasor = _field(spec)
-
-    forward = dlu.ASM(phasor, 0.5, spec, 0.02, pad=padding, crop=False)
-    padded, padded_spec = dlu.FFT_pad(phasor, spec, pad=padding)
-    recovered = dlu.ASM(forward, 0.5, padded_spec, -0.02, crop=False)
-
-    _assert_field_close(recovered, padded)
-
-
-@pytest.mark.parametrize("propagate", [dlu.FFT, dlu.MFT])
-def test_fourier_transforms(propagate):
-    spec = dlu.nd_axes((7, 5), (0.1, 0.13))
-    phasor = _field(spec)
-    spec_out = dlu.FFT_spec(spec, 0.5, dlu.abcd_fraunhofer(2.0))
-
-    def function(field):
-        if propagate is dlu.FFT:
-            return propagate(field, 0.5, spec, focal_length=2.0)[0]
-        return propagate(field, 0.5, spec, spec_out, focal_length=2.0)
-
-    assert_jittable(function, phasor)
-    assert_differentiable(function, phasor)
-
-
-def test_fft_vectorises_over_fields():
-    spec = dlu.nd_axes((7, 5), (0.1, 0.13))
-    phasor = _field(spec)
-    fields = np.stack((phasor, phasor * np.exp(0.3j)))
-    propagate = lambda field: dlu.FFT(field, 0.5, spec, focal_length=2.0)[0]
-
-    mapped = jax.vmap(propagate)(fields)
-    expected = np.stack([propagate(field) for field in fields])
-
-    assert np.allclose(mapped, expected)
-
-
-@pytest.mark.parametrize("method", ["fft", "mft", "abcd_fft", "abcd_mft", "asm"])
-def test_native_leading_dimensions(method):
-    spec = dlu.nd_axes((7, 5), (0.1, 0.13))
-    phasor = _field(spec)
-    fields = np.broadcast_to(phasor, (2, 3) + phasor.shape)
-    ABCD = dlu.abcd_fraunhofer(2.0)
-    spec_out = dlu.FFT_spec(spec, 0.5, ABCD)
-
-    if method == "fft":
-        propagate = lambda field: dlu.FFT(field, 0.5, spec, focal_length=2.0)[0]
-    elif method == "mft":
-        propagate = lambda field: dlu.MFT(field, 0.5, spec, spec_out, focal_length=2.0)
-    elif method == "abcd_fft":
-        propagate = lambda field: dlu.ABCD_FFT(field, 0.5, spec, ABCD)[0]
-    elif method == "abcd_mft":
-        propagate = lambda field: dlu.ABCD_MFT(field, 0.5, spec, spec_out, ABCD)
+@pytest.mark.parametrize("kind", ["fft", "mft"])
+def test_released_transforms_jit_vmap_and_field_gradient(kind):
+    field = _field(7)
+    if kind == "fft":
+        propagate = lambda x: dlu.FFT(x, 5e-4, 0.02, pad=1)[0]
     else:
-        propagate = lambda field: dlu.ASM(field, 0.5, spec, 0.02)
+        propagate = lambda x: dlu.MFT(x, 5e-4, 0.02, 7, 5e-4 / (7 * 0.02))
+    assert_jittable(propagate, field, rtol=2e-6, atol=2e-6)
+    fields = np.stack([field, field * np.exp(0.3j)])
+    mapped = jax.jit(jax.vmap(propagate))(fields)
+    expected = np.stack([propagate(incident) for incident in fields])
+    assert np.allclose(mapped, expected, rtol=2e-6, atol=2e-6)
 
-    actual = propagate(fields)
-    expected = jax.vmap(jax.vmap(propagate))(fields)
+    def power(amplitude):
+        return np.sum(np.abs(propagate(amplitude * field)) ** 2)
 
-    _assert_field_close(actual, expected)
-
-
-def test_inverse_fresnel_mft_roundtrip():
-    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
-    phasor = _field(spec)
-    kwargs = {"focal_length": 2.0, "defocus": 0.1}
-    ABCD = dlu.compose_abcd(
-        (dlu.abcd_fraunhofer(2.0), dlu.abcd_free_space(0.1))
-    )
-    spec_out = dlu.FFT_spec(spec, 0.5, ABCD)
-
-    focal = dlu.MFT(phasor, 0.5, spec, spec_out, **kwargs)
-    recovered = dlu.MFT(focal, 0.5, spec_out, spec, inverse=True, **kwargs)
-
-    _assert_field_close(recovered, phasor)
-
-
-def test_inverse_fresnel_fft_is_rejected():
-    spec = dlu.nd_axes((8, 6), (0.1, 0.13))
-
-    with pytest.raises(ValueError, match="not supported"):
-        dlu.FFT(_field(spec), 0.5, spec, defocus=0.1, inverse=True)
+    derivative = jax.jit(jax.grad(power))(1.2)
+    assert np.allclose(derivative, 2 * 1.2 * np.sum(np.abs(field) ** 2), rtol=2e-6)

@@ -1,7 +1,9 @@
 """Tests for dLux.grids."""
 
+import jax
 import jax.numpy as np
 import pytest
+import zodiax as zdx
 
 import dLux as dl
 import dLux.utils as dlu
@@ -10,6 +12,123 @@ from .helpers import assert_differentiable, assert_jittable
 
 
 class TestSpecifications:
+    @pytest.mark.parametrize("n", [(1,), (3,), (1, 4), (3, 1, 2)])
+    @pytest.mark.parametrize("indexing", ["xy", "ij"])
+    def test_dimension_generic_coordinates(self, n, indexing):
+        d = np.arange(1, len(n) + 1, dtype=float)
+        c = d / 3
+        grid = dl.GridSpec(n, d, c, unit="mm", indexing=indexing)
+        axes = tuple(
+            (np.linspace(-(size - 1) / 2, (size - 1) / 2, size) * step + center) * 1e-3
+            for size, step, center in zip(n, d, c)
+        )
+        expected = np.stack(np.meshgrid(*axes, indexing="ij"))
+        if indexing == "xy":
+            expected = expected.transpose((0,) + tuple(range(1, len(n) + 1))[::-1])
+
+        output = assert_jittable(lambda value: value.coordinates, grid)
+
+        assert grid.shape == (n[::-1] if indexing == "xy" else n)
+        assert output.shape == (len(n),) + grid.shape
+        assert np.allclose(output, expected)
+        assert all(np.allclose(actual, axis) for actual, axis in zip(grid.axes, axes))
+
+    def test_broadcast_metadata_matches_independent_grids(self):
+        d = np.asarray([[[1.0, 2.0]], [[2.0, 3.0]]])
+        c = np.asarray([[[0.0, 1.0], [2.0, -1.0], [1.0, 0.0]]])
+        grid = dl.GridSpec((4, 3), d, c, unit="mm")
+        coordinates, extent = assert_jittable(
+            lambda value: (value.coordinates, value.extent()), grid
+        )
+        expected = np.stack(
+            [
+                np.stack(
+                    [
+                        dl.GridSpec(grid.n, spacing, center, "mm").coordinates
+                        for center in c[0]
+                    ]
+                )
+                for spacing in d[:, 0]
+            ]
+        )
+
+        assert grid.batch_shape == (2, 3)
+        assert np.allclose(coordinates, expected)
+        assert extent.shape == (2, 3, 4)
+
+        # A shared centre must also broadcast over independently batched spacings
+        shared = grid.set(c=None)
+        bounds = np.stack((-shared.fov / 2, shared.fov / 2), -1).reshape((2, 1, 4))
+        assert np.allclose(shared.extent(), bounds)
+
+    def test_coordinate_gradients_and_vectorisation(self):
+        grid = dl.GridSpec((3, 1), (2.0, 3.0), (1.0, 2.0), "mm")
+        gradient = assert_differentiable(lambda value: value.coordinates, grid)
+
+        assert np.allclose(gradient.d, np.asarray((8e-6, 0.0)), atol=1e-10)
+        assert np.allclose(gradient.c, np.asarray((6e-6, 12e-6)), atol=1e-10)
+
+        centres = np.asarray(((0.0, 0.0), (1.0, -2.0)))
+        mapped = jax.vmap(lambda center: grid.set(c=center).coordinates)(centres)
+        assert np.allclose(mapped, grid.set(c=centres).coordinates)
+
+    def test_scalar_sampling_and_field_promotion(self):
+        grid = dl.GridSpec(4, 2.0, unit="mm")
+        image = dl.Intensity(np.ones((4, 4)), grid)
+        partial = dl.GridSpec(d=2.0, unit="mm").match_shape((3, 4))
+
+        assert grid.coordinates.shape == (1, 4)
+        assert image.grid.coordinates.shape == (2, 4, 4)
+        assert np.allclose(image.coordinates, grid.broadcast(2).coordinates)
+        assert partial.coordinates.shape == (2, 3, 4)
+        assert np.allclose(partial.d, np.asarray((2.0, 2.0)))
+
+    @pytest.mark.parametrize(
+        "width, spacing",
+        [(12.0, (3.0, 4.0)), ((8.0, 9.0), (2.0, 3.0))],
+        ids=["scalar-diameter", "axis-diameters"],
+    )
+    def test_contextual_sampling_keeps_physical_units(self, width, spacing):
+        grid = dl.GridSpec(
+            n=(4, 3),
+            diam=zdx.StateRef("width"),
+            c=zdx.StateRef("centre"),
+            unit="mm",
+        )
+        state = zdx.State(width=np.asarray(width), centre=1.0)
+        sampled = assert_jittable(lambda value: grid.sampled(state=value), state)
+        expected = dl.GridSpec((4, 3), spacing, 1.0, "mm")
+
+        assert isinstance(grid.d, zdx.Expression)
+        assert sampled.unit == "mm"
+        assert np.allclose(sampled.d, expected.d)
+        assert np.allclose(sampled.coordinates, expected.coordinates)
+        assert np.allclose(
+            zdx.resolve(grid, state=state).coordinates, expected.coordinates
+        )
+
+    @pytest.mark.parametrize(
+        "old, new", [(4, 5), (5, 4), (4, 6), (6, 4), (4, 7), (7, 4)]
+    )
+    def test_resize_samples_preserves_retained_coordinates(self, old, new):
+        grid = dl.GridSpec(old, 0.2, 0.7, "mm")
+        resized = grid.resize_samples(new)
+        coordinates = dlu.resize_samples(grid.axes[0], (new,), fill=np.nan)
+        retained = np.isfinite(coordinates)
+
+        assert np.allclose(resized.axes[0][retained], coordinates[retained])
+        assert np.allclose(resized.d, grid.d)
+        assert np.allclose(grid.resize(new).c, grid.c)
+
+    def test_frequency_grid_matches_fft_bins(self):
+        grid = dl.GridSpec((4, 5), (2.0, 3.0), (1.0, -2.0), "mm")
+        frequency = assert_jittable(lambda value: value.frequency(), grid)
+
+        assert frequency.unit == "1/m"
+        for size, spacing, axis in zip(grid.n, grid.d_si, frequency.axes):
+            expected = np.fft.fftshift(np.fft.fftfreq(size, spacing))
+            assert np.allclose(axis, expected)
+
     def test_coordinate_interface(self):
         spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), c=(0.1, -0.2), unit="m")
 
@@ -117,6 +236,20 @@ class TestSpecifications:
         assert spec.unit == "mm"
         assert batched.d.shape == batched.c.shape == (2, 2)
         assert np.allclose(batched.c, np.asarray(((0.0, 0.0), (1.0, -2.0))))
+
+    def test_grid_from_axes_broadcasts_and_retains_indexing(self):
+        x = np.asarray((-1.0, 0.0, 1.0)) * 1e-3
+        y = np.asarray(((0.0, 2.0), (1.0, 3.0))) * 1e-3
+        grid = dl.GridSpec.from_axes((x, y), unit="mm", indexing="ij")
+
+        assert grid.coordinates.shape == (2, 2, 3, 2)
+        assert np.allclose(grid.axes[0], np.broadcast_to(x, (2, 3)))
+        assert np.allclose(grid.axes[1], y)
+
+    @pytest.mark.parametrize("axes", [(), (1.0,), ([1.0],), ([],)])
+    def test_grid_from_axes_requires_sampled_vectors(self, axes):
+        with pytest.raises(ValueError, match="coordinate|samples"):
+            dl.GridSpec.from_axes(axes)
 
     def test_grid_sampling_transforms(self):
         spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")

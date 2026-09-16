@@ -7,7 +7,7 @@ from jax import vmap
 import dLux.utils as dlu
 
 from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coeffs
-from ..grids import Affine, PasteSpec
+from ..utils.grids import Affine, PasteSpec
 from ..layers.optical import Optic
 from ..utils.parametrics import (
     Circle,

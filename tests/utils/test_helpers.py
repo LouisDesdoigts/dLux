@@ -47,6 +47,16 @@ def test_tree_and_dictionary_helpers():
     assert list(values) == ["int_0", "int_1", "named"]
 
 
+@pytest.mark.parametrize("ordered", [False, True])
+def test_list2dictionary_preserves_values_when_names_collide(ordered):
+    entries = [("step", 1), ("step_0", 2), ("step", 3), ("step_1", 4)]
+    values = dlu.list2dictionary(entries, ordered=ordered)
+
+    assert list(values.values()) == [1, 2, 3, 4]
+    assert values["step_0"] == 2
+    assert values["step_1"] == 4
+
+
 def test_tree_mapping_with_custom_leaves():
     tree = [(1, 2), (3, 4)]
     output = dlu.map2array(

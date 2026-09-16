@@ -4,8 +4,6 @@ from .helpers import reexport
 
 # Import as modules
 from . import (
-    abcd,
-    propagation,
     coordinates,
     helpers,
     interpolation,
@@ -25,8 +23,6 @@ from . import (
 )
 
 _modules = (
-    abcd,
-    propagation,
     coordinates,
     helpers,
     interpolation,
@@ -46,8 +42,6 @@ _modules = (
 )
 
 _module_names = [
-    "abcd",
-    "propagation",
     "coordinates",
     "helpers",
     "interpolation",
@@ -67,7 +61,19 @@ _module_names = [
 ]
 __all__ = _module_names + reexport(_modules, globals())
 
-# Parametric expressions build on the array utilities and sampling grids.
+# Numerical objects depend on the already available array utilities.
+from . import grids, propagation, sequential
+from .propagation import _legacy
+
+__all__ += ["grids", "propagation"]
+__all__ += reexport((grids, propagation, sequential), globals())
+
+# Parametric expressions build on the array utilities and sampling grids above.
 from . import parametrics
 
 __all__ += ["parametrics"] + reexport((parametrics,), globals())
+
+# Preserve the released array-call interfaces at the utility root. Prepared
+# FFT/MFT objects are available explicitly in dlu.propagation.
+__all__ += reexport((_legacy,), globals())
+__all__ = list(dict.fromkeys(__all__))

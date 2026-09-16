@@ -1,8 +1,11 @@
 """Public package interface for dLux."""
 
 import importlib.metadata
-from .utils import parametrics
+from .utils import grids, parametrics
+from .utils.propagation import abcd as _abcd
 from .utils.helpers import reexport
+from .utils import propagation as _propagation
+from .utils import sequential as _sequential
 
 __version__ = importlib.metadata.version("dLux")
 
@@ -11,12 +14,13 @@ from . import (
     layers,
     systems,
     sources,
-    grids,
     prebuilt,
     compatibility,
 )
 
 _modules = (
+    _abcd,
+    _sequential,
     parametrics,
     layers,
     systems,
@@ -28,6 +32,7 @@ _modules = (
 )
 
 _module_names = [
+    "propagation",
     "parametrics",
     "layers",
     "utils",
@@ -39,3 +44,7 @@ _module_names = [
     "compatibility",
 ]
 __all__ = _module_names + reexport(_modules, globals())
+
+# Keep the numerical facade distinct from the layers' propagation module export.
+propagation = _propagation
+del _propagation

@@ -8,6 +8,7 @@ when constructed.
 from __future__ import annotations
 
 from abc import abstractmethod
+from typing import Any
 import sys
 import warnings
 
@@ -16,14 +17,18 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from .grids import BaseCoordTransform, BaseGridSpec, Distortion, GridSpec, ResizeSpec
+from .utils import grids as _grids
+from .utils.grids import (
+    BaseCoordTransform,
+    BaseGridSpec,
+    Distortion,
+    GridSpec,
+    ResizeSpec,
+)
 from .fields import Intensity, Wavefront
 from .layers.detector import DetectorLayer
-from .layers.propagation import (
-    ABCDFraunhofer,
-    ABCDPropagator,
-    Fraunhofer,
-)
+from .layers.propagation import Propagator, FFTPropagator as _FFTPropagator
+from .utils.propagation.abcd import ABCDFraunhofer, ABCDChain
 from .sources import Source, Spectrum
 from .systems import DetectorSystem, OpticalSystem
 
@@ -548,10 +553,18 @@ class ResolvedSource(Source):
         super().__init__(wavelengths, position, flux, weights, distribution)
 
 
-class MFT(Fraunhofer):
+class MFT(Propagator):
     """Deprecated wrapper for the legacy direct MFT propagator."""
 
-    def __init__(self, npixels, pixel_scale, focal_length=None, inverse=False):
+    def __init__(
+        self,
+        npixels,
+        pixel_scale,
+        focal_length=None,
+        inverse=False,
+        *,
+        alias=None,
+    ):
         """Initialise the deprecated direct MFT propagator.
 
         Parameters
@@ -565,17 +578,30 @@ class MFT(Fraunhofer):
         inverse : bool
             Use reverse Fraunhofer propagation.
         """
-        unit = "rad" if focal_length is None else "m"
+        unit = "m" if inverse or focal_length is not None else "rad"
         grid = GridSpec(n=npixels, d=pixel_scale, unit=unit)
-        migration = "`dl.MFT(n, d, f)` -> `dl.Fraunhofer(GridSpec(n=n, d=d), f)`"
-        warn_deprecated("MFT", "Fraunhofer", migration)
-        super().__init__(grid, focal_length, "mft", inverse)
+        migration = (
+            "`dl.MFT(n, d, f)` -> `dl.Propagator(GridSpec(n=n, d=d, unit='m'), f)`"
+        )
+        warn_deprecated("MFT", "Propagator", migration)
+        super().__init__(grid.broadcast(2), focal_length, inverse=inverse)
+
+        self.alias = alias
 
 
-class FFT(Fraunhofer):
+class FFT(_FFTPropagator):
     """Deprecated wrapper for the legacy direct FFT propagator."""
 
-    def __init__(self, focal_length=None, inverse=False, pad=1, crop=1, center=True):
+    def __init__(
+        self,
+        focal_length=None,
+        inverse=False,
+        pad=1,
+        crop=1,
+        center=True,
+        *,
+        alias=None,
+    ):
         """Initialise the deprecated direct FFT propagator.
 
         Parameters
@@ -590,18 +616,20 @@ class FFT(Fraunhofer):
             Must remain true; uncentred propagation has no compatibility route.
         """
         if not center:
-            example = "`dl.Fraunhofer(dl.ResizeSpec(...), method='fft')`"
-            migration_error("FFT(center=False)", "Fraunhofer", example)
+            example = "`dl.FFTPropagator(dl.FFTSpec(...))`"
+            migration_error("FFT(center=False)", "FFTPropagator", example)
         grid = ResizeSpec(pad=pad, crop=crop, c=0.0)
-        migration = "`dl.FFT(...)` -> `dl.Fraunhofer(ResizeSpec(...), method='fft')`"
-        warn_deprecated("FFT", "Fraunhofer", migration)
-        super().__init__(grid, focal_length, "fft", inverse)
+        migration = "`dl.FFT(...)` -> `dl.FFTPropagator(FFTSpec(...))`"
+        warn_deprecated("FFT", "FFTPropagator", migration)
+        super().__init__(grid, focal_length, inverse=inverse)
+
+        self.alias = alias
 
 
-class MFTPropagator(ABCDPropagator):
+class MFTPropagator(Propagator):
     """Deprecated LCT-based ABCD propagation wrapper."""
 
-    def __init__(self, ABCDs, grid):
+    def __init__(self, ABCDs, grid, *, alias=None):
         """Initialise the deprecated LCT-based ABCD propagator.
 
         Parameters
@@ -612,16 +640,19 @@ class MFTPropagator(ABCDPropagator):
             Physical output grid.
         """
         migration = (
-            "`dl.MFTPropagator(ABCDs, grid)` -> `dl.ABCDPropagator(ABCDs, grid)`"
+            "`dl.MFTPropagator(ABCDs, grid)` -> "
+            "`dl.Propagator(grid, abcd=dl.ABCDChain(ABCDs))`"
         )
-        warn_deprecated("MFTPropagator", "ABCDPropagator", migration)
-        super().__init__(ABCDs, grid, "lct")
+        warn_deprecated("MFTPropagator", "Propagator", migration)
+        super().__init__(grid, abcd=ABCDChain(ABCDs))
+
+        self.alias = alias
 
 
-class FFTPropagator(ABCDPropagator):
+class FFTPropagator(_FFTPropagator):
     """Deprecated FFT-based ABCD propagation wrapper."""
 
-    def __init__(self, ABCDs, grid):
+    def __init__(self, ABCDs, grid, *, alias=None):
         """Initialise the deprecated FFT-based ABCD propagator.
 
         Parameters
@@ -632,16 +663,20 @@ class FFTPropagator(ABCDPropagator):
             FFT resize specification.
         """
         old = "`dl.FFTPropagator(ABCDs, grid)`"
-        new = "`dl.ABCDPropagator(ABCDs, grid, method='fft')`"
+        new = "`dl.FFTPropagator(grid, abcd=dl.ABCDChain(ABCDs))`"
         migration = f"{old} -> {new}"
-        warn_deprecated("FFTPropagator", "ABCDPropagator", migration)
-        super().__init__(ABCDs, grid, "fft")
+        warn_deprecated("FFTPropagator(ABCDs, grid)", "FFTPropagator", migration)
+        super().__init__(grid, abcd=ABCDChain(ABCDs))
+
+        self.alias = alias
 
 
 class ABCDConjugatePlane(ABCDFraunhofer):
     """Deprecated name for ``ABCDFraunhofer``."""
 
-    def __init__(self, focal_length):
+    focal_length: Any
+
+    def __init__(self, focal_length, *, alias=None):
         """Initialise the deprecated conjugate-plane element.
 
         Parameters
@@ -652,6 +687,8 @@ class ABCDConjugatePlane(ABCDFraunhofer):
         migration = "`dl.ABCDConjugatePlane(f)` -> `dl.ABCDFraunhofer(f)`"
         warn_deprecated("ABCDConjugatePlane", "ABCDFraunhofer", migration)
         super().__init__(focal_length)
+
+        self.alias = alias
 
 
 def _removed_class(name, replacement, example):
@@ -816,6 +853,10 @@ def _legacy_module(name, replacement, values):
     return namespace
 
 
+# Keep the former module path pointing directly to its numerical implementation.
+sys.modules["dLux.grids"] = _grids
+
+
 coordinates = _legacy_module(
     "coordinates",
     "dLux.grids",
@@ -943,7 +984,6 @@ __all__ = [
     "DistortedCoords",
     "Dither",
     "FFT",
-    "FFTPropagator",
     "Instrument",
     "LayeredDetector",
     "LayeredOpticalSystem",

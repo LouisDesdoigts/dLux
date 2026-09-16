@@ -13,7 +13,7 @@ from jax import Array, vmap
 import dLux.utils as dlu
 
 from ..base import Base
-from ..grids import BaseCoordTransform, GridSpec
+from ..utils.grids import BaseCoordTransform, GridSpec
 from ..layers.optical import Optic
 from ..layers.sparse import SparseOptic
 from ..utils.parametrics import Basis, Shape

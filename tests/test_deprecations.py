@@ -230,3 +230,24 @@ def test_legacy_detector_layer_module():
     assert np.allclose(CustomLayer().apply(intensity).data, 2)
     assert downsample.kernel_size == 2
     assert downsample(intensity).data.shape == (2, 2)
+
+
+@pytest.mark.parametrize("kind", ["mft", "fft", "abcd_fft"])
+def test_legacy_propagation_wrappers_preserve_modern_complex_fields(kind):
+    pupil = dl.GridSpec((7, 6), (0.02, 0.03), unit="m")
+    wavefront = dl.Wavefront(5e-4, pupil)
+    with pytest.warns(DeprecationWarning) as warnings:
+        if kind == "mft":
+            legacy = dl.MFT(5, 0.01, 0.7)
+            modern = dl.Propagator(dl.GridSpec((5, 5), 0.01, unit="m"), 0.7)
+        elif kind == "fft":
+            legacy = dl.FFT(0.7, pad=2, crop=2)
+            modern = dl.FFTPropagator(dl.FFTSpec(pad=2, crop=2, c=0.0), 0.7)
+        else:
+            elements = [dl.ABCDFreeSpace(0.1)]
+            legacy = dl.compatibility.FFTPropagator(elements, dl.FFTSpec())
+            modern = dl.FFTPropagator(abcd=dl.ABCDChain(elements))
+    message = str(warnings[0].message)
+    assert "0.17.0" in message and "->" in message and "Propagator" in message
+    assert np.allclose(legacy(wavefront).phasor, modern(wavefront).phasor)
+    assert dl.FFTPropagator is dl.layers.FFTPropagator

@@ -3,15 +3,22 @@
 import jax.numpy as np
 from jax import Array, lax
 
-import dLux.utils as dlu
+from .helpers import as_size
 
-__all__ = ["pad_to", "crop_to", "resize", "downsample", "paste"]
+__all__ = [
+    "pad_to",
+    "crop_to",
+    "resize",
+    "resize_samples",
+    "downsample",
+    "paste",
+]
 
 
 def _size(npixels: int | tuple[int, ...]) -> tuple[int, ...]:
     """Cast a scalar or tuple to a physical-axis size tuple."""
     ndim = None if isinstance(npixels, (tuple, list)) else 2
-    return dlu.as_size(npixels, ndim, "npixels")
+    return as_size(npixels, ndim, "npixels")
 
 
 def _spatial_sizes(array: Array, npixels) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -124,6 +131,55 @@ def resize(array: Array, npixels: int | tuple[int, ...], fill: float = 0.0) -> A
     if intermediate != sizes_out:
         array = pad_to(array, sizes_out, fill)
     return array
+
+
+def resize_samples(
+    array: Array,
+    npixels: int | tuple[int, ...],
+    fill: float = 0.0,
+) -> Array:
+    """Centrally resize sampled axes while allowing parity changes.
+
+    Unlike :func:`resize`, this operation preserves the retained sample locations
+    rather than requiring the geometric centre to remain on the same sample parity.
+    When an odd sample must be removed it is removed from the end; when one must be
+    added it is added at the end. A matching coordinate grid must therefore be
+    updated with ``GridSpec.resize_samples`` rather than ``GridSpec.resize``.
+
+    Parameters
+    ----------
+    array : Array
+        Input values whose final axes are spatial.
+    npixels : int or tuple[int, ...]
+        Target counts in physical-axis order.
+    fill : float
+        Value used for newly padded samples.
+
+    Returns
+    -------
+    array : Array
+        Resized values with all leading axes preserved.
+    """
+    sizes_in, sizes_out = _spatial_sizes(array, npixels)
+    ndim = len(sizes_out)
+
+    # Centrally crop, retaining the earlier sample when parity changes
+    slices = [slice(None)] * array.ndim
+    for axis, target in enumerate(sizes_out[::-1], start=array.ndim - ndim):
+        size = array.shape[axis]
+        if target < size:
+            start = (size - target) // 2
+            slices[axis] = slice(start, start + target)
+    array = array[tuple(slices)]
+
+    # Centrally pad, placing an unmatched sample at the end
+    widths = [(0, 0)] * array.ndim
+    for axis, target in enumerate(sizes_out[::-1], start=array.ndim - ndim):
+        size = array.shape[axis]
+        if target > size:
+            before = (target - size) // 2
+            widths[axis] = (before, target - size - before)
+    return np.pad(array, widths, constant_values=fill)
 
 
 def downsample(array: Array, n: int | tuple[int, ...], mean: bool = True) -> Array:
@@ -247,7 +303,7 @@ def paste(
     # Standardise the pasted arrays and placement indices
     arrays = np.asarray(arrays)
     starts = np.asarray(starts, dtype=int)
-    sizes = dlu.as_size(npixels, 2, "npixels")
+    sizes = as_size(npixels, 2, "npixels")
 
     if arrays.ndim < 3:
         raise ValueError("arrays must have shape (n, ..., ny, nx).")

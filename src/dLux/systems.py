@@ -10,7 +10,7 @@ import jax.numpy as np
 import dLux.utils as dlu
 
 from .base import Base
-from .grids import GridSpec
+from .utils.grids import GridSpec
 from .layers.detector import BaseDetectorLayer
 from .layers.optical import BaseLayer, BaseOpticalLayer
 from .fields import Intensity, Wavefront

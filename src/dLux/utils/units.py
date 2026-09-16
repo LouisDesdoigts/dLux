@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-import jax.numpy as np
+import zodiax as zdx
 from jax import Array
 
 __all__ = [
@@ -25,70 +25,40 @@ __all__ = [
 ]
 
 
-# Canonical units store their physical dimension and canonical-SI factor
-_UNITS = {
-    "rad": ("angle", 1.0),
-    "deg": ("angle", np.pi / 180.0),
-    "arcmin": ("angle", np.pi / (180.0 * 60.0)),
-    "arcsec": ("angle", np.pi / (180.0 * 3600.0)),
-    "mas": ("angle", np.pi / (180.0 * 3.6e6)),
-    "uas": ("angle", np.pi / (180.0 * 3.6e9)),
-    "m": ("length", 1.0),
-    "angstrom": ("length", 1e-10),
-    "photon": ("photon", 1.0),
+_DIMENSIONS = ("angle", "length", "spatial_frequency", "photon")
+_ACCEPTED_UNITS = {
+    None: "rad, deg, arcmin, arcsec, mas, uas, m, angstrom, photon",
+    "angle": "rad, deg, arcmin, arcsec, mas, uas",
+    "length": "m, angstrom",
+    "spatial_frequency": "1/m, 1/mm, 1/um, 1/nm",
+    "photon": "photon",
 }
-
-# Aliases are resolved before any prefix parsing
-_ALIASES = {
-    "radian": "rad",
-    "radians": "rad",
-    "degree": "deg",
-    "degrees": "deg",
-    "am": "arcmin",
-    "arcmins": "arcmin",
-    "arcminute": "arcmin",
-    "arcminutes": "arcmin",
-    "as": "arcsec",
-    "arcsecs": "arcsec",
-    "arcsecond": "arcsec",
-    "arcseconds": "arcsec",
-    "metre": "m",
-    "metres": "m",
-    "meter": "m",
-    "meters": "m",
-    "a": "angstrom",
-    "aa": "angstrom",
-    "ångström": "angstrom",
-    "angstroms": "angstrom",
-    "photons": "photon",
-}
-
-_PREFIXES = {"G": 1e9, "M": 1e6, "k": 1e3, "m": 1e-3, "u": 1e-6, "n": 1e-9}
-_DIMENSIONS = ("angle", "length", "photon")
 
 
 @lru_cache(maxsize=None)
 def _unit_info(unit: str):
-    """Resolve a unit into canonical spelling, dimension, and SI factor."""
-    if not isinstance(unit, str):
-        raise TypeError("unit must be a string.")
-    canonical = unit.strip()
-    if not canonical:
-        raise ValueError("unit cannot be empty.")
+    """Adapt Zodiax unit information to dLux physical dimensions."""
+    if isinstance(unit, zdx.Unit):
+        unit = unit.unit
+    info = zdx.unit_info(unit)
 
-    # Resolve direct canonical units and aliases
-    canonical = _ALIASES.get(canonical.lower(), canonical)
-    if canonical in _UNITS:
-        dimension, factor = _UNITS[canonical]
-        return canonical, dimension, factor
+    if info.category == "angular" and info.power == 1:
+        dimension = "angle"
+    elif info.category == "cartesian" and info.power == 1:
+        dimension = "length"
+    elif info.category == "cartesian" and info.power == -1:
+        dimension = "spatial_frequency"
+    elif info.category == "photon" and info.power == 1:
+        dimension = "photon"
+    else:
+        raise ValueError(f"Unknown unit {unit!r}.")
 
-    # Resolve the supported short-form prefixes
-    prefix = canonical[0]
-    base = _ALIASES.get(canonical[1:].lower(), canonical[1:])
-    if prefix in _PREFIXES and base in _UNITS:
-        dimension, factor = _UNITS[base]
-        return prefix + base, dimension, _PREFIXES[prefix] * factor
-    raise ValueError(f"Unknown unit {unit!r}.")
+    return info.unit, dimension, info.factor
+
+
+def _unit_dimension(unit: str) -> str:
+    """Return the physical dimension of a supported unit."""
+    return _unit_info(unit)[1]
 
 
 def _validate_dimension(unit, resolved, dimension, name):
@@ -104,12 +74,7 @@ def _validate_dimension(unit, resolved, dimension, name):
 
 def _unit_error(unit, dimension, name):
     """Build an accepted-value error for one physical dimension."""
-    if dimension is None:
-        accepted = ", ".join(_UNITS)
-    else:
-        accepted = ", ".join(
-            key for key, (kind, _) in _UNITS.items() if kind == dimension
-        )
+    accepted = _ACCEPTED_UNITS.get(dimension, "")
     return ValueError(
         f"Unknown {name} {unit!r}. Accepted units include {accepted} and supported "
         "short-form prefixes."
@@ -172,7 +137,7 @@ def unit_factor(unit: str, *, dimension=None, name="unit"):
     Returns
     -------
     factor : float
-        Multiplicative factor converting angles to radians or lengths to metres.
+        Multiplicative factor converting values to canonical SI units.
 
     Raises
     ------
@@ -218,11 +183,11 @@ def convert(
     ValueError
         If either unit is unknown or the units have incompatible dimensions.
     """
-    _, dim_in, fin = _resolve_unit(unit_in, dimension, name)
-    _, dim_out, fout = _resolve_unit(unit_out, dimension, name)
+    source, dim_in, _ = _resolve_unit(unit_in, dimension, name)
+    target, dim_out, _ = _resolve_unit(unit_out, dimension, name)
     if dim_in != dim_out:
         raise ValueError(f"Cannot convert {name} from {unit_in!r} to {unit_out!r}.")
-    return value * (fin / fout) / scale
+    return zdx.convert(value, source, target) / scale
 
 
 def rad2arcsec(values: Array) -> Array:

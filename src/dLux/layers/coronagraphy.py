@@ -3,7 +3,7 @@
 import zodiax as zdx
 
 from .optical import OpticalLayer
-from .propagation import Fraunhofer
+from .propagation import Propagator
 
 __all__ = ["SoummerFPM"]
 
@@ -17,7 +17,7 @@ class SoummerFPM(OpticalLayer):
     parametric optics, and Jones optics that promote the wavefront to a polarised
     representation.
 
-    This implementation requires a forward MFT ``Fraunhofer`` propagator. The same
+    This implementation requires a forward MFT ``Propagator`` propagator. The same
     propagator is configured for inverse propagation when returning the modified
     field to the input pupil grid.
 
@@ -27,8 +27,8 @@ class SoummerFPM(OpticalLayer):
         Callable optical layer or composition, such as ``Sequential``, applied on
         the sampled focal grid. It must return a wavefront on that same grid and
         act as the identity outside the compact region represented by the grid.
-    propagator : Fraunhofer
-        Forward ``Fraunhofer`` propagator configured with ``method="mft"``.
+    propagator : Propagator
+        Forward ``Propagator`` propagator with explicit output sampling.
 
     References
     ----------
@@ -54,7 +54,7 @@ class SoummerFPM(OpticalLayer):
     # Construct the Soummer propagation layer
     propagation = dl.SoummerFPM(
         optic=dl.Optic(transmission=fpm),
-        propagator=dl.Fraunhofer(focal_grid),
+        propagator=dl.Propagator(focal_grid),
     )
 
     # Construct the entrance pupil and wavefront
@@ -68,7 +68,7 @@ class SoummerFPM(OpticalLayer):
     """
 
     optic: zdx.Module
-    propagator: Fraunhofer
+    propagator: Propagator
 
     def __init__(self, optic, propagator, *, alias=None):
         """Initialise a Soummer focal-plane-mask operation.
@@ -78,17 +78,17 @@ class SoummerFPM(OpticalLayer):
         optic : zodiax.Module
             Callable optical mask or composition with ``apply(wavefront, **context)``.
             It must preserve focal sampling; complex and Jones masks are supported.
-        propagator : Fraunhofer
+        propagator : Propagator
             MFT-based focal propagator used forward and in reverse.
         """
         if not isinstance(optic, zdx.Module) or not callable(
             getattr(optic, "apply", None)
         ):
             raise TypeError("optic must be a callable optical layer or composition.")
-        if not isinstance(propagator, Fraunhofer):
-            raise TypeError("propagator must be a Fraunhofer layer.")
-        if propagator.method != "mft":
-            raise ValueError("SoummerFPM requires an MFT Fraunhofer propagator.")
+        if not isinstance(propagator, Propagator):
+            raise TypeError("propagator must be a Propagator layer.")
+        if propagator.abcd is not None or propagator.defocus is not None:
+            raise ValueError("SoummerFPM requires an undefocused conjugate Propagator.")
         if propagator.inverse:
             raise ValueError("SoummerFPM requires a forward propagator.")
         self.optic = optic
@@ -109,7 +109,7 @@ class SoummerFPM(OpticalLayer):
         difference = focal - self.optic(focal, **context)
 
         # Inverse propagate only the field introduced by the optic
-        inverse = self.propagator.set(grid=wavefront.grid, inverse=True)
+        inverse = self.propagator.set(grid_out=wavefront.grid, inverse=True)
         pupil_difference = inverse(difference, **context)
 
         # Subtract the focal-plane modification from the original pupil

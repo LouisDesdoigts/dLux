@@ -229,11 +229,20 @@ def list2dictionary(list_in: list, ordered: bool, allowed_types: tuple = ()) -> 
         if " " in name:
             raise ValueError(f"Names cannot contain spaces, got {name}")
 
-    counts, seen = Counter(name for name, _ in entries), defaultdict(int)
+    counts = Counter(name for name, _ in entries)
+    used_names = set(counts)
+    next_index = defaultdict(int)
     dict_out = OrderedDict() if ordered else {}
     for name, item in entries:
-        key = f"{name}_{seen[name]}" if counts[name] > 1 else name
-        seen[name] += 1
+        key = name
+        if counts[name] > 1:
+            # Skip supplied names and names already assigned to earlier entries.
+            key = f"{name}_{next_index[name]}"
+            while key in used_names:
+                next_index[name] += 1
+                key = f"{name}_{next_index[name]}"
+            next_index[name] += 1
+            used_names.add(key)
         dict_out[key] = item
     return dict_out
 

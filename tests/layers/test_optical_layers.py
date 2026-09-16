@@ -2,6 +2,7 @@
 
 import jax.numpy as np
 import pytest
+from abcdLux import lct
 
 import dLux as dl
 
@@ -185,21 +186,23 @@ class TestSoummerFPM:
         wavefront = make_wavefront()
         phase = np.linspace(0.0, np.pi, 48).reshape(8, 6)
         optic = dl.Optic(transmission=0.7, phase=phase)
-        layer = dl.SoummerFPM(optic, dl.Fraunhofer(focal_spec))
+        propagator = dl.Propagator(focal_spec)
+        layer = dl.SoummerFPM(optic, propagator)
 
-        focal = dl.utils.MFT(
+        focal = lct.lct_prop(
             wavefront.phasor,
-            wavefront.wavelength,
             wavefront.axes,
             focal_spec.axes,
+            wavefront.wavelength,
+            propagator.matrix,
         )
         modified = focal * 0.7 * np.exp(1j * phase)
-        difference = dl.utils.MFT(
+        difference = lct.lct_prop(
             focal - modified,
-            wavefront.wavelength,
             focal_spec.axes,
             wavefront.axes,
-            inverse=True,
+            wavefront.wavelength,
+            propagator.set(inverse=True).matrix,
         )
         expected = wavefront.set(phasor=wavefront.phasor - difference)
 
@@ -209,7 +212,7 @@ class TestSoummerFPM:
     def test_parametric_optic(self, focal_spec, make_wavefront):
         wavefront = make_wavefront()
         optic = dl.Optic(transmission=dl.Complement(dl.Circle(diameter=8e-7)))
-        layer = dl.SoummerFPM(optic, dl.Fraunhofer(focal_spec))
+        layer = dl.SoummerFPM(optic, dl.Propagator(focal_spec))
 
         assert isinstance(layer.optic.transmission, dl.Parametric)
         assert_jittable(layer, wavefront, rtol=1e-5, atol=1e-5)
@@ -224,7 +227,7 @@ class TestSoummerFPM:
 
     def test_polarising_optic(self, focal_spec, make_wavefront):
         wavefront = make_wavefront()
-        layer = dl.SoummerFPM(dl.LinearPolariser(np.pi / 4), dl.Fraunhofer(focal_spec))
+        layer = dl.SoummerFPM(dl.LinearPolariser(np.pi / 4), dl.Propagator(focal_spec))
 
         output = assert_jittable(layer, wavefront, rtol=1e-5, atol=1e-5)
 
@@ -235,7 +238,7 @@ class TestSoummerFPM:
         wavefront = make_wavefront()
         grid = dl.GridSpec(n=(6, 8), d=(2e-6, 3e-6), unit="m")
         layer = dl.SoummerFPM(
-            dl.Optic(transmission=0.5), dl.Fraunhofer(grid, focal_length=2.0)
+            dl.Optic(transmission=0.5), dl.Propagator(grid, focal_length=2.0)
         )
 
         assert_differentiable(
@@ -246,7 +249,7 @@ class TestSoummerFPM:
         )
 
     def test_vectorised_wavefronts(self, focal_spec, make_wavefront):
-        layer = dl.SoummerFPM(dl.Optic(transmission=0.5), dl.Fraunhofer(focal_spec))
+        layer = dl.SoummerFPM(dl.Optic(transmission=0.5), dl.Propagator(focal_spec))
         chromatic = make_wavefront(wavelength=np.asarray([1e-6, 1.1e-6]))
         polarised = make_wavefront(polarised=True)
 
@@ -255,10 +258,12 @@ class TestSoummerFPM:
 
     def test_validation(self, focal_spec, make_wavefront):
         with pytest.raises(TypeError, match="callable optical layer"):
-            dl.SoummerFPM(np.ones(focal_spec.shape), dl.Fraunhofer(focal_spec))
-        with pytest.raises(TypeError, match="Fraunhofer"):
+            dl.SoummerFPM(np.ones(focal_spec.shape), dl.Propagator(focal_spec))
+        with pytest.raises(TypeError, match="Propagator"):
             dl.SoummerFPM(dl.Optic(), dl.FreeSpace(0.1))
-        with pytest.raises(ValueError, match="MFT"):
-            dl.SoummerFPM(dl.Optic(), dl.Fraunhofer(dl.ResizeSpec(), method="fft"))
+        with pytest.raises(TypeError, match="Propagator"):
+            dl.SoummerFPM(dl.Optic(), dl.FFTPropagator(dl.ResizeSpec()))
         with pytest.raises(ValueError, match="forward"):
-            dl.SoummerFPM(dl.Optic(), dl.Fraunhofer(focal_spec, inverse=True))
+            dl.SoummerFPM(
+                dl.Optic(), dl.Propagator(focal_spec.set(unit="m"), inverse=True)
+            )
