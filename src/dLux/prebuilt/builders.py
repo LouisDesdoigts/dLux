@@ -16,8 +16,8 @@ from ..base import Base
 from ..grids import BaseCoordTransform, GridSpec
 from ..layers.optical import Optic
 from ..layers.sparse import SparseOptic
-from ..parametric import Basis, Shape
-from ..parametric.bases import _resolve_coeffs
+from ..utils.parametrics import Basis, Shape
+from ..utils.parametrics.bases import _resolve_coeffs
 
 __all__ = [
     "BaseBuilder",

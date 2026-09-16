@@ -1,6 +1,6 @@
 """Contextual expressions, optical bases, and physical-property models."""
 
-from ..utils.helpers import reexport
+from ..helpers import reexport
 from . import (
     bases,
     gaussians,
@@ -20,14 +20,5 @@ _modules = (
     refractive,
     spectral,
 )
-_module_names = [
-    "parametrics",
-    "gaussians",
-    "bases",
-    "polynomials",
-    "shapes",
-    "refractive",
-    "spectral",
-]
-
-__all__ = _module_names + reexport(_modules, globals())
+# Export the classes; the constituent modules stay within this package.
+__all__ = reexport(_modules, globals())

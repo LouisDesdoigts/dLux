@@ -8,7 +8,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..utils.grids import GridSpec
+from ..grids import GridSpec
 from .bases import Basis, SpatialBasis, ParametricBasis, _coefficients
 from .parametrics import SpatialExpression, _spatial_context
 

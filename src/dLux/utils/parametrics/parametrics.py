@@ -14,7 +14,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..utils.grids import BaseCoordTransform, GridSpec
+from ..grids import BaseCoordTransform, GridSpec
 
 __all__ = [
     "Parametric",

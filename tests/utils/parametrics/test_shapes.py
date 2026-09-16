@@ -1,4 +1,4 @@
-"""Tests for dLux.parametric.shapes."""
+"""Tests for dLux.utils.parametrics.shapes."""
 
 import jax.numpy as np
 import zodiax as zdx

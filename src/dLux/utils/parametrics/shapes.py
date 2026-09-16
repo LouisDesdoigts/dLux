@@ -10,7 +10,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..utils.grids import BaseCoordTransform
+from ..grids import BaseCoordTransform
 from .parametrics import SpatialExpression, _spatial_context
 
 __all__ = [

@@ -7,7 +7,7 @@ import zodiax as zdx
 
 import dLux as dl
 import dLux.utils as dlu
-from dLux.parametric.parametrics import _spatial_context
+from dLux.utils.parametrics.parametrics import _spatial_context
 from tests.helpers import assert_jittable
 
 

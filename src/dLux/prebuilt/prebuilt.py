@@ -9,7 +9,7 @@ import dLux.utils as dlu
 from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coeffs
 from ..grids import Affine, PasteSpec
 from ..layers.optical import Optic
-from ..parametric import (
+from ..utils.parametrics import (
     Circle,
     Rectangle,
     RegularPolygon,
@@ -18,7 +18,7 @@ from ..parametric import (
     Spider,
     TransformedShape,
 )
-from ..parametric.bases import _resolve_coeffs
+from ..utils.parametrics.bases import _resolve_coeffs
 
 __all__ = [
     "SimpleCircular",

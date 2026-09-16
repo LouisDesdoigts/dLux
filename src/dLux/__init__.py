@@ -1,13 +1,13 @@
 """Public package interface for dLux."""
 
 import importlib.metadata
+from .utils import parametrics
 from .utils.helpers import reexport
 
 __version__ = importlib.metadata.version("dLux")
 
 from . import (
     fields,
-    parametric,
     layers,
     systems,
     sources,
@@ -17,7 +17,7 @@ from . import (
 )
 
 _modules = (
-    parametric,
+    parametrics,
     layers,
     systems,
     sources,
@@ -28,7 +28,7 @@ _modules = (
 )
 
 _module_names = [
-    "parametric",
+    "parametrics",
     "layers",
     "utils",
     "systems",

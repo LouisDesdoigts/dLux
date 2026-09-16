@@ -66,3 +66,8 @@ _module_names = [
     "source_estimation",
 ]
 __all__ = _module_names + reexport(_modules, globals())
+
+# Parametric expressions build on the array utilities and sampling grids.
+from . import parametrics
+
+__all__ += ["parametrics"] + reexport((parametrics,), globals())

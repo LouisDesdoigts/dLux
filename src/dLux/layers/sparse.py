@@ -8,8 +8,8 @@ import zodiax as zdx
 from jax import Array, vmap
 
 from ..utils.grids import Affine, AffineMap, BaseCoordTransform, Distortion, GridSpec
-from ..parametric.bases import Basis, ImplicitBasis, FourierBasis
-from ..parametric.polynomials import Polynomial
+from ..utils.parametrics.bases import Basis, ImplicitBasis, FourierBasis
+from ..utils.parametrics.polynomials import Polynomial
 from ..fields import Wavefront
 from .dynamic import BaseDynamicLayer
 from .optical import BaseOpticalLayer, OpticalLayer, Optic

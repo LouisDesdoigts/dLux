@@ -1,4 +1,4 @@
-"""Tests for dLux.parametric.refractive."""
+"""Tests for dLux.utils.parametrics.refractive."""
 
 import jax.numpy as np
 import pytest

@@ -12,7 +12,7 @@ from jax import Array, vmap
 import dLux.utils as dlu
 
 from .fields import Wavefront
-from .parametric import Parametric, ParametricHolder, resolve
+from .utils.parametrics import Parametric, ParametricHolder, resolve
 
 __all__ = ["BaseSource", "Spectrum", "Source", "BinarySource"]
 

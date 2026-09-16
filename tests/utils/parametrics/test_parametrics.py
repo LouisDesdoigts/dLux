@@ -1,4 +1,4 @@
-"""Tests for dLux.parametric.parametrics."""
+"""Tests for dLux.utils.parametrics.parametrics."""
 
 import jax.numpy as np
 import jax
@@ -6,8 +6,19 @@ import pytest
 import zodiax as zdx
 
 import dLux as dl
+import dLux.utils as dlu
+from dLux.utils import parametrics
 
 from tests.helpers import assert_differentiable, assert_jittable
+
+
+@pytest.mark.parametrize(
+    "name", ["Basis", "Gaussian", "DynamicParametric", "Interpolation"]
+)
+def test_public_parametric_imports(name):
+    """The utility package and convenient namespaces expose the same classes."""
+    assert getattr(dl, name) is getattr(parametrics, name)
+    assert getattr(dlu, name) is getattr(parametrics, name)
 
 
 class CoordinateValue(dl.Parametric):

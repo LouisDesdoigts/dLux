@@ -18,7 +18,6 @@ import dLux.utils as dlu
 from .bases import _coefficients
 from .parametrics import Interpolation, Parametric
 
-
 __all__ = ["CauchyIndex", "PolynomialIndex", "InterpolatedIndex"]
 
 

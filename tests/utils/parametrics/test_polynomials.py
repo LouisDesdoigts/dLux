@@ -1,4 +1,4 @@
-"""Tests for dLux.parametric.polynomials."""
+"""Tests for dLux.utils.parametrics.polynomials."""
 
 import jax.numpy as np
 import jax

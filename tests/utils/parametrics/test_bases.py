@@ -1,4 +1,4 @@
-"""Tests for dLux.parametric.bases."""
+"""Tests for dLux.utils.parametrics.bases."""
 
 import jax.numpy as np
 import jax

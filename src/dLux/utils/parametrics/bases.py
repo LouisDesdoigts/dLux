@@ -14,7 +14,7 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..utils.grids import PasteSpec
+from ..grids import PasteSpec
 from .parametrics import Parametric, SpatialExpression, _spatial_context
 
 __all__ = [

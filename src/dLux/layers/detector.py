@@ -12,7 +12,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..fields import Intensity
-from ..parametric import CorrelatedGaussian, Gaussian
+from ..utils.parametrics import CorrelatedGaussian, Gaussian
 from .optical import BaseLayer
 
 __all__ = [
