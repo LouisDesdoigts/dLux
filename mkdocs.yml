@@ -95,8 +95,6 @@ nav:
     - Basics:
       - Overview: tutorials/basics/overview.md
       - Migrating to 0.16: migration.md
-      - Parameters and Updates: parameters.md
-      - Parametric Values: parametrics.md
     - Advanced:
       - Overview: tutorials/advanced/overview.md
     - Old Tutorials:
