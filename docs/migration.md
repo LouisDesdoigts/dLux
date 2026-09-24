@@ -1,414 +1,347 @@
-# Migrating to dLux 0.16
+# Migrating from dLux 0.15.1 to 0.16
 
-dLux 0.16 reorganises the package around multidimensional, unit-aware grids; field
-containers; parametrics; composable layers; prebuilt optical components; and explicit
-optical and detector systems. It also makes vectorisation and unitful behaviour part
-of the core modelling contracts. This guide shows how common dLux 0.14 and 0.15
-workflows translate to the new API. Compatibility aliases remain where old behaviour
-can be preserved and are scheduled for removal in dLux 0.17.
+The main changes are explicit sampling with `Grid`, array parameterisations inside
+`Optic`, and separate optical, photometric and detector stages. `OpticalSystem`
+retains `.propagate()` and `.model()` with array returns by default. `Imager`
+adds stored source, bandpass and detector settings with methods for each stage.
 
-## Grids and coordinates
+## Start with the compatibility constructors
 
-Older dLux objects each carried their own sampling values. A wavefront, for example,
-was constructed directly from a square pixel count and diameter:
+For an existing script, use the released namespace explicitly:
 
 ```python
-# dLux 0.14
-wavefront = dl.Wavefront(npixels=128, diameter=1.0, wavelength=650e-9)
-
-# dLux 0.16
-grid = dl.GridSpec(n=128, d=0.01, unit="m")
-wavefront = dl.Wavefront(650e-9, grid)
-```
-
-`GridSpec` is now a core object retained by fields, systems, and propagators. It
-centralises sample counts, pixel scales, centres, dimensionality, and physical units,
-so sampling changes remain explicit as a field moves through a model. Its `n`, `d`,
-and optional `c` values follow physical-axis order and may be multidimensional even
-when a square grid is constructed from scalars.
-
-Coordinate transformations now live alongside grids. Replace `DistortedCoords` with
-`Distortion`; replace the former concrete `CoordTransform` with `Affine`.
-
-## Fields
-
-Wavefronts, deterministic sampled intensities, and detector images now live in
-`dLux.fields`. Construct a wavefront from its wavelength and a grid:
-
-```python
-wavefront = dl.Wavefront(650e-9, pupil_grid)
-```
-
-Fields retain their `GridSpec`, including its physical unit. Use field methods for
-normalisation, tilts, OPD, phase, interpolation, and image simulation rather than
-manually updating their sampled arrays.
-
-Wavelength arrays create vectorised wavefronts directly. Optical layers implement a
-single monochromatic operation and dLux maps it over leading wavelength and batch
-axes:
-
-```python
-wavelengths = np.linspace(600, 700, 5) * 1e-9
-wavefronts = dl.Wavefront(wavelengths, pupil_grid)
-```
-
-`Intensity` replaces the former `PSF` container because extended-source and
-detector-domain predictions are not necessarily point-spread functions. Convert
-between the deterministic and observed containers explicitly:
-
-```python
-intensity = wavefront.to_intensity()
-image = intensity.to_image(read_noise=3.0)
-```
-
-`PSF` remains a warning-backed constructor alias until dLux 0.17.
-
-## Optical and detector systems
-
-Replace specialised layered, angular, Cartesian, and parametric system classes with
-explicit composition:
-
-```python
-# dLux 0.15
-optics = dl.LayeredOpticalSystem(npix, diameter, layers)
-
-# dLux 0.16
-pupil_grid = dl.GridSpec(n=npix, diam=diameter, unit="m")
-optics = dl.OpticalSystem(layers, pupil_grid)
-```
-
-`OpticalSystem.model(source)` and `source.model(optics)` are equivalent and return an
-`Intensity`. Detector systems apply deterministic response layers and also return an
-`Intensity`; construct an `Image` explicitly before simulating observations:
-
-```python
-intensity = optics.model(source)
-intensity = detector.model(intensity)
-image = dl.Image(intensity, read_noise=3.0)
-```
-
-Detector layers now use concise transformation names:
-
-| Deprecated | Current |
-| --- | --- |
-| `ApplyPixelResponse` | `Sensitivity` |
-| `ApplyJitter` | `Jitter` |
-| `ApplySaturation` | `Saturation` |
-| `AddConstant` | `Bias` |
-
-`Convolve` supplies arbitrary fixed or parametric kernels, while `Gain` supports
-linear arrays and nonlinear parametric gain curves.
-
-## Sources and spectra
-
-`Source` now represents one point source or a vectorised population. Supply scalar or
-one-dimensional wavelengths directly and use a spectral parametric for generated
-weights:
-
-```python
-# dLux 0.14/0.15
-source = dl.PointSource(
-    wavelengths=np.linspace(600, 700, 5) * 1e-9,
-    position=np.array([0.0, 0.0]),
-    flux=1e5,
-)
-
-# dLux 0.16
-source = dl.Source(
-    wavelengths=np.linspace(600, 700, 5),
-    position=[0.0, 0.0],
-    flux=1e5,
-    weights=dl.SpectralPolynomial(degrees=1, coeffs=[0.1]),
-    units={"wavelengths": "nm", "position": "arcsec"},
-)
-```
-
-`PointSource`, `PointSources`, and `ResolvedSource` remain warning-backed wrappers.
-The former `spectrum=` constructor path cannot always be translated safely; pass its
-wavelengths and weights explicitly.
-
-## Parametrics and coefficients
-
-Parametrics are now a core mechanism rather than a collection of specialised layer
-types. Any layer value that accepts a `Parametric` can be generated from compact
-parameters and evaluation context—for example explicit or implicit bases,
-polynomials, interpolation, spectral models, shapes, and custom parameterisations.
-
-Use `dl.Basis` for explicit expansions. Numerical basis evaluation and fitting live
-in `dLux.utils`; the dLux parametric owns coefficients and contextual operands:
-
-```python
-# dLux 0.14/0.15
-optic = dl.BasisOptic(
-    transmission=aperture,
-    basis=basis,
-    coefficients=np.zeros(7),
-)
-
-# dLux 0.16
-import zodiax as zdx
-
-opd = dl.Basis(basis, coeffs=np.zeros(7), axes=1)
-optic = dl.Optic(transmission=aperture, opd=opd)
-```
-
-Bases store their physical coefficients in `coeffs`, which can itself be a
-Zodiax expression. dLux's `Parametric` inherits `zdx.Expression`; Zodiax no longer
-exports a `Parametric` class. Basis families implement `evaluate` and `solve`,
-without inheriting Transform chaining methods.
-
-`ZernikeBasis` subclasses `dl.Basis`. `DynamicZernikeBasis` combines the spatial
-and `ImplicitBasis` contracts. Spatial definitions use `evaluate(grid=...)` or
-`evaluate(coordinates=...)`, replacing the separate `sample` entry point.
-Generated basis and coefficient batches are
-independent populations; use explicit `jax.vmap` to pair them.
-
-Use `solve` for a linear expansion's minimum-norm coefficients. CLIMB owns its
-linear basis as `expansion`; `expansion.solve` operates on the continuous latent
-field, and the final binarised output has no inverse. `PastedBasis.solve`
-projects each extracted stamp independently and is not a global inverse when
-stamps overlap.
-
-Specialised basis and aperture layers were therefore replaced by parametrics placed
-directly in general optical layers:
-
-```python
-optic = dl.Optic(transmission=aperture, opd=dl.Basis(basis, coeffs, axes=1))
-```
-
-### Polynomials and interpolation
-
-Use `dl.Polynomial` and `dl.Interpolation` directly. They share dLux's numerical
-kernels and use the public Zodiax expression protocol for stored parameters, aliases,
-external state, and composition:
-
-```python
-polynomial = dl.Polynomial(degree=2, coeffs=[1.0, 2.0, 3.0])
-coordinates = np.array([0.0, 1.0, 2.0])
-values = polynomial.resolve(coordinates=coordinates)
-coeffs = polynomial.solve(values, coordinates=coordinates)
-
-response = dl.Interpolation([0.0, 1.0, 2.0], [0.0, 1.0, 0.0])
-samples = response.resolve(coordinates=[0.5, 1.5])
-```
-
-Polynomial term topology comes from exactly one of `degree`, selected `degrees`,
-or explicit integer `powers`. Coefficients are stored in `coeffs`, and `solve`
-returns minimum-norm least-squares coefficients. No coordinate centring or
-normalisation is implicit.
-
-Interpolation accepts explicit `coordinates` through `evaluate` or `resolve`.
-The stored table uses `knots` and `values`; the output has the query shape followed
-by trailing value axes.
-The default is linear interpolation with zero fill
-outside the knots; interpolation defines no inverse or representative solve.
-
-### Normalisation
-
-Use `dlu.normalise` for array normalisation:
-
-```python
-import dLux.utils as dlu
-
-weights = dlu.normalise(np.array([1.0, 2.0, 3.0]), mode="sum", axis=-1)
-```
-
-It supports `sum`, `mean`, `rms`, `l1`, `l2`, `max`, and `p2v`, with explicit
-`scale`, `weights`, and reduction `axis`. Weights affect the measured normalisation;
-they do not mask the returned array. Normalisation is generally non-injective and
-defines no inverse or solve.
-
-Physical ownership remains with the consumer: spectra normalise along wavelength,
-builders measure modes on their support, and field layers own optical power.
-`dl.Norm` remains the support-aware builder policy and delegates to the same kernel;
-`dl.Normalise` remains the optical field layer.
-
-### Composing contextual values
-
-`Combination` broadcasts child values before stacking them. A scalar, a row and a
-column can therefore contribute to one image. At least one child is required.
-Sum and product reduce arithmetically; union clips the sum to `[0, 1]`, and
-intersection multiplies transmissions.
-
-`DynamicParametric` remains the adapter for evaluating an expression on transformed
-coordinates. It resolves transform parameters in the incident frame, then passes
-the transformed coordinates and external state to the child. A numerical
-`zdx.Map` transforms values; it does not replace a child's coordinate context.
-
-### Selected coefficient updates
-
-The unreleased `Selection` factory and `parametrisations` module have been removed.
-Compose Zodiax transforms directly for selected coefficient displacements:
-
-```python
+import dLux.compat as old
+import dLux.utils.compat as old_utils
 import jax.numpy as np
-import zodiax as zdx
 
-origin = np.array([1.0, 0.0, 2.0])
-mask = np.array([True, False, True])
-latent = np.zeros(2)
-coeffs = zdx.Map(
-    x=zdx.Mask(x=latent, mask=mask),
-    b=origin,
-    alias={"latent": "x.x", "origin": "b"},
+optics = old.AngularOpticalSystem(
+    wf_npixels=16, diameter=1.0,
+    layers=[old.CircularAperture(radius=0.5, normalise=True)],
+    psf_npixels=8, psf_pixel_scale=0.1,
 )
-updated = coeffs.set(latent=np.array([0.1, -0.2]))
-values = updated.resolve()  # [1.1, 0.0, 1.8]
-recovered = updated.apply(values, inverse=True)  # [0.1, -0.2]
+source = old.PointSource(wavelengths=np.array([600e-9]), flux=1000)
+image_array = optics.model(source)
 ```
 
-For logarithmic displacements, apply the decoder only to active entries. This
-allows inactive entries to remain zero without taking their logarithm:
+These constructors translate supported arguments into current objects. They do not
+restore the old class hierarchy, parameter paths or every Wavefront method.
+The [compatibility reference](API/compat/overview.md) lists the retained entry points.
+Deprecation warnings identify replacements and schedule removal for **0.17.0**.
+Python may hide `DeprecationWarning`; use `python -W default your_script.py` when
+migrating. Some retained functions and direct aliases do not emit their own warning.
 
-```python
-encoded = zdx.Map(x=latent, b=np.log(origin[mask]))
-selected = zdx.Mask(x=zdx.Exp(x=encoded), mask=mask)
-coeffs = zdx.Map(
-    x=selected,
-    b=origin.at[mask].set(0),
-    alias={"latent": "x.x.x.x"},
-)
-```
+The declared requirements are Python 3.10 or later, Zodiax 0.6.0 or later, and
+Interpax. Use the declared dependency versions rather than an older Zodiax checkout.
 
-Mask topology is fixed during construction. The latent array may have leading
-batch axes or be a `StateRef`; evaluation and reversal belong to Zodiax.
+Current names take precedence in `import dLux as dl`, including `Spectrum`,
+`PolySpectrum`, `FourierBasis`, `FFT`, `MFT` and the numerical propagators.
+Old code using those names must choose `compat` explicitly. Utilities are also
+available directly from `dLux`; `dLux.utils` remains their implementation namespace.
 
-### Spectral and refractive wrappers
+## OpticalSystem: keep the familiar entry point
 
-`SpectralBasis` infers coefficient dimensions from every basis axis except the
-final wavelength axis. Leading coefficient batches no longer interfere with this
-inference, and coefficient expressions can use it too. Explicit `shape` still
-selects a contraction prefix. Normalisation acts along the final wavelength axis;
-zero default coefficients must be set before normalised evaluation.
-
-`PolynomialIndex` owns its coefficients and integer powers directly, using the same
-dLux polynomial kernel. `CauchyIndex` specialises its coordinates to inverse-square
-wavelength. Coefficients are stored directly in `coeffs`. Explicit wavelengths
-and dispersion scales are in metres; optical layers supply the incident wavelength
-context. An expression providing coefficients requires `degree` to fix polynomial
-topology at construction:
+Replace scalar entrance sampling with a Grid and describe the final relay explicitly.
+This is the current equivalent of a simple layered imaging system:
 
 ```python
 import dLux as dl
-
-index = dl.CauchyIndex(zdx.StateRef("index_coeffs"), degree=1)
-state = zdx.State(index_coeffs=np.array([1.5, 0.004]))
-indices = index.resolve(wavelengths=np.array([500e-9, 600e-9]), state=state)
-```
-
-`InterpolatedIndex` subclasses `dl.Interpolation`. Its constructor accepts
-`wavelengths` and `indices`, stored as `knots` and `values` for parameter updates.
-`extrapolate=False` gives the default NaN outside the sampled interval.
-`Blackbody` retains the stable photon-number Planck spectrum, with temperature in
-kelvin and optional external-state resolution. Spectral normalisation remains an
-equal-sample convention, not wavelength quadrature.
-
-## Apertures and shapes
-
-Grid-aware builders and prebuilt templates are now the standard construction route
-for canonicalising optical components. `build()` returns explicit sampled data for
-inspection or custom assembly; calling the builder returns a ready-to-use layer:
-
-```python
-# dLux 0.14/0.15: dynamically evaluated layer
-aperture = dl.CircularAperture(radius=0.5, softening=1.0)
-
-# dLux 0.16: reusable geometry and grid-aware construction
-builder = dl.ApertureBuilder(primary=dl.Circle(1.0))
-optic = builder(pupil_grid)
-
-# Named telescope-like components follow the same builder contract
-builder = dl.JWSTLike(opd=dl.ZernikeDef(orders=2))
-aperture, basis = builder.build(pupil_grid)
-optic = builder(pupil_grid)
-```
-
-Hard and softened geometry share the same shape classes. Pass a soft edge explicitly
-when dynamic edge gradients are required:
-
-```python
-hard = dl.Circle(1.0)
-soft = dl.Circle(1.0, edge=dl.Soft(pixels=1.0))
-```
-
-## Propagation
-
-Propagation is now expressed by explicit layer classes. Use `Fraunhofer`, `Fresnel`,
-or `FreeSpace` for direct physical propagation, and compose `ABCDFreeSpace`,
-`ABCDLens`, `ABCDMirror`, and `ABCDFraunhofer` inside `ABCDPropagator` for paraxial
-systems:
-
-```python
-# dLux 0.14/0.15
-propagator = dl.MFT(npixels=96, pixel_scale=20 * dlu.mas2rad)
-
-# dLux 0.16
-focal_grid = dl.GridSpec(n=96, d=20.0, unit="mas")
-propagator = dl.Fraunhofer(focal_grid, method="mft")
-```
-
-For a paraxial train, replace specialised ABCD propagator wrappers with an explicit
-sequence whose physical meaning remains visible:
-
-```python
-relay_grid = dl.GridSpec(n=96, d=10.0, unit="um")
-relay = dl.ABCDPropagator(
-    [dl.ABCDFreeSpace(0.5), dl.ABCDLens(0.5), dl.ABCDFreeSpace(0.5)],
-    relay_grid,
-)
-```
-
-The former `MFT`, `FFT`, `MFTPropagator`, `FFTPropagator`, and
-`ABCDConjugatePlane` names remain compatibility wrappers where their behaviour maps
-cleanly. `ASMPropagator` has no direct wrapper; use `FreeSpace`. Reverse propagation
-is supported only where the propagator's physical contract defines it.
-
-## Layers and custom extensions
-
-Custom optical layers previously implemented `apply` directly. They now implement the
-monochromatic operation in `apply_mono`; the base class owns ordinary leading-axis
-vectorisation through `apply`, while `__call__` provides the normal user-facing
-syntax:
-
-```python
 import jax.numpy as np
+
+pupil_grid = dl.Grid(16, diam=1.0, unit="m")
+image_grid = dl.Grid(8, d=0.1, unit="arcsec")
+pupil = dl.Optic(transmission=dl.Circle(1.0), normalise=True)
+optics = dl.OpticalSystem({
+    "pupil": pupil,
+    "focus": dl.Propagator(grid_out=image_grid),
+}, grid=pupil_grid)
+
+psf_array = optics.propagate(np.array([550e-9, 650e-9]))
+psf = optics.propagate(np.array([550e-9, 650e-9]), return_psf=True)
+band = dl.BandPass(range=(550, 650), n=2, unit="nm")
+source = dl.PointSource(flux=1000)
+image_array = optics.model(source, bandpass=band)
+```
+
+- `propagate_mono(wavelength)` uses one wavelength in metres.
+- `propagate(wavelengths, weights=...)` sums point responses; omitted weights sum
+  to one, and explicit weights retain their supplied total. Offsets use radians.
+- `model(source, bandpass=...)` includes source brightness and resolved morphology.
+  It does not apply a detector.
+- Both modelling routes return arrays by default. `return_psf=True` retains a PSF
+  container; `return_wf=True` requests complex fields instead. The latter is not
+  an intensity representation for a resolved source.
+- `optics(wavefront)` applies the sequence to an existing Wavefront.
+
+Summed wavelengths must share an output grid. Use an explicit angular image grid
+for broadband imaging; summing native FFT outputs with different pixel scales is
+not a physically equivalent replacement.
+
+## Imager: inspect the modelling stages
+
+An Imager owns the final image grid and derives its relay. Its pupil must not
+also specify `grid_out`, which would propagate twice.
+
+```python
+imager = dl.Imager(
+    pupil_grid, image_grid, pupil=pupil, source=source, bandpass=band,
+    filter=dl.Filter(0.8), detector=dl.Detector(qe=0.9, read_noise=2.0),
+)
+psf = imager.psf()                  # Unweighted source/wavelength responses
+weights = imager.photometry()      # Integrated counts after filter and QE
+intensity = imager.intensity()     # Combined source prediction before readout
+image = imager.model()             # Expected detector image
+companion_image = imager.model(source=dl.PointSource(position=[0.2, 0], flux=100))
+```
+
+`psf()` returns source-by-wavelength samples `(C, L, ny, nx)`; it does not apply
+spectral brightness or filter losses. `model()`/`image()` return an Image, while
+`simulate(key, ...)` adds photon and read noise. These return conventions differ
+from OpticalSystem's retained array interface.
+
+A source list or `Scene` adds incoherent source contributions. Dictionaries passed
+to Imager's modelling methods name separate outputs; matching keys pair inputs,
+scalar values are shared, and missing entries use stored defaults. They do not
+request a Cartesian product. See the [systems overview](overviews/systems/overview.md)
+for detector ordering, overrides and extension methods.
+
+## Spectra, filters and integrated counts
+
+The released `Spectrum(wavelengths, weights)` stores discrete relative weights.
+The current `Spectrum(value, bandpass=..., flux=...)` describes a **spectral density
+shape**. Do not copy old weights into it and assume the same integration convention.
+Keep `old.Spectrum` with a supported compatibility modelling route when exact
+released point weights are required.
+
+```python
+native = dl.BandPass(range=(500, 800), n=5, unit="nm")
+spectrum = dl.Spectrum([1.0, 1.2, 1.8, 1.1, 1.0], bandpass=native, flux=1000)
+filter_curve = dl.Filter([0.0, 0.6, 1.0, 0.7, 0.0], bandpass=native)
+photometry = dl.Photometry(spectrum, filter=filter_curve, qe=dl.Filter(0.9))
+optical_bins = dl.BandPass(range=(500, 800), n=3, unit="nm")
+weights = photometry(optical_bins)
+counts_per_bin = weights.value
+total_counts = weights.integrate()
+```
+
+| Operation | Meaning |
+| --- | --- |
+| `curve.sample(wavelengths)` | Point values; raw wavelengths are metres |
+| `spectrum(bandpass)` | Integrated incident `Weights`, including its flux |
+| `spectrum.integrate(bandpass)` | Total incident photons |
+| `filter_curve.sample(bandpass)` | Response sampled at bin centres |
+| `filter_curve(weights)` | Multiply existing counts by centre-sampled response; use Photometry for within-bin integration |
+| `filter_curve.integrate(bandpass)` | Response integral in metres, not photon counts |
+| `Photometry(spectrum, filter=..., qe=...)(bandpass)` | Integrate the product into detected counts |
+| `Weights(values, bandpass)` | Already-integrated counts; no second integration-width factor |
+
+Filter and QE use the same `Filter` response class. Integrate the product of source,
+filter and QE; multiplying their separate integrals is not equivalent. Weights are
+an intermediate result, not an input Source spectrum. `Spectrum.from_weights`
+constructs Weights rather than a density spectrum.
+
+BandPass `range=(low, high)` defines the **outer bin edges**, not the first and last
+sample wavelengths. Bins are equal-width; `min`/`max`, `wl`/`delta_wl` and regular
+`wavelengths` are alternative constructor inputs. Its endpoints and sample count
+are fixed Python metadata. Construct a new BandPass when changing sampling.
+The Imager BandPass sets the optical wavelength count; each curve can retain finer
+native sampling for integration.
+
+A numeric `Spectrum.flux` is total incident photons in the calculation's BandPass,
+before losses. `flux=None` preserves absolute photon density per metre. Only photon
+flux units are supported; `flux2mag`/`mag2flux` use an explicit reference flux and do
+not supply AB, ST or Vega calibration.
+
+Sampled curves default to `method="cubic2"`; request `"linear"` explicitly for linear
+interpolation. Curves with declared sampling are zero outside their support. With
+BandPass sampling, the interpolant continues from the outer centres to the declared
+edges, then stops. Raw native coordinates (`bandpass=array` or Filter
+`knots=array`) use their first and last knots as support. The `wavelengths=`
+constructor shortcut instead infers a regular BandPass from sample centres.
+Integration respects those boundaries. See the
+[photometry overview](overviews/utils/photometry/overview.md).
+
+Current `PolySpectrum(bandpass, coeffs=...)` means `1 + c1*x + c2*x**2 + ...`, with
+wavelength mapped to `[-1, 1]` using that fixed BandPass. Released PolySpectrum
+coefficients include a constant term and use wavelengths in metres: retain
+`old.PolySpectrum` or convert/refit coefficients before changing constructors.
+`Blackbody` is a photon-spectrum model. With `flux=None`, it exposes raw photon
+radiance; aperture area, solid angle and exposure time are not inferred.
+Basis and Polynomial expressions can supply
+Spectrum's value; a fixed basis needs native sampling matching its output samples.
+
+## Source positions and brightness
+
+| Input | Current convention |
+| --- | --- |
+| `PointSource(position=...)` | Arcseconds by default; `unit="rad"` preserves radian inputs |
+| `Source(positions=...)` | Raw `(C, 2)` arrays in radians; a scalar flux applies to every component |
+| `Positions(value, unit=...)` | Explicit conversion to `(C, 2)` radians; defaults to arcseconds |
+| `Point(position, unit=...)` | Low-level single-position expression; defaults to radians |
+| `Binary` / `Companions` | Position locates the primary; separation defaults to arcseconds, PA to degrees from +y towards +x |
+| `BinarySource(primary_flux=..., contrast=...)` | Primary photon count; default contrast is `log10(companion/primary)` |
+| `ContrastFlux(..., log=False)` | Linear companion/primary ratios |
+
+Released binary constructors use midpoint position, radian PA, mean component flux
+and primary/secondary contrast. `old.BinarySource` translates those conventions.
+Do not transfer its numeric parameters directly into the current constructor.
+
+```python
+binary = dl.BinarySource(
+    position=[0, 0], separation=0.2, pa=90,
+    primary_flux=1000, contrast=-1,       # Companion has 100 photons
+)
+binary_image = imager.model(source=binary)
+```
+
+Brightness is stored at `source.spectrum.flux`; the Source `flux=` argument sets that
+leaf. Use a Scene for components with different spectra or profiles. ResolvedSource
+needs a Profile or explicit `profile_grid`; a distribution array alone cannot state
+its angular scale. `source.model(optics)` remains a deprecated forwarding method;
+call the system's modelling method instead.
+
+## Apertures and fitted coefficients
+
+Replace specialised basis layers with a Basis in an ordinary Optic. Coefficients
+live at `opd.coeffs` (or `phase.coeffs`), not at a layer-level `coefficients` leaf.
+
+```python
+opd = dl.Basis(dl.Zernike([4, 5, 6], diameter=1.0), unit="nm")
+aberrated = dl.Optic(transmission=dl.Circle(1.0), opd=opd, normalise=True)
+aberrated = aberrated.set("opd.coeffs", np.array([10.0, 0.0, -5.0]))
+aberrated_image = imager.model(pupil=aberrated)
+```
+
+Coefficients default to a fit-ready zero array when their shape is known. Basis's
+`unit` scales the contracted output; it does not change coordinate units.
+Use `ZernikeDef(...)(grid)` to construct a sampled Basis, or retain a Zernike
+expression for runtime generation. Current `FourierBasis` produces arrays; wrap it
+in `Optic(opd=...)` to replace the released FourierBasis layer.
+
+| Released construction | Current construction |
+| --- | --- |
+| `CircularAperture(radius=r, softening=s)` | `Optic(transmission=Circle(2*r, edge=Soft(s)))` |
+| `RegPolyAperture(nsides=k, rmax=r)` | `Optic(transmission=RegularPolygon(k, 2*r, edge=Soft(1)))` |
+| `BasisOptic(basis, coefficients=c)` | `Optic(opd=Basis(basis, coeffs=c))` |
+| `AberratedAperture(aperture, nolls, coefficients)` | Explicit transmission and `Basis(Zernike(...), coeffs=...)`, with diameter/support |
+| Transmission-only `CompoundAperture` / `MultiAperture` | `Optic(transmission=Combine(shapes, operation="product" / "sum"))` |
+| Telescope pupil helpers | `HSTAper`, `JWSTAper`, `JWSTNRMAper`, `EuclidAper`, supplied a pupil Grid |
+
+Shape size and coordinate values use metres when evaluated on a length-valued Grid.
+Current shapes default to hard edges; the released dynamic apertures default to
+softening. Polygon diameter is the enclosing-circle diameter. Named pupil helpers
+return Optic or SparseOptic, not Imager. Their default normalisation sets transmitted
+pupil power to one; subsequent losses still reduce the output. Revisit that choice
+when fitting throughput. Aberrated composite apertures require explicit local
+basis/support definitions; compat does not infer them.
+
+## Grids, fields and numerical operators
+
+Grid is strictly two-dimensional with physical `(x, y)` metadata and `xy` indexing;
+arrays end in `(ny, nx)`. Scalar counts expand to a square grid. Use Axis for 1D
+sampling. Partial Grids are allowed until an operation needs complete sampling.
+Grid has no dimensional broadcasting method; use explicit sampling and batch axes.
+
+Fields store `array` and `grid`; `PSF.data` and `Wavefront.phasor` are views of that
+array. Immutable updates should target stored leaves, such as `array` and `grid.d`.
+Wavefront owns wavelengths and Jones state, but no photometric weights.
+Its axis order is `(*batch, *wavelength, ny, nx)`, with `(2, 2)` inserted immediately
+before the spatial axes when Jones fields are explicit. Uniform Jones matrices can
+stay separate; `materialise()` creates their spatial representation.
+
+| Released use | Current replacement |
+| --- | --- |
+| Scalar field sampling | `Wavefront(wavelength, Grid(...))`; `PSF(data, Grid(...))` |
+| `CoordSpec` / `PadSpec` | `Grid` / `FFTSpec` |
+| `CoordTransform` / `DistortedCoords` | `Affine` or `AffineMap` / `Distortion` |
+| `Resize`, `Downsample`, `Flip`, `Lambda`, `Normalise`, `Tilt` layers | `ResizeLayer`, `DownsampleLayer`, `FlipLayer`, `LambdaLayer`, `NormaliseLayer`, `TiltLayer` |
+| `Rotate(angle)` | `InterpolateLayer(Affine(rotation=angle), method="linear", complex=False, fill=0)` |
+| Released FFT/MFT array functions | `old_utils.FFT` / `old_utils.MFT`, or current prepared operators |
+| `ABCDFreeSpace(d)` / `ABCDLens(f)` / `ABCDMirror(r)` | `ABCD(free_space=d)` / `ABCD(lens=f)` / `ABCD(radius=r)` |
+| `ABCDConjugatePlane(f)` | `ABCD(fraunhofer=f)` |
+| `ABCDPropagator(elements, grid)` / `MFTPropagator(elements, grid)` | `Propagator(grid, abcd=ABCDChain(elements))` |
+| `ASMPropagator(distance, spec)` | `FreeSpace(distance, resize=...)` with compatible ResizeSpec |
+| Propagation on Wavefront | `wavefront.propagate(Propagator(grid_out))` |
+| Propagation as a layer | `PropagatorLayer(grid_out=...)`, or a numerical propagator in OpticalSystem |
+
+A numerical propagator is called as `relay(array, grid_in, wavelength)`;
+`return_grid=True` also returns the realised Grid. `prepare(grid_in, wavelength)`
+returns a fixed operator for reuse. Re-prepare after changing its inputs; prepare
+inside differentiation when fitting them. For a supplied ABCD matrix, direction
+is in the matrix and the propagator stores `inverse=None`. ABCD's `.inverse()`
+reverses optical traversal; use array linear algebra for a matrix inverse.
+
+Interp performs value interpolation without pixel-area or distortion compensation.
+It defaults to `cubic2`, complex real/imaginary interpolation, and `fill=None`
+(extrapolation). Use `fill=0` where an image should be zero outside its support.
+In 2D/3D, tuples denote arbitrary query points; stacked arrays denote grids.
+Padding/cropping preserves centres and rejects odd/even size changes that would
+introduce a half-pixel shift. Resampling is a separate interpolation operation.
+
+## Detectors and custom layers
+
+| Released detector operation | Current replacement |
+| --- | --- |
+| `ApplyPixelResponse(response)` | `SensitivityLayer(response)` |
+| `ApplySaturation(threshold)` | `SaturationLayer(threshold)` |
+| `AddConstant(value)` | `BiasLayer(value)` |
+| `ApplyJitter(sigma, kernel_size=k, oversample=o)` | `ConvolveLayer(Jitter(sigma_pixels, k, o))`, with `sigma_pixels = sigma*(k*o - 1)/(10*o)` |
+| `LayeredDetector(layers)` | `DetectorSystem(layers)` for deterministic layers, or `Detector(layers)` for sampling/noise/gain |
+
+Current Jitter uses actual pixel widths; compat converts the released fixed-domain
+Gaussian width during evaluation. Passing the old sigma unchanged to Jitter changes
+the blur. Imager also accepts `jitter=Jitter(...)` for image-plane blur.
+
+DetectorSystem takes and returns Intensity. Detector owns QE, optional field
+resampling, deterministic layers, pixel integration, noise and gain. See the systems
+overview for the exact order.
+
+Custom optical layers implement `apply_mono`; OpticalLayer handles the Wavefront
+batches. Ordinary model objects inherit `zodiax.Module`.
+
+```python
 from jax import Array
 
-import dLux as dl
-
-
-# dLux 0.14/0.15
-class OldPhaseOffset(dl.OpticalLayer):
-    def apply(self, wavefront):
-        return wavefront.add_phase(self.phase)
-
-
-# dLux 0.16
-class PhaseOffset(dl.BaseOpticalLayer):
+class PhaseOffset(dl.OpticalLayer):
     phase: Array
 
     def __init__(self, phase):
         self.phase = np.asarray(phase)
 
-    def apply_mono(self, wavefront):
+    def apply_mono(self, wavefront, **context):
         return wavefront.add_phase(self.phase)
 
-layer = PhaseOffset(0.1)
-output = layer(wavefront)
+shifted = PhaseOffset(0.1)(dl.Wavefront(600e-9, pupil_grid))
 ```
 
-Do not manually batch ordinary wavelength axes in a custom optical layer.
+Custom detector layers implement `apply(intensity, **context)`; unified field
+operations implement `apply_mono`. Keep coordinate metadata consistent with changed
+sampling and pass context to nested definitions. Automatic descendant shortcuts
+and old generated names are not stable migration paths: inspect the current object
+and use explicit paths or user-defined aliases for fitted parameters.
+For example, migrate `optic.set("coefficients", values)` to
+`optic.set("opd.coeffs", values)`, and `source.set("flux", value)` to
+`source.set("spectrum.flux", value)`. The old names are not general update aliases.
 
-## Removed contracts
+## Compatibility limits and numerical conventions
 
-Interfaces such as `BasisLayer`, `BasisOptic`, `ParametricOpticalSystem`,
-`ParametricLayeredOpticalSystem`, `Scene`, and the specialised aperture-layer classes
-changed too substantially for a safe alias. Instantiating them raises an error
-containing the current replacement and a migration example. Custom subclasses of the
-former `OpticalSystem` base should instead subclass the layer or system contract they
-actually implement. The complete compatibility surface is available in the
-[compatibility API](API/compat/overview.md).
+The supported translations retain current objects. Code that relies on old class
+identities, scalar sampling fields, private helpers, automatic names or old subclass
+constructors needs revision. Deprecated factory names cannot serve as `isinstance`
+types. `ParametricOpticalSystem`, implicit aberrated-aperture composition and
+PointResolvedSource need explicit current modelling setups; Scene replaces mixed
+point/resolved composition. Released coordinate shear transposes grid samples and
+is not the current pointwise Affine shear; use the explicit compat utility when
+that old operation is required.
 
-If a migration error does not explain your use case, please open an issue with a
-minimal old-version example. That helps distinguish a missing compatibility route from
-a deliberately changed physical contract.
+The released rotation convention and Fourier coefficient mapping are retained.
+Positive Affine rotation turns coordinates anticlockwise and sampled objects
+clockwise. General ABCD FFT propagation now agrees with MFT's phase convention;
+compare complex fields as well as intensity when migrating interferometric models.
+EuclidAper keeps the released spider orientation but uses the current shared edge
+sampling, without the old helper's unintended additional circular-edge oversampling.
+The retained compat helper is available for reproducing that sampling.
+
+Compatibility is partial, not a guarantee that every 0.15.1 program runs unchanged.
+A known limitation remains when differentiating Zernike geometry at the exact
+origin: coordinate or diameter gradients can be non-finite even when sampled
+values and coefficient derivatives are finite.
