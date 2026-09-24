@@ -6,49 +6,71 @@
 
 ```mermaid
 classDiagram
+    direction TB
     class dLux_layers_unified_UnifiedLayer["UnifiedLayer"]
-    class dLux_layers_unified_Resize["Resize"]
-    class dLux_layers_unified_Downsample["Downsample"]
-    class dLux_layers_unified_Flip["Flip"]
-    class dLux_layers_unified_Interpolate["Interpolate"]
-    class dLux_layers_unified_Normalise["Normalise"]
-    class dLux_layers_unified_Lambda["Lambda"]
+    class dLux_layers_unified_ResizeLayer["ResizeLayer"]
+    class dLux_layers_unified_DownsampleLayer["DownsampleLayer"]
+    class dLux_layers_unified_FlipLayer["FlipLayer"]
+    class dLux_layers_unified_InterpolateLayer["InterpolateLayer"]
+    class dLux_layers_unified_NormaliseLayer["NormaliseLayer"]
+    class dLux_layers_unified_LambdaLayer["LambdaLayer"]
     class dLux_layers_detector_DetectorLayer["DetectorLayer"]
     class dLux_layers_optical_OpticalLayer["OpticalLayer"]
     dLux_layers_optical_OpticalLayer <|-- dLux_layers_unified_UnifiedLayer
     dLux_layers_detector_DetectorLayer <|-- dLux_layers_unified_UnifiedLayer
-    click dLux_layers_unified_UnifiedLayer href "#dLux.layers.unified.UnifiedLayer" "No direct public attributes or methods"
-    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Resize
-    click dLux_layers_unified_Resize href "#dLux.layers.unified.Resize" "Attributes: npixels · Methods: apply_mono()"
-    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Downsample
-    click dLux_layers_unified_Downsample href "#dLux.layers.unified.Downsample" "Attributes: n · Methods: apply_mono()"
-    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Flip
-    click dLux_layers_unified_Flip href "#dLux.layers.unified.Flip" "Attributes: axes · Methods: apply_mono()"
-    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Interpolate
-    click dLux_layers_unified_Interpolate href "#dLux.layers.unified.Interpolate" "Attributes: transformation, method, complex, fill · Methods: apply_mono()"
-    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Normalise
-    click dLux_layers_unified_Normalise href "#dLux.layers.unified.Normalise" "Attributes: mode, value · Methods: apply_mono()"
-    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_Lambda
-    click dLux_layers_unified_Lambda href "#dLux.layers.unified.Lambda" "Methods: apply_mono()"
+    click dLux_layers_unified_UnifiedLayer href "#dLux.layers.unified.UnifiedLayer" "Methods: __init__()"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_ResizeLayer
+    click dLux_layers_unified_ResizeLayer href "#dLux.layers.unified.ResizeLayer" "Attributes: npixels · Methods: __init__(), apply_mono()"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_DownsampleLayer
+    click dLux_layers_unified_DownsampleLayer href "#dLux.layers.unified.DownsampleLayer" "Attributes: n · Methods: __init__(), apply_mono()"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_FlipLayer
+    click dLux_layers_unified_FlipLayer href "#dLux.layers.unified.FlipLayer" "Attributes: axes · Methods: __init__(), apply_mono()"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_InterpolateLayer
+    click dLux_layers_unified_InterpolateLayer href "#dLux.layers.unified.InterpolateLayer" "Attributes: transformation, method, complex, fill · Methods: __init__(), apply_mono()"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_NormaliseLayer
+    click dLux_layers_unified_NormaliseLayer href "#dLux.layers.unified.NormaliseLayer" "Attributes: mode, value · Methods: __init__(), apply_mono()"
+    dLux_layers_unified_UnifiedLayer <|-- dLux_layers_unified_LambdaLayer
+    click dLux_layers_unified_LambdaLayer href "#dLux.layers.unified.LambdaLayer" "Methods: apply_mono(), __init__()"
 ```
 
 ???+ info "UnifiedLayer"
     ::: dLux.layers.unified.UnifiedLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Resize"
-    ::: dLux.layers.unified.Resize
+???+ info "ResizeLayer"
+    ::: dLux.layers.unified.ResizeLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Downsample"
-    ::: dLux.layers.unified.Downsample
+???+ info "DownsampleLayer"
+    ::: dLux.layers.unified.DownsampleLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Flip"
-    ::: dLux.layers.unified.Flip
+???+ info "FlipLayer"
+    ::: dLux.layers.unified.FlipLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Interpolate"
-    ::: dLux.layers.unified.Interpolate
+???+ info "InterpolateLayer"
+    ::: dLux.layers.unified.InterpolateLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Normalise"
-    ::: dLux.layers.unified.Normalise
+???+ info "NormaliseLayer"
+    ::: dLux.layers.unified.NormaliseLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Lambda"
-    ::: dLux.layers.unified.Lambda
+???+ info "LambdaLayer"
+    ::: dLux.layers.unified.LambdaLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]

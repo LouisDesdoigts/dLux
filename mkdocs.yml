@@ -110,61 +110,149 @@ nav:
       - ASM Fresnel: tutorials/old/asm.md
       - Sparse Propagation: tutorials/old/sparse_propagation.md
 
+  - Module Overviews:
+    - Image Formation: overviews/overview.md
+    - Fields: overviews/fields/overview.md
+    - Layers: overviews/layers/overview.md
+    - Systems: overviews/systems/overview.md
+    - Prebuilt: overviews/prebuilt/overview.md
+    - Numerical Utilities:
+      - Overview: overviews/utils/overview.md
+      - Grids: overviews/utils/grids/overview.md
+      - Numerical Tools: overviews/utils/numerical/overview.md
+      - Bases: overviews/utils/bases/overview.md
+      - Optical Models: overviews/utils/optical/overview.md
+      - Photometry: overviews/utils/photometry/overview.md
+      - Propagation: overviews/utils/propagation/overview.md
+
   - API:
     - Overview: API/overview.md
-    - Core API:
-      - Overview: API/core/overview.md
-      - Base: API/core/base.md
-      - Compatibility: API/core/compatibility.md
-      - Fields: API/core/fields.md
-      - Grids: API/core/grids.md
-      - Bases: API/core/bases.md
-      - Gaussians: API/core/gaussians.md
-      - Parametrics: API/core/parametrics.md
-      - Polynomials: API/core/polynomials.md
-      - Refractive: API/core/refractive.md
-      - Shapes: API/core/shapes.md
-      - Spectral: API/core/spectral.md
-      - Sources: API/core/sources.md
-      - Systems: API/core/systems.md
+    - Fields:
+      - Overview: API/fields/overview.md
+      - Image: API/fields/image.md
+      - Intensity: API/fields/intensity.md
+      - Psf: API/fields/psf.md
+      - Wavefront: API/fields/wavefront.md
 
-    - Prebuilt API:
-      - Overview: API/prebuilt/overview.md
-      - Builders: API/prebuilt/builders.md
-      - Prebuilt: API/prebuilt/prebuilt.md
-
-    - Layers API:
+    - Layers:
       - Overview: API/layers/overview.md
       - Coronagraphy: API/layers/coronagraphy.md
       - Detector: API/layers/detector.md
-      - Dynamic: API/layers/dynamic.md
       - Optical: API/layers/optical.md
-      - Polarised: API/layers/polarised.md
-      - Propagation: API/layers/propagation.md
-      - Refractive: API/layers/refractive.md
       - Sparse: API/layers/sparse.md
       - Unified: API/layers/unified.md
 
-    - Utils API:
+    - Prebuilt:
+      - Overview: API/prebuilt/overview.md
+      - Apertures: API/prebuilt/apertures.md
+      - Definitions: API/prebuilt/definitions.md
+      - Prebuilt: API/prebuilt/prebuilt.md
+
+    - Systems:
+      - Overview: API/systems/overview.md
+      - Detector: API/systems/detector.md
+      - Imagers: API/systems/imagers.md
+      - Modelling: API/systems/modelling.md
+      - Optical: API/systems/optical.md
+      - Sources: API/systems/sources.md
+
+    - Utils:
       - Overview: API/utils/overview.md
-      - Abcd: API/utils/abcd.md
-      - Apertures: API/utils/apertures.md
-      - Array Ops: API/utils/array_ops.md
-      - Coordinates: API/utils/coordinates.md
-      - Fourier: API/utils/fourier.md
-      - Geometry: API/utils/geometry.md
-      - Helpers: API/utils/helpers.md
-      - Interpolation: API/utils/interpolation.md
-      - Math: API/utils/math.md
-      - Misc: API/utils/misc.md
-      - Norms: API/utils/norms.md
-      - Optics: API/utils/optics.md
-      - Polarisation: API/utils/polarisation.md
-      - Polynomials: API/utils/polynomials.md
-      - Propagation: API/utils/propagation.md
-      - Source: API/utils/source.md
-      - Source Estimation: API/utils/source_estimation.md
-      - Units: API/utils/units.md
+      - Astrometry: API/utils/astrometry.md
+      - Bases:
+        - Overview: API/utils/bases.md
+        - Basis: API/utils/bases/basis.md
+        - CLIMB: API/utils/bases/climb.md
+        - Fourier: API/utils/bases/fourier.md
+      - Batching: API/utils/batching.md
+      - Compat:
+        - Overview: API/utils/compat.md
+        - Apertures: API/utils/compat/apertures.md
+        - Array Ops: API/utils/compat/array_ops.md
+        - Coordinates: API/utils/compat/coordinates.md
+        - Fourier: API/utils/compat/fourier.md
+        - Geometry: API/utils/compat/geometry.md
+        - Helpers: API/utils/compat/helpers.md
+        - Interpolation: API/utils/compat/interpolation.md
+        - Math: API/utils/compat/math.md
+        - Misc: API/utils/compat/misc.md
+        - Norms: API/utils/compat/norms.md
+        - Optics: API/utils/compat/optics.md
+        - Polarisation: API/utils/compat/polarisation.md
+        - Polynomials: API/utils/compat/polynomials.md
+        - Propagation: API/utils/compat/propagation.md
+        - Registration: API/utils/compat/registration.md
+        - Source: API/utils/compat/source.md
+        - Units: API/utils/compat/units.md
+        - Zernikes: API/utils/compat/zernikes.md
+      - Grids:
+        - Overview: API/utils/grids.md
+        - Array Ops: API/utils/grids/array_ops.md
+        - Coordinates: API/utils/grids/coordinates.md
+        - Fields: API/utils/grids/fields.md
+        - Grid: API/utils/grids/grid.md
+        - Paste: API/utils/grids/paste.md
+        - Specs: API/utils/grids/specs.md
+        - Transforms: API/utils/grids/transforms.md
+      - Numerical:
+        - Overview: API/utils/numerical.md
+        - Gaussians: API/utils/numerical/gaussians.md
+        - Interpolation: API/utils/numerical/interpolation.md
+        - Math: API/utils/numerical/math.md
+        - Norms: API/utils/numerical/norms.md
+        - Polynomials: API/utils/numerical/polynomials.md
+        - Profiles: API/utils/numerical/profiles.md
+        - Shapes: API/utils/numerical/shapes.md
+        - Units: API/utils/numerical/units.md
+      - Optical:
+        - Overview: API/utils/optical.md
+        - Jones: API/utils/optical/jones.md
+        - Phase: API/utils/optical/phase.md
+        - Refractive: API/utils/optical/refractive.md
+        - Zernikes: API/utils/optical/zernikes.md
+      - Photometry:
+        - Overview: API/utils/photometry.md
+        - Bandpass: API/utils/photometry/bandpass.md
+        - Flux: API/utils/photometry/flux.md
+        - Integration: API/utils/photometry/integration.md
+        - Photometry: API/utils/photometry/photometry.md
+        - Spectral: API/utils/photometry/spectral.md
+        - Weights: API/utils/photometry/weights.md
+      - Propagation:
+        - Overview: API/utils/propagation.md
+        - ABCD: API/utils/propagation/abcd.md
+        - Asm: API/utils/propagation/asm.md
+        - FFT: API/utils/propagation/fft.md
+        - MFT: API/utils/propagation/mft.md
+        - Operations: API/utils/propagation/operations.md
+        - Propagators: API/utils/propagation/propagators.md
+      - Sampled: API/utils/sampled.md
+      - Sequential: API/utils/sequential.md
+
+    - Compat:
+      - Overview: API/compat/overview.md
+      - Coordinates: API/compat/coordinates.md
+      - Detectors: API/compat/detectors.md
+      - Instruments: API/compat/instruments.md
+      - Layers:
+        - Overview: API/compat/layers.md
+        - Abcd Propagators: API/compat/layers/abcd_propagators.md
+        - Aberrations: API/compat/layers/aberrations.md
+        - Apertures: API/compat/layers/apertures.md
+        - Detector Layers: API/compat/layers/detector_layers.md
+        - Optical Layers: API/compat/layers/optical_layers.md
+        - Optics: API/compat/layers/optics.md
+        - Propagators: API/compat/layers/propagators.md
+        - Unified Layers: API/compat/layers/unified_layers.md
+      - Modelling: API/compat/modelling.md
+      - Optical Systems: API/compat/optical_systems.md
+      - Psfs: API/compat/psfs.md
+      - Registration: API/compat/registration.md
+      - Sampling: API/compat/sampling.md
+      - Sources: API/compat/sources.md
+      - Spectra: API/compat/spectra.md
+      - Warnings: API/compat/warnings.md
+      - Wavefronts: API/compat/wavefronts.md
   - Publications: publications.md
   - Contributors: contributors.md
   - Citation: citation.md

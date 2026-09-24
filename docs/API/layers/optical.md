@@ -6,48 +6,95 @@
 
 ```mermaid
 classDiagram
-    class dLux_layers_optical_BaseLayer["BaseLayer"]
-    class dLux_layers_optical_BaseOpticalLayer["BaseOpticalLayer"]
+    direction TB
     class dLux_layers_optical_OpticalLayer["OpticalLayer"]
-    class dLux_layers_optical_TransmissiveLayer["TransmissiveLayer"]
-    class dLux_layers_optical_AberratedLayer["AberratedLayer"]
+    class dLux_layers_optical_ComplexLayer["ComplexLayer"]
+    class dLux_layers_optical_BaseOptic["BaseOptic"]
+    class dLux_layers_optical_RefractiveLayer["RefractiveLayer"]
+    class dLux_layers_optical_JonesLayer["JonesLayer"]
+    class dLux_layers_optical_PropagatorLayer["PropagatorLayer"]
     class dLux_layers_optical_Optic["Optic"]
-    class dLux_layers_optical_Tilt["Tilt"]
-    class zodiax_module_Module["Module"]
-    zodiax_module_Module <|-- dLux_layers_optical_BaseLayer
-    click dLux_layers_optical_BaseLayer href "#dLux.layers.optical.BaseLayer" "Methods: apply()"
-    dLux_layers_optical_BaseLayer <|-- dLux_layers_optical_BaseOpticalLayer
-    click dLux_layers_optical_BaseOpticalLayer href "#dLux.layers.optical.BaseOpticalLayer" "Methods: apply_mono(), apply()"
-    dLux_layers_optical_BaseOpticalLayer <|-- dLux_layers_optical_OpticalLayer
-    click dLux_layers_optical_OpticalLayer href "#dLux.layers.optical.OpticalLayer" "Methods: context()"
-    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_TransmissiveLayer
-    click dLux_layers_optical_TransmissiveLayer href "#dLux.layers.optical.TransmissiveLayer" "Attributes: transmission, normalise · Methods: apply_mono()"
-    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_AberratedLayer
-    click dLux_layers_optical_AberratedLayer href "#dLux.layers.optical.AberratedLayer" "Attributes: opd, phase · Methods: apply_mono()"
-    dLux_layers_optical_TransmissiveLayer <|-- dLux_layers_optical_Optic
-    dLux_layers_optical_AberratedLayer <|-- dLux_layers_optical_Optic
-    click dLux_layers_optical_Optic href "#dLux.layers.optical.Optic" "Attributes: transmission, opd, phase, amplitude, jones, thickness, n, propagator, normalise · Methods: phasor(), apply(), apply_mono()"
-    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_Tilt
-    click dLux_layers_optical_Tilt href "#dLux.layers.optical.Tilt" "Attributes: angles, unit · Methods: apply_mono()"
+    class dLux_layers_optical_TiltLayer["TiltLayer"]
+    class dLux_layers_optical_WedgeLayer["WedgeLayer"]
+    class dLux_utils_numerical_units_Unitful["Unitful"]
+    class dLux_utils_propagation_propagators_Propagator["Propagator"]
+    class dLux_utils_sequential_BaseLayer["BaseLayer"]
+    dLux_utils_sequential_BaseLayer <|-- dLux_layers_optical_OpticalLayer
+    click dLux_layers_optical_OpticalLayer href "#dLux.layers.optical.OpticalLayer" "Methods: apply_mono(), apply(), context(), __init__()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_ComplexLayer
+    click dLux_layers_optical_ComplexLayer href "#dLux.layers.optical.ComplexLayer" "Attributes: amplitude, phase · Methods: __init__(), modulation(), apply_mono()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_BaseOptic
+    click dLux_layers_optical_BaseOptic href "#dLux.layers.optical.BaseOptic" "Attributes: transmission, opd, normalise · Methods: __init__(), resolve_local(), modulation(), apply_mono()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_RefractiveLayer
+    click dLux_layers_optical_RefractiveLayer href "#dLux.layers.optical.RefractiveLayer" "Attributes: thickness, n · Methods: __init__(), modulation(), apply_mono()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_JonesLayer
+    click dLux_layers_optical_JonesLayer href "#dLux.layers.optical.JonesLayer" "Attributes: jones · Methods: __init__(), apply_mono(), apply_jones()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_PropagatorLayer
+    dLux_utils_propagation_propagators_Propagator <|-- dLux_layers_optical_PropagatorLayer
+    click dLux_layers_optical_PropagatorLayer href "#dLux.layers.optical.PropagatorLayer" "Attributes: abcd, grid_out, focal_length, defocus, inverse · Methods: __init__(), propagate(), apply(), apply_mono()"
+    dLux_layers_optical_BaseOptic <|-- dLux_layers_optical_Optic
+    dLux_layers_optical_ComplexLayer <|-- dLux_layers_optical_Optic
+    dLux_layers_optical_RefractiveLayer <|-- dLux_layers_optical_Optic
+    dLux_layers_optical_JonesLayer <|-- dLux_layers_optical_Optic
+    dLux_layers_optical_PropagatorLayer <|-- dLux_layers_optical_Optic
+    click dLux_layers_optical_Optic href "#dLux.layers.optical.Optic" "Attributes: abcd, grid_out, focal_length, defocus, inverse, jones, thickness, n, amplitude, phase, transmission, opd, normalise, grid, transform · Methods: __init__(), context(), modulation(), scalar_phasor(), phasor(), apply_scalar(), apply_local(), apply(), apply_mono()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_TiltLayer
+    dLux_utils_numerical_units_Unitful <|-- dLux_layers_optical_TiltLayer
+    click dLux_layers_optical_TiltLayer href "#dLux.layers.optical.TiltLayer" "Attributes: angles, unit · Methods: __init__(), apply_mono()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_optical_WedgeLayer
+    click dLux_layers_optical_WedgeLayer href "#dLux.layers.optical.WedgeLayer" "Attributes: angle, n · Methods: __init__(), apply_mono()"
 ```
-
-???+ info "BaseLayer"
-    ::: dLux.layers.optical.BaseLayer
-
-???+ info "BaseOpticalLayer"
-    ::: dLux.layers.optical.BaseOpticalLayer
 
 ???+ info "OpticalLayer"
     ::: dLux.layers.optical.OpticalLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "TransmissiveLayer"
-    ::: dLux.layers.optical.TransmissiveLayer
+???+ info "ComplexLayer"
+    ::: dLux.layers.optical.ComplexLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "AberratedLayer"
-    ::: dLux.layers.optical.AberratedLayer
+???+ info "BaseOptic"
+    ::: dLux.layers.optical.BaseOptic
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
+
+???+ info "RefractiveLayer"
+    ::: dLux.layers.optical.RefractiveLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
+
+???+ info "JonesLayer"
+    ::: dLux.layers.optical.JonesLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
+
+???+ info "PropagatorLayer"
+    ::: dLux.layers.optical.PropagatorLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
 ???+ info "Optic"
     ::: dLux.layers.optical.Optic
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Tilt"
-    ::: dLux.layers.optical.Tilt
+???+ info "TiltLayer"
+    ::: dLux.layers.optical.TiltLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
+
+???+ info "WedgeLayer"
+    ::: dLux.layers.optical.WedgeLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]

@@ -6,53 +6,60 @@
 
 ```mermaid
 classDiagram
-    class dLux_layers_detector_BaseDetectorLayer["BaseDetectorLayer"]
+    direction TB
     class dLux_layers_detector_DetectorLayer["DetectorLayer"]
-    class dLux_layers_detector_Sensitivity["Sensitivity"]
-    class dLux_layers_detector_Convolve["Convolve"]
-    class dLux_layers_detector_Jitter["Jitter"]
-    class dLux_layers_detector_Bias["Bias"]
-    class dLux_layers_detector_Gain["Gain"]
-    class dLux_layers_detector_Saturation["Saturation"]
-    class dLux_layers_optical_BaseLayer["BaseLayer"]
-    dLux_layers_optical_BaseLayer <|-- dLux_layers_detector_BaseDetectorLayer
-    click dLux_layers_detector_BaseDetectorLayer href "#dLux.layers.detector.BaseDetectorLayer" "Methods: apply()"
-    dLux_layers_detector_BaseDetectorLayer <|-- dLux_layers_detector_DetectorLayer
-    click dLux_layers_detector_DetectorLayer href "#dLux.layers.detector.DetectorLayer" "Methods: context()"
-    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Sensitivity
-    click dLux_layers_detector_Sensitivity href "#dLux.layers.detector.Sensitivity" "Attributes: response · Methods: apply()"
-    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Convolve
-    click dLux_layers_detector_Convolve href "#dLux.layers.detector.Convolve" "Attributes: kernel · Methods: apply()"
-    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Jitter
-    click dLux_layers_detector_Jitter href "#dLux.layers.detector.Jitter" "Attributes: profile, kernel_size, oversample · Methods: kernel(), apply()"
-    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Bias
-    click dLux_layers_detector_Bias href "#dLux.layers.detector.Bias" "Attributes: bias · Methods: apply()"
-    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Gain
-    click dLux_layers_detector_Gain href "#dLux.layers.detector.Gain" "Attributes: gain · Methods: context(), apply()"
-    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_Saturation
-    click dLux_layers_detector_Saturation href "#dLux.layers.detector.Saturation" "Attributes: limit · Methods: apply()"
+    class dLux_layers_detector_SensitivityLayer["SensitivityLayer"]
+    class dLux_layers_detector_ConvolveLayer["ConvolveLayer"]
+    class dLux_layers_detector_BiasLayer["BiasLayer"]
+    class dLux_layers_detector_GainLayer["GainLayer"]
+    class dLux_layers_detector_SaturationLayer["SaturationLayer"]
+    class dLux_utils_sequential_BaseLayer["BaseLayer"]
+    dLux_utils_sequential_BaseLayer <|-- dLux_layers_detector_DetectorLayer
+    click dLux_layers_detector_DetectorLayer href "#dLux.layers.detector.DetectorLayer" "Methods: apply(), context(), __init__()"
+    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_SensitivityLayer
+    click dLux_layers_detector_SensitivityLayer href "#dLux.layers.detector.SensitivityLayer" "Attributes: response · Methods: __init__(), apply()"
+    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_ConvolveLayer
+    click dLux_layers_detector_ConvolveLayer href "#dLux.layers.detector.ConvolveLayer" "Attributes: kernel · Methods: __init__(), apply()"
+    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_BiasLayer
+    click dLux_layers_detector_BiasLayer href "#dLux.layers.detector.BiasLayer" "Attributes: bias · Methods: __init__(), apply()"
+    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_GainLayer
+    click dLux_layers_detector_GainLayer href "#dLux.layers.detector.GainLayer" "Attributes: gain · Methods: __init__(), context(), apply()"
+    dLux_layers_detector_DetectorLayer <|-- dLux_layers_detector_SaturationLayer
+    click dLux_layers_detector_SaturationLayer href "#dLux.layers.detector.SaturationLayer" "Attributes: limit · Methods: __init__(), apply()"
 ```
-
-???+ info "BaseDetectorLayer"
-    ::: dLux.layers.detector.BaseDetectorLayer
 
 ???+ info "DetectorLayer"
     ::: dLux.layers.detector.DetectorLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Sensitivity"
-    ::: dLux.layers.detector.Sensitivity
+???+ info "SensitivityLayer"
+    ::: dLux.layers.detector.SensitivityLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Convolve"
-    ::: dLux.layers.detector.Convolve
+???+ info "ConvolveLayer"
+    ::: dLux.layers.detector.ConvolveLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Jitter"
-    ::: dLux.layers.detector.Jitter
+???+ info "BiasLayer"
+    ::: dLux.layers.detector.BiasLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Bias"
-    ::: dLux.layers.detector.Bias
+???+ info "GainLayer"
+    ::: dLux.layers.detector.GainLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "Gain"
-    ::: dLux.layers.detector.Gain
-
-???+ info "Saturation"
-    ::: dLux.layers.detector.Saturation
+???+ info "SaturationLayer"
+    ::: dLux.layers.detector.SaturationLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]

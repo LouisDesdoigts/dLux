@@ -4,18 +4,26 @@
 
 Select a section to inspect its module diagrams and complete public API.
 
-## [Core objects and parametrics](core/overview.md)
+## [Fields](fields/overview.md)
 
-Base, Compatibility, Fields, Grids, Bases, Parametrics, Parametrisations, Polynomials, Refractive, Shapes, Spectral, Sources, Systems.
+Image, Intensity, Psf, Wavefront.
 
-## [Builders and prebuilt components](prebuilt/overview.md)
+## [Layers](layers/overview.md)
 
-Builders, Prebuilt.
+Coronagraphy, Detector, Optical, Sparse, Unified.
 
-## [Optical and detector layers](layers/overview.md)
+## [Prebuilt](prebuilt/overview.md)
 
-Coronagraphy, Detector, Dynamic, Optical, Polarised, Propagation, Refractive, Sparse, Unified.
+Apertures, Definitions, Prebuilt.
 
-## [Numerical utilities](utils/overview.md)
+## [Systems](systems/overview.md)
 
-Abcd, Apertures, Array Ops, Coordinates, Fourier, Geometry, Helpers, Interpolation, Math, Misc, Norms, Optics, Polarisation, Polynomials, Propagation, Source, Source Estimation, Units.
+Detector, Imagers, Modelling, Optical, Sources.
+
+## [Utils](utils/overview.md)
+
+Astrometry, Bases, Bases / Basis, Bases / CLIMB, Bases / Fourier, Batching, Compat, Compat / Apertures, Compat / Array Ops, Compat / Coordinates, Compat / Fourier, Compat / Geometry, Compat / Helpers, Compat / Interpolation, Compat / Math, Compat / Misc, Compat / Norms, Compat / Optics, Compat / Polarisation, Compat / Polynomials, Compat / Propagation, Compat / Registration, Compat / Source, Compat / Units, Compat / Zernikes, Grids, Grids / Array Ops, Grids / Coordinates, Grids / Fields, Grids / Grid, Grids / Paste, Grids / Specs, Grids / Transforms, Numerical, Numerical / Gaussians, Numerical / Interpolation, Numerical / Math, Numerical / Norms, Numerical / Polynomials, Numerical / Profiles, Numerical / Shapes, Numerical / Units, Optical, Optical / Jones, Optical / Phase, Optical / Refractive, Optical / Zernikes, Photometry, Photometry / Bandpass, Photometry / Flux, Photometry / Integration, Photometry / Photometry, Photometry / Spectral, Photometry / Weights, Propagation, Propagation / ABCD, Propagation / Asm, Propagation / FFT, Propagation / MFT, Propagation / Operations, Propagation / Propagators, Sampled, Sequential.
+
+## [Compat](compat/overview.md)
+
+Coordinates, Detectors, Instruments, Layers, Layers / Abcd Propagators, Layers / Aberrations, Layers / Apertures, Layers / Detector Layers, Layers / Optical Layers, Layers / Optics, Layers / Propagators, Layers / Unified Layers, Modelling, Optical Systems, Psfs, Registration, Sampling, Sources, Spectra, Warnings, Wavefronts.

@@ -407,7 +407,7 @@ changed too substantially for a safe alias. Instantiating them raises an error
 containing the current replacement and a migration example. Custom subclasses of the
 former `OpticalSystem` base should instead subclass the layer or system contract they
 actually implement. The complete compatibility surface is available in the
-[compatibility API](API/core/compatibility.md).
+[compatibility API](API/compat/overview.md).
 
 If a migration error does not explain your use case, please open an issue with a
 minimal old-version example. That helps distinguish a missing compatibility route from

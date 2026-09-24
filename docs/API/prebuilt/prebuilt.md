@@ -6,48 +6,29 @@
 
 ```mermaid
 classDiagram
-    class dLux_prebuilt_prebuilt_SimpleCircular["SimpleCircular"]
-    class dLux_prebuilt_prebuilt_SegmentedHex["SegmentedHex"]
-    class dLux_prebuilt_prebuilt_NRMLike["NRMLike"]
-    class dLux_prebuilt_prebuilt_HSTLike["HSTLike"]
-    class dLux_prebuilt_prebuilt_JWSTLike["JWSTLike"]
-    class dLux_prebuilt_prebuilt_JWSTNRMLike["JWSTNRMLike"]
-    class dLux_prebuilt_prebuilt_EuclidLike["EuclidLike"]
-    class dLux_prebuilt_builders_ApertureBuilder["ApertureBuilder"]
-    class dLux_prebuilt_builders_SparseApertureBuilder["SparseApertureBuilder"]
-    dLux_prebuilt_builders_ApertureBuilder <|-- dLux_prebuilt_prebuilt_SimpleCircular
-    click dLux_prebuilt_prebuilt_SimpleCircular href "#dLux.prebuilt.prebuilt.SimpleCircular" "No direct public attributes or methods"
-    dLux_prebuilt_builders_SparseApertureBuilder <|-- dLux_prebuilt_prebuilt_SegmentedHex
-    click dLux_prebuilt_prebuilt_SegmentedHex href "#dLux.prebuilt.prebuilt.SegmentedHex" "Attributes: paste_method · Methods: build()"
-    dLux_prebuilt_builders_SparseApertureBuilder <|-- dLux_prebuilt_prebuilt_NRMLike
-    click dLux_prebuilt_prebuilt_NRMLike href "#dLux.prebuilt.prebuilt.NRMLike" "No direct public attributes or methods"
-    dLux_prebuilt_prebuilt_SimpleCircular <|-- dLux_prebuilt_prebuilt_HSTLike
-    click dLux_prebuilt_prebuilt_HSTLike href "#dLux.prebuilt.prebuilt.HSTLike" "No direct public attributes or methods"
-    dLux_prebuilt_prebuilt_SegmentedHex <|-- dLux_prebuilt_prebuilt_JWSTLike
-    click dLux_prebuilt_prebuilt_JWSTLike href "#dLux.prebuilt.prebuilt.JWSTLike" "No direct public attributes or methods"
-    dLux_prebuilt_prebuilt_NRMLike <|-- dLux_prebuilt_prebuilt_JWSTNRMLike
-    click dLux_prebuilt_prebuilt_JWSTNRMLike href "#dLux.prebuilt.prebuilt.JWSTNRMLike" "No direct public attributes or methods"
-    dLux_prebuilt_builders_ApertureBuilder <|-- dLux_prebuilt_prebuilt_EuclidLike
-    click dLux_prebuilt_prebuilt_EuclidLike href "#dLux.prebuilt.prebuilt.EuclidLike" "No direct public attributes or methods"
+    direction TB
+    class dLux_prebuilt_prebuilt_ZernikeDef["ZernikeDef"]
+    class dLux_prebuilt_definitions_Def["Def"]
+    class dLux_utils_numerical_units_Unitful["Unitful"]
+    dLux_prebuilt_definitions_Def <|-- dLux_prebuilt_prebuilt_ZernikeDef
+    dLux_utils_numerical_units_Unitful <|-- dLux_prebuilt_prebuilt_ZernikeDef
+    click dLux_prebuilt_prebuilt_ZernikeDef href "#dLux.prebuilt.prebuilt.ZernikeDef" "Attributes: unit, nolls, coeffs, diameter, n_sides, oversize, norm, method, grid, transform, support · Methods: __init__(), __call__()"
 ```
 
-???+ info "SimpleCircular"
-    ::: dLux.prebuilt.prebuilt.SimpleCircular
+???+ info "ZernikeDef"
+    ::: dLux.prebuilt.prebuilt.ZernikeDef
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
 
-???+ info "SegmentedHex"
-    ::: dLux.prebuilt.prebuilt.SegmentedHex
+???+ info "HSTAper"
+    ::: dLux.prebuilt.prebuilt.HSTAper
 
-???+ info "NRMLike"
-    ::: dLux.prebuilt.prebuilt.NRMLike
+???+ info "JWSTAper"
+    ::: dLux.prebuilt.prebuilt.JWSTAper
 
-???+ info "HSTLike"
-    ::: dLux.prebuilt.prebuilt.HSTLike
+???+ info "JWSTNRMAper"
+    ::: dLux.prebuilt.prebuilt.JWSTNRMAper
 
-???+ info "JWSTLike"
-    ::: dLux.prebuilt.prebuilt.JWSTLike
-
-???+ info "JWSTNRMLike"
-    ::: dLux.prebuilt.prebuilt.JWSTNRMLike
-
-???+ info "EuclidLike"
-    ::: dLux.prebuilt.prebuilt.EuclidLike
+???+ info "EuclidAper"
+    ::: dLux.prebuilt.prebuilt.EuclidAper

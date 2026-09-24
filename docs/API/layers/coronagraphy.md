@@ -6,11 +6,15 @@
 
 ```mermaid
 classDiagram
-    class dLux_layers_coronagraphy_SoummerFPM["SoummerFPM"]
+    direction TB
+    class dLux_layers_coronagraphy_SoummerFPMLayer["SoummerFPMLayer"]
     class dLux_layers_optical_OpticalLayer["OpticalLayer"]
-    dLux_layers_optical_OpticalLayer <|-- dLux_layers_coronagraphy_SoummerFPM
-    click dLux_layers_coronagraphy_SoummerFPM href "#dLux.layers.coronagraphy.SoummerFPM" "Attributes: optic, propagator · Methods: apply_mono()"
+    dLux_layers_optical_OpticalLayer <|-- dLux_layers_coronagraphy_SoummerFPMLayer
+    click dLux_layers_coronagraphy_SoummerFPMLayer href "#dLux.layers.coronagraphy.SoummerFPMLayer" "Attributes: optic, propagator · Methods: __init__(), apply_mono(), return_to_pupil()"
 ```
 
-???+ info "SoummerFPM"
-    ::: dLux.layers.coronagraphy.SoummerFPM
+???+ info "SoummerFPMLayer"
+    ::: dLux.layers.coronagraphy.SoummerFPMLayer
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]

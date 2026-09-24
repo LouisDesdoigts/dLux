@@ -6,26 +6,15 @@
 
 ```mermaid
 classDiagram
-    class dLux_layers_sparse_Interfere["Interfere"]
+    direction TB
     class dLux_layers_sparse_SparseOptic["SparseOptic"]
-    class dLux_layers_sparse_SparseDynamicOptic["SparseDynamicOptic"]
-    class dLux_layers_dynamic_BaseDynamicLayer["BaseDynamicLayer"]
     class dLux_layers_optical_Optic["Optic"]
-    class dLux_layers_optical_OpticalLayer["OpticalLayer"]
-    dLux_layers_optical_OpticalLayer <|-- dLux_layers_sparse_Interfere
-    click dLux_layers_sparse_Interfere href "#dLux.layers.sparse.Interfere" "Methods: apply(), apply_mono()"
     dLux_layers_optical_Optic <|-- dLux_layers_sparse_SparseOptic
-    click dLux_layers_sparse_SparseOptic href "#dLux.layers.sparse.SparseOptic" "Attributes: amplitude, jones, thickness, n, propagator, transmission, opd, phase, normalise, centers · Properties: n_apertures · Methods: phasor(), localise(), apply_mono()"
-    dLux_layers_dynamic_BaseDynamicLayer <|-- dLux_layers_sparse_SparseDynamicOptic
-    dLux_layers_sparse_SparseOptic <|-- dLux_layers_sparse_SparseDynamicOptic
-    click dLux_layers_sparse_SparseDynamicOptic href "#dLux.layers.sparse.SparseDynamicOptic" "Attributes: amplitude, jones, thickness, n, propagator, coordinates, transformation, transmission, opd, phase, normalise, centers"
+    click dLux_layers_sparse_SparseOptic href "#dLux.layers.sparse.SparseOptic" "Attributes: abcd, grid_out, focal_length, defocus, inverse, jones, thickness, n, amplitude, phase, transmission, opd, normalise, grid, transform, centers · Properties: n_apertures · Methods: __init__(), phasor(), localise(), apply_mono()"
 ```
-
-???+ info "Interfere"
-    ::: dLux.layers.sparse.Interfere
 
 ???+ info "SparseOptic"
     ::: dLux.layers.sparse.SparseOptic
-
-???+ info "SparseDynamicOptic"
-    ::: dLux.layers.sparse.SparseDynamicOptic
+        options:
+          merge_init_into_class: true
+          inherited_members: [__init__]
