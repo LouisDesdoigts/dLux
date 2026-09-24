@@ -2,175 +2,122 @@
 
 ---
 
-## V0.16.0
+## V0.16.0 (unreleased)
 
 ### 🚀 Highlights
-- Rebuilt dLux around coordinate-aware field containers, composable parametric
-  models, and explicit contracts between optical and detector systems.
-- Replaced the legacy propagation classes with a unified set of Fraunhofer,
-  Fresnel, free-space, and ABCD propagation layers.
-- Added first-class support for chromatic and polarised wavefronts throughout the
-  optical modelling stack.
-- Added grid-aware dense, sparse, dynamic, and segmented aperture construction for
-  building realistic differentiable instruments without materialising unnecessary
-  full-array bases.
 
-### ✨ New Features
-- **Fields and grids:** added `BaseField`, `ContinuousField`, and `DiscreteField`
-  contracts for `Wavefront`, `PolarisedWavefront`, deterministic `Intensity`, and
-  realised `Image`, all backed by a multidimensional `GridSpec`.
-- **Images:** added explicit `Intensity` to `Image` conversion, Poisson and read-noise
-  simulation, standard-deviation and derived-variance tracking, and Fourier amplitude
-  and power spectra. Statistical residuals and likelihoods remain in Zodiax.
-- **Coordinates:** added broadcastable grid specifications, `ResizeSpec`,
-  coordinate transformations, affine maps, polynomial distortions, ordered
-  transformation composition, construction from regular axes, oversampling, and
-  unit-aware plotting extents.
-- **Parametrics:** added general explicit and implicit bases, dynamic coordinate
-  evaluation, interpolation, arbitrary-dimensional polynomial models, refractive
-  index models, selected polynomial degrees, and reusable hard or softened shape
-  definitions. Added dense and masked coefficient reparametrisations with batched
-  latent coordinates, reversible logarithmic coordinate transforms, and transform
-  composition. `Basis` replaces the former `ExplicitBasis` name.
-- **Spectral parametrics:** added normalised `SpectralPolynomial`, `SpectralBasis`,
-  and `Blackbody` models for wavelength-dependent source weights.
-- **Aperture construction:** added grid-aware builders for dense and sparse optics,
-  Zernike OPD definitions, and configurable HST-, JWST-, JWST NRM-, and Euclid-like
-  templates. Named templates describe their intended fidelity rather than claiming
-  exact observatory models.
-- **Geometry:** added hard and softened convex polygons, differentiable vertices, and
-  opt-in convexity validation alongside the existing circular, rectangular, polygon,
-  and spider primitives.
-- **Segmented apertures:** added compact pasted transmission and `PastedBasis`
-  construction, with parallel and memory-efficient placement strategies for large
-  segmented pupils such as ELT-scale apertures.
-- **Dynamic optics:** added coordinate-aware dynamic optical layers and sparse
-  optic foundations that compose shapes, aberrations, positions, and local or
-  global transformations.
-- **Sparse optics:** added shared and per-aperture parametric evaluation,
-  position-vectorised wavefront propagation through optical systems, and explicit
-  coherent interference of propagated sub-apertures.
-- **Propagation:** added `Fraunhofer`, `Fresnel`, `FreeSpace`, and
-  `ABCDPropagator`, including FFT, MFT, and LCT routes with coordinate-unit
-  validation and vectorised chromatic sampling. Fraunhofer and Fresnel propagation
-  support explicit reverse propagation where the numerical route has a defined
-  physical inverse.
-- **Optical systems:** added a single layered `OpticalSystem`, a dedicated
-  `DetectorSystem`, intermediate-state debugging, and optional wavefront returns
-  from propagation.
-- **Detector modelling:** added deterministic `Sensitivity`, `Convolve`, `Jitter`,
-  `Bias`, `Gain`, and `Saturation` layers. Responses may be fixed arrays or
-  parametrics, allowing spatial and nonlinear detector models to use the same layer
-  contract.
-- **Sources:** added composable `Spectrum`, `Source`, and `BinarySource` models
-  with parametric wavelengths, weights, positions, fluxes, and resolved
-  distributions. `Source` now supports vectorised populations of positions, fluxes,
-  spectra, and resolved distributions through one leading-axis contract.
-- **Coronagraphy:** added `SoummerFPM`, a modular Soummer-style focal-plane-mask
-  layer built around a Fraunhofer MFT propagator and an arbitrary optical mask layer.
-- **Optical layers:** added `RefractiveOptic` and `Wedge` layers for static or
-  parametrically generated thickness and refractive-index profiles.
-- **Polarisation:** added polarised wavefront propagation, Stokes evaluation, and
-  uniform or spatially varying parametric polariser and retarder fields.
-- Added shared interpolation methods and layers for complex wavefronts and real
-  intensity fields ([#302](https://github.com/LouisDesdoigts/dLux/issues/302)).
-- Added a normalised multidimensional Gaussian utility with explicit physical-axis
-  ordering and batched mean or covariance support.
-- Added central unit parsing, canonicalisation, validation, and contextual errors for
-  grids, wavelengths, positions, fluxes, and relative source distributions.
-- Added consistent raised-parameter paths across nested fields, sources, parametrics,
-  layers, and systems, with clearer errors for unresolved paths.
-- Added `dLux.utils.update(...)` for applying one parameter-path mapping across one or
-  more Zodiax objects with strict unused-path detection.
-- Added official Python 3.14 support.
+- Added `Imager`, `Coronagraph` and `Interferometer` with separate Wavefront, PSF,
+  photometry, Intensity and Image stages. Stored inputs can be overridden for one
+  calculation; named input dictionaries produce named outputs.
+- Retained `OpticalSystem.propagate()` and `.model()` as familiar array-returning
+  entry points, backed by the current field and source calculations.
+- Added unit-aware grids, reusable numerical propagators, array parameterisations,
+  Jones optics and bin-integrated photometry. Utilities are available from both
+  `dLux` and `dLux.utils`.
+- Added explicit compatibility constructors for supported 0.15.1 workflows. They
+  construct current objects rather than reproducing the old object hierarchy.
 
-### ⚠️ Breaking Changes
-- Replaced `CoordSpec` and `PadSpec` with `GridSpec` and `ResizeSpec`, and moved
-  coordinate specifications and transformations into `dLux.grids`.
-- `ResizeSpec` now uses the concise `pad` and `crop` attribute names.
-- Consolidated wavefronts, deterministic intensities, and detector images into
-  `dLux.fields`; removed the former wavefront, PSF, detector, spectrum, and scene
-  module structure. `PSF` is retained only as a deprecated compatibility wrapper for
-  `Intensity`.
-- Replaced the separate layered, angular, Cartesian, and parametric optical-system
-  classes with `OpticalSystem`; detector processing now lives in
-  `DetectorSystem`.
-- `OpticalSystem.model(...)` now takes a source and returns an `Intensity`.
-  `DetectorSystem.model(...)` applies deterministic detector responses and also
-  returns an `Intensity`; construct an `Image` explicitly to simulate observations.
-- Replaced the legacy FFT, MFT, and ASM propagation-layer classes with the new
-  propagation contracts; `ASM` is now represented by `FreeSpace`.
-- Reworked aperture and basis aberrations around dynamic optics and general
-  parametric interfaces, replacing the specialised aperture-layer hierarchy
-  ([#331](https://github.com/LouisDesdoigts/dLux/issues/331)).
-- Unified hard and softened geometry through explicit edge definitions. Aperture
-  builders now materialise a layer when called and return sampled arrays through
-  their explicit `build(...)` methods.
-- Renamed abstract extension contracts consistently: coordinate transforms derive
-  from `BaseCoordTransform`, aperture construction derives from `BaseBuilder`, and
-  OPD recipes derive from `BaseOPDDef`. `Distortion` is the general coordinate-field
-  transformation; the released concrete `CoordTransform` remains a deprecated
-  affine compatibility wrapper.
-- Standardised aperture and polygon sizes on diameter, with polygon diameters
-  referring to their enclosing circles.
-- `LinearPolariser` and `Retarder` now cover uniform and spatially varying fields;
-  their axis parameter is named `angle`, and `SVLinearPolariser` and `SVRetarder`
-  have been removed.
-- Optical layers define their monochromatic operation through `apply_mono(...)`;
-  `apply(...)` owns leading-axis vectorisation and `__call__(...)` remains its concise
-  callable interface.
-- Renamed public parameter leaves and constructor keywords from `coefficients` to
-  `coeffs`. Warning-backed aliases preserve released uses through dLux 0.17.
+### ✨ New capabilities
 
-### ⏳ Deprecations and Compatibility
-- Added a central compatibility layer for supported dLux 0.14 and 0.15 interfaces.
-  Safe aliases emit actionable warnings with direct migration examples; legacy
-  contracts that cannot preserve their physical meaning raise migration errors.
-- Legacy module import paths are exposed without retaining empty compatibility
-  modules throughout the package.
-- Deprecated interfaces are scheduled for removal in dLux 0.17.0.
-- Retained `PSF`, `CoordSpec`, `PadSpec`, `CoordTransform`, `DistortedCoords`, legacy
-  detector-layer names, system names, source wrappers, propagator wrappers, and
-  `coefficients` aliases where their released behaviour can be translated safely.
-- Added a task-oriented [0.16 migration guide](https://louisdesdoigts.github.io/dLux/latest/migration/)
-  covering grids, fields, systems, sources, parametrics, apertures, propagation, and
-  custom layers.
+- `Grid` describes 2D spatial sampling; `Axis` describes 1D sampling. Fields retain
+  their sampling through propagation, resizing and interpolation. Partial grids
+  can be completed when an operation has the required information.
+- One `Wavefront` handles scalar, chromatic and Jones fields. Uniform Jones matrices
+  remain separate until spatial materialisation is needed. `Jones`, `JonesMatrix`
+  and `JonesChain` describe polarisation independently of optical layers.
+- `Optic` combines transmission, OPD, phase, Jones and refractive effects. Generated
+  shapes and `Basis` expressions can replace arrays; coefficients default to zeros
+  when their shape is known. Basis units scale the contracted output.
+- `HSTAper`, `JWSTAper`, `JWSTNRMAper` and `EuclidAper` construct sampled pupils.
+  Builders and `ZernikeDef` prepare ordinary Optic/SparseOptic and Basis objects.
+- Numerical `Propagator`, `FFTPropagator`, `LCT`, `SpectralPropagator` and `FreeSpace`
+  support explicit grids and reusable preparation. ABCD definitions resolve to
+  matrices; prepared FFT routes can compose array operations through Series.
+- `BandPass` specifies equal-width bins by their outer edges. Spectrum, Blackbody,
+  PolySpectrum and Filter definitions can retain finer native sampling. Photometry
+  integrates spectrum × filter × QE into optical-bin Weights, respecting each
+  curve's support boundaries.
+- Source geometry is independent of brightness. Point/Binary/Companions expressions
+  resolve angular positions; ContrastFlux allocates primary and companion fluxes.
+  Scenes combine source components with their own spectra and resolved profiles.
+- Detector separates field resampling, deterministic response, pixel integration,
+  photon/read noise and gain. Imager supports image oversampling and jitter blur.
 
-### 🐛 Bug Fixes
-- Corrected FFT coordinate centring and restored explicit final-wavefront returns.
-- Standardised the Collins phase across Fourier propagation routes, with FFT and
-  MFT forward, inverse, centring, and mixed-route behaviour checked against common
-  correctness contracts.
-- Wavefront and intensity interpolation share the established interpolation utility
-  while preserving complex and real-valued data requirements.
-- Expanded propagation and array operations to preserve leading vectorisation
-  dimensions and non-square spatial shapes where supported.
-- Standardised batched coordinate transformations and vectorised optical application
-  so semantic leading axes are preserved through nested models.
-- Corrected source spectral evaluation by using normalised wavelength coordinates,
-  optional spectral-weight normalisation, and explicit `linear`, `log`, and `ln`
-  distribution conventions.
-- Corrected finite-grid jitter construction for scalar, axis-aligned, correlated,
-  and zero-width kernels while preserving differentiability.
+### ⚠️ Changed interfaces and conventions
 
-### 📚 Documentation and Testing
-- Rebuilt the tests around public behavioural contracts, shared JAX transformation
-  checks, and finite-output assertions.
-- Automated API page and inheritance-diagram generation from public module exports.
-- Added dedicated installation, citation, and publications pages and removed the
-  empty FAQ and manually maintained UML image assets.
-- Added repository guidance and a dLux development skill for consistent AI-assisted
-  implementation, review, testing, documentation, and external model construction.
-- Added a dedicated 0.14/0.15 migration guide, parameter-path guide, compatibility
-  API reference, and deprecation test suite.
-- Reorganised tutorials into introductory, basics, advanced, and retained legacy
-  routes, with Getting Started published as the reference end-to-end workflow.
-- Replaced package-scale class diagrams with compact package and module maps while
-  retaining local inheritance diagrams on generated API pages.
-- Added a maintained contributor register covering software, science, tutorials,
-  documentation, testing, and review.
+- Declared dependencies now require Zodiax 0.6.0 or later and Interpax; the declared
+  minimum Python version is 3.10.
+
+- `Spectrum(value, bandpass=..., flux=...)` is a density model, not the released
+  discrete-weight constructor. A numeric flux is total incident photons in the
+  calculation BandPass; `None` preserves absolute density. Only photon flux units
+  are supported. Current PolySpectrum uses a unit baseline and fixed normalised
+  wavelength coordinates; old polynomial coefficients need conversion.
+- Current `PointSource` positions default to arcseconds. Binary positions locate
+  the primary; PA defaults to degrees and contrast to log10(companion/primary).
+  The explicit compat constructors translate released radian/midpoint/mean-flux
+  conventions.
+- Current `FFT`, `MFT`, `ASM`, propagators, Spectrum and FourierBasis take precedence
+  at the package root. Released signatures are available through `dLux.compat` or
+  `dLux.utils.compat`. Field-operation layers use names such as `ResizeLayer` and
+  `InterpolateLayer` to distinguish them from numerical operators.
+- Grids use physical `(x, y)` metadata and array `(ny, nx)` order. Wavefront batches
+  lead wavelength axes; explicit Jones axes sit directly before spatial axes.
+  ABCD and numerical Jones matrices both use trailing `(..., 2, 2)` axes.
+- Wavefront has no spectral-weight leaf. Imager's PSF is unweighted; photometry
+  supplies weights before Intensity and detector Image formation. OpticalSystem
+  retains its weighted propagation and default array-return conventions.
+- Array-valued fields store `array` and `grid`. Coefficients use `coeffs` on their
+  parameterisation. Fitted paths and old scalar-sampling assumptions need review.
+- Interp defaults to `cubic2`, real/imaginary interpolation for complex values, and
+  extrapolation with `fill=None`. It interpolates values without flux compensation.
+  Shape edges are hard unless softening is supplied. Padding/cropping rejects
+  parity changes that would shift the centre by half a pixel.
+- Current Jitter measures width in actual pixels. The ApplyJitter adapter converts
+  the released fixed-domain width; moving its sigma unchanged changes the blur.
+
+### ⏳ Deprecations and migration
+
+- Supported released constructors and numerical functions live in `compat` and
+  `utils.compat`. Warning-backed entry points give replacements and a planned
+  removal version of **0.17.0**; some direct aliases do not emit separate warnings.
+- Adapters cover sampled optical systems, source/spectrum constructors, simple
+  apertures, detector operations, coordinates and propagation. Transmission-only
+  compound apertures construct nested Combine expressions.
+- Old class identity, automatic parameter paths and implicit aberrated-aperture
+  support are not restored. Unsupported physical or structural translations require
+  explicit current models rather than silent approximations.
+- See the [migration guide](https://louisdesdoigts.github.io/dLux/latest/migration/)
+  for before/after constructions, changed units, coefficient paths and limitations.
+
+### 🐛 Numerical fixes and retained behaviour
+
+- Unified FFT/MFT centring and the general ABCD phase convention. Released FFT
+  adapters preserve supported old transform conventions where appropriate.
+- Preserved the released Affine rotation direction, Fourier coefficient mapping
+  and Gaussian utility axis order, with numerical reference comparisons.
+- Corrected Euclid's spider orientation. Its current aperture builder uses one
+  shared edge-sampling route rather than the old helper's extra circular oversampling.
+- Unified spectral integration for stored and explicit BandPass inputs. Integration
+  splits at curve support boundaries instead of extending response outside support.
+- Consolidated leading-batch handling, interpolation and optical preparation across
+  numerical operations, fields and systems.
+
+### 📚 Documentation and validation
+
+- Rebuilt Module Overviews and API navigation around the current package structure;
+  generated inheritance diagrams include the methods defining each contract.
+- Restored constructor contracts and executable examples in principal class
+  docstrings. Added focused Bases, Prebuilt and photometry guides.
+- Reworked behavioral/JIT tests and added comparisons against the untouched 0.15.1
+  reference. Compatibility remains partial; passing supported numerical comparisons
+  does not imply the old object structure is preserved.
+- Known limitation: Zernike coordinate/diameter derivatives can be non-finite at
+  the exact origin. Final release-artifact and supported-Python validation are
+  still pending.
 
 ### 🎉 Contributors
+
 - [Jaren Ashcraft (@Jashcraf)](https://github.com/Jashcraf) contributed the
   polarisation foundations, including polarised wavefronts, Stokes evaluation, and
   uniform and spatially varying polarisation layers.
