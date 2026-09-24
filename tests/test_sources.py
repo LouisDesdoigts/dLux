@@ -191,9 +191,3 @@ def test_unitful_point_and_linear_binary_defaults():
     assert np.array_equal(
         dl.BinarySource(log=False).spectrum.flux.resolve(), np.ones(2)
     )
-
-
-def test_released_binary_default_contrast_stays_linear_at_boundary():
-    with pytest.warns(DeprecationWarning):
-        source = dl.BinarySource(wavelengths=np.array([6e-7]), mean_flux=2.0)
-    assert np.allclose(source.spectrum.flux, np.array([2.0, 2.0]))

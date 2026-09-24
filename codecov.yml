@@ -1,3 +1,7 @@
+ignore:
+  - "src/dLux/compat/**/*"
+  - "src/dLux/utils/compat/**/*"
+
 coverage:
   precision: 2
   round: down

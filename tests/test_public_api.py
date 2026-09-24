@@ -1,4 +1,4 @@
-"""Canonical public names must not be shadowed by compatibility exports."""
+"""Public exports expose the current classes through consistent namespaces."""
 
 import dLux as dl
 import dLux.utils as dlu
@@ -12,7 +12,7 @@ def test_sampling_base_is_the_canonical_spec():
     assert isinstance(dlu.Grid(4, d=1), dl.Spec)
 
 
-def test_current_source_names_are_not_legacy_adapters():
+def test_current_source_names_are_exported():
     assert dl.PointSource is PointSource
     assert dl.ResolvedSource is ResolvedSource
     assert dl.Scene is Scene
@@ -26,7 +26,6 @@ def test_source_module_import_forms_agree():
     assert importlib.import_module("dLux.sources") is sources
     assert sources.PointSource is PointSource
     assert sources.BinarySource is dl.BinarySource
-    assert sources is not dl.compat.sources
 
 
 def test_numerical_source_definitions_belong_to_utilities():
@@ -57,7 +56,7 @@ def test_propagation_layer_inherits_flat_numerical_definition():
         assert name not in vars(dl.layers)
 
 
-def test_current_zernike_is_not_shadowed_by_a_removed_compatibility_name():
+def test_current_zernike_is_exported():
     assert dl.Zernike is dlu.Zernike
     assert dl.Zernike.__module__ == "dLux.utils.optical.zernikes"
 
@@ -77,15 +76,6 @@ def test_public_exports_are_unique_and_importable():
         assert all(hasattr(module, name) for name in module.__all__)
 
 
-def test_compatibility_facades_do_not_modify_canonical_exports():
-    assert "rad2deg" not in dlu.numerical.units.__all__
-    assert "l1_norm" not in dlu.numerical.norms.__all__
-    assert "paste" not in dlu.grids.array_ops.__all__
-    assert dlu.units.unit_factor is dlu.numerical.units.unit_factor
-    assert dlu.array_ops.paste is dlu.grids.paste
-    assert dlu.units is not dlu.numerical.units
-
-
 def test_numerical_operations_and_field_layers_have_distinct_names():
     from dLux.utils.propagation import FFT, MFT, Resize
     from dLux.layers.unified import ResizeLayer
@@ -94,11 +84,6 @@ def test_numerical_operations_and_field_layers_have_distinct_names():
     assert dl.ResizeLayer is dl.layers.ResizeLayer is ResizeLayer
     assert dl.FFT is dlu.FFT is FFT
     assert dl.MFT is dlu.MFT is MFT
-    assert dl.compat.Resize is ResizeLayer
-    assert dl.compat.FFT is not FFT
-    assert dl.compat.MFT is not MFT
-    assert dl.compat.utils.FFT is not FFT
-    assert dl.compat.utils.MFT is not MFT
 
 
 def test_concrete_operation_layers_use_the_layer_suffix():
@@ -126,15 +111,14 @@ def test_concrete_operation_layers_use_the_layer_suffix():
 
 
 def test_all_utility_exports_are_available_in_main():
-    # Current core helpers win over their legacy utility copies. The old
-    # coordinates module keeps its released import path rather than being shadowed.
+    # Core helpers own these names; the legacy coordinates facade is outside
+    # this current-API export contract.
     overrides = {
-        "coordinates": dl.compat.coordinates,
         "segmented_hex_cens": dl.prebuilt.segmented_hex_cens,
         "non_redundant_support": dl.prebuilt.non_redundant_support,
     }
     assert set(dlu.__all__) <= set(dl.__all__)
-    for name in dlu.__all__:
+    for name in set(dlu.__all__) - {"coordinates"}:
         assert getattr(dl, name) is overrides.get(name, getattr(dlu, name))
     assert dl.optical is dlu.optical
     assert dl.layers.optical is not dl.optical
@@ -155,12 +139,3 @@ def test_main_spectra_are_current_definitions_without_deprecation_warnings():
     assert dl.Blackbody is dlu.Blackbody
     assert type(polynomial) is dlu.PolySpectrum
     assert model.spectrum is spectrum
-    assert dl.compat.Spectrum is not dl.Spectrum
-    assert dl.compat.PolySpectrum is not dl.PolySpectrum
-
-
-def test_main_module_exports_preserve_released_coordinate_imports():
-    import importlib
-
-    assert importlib.import_module("dLux.coordinates") is dl.coordinates
-    assert dl.coordinates is dl.compat.coordinates

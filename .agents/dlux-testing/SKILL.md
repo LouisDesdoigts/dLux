@@ -11,9 +11,11 @@ user decisions to distinguish a real regression from an obsolete API expectation
 
 When tests are authorised, organise them by package ownership: fields,
 systems (including sources), layers, prebuilt and the utility subpackages. Existing
-root source tests need not move as a side effect of a narrow fix. Keep released adapters in
-compatibility tests. dLux no longer owns a serialization subsystem; use Zodiax for a
-small integration check on representative dLux objects, without reproducing its suite.
+root source tests need not move as a side effect of a narrow fix. Keep backwards-
+compatibility audits outside the maintained suite: do not add copied release tests,
+compatibility snapshots or adapter tests to this repository. dLux no longer owns a
+serialization subsystem; use Zodiax for a small integration check on representative
+dLux objects, without reproducing its suite.
 
 Preserve valid behavioural coverage during a migration. Move/rewrite assertions for
 consolidated classes, remove tests solely for deliberately removed unreleased APIs,
@@ -49,7 +51,8 @@ work. Do not install into a system/base environment as a fallback.
 Documentation examples can provide useful contracts when documentation is in scope.
 A test update does not independently authorise editing or regenerating documentation.
 
-For compatibility checks, keep the reference release/tests untouched. Report supported
+When explicitly requested, perform compatibility checks in an external test bed and
+keep the reference release/tests untouched. Report supported
 numerical comparisons separately from failures due to deliberate structural changes;
 do not recreate old classes just to satisfy identity assertions. Use the release-file
 selection when testing an artifact; a whole development checkout may include excluded

@@ -10,25 +10,7 @@ import dLux as dl
 import dLux.utils as dlu
 
 from dLux.prebuilt.apertures import SparseApertureBuilder
-from dLux.utils.compat.apertures import euclid_like
 from tests.helpers import assert_jittable
-
-
-@pytest.mark.parametrize("angles", [(0, 120, 240), (15, 80, 210)])
-def test_euclid_spiders_retain_released_orientation(angles):
-    grid = dl.Grid(64, diam=1.21)
-    optic = dl.EuclidAper(
-        grid, spider_angles=angles, pupil_oversample=3, normalise=False
-    )
-    reference = euclid_like(64, spider_angles=angles, oversample=3)
-
-    # The old helper further oversamples circular edges. Compare inside the clear
-    # pupil, where both implementations sample exactly the same spider geometry.
-    radius = np.sqrt((grid.coordinates**2).sum(0))
-    interior = (radius > 0.395 / 2 + 2 * grid.d[0]) & (
-        radius < 1.21 / 2 - 2 * grid.d[0]
-    )
-    assert np.array_equal(optic.transmission[interior], reference[interior])
 
 
 def test_aperture_builder_contract():

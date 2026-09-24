@@ -73,11 +73,13 @@ markers = [
 [tool.coverage.run]
 source = ["dLux"]
 relative_files = true
+omit = ["*/dLux/compat/*", "*/dLux/utils/compat/*"]
 
 [tool.coverage.report]
 fail_under = 95
 precision = 2
 show_missing = true
+omit = ["*/dLux/compat/*", "*/dLux/utils/compat/*"]
 exclude_also = ["@(abc\\.)?abstractmethod"]
 
 [tool.coverage.xml]

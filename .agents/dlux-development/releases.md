@@ -25,7 +25,8 @@ Compare against the released baseline, not every intermediate development interf
 Keep the original upstream tests unchanged when measuring compatibility. Separate
 namespace availability, structural compatibility and numerical agreement; an adapter
 returning current objects does not promise old `isinstance` checks or parameter paths.
-Use the repository comparison scripts where applicable, inspecting their inputs first.
+Keep such comparisons in an external test bed; do not commit reference snapshots,
+copied release tests or compatibility-audit harnesses to this repository.
 
 The current selected release excludes `utils/raytrace/` (including GaussBeam),
 `utils/source_estimation.py` and `calib.py`, plus dependent experiments/tests. Keep

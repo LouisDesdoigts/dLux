@@ -12,11 +12,9 @@ from tests.helpers import assert_jittable
 
 
 def test_array_function_uses_shared_numerics_without_constructing_an_expression():
-    from dLux.utils.compat.interpolation import interp as legacy_interp
     from dLux.utils.numerical.interpolation import interp
 
     assert dlu.interp is interp
-    assert legacy_interp is interp
     grid = dlu.Grid((5, 4), (0.4, 0.6))
     queries = dlu.Grid((3, 3), 0.2, c=(0.1, 0.1)).coordinates
     x, y = grid.coordinates
@@ -37,7 +35,7 @@ def test_array_function_uses_shared_numerics_without_constructing_an_expression(
     assert np.allclose(gradient, expected.real.sum(), atol=1e-6)
 
 
-def test_array_function_retains_complex_fill_and_released_default():
+def test_array_function_retains_complex_fill_and_linear_default():
     grid = dlu.Grid((3, 3), 1)
     x, y = grid.coordinates
     image = x**2 + 1j * y**2
