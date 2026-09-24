@@ -1,9 +1,8 @@
-"""Builders and prebuilt optical components."""
+"""Constructor definitions, pupil builders and instrument presets."""
 
-from dLux.utils.helpers import reexport
+# Load the constructor contract before builders import their optical layers.
+from . import definitions, apertures, prebuilt
+from ..utils import reexport
 
-from . import builders, prebuilt
-
-_modules = (builders, prebuilt)
-
+_modules = (definitions, apertures, prebuilt)
 __all__ = reexport(_modules, globals())

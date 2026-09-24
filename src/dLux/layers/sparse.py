@@ -2,77 +2,47 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import jax.numpy as np
 import jax.tree as jtu
 import zodiax as zdx
 from jax import Array, vmap
 
-from ..utils.grids import Affine, AffineMap, BaseCoordTransform, Distortion, GridSpec
-from ..utils.parametrics.bases import Basis, ImplicitBasis, FourierBasis
-from ..utils.parametrics.polynomials import Polynomial
+import dLux.utils as dlu
+
 from ..fields import Wavefront
-from .dynamic import BaseDynamicLayer
-from .optical import BaseOpticalLayer, OpticalLayer, Optic
+from ..prebuilt.definitions import Def
+from .optical import Optic, OpticalLayer
 
-__all__ = ["Interfere", "SparseOptic", "SparseDynamicOptic"]
-
-
-class Interfere(OpticalLayer):
-    """Coherently sum the leading sub-aperture axis of a `Wavefront`.
-
-    Complex phasors are added before intensity is formed, retaining interference
-    between apertures. Inputs must have compatible wavelength and sampling metadata.
-    """
-
-    def apply(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Interfere the complete wavefront without generic leading-axis mapping.
-
-        The final leading batch axis is interpreted as the sub-aperture axis and is
-        consumed coherently, so `BaseOpticalLayer.apply` vectorisation is bypassed.
-        """
-        return self.apply_mono(wavefront, **context)
-
-    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Coherently collapse the final leading sub-aperture dimension.
-
-        Complex phasors are summed along the axis immediately before intrinsic Jones
-        and spatial axes. Sampling carrying that axis, including a shared singleton,
-        is collapsed to its first sub-aperture value.
-        """
-        # Identify the sub-aperture axis and size
-        axis = wavefront.batch_ndim - 1
-        size = wavefront.phasor.shape[axis]
-        batch = wavefront.phasor.shape[wavefront.wavelength.ndim : axis + 1]
-
-        # Define collapse of matching vectorised grid metadata
-        def collapse(value):
-            if value is None or value.ndim <= 1:
-                return value
-            prefix = value.shape[:-1]
-            if batch and prefix == batch:
-                return np.take(value, 0, axis=len(prefix) - 1)
-            if len(prefix) == wavefront.batch_ndim and prefix[axis] in (1, size):
-                return np.take(value, 0, axis=axis)
-            return value
-
-        # Collapse the field and its realised grid metadata
-        d = collapse(wavefront.grid.d)
-        c = collapse(wavefront.grid.c)
-        return wavefront.set(phasor=wavefront.phasor.sum(axis), d=d, c=c)
+__all__ = ["SparseOptic"]
 
 
 class SparseOptic(Optic):
     """Generate locally sampled wavefronts over a set of sub-aperture centers.
 
-    Basis, ImplicitBasis (including DynamicZernikeBasis), FourierBasis and Polynomial
-    coefficients are shared in their native coefficient shape. One leading axis
-    matching the number of centres selects independent coefficients per aperture.
-    Other arrays and expressions are shared; their axes are not inferred as aperture
-    axes. Coordinate transforms support the same explicit leading aperture axis.
+    ParametricBasis coefficients are shared in their native coefficient shape.
+    Their coeffs_ndim property identifies the intrinsic coefficient axes. One leading
+    axis matching the number of centres selects independent coefficients per aperture.
+    A one-mode basis therefore uses (n_apertures, 1) for independent coefficients.
+    Sampled transmission, OPD and phase are shared scalars or 2D arrays, or arrays
+    shaped (n_apertures, ny, nx). A third axis always identifies apertures, never
+    wavelengths. Expressions follow this same contract after resolution.
+    Coordinate transforms support the same explicit leading aperture axis.
 
-    Local Jones terms are unsupported and raise an error when configured. Apply a
-    separate polarising layer before or after the sparse optic. Scalar modulation
-    preserves an already polarised input wavefront.
+    An optional grid supplies the sampling coordinates. A shared transform acts
+    before subtracting aperture centres; a transform with an aperture axis acts
+    afterwards, in each local frame. Array-valued optical terms are applied
+    directly; grid and transform only control expression evaluation.
+
+    Inherited scalar, refractive and Jones effects use the same operations as
+    Optic. Normalisation acts across the complete pupil before Jones losses.
+    Aperture-specific Jones samples have shape (n_apertures, ny, nx, 2, 2);
+    omitting the aperture axis shares the matrix across apertures. Local Jones
+    operations produce explicit matrix axes in the returned field.
+
+    A supplied grid_out propagates these fields after the local effects. The
+    aperture axis remains separate until an explicit Wavefront.coherent_sum().
 
     Examples
     --------
@@ -80,13 +50,14 @@ class SparseOptic(Optic):
 
     ```python
     import dLux as dl
+    import dLux.utils as dlu
 
     # Construct a sparse optic from one locally sampled aperture
-    grid = dl.GridSpec(n=64, diam=0.25, unit="m")
+    grid = dl.Grid(n=64, diam=0.25, unit="m")
     optic = dl.SparseOptic(
         centers=[[-0.3, 0.0], [0.0, 0.3], [0.3, 0.0]],
         transmission=dl.Circle(diameter=0.2)(grid),
-        opd=dl.DynamicZernikeBasis(order=4, diameter=0.2),
+        opd=dl.Basis(dl.utils.Zernike(order=4, diameter=0.2)),
         normalise=True,
     )
 
@@ -95,21 +66,29 @@ class SparseOptic(Optic):
     wavefront = optic(wavefront)
 
     # Propagate each aperture independently and interfere the fields
-    focal_grid = dl.GridSpec(n=64, d=10, unit="mas")
-    wavefront = dl.Fraunhofer(focal_grid)(wavefront)
-    wavefront = dl.Interfere()(wavefront)
+    focal_grid = dl.Grid(n=64, d=10, unit="mas")
+    wavefront = dl.PropagatorLayer(focal_grid)(wavefront)
+    wavefront = wavefront.coherent_sum()
     ```
     """
 
-    amplitude: Array | zdx.Expression | None = None
+    # Inherited fields
+    abcd: Array | zdx.Expression | None = None
+    grid_out: dlu.Grid | None = None
+    focal_length: Any = None
+    defocus: Any = None
+    inverse: bool | None = False
     jones: Array | zdx.Expression | None = None
     thickness: Array | zdx.Expression | None = None
     n: Array | zdx.Expression | None = None
-    propagator: BaseOpticalLayer | None = None
+    amplitude: Array | zdx.Expression | None = None
+    phase: Array | zdx.Expression | None = None
     transmission: Array | zdx.Expression | None = None
     opd: Array | zdx.Expression | None = None
-    phase: Array | zdx.Expression | None = None
     normalise: bool | None = None
+    grid: dlu.Grid | None = None
+    transform: dlu.BaseCoordTransform | None = None
+
     centers: Array
 
     def __init__(
@@ -120,6 +99,18 @@ class SparseOptic(Optic):
         phase=None,
         normalise=None,
         *,
+        amplitude=None,
+        jones=None,
+        thickness=None,
+        n=None,
+        grid=None,
+        transform=None,
+        dynamic=False,
+        grid_out=None,
+        focal_length=None,
+        defocus=None,
+        abcd=None,
+        inverse=False,
         alias=None,
     ):
         """Initialise repeated locally sampled optics.
@@ -128,21 +119,64 @@ class SparseOptic(Optic):
         ----------
         centers : ArrayLike
             Physical ``(x, y)`` centres with shape ``(n_apertures, 2)``.
-        transmission : Array, Parametric, or None
-            Shared real amplitude transmission, or a basis with per-aperture
-            coefficients.
-        opd, phase : Array, Parametric, or None
-            Shared OPD in metres and phase in radians, or bases with per-aperture
-            coefficients.
+        transmission : Array, Expression, or None
+            Real amplitude transmission: shared scalar or (ny, nx) samples,
+            (n_apertures, ny, nx) samples, or an expression/basis producing them.
+        opd, phase : Array, Expression, or None
+            OPD in metres and phase in radians, with the same sampling contract
+            as transmission. Bases may have independent per-aperture coefficients.
         normalise : bool or None
-            Renormalise the resulting wavefront power when true. Omit to leave
-            normalisation unconfigured.
+            Normalise total power across all apertures to one, preserving relative
+            aperture transmission. Omit to retain the incident amplitude.
+        grid : Grid or None
+            Sampling grid for expressions. None uses the incident wavefront grid.
+            This does not resample the incident field or change its output grid.
+        transform : BaseCoordTransform or None
+            Shared global or aperture-dependent local coordinate transformation.
+        dynamic : bool
+            Build Def inputs as runtime expressions. Precomputed local expansions
+            should be supplied as complete Basis objects: their sampling is then
+            explicit, independent of the sparse optic's placement frame.
+        grid_out : Grid or None
+            Optional output sampling. Supplying it propagates each aperture after
+            its local effects; None returns the locally sampled aperture fields.
+        focal_length, defocus, abcd, inverse
+            Inherited Propagator relay parameters. An Imager uses these parameters
+            with its own output grid; its sparse pupil must leave grid_out unset.
+        alias : mapping or sequence of pairs, optional
+            User-defined Zodiax parameter aliases.
         """
+        # Check centres and keep definitions dynamic until their local frame is known.
         centers = zdx.as_array(centers, dtype=float)
         if centers.ndim != 2 or centers.shape[-1] != 2:
             raise ValueError("centers must have shape (n, 2).")
         self.centers = centers
-        super().__init__(transmission, opd, phase, normalise)
+        for value in (transmission, opd, phase, amplitude, thickness, n, jones):
+            if isinstance(value, Def) and not dynamic:
+                sampling = grid if grid is not None else getattr(value, "grid", None)
+                if sampling is not None:
+                    raise ValueError(
+                        "SparseOptic cannot cache Def inputs in a shared grid frame. "
+                        "Use dynamic=True, or construct a local Basis first."
+                    )
+        super().__init__(
+            transmission,
+            opd,
+            phase,
+            normalise,
+            amplitude=amplitude,
+            jones=jones,
+            thickness=thickness,
+            n=n,
+            grid=grid,
+            transform=transform,
+            dynamic=dynamic,
+            grid_out=grid_out,
+            focal_length=focal_length,
+            defocus=defocus,
+            abcd=abcd,
+            inverse=inverse,
+        )
 
         self.alias = alias
 
@@ -154,22 +188,12 @@ class SparseOptic(Optic):
     @staticmethod
     def _slice(obj, index, size, **context):
         """Select one centre from a shared or centre-vectorised object."""
-        if isinstance(obj, (Basis, ImplicitBasis, FourierBasis, Polynomial)):
+        if isinstance(obj, dlu.ParametricBasis):
             # Select coefficients without generating modes in the wrong frame.
-            if isinstance(obj, Basis):
-                axes = obj.axes
-            elif isinstance(obj, Polynomial):
-                axes = 1
-            else:
-                axes = len(obj.shape)
+            axes = obj.coeffs_ndim
             coeffs = zdx.resolve(obj.coeffs, **context)
             if coeffs is None:
                 return obj, False
-
-            # Retain compact per-aperture coefficients for a single implicit mode.
-            if isinstance(obj, ImplicitBasis) and obj.shape == (1,):
-                if coeffs.shape == (size,) and size != 1:
-                    return obj.set(coeffs=coeffs[index, None]), True
 
             if coeffs.ndim == axes:
                 return obj.set(coeffs=coeffs), False
@@ -180,9 +204,10 @@ class SparseOptic(Optic):
                 f"by an aperture axis of size {size}."
             )
 
-        if isinstance(obj, Distortion):
+        # Describe the intrinsic parameter shapes for each coordinate-transform family.
+        if isinstance(obj, dlu.Distortion):
             params = (("distortion", obj.powers.shape),)
-        elif isinstance(obj, AffineMap):
+        elif isinstance(obj, dlu.AffineMap):
             params = (("matrix", (2, 2)), ("offset", (2,)))
         else:
             params = (
@@ -192,6 +217,7 @@ class SparseOptic(Optic):
                 ("shear", (2,)),
             )
 
+        # Select one aperture only for parameters with a leading aperture axis.
         values, local = {}, False
         for name, shape in params:
             value = getattr(obj, name)
@@ -209,8 +235,13 @@ class SparseOptic(Optic):
 
     def _slice_local(self, index, *, bases, **context):
         """Select either basis coefficients or coordinate transforms per aperture."""
-        basis_types = (Basis, ImplicitBasis, FourierBasis, Polynomial)
-        types = basis_types + (Distortion, AffineMap, Affine)
+
+        # Treat each basis or transform as a leaf when selecting an aperture.
+        types = (
+            (dlu.ParametricBasis,)
+            if bases
+            else (dlu.Distortion, dlu.AffineMap, dlu.Affine)
+        )
         is_leaf = lambda leaf: isinstance(leaf, types)
         local_transform = False
 
@@ -218,13 +249,19 @@ class SparseOptic(Optic):
             nonlocal local_transform
             if not isinstance(leaf, types):
                 return leaf
-            if isinstance(leaf, basis_types) != bases:
-                return leaf
             leaf, local = self._slice(leaf, index, self.n_apertures, **context)
-            local_transform |= local and isinstance(leaf, BaseCoordTransform)
+            local_transform |= local and isinstance(leaf, dlu.BaseCoordTransform)
             return leaf
 
-        return jtu.map(select, self, is_leaf=is_leaf), local_transform
+        if bases:
+            return jtu.map(select, self, is_leaf=is_leaf), False
+
+        # Only the outer transform chooses between global and local placement.
+        # Nested transforms are selected too, but stay in their own child frames.
+        transform = jtu.map(select, self.transform, is_leaf=is_leaf)
+        outer_is_local = local_transform
+        optic = jtu.map(select, self.set(transform=None), is_leaf=is_leaf)
+        return optic.set(transform=transform), outer_is_local
 
     def _context_at(
         self,
@@ -234,31 +271,67 @@ class SparseOptic(Optic):
         local=False,
         **context,
     ) -> dict:
-        """Build parametric context in one sub-aperture frame."""
-        coordinates = AffineMap(offset=-center)(wavefront.coordinates)
-        return {
-            **context,
-            "wavelengths": wavefront.wavelength,
-            "coordinates": coordinates,
-            "pixel_scale": wavefront.pixel_scale,
-        }
+        """Sample the chosen grid in one global or locally transformed frame."""
+        if optic.grid is not None:
+            wavefront = wavefront.set(grid=optic.grid)
+        # Start before Optic's transform: sparse placement determines its order.
+        context = OpticalLayer.context(wavefront, **context)
+        coordinates = context.pop("coordinates")
 
-    def _phasor_at(self, index, center, wavefront, **context):
-        """Resolve and evaluate one centred local optic phasor."""
-        if self.jones is not None:
-            raise ValueError(
-                "Sparse optics do not support local Jones terms; "
-                "apply a separate polarising layer."
-            )
+        # Shared mappings act before placement; aperture-specific ones act after.
+        if optic.transform is not None and not local:
+            coordinates = optic.transform(coordinates)
+        coordinates = dlu.Affine(translation=center)(coordinates)
+        if optic.transform is not None and local:
+            coordinates = optic.transform(coordinates)
 
-        # Select geometry before constructing the authoritative local context.
+        return {**context, "coordinates": coordinates}
+
+    def _prepare_at(self, index, center, wavefront, **context):
+        """Resolve one aperture's fields in their authoritative local frame."""
+        context = dict(
+            context, wavelength=wavefront.wavelength, wavelengths=wavefront.wavelength
+        )
         optic, local = self._slice_local(index, bases=False, **context)
         context = self._context_at(wavefront, center, optic, local, **context)
 
         # Resolve and select coefficients only after their coordinates exist.
         optic, _ = optic._slice_local(index, bases=True, **context)
-        optic = optic.resolve(**context)
-        return optic._phasor(wavefront)
+        transmission = zdx.resolve(optic.transmission, **context)
+        if transmission is not None:
+            if transmission.ndim == 3:
+                if transmission.shape[0] != self.n_apertures:
+                    raise ValueError(
+                        "transmission must have an aperture axis of size "
+                        f"{self.n_apertures}; received {transmission.shape}."
+                    )
+                transmission = transmission[index]
+            context["support"] = transmission != 0
+        optic = optic.set(transmission=transmission).resolve_local(**context)
+
+        # Sampled scalar terms may share a patch or carry one leading aperture
+        # axis. Wavelength-dependent definitions have resolved at one wavelength.
+        updates = {}
+        for name in ("transmission", "opd", "amplitude", "phase", "thickness", "n"):
+            value = getattr(optic, name)
+            if value is None or value.ndim in (0, 2):
+                continue
+            if value.ndim != 3 or value.shape[0] != self.n_apertures:
+                raise ValueError(
+                    f"{name} must be scalar, (ny, nx), or "
+                    f"({self.n_apertures}, ny, nx) with an aperture axis; "
+                    f"received {value.shape}."
+                )
+            updates[name] = value[index]
+
+        # Jones matrices end in their two intrinsic axes. An explicit aperture
+        # axis may lead compact matrices or sampled spatial matrices.
+        matrix = optic.jones
+        if matrix is not None and matrix.ndim in (3, 5):
+            if matrix.shape[0] != self.n_apertures:
+                raise ValueError("Jones aperture axis must match centers.")
+            updates["jones"] = matrix[index]
+        return optic.set(**updates) if updates else optic
 
     def phasor(self, wavefront: Wavefront, **context) -> Array:
         """Return the coherent sum of all locally centred optic phasors.
@@ -266,129 +339,71 @@ class SparseOptic(Optic):
         The returned complex array broadcasts against ``wavefront.phasor`` and does
         not introduce a sub-aperture axis. Use `localise` to retain that axis.
         """
+        self = self.populate()
+        if self.jones is not None:
+            raise ValueError(
+                "phasor returns a scalar multiplier; "
+                "use localise or apply for Jones optics."
+            )
         indices = np.arange(self.n_apertures)
-        phasors = vmap(lambda i, c: self._phasor_at(i, c, wavefront, **context))(
-            indices, self.centers
-        )
-        return phasors.sum(0)
 
-    def localise(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Evaluate one locally centred field per sub-aperture.
+        def sample(index, center):
+            optic = self._prepare_at(index, center, wavefront, **context)
+            return optic.scalar_phasor(wavefront)
 
-        The returned wavefront inserts the aperture axis after existing batch axes
-        and stores per-aperture grid centres in the grid's declared unit.
+        return vmap(sample)(indices, self.centers).sum(0)
+
+    def localise(
+        self, wavefront: Wavefront, *, normalise=False, **context
+    ) -> Wavefront:
+        """Apply local effects, adding an aperture axis before wavelength axes.
+
+        Coordinates and coefficients are prepared per aperture. Optional
+        normalisation uses total scalar pupil power before Jones application,
+        preserving relative aperture transmission and subsequent polarisation loss.
         """
+        if wavefront.batch_ndim:
+
+            def localise(field):
+                return self.localise(field, normalise=normalise, **context)
+
+            return wavefront._map_wavefronts(localise)
+
+        self = self.populate()
         indices = np.arange(self.n_apertures)
+        polarised = self.jones is not None
 
         def make_wavefront(index, center):
-            local = wavefront.set(c=center / wavefront.grid.scale)
-            phasor = local.phasor * self._phasor_at(index, center, local, **context)
-            return phasor
+            local = wavefront.set(c=center / dlu.unit_factor(wavefront.grid.unit))
+            optic = self._prepare_at(index, center, local, **context)
+            field = optic.apply_scalar(local, normalise=False)
+            power = field.power
+            if polarised:
+                field = optic.apply_jones(field).materialise()
+            return field.phasor, power
 
-        phasor = vmap(make_wavefront)(indices, self.centers)
-        phasor = np.moveaxis(phasor, 0, wavefront.batch_ndim)
-        c = self.centers / wavefront.grid.scale
-        return wavefront.set(phasor=phasor, c=c)
+        phasor, power = vmap(make_wavefront)(indices, self.centers)
+        if normalise:
+            # Scalar normalisation commutes with the Jones multiplication. Use
+            # the recorded pre-Jones power so polarisation losses remain visible.
+            total = power.sum(0)
+            scale = np.sqrt(total).reshape(
+                total.shape + (1,) * (phasor.ndim - total.ndim)
+            )
+            phasor = phasor / scale
+
+        # This mono field gains one aperture axis. The outer Wavefront mapper
+        # restores wavelengths after it, keeping apertures and wavelengths separate.
+        c = self.centers / dlu.unit_factor(wavefront.grid.unit)
+        d = wavefront.grid.d
+        return wavefront.set(
+            phasor=phasor, d=d, c=c, jones=True if polarised else wavefront.jones
+        )
 
     def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Apply the optic and append its sub-aperture axis to the wavefront.
-
-        Optional normalisation is applied after localisation. The input wavefront is
-        not mutated.
-        """
-        wavefront = self.localise(wavefront, **context)
-        return wavefront.normalise() if self.normalise else wavefront
-
-
-class SparseDynamicOptic(BaseDynamicLayer, SparseOptic):
-    """A sparse optic with an optional coordinate source and transformation.
-
-    A shared transformation acts in the global coordinate frame before aperture
-    placement. A transformation with a leading aperture axis acts independently in
-    each aperture's local frame.
-
-    Transmission, OPD, and phase may be contextual `Parametric` objects evaluated on
-    the local grids, allowing differentiable sparse geometry without materialising a
-    global pupil.
-    """
-
-    amplitude: Array | zdx.Expression | None = None
-    jones: Array | zdx.Expression | None = None
-    thickness: Array | zdx.Expression | None = None
-    n: Array | zdx.Expression | None = None
-    propagator: BaseOpticalLayer | None = None
-
-    def __init__(
-        self,
-        centers,
-        transmission=None,
-        opd=None,
-        phase=None,
-        coordinates=None,
-        transformation=None,
-        normalise=None,
-        *,
-        alias=None,
-    ):
-        """Initialise repeated coordinate-dependent local optics.
-
-        Parameters
-        ----------
-        centers : ArrayLike
-            Physical ``(x, y)`` centres with shape ``(n_apertures, 2)``.
-        transmission : Array, Parametric, or None
-            Shared real amplitude transmission, or a basis with per-aperture
-            coefficients.
-        opd, phase : Array, Parametric, or None
-            Shared OPD in metres and phase in radians, or bases with per-aperture
-            coefficients.
-        coordinates : Array, GridSpec, or None
-            Explicit coordinate source, or incident coordinates when omitted.
-        transformation : BaseCoordTransform or None
-            Shared global or aperture-vectorised local coordinate transformation.
-        normalise : bool or None
-            Renormalise the resulting wavefront power when true. Omit to leave
-            normalisation unconfigured.
-        """
-        BaseDynamicLayer.__init__(self, coordinates, transformation)
-        SparseOptic.__init__(self, centers, transmission, opd, phase, normalise)
-
-        self.alias = alias
-
-    def _context_at(self, wavefront, center, optic, local=False, **context):
-        """Build dynamic context in a global or local transformed frame."""
-        # Resolve the coordinate source and its physical sampling
-        coordinate_source = optic.coordinates
-        if coordinate_source is None:
-            coordinates = wavefront.coordinates
-            pixel_scale = wavefront.pixel_scale
-        elif isinstance(coordinate_source, GridSpec):
-            coordinate_source = coordinate_source.sampled(**context)
-            coordinates = coordinate_source.coordinates
-            pixel_scale = coordinate_source.d_si
-        else:
-            coordinates = coordinate_source
-            pixel_scale = wavefront.pixel_scale
-
-        # Apply global transformation before aperture placement
-        if optic.transformation is not None and not local:
-            coordinates = optic.transformation(coordinates)
-        coordinates = AffineMap(offset=-center)(coordinates)
-
-        # Apply aperture-dependent transformation in the local frame
-        if optic.transformation is not None and local:
-            coordinates = optic.transformation(coordinates)
-        return {
-            **context,
-            "wavelengths": wavefront.wavelength,
-            "coordinates": coordinates,
-            "pixel_scale": pixel_scale,
-        }
-
-    coordinates: Array | GridSpec | None = None
-    transformation: BaseCoordTransform | None = None
-    transmission: Array | zdx.Expression | None = None
-    opd: Array | zdx.Expression | None = None
-    phase: Array | zdx.Expression | None = None
-    normalise: bool | None = None
-    centers: Array
+        """Apply the pupil with one normalisation shared by all apertures."""
+        self = self.populate()
+        wavefront = self.localise(wavefront, normalise=bool(self.normalise), **context)
+        if self.grid_out is not None:
+            wavefront = self.propagate(wavefront, **context)
+        return wavefront

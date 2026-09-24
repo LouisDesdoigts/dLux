@@ -2,13 +2,13 @@
 
 import zodiax as zdx
 
+import dLux.utils as dlu
 from .optical import OpticalLayer
-from .propagation import Propagator
 
-__all__ = ["SoummerFPM"]
+__all__ = ["SoummerFPMLayer"]
 
 
-class SoummerFPM(OpticalLayer):
+class SoummerFPMLayer(OpticalLayer):
     """Apply a focal-plane optical layer with the Soummer MFT algorithm.
 
     The focal-plane field is evaluated only on the propagator's compact output grid.
@@ -17,7 +17,7 @@ class SoummerFPM(OpticalLayer):
     parametric optics, and Jones optics that promote the wavefront to a polarised
     representation.
 
-    This implementation requires a forward MFT ``Propagator`` propagator. The same
+    This implementation requires a forward numerical MFT ``Propagator``. The same
     propagator is configured for inverse propagation when returning the modified
     field to the input pupil grid.
 
@@ -27,8 +27,8 @@ class SoummerFPM(OpticalLayer):
         Callable optical layer or composition, such as ``Sequential``, applied on
         the sampled focal grid. It must return a wavefront on that same grid and
         act as the identity outside the compact region represented by the grid.
-    propagator : Propagator
-        Forward ``Propagator`` propagator with explicit output sampling.
+    propagator : dlu.Propagator
+        Forward numerical propagator with explicit output sampling.
 
     References
     ----------
@@ -42,19 +42,20 @@ class SoummerFPM(OpticalLayer):
 
     ```python
     import dLux as dl
+    import dLux.utils as dlu
 
     # Construct the pupil and compact focal-plane grids
-    pupil_grid = dl.GridSpec(n=128, diam=1.0, unit="m")
-    focal_grid = dl.GridSpec(n=64, d=5, unit="mas")
+    pupil_grid = dl.Grid(n=128, diam=1.0, unit="m")
+    focal_grid = dl.Grid(n=64, d=5, unit="mas")
 
     # Make the focal-plane mask
-    fpm_diam = 100 * focal_grid.scale  # 100 mas in radians
+    fpm_diam = 100 * dlu.unit_factor(focal_grid.unit)  # 100 mas in radians
     fpm = dl.Complement(dl.Circle(diameter=fpm_diam))
 
     # Construct the Soummer propagation layer
-    propagation = dl.SoummerFPM(
+    propagation = dl.SoummerFPMLayer(
         optic=dl.Optic(transmission=fpm),
-        propagator=dl.Propagator(focal_grid),
+        propagator=dlu.Propagator(focal_grid),
     )
 
     # Construct the entrance pupil and wavefront
@@ -68,7 +69,7 @@ class SoummerFPM(OpticalLayer):
     """
 
     optic: zdx.Module
-    propagator: Propagator
+    propagator: dlu.Propagator
 
     def __init__(self, optic, propagator, *, alias=None):
         """Initialise a Soummer focal-plane-mask operation.
@@ -78,19 +79,23 @@ class SoummerFPM(OpticalLayer):
         optic : zodiax.Module
             Callable optical mask or composition with ``apply(wavefront, **context)``.
             It must preserve focal sampling; complex and Jones masks are supported.
-        propagator : Propagator
+        propagator : dlu.Propagator
             MFT-based focal propagator used forward and in reverse.
         """
         if not isinstance(optic, zdx.Module) or not callable(
             getattr(optic, "apply", None)
         ):
             raise TypeError("optic must be a callable optical layer or composition.")
-        if not isinstance(propagator, Propagator):
-            raise TypeError("propagator must be a Propagator layer.")
+        if not isinstance(propagator, dlu.Propagator) or not isinstance(
+            propagator.grid_out, dlu.Grid
+        ):
+            raise TypeError("propagator must be a numerical explicit-grid Propagator.")
         if propagator.abcd is not None or propagator.defocus is not None:
-            raise ValueError("SoummerFPM requires an undefocused conjugate Propagator.")
+            raise ValueError(
+                "SoummerFPMLayer requires an undefocused conjugate Propagator."
+            )
         if propagator.inverse:
-            raise ValueError("SoummerFPM requires a forward propagator.")
+            raise ValueError("SoummerFPMLayer requires a forward propagator.")
         self.optic = optic
         self.propagator = propagator
 
@@ -105,12 +110,19 @@ class SoummerFPM(OpticalLayer):
         matches the input pupil grid.
         """
         # Propagate to and apply the compact focal-plane optic
-        focal = self.propagator(wavefront, **context)
-        difference = focal - self.optic(focal, **context)
+        self = self.populate()
+        focal = wavefront.propagate(self.propagator, **context)
+        masked = self.optic(focal, **context)
+        return self.return_to_pupil(wavefront, focal, masked, **context)
 
-        # Inverse propagate only the field introduced by the optic
-        inverse = self.propagator.set(grid_out=wavefront.grid, inverse=True)
-        pupil_difference = inverse(difference, **context)
+    def return_to_pupil(self, pupil, focal, masked, **context):
+        """Recombine a supplied focal-mask correction with its original pupil.
 
-        # Subtract the focal-plane modification from the original pupil
-        return wavefront - pupil_difference
+        Keeping these fields explicit lets a system share the pupil or focal field
+        with another optical branch without repeating propagation.
+        """
+        self = self.populate()
+        difference = focal - masked
+        inverse = self.propagator.set(grid_out=pupil.grid, inverse=True)
+        pupil_difference = difference.propagate(inverse, **context)
+        return pupil - pupil_difference

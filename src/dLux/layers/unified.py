@@ -7,19 +7,18 @@ from jax import Array
 
 import dLux.utils as dlu
 
-from ..utils.grids import BaseCoordTransform
 from ..fields import Intensity, Wavefront
 from .detector import DetectorLayer
 from .optical import OpticalLayer
 
 __all__ = [
     "UnifiedLayer",
-    "Resize",
-    "Downsample",
-    "Flip",
-    "Interpolate",
-    "Normalise",
-    "Lambda",
+    "ResizeLayer",
+    "DownsampleLayer",
+    "FlipLayer",
+    "InterpolateLayer",
+    "NormaliseLayer",
+    "LambdaLayer",
 ]
 
 
@@ -35,7 +34,7 @@ class UnifiedLayer(OpticalLayer, DetectorLayer):
     """
 
 
-class Resize(UnifiedLayer):
+class ResizeLayer(UnifiedLayer):
     """Centrally pad or crop a wavefront or intensity to explicit sample counts.
 
     Final spatial axes are resized while leading axes are preserved. Pixel scales do
@@ -67,7 +66,7 @@ class Resize(UnifiedLayer):
         return target.resize(self.npixels)
 
 
-class Downsample(UnifiedLayer):
+class DownsampleLayer(UnifiedLayer):
     """Downsample spatial axes by integer factors in physical-axis order.
 
     Wavefront and intensity reduction semantics are delegated to their field methods,
@@ -93,17 +92,17 @@ class Downsample(UnifiedLayer):
     ) -> Wavefront | Intensity:
         """Downsample target spatial axes by the configured integer factors.
 
-        Field-specific sum or mean semantics are delegated to `BaseField.downsample`,
+        Field-specific sum or mean semantics are delegated to `dlu.Field.downsample`,
         and sampling metadata are updated to preserve the field of view.
         """
         return target.downsample(self.n)
 
 
-class Flip(UnifiedLayer):
+class FlipLayer(UnifiedLayer):
     """Reverse a wavefront or intensity along selected NumPy array axes.
 
-    Values are flipped without changing their `GridSpec`; use a coordinate transform
-    and `Interpolate` when a physical resampling operation is required instead.
+    Values are flipped without changing their `Grid`; use a coordinate transform
+    and `InterpolateLayer` when a physical resampling operation is required instead.
     """
 
     axes: tuple[int, ...] | int
@@ -133,25 +132,25 @@ class Flip(UnifiedLayer):
         return target.flip(self.axes)
 
 
-class Interpolate(UnifiedLayer):
+class InterpolateLayer(UnifiedLayer):
     """Resample a wavefront or intensity through a coordinate transformation.
 
     The transform maps output-grid coordinates into the sampled input frame. Output
-    size and grid metadata remain fixed while values are interpolated, with explicit
+    spatial size and sampling remain fixed while values are interpolated, with explicit
     handling for complex fields and samples outside the original support.
     """
 
-    transformation: BaseCoordTransform
+    transformation: dlu.BaseCoordTransform
     method: str
-    complex: bool
-    fill: Array
+    complex: bool = True
+    fill: Array | zdx.Expression | None = None
 
     def __init__(
         self,
         transformation,
-        method="linear",
+        method="cubic2",
         complex=True,
-        fill=0.0,
+        fill=None,
         *,
         alias=None,
     ):
@@ -165,15 +164,15 @@ class Interpolate(UnifiedLayer):
             Interpolation method accepted by the interpolation utility.
         complex : bool
             Interpolate complex values through their complex representation.
-        fill : float
-            Value used outside the sampled support.
+        fill : float, Array, zodiax.Expression, or None
+            Outside value, resolved from the target context. None extrapolates.
         """
-        if not isinstance(transformation, BaseCoordTransform):
+        if not isinstance(transformation, dlu.BaseCoordTransform):
             raise TypeError("transformation must be a BaseCoordTransform.")
         self.transformation = transformation
         self.method = str(method)
         self.complex = bool(complex)
-        self.fill = zdx.as_array(fill, dtype=float)
+        self.fill = zdx.as_array(fill)
 
         self.alias = alias
 
@@ -183,8 +182,14 @@ class Interpolate(UnifiedLayer):
         """Interpolate the target through the configured coordinate transformation.
 
         The transformation maps output SI coordinates into the sampled input frame.
-        Output size and grid metadata remain unchanged.
+        Spatial size and physical sampling are preserved; transforms may add batch axes.
         """
+        if isinstance(target, Wavefront):
+            context = OpticalLayer.context(target, **context)
+        else:
+            context = DetectorLayer.context(target, **context)
+        self = self.resolve(**context)
+
         return target.interpolate(
             self.transformation,
             method=self.method,
@@ -193,7 +198,7 @@ class Interpolate(UnifiedLayer):
         )
 
 
-class Normalise(UnifiedLayer):
+class NormaliseLayer(UnifiedLayer):
     """Normalise a wavefront or intensity to a configured total or peak value.
 
     The field owns the meaning of each mode: wavefront power is computed from the
@@ -236,7 +241,7 @@ class Normalise(UnifiedLayer):
         return target.normalise(self.mode, value)
 
 
-class Lambda(UnifiedLayer):
+class LambdaLayer(UnifiedLayer):
     """Identity layer returning a wavefront or intensity unchanged.
 
     This provides a named no-op inside immutable system topologies, for example when

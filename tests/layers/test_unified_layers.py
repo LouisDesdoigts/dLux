@@ -4,6 +4,7 @@ import jax.numpy as np
 import pytest
 
 import dLux as dl
+import dLux.utils as dlu
 
 from tests.helpers import assert_jittable
 
@@ -16,16 +17,16 @@ def targets(make_wavefront, make_psf):
 @pytest.mark.parametrize(
     "layer",
     [
-        dl.Resize(12),
-        dl.Downsample(2),
-        dl.Flip(0),
-        dl.Flip((0, 1)),
-        dl.Interpolate(
-            dl.Affine(translation=[0.01, -0.02], rotation=0.1), method="linear"
+        dl.ResizeLayer(12),
+        dl.DownsampleLayer(2),
+        dl.FlipLayer(0),
+        dl.FlipLayer((0, 1)),
+        dl.InterpolateLayer(
+            dlu.Affine(translation=[0.01, -0.02], rotation=0.1), method="linear"
         ),
-        dl.Normalise(),
-        dl.Normalise(mode="peak", value=2),
-        dl.Lambda(),
+        dl.NormaliseLayer(),
+        dl.NormaliseLayer(mode="peak", value=2),
+        dl.LambdaLayer(),
     ],
 )
 def test_unified_layer_contract(layer, targets):
@@ -41,7 +42,7 @@ def test_unified_layer_contract(layer, targets):
 
 
 def test_lambda_identity(targets):
-    layer = dl.Lambda()
+    layer = dl.LambdaLayer()
     for target in targets:
         assert layer(target) is target
 
@@ -49,18 +50,18 @@ def test_lambda_identity(targets):
 def test_normalise_modes(targets):
     wavefront, psf = targets
 
-    assert np.allclose(dl.Normalise("power", 2)(wavefront).power, 2)
-    assert np.allclose(dl.Normalise("peak", 2)(psf).data.max(), 2)
+    assert np.allclose(dl.NormaliseLayer("power", 2)(wavefront).power, 2)
+    assert np.allclose(dl.NormaliseLayer("peak", 2)(psf).data.max(), 2)
 
 
 @pytest.mark.parametrize(
     ("layer", "shape", "n", "d"),
     [
-        (dl.Resize((10, 6)), (2, 3, 6, 10), (10, 6), (0.1, 0.1)),
-        (dl.Downsample((2, 4)), (2, 3, 2, 4), (4, 2), (0.2, 0.4)),
-        (dl.Flip((-2, -1)), (2, 3, 8, 8), (8, 8), (0.1, 0.1)),
+        (dl.ResizeLayer((10, 6)), (2, 3, 6, 10), (10, 6), (0.1, 0.1)),
+        (dl.DownsampleLayer((2, 4)), (2, 3, 2, 4), (4, 2), (0.2, 0.4)),
+        (dl.FlipLayer((-2, -1)), (2, 3, 8, 8), (8, 8), (0.1, 0.1)),
         (
-            dl.Interpolate(dl.Affine(translation=[0.01, -0.02])),
+            dl.InterpolateLayer(dlu.Affine(translation=[0.01, -0.02])),
             (2, 3, 8, 8),
             (8, 8),
             (0.1, 0.1),
@@ -85,11 +86,19 @@ def test_unified_layers_preserve_leading_axes(layer, shape, n, d, make_grid):
 @pytest.mark.parametrize(
     "constructor",
     [
-        lambda: dl.Downsample(0),
-        lambda: dl.Flip((0.0, 1)),
-        lambda: dl.Interpolate("rotate"),
+        lambda: dl.DownsampleLayer(0),
+        lambda: dl.FlipLayer((0.0, 1)),
+        lambda: dl.InterpolateLayer("rotate"),
     ],
 )
 def test_validation(constructor):
     with pytest.raises((TypeError, ValueError)):
         constructor()
+
+
+def test_interpolate_defaults_to_shared_cubic_interpolator(make_psf):
+    intensity = make_psf(data=np.arange(64.0).reshape(8, 8) ** 2)
+    transform = dlu.Affine(rotation=0.2)
+    layer = dl.InterpolateLayer(transform)
+    assert layer.method == "cubic2"
+    assert np.allclose(layer(intensity).data, intensity.interpolate(transform).data)

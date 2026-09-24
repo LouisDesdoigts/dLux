@@ -18,12 +18,12 @@ def intensity(make_psf):
 @pytest.mark.parametrize(
     "layer",
     [
-        dl.Sensitivity(np.ones((8, 8))),
-        dl.Convolve(np.ones((3, 3)) / 9),
-        dl.Jitter(0.5, kernel_size=5),
-        dl.Bias(1),
-        dl.Gain(2),
-        dl.Saturation(32),
+        dl.SensitivityLayer(np.ones((8, 8))),
+        dl.ConvolveLayer(np.ones((3, 3)) / 9),
+        dl.ConvolveLayer(dlu.Jitter(0.5, kernel_size=5)),
+        dl.BiasLayer(1),
+        dl.GainLayer(2),
+        dl.SaturationLayer(32),
     ],
 )
 def test_detector_layer_contract(layer, intensity):
@@ -38,37 +38,37 @@ def test_detector_layer_contract(layer, intensity):
 @pytest.mark.parametrize(
     ("layer", "path"),
     [
-        (dl.Sensitivity(np.ones((8, 8))), "response"),
-        (dl.Convolve(np.ones((3, 3)) / 9), "kernel"),
-        (dl.Jitter(0.5, kernel_size=5), "std"),
-        (dl.Bias(1), "bias"),
-        (dl.Gain(2), "gain"),
-        (dl.Saturation(32), "limit"),
+        (dl.SensitivityLayer(np.ones((8, 8))), "response"),
+        (dl.ConvolveLayer(np.ones((3, 3)) / 9), "kernel"),
+        (dl.ConvolveLayer(dlu.Jitter(0.5, kernel_size=5)), "kernel.profile.std"),
+        (dl.BiasLayer(1), "bias"),
+        (dl.GainLayer(2), "gain"),
+        (dl.SaturationLayer(32), "limit"),
     ],
 )
 def test_detector_layer_gradients(layer, path, intensity):
     function = lambda value: layer.set(path, value)(intensity)
 
     # XLA convolution changes float32 accumulation order for convolution layers
-    rtol = 3e-5 if isinstance(layer, (dl.Convolve, dl.Jitter)) else 1e-6
+    rtol = 3e-5 if isinstance(layer, dl.ConvolveLayer) else 1e-6
     gradient = assert_differentiable(function, layer.get(path), rtol=rtol)
     assert np.any(gradient != 0)
 
 
 def test_parametric_detector_layers(intensity):
-    spatial = dl.Basis(np.ones((1, 8, 8)), [2.0])
-    kernel = dl.Basis(np.ones((1, 3, 3)) / 9, [1.0])
-    scalar = dl.Basis(np.ones(1), [2.0])
-    std = dl.Basis(np.ones(1), [0.5])
-    polynomial = dl.Polynomial(degree=1, coeffs=[1.0, 0.5])
+    spatial = dlu.Basis(np.ones((1, 8, 8)), [2.0])
+    kernel = dlu.Basis(np.ones((1, 3, 3)) / 9, [1.0])
+    scalar = dlu.Basis(np.ones(1), [2.0])
+    std = dlu.Basis(np.ones(1), [0.5])
+    polynomial = dlu.Polynomial(degree=1, coeffs=[1.0, 0.5])
 
     layers = [
-        dl.Sensitivity(spatial),
-        dl.Convolve(kernel),
-        dl.Jitter(dl.Gaussian(std), kernel_size=5),
-        dl.Bias(spatial),
-        dl.Gain(polynomial),
-        dl.Saturation(scalar),
+        dl.SensitivityLayer(spatial),
+        dl.ConvolveLayer(kernel),
+        dl.ConvolveLayer(dlu.Jitter(dlu.Gaussian(std), kernel_size=5)),
+        dl.BiasLayer(spatial),
+        dl.GainLayer(polynomial),
+        dl.SaturationLayer(scalar),
     ]
     outputs = [assert_jittable(layer, intensity, rtol=1e-5) for layer in layers]
 
@@ -90,8 +90,8 @@ def test_parametric_detector_layers(intensity):
     ],
 )
 def test_jitter_kernel(profile, shape):
-    layer = dl.Jitter(profile, kernel_size=shape[::-1], oversample=(2, 3))
-    kernel = assert_jittable(layer.kernel)
+    layer = dlu.Jitter(profile, kernel_size=shape[::-1], oversample=(2, 3))
+    kernel = assert_jittable(lambda value: value.resolve(), layer)
 
     assert kernel.shape == shape
     assert np.allclose(kernel.sum(), 1)
@@ -101,22 +101,24 @@ def test_jitter_kernel(profile, shape):
 
 
 def test_zero_jitter(intensity):
-    layer = dl.Jitter(0.0, kernel_size=5)
+    layer = dlu.Jitter(0.0, kernel_size=5)
     expected = np.zeros((5, 5)).at[2, 2].set(1.0)
 
-    assert np.allclose(layer.kernel(), expected)
-    assert np.allclose(assert_jittable(layer, intensity).data, intensity.data)
+    assert np.allclose(layer.resolve(), expected)
+    assert np.allclose(
+        assert_jittable(dl.ConvolveLayer(layer), intensity).data, intensity.data
+    )
 
 
 @pytest.mark.parametrize(
     "layer",
     [
-        dl.Sensitivity(np.linspace(0.5, 1.0, 64).reshape(8, 8)),
-        dl.Convolve(np.ones((3, 3)) / 9),
-        dl.Jitter(0.5, kernel_size=5),
-        dl.Bias(1),
-        dl.Gain(2),
-        dl.Saturation(32),
+        dl.SensitivityLayer(np.linspace(0.5, 1.0, 64).reshape(8, 8)),
+        dl.ConvolveLayer(np.ones((3, 3)) / 9),
+        dl.ConvolveLayer(dlu.Jitter(0.5, kernel_size=5)),
+        dl.BiasLayer(1),
+        dl.GainLayer(2),
+        dl.SaturationLayer(32),
     ],
 )
 def test_detector_layers_preserve_leading_axes(layer, make_psf):
@@ -135,13 +137,21 @@ def test_detector_layers_preserve_leading_axes(layer, make_psf):
 @pytest.mark.parametrize(
     "constructor",
     [
-        lambda: dl.Convolve(np.ones(8)),
-        lambda: dl.Jitter(0.5, kernel_size=0),
-        lambda: dl.Jitter(0.5, kernel_size=4),
-        lambda: dl.Jitter([0.5]),
-        lambda: dl.Jitter(0.5, oversample=0),
+        lambda: dl.ConvolveLayer(np.ones(8)),
+        lambda: dlu.Jitter(0.5, kernel_size=0),
+        lambda: dlu.Jitter(0.5, kernel_size=4),
+        lambda: dlu.Jitter([0.5]),
+        lambda: dlu.Jitter(0.5, oversample=0),
     ],
 )
 def test_validation(constructor):
     with pytest.raises(ValueError):
         constructor()
+
+
+def test_expression_kernel_is_checked_after_resolution(intensity):
+    import zodiax as zdx
+
+    layer = dl.ConvolveLayer(zdx.StateRef("kernel"))
+    with pytest.raises(ValueError, match="2d"):
+        layer(intensity, state=zdx.State(kernel=np.ones(3)))

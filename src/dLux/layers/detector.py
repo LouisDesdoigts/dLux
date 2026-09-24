@@ -12,22 +12,18 @@ from jax import Array
 import dLux.utils as dlu
 
 from ..fields import Intensity
-from ..utils.parametrics import CorrelatedGaussian, Gaussian
-from .optical import BaseLayer
 
 __all__ = [
-    "BaseDetectorLayer",
     "DetectorLayer",
-    "Sensitivity",
-    "Convolve",
-    "Jitter",
-    "Bias",
-    "Gain",
-    "Saturation",
+    "SensitivityLayer",
+    "ConvolveLayer",
+    "BiasLayer",
+    "GainLayer",
+    "SaturationLayer",
 ]
 
 
-class BaseDetectorLayer(BaseLayer):
+class DetectorLayer(dlu.BaseLayer):
     """Base contract for deterministic transformations of an `Intensity`.
 
     Detector layers operate on expected sampled signals and return another
@@ -45,17 +41,6 @@ class BaseDetectorLayer(BaseLayer):
         spatial sampling. Detector layers do not generate noise or uncertainty.
         """
 
-
-class DetectorLayer(BaseDetectorLayer):
-    """Public contract for deterministic detector transformations.
-
-    Implementations receive an ``Intensity`` and must return an ``Intensity`` while
-    preserving unrelated leading axes and consistent grid metadata. Resolve
-    Parametric leaves against :meth:`context` before applying the transformation.
-    Custom layers should change sampling only when that behaviour is part of their
-    explicit public contract.
-    """
-
     @staticmethod
     def context(intensity: Intensity, **context) -> dict[str, Any]:
         """Return the standard parametric context for a detector layer.
@@ -66,7 +51,7 @@ class DetectorLayer(BaseDetectorLayer):
         return {**context, "grid": intensity.grid}
 
 
-class Sensitivity(DetectorLayer):
+class SensitivityLayer(DetectorLayer):
     """Multiply an intensity by a scalar, spatial, or parametric response.
 
     The resolved response follows ordinary JAX broadcasting against
@@ -74,8 +59,8 @@ class Sensitivity(DetectorLayer):
 
     Parameters
     ----------
-    response : Array or Parametric
-        Multiplicative detector response. Parametric values are evaluated against
+    response : Array or Expression
+        Multiplicative detector response. Expression values are evaluated against
         the input intensity.
 
     Examples
@@ -90,10 +75,10 @@ class Sensitivity(DetectorLayer):
 
     # Construct a spatially varying detector sensitivity
     response = jr.uniform(jr.key(0), (64, 64), minval=0.95, maxval=1.0)
-    sensitivity = dl.Sensitivity(response=response)
+    sensitivity = dl.SensitivityLayer(response=response)
 
     # Construct an input detector intensity
-    grid = dl.GridSpec(n=64, d=10, unit="um")
+    grid = dl.Grid(n=64, d=10, unit="um")
     data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
     intensity = dl.Intensity(data=data, grid=grid)
 
@@ -109,7 +94,7 @@ class Sensitivity(DetectorLayer):
 
         Parameters
         ----------
-        response : Array or Parametric
+        response : Array or Expression
             Scalar or spatial response broadcast against the intensity data, or a
             parametric resolved from the detector context.
         """
@@ -127,16 +112,16 @@ class Sensitivity(DetectorLayer):
         return intensity * self.response
 
 
-class Convolve(DetectorLayer):
+class ConvolveLayer(DetectorLayer):
     """Convolve an intensity with a two-dimensional kernel.
 
-    ``kernel`` may be a fixed array or Parametric resolving to shape ``(ny, nx)``.
+    ``kernel`` may be a fixed array or Expression resolving to shape ``(ny, nx)``.
     It is applied independently over the final two intensity axes and is not
     normalised automatically. Leading intensity axes are preserved.
 
     Parameters
     ----------
-    kernel : Array or Parametric
+    kernel : Array or Expression
         Two-dimensional convolution kernel in array ``(y, x)`` order.
 
     Examples
@@ -149,10 +134,10 @@ class Convolve(DetectorLayer):
 
     # Construct a detector convolution kernel
     kernel = dlu.gaussian(std=1.0, npixels=(9, 9), extent=4)
-    convolution = dl.Convolve(kernel=kernel)
+    convolution = dl.ConvolveLayer(kernel=kernel)
 
     # Construct an input detector intensity
-    grid = dl.GridSpec(n=64, d=10, unit="um")
+    grid = dl.Grid(n=64, d=10, unit="um")
     data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
     intensity = dl.Intensity(data=data, grid=grid)
 
@@ -168,7 +153,7 @@ class Convolve(DetectorLayer):
 
         Parameters
         ----------
-        kernel : Array or Parametric
+        kernel : Array or Expression
             Fixed two-dimensional ``(y, x)`` kernel or a parametric resolving to one.
             The kernel is not normalised automatically.
         """
@@ -190,167 +175,12 @@ class Convolve(DetectorLayer):
         return intensity.convolve(self.kernel)
 
 
-class Jitter(DetectorLayer):
-    """Convolve an intensity with a sampled continuous displacement profile.
-
-    ``profile`` is evaluated on a compact coordinate grid measured in detector
-    pixels. `Jitter` owns that grid, sub-pixel integration, and independent unit-sum
-    normalisation over each realised kernel. The parametric owns only the continuous
-    relative profile, allowing Gaussian and future non-Gaussian motion models to use
-    the same detector operation. Its leaves are raised through the layer, so Gaussian
-    parameters retain concise paths such as ``std``, ``stds``, and ``corr``.
-
-    ``kernel_size`` and ``oversample`` are scalar or physical ``(x, y)`` integer
-    pairs. Kernels use final array ``(y, x)`` order and may have broadcast leading
-    axes supplied by the profile. Resolved profiles must be non-negative with a
-    finite, non-zero spatial sum; these conditions are not checked during compiled
-    evaluation.
-
-    Numeric ``profile`` values retain the Gaussian convenience route: a scalar is a
-    circular standard deviation, physical ``(x, y)`` values are independent widths,
-    and a ``(2, 2)`` value is converted from covariance. Diagonal zero widths produce
-    discrete deltas and an entirely zero width produces the identity kernel.
-
-    Parameters
-    ----------
-    profile : Parametric or Array
-        Continuous relative profile evaluated in detector-pixel coordinates. Numeric
-        values are promoted to `Gaussian` or converted with
-        `CorrelatedGaussian.from_cov`.
-    kernel_size : int or tuple[int, int]
-        Odd detector-pixel kernel dimensions in physical ``(x, y)`` order.
-    oversample : int or tuple[int, int]
-        Sub-pixel integration factors in physical ``(x, y)`` order.
-
-    Examples
-    --------
-    Apply correlated detector-pixel jitter and inspect its sampled kernel:
-
-    ```python
-    import dLux as dl
-    import dLux.utils as dlu
-
-    # Construct a continuous correlated Gaussian displacement profile
-    profile = dl.CorrelatedGaussian(
-        stds=[0.5, 1.0],
-        corr=0.4,
-    )
-
-    # Sample and apply the profile as detector jitter
-    jitter = dl.Jitter(
-        profile=profile,
-        kernel_size=9,
-        oversample=3,
-    )
-
-    # Construct an input detector intensity
-    grid = dl.GridSpec(n=64, d=10, unit="um")
-    data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
-    intensity = dl.Intensity(data=data, grid=grid)
-
-    # Apply the normalised jitter kernel
-    intensity = jitter(intensity)
-
-    # Access the kernel directly
-    kernel = jitter.kernel()
-    ```
-    """
-
-    profile: zdx.Expression
-    kernel_size: tuple[int, ...]
-    oversample: tuple[int, ...]
-
-    def __init__(self, profile, kernel_size=9, oversample=3, *, alias=None):
-        """Initialise a continuous jitter profile and its numerical sampling.
-
-        Parameters
-        ----------
-        profile : Parametric or Array
-            Relative profile evaluated on local detector-pixel coordinates. Numeric
-            scalar or ``(x, y)`` values construct `Gaussian`; a numeric ``(2, 2)``
-            covariance is converted with `CorrelatedGaussian.from_cov`.
-        kernel_size : int or tuple[int, int]
-            Odd detector-pixel dimensions in physical ``(x, y)`` order.
-        oversample : int or tuple[int, int]
-            Positive sub-pixel integration factors in physical ``(x, y)`` order.
-        """
-        # Promote numeric widths and covariances to continuous Gaussian profiles
-        if not isinstance(profile, zdx.Expression):
-            value = zdx.as_array(profile, dtype=float)
-            if value.ndim == 0 or value.shape == (2,):
-                profile = Gaussian(value)
-            elif value.shape == (2, 2):
-                profile = CorrelatedGaussian.from_cov(value)
-            else:
-                raise ValueError(
-                    "Numeric profile must be scalar or have shape (2,) or (2, 2)."
-                )
-
-        # Store the dynamic profile and fixed sampling topology
-        self.profile = profile
-        self.kernel_size = dlu.as_size(kernel_size, 2, "kernel_size")
-        self.oversample = dlu.as_size(oversample, 2, "oversample")
-
-        if any(size % 2 == 0 for size in self.kernel_size):
-            raise ValueError("kernel_size must contain odd values.")
-
-        self.alias = alias
-
-    def kernel(self, intensity=None, **context) -> Array:
-        """Return the integrated, unit-sum detector-pixel jitter kernel.
-
-        Parameters
-        ----------
-        intensity : Intensity or None
-            Optional detector input supplying ``data`` to a signal-dependent
-            profile. Spatial inputs are local detector-pixel ``coordinates`` and
-            ``pixel_scale``, independently of the detector's physical grid.
-
-        Returns
-        -------
-        kernel : Array
-            Unit-sum kernels with any profile leading axes followed by final array
-            shape ``(kernel_y, kernel_x)``.
-        """
-        # Generate compact sub-pixel coordinates in detector-pixel units
-        shape = tuple(n * o for n, o in zip(self.kernel_size, self.oversample))
-        spacing = tuple(1 / o for o in self.oversample)
-        coordinates = dlu.nd_coords(shape, spacing)
-
-        # Resolve the profile on its own pixel sampling, with optional incident data.
-        context = dict(context)
-        if intensity is not None:
-            context["data"] = intensity.data
-        context.update(
-            coordinates=coordinates,
-            pixel_scale=np.asarray(spacing),
-        )
-        density = zdx.resolve(self.profile, **context)
-        if density.ndim < 2 or density.shape[-2:] != shape[::-1]:
-            raise ValueError(
-                "Resolved profile must end in the oversampled kernel shape "
-                f"{shape[::-1]}."
-            )
-
-        # Integrate to detector pixels and normalise every finite-support kernel
-        kernel = dlu.downsample(density, self.oversample, mean=False)
-        total = kernel.sum((-2, -1), keepdims=True)
-        return kernel / total
-
-    def apply(self, intensity: Intensity, **context) -> Intensity:
-        """Convolve the final two intensity axes with the resolved jitter kernel.
-
-        Leading axes and the input grid are preserved.
-        """
-        return intensity.convolve(self.kernel(intensity, **context))
-
-
-class Bias(DetectorLayer):
+class BiasLayer(DetectorLayer):
     """Add a scalar, spatial, or parametric bias to an intensity.
 
     Parameters
     ----------
-    bias : Array or Parametric
+    bias : Array or Expression
         Additive detector signal broadcast against the input intensity.
 
     Examples
@@ -365,10 +195,10 @@ class Bias(DetectorLayer):
 
     # Construct a spatially varying detector bias
     bias = jr.uniform(jr.key(0), (64, 64), minval=5.0, maxval=10.0)
-    bias_layer = dl.Bias(bias=bias)
+    bias_layer = dl.BiasLayer(bias=bias)
 
     # Construct an input detector intensity
-    grid = dl.GridSpec(n=64, d=10, unit="um")
+    grid = dl.Grid(n=64, d=10, unit="um")
     data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
     intensity = dl.Intensity(data=data, grid=grid)
 
@@ -384,7 +214,7 @@ class Bias(DetectorLayer):
 
         Parameters
         ----------
-        bias : Array or Parametric
+        bias : Array or Expression
             Scalar or spatial signal broadcast against the intensity data, or a
             parametric resolved from the detector context.
         """
@@ -401,16 +231,16 @@ class Bias(DetectorLayer):
         return intensity + self.bias
 
 
-class Gain(DetectorLayer):
+class GainLayer(DetectorLayer):
     """Multiply an intensity by a linear or parametrically generated gain.
 
-    A Parametric receives intensity data as its ``coordinates`` before being
+    A Expression receives intensity data as its ``coordinates`` before being
     multiplied into the data. This enables nonlinear responses while retaining the
     same broadcasting contract as scalar and spatial gains.
 
     Parameters
     ----------
-    gain : Array or Parametric
+    gain : Array or Expression
         Multiplicative gain or context-dependent nonlinear response.
 
     Examples
@@ -422,10 +252,10 @@ class Gain(DetectorLayer):
     import dLux.utils as dlu
 
     # Construct a fixed detector gain
-    gain = dl.Gain(gain=2.0)
+    gain = dl.GainLayer(gain=2.0)
 
     # Construct an input detector intensity
-    grid = dl.GridSpec(n=64, d=10, unit="um")
+    grid = dl.Grid(n=64, d=10, unit="um")
     data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
     intensity = dl.Intensity(data=data, grid=grid)
 
@@ -442,8 +272,8 @@ class Gain(DetectorLayer):
 
         Parameters
         ----------
-        gain : Array or Parametric
-            Multiplicative response. Parametrics receive intensity data through
+        gain : Array or Expression
+            Multiplicative response. Expressions receive intensity data through
             ``coordinates`` and may therefore describe nonlinear gain.
         """
         self.gain = zdx.as_array(gain, dtype=float)
@@ -458,19 +288,19 @@ class Gain(DetectorLayer):
     def apply(self, intensity: Intensity, **context) -> Intensity:
         """Multiply ``intensity.data`` by the resolved gain.
 
-        Parametric gains may depend on the input data and therefore represent
+        Expression gains may depend on the input data and therefore represent
         nonlinear response without a separate detector-layer type.
         """
         self = self.resolve(**self.context(intensity, **context))
         return intensity * self.gain
 
 
-class Saturation(DetectorLayer):
+class SaturationLayer(DetectorLayer):
     """Limit intensity values to a scalar, spatial, or parametric maximum.
 
     Parameters
     ----------
-    limit : Array or Parametric
+    limit : Array or Expression
         Maximum retained intensity, broadcast over the input data.
 
     Examples
@@ -484,10 +314,10 @@ class Saturation(DetectorLayer):
     import dLux.utils as dlu
 
     # Construct a fixed detector saturation limit
-    saturation = dl.Saturation(limit=5e3)
+    saturation = dl.SaturationLayer(limit=5e3)
 
     # Construct an input detector intensity
-    grid = dl.GridSpec(n=64, d=10, unit="um")
+    grid = dl.Grid(n=64, d=10, unit="um")
     data = 1e5 * dlu.gaussian(std=8, npixels=(64, 64), extent=32)
     intensity = dl.Intensity(data=data, grid=grid)
 
@@ -496,7 +326,7 @@ class Saturation(DetectorLayer):
 
     # Apply a spatially varying saturation limit
     limit = jr.uniform(jr.key(0), (64, 64), minval=4e3, maxval=6e3)
-    saturation = dl.Saturation(limit=limit)
+    saturation = dl.SaturationLayer(limit=limit)
     intensity = saturation(intensity)
     ```
     """
@@ -508,7 +338,7 @@ class Saturation(DetectorLayer):
 
         Parameters
         ----------
-        limit : Array or Parametric
+        limit : Array or Expression
             Scalar or spatial maximum broadcast against the intensity data, or a
             parametric resolved from the detector context.
         """

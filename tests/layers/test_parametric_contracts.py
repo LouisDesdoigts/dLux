@@ -6,6 +6,7 @@ import pytest
 import zodiax as zdx
 
 import dLux as dl
+import dLux.utils as dlu
 from tests.helpers import assert_jittable, assert_tree_allclose
 
 
@@ -16,7 +17,7 @@ class ScaledJones(zdx.Expression):
         return zdx.resolve(self.scale, **context) * np.eye(2)
 
 
-@pytest.mark.parametrize("layer_type", [dl.TransmissiveLayer, dl.Optic])
+@pytest.mark.parametrize("layer_type", [dl.Optic])
 def test_transmission_is_real_for_arrays_expressions_and_updates(
     layer_type, make_wavefront
 ):
@@ -29,19 +30,19 @@ def test_transmission_is_real_for_arrays_expressions_and_updates(
     assert_tree_allclose(output, layer_type(transmission=0.4)(wavefront))
     for model, context in [
         (layer, {"state": zdx.State(transmission=np.array(1j))}),
-        (layer_type(transmission=1.0).set(transmission=np.array(1j)), {}),
+        (layer_type(transmission=1.0).set("transmission", np.array(1j)), {}),
     ]:
         with pytest.raises(TypeError, match="transmission must be real"):
             model(wavefront, **context)
 
 
-@pytest.mark.parametrize("layer_type", [dl.SparseOptic, dl.SparseDynamicOptic])
+@pytest.mark.parametrize("layer_type", [dl.SparseOptic])
 def test_sparse_polynomial_selects_one_coefficient_vector_per_aperture(
     layer_type, make_wavefront
 ):
     wavefront = make_wavefront()
     coefficients = np.array([[0.1], [0.3]])
-    polynomial = dl.Polynomial(degree=0, ndim=2, coeffs=zdx.StateRef("coeffs"))
+    polynomial = dlu.Polynomial(degree=0, ndim=2, coeffs=zdx.StateRef("coeffs"))
     optic = layer_type([[-0.2, 0.0], [0.2, 0.0]], phase=polynomial)
     evaluate = lambda coeffs: optic(wavefront, state=zdx.State(coeffs=coeffs)).phasor
     result = assert_jittable(evaluate, coefficients)
@@ -66,38 +67,23 @@ def test_optic_resolves_links_between_scalar_and_jones_terms(make_wavefront):
     assert np.allclose(optic.phasor(wavefront, state=state), 0.5)
 
 
-@pytest.mark.parametrize("uniform", [False, True])
-def test_polarising_optics_resolve_jones_and_orientation(uniform, make_wavefront):
-    wavefront = make_wavefront(wavelength=np.array([500e-9, 700e-9]))
-    matrix = np.array([[1.0, 0.0], [0.0, 0.3]])
-    state = zdx.State(jones=matrix, angle=0.2)
-    if uniform:
-        optic = dl.UniformPolarisingOptic(zdx.StateRef("jones"), zdx.StateRef("angle"))
-        reference = dl.UniformPolarisingOptic(matrix, 0.2)
-    else:
-        optic = dl.PolarisingOptic(zdx.StateRef("jones"))
-        reference = dl.PolarisingOptic(matrix)
-    output = assert_jittable(lambda model: model(wavefront, state=state), optic)
-    assert_tree_allclose(output, reference(wavefront))
-
-
 @pytest.mark.parametrize("field_type", ["wavefront", "intensity"])
 def test_normalise_resolves_target_value(field_type, make_wavefront):
     target = make_wavefront()
     mode = "power"
     if field_type == "intensity":
         target = target.to_intensity()
-    layer = dl.Normalise(mode, zdx.StateRef("target_power"))
+    layer = dl.NormaliseLayer(mode, zdx.StateRef("target_power"))
     output = assert_jittable(
         lambda model: model(target, state=zdx.State(target_power=2.0)), layer
     )
-    assert_tree_allclose(output, dl.Normalise(mode, 2.0)(target))
+    assert_tree_allclose(output, dl.NormaliseLayer(mode, 2.0)(target))
 
 
 def test_detector_soft_shape_receives_grid_sampling(make_psf):
     intensity = make_psf()
-    shape = dl.Circle(0.6, edge=1.0)
-    response = dl.Sensitivity(shape)
+    shape = dlu.Circle(0.6, edge=1.0)
+    response = dl.SensitivityLayer(shape)
     output = assert_jittable(response, intensity)
     assert np.allclose(
         output.data, intensity.data * shape.evaluate(grid=intensity.grid)
@@ -107,24 +93,38 @@ def test_detector_soft_shape_receives_grid_sampling(make_psf):
 
 def test_specialised_contexts_keep_their_query_meaning(make_psf, make_wavefront):
     intensity = make_psf(data=np.arange(64.0).reshape(8, 8))
-    gain = dl.Gain(dl.Polynomial(1, [1.0, 0.1]))
+    gain = dl.GainLayer(dlu.Polynomial(1, [1.0, 0.1]))
     result = assert_jittable(gain, intensity)
     assert np.allclose(result.data, intensity.data * (1 + 0.1 * intensity.data))
     assert set(gain.context(intensity)) == {"coordinates"}
 
-    dynamic = dl.DynamicOptic(transmission=dl.Circle(0.6, edge=1.0))
+    dynamic = dl.Optic(transmission=dlu.Circle(0.6, edge=1.0))
     context = dynamic.context(make_wavefront())
-    assert set(context) == {"coordinates", "pixel_scale", "wavelengths"}
+    assert set(context) == {"coordinates", "pixel_scale", "wavelength", "wavelengths"}
 
 
-def test_jitter_profile_uses_local_pixels_and_explicit_incident_data(make_psf):
-    class SignalWidth(zdx.Expression):
-        def evaluate(self, *, data, **context):
-            return np.mean(data) / 4
-
-    intensity = make_psf(data=np.full((8, 8), 2.0))
-    jitter = dl.Jitter(dl.Gaussian(SignalWidth()), kernel_size=5, oversample=2)
-    kernel = assert_jittable(lambda model: model.kernel(intensity), jitter)
-    assert np.allclose(
-        kernel, dl.Jitter(dl.Gaussian(0.5), kernel_size=5, oversample=2).kernel()
+def test_sparse_coordinate_maps_resolve_state_parameters(make_wavefront):
+    wavefront = make_wavefront()
+    shifts = np.array([[0.05, 0.0], [-0.03, 0.0]])
+    transform = dlu.Affine(translation=zdx.StateRef("shifts"))
+    optic = dl.SparseOptic(
+        [[-0.2, 0.0], [0.2, 0.0]], transmission=dlu.Circle(0.4), transform=transform
     )
+    state = zdx.State(shifts=shifts)
+    result = assert_jittable(lambda x: optic(x, state=state), wavefront)
+    reference = optic.set(transform=dlu.Affine(translation=shifts))(wavefront)
+    assert_tree_allclose(result, reference)
+
+
+def test_sparse_invalid_coefficients_and_jones_axes(make_wavefront):
+    """Conditional tails for explicitly unbound or incorrectly batched leaves."""
+    field = make_wavefront()
+    centers = [[-0.2, 0.0], [0.2, 0.0]]
+    basis = dlu.Basis(np.ones((1, 8, 8)), empty=True)
+    # Selection preserves an unbound definition; evaluating it still needs coefficients.
+    selected, batched = dl.SparseOptic._slice(basis, 0, 2)
+    assert selected is basis and not batched
+    with pytest.raises(ValueError, match="coeffs"):
+        dl.SparseOptic(centers, opd=basis.set(coeffs=np.ones((3, 1))))(field)
+    with pytest.raises(ValueError, match="Jones aperture"):
+        dl.SparseOptic(centers, jones=np.broadcast_to(np.eye(2), (3, 2, 2)))(field)

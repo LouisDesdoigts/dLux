@@ -1,816 +1,331 @@
-"""Prebuilt generic and representative aperture models."""
+"""Convenience constructors for sampled pupils and aberration bases.
+
+Presets use dataclass replacement to retain the builder's optic type and fields.
+Unlike a leaf update, this also validates static aliases through the constructor.
+"""
+
+from collections.abc import Callable
+from dataclasses import replace
 
 import equinox as eqx
 import jax.numpy as np
-from jax import vmap
+import zodiax as zdx
+from jax import Array
 
 import dLux.utils as dlu
 
-from .builders import ApertureBuilder, SparseApertureBuilder, _initialise_coeffs
-from ..utils.grids import Affine, PasteSpec
-from ..layers.optical import Optic
-from ..utils.parametrics import (
-    Circle,
-    Rectangle,
-    RegularPolygon,
-    PastedBasis,
-    Shape,
-    Spider,
-    TransformedShape,
-)
-from ..utils.parametrics.bases import _resolve_coeffs
+from .apertures import ApertureBuilder, NRMLike, SegmentedHex, SimpleCircular
+from .definitions import Def
 
-__all__ = [
-    "SimpleCircular",
-    "SegmentedHex",
-    "NRMLike",
-    "HSTLike",
-    "JWSTLike",
-    "JWSTNRMLike",
-    "EuclidLike",
-]
+__all__ = ["ZernikeDef", "HSTAper", "JWSTAper", "JWSTNRMAper", "EuclidAper"]
 
 
-class SimpleCircular(ApertureBuilder):
-    """Pedagogical circular pupil assembled with a compact numeric API.
+class ZernikeDef(Def, dlu.Unitful):
+    """Construct a Basis from sampled modes or a Zernike generator.
 
-    Parameters
-    ----------
-    diameter : float
-        Primary diameter in the grid's physical length unit.
-    secondary_diameter : float or None
-        Optional central obscuration diameter.
-    spider_width, spider_angles
-        Optional radial support width and one-dimensional angles in degrees. Both
-        must be supplied together.
-    opd : BaseOPDDef or None
-        Optional OPD definition evaluated over the pupil support.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
+    A supplied grid or coordinate array samples the modes once into an ordinary
+    ``Basis``. Without sampling, or with ``dynamic=True``, the same Basis contains
+    a ``Zernike`` Expression. Generated objects retain the coefficients and unit;
+    they do not retain this factory.
 
-    Examples
-    --------
-    Construct a circular pupil with a secondary, supports, and low-order OPD:
-
-    ```python
-    import dLux as dl
-
-    # Construct a circular pupil with a secondary and radial supports
-    pupil = dl.SimpleCircular(
-        diameter=1.0,
-        secondary_diameter=0.3,
-        spider_width=0.02,
-        spider_angles=[0, 120, 240],
-        opd=dl.ZernikeDef(
-            orders=[2, 3],  # Skip piston, tip, and tilt
-            norm=dl.Norm(mode="rms", scale=10e-9),
-        ),
-    )
-
-    # Materialise the pupil as an optical layer
-    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
-    optic = pupil(grid)
-    ```
+    Modes are dimensionless, optionally clipped and normalised on a support.
+    Coefficients carry the amplitude in ``unit``. The unit conversion is applied
+    after contraction, keeping sampled modes well-scaled for coefficient solves.
     """
+
+    # Inherited fields
+    unit: str | None = eqx.field(kw_only=True, default=None)
+
+    nolls: tuple[int, ...] = eqx.field(static=True)
+    coeffs: Array | zdx.Expression | None = None
+    diameter: Array | zdx.Expression | None = None
+    n_sides: int = eqx.field(static=True, default=0)
+    oversize: Array | zdx.Expression
+    norm: str | None = eqx.field(static=True, default=None)
+    method: str = eqx.field(static=True, default="padded")
+    grid: dlu.Grid | None = None
+    transform: Callable | None = None
+    support: Array | zdx.Expression | None = None
 
     def __init__(
         self,
+        nolls=None,
+        order=None,
+        orders=None,
+        coeffs=None,
+        diameter=None,
+        n_sides=0,
+        oversize=0.0,
+        norm=None,
+        method="padded",
+        *,
+        empty=False,
+        unit=None,
+        grid=None,
+        transform=None,
+        support=None,
+        alias=None,
+    ):
+        """Store mode selection, coefficient values and optional sampling.
+
+        Supply exactly one of ``nolls``, maximum radial ``order``, or selected
+        radial ``orders``. ``diameter`` uses SI coordinate units and defaults to
+        2.0 during evaluation. ``oversize`` is a fractional diameter enlargement.
+        ``n_sides=0`` selects circular modes; values at least three select polygons.
+        ``norm`` optionally selects l1, l2, max, rms or p2v mode normalisation.
+        Omitted coefficients start at zero; ``empty=True`` instead retains None.
+        """
+        self.nolls = tuple(dlu.Zernike.indices(nolls, order, orders))
+        self.coeffs = dlu.initialise_coeffs(coeffs, (len(self.nolls),), empty=empty)
+        self.diameter = zdx.as_array(diameter, dtype=float)
+        self.n_sides = int(n_sides)
+        self.oversize = zdx.as_array(oversize, dtype=float)
+        self.norm = norm
+        self.method = method
+        self.unit = self.validate_unit(unit)
+        self.grid = grid
+        self.transform = transform
+        self.support = zdx.as_array(support, dtype=float)
+        self.alias = alias
+
+    def __call__(
+        self,
+        grid=None,
+        *,
+        coordinates=None,
+        dynamic=False,
+        coeffs=None,
+        transform=None,
+        support=None,
+        diameter=None,
+        centers=None,
+        alias=None,
+        **context,
+    ):
+        """Build an expansion on supplied or stored sampling.
+
+        Runtime inputs replace stored defaults. Explicit coordinates replace a
+        stored grid. ``centers`` supplies an aperture axis before the mode axis,
+        with independent coefficients of shape ``(n_apertures, n_modes)``.
+        Omitted coefficients become stored zeros of the required shape.
+        """
+        self = self.populate()
+        if grid is not None and coordinates is not None:
+            raise ValueError("Supply exactly one of grid or coordinates, not both.")
+        if coordinates is None:
+            grid = self.grid if grid is None else grid
+        # Construct the dimensionless generator independently of coefficient values.
+        modes = dlu.Zernike(
+            self.nolls,
+            diameter=self.diameter if diameter is None else diameter,
+            n_sides=self.n_sides,
+            oversize=self.oversize,
+            norm=self.norm,
+            method=self.method,
+            grid=grid,
+            transform=self.transform if transform is None else transform,
+            support=self.support if support is None else support,
+            centers=centers,
+        )
+
+        # A factory can add an aperture axis to its stored shared coefficients.
+        # An explicitly empty definition stays empty in the resulting expansion.
+        coeffs = self.coeffs if coeffs is None else zdx.as_array(coeffs)
+        shape = modes.coeffs_shape
+        if centers is not None and isinstance(coeffs, Array) and coeffs.ndim == 1:
+            coeffs = np.broadcast_to(coeffs, shape)
+
+        # Both routes return Basis; only the representation of its modes differs.
+        if not dynamic and (grid is not None or coordinates is not None):
+            modes = modes.evaluate(coordinates=coordinates, **context)
+        return dlu.Basis(
+            modes,
+            coeffs,
+            axes=len(shape),
+            shape=shape,
+            empty=coeffs is None,
+            unit=self.unit,
+            alias=alias,
+        )
+
+
+def HSTAper(
+    pupil_grid,
+    *,
+    diameter=2.4,
+    secondary_diameter=0.305,
+    spider_width=0.038,
+    spider_angles=(0, 90, 180, 270),
+    opd=None,
+    coeffs=None,
+    pupil_oversample=5,
+    key=None,
+    normalise=True,
+    jit=True,
+    focal_length=None,
+    alias=None,
+):
+    """Construct an Optic with the representative circular HST pupil.
+
+    ``pupil_grid`` defines the sampling; dimensions are metres and spider angles
+    are degrees. ``opd`` supplies a basis definition, with optional ``coeffs`` or
+    random ``key``. ``pupil_oversample`` controls aperture-edge sampling, while
+    ``normalise`` normalises power after applying the pupil. ``focal_length``
+    optionally defines a later relay; this constructor performs no propagation.
+    """
+    builder = SimpleCircular(
         diameter,
-        secondary_diameter=None,
-        spider_width=None,
-        spider_angles=None,
-        opd=None,
-        oversample=5,
-    ):
-        """Initialise a configurable circular pupil template.
-
-        Parameters
-        ----------
-        diameter : float
-            Primary diameter in the grid's physical unit.
-        secondary_diameter : float or None
-            Optional central obscuration diameter.
-        spider_width, spider_angles : ArrayLike or None
-            Radial-support width and angles in degrees; supply both or neither.
-        opd : BaseOPDDef or None
-            Optional OPD definition.
-        oversample : int or tuple[int, int]
-            Hard-edge sampling factors.
-        """
-        if (spider_width is None) != (spider_angles is None):
-            raise ValueError("spider_width and spider_angles must both be provided.")
-
-        # Assemble the optional secondary and radial supports
-        obscurations = []
-        if secondary_diameter is not None:
-            obscurations.append(Circle(secondary_diameter))
-        if spider_width is not None:
-            obscurations.append(Spider(spider_width, spider_angles))
-
-        super().__init__(Circle(diameter), obscurations, opd, oversample)
+        secondary_diameter,
+        spider_width,
+        spider_angles,
+        opd=opd,
+        oversample=pupil_oversample,
+        key=key,
+    )
+    pupil = builder(pupil_grid, coeffs=coeffs, normalise=normalise, jit=jit)
+    focal_length = zdx.as_array(focal_length, dtype=float)
+    return replace(pupil, grid=pupil_grid, focal_length=focal_length, alias=alias)
 
 
-class SegmentedHex(SparseApertureBuilder):
-    """Pedagogical hexagonal tiling assembled with a compact numeric API.
+def JWSTAper(
+    pupil_grid,
+    *,
+    segment_diameter=1.524,
+    gap=0.007,
+    spider_width=0.1,
+    spider_angles=(30, 180, 330),
+    opd=None,
+    coeffs=None,
+    pupil_oversample=5,
+    paste_method="scan",
+    key=None,
+    normalise=True,
+    jit=True,
+    focal_length=None,
+    sparse=False,
+    alias=None,
+):
+    """Construct the representative 18-segment JWST Optic or SparseOptic.
 
-    ``segment_diameter`` is the point-to-point diameter of the circumscribed circle;
-    ``segment_f2f`` is the flat-to-flat width. Exactly one must be provided.
-    Obscurations are global structures applied across the assembled pupil.
-
-    Parameters
-    ----------
-    nrings : int
-        Number of hexagonal rings including the central segment.
-    segment_diameter, segment_f2f : float or None
-        Alternative segment-size conventions; exactly one is required.
-    gap : float
-        Non-negative edge-to-edge gap between adjacent segments.
-    remove_center : bool
-        Remove the central segment after generating the complete tiling.
-    obscurations : list or tuple of Shape
-        Global geometry removed from the assembled pupil.
-    paste_method : str
-        Compact-stamp assembly strategy. ``"scan"`` is sequential and
-        memory-efficient; ``"scatter"`` uses per-pixel indices to expose more
-        parallelism at higher memory cost. Benchmark both for large systems because
-        performance depends on the hardware and pupil sampling.
-    opd : BaseOPDDef or None
-        Optional OPD definition evaluated independently over each segment.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
-
-    Notes
-    -----
-    Both methods are numerically equivalent. Changing ``paste_method`` through an
-    immutable update may trigger a separate JAX compilation. Compact OPD bases are
-    evaluated directly at the output sampling and clipped by the corresponding hard
-    segment support; only the transmission uses the configured oversampling.
-
-    Examples
-    --------
-    Construct a segmented pupil with independent low-order segment errors:
-
-    ```python
-    import jax.random as jr
-
-    import dLux as dl
-
-    # Construct a segmented pupil with independent low-order segment errors
-    pupil = dl.SegmentedHex(
+    ``pupil_grid`` defines the sampling; dimensions are metres and spider angles
+    are degrees. ``opd`` supplies a basis definition, with optional ``coeffs`` or
+    random ``key``. ``pupil_oversample`` controls aperture-edge sampling, while
+    ``normalise`` normalises power after applying the pupil. ``focal_length``
+    optionally defines a later relay; this constructor performs no propagation.
+    With ``sparse=True``, the grid samples each local aperture independently.
+    """
+    builder = SegmentedHex(
         nrings=3,
-        segment_f2f=1.3,
-        gap=0.01,
-        opd=dl.ZernikeDef(
-            orders=[1, 2],
-            norm=dl.Norm(mode="rms", scale=10e-9),
-        ),
+        segment_diameter=segment_diameter,
+        gap=gap,
+        remove_center=True,
+        obscurations=(dlu.Spider(spider_width, spider_angles),),
+        opd=opd,
+        oversample=pupil_oversample,
+        paste_method=paste_method,
+        key=key,
     )
-
-    # Materialise the segmented pupil as an optic
-    grid = dl.GridSpec(n=256, diam=7.0, unit="m")
-    optic = pupil(grid=grid, key=jr.key(0))
-    ```
-    """
-
-    paste_method: str
-
-    def __init__(
-        self,
-        nrings,
-        segment_diameter=None,
-        segment_f2f=None,
-        gap=0.0,
-        remove_center=False,
-        obscurations=(),
-        opd=None,
-        oversample=5,
-        paste_method="scan",
-    ):
-        """Initialise an ideal hexagonally segmented pupil.
-
-        Parameters
-        ----------
-        nrings : int
-            Number of rings including the central segment.
-        segment_diameter, segment_f2f : float or None
-            Point-to-point and flat-to-flat size alternatives; supply exactly one.
-        gap : float
-            Non-negative edge-to-edge segment gap.
-        remove_center : bool
-            Whether to omit the central segment.
-        obscurations : list or tuple of Shape
-            Global obscurations applied after assembly.
-        opd : BaseOPDDef or None
-            Optional per-segment OPD definition.
-        oversample : int or tuple[int, int]
-            Hard-edge sampling factors.
-        paste_method : str
-            ``"scan"`` for lower memory or ``"scatter"`` for greater parallelism.
-        """
-        # Resolve and validate the construction options
-        if (segment_diameter is None) == (segment_f2f is None):
-            raise ValueError("Provide exactly one of segment_diameter or segment_f2f.")
-        nrings = dlu.as_size(nrings, 1, "nrings")[0]
-        gap = dlu.to_value(gap, name="gap")
-        segment_f2f = dlu.to_value(segment_f2f, optional=True, name="segment_f2f")
-        segment_diameter = dlu.to_value(
-            segment_diameter, optional=True, name="segment_diameter"
-        )
-        if segment_diameter is None:
-            segment_diameter = 2 * segment_f2f / np.sqrt(3)
-        if segment_diameter.ndim != 0 or gap.ndim != 0:
-            raise ValueError("segment diameter and gap must be scalar.")
-        if segment_diameter <= 0:
-            raise ValueError("segment diameter must be greater than zero.")
-        if gap < 0:
-            raise ValueError("gap must be greater than or equal to zero.")
-
-        paste_method = str(paste_method).lower()
-        if paste_method not in ("scan", "scatter"):
-            raise ValueError("paste_method must be either 'scan' or 'scatter'.")
-
-        # Generate the requested ideal segment centres
-        centers = dlu.segmented_hex_cens(nrings, segment_diameter / 2, gap)
-        if remove_center:
-            centers = centers[1:]
-
-        # Initialise the general sparse-aperture definition
-        super().__init__(
-            RegularPolygon(6, segment_diameter),
-            centers,
-            global_obscurations=obscurations,
-            opd=opd,
-            oversample=oversample,
-        )
-
-        self.paste_method = paste_method
-
-    def build(self, grid, transform=None, jit=True, return_support=False):
-        """Build a compact ideal or densely transformed segmented aperture.
-
-        Parameters
-        ----------
-        grid : GridSpec
-            Output pupil sampling.
-        transform : BaseCoordTransform or None
-            Optional global transform; transformed pupils use dense construction.
-        jit : bool
-            Compile the fixed-topology construction path.
-        return_support : bool
-            Return per-segment support and therefore use dense construction.
-        """
-        # Promote and validate the construction grid
-        grid = self._promote_grid(grid)
-        self._validate(grid, transform)
-
-        # Use global sampling when compact ideal placement is not possible
-        if transform is not None or self.opd is not None or return_support:
-            return super().build(grid, transform, jit, return_support)
-
-        # Assemble compact transmission stamps through the selected path
-        fine, spec = self._stamp_data(grid)
-        build_fn = self._assemble_transmission
-        build_fn = eqx.filter_jit(build_fn) if jit else build_fn
-        return build_fn(fine, spec)
-
-    def _stamp_data(self, grid):
-        """Return the oversampled grid and compact placement specification."""
-        # Generate the oversampled grid and fixed stamp topology
-        fine = grid.oversample(self.oversample)
-        spec = PasteSpec.from_grid(fine, self.centers, self.primary.extent)
-        return fine, spec
-
-    def _assemble_transmission(self, fine, spec):
-        """Assemble a transmission from prepared segment stamps."""
-        # Generate each compact segment transmission in parallel
-        coordinates = spec.coordinates
-        scale = fine.d * fine.scale
-        eval_fn = lambda c: self.primary.evaluate(coordinates=c, pixel_scale=scale)
-        components = vmap(eval_fn)(coordinates)
-
-        for shape in self.obscurations:
-            eval_fn = lambda c: shape.evaluate(coordinates=c, pixel_scale=scale)
-            components *= 1 - vmap(eval_fn)(coordinates)
-
-        # Paste the compact segments into the oversampled global pupil
-        aperture = spec.paste(components, self.paste_method)
-        aperture = np.clip(aperture, 0.0, 1.0)
-
-        # Apply global obscurations on the complete pupil grid
-        mask = np.ones_like(aperture)
-        for shape in self.global_obscurations:
-            mask *= 1 - self._evaluate(shape, fine, None)
-
-        # Downsample the completed ideal pupil
-        return dlu.downsample(aperture * mask, self.oversample)
-
-    def _pasted_transmission(self, grid):
-        """Prepare and assemble the compact segment stamps."""
-        fine, spec = self._stamp_data(grid)
-        return self._assemble_transmission(fine, spec)
-
-    def _assemble_opd(self, spec):
-        """Generate compact supported OPD basis stamps."""
-        # Generate each compact segment support
-        coordinates = spec.coordinates
-        eval_fn = lambda c: self.primary.evaluate(coordinates=c, pixel_scale=spec.d)
-        support = vmap(eval_fn)(coordinates) > 0
-
-        # Generate the configured OPD basis over each local support
-        diameter = 2 * self.primary.extent
-        calc_fn = lambda c, s: self.opd.calculate(c, s, diameter)
-        basis = vmap(calc_fn)(coordinates, support)
-        return basis, support
-
-    def _pasted_opd(self, grid, jit=True):
-        """Prepare and generate the compact OPD basis data."""
-        spec = PasteSpec.from_grid(grid, self.centers, self.primary.extent)
-        build_fn = self._assemble_opd
-        build_fn = eqx.filter_jit(build_fn) if jit else build_fn
-        basis, support = build_fn(spec)
-        return basis, support, spec
-
-    def _build(self, grid, transform, return_support=False):
-        """Build the ideal pupil using compact segment stamps where possible."""
-        if transform is not None or self.opd is not None or return_support:
-            return super()._build(grid, transform, return_support)
-        return self._pasted_transmission(grid)
-
-    def __call__(
-        self,
-        grid,
-        transform=None,
-        coeffs=None,
-        key=None,
-        normalise=True,
-        jit=True,
-        sparse=False,
-        shared=False,
-        coefficients=None,
-    ):
-        """Materialise a global pasted optic or a genuinely sparse optic.
-
-        Parameters
-        ----------
-        grid : GridSpec
-            One-dimensional square or explicit two-dimensional pupil sampling.
-        transform : BaseCoordTransform or None
-            Optional global transform. Transformed pupils use dense construction.
-        coeffs : Array or None
-            Explicit per-segment OPD coefficients.
-        key : Array or None
-            JAX random key for standard-normal coefficient initialisation; mutually
-            exclusive with ``coeffs``.
-        normalise, jit : bool
-            Set output-optic normalisation and compiled construction respectively.
-        sparse : bool
-            Return a `SparseOptic` instead of the compactly assembled global `Optic`.
-        shared : bool
-            Share sparse OPD coefficients between segments when ``sparse=True``.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
-
-        Returns
-        -------
-        optic : Optic or SparseOptic
-            Materialised ideal segmented pupil. Untransformed global OPD uses a
-            compact `PastedBasis` by default.
-        """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-
-        # Use sparse or transformed global construction when requested
-        if sparse or transform is not None:
-            return super().__call__(
-                grid, transform, coeffs, key, normalise, jit, sparse, shared
-            )
-
-        # Promote and validate the ideal construction grid
-        grid = self._promote_grid(grid)
-        self._validate(grid, transform)
-
-        # Generate the compactly assembled pupil transmission
-        fine, spec = self._stamp_data(grid)
-        build_fn = self._assemble_transmission
-        build_fn = eqx.filter_jit(build_fn) if jit else build_fn
-        transmission = build_fn(fine, spec)
-        if self.opd is None:
-            return Optic(transmission=transmission, normalise=normalise)
-
-        # Generate and materialise the compact per-segment OPD basis
-        basis, _, spec = self._pasted_opd(grid, jit)
-        shape = basis.shape[:-2]
-        coeffs = _initialise_coeffs(shape, coeffs, key, shape)
-        opd = PastedBasis(basis, spec, coeffs, self.paste_method)
-        return Optic(transmission=transmission, opd=opd, normalise=normalise)
-
-
-class NRMLike(SparseApertureBuilder):
-    """Simple NRM with ``(x, y)`` hole centres and one shared hole shape.
-
-    This helper deliberately excludes global stops and obscurations. Sparse
-    materialisation always gives every hole independent OPD coefficients.
-
-    Parameters
-    ----------
-    centers : ArrayLike
-        Hole centres with shape ``(n_holes, 2)`` in ``(x, y)`` order.
-    hole : Shape
-        The single local geometry shared by every hole.
-    opd : BaseOPDDef or None
-        Optional OPD definition evaluated independently over each hole.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
-
-    Returns
-    -------
-    Array or tuple of Array
-        ``build`` returns the densely sampled global transmission, with OPD basis
-        data and aperture support appended when requested.
-    SparseOptic
-        Calling with ``sparse=True`` creates one local pupil per centre with
-        independent OPD coefficients.
-
-    Examples
-    --------
-    Materialise the same hexagonal-hole mask globally or as a sparse optic:
-
-    ```python
-    import jax.random as jr
-
-    import dLux as dl
-
-    # Construct a non-redundant mask with per-hole aberrations
-    pupil = dl.NRMLike(
-        centers=[
-            [-0.4, 0.0],
-            [0.0, 0.3],
-            [0.4, 0.0],
-        ],
-        hole=dl.RegularPolygon(nsides=6, diameter=0.2),
-        opd=dl.ZernikeDef(
-            orders=[1, 2],
-            norm=dl.Norm(mode="rms", scale=10e-9),
-        ),
+    pupil = builder(
+        pupil_grid, coeffs=coeffs, normalise=normalise, jit=jit, sparse=sparse
     )
+    focal_length = zdx.as_array(focal_length, dtype=float)
+    return replace(pupil, grid=pupil_grid, focal_length=focal_length, alias=alias)
 
-    # Materialise the complete mask on a global grid
-    global_grid = dl.GridSpec(n=256, diam=1.2, unit="m")
-    optic = pupil(grid=global_grid, key=jr.key(0))
 
-    # Materialise independent holes on a compact local grid
-    local_grid = dl.GridSpec(n=64, diam=0.25, unit="m")
-    sparse_optic = pupil(grid=local_grid, key=jr.key(0), sparse=True)
-    ```
+def JWSTNRMAper(
+    pupil_grid,
+    *,
+    centers=None,
+    hole_f2f=0.8,
+    opd=None,
+    coeffs=None,
+    pupil_oversample=5,
+    key=None,
+    normalise=True,
+    jit=True,
+    sparse=False,
+    focal_length=None,
+    alias=None,
+):
+    """Construct the seven-hole JWST/NIRISS Optic or SparseOptic.
+
+    ``pupil_grid`` defines the sampling; dimensions are metres and spider angles
+    are degrees. ``opd`` supplies a basis definition, with optional ``coeffs`` or
+    random ``key``. ``pupil_oversample`` controls aperture-edge sampling, while
+    ``normalise`` normalises power after applying the pupil. ``focal_length``
+    optionally defines a later relay; this constructor performs no propagation.
+    With ``sparse=True``, the grid samples each local aperture independently.
     """
-
-    def __init__(self, centers, hole, opd=None, oversample=5):
-        """Initialise a shared-shape non-redundant mask.
-
-        Parameters
-        ----------
-        centers : ArrayLike
-            Physical hole centres with shape ``(n_holes, 2)``.
-        hole : Shape
-            Geometry shared by every hole.
-        opd : BaseOPDDef or None
-            Optional local OPD definition.
-        oversample : int or tuple[int, int]
-            Hard-edge sampling factors.
-        """
-        if not isinstance(hole, Shape):
-            raise TypeError("hole must be a Shape.")
-
-        super().__init__(hole, centers, opd=opd, oversample=oversample)
-
-    def __call__(
-        self,
-        grid,
-        transform=None,
-        coeffs=None,
-        key=None,
-        normalise=True,
-        jit=True,
-        sparse=False,
-        coefficients=None,
-    ):
-        """Materialise a global NRM or independent sparse holes.
-
-        Parameters
-        ----------
-        grid : GridSpec
-            One-dimensional square or explicit two-dimensional sampling grid.
-        transform : BaseCoordTransform or None
-            Optional map into the aperture frame. Transforms require dense output.
-        coeffs : Array or None
-            Explicit OPD coefficients. Sparse coefficients must begin with an axis
-            matching the number of holes.
-        key : Array or None
-            JAX random key for standard-normal coefficient initialisation. Mutually
-            exclusive with ``coeffs``.
-        normalise : bool
-            Renormalise wavefront power after applying the returned optic.
-        jit : bool
-            Compile the fixed-topology sampling calculation.
-        sparse : bool
-            Return independent locally sampled holes as a ``SparseOptic``; otherwise
-            return one globally sampled ``Optic``.
-        coefficients : Array or None
-            Deprecated alias for ``coeffs``.
-
-        Returns
-        -------
-        optic : Optic or SparseOptic
-            Materialised global pupil or independent sparse-hole representation.
-        """
-        coeffs = _resolve_coeffs(coeffs, coefficients)
-        if sparse and coeffs is not None:
-            coeffs = np.asarray(coeffs)
-            if coeffs.ndim == 0 or coeffs.shape[0] != len(self.centers):
-                raise ValueError("coeffs must have a leading axis matching the holes.")
-
-        return super().__call__(
-            grid, transform, coeffs, key, normalise, jit, sparse, False
+    if centers is None:
+        centers = (
+            (0.0, 2.64),
+            (2.28631, 0.0),
+            (-2.28631, 1.32),
+            (2.28631, -1.32),
+            (1.14315, -1.98),
+            (-2.28631, -1.32),
+            (-1.14315, -1.98),
         )
-
-
-class HSTLike(SimpleCircular):
-    """Representative HST-like pupil preserving the legacy dLux geometry.
-
-    This model omits detailed support-pad, baffle, and edge geometry and is intended
-    for examples rather than observatory-grade reproduction. Its dimensions are
-    carried forward from ``dLux.utils.hst_like`` and are not independently validated
-    here against a contemporary observatory pupil model.
-
-    The primary, secondary, and support dimensions may be overridden while retaining
-    the HST-like circular-pupil topology.
-
-    Examples
-    --------
-    Materialise the representative pupil or override its principal geometry:
-
-    ```python
-    import jax.random as jr
-
-    import dLux as dl
-
-    # Construct an HST-like pupil with low-order aberrations
-    pupil = dl.HSTLike(
-        opd=dl.ZernikeDef(
-            orders=[2, 3],  # Skip piston, tip, and tilt
-            norm=dl.Norm(mode="rms", scale=10e-9),
-        ),
+    diameter = 2 * zdx.as_array(hole_f2f, dtype=float) / np.sqrt(3)
+    builder = NRMLike(
+        centers,
+        dlu.RegularPolygon(6, diameter),
+        opd=opd,
+        oversample=pupil_oversample,
+        key=key,
     )
+    pupil = builder(
+        pupil_grid,
+        coeffs=coeffs,
+        normalise=normalise,
+        jit=jit,
+        sparse=sparse,
+    )
+    focal_length = zdx.as_array(focal_length, dtype=float)
+    return replace(pupil, grid=pupil_grid, focal_length=focal_length, alias=alias)
 
-    # Materialise the standard pupil as an optic
-    grid = dl.GridSpec(n=256, diam=2.8, unit="m")
-    optic = pupil(grid=grid, key=jr.key(0))
 
-    # Override the support width while retaining the HST-like geometry
-    wide_supports = dl.HSTLike(spider_width=0.06)
-    wide_supports_optic = wide_supports(grid)
-    ```
+def EuclidAper(
+    pupil_grid,
+    *,
+    diameter=1.21,
+    secondary_diameter=0.395,
+    spider_width=0.012,
+    spider_angles=(0, 120, 240),
+    opd=None,
+    coeffs=None,
+    pupil_oversample=5,
+    key=None,
+    normalise=True,
+    jit=True,
+    focal_length=None,
+    alias=None,
+):
+    """Construct an Optic with the approximate Euclid pupil.
+
+    ``pupil_grid`` defines the sampling; dimensions are metres and spider angles
+    are degrees. ``opd`` supplies a basis definition, with optional ``coeffs`` or
+    random ``key``. ``pupil_oversample`` controls aperture-edge sampling, while
+    ``normalise`` normalises power after applying the pupil. ``focal_length``
+    optionally defines a later relay; this constructor performs no propagation.
     """
-
-    def __init__(
-        self,
-        diameter=2.4,
-        secondary_diameter=0.305,
-        spider_width=0.038,
-        spider_angles=(0, 90, 180, 270),
-        opd=None,
-        oversample=5,
-    ):
-        """Initialise the representative HST-like pupil.
-
-        Parameters
-        ----------
-        diameter, secondary_diameter : float
-            Primary and central-obscuration diameters in the grid's physical unit.
-        spider_width : float
-            Radial-support width.
-        spider_angles : ArrayLike
-            Support angles in degrees.
-        opd : BaseOPDDef or None
-            Optional OPD definition.
-        oversample : int or tuple[int, int]
-            Hard-edge sampling factors.
-        """
-        super().__init__(
-            diameter, secondary_diameter, spider_width, spider_angles, opd, oversample
+    shift = np.asarray((secondary_diameter / 2 - spider_width / 2, diameter / 2))
+    obscurations = [dlu.Circle(secondary_diameter)]
+    for angle in spider_angles:
+        transform = dlu.Affine(
+            translation=shift,
+            rotation=np.deg2rad(angle + 30),
+            order=("rotation", "translation"),
         )
-
-
-class JWSTLike(SegmentedHex):
-    """Representative JWST-like pupil preserving the legacy dLux geometry.
-
-    This model includes the 18 primary segments and three support arms, but omits
-    features such as the secondary-mirror support hinges and detailed pupil edges.
-    Its dimensions are carried forward from ``dLux.utils.jwst_like``; it is not an
-    STPSF-equivalent or independently validated observatory pupil.
-
-    Segment size, gap, and simplified support geometry may be overridden while the
-    18-segment JWST-like topology remains fixed.
-
-    Examples
-    --------
-    Construct the representative pupil with independent segment aberrations:
-
-    ```python
-    import jax.random as jr
-
-    import dLux as dl
-
-    # Construct a JWST-like pupil with independent segment aberrations
-    pupil = dl.JWSTLike(
-        opd=dl.ZernikeDef(
-            orders=[1, 2],
-            norm=dl.Norm(mode="rms", scale=10e-9),
-        ),
+        support = dlu.Rectangle(spider_width, diameter, transform=transform)
+        obscurations.append(support)
+    builder = ApertureBuilder(
+        dlu.Circle(diameter),
+        obscurations,
+        opd=opd,
+        oversample=pupil_oversample,
+        key=key,
     )
-
-    # Materialise the standard pupil as an optic
-    grid = dl.GridSpec(n=256, diam=7.0, unit="m")
-    optic = pupil(grid=grid, key=jr.key(0))
-    ```
-    """
-
-    def __init__(
-        self,
-        segment_diameter=1.524,
-        gap=0.007,
-        spider_width=0.1,
-        spider_angles=(30, 180, 330),
-        opd=None,
-        oversample=5,
-        paste_method="scan",
-    ):
-        """Initialise the representative 18-segment JWST-like pupil.
-
-        Parameters
-        ----------
-        segment_diameter, gap : float
-            Point-to-point segment diameter and edge gap in the grid's physical unit.
-        spider_width : float
-            Simplified support-arm width.
-        spider_angles : ArrayLike
-            Support angles in degrees.
-        opd : BaseOPDDef or None
-            Optional per-segment OPD definition.
-        oversample : int or tuple[int, int]
-            Hard-edge sampling factors.
-        paste_method : str
-            Compact assembly strategy, ``"scan"`` or ``"scatter"``.
-        """
-        super().__init__(
-            nrings=3,
-            segment_diameter=segment_diameter,
-            gap=gap,
-            remove_center=True,
-            obscurations=(Spider(spider_width, spider_angles),),
-            opd=opd,
-            oversample=oversample,
-            paste_method=paste_method,
-        )
-
-
-class JWSTNRMLike(NRMLike):
-    """Representative seven-hole JWST/NIRISS NRM geometry.
-
-    Hole centres and the nominal 0.8 m flat-to-flat width are taken from the AMIGO
-    model. Its fitted pupil-registration offset and detailed mask-edge effects are
-    deliberately omitted.
-
-    ``centers`` and ``hole_f2f`` may be overridden for calibrated or deliberately
-    perturbed NRM geometries while retaining a shared hexagonal hole shape.
-
-    Examples
-    --------
-    Materialise the ideal mask with independent low-order hole aberrations:
-
-    ```python
-    import jax.random as jr
-
-    import dLux as dl
-
-    # Construct the seven-hole JWST/NIRISS mask with per-hole aberrations
-    pupil = dl.JWSTNRMLike(
-        opd=dl.ZernikeDef(
-            orders=[0, 1],
-            norm=dl.Norm(mode="rms", scale=10e-9),
-        ),
-    )
-
-    # Materialise the holes on a compact local grid
-    grid = dl.GridSpec(n=96, diam=1.0, unit="m")
-    sparse_optic = pupil(grid=grid, key=jr.key(0), sparse=True)
-    ```
-    """
-
-    def __init__(self, centers=None, hole_f2f=0.8, opd=None, oversample=5):
-        """Initialise the representative seven-hole JWST/NIRISS mask.
-
-        Parameters
-        ----------
-        centers : ArrayLike or None
-            Physical ``(x, y)`` hole centres; defaults to the AMIGO ideal geometry.
-        hole_f2f : float
-            Shared hexagonal-hole flat-to-flat width.
-        opd : BaseOPDDef or None
-            Optional per-hole OPD definition.
-        oversample : int or tuple[int, int]
-            Hard-edge sampling factors.
-        """
-        # Ideal mask coordinates used by AMIGO, excluding its fitted pupil offset.
-        if centers is None:
-            centers = np.asarray(
-                (
-                    (0.0, 2.64),
-                    (2.28631, 0.0),
-                    (-2.28631, 1.32),
-                    (2.28631, -1.32),
-                    (1.14315, -1.98),
-                    (-2.28631, -1.32),
-                    (-1.14315, -1.98),
-                )
-            )
-        hole_f2f = dlu.to_value(hole_f2f, name="hole_f2f")
-        diameter = 2 * hole_f2f / np.sqrt(3)
-        super().__init__(
-            centers, RegularPolygon(6, diameter), opd=opd, oversample=oversample
-        )
-
-
-class EuclidLike(ApertureBuilder):
-    """Approximate Euclid-like pupil preserving the legacy dLux geometry.
-
-    The dimensions and simplified displaced arms are carried forward from
-    ``dLux.utils.euclid_like``. This is suitable for examples, not a validated Euclid
-    mission pupil model.
-
-    Primary, secondary, and support dimensions may be overridden. Increasing
-    ``spider_width`` is useful when a stronger asymmetric diffraction signature is
-    desired for phase-retrieval experiments.
-
-    Examples
-    --------
-    Widen the asymmetric supports for a stronger phase-retrieval signature:
-
-    ```python
-    import jax.random as jr
-
-    import dLux as dl
-
-    # Construct a Euclid-like pupil with widened asymmetric supports
-    pupil = dl.EuclidLike(
-        spider_width=0.03,
-        opd=dl.ZernikeDef(
-            orders=[2, 3],  # Skip piston, tip, and tilt
-            norm=dl.Norm(mode="rms", scale=10e-9),
-        ),
-    )
-
-    # Materialise the pupil as an optic
-    grid = dl.GridSpec(n=256, diam=1.4, unit="m")
-    optic = pupil(grid=grid, key=jr.key(0))
-    ```
-    """
-
-    def __init__(
-        self,
-        diameter=1.21,
-        secondary_diameter=0.395,
-        spider_width=0.012,
-        spider_angles=(0, 120, 240),
-        opd=None,
-        oversample=5,
-    ):
-        """Initialise the approximate Euclid-like pupil.
-
-        Parameters
-        ----------
-        diameter, secondary_diameter : float
-            Primary and central-obscuration diameters in the grid's physical unit.
-        spider_width : float
-            Displaced support-arm width.
-        spider_angles : ArrayLike
-            Support angles in degrees.
-        opd : BaseOPDDef or None
-            Optional OPD definition.
-        oversample : int or tuple[int, int]
-            Hard-edge sampling factors.
-        """
-        # Generate the displaced support-arm geometry
-        shift = np.asarray((secondary_diameter / 2 - spider_width / 2, diameter / 2))
-        obscurations = [Circle(secondary_diameter)]
-        for angle in spider_angles:
-            transformation = Affine(
-                translation=shift,
-                rotation=dlu.deg2rad(angle + 30),
-                order=("rotation", "translation"),
-            )
-            obscurations.append(
-                TransformedShape(Rectangle(spider_width, diameter), transformation)
-            )
-
-        # Initialise the complete sampled pupil definition
-        super().__init__(Circle(diameter), obscurations, opd=opd, oversample=oversample)
+    pupil = builder(pupil_grid, coeffs=coeffs, normalise=normalise, jit=jit)
+    focal_length = zdx.as_array(focal_length, dtype=float)
+    return replace(pupil, grid=pupil_grid, focal_length=focal_length, alias=alias)

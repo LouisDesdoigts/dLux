@@ -1,332 +1,284 @@
-"""User-facing optical elements and direct wavefront operations."""
+"""Optical effects, their combined Optic, and Wavefront propagation adapters."""
 
 from __future__ import annotations
 
-from abc import abstractmethod
 from typing import Any
 
 import jax.numpy as np
-import equinox as eqx
 import zodiax as zdx
 from jax import Array
 
 import dLux.utils as dlu
 
 from ..fields import Wavefront
+from ..prebuilt.definitions import Def
 
 __all__ = [
-    "BaseLayer",
-    "BaseOpticalLayer",
     "OpticalLayer",
-    "TransmissiveLayer",
-    "AberratedLayer",
+    "ComplexLayer",
+    "BaseOptic",
+    "RefractiveLayer",
+    "JonesLayer",
+    "PropagatorLayer",
     "Optic",
-    "Tilt",
+    "TiltLayer",
+    "WedgeLayer",
 ]
 
 
-class BaseLayer(zdx.Module):
-    """Base contract for callable immutable transformations of dLux objects.
+class OpticalLayer(dlu.BaseLayer):
+    """Transform a Wavefront, mapping apply_mono over independent samples.
 
-    Concrete layer families define the target accepted by `apply`. Layers contain
-    their differentiable parameters and return transformed objects without mutating
-    their inputs. ``**context`` is forwarded unchanged through application; pass
-    ``state=zdx.State(...)`` to resolve external ``zdx.StateRef`` values. Layers
-    consume state without advancing it or storing it on the returned field.
+    Subclasses implement apply_mono for one monochromatic field. Layers supporting
+    complete chromatic fields override apply; Wavefront owns their axis alignment.
     """
 
-    @abstractmethod
-    def apply(self, target: Any, **context) -> Any:
-        """Transform a compatible target and return a new object.
-
-        Subclasses define the accepted target type and must preserve immutable dLux
-        semantics: applying a layer does not mutate the input object. Accept
-        ``**context`` to participate in contextual system evaluation.
-        """
-
-    def __call__(self, target: Any, **context) -> Any:
-        """Call :meth:`apply` using concise layer syntax."""
-        return self.apply(target, **context)
-
-
-class BaseOpticalLayer(BaseLayer):
-    """Base contract for layers that transform scalar or polarised wavefronts.
-
-    Subclasses implement the monochromatic `apply_mono` operation. `apply` maps it
-    over wavelength and compatible leading axes, while `__call__` provides concise
-    layer syntax with the same vectorisation contract.
-    """
-
-    @abstractmethod
     def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Transform one monochromatic wavefront.
+        """Transform one scalar-wavelength field on one grid.
 
-        Implement this method when defining a standard optical layer. It receives a
-        wavefront with no mapped leading batch axis and must return a wavefront;
-        `apply` supplies recursive leading-axis vectorisation.
+        The phasor is (ny, nx), or (2, 2, ny, nx) for explicit Jones samples.
+        Layer parameters are shared across mapped samples; resolve expressions
+        using self.context(wavefront, **context). Ordinary layers retain the batch
+        layout; a specialised layer such as SparseOptic may introduce apertures.
         """
+        raise NotImplementedError(
+            "Implement apply_mono(wavefront, **context) for automatic batching. "
+            "Released layers may still implement __call__ directly."
+        )
 
     def apply(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Apply the monochromatic operation over all leading wavefront axes.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            Scalar or polarised wavefront with optional leading wavelength and batch
-            axes. Sampling metadata are vectorised only when they share the mapped
-            leading axis.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            Transformed wavefront with leading axes and realised grid metadata
-            restored. The input wavefront is not mutated.
-        """
-        # Apply directly to non-wavefront targets and scalar wavefronts
-        if not isinstance(wavefront, Wavefront):
-            return self.apply_mono(wavefront, **context)
-        axes = wavefront._mapped_axis
-        if axes is None:
-            return self.apply_mono(wavefront, **context)
-
-        # Define application to one monochromatic field
-        def apply_one(phasor, wavelength, weight, d, c):
-            wavefront_i = wavefront.set(
-                phasor=phasor,
-                wavelength=wavelength,
-                weight=weight,
-                d=d,
-                c=c,
-            )
-            return self.apply(wavefront_i, **context)
-
-        # Vectorise the layer over leading wavefront dimensions
-        apply_one = eqx.filter_vmap(apply_one, in_axes=axes)
-        output = apply_one(
-            wavefront.phasor,
-            wavefront.wavelength,
-            wavefront.weight,
-            wavefront.grid.d,
-            wavefront.grid.c,
-        )
-
-        # Remove axes introduced for metadata values that were not vectorised
-        wavelength = output.wavelength
-        if axes[1] is None:
-            wavelength = wavelength[0]
-        weights = output.weight
-        if weights is not None and axes[2] is None:
-            weights = weights[0]
-        c = output.grid.c
-        c = c[0] if c is not None and axes[4] is None else c
-        d = output.grid.d[0] if axes[3] is None else output.grid.d
-
-        # Restore the realised wavefront grid
-        return output.set(
-            wavelength=wavelength,
-            weight=weights,
-            d=d,
-            c=c,
-        )
-
-
-class OpticalLayer(BaseOpticalLayer):
-    """Public extension point for user-defined monochromatic optical layers.
-
-    Implement `apply_mono(wavefront, **context)` for one monochromatic `Wavefront`.
-    Inherited application handles chromatic and otherwise vectorised wavefronts.
-    The result must retain physically consistent wavelength and grid metadata.
-    """
+        """Apply a monochromatic operation across independent field samples."""
+        if isinstance(wavefront, Wavefront):
+            return wavefront._map_wavefronts(self.apply_mono, **context)
+        return self.apply_mono(wavefront, **context)
 
     @staticmethod
     def context(wavefront: Wavefront, **context) -> dict[str, Any]:
-        """Return the standard parametric context for an optical layer.
+        """Supply incident SI coordinates, pixel scale and wavelengths.
 
-        Spatial definitions obtain coordinates and pixel sampling from the incident
-        grid. Chromatic definitions receive wavelengths separately. Explicit caller
-        context, such as external state, is forwarded; an additional coordinate
-        input is rejected by spatial definitions rather than silently overwritten.
+        Plain Expressions and Sampled definitions receive the same coordinate
+        context. The grid is used here only, avoiding two sampling inputs downstream.
         """
+        context = dict(
+            context, wavelength=wavefront.wavelength, wavelengths=wavefront.wavelength
+        )
+        context.pop("grid", None)
+        context.pop("coordinates", None)
+        grid = wavefront.grid.resolve(**context)
         return {
             **context,
-            "grid": wavefront.grid,
-            "wavelengths": wavefront.wavelength,
+            "coordinates": grid.coordinates,
+            "pixel_scale": grid.d_si,
         }
 
 
-class TransmissiveLayer(OpticalLayer):
-    """Apply a transmission with optional output normalisation.
+class ComplexLayer(OpticalLayer):
+    """Multiply a field by amplitude and a wavelength-independent phase.
 
-    Transmission is real-valued amplitude scaling. Use OPD, phase, or Jones terms
-    for phase and complex field effects. Values broadcast to the incoming phasor
-    while preserving its wavelength, polarisation, and other leading axes.
+    Amplitude is dimensionless and phase is in radians. Inputs may be arrays or
+    Expressions sampled on the incident grid. The layer preserves its sampling.
+    """
 
-    Parameters
-    ----------
-    transmission : Array, Parametric, or None
-        Real scalar or sampled amplitude transmission.
-    normalise : bool or None
-        Normalise the resulting wavefront to unit power when true. Omit to leave
-        normalisation unconfigured.
+    amplitude: Array | zdx.Expression | None = None
+    phase: Array | zdx.Expression | None = None
+
+    def __init__(self, amplitude=None, phase=None, *, alias=None):
+        self.amplitude = zdx.as_array(amplitude, dtype=float)
+        self.phase = zdx.as_array(phase, dtype=float)
+        self.alias = alias
+
+    def modulation(self, wavefront: Wavefront) -> tuple[Array, Array]:
+        """Return resolved amplitude and phase aligned to the field axes."""
+        amplitude = 1.0 if self.amplitude is None else self.amplitude
+        phase = 0.0 if self.phase is None else self.phase
+        return (
+            wavefront._to_phasor_shape(amplitude),
+            wavefront._to_phasor_shape(phase),
+        )
+
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
+        self = self.resolve(**self.context(wavefront, **context))
+        amplitude, phase = self.modulation(wavefront)
+        return wavefront.set(phasor=wavefront.phasor * amplitude * np.exp(1j * phase))
+
+
+class BaseOptic(OpticalLayer):
+    """Apply real amplitude transmission and optical path difference in metres.
+
+    Optional normalisation sets the resulting field power to one. In a combined
+    Optic this happens after all scalar effects and before Jones polarisation.
     """
 
     transmission: Array | zdx.Expression | None = None
+    opd: Array | zdx.Expression | None = None
     normalise: bool | None = None
 
-    def __init__(self, transmission=None, normalise=None, *, alias=None):
-        """Initialise a transmissive optical layer.
-
-        Parameters
-        ----------
-        transmission : Array, Parametric, or None
-            Scalar or sampled amplitude transmission, or a parametric resolving one.
-        normalise : bool or None
-            Renormalise wavefront power after applying the transmission when true.
-            Omit to leave normalisation unconfigured.
-        """
+    def __init__(self, transmission=None, opd=None, normalise=None, *, alias=None):
         transmission = zdx.as_array(transmission)
         if not isinstance(transmission, zdx.Expression) and np.iscomplexobj(
             transmission
         ):
             raise TypeError("transmission must be real-valued; use phase or opd.")
         self.transmission = zdx.as_array(transmission, dtype=float)
-        self.normalise = None if normalise is None else bool(normalise)
-
-        self.alias = alias
-
-    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Apply the resolved amplitude transmission to one wavefront.
-
-        Parametric transmission is resolved from the optical context, reshaped for
-        phasor broadcasting, and multiplied into a new wavefront. Unit-power
-        normalisation is applied afterward when configured.
-        """
-        self = self.resolve(**self.context(wavefront, **context))
-        if self.transmission is not None:
-            if np.iscomplexobj(self.transmission):
-                raise TypeError("transmission must be real-valued; use phase or opd.")
-            transmission = wavefront._to_phasor_shape(self.transmission)
-            wavefront = wavefront.set(phasor=wavefront.phasor * transmission)
-        if self.normalise:
-            wavefront = wavefront.normalise()
-        return wavefront
-
-
-class AberratedLayer(OpticalLayer):
-    """Apply optical-path and phase aberrations to a wavefront.
-
-    OPD is converted to phase using the wavefront wavelength, while phase is applied
-    directly. Values broadcast to the incoming phasor and may be arrays or contextual
-    `Parametric` objects in concrete layers.
-
-    Parameters
-    ----------
-    opd : Array, Parametric, or None
-        Optical path difference in meters.
-    phase : Array, Parametric, or None
-        Additional phase in radians.
-    """
-
-    opd: Array | zdx.Expression | None = None
-    phase: Array | zdx.Expression | None = None
-
-    def __init__(self, opd=None, phase=None, *, alias=None):
-        """Initialise optical-path and phase aberrations.
-
-        Parameters
-        ----------
-        opd : Array, Parametric, or None
-            Optical path difference in metres.
-        phase : Array, Parametric, or None
-            Wavelength-independent phase in radians.
-        """
         self.opd = zdx.as_array(opd, dtype=float)
-        self.phase = zdx.as_array(phase, dtype=float)
+        self.normalise = None if normalise is None else bool(normalise)
+        self.alias = alias
 
+    def resolve_local(self, **context) -> BaseOptic:
+        """Resolve transmission first so sampled OPD can use its footprint."""
+        self = self.populate()
+        transmission = zdx.resolve(self.transmission, **context)
+        if transmission is not None:
+            context = {**context, "support": transmission != 0}
+        return self.set(transmission=transmission).resolve(**context)
+
+    def modulation(self, wavefront: Wavefront) -> tuple[Array, Array]:
+        """Return resolved transmission and OPD phase aligned to field axes."""
+        if np.iscomplexobj(self.transmission):
+            raise TypeError("transmission must be real-valued; use phase or opd.")
+        transmission = 1.0 if self.transmission is None else self.transmission
+        opd = 0.0 if self.opd is None else self.opd
+        return wavefront._to_phasor_shape(transmission), wavefront.phase_from_opd(opd)
+
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
+        self = self.resolve_local(**self.context(wavefront, **context))
+        amplitude, phase = self.modulation(wavefront)
+        wavefront = wavefront.set(
+            phasor=wavefront.phasor * amplitude * np.exp(1j * phase)
+        )
+        return wavefront.normalise() if self.normalise else wavefront
+
+
+class RefractiveLayer(OpticalLayer):
+    """Apply excess material optical path ``(n - 1) * thickness``.
+
+    Thickness is in metres. The refractive index may be complex to represent
+    absorption, or an Expression evaluated at the incident wavelengths.
+    """
+
+    thickness: Array | zdx.Expression | None = None
+    n: Array | zdx.Expression | None = None
+
+    def __init__(self, thickness=None, n=None, *, alias=None):
+        self.thickness = zdx.as_array(thickness, dtype=float)
+        self.n = zdx.as_array(n)
+        self.alias = alias
+
+    def modulation(self, wavefront: Wavefront) -> tuple[Array, Array]:
+        """Return unit amplitude and resolved material phase on the field axes."""
+        phase = wavefront._to_phasor_shape(0.0)
+        if self.thickness is not None and self.n is not None:
+            opd = (self.n - 1) * self.thickness
+            phase = wavefront.phase_from_opd(opd)
+        return wavefront._to_phasor_shape(1.0), phase
+
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
+        self = self.resolve(**self.context(wavefront, **context))
+        _, phase = self.modulation(wavefront)
+        return wavefront.set(phasor=wavefront.phasor * np.exp(1j * phase))
+
+
+class JonesLayer(OpticalLayer):
+    """Apply a numerical Jones definition through Wavefront's polarisation API."""
+
+    jones: Array | zdx.Expression | None = None
+
+    def __init__(self, jones=None, *, alias=None):
+        self.jones = zdx.as_array(jones)
         self.alias = alias
 
     def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Apply resolved OPD and phase aberrations to one wavefront.
-
-        OPD is interpreted in metres and converted using the wavefront wavelength;
-        phase is interpreted directly in radians. The input is not mutated.
-        """
         self = self.resolve(**self.context(wavefront, **context))
-        wavefront = wavefront.add_opd(self.opd)
-        return wavefront.add_phase(self.phase)
+        return self.apply_jones(wavefront)
+
+    def apply_jones(self, wavefront: Wavefront) -> Wavefront:
+        """Apply an already-resolved Jones matrix, preserving field sampling."""
+        if self.jones is None:
+            return wavefront
+        # One monochromatic layer has a matrix or a sampled matrix field.
+        if self.jones.ndim not in (2, 4):
+            raise ValueError("A local Jones layer needs (2, 2) or (ny, nx, 2, 2).")
+        return wavefront.apply_jones(self.jones, spatial=self.jones.ndim == 4)
 
 
-class Optic(TransmissiveLayer, AberratedLayer):
-    """Combine optional scalar, refractive, and Jones effects at one plane.
+class PropagatorLayer(OpticalLayer, dlu.Propagator):
+    """A numerical Propagator with Wavefront input and output.
 
-    Local terms resolve on the incident grid. Amplitude and transmission multiply
-    the field, while OPD, phase, and refractive thickness contribute phase. A Jones
-    matrix promotes scalar inputs to polarised wavefronts. Optional unit-power
-    normalisation follows these local operations, then the propagator transports
-    the complete field to its output grid. Unconfigured terms are skipped.
-
-    Parameters
-    ----------
-    transmission : Array, Parametric, or None
-        Real scalar or sampled amplitude transmission.
-    opd : Array, Parametric, or None
-        Optical path difference in meters.
-    phase : Array, Parametric, or None
-        Additional phase in radians.
-    normalise : bool or None
-        Normalise the resulting wavefront to unit power when true. Omit to leave
-        normalisation unconfigured.
-    amplitude : Array, Parametric, or None
-        Additional dimensionless amplitude multiplier, broadcast like transmission.
-    jones : Array, Parametric, or None
-        Complex Jones matrix with shape ``(2, 2, ...)``; trailing axes are spatial.
-    thickness : Array, Parametric, or None
-        Scalar or sampled material thickness in metres.
-    n : Array, Parametric, or None
-        Dimensionless refractive index. When both ``n`` and ``thickness`` are set,
-        add ``(n - 1) * thickness`` to OPD, relative to propagation in vacuum.
-    propagator : BaseOpticalLayer or None
-        Propagation layer called after local operations and normalisation. It owns
-        output sampling and handles the complete wavelength and batch population.
-
-    Examples
-    --------
-    Combine amplitude transmission, OPD, and phase in one optical layer:
-
-    ```python
-    import jax.random as jr
-
-    import dLux as dl
-
-    # Construct the sampled optical components
-    grid = dl.GridSpec(n=128, diam=1.2, unit="m")
-    transmission = dl.Circle(diameter=1.0)(grid)
-    opd = 10e-9 * jr.normal(jr.key(0), transmission.shape)
-    phase = 0.1 * jr.normal(jr.key(1), transmission.shape)
-
-    # Combine the transmission, OPD, and phase into one optic
-    optic = dl.Optic(
-        transmission=transmission,
-        opd=opd,
-        phase=phase,
-        normalise=True,
-    )
-
-    # Apply the optic to a wavefront
-    wavefront = dl.Wavefront(wavelength=650e-9, grid=grid)
-    wavefront = optic(wavefront)
-    ```
+    Grid, focal length, defocus, ABCD and inverse parameters are inherited directly.
+    Wavefront owns the wavelength, population and Jones-axis adaptation. Alternative
+    numerical algorithms can be applied with ``wavefront.propagate(definition)``.
     """
 
-    transmission: Array | zdx.Expression | None = None
-    opd: Array | zdx.Expression | None = None
-    phase: Array | zdx.Expression | None = None
-    amplitude: Array | zdx.Expression | None = None
+    # Inherited fields
+    abcd: Array | zdx.Expression | None = None
+    grid_out: dlu.Grid | None = None
+    focal_length: Any = None
+    defocus: Any = None
+    inverse: bool | None = False
+
+    def __init__(
+        self,
+        grid_out=None,
+        focal_length=None,
+        defocus=None,
+        *,
+        abcd=None,
+        inverse=False,
+        alias=None,
+    ):
+        dlu.Propagator.__init__(
+            self,
+            grid_out,
+            focal_length,
+            defocus,
+            abcd=abcd,
+            inverse=inverse,
+            alias=alias,
+        )
+
+    def propagate(self, wavefront: Wavefront, **context) -> Wavefront:
+        """Apply this object's propagation parameters to an incident field."""
+        return wavefront.propagate(self, **context)
+
+    def apply(self, wavefront: Wavefront, **context) -> Wavefront:
+        return self.propagate(wavefront, **context)
+
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
+        return self.apply(wavefront, **context)
+
+
+class Optic(BaseOptic, ComplexLayer, RefractiveLayer, JonesLayer, PropagatorLayer):
+    """Combine inherited scalar, complex, refractive and Jones effects at one plane.
+
+    Each parent supplies its own fields and numerical operation. Transmission,
+    OPD, amplitude, phase, thickness, index and Jones terms are stored directly on
+    the optic, with ordinary update paths such as ``opd.coeffs``.
+
+    Evaluation uses one local grid and coordinate transform. Scalar phases combine
+    before exponentiation, optional normalisation follows scalar modulation, and
+    Jones effects follow normalisation so polarisation losses are retained.
+    A supplied ``grid_out`` propagates the resulting field after these effects.
+    None retains the incident sampling. Focal length defines the relay, not a
+    second local lens phase.
+    """
+
+    # Inherited fields
+    abcd: Array | zdx.Expression | None = None
+    grid_out: dlu.Grid | None = None
+    focal_length: Any = None
+    defocus: Any = None
+    inverse: bool | None = False
     jones: Array | zdx.Expression | None = None
     thickness: Array | zdx.Expression | None = None
     n: Array | zdx.Expression | None = None
-    propagator: BaseOpticalLayer | None = None
+    amplitude: Array | zdx.Expression | None = None
+    phase: Array | zdx.Expression | None = None
+    transmission: Array | zdx.Expression | None = None
+    opd: Array | zdx.Expression | None = None
     normalise: bool | None = None
+
+    grid: dlu.Grid | None = None
+    transform: dlu.BaseCoordTransform | None = None
 
     def __init__(
         self,
@@ -339,121 +291,134 @@ class Optic(TransmissiveLayer, AberratedLayer):
         jones=None,
         thickness=None,
         n=None,
-        propagator=None,
+        grid=None,
+        transform=None,
+        dynamic=False,
+        grid_out=None,
+        focal_length=None,
+        defocus=None,
+        abcd=None,
+        inverse=False,
         alias=None,
     ):
-        """Initialise optional local optical terms and outgoing propagation.
+        """Initialise inherited fields, consuming Def inputs on local sampling.
 
-        Parameters
-        ----------
-        transmission : Array, Parametric, or None
-            Real scalar or sampled amplitude transmission.
-        opd : Array, Parametric, or None
-            Optical path difference in metres.
-        phase : Array, Parametric, or None
-            Wavelength-independent phase in radians.
-        normalise : bool or None
-            Renormalise wavefront power after applying the optic when true. Omit to
-            leave normalisation unconfigured.
-        amplitude : Array, Parametric, or None
-            Scalar or sampled amplitude multiplier. Defaults to no multiplication.
-        jones : Array, Parametric, or None
-            Jones matrix of shape ``(2, 2, ...)``. Defaults to no Jones operation.
-        thickness : Array, Parametric, or None
-            Thickness in metres, broadcast to the field. Defaults to no thickness.
-        n : Array, Parametric, or None
-            Refractive index, broadcast to the field. Refraction is skipped unless
-            both this and ``thickness`` are supplied; both default to ``None``.
-        propagator : BaseOpticalLayer or None
-            Outgoing propagation layer. Defaults to remaining at the incident grid.
-        alias : mapping or sequence of pairs, optional
-            Additional Zodiax parameter aliases.
+        ``dynamic=True`` asks definitions for runtime expressions. Otherwise a
+        supplied grid permits sampling at construction. Arrays and Expressions
+        are retained; factories are not stored in the optic.
         """
-        TransmissiveLayer.__init__(self, transmission, normalise)
-        AberratedLayer.__init__(self, opd, phase)
+        # Choose sampling before constructing deferred optical definitions.
+        if grid is not None and not isinstance(grid, dlu.Grid):
+            raise TypeError("grid must be a Grid or None.")
+        if transform is not None and not isinstance(transform, dlu.BaseCoordTransform):
+            raise TypeError("transform must be a BaseCoordTransform or None.")
 
-        self.amplitude = zdx.as_array(amplitude, dtype=float)
-        self.jones = zdx.as_array(jones, dtype=None)
-        self.thickness = zdx.as_array(thickness, dtype=float)
-        self.n = zdx.as_array(n, dtype=None)
-        if propagator is not None and not isinstance(propagator, BaseOpticalLayer):
-            raise TypeError("propagator must be a BaseOpticalLayer or None.")
-        self.propagator = propagator
+        def construct(value, support=None):
+            if not isinstance(value, Def):
+                return value
+            context = {}
+            sampling = grid if grid is not None else getattr(value, "grid", None)
+            if sampling is not None and not dynamic:
+                sampling = sampling.resolve()
+                context = dict(
+                    coordinates=sampling.transformed(transform),
+                    pixel_scale=sampling.d_si,
+                )
+                if support is not None:
+                    context["support"] = zdx.resolve(support, **context) != 0
+            return value(dynamic=dynamic, **context)
 
-        self.alias = alias
+        # Each parent initialises its own fields; shared Module state is set last.
+        transmission = construct(transmission)
+        BaseOptic.__init__(self, transmission, construct(opd, transmission), normalise)
+        ComplexLayer.__init__(
+            self, construct(amplitude), construct(phase, transmission)
+        )
+        RefractiveLayer.__init__(self, construct(thickness, transmission), construct(n))
+        JonesLayer.__init__(self, construct(jones))
+        self.grid = grid
+        self.transform = transform
+        PropagatorLayer.__init__(
+            self,
+            grid_out,
+            focal_length,
+            defocus,
+            abcd=abcd,
+            inverse=inverse,
+            alias=alias,
+        )
+
+    def context(self, wavefront: Wavefront, **context) -> dict[str, Any]:
+        """Build local coordinates once, retaining incident pixel sampling."""
+        if self.grid is not None:
+            wavefront = wavefront.set(grid=self.grid)
+        context = super().context(wavefront, **context)
+        coordinates = context.pop("coordinates")
+        if self.transform is not None:
+            coordinates = self.transform(coordinates, **context)
+        return {**context, "coordinates": coordinates}
+
+    def modulation(self, wavefront: Wavefront) -> tuple[Array, Array]:
+        """Combine the inherited amplitude and phase operations on resolved fields."""
+        amplitude = wavefront._to_phasor_shape(1.0)
+        phase = wavefront._to_phasor_shape(0.0)
+        for layer in (BaseOptic, ComplexLayer, RefractiveLayer):
+            local_amplitude, local_phase = layer.modulation(self, wavefront)
+            amplitude = amplitude * local_amplitude
+            phase = phase + local_phase
+        return amplitude, phase
+
+    def scalar_phasor(self, wavefront: Wavefront) -> Array:
+        """Combine already-resolved scalar effects with one exponentiation."""
+        amplitude, phase = self.modulation(wavefront)
+        return amplitude * np.exp(1j * phase)
 
     def phasor(self, wavefront: Wavefront, **context) -> Array:
-        """Resolve and return the optic's cumulative complex field multiplier.
+        """Return local scalar modulation, excluding normalisation and Jones terms."""
+        self = self.populate()
+        local = self.resolve_local(**self.context(wavefront, **context))
+        return local.scalar_phasor(wavefront)
 
-        Amplitude, transmission, OPD in metres, phase in radians, and refractive
-        thickness are resolved together with Jones terms from the wavefront
-        context, so expressions can share linked values. The returned array
-        broadcasts against the wavefront phasor and includes only scalar
-        modulation. Jones effects, normalisation, and propagation are excluded.
+    def apply_scalar(self, wavefront: Wavefront, *, normalise=False) -> Wavefront:
+        """Apply prepared scalar effects, optionally normalising their output."""
+        wavefront = wavefront.set(
+            phasor=wavefront.phasor * self.scalar_phasor(wavefront)
+        )
+        return wavefront.normalise() if normalise else wavefront
+
+    def apply_local(
+        self, wavefront: Wavefront, *, normalise=False, polarisation=True, **context
+    ) -> Wavefront:
+        """Resolve supplied local context, apply scalar terms, then Jones effects.
+
+        Normalisation is explicitly controlled here so sparse owners can normalise
+        jointly across apertures before applying their Jones effects.
         """
-        local = self._resolve_local(wavefront, **context)
-        return local._phasor(wavefront)
-
-    def apply(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Apply local effects over leading axes, then propagate the full field."""
-        if self.propagator is None:
-            return super().apply(wavefront, **context)
-        local = self.set(propagator=None)
-        wavefront = local(wavefront, **context)
-        return self.propagator(wavefront, **context)
-
-    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
-        """Apply local scalar and Jones effects to one monochromatic wavefront.
-
-        Normalisation follows local modulation. :meth:`apply` owns outgoing
-        propagation after restoring all wavelength and batch axes.
-        """
-        local = self._resolve_local(wavefront, **context)
-        jones = local.jones
-        phasor = wavefront.phasor * local._phasor(wavefront)
-        wavefront = wavefront.set(phasor=phasor)
-        if jones is not None:
-            wavefront = wavefront.apply_jones(jones)
-        if self.normalise:
-            wavefront = wavefront.normalise()
+        context = dict(
+            context, wavelength=wavefront.wavelength, wavelengths=wavefront.wavelength
+        )
+        local = self.resolve_local(**context)
+        wavefront = local.apply_scalar(wavefront, normalise=normalise)
+        if polarisation:
+            wavefront = local.apply_jones(wavefront)
         return wavefront
 
-    def _resolve_local(self, wavefront, **context):
-        """Resolve local terms together so shared links retain their owners."""
-        names = ("transmission", "amplitude", "opd", "phase", "thickness", "n", "jones")
-        values = {name: getattr(self, name) for name in names}
-        values = zdx.resolve(values, **self.context(wavefront, **context))
-        return self.set(**values)
+    def apply(self, wavefront: Wavefront, **context) -> Wavefront:
+        """Apply the optic to a complete field with Wavefront-owned alignment."""
+        return wavefront._map_wavefronts(self.apply_mono, **context)
 
-    def _phasor(self, wavefront: Wavefront) -> Array:
-        """Combine resolved optical terms into one complex field."""
-        if np.iscomplexobj(self.transmission):
-            raise TypeError("transmission must be real-valued; use phase or opd.")
-
-        # Resolve absent optical terms to their identities
-        transmission = 1.0 if self.transmission is None else self.transmission
-        opd = 0.0 if self.opd is None else self.opd
-        phase = 0.0 if self.phase is None else self.phase
-
-        # Promote every term to the wavefront field shape
-        wavenumber = wavefront._to_phasor_shape(wavefront.wavenumber)
-        transmission = wavefront._to_phasor_shape(transmission)
-        opd = wavefront._to_phasor_shape(opd)
-        phase = wavefront._to_phasor_shape(phase)
-
-        # Apply optional amplitude and excess material optical path
-        if self.amplitude is not None:
-            transmission = transmission * wavefront._to_phasor_shape(self.amplitude)
-        if self.thickness is not None and self.n is not None:
-            thickness = wavefront._to_phasor_shape(self.thickness)
-            index = wavefront._to_phasor_shape(self.n)
-            opd = opd + (index - 1) * thickness
-
-        # Construct the combined scalar phasor
-        return transmission * np.exp(1j * (wavenumber * opd + phase))
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
+        self = self.populate()
+        context = self.context(wavefront, **context)
+        wavefront = self.apply_local(
+            wavefront, normalise=bool(self.normalise), **context
+        )
+        if self.grid_out is not None:
+            wavefront = self.propagate(wavefront, **context)
+        return wavefront
 
 
-class Tilt(OpticalLayer):
+class TiltLayer(OpticalLayer, dlu.Unitful):
     """Tilt a wavefront by two angular coordinates.
 
     Parameters
@@ -473,18 +438,18 @@ class Tilt(OpticalLayer):
     import dLux as dl
 
     # Construct a chromatic wavefront
-    grid = dl.GridSpec(n=128, diam=1.0, unit="m")
+    grid = dl.Grid(n=128, diam=1.0, unit="m")
     wavelengths = np.linspace(600e-9, 700e-9, 5)
     wavefront = dl.Wavefront(wavelength=wavelengths, grid=grid)
 
     # Apply an angular offset in convenient physical units
-    tilt = dl.Tilt(angles=[20.0, -10.0], unit="mas")
+    tilt = dl.TiltLayer(angles=[20.0, -10.0], unit="mas")
     wavefront = tilt(wavefront)
     ```
     """
 
-    angles: Array
-    unit: str
+    angles: Array | zdx.Expression
+    unit: str | None = "rad"
 
     def __init__(self, angles, unit="rad", *, alias=None):
         """Initialise an angular wavefront tilt.
@@ -497,9 +462,9 @@ class Tilt(OpticalLayer):
             Supported angular unit for ``angles``.
         """
         self.angles = zdx.as_array(angles, dtype=float)
-        if self.angles.shape != (2,):
+        if not isinstance(self.angles, zdx.Expression) and self.angles.shape != (2,):
             raise ValueError("angles must have shape (2,).")
-        self.unit = dlu.canonical_unit(unit, dimension="angle", name="tilt unit")
+        self.unit = self.validate_unit(unit, dimension="angle", name="tilt unit")
 
         self.alias = alias
 
@@ -511,3 +476,54 @@ class Tilt(OpticalLayer):
         """
         angles = zdx.resolve(self.angles, **self.context(wavefront, **context))
         return wavefront.tilt(angles, self.unit)
+
+
+class WedgeLayer(OpticalLayer):
+    """Apply the optical path of a thin refractive wedge.
+
+    The two wedge angles define a linear thickness ramp. A constant or parametric
+    refractive index is resolved at the incident wavelength and converted into OPD
+    before being applied to the wavefront.
+
+    Parameters
+    ----------
+    angle : ArrayLike
+        Two wedge angles in radians along the physical ``(x, y)`` axes.
+    n : Array or Expression
+        Wavelength-dependent or fixed refractive index.
+    """
+
+    angle: Array | zdx.Expression
+    n: Array | zdx.Expression
+
+    def __init__(self, angle, n, *, alias=None):
+        """Initialise a refractive wedge.
+
+        Parameters
+        ----------
+        angle : ArrayLike
+            Two-component wedge slope.
+        n : Array or Expression
+            Refractive index evaluated at the wavefront wavelength.
+        """
+        self.angle = zdx.as_array(angle, dtype=float)
+        if not isinstance(self.angle, zdx.Expression) and self.angle.shape != (2,):
+            raise ValueError("angle must have shape (2,).")
+        self.n = zdx.as_array(n, dtype=float)
+
+        self.alias = alias
+
+    def apply_mono(self, wavefront: Wavefront, **context) -> Wavefront:
+        """Apply the wavelength-dependent optical path of the wedge.
+
+        Wedge angle is in radians, coordinates and thickness are in metres, and the
+        refractive index is resolved at each wavefront wavelength.
+        """
+        # Resolve the sampled wedge thickness
+        self = self.resolve(**self.context(wavefront, **context))
+        coordinates = wavefront.coordinates
+        x, y = coordinates[..., 0, :, :], coordinates[..., 1, :, :]
+        thickness = x * np.tan(self.angle[0]) + y * np.tan(self.angle[1])
+
+        # Convert thickness into refractive optical path
+        return wavefront.add_opd((self.n - 1) * thickness)
