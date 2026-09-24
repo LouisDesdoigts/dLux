@@ -1,142 +1,116 @@
-"""Prepared unitary Fourier-transform evaluations."""
+"""Fourier transforms, phase-ramp shifts, and prepared FFT operations."""
 
 from __future__ import annotations
 
-
-import equinox as eqx
 from jax import Array
 import jax.numpy as np
 
-from ..helpers import as_size
+from ..grids.specs import _check_parity
+from ..grids.array_ops import as_size
+from ..sequential import BaseLayer
 from .operations import (
-    BaseOperation,
     Chirp,
     Resize,
-    _factor_sizes,
-    _prepare_factors,
     _series,
 )
 
-__all__ = ["FFT"]
+__all__ = ["FFT", "fourier_shift"]
 
 
-def _require_within(n, limit, name) -> None:
-    """Require every physical-order count to fit within its FFT count."""
-    if any(size > bound for size, bound in zip(n, limit)):
-        raise ValueError(f"{name} may not exceed the FFT counts.")
+def fourier_shift(array: Array, shift: Array, pad: bool = True) -> Array:
+    """Shift an array by a subpixel offset using Fourier interpolation.
+
+    The final two axes are interpreted as ``(y, x)``, while ``shift`` is
+    supplied in physical ``(x, y)`` order. Leading dimensions are preserved and
+    receive the same shift. By default, the spatial axes are zero-padded before
+    interpolation and cropped afterwards to suppress periodic wrapping.
+
+    Parameters
+    ----------
+    array : Array
+        Real or complex array with shape ``(..., ny, nx)``.
+    shift : Array
+        Length-two ``(x, y)`` shift measured in pixels. Positive values move
+        samples towards increasing indices.
+    pad : bool
+        Whether to zero-pad each spatial axis by half its length at both ends.
+        Disable this only when periodic boundary conditions are intended.
+
+    Returns
+    -------
+    shifted : Array
+        Fourier-interpolated array with the same shape and dtype kind as ``array``.
+
+    Examples
+    --------
+    Shift an image half a pixel along the x-axis:
+
+    >>> image = np.eye(5)
+    >>> shifted = fourier_shift(image, np.array([0.5, 0.0]))
+
+    Notes
+    -----
+    The operation is differentiable with respect to both the array and shift.
+    Vectorise over ``shift`` with ``jax.vmap`` when different shifts are
+    required for a batch.
+    """
+    # Convert and validate the array contract
+    array = np.asarray(array)
+    shift = np.asarray(shift)
+    if array.ndim < 2:
+        raise ValueError("array must have at least two dimensions.")
+    if shift.shape != (2,):
+        raise ValueError("shift must have shape (2,).")
+    if not isinstance(pad, bool):
+        raise TypeError("pad must be a bool.")
+
+    # Pad the spatial axes to suppress periodic wrapping
+    ny, nx = array.shape[-2:]
+    py, px = (ny // 2, nx // 2) if pad else (0, 0)
+    padding = [(0, 0)] * (array.ndim - 2) + [(py, py), (px, px)]
+    padded = np.pad(array, padding)
+
+    # Apply the Fourier-shift phase ramp over the final two axes
+    ny, nx = padded.shape[-2:]
+    fy, fx = np.fft.fftfreq(ny), np.fft.fftfreq(nx)
+    phase = np.exp(-2j * np.pi * (fy[:, None] * shift[1] + fx[None, :] * shift[0]))
+    shifted = np.fft.ifft2(np.fft.fft2(padded, axes=(-2, -1)) * phase, axes=(-2, -1))
+
+    # Restore real inputs and crop back to the original spatial extent
+    shifted = shifted if np.iscomplexobj(array) else shifted.real
+    return shifted[..., py : py + array.shape[-2], px : px + array.shape[-1]]
 
 
-def _resize_step(n_in, n_out):
-    """Return a resize operation only when the sample counts differ."""
-    return None if n_in == n_out else Resize(n_out)
+class FFT(BaseLayer):
+    """A unitary FFT over the final two spatial array axes.
 
-
-def _resized_fft(n_in, n_fft, *, inverse=False, centered=True) -> BaseOperation:
-    """Build an optional central resize followed by a fixed-size FFT."""
-    n_in = as_size(n_in, name="n_in")
-    n_fft = as_size(n_fft, len(n_in), "n_fft")
-    _require_within(n_in, n_fft, "n_in")
-
-    resize = _resize_step(n_in, n_fft)
-    if resize is None:
-        return FFT(n_fft, inverse=inverse, centered=centered)
-    return _series(resize, FFT(n_fft, inverse=inverse, centered=centered))
-
-
-def _output_fft(n_in, n_fft, factors, *, inverse=False) -> BaseOperation:
-    """Build a centred FFT, crop, and output-factor series."""
-    n_in = as_size(n_in, name="n_in")
-    n_fft = as_size(n_fft, len(n_in), "n_fft")
-    factors = _prepare_factors(factors)
-    n_out = _factor_sizes(factors)
-
-    if len(factors) != len(n_in):
-        raise ValueError("factors must contain one factor per transform axis.")
-    _require_within(n_in, n_fft, "n_in")
-    _require_within(n_out, n_fft, "output factor lengths")
-
-    steps = (
-        _resize_step(n_in, n_fft),
-        FFT(n_fft, inverse=inverse),
-        _resize_step(n_fft, n_out),
-        Chirp(factors),
-    )
-    return _series(*(step for step in steps if step is not None))
-
-
-def _shifted_fft(n_fft, input, output, *, inverse=False) -> BaseOperation:
-    """Build a centred FFT between separable input and output factors."""
-    input = _prepare_factors(input, "input")
-    output = _prepare_factors(output, "output")
-    n_fft = as_size(n_fft, len(input), "n_fft")
-    n_in = _factor_sizes(input)
-    n_out = _factor_sizes(output)
-
-    if len(output) != len(input):
-        raise ValueError("input and output must contain equal factor counts.")
-    _require_within(n_in, n_fft, "input factor lengths")
-    _require_within(n_out, n_fft, "output factor lengths")
-
-    steps = (
-        Chirp(input),
-        _resize_step(n_in, n_fft),
-        FFT(n_fft, inverse=inverse),
-        _resize_step(n_fft, n_out),
-        Chirp(output),
-    )
-    return _series(*(step for step in steps if step is not None))
-
-
-def _fft_convolution(n_in, n_out, transfer) -> BaseOperation:
-    """Build a raw FFT, transfer-factor, inverse-FFT convolution series."""
-    transfer = _prepare_factors(transfer, "transfer")
-    n_fft = _factor_sizes(transfer)
-    ndim = len(transfer)
-    n_in = as_size(n_in, ndim, "n_in")
-    n_out = as_size(n_out, ndim, "n_out")
-
-    _require_within(n_in, n_fft, "n_in")
-    _require_within(n_out, n_fft, "n_out")
-
-    steps = (
-        _resize_step(n_in, n_fft),
-        FFT(n_fft, centered=False),
-        Chirp(transfer),
-        FFT(n_fft, inverse=True, centered=False),
-        _resize_step(n_fft, n_out),
-    )
-    return _series(*(step for step in steps if step is not None))
-
-
-class FFT(BaseOperation):
-    """A unitary FFT over fixed final array axes.
-
-    Leading axes are preserved. The input origin is shifted to index zero before the
-    transform and the zero-frequency output is shifted back to the centre by default.
+    Leading axes broadcast with any array-valued direction. The input origin shifts
+    to index zero before the transform and zero frequency shifts back to the centre.
     Set ``centered=False`` for raw transforms used inside convolution series.
 
     Parameters
     ----------
-    n : int or tuple[int, ...]
-        Transform counts in physical-axis order. The input must already match them.
+    n : int or tuple[int, int]
+        Transform counts in (x, y) order; a scalar defines a square. The final
+        input shape must match (ny, nx).
     inverse : bool or Array[bool]
-        Use the inverse Fourier sign. Array directions align with the leading
-        field prefix, allowing different directions within a batch.
+        Use the inverse Fourier sign. Array directions broadcast with the leading
+        field batch, allowing different directions and explicit outer batches.
     centered : bool
         Apply centred input and output conventions.
     """
 
-    n: tuple[int, ...] = eqx.field(static=True)
-    inverse: bool | Array
-    centered: bool = eqx.field(static=True)
+    n: tuple[int, int]
+    inverse: bool | Array = False
+    centered: bool = True
 
     def __init__(self, n, *, inverse=False, centered=True, alias=None):
         """Initialise a unitary FFT with fixed transform topology.
 
         Parameters
         ----------
-        n : int or tuple[int, ...]
-            Positive transform counts in physical-axis order.
+        n : int or tuple[int, int]
+            Positive transform counts in (x, y) order; a scalar defines a square.
         inverse : bool or Array[bool]
             If true, apply the inverse Fourier transform. Boolean arrays select
             directions per leading field batch, including under JIT.
@@ -147,19 +121,68 @@ class FFT(BaseOperation):
         """
         if not isinstance(inverse, bool):
             inverse = np.asarray(inverse, dtype=bool)
-        self.n = as_size(n, name="n")
+        self.n = as_size(n, 2, "n")
         self.inverse = inverse
         self.centered = bool(centered)
 
         self.alias = alias
 
+    @classmethod
+    def prepare(
+        cls,
+        n_in,
+        n_fft=None,
+        *,
+        n_out=None,
+        input=None,
+        output=None,
+        inverse=False,
+        centered=True,
+    ) -> BaseLayer:
+        """Build one FFT or a series with optional resizing and phase factors.
+
+        Counts use (x, y) order. Input factors apply before padding; output
+        factors apply after cropping. Both are pairs of separable vectors.
+        Every resize preserves the centre, so counts must retain their parity.
+        """
+        # Resolve working counts and check factors, bounds and centre-preserving parity.
+        n_in = as_size(n_in, 2, "n_in")
+        n_fft = n_in if n_fft is None else as_size(n_fft, 2, "n_fft")
+        before = None if input is None else Chirp(input)
+        after = None if output is None else Chirp(output)
+        if n_out is None:
+            n_out = n_fft if after is None else after.n
+        n_out = as_size(n_out, 2, "n_out")
+        for counts in (n_in, n_out):
+            if any(size > limit for size, limit in zip(counts, n_fft)):
+                raise ValueError("Input and output counts may not exceed FFT counts.")
+        if before is not None and before.n != n_in:
+            raise ValueError("Input factors must match input counts.")
+        if after is not None and after.n != n_out:
+            raise ValueError("Output factors must match output counts.")
+        _check_parity(n_in, n_fft, "padding")
+        _check_parity(n_fft, n_out, "cropping")
+
+        # Assemble phase, resize and Fourier steps in their execution order.
+        steps = []
+        if before is not None:
+            steps.append(before)
+        if n_in != n_fft:
+            steps.append(Resize(n_fft))
+        steps.append(cls(n_fft, inverse=inverse, centered=centered))
+        if n_out != n_fft:
+            steps.append(Resize(n_out))
+        if after is not None:
+            steps.append(after)
+        return _series(*steps)
+
     @property
-    def n_in(self) -> tuple[int, ...]:
+    def n_in(self) -> tuple[int, int]:
         """Return input counts in physical-axis order."""
         return self.n
 
     @property
-    def n_out(self) -> tuple[int, ...]:
+    def n_out(self) -> tuple[int, int]:
         """Return transformed output counts in physical-axis order."""
         return self.n
 
@@ -177,23 +200,21 @@ class FFT(BaseOperation):
         """Transform final axes using resolved physical-order counts."""
         n, inverse, centered = self.n, self.inverse, self.centered
         field = np.asarray(field)
-        ndim = len(n)
-        if field.shape[-ndim:] != n[::-1]:
+        if field.shape[-2:] != n[::-1]:
             raise ValueError("field spatial shape must match n.")
 
-        axes = tuple(range(field.ndim - ndim, field.ndim))
+        axes = (-2, -1)
         if centered:
             field = np.fft.ifftshift(field, axes=axes)
 
         if isinstance(inverse, bool):
-            transform = np.fft.ifftn if inverse else np.fft.fftn
+            transform = np.fft.ifft2 if inverse else np.fft.fft2
             field = transform(field, axes=axes, norm="ortho")
         else:
             # For unitary transforms, IFFT(x) = conj(FFT(conj(x))). This keeps
             # one FFT when matrix values select different directions under JIT.
-            shape = inverse.shape + (1,) * (field.ndim - inverse.ndim)
-            inverse = inverse.reshape(shape)
+            inverse = inverse[..., None, None]
             field = np.where(inverse, np.conj(field), field)
-            field = np.fft.fftn(field, axes=axes, norm="ortho")
+            field = np.fft.fft2(field, axes=axes, norm="ortho")
             field = np.where(inverse, np.conj(field), field)
         return np.fft.fftshift(field, axes=axes) if centered else field

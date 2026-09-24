@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import jax.numpy as np
-from jax import Array, core, lax
-from .operations import BaseOperation
+from jax import Array, core
+from ..batching import broadcast_batch
+from ..sequential import BaseLayer
 
 __all__ = [
     "MFT",
@@ -32,56 +33,6 @@ def _per_axis(value, ndim, name):
     if len(value) != ndim:
         raise ValueError(f"{name} must contain {ndim} values.")
     return value
-
-
-def _prefix_matmul(left, right) -> Array:
-    """Multiply matrices whose leading batches align from the left."""
-    left = np.asarray(left)
-    right = np.asarray(right)
-    ndim = max(left.ndim, right.ndim) - 2
-    left_batch = left.shape[:-2] + (1,) * (ndim - left.ndim + 2)
-    right_batch = right.shape[:-2] + (1,) * (ndim - right.ndim + 2)
-    lax.broadcast_shapes(left_batch, right_batch)
-
-    left = left.reshape(left_batch + left.shape[-2:])
-    right = right.reshape(right_batch + right.shape[-2:])
-    return np.matmul(left, right)
-
-
-def _prefix_factor(kernel, factor, *, output) -> Array:
-    """Fuse a vector into one kernel using left-aligned prefix batches."""
-    kernel = np.asarray(kernel)
-    factor = np.asarray(factor)
-    if factor.ndim < 1:
-        raise ValueError("factors must have at least one dimension.")
-
-    size = kernel.shape[-2 if output else -1]
-    if factor.shape[-1] != size:
-        plane = "output" if output else "input"
-        raise ValueError(f"{plane} factor length must match the kernel {plane} size.")
-
-    ndim = max(kernel.ndim - 2, factor.ndim - 1)
-    kernel_batch = kernel.shape[:-2] + (1,) * (ndim - kernel.ndim + 2)
-    factor_batch = factor.shape[:-1] + (1,) * (ndim - factor.ndim + 1)
-    lax.broadcast_shapes(kernel_batch, factor_batch)
-
-    kernel = kernel.reshape(kernel_batch + kernel.shape[-2:])
-    factor = factor.reshape(factor_batch + factor.shape[-1:])
-    return factor[..., :, None] * kernel if output else kernel * factor[..., None, :]
-
-
-def _prefix_scale(kernel, factor) -> Array:
-    """Fuse a scalar factor into one kernel using left-aligned batches."""
-    kernel = np.asarray(kernel)
-    factor = np.asarray(factor)
-    ndim = max(kernel.ndim - 2, factor.ndim)
-    kernel_batch = kernel.shape[:-2] + (1,) * (ndim - kernel.ndim + 2)
-    factor_batch = factor.shape + (1,) * (ndim - factor.ndim)
-    lax.broadcast_shapes(kernel_batch, factor_batch)
-
-    kernel = kernel.reshape(kernel_batch + kernel.shape[-2:])
-    factor = factor.reshape(factor_batch + (1, 1))
-    return factor * kernel
 
 
 def mft_kernel(x_in, x_out, alpha, weight=1.0) -> Array:
@@ -140,6 +91,7 @@ def mft_kernels(axes_in, axes_out, alpha, weight=1.0) -> tuple[Array, ...]:
         Kernels in physical-axis order. Each ends in ``(n_out, n_in)`` and carries
         the broadcast prefix of its coordinates, coefficient, and weight.
     """
+    # Pair input and output axes, expanding shared kernel coefficients per axis.
     axes_in = _as_arrays(axes_in, "axes_in", 1)
     axes_out = _as_arrays(axes_out, "axes_out", 1)
     if len(axes_in) != len(axes_out):
@@ -180,6 +132,7 @@ def mft_phase_parameter(x_in, x_out, alpha, eps=1e-30) -> tuple[Array, Array]:
     p_in, p_out : Array
         Broadcast input and output phase-sampling margins.
     """
+    # Require a scalar tolerance and coordinate vectors long enough to infer spacing.
     eps = np.asarray(eps)
     if eps.ndim != 0 or np.issubdtype(eps.dtype, np.complexfloating):
         raise ValueError("eps must be a real scalar.")
@@ -195,6 +148,7 @@ def mft_phase_parameter(x_in, x_out, alpha, eps=1e-30) -> tuple[Array, Array]:
 
     alpha = np.asarray(alpha)
 
+    # Measure the largest phase step in each direction and convert to Nyquist margins.
     dx_in = np.abs(x_in[..., 1] - x_in[..., 0])
     dx_out = np.abs(x_out[..., 1] - x_out[..., 0])
     xmax_in = np.max(np.abs(x_in), axis=-1)
@@ -213,21 +167,20 @@ def mft_sampling_parameter(x_in, x_out, alpha, eps=1e-30) -> Array:
     return np.minimum(p_in, p_out)
 
 
-class MFT(BaseOperation):
-    """A prepared separable matrix Fourier transform.
+class MFT(BaseLayer):
+    """A prepared two-dimensional separable matrix Fourier transform.
 
-    Kernels follow physical ``(x, y, z, ...)`` order and each has shape
-    ``kernel_batch + (n_out, n_in)``. A kernel batch aligns with the same leading
-    prefix of the field, allowing wavelength-dependent kernels to act on fields whose
-    later leading axes contain polarisation or other independent structure. Kernel
-    arrays are the only leaves; sizes and field shapes are derived from them.
+    Kernels follow physical ``(x, y)`` order and each has shape
+    ``kernel_batch + (n_out, n_in)``. Kernel and field batches use ordinary JAX
+    broadcasting, including expansion through explicit singleton axes. Kernel arrays
+    are the only leaves; sizes and field shapes are derived from them. The final two
+    field axes are spatial; all preceding axes are numerical batches.
 
     Parameters
     ----------
-    kernels : Array or tuple[Array, ...]
-        A bare array defines a one-dimensional transform. A non-empty tuple defines
-        a separable transform in physical-axis order. Every kernel must end in
-        positive ``(n_out, n_in)`` dimensions.
+    kernels : tuple[Array, Array]
+        Two kernels in physical ``(x, y)`` order. Every kernel must end in positive
+        ``(n_out, n_in)`` dimensions.
 
     Examples
     --------
@@ -239,20 +192,22 @@ class MFT(BaseOperation):
     ```
     """
 
-    kernels: tuple[Array, ...]
+    kernels: tuple[Array, Array]
 
     def __init__(self, kernels, *, alias=None):
         """Initialise a prepared separable transform.
 
         Parameters
         ----------
-        kernels : Array or tuple[Array, ...]
-            One kernel per physical axis. Leading dimensions use the field-prefix
-            batching contract and final dimensions are ``(n_out, n_in)``.
+        kernels : tuple[Array, Array]
+            Two kernels in physical ``(x, y)`` order. Leading dimensions broadcast
+            with the field batch and final dimensions are ``(n_out, n_in)``.
         alias : mapping or sequence of pairs, optional
             Zodiax parameter aliases.
         """
         kernels = _as_arrays(kernels, "kernels", 2)
+        if len(kernels) != 2:
+            raise ValueError("kernels must contain two arrays in (x, y) order.")
         if any(0 in kernel.shape[-2:] for kernel in kernels):
             raise ValueError("kernel input and output dimensions must be positive.")
         self.kernels = kernels
@@ -266,100 +221,58 @@ class MFT(BaseOperation):
 
     @property
     def batch_shape(self) -> tuple[int, ...]:
-        """Broadcast preparation shape of the stored kernel prefixes."""
-        return np.broadcast_shapes(*(kernel.shape[:-2] for kernel in self.kernels))
+        """Return the ordinary broadcast shape of the kernel batches."""
+        batches = [kernel.shape[:-2] for kernel in self.kernels]
+        return np.broadcast_shapes(*batches)
 
     def broadcast(self, batch_shape) -> MFT:
-        """Align preparation batches to a common field prefix without copying.
-
-        Missing leading batch axes become singleton dimensions. Existing axes
-        must broadcast to ``batch_shape`` by ordinary JAX rules. Field application
-        then aligns this complete prefix from the left, before polarisation axes.
-        """
-        batch_shape = tuple(batch_shape)
-        kernels = []
-        for kernel in self.kernels:
-            if np.broadcast_shapes(kernel.shape[:-2], batch_shape) != batch_shape:
-                raise ValueError("kernel batches must broadcast to batch_shape.")
-            extra = len(batch_shape) - (kernel.ndim - 2)
-            kernels.append(kernel.reshape((1,) * extra + kernel.shape))
-        return MFT(tuple(kernels), alias=self.alias)
+        """Broadcast both kernels to an explicit leading batch shape."""
+        kernels = tuple(broadcast_batch(x, batch_shape, 2) for x in self.kernels)
+        return MFT(kernels, alias=self.alias)
 
     @property
-    def n_in(self) -> tuple[int, ...]:
+    def n_in(self) -> tuple[int, int]:
         """Return input counts in physical-axis order."""
         return tuple(kernel.shape[-1] for kernel in self.kernels)
 
     @property
-    def n_out(self) -> tuple[int, ...]:
+    def n_out(self) -> tuple[int, int]:
         """Return output counts in physical-axis order."""
         return tuple(kernel.shape[-2] for kernel in self.kernels)
 
     @property
-    def input_shape(self) -> tuple[int, ...]:
+    def input_shape(self) -> tuple[int, int]:
         """Return the final input field shape in array-axis order."""
         return self.n_in[::-1]
 
     @property
-    def output_shape(self) -> tuple[int, ...]:
+    def output_shape(self) -> tuple[int, int]:
         """Return the final output field shape in array-axis order."""
         return self.n_out[::-1]
 
     def apply(self, field, **context) -> Array:
         """Apply physical-order separable kernels to reversed final field axes.
 
-        Kernels end in (n_out, n_in). Their batch axes align with the existing
-        leading field prefix; they may not add field axes. Spatial rank is arbitrary.
+        Kernels end in (n_out, n_in); the field ends in (ny, nx). All leading
+        dimensions broadcast normally. For example, operator batch (B, 1) and
+        field batch (1, C) produce a (B, C) batch of transformed fields.
         """
-        kernels = tuple(self._squeeze_batch(k) for k in self.kernels)
-        ndim = len(kernels)
-        n_in = tuple(kernel.shape[-1] for kernel in kernels)
-        n_out = tuple(kernel.shape[-2] for kernel in kernels)
         field = np.asarray(field)
-        if field.ndim < ndim or field.shape[-ndim:] != n_in[::-1]:
+        if field.ndim < 2 or field.shape[-2:] != self.input_shape:
             raise ValueError("field spatial shape must match the MFT input shape.")
 
-        # Promote once because dot_general requires identical operand dtypes
-        dtype = np.result_type(field, *kernels)
+        dtype = np.result_type(field, *self.kernels)
         field = field.astype(dtype)
-        kernels = tuple(kernel.astype(dtype) for kernel in kernels)
+        kernel_x, kernel_y = (kernel.astype(dtype) for kernel in self.kernels)
+        kernel_x = np.swapaxes(kernel_x, -1, -2)
 
-        # Contract shrinking axes first and expanding axes last to minimise MACs
-        order = sorted(
-            range(ndim),
-            key=lambda i: 1 / n_in[i] - 1 / n_out[i],
-        )
-        wanted = list(range(ndim - 1, -1, -1))
-        labels = wanted.copy()
-        leading = field.ndim - ndim
-
-        for physical_axis in order:
-            # Pair kernel batches with the existing leading field prefix.
-            kernel = kernels[physical_axis]
-            batch_ndim = kernel.ndim - 2
-            if batch_ndim > leading:
-                raise ValueError("kernel batch rank exceeds the field leading rank.")
-
-            target = field.shape[:batch_ndim]
-            if lax.broadcast_shapes(target, kernel.shape[:-2]) != target:
-                raise ValueError("kernel batches may not expand the field prefix.")
-            kernel = np.broadcast_to(kernel, target + kernel.shape[-2:])
-
-            # Contract one physical axis and track its new array-axis position.
-            field_axis = leading + labels.index(physical_axis)
-            batch_axes = tuple(range(batch_ndim))
-            dimensions = (((field_axis,), (batch_ndim + 1,)), (batch_axes, batch_axes))
-            field = lax.dot_general(field, kernel, dimensions)
-
-            labels.remove(physical_axis)
-            labels.append(physical_axis)
-
-        # Restore reversed physical-axis order with at most one final transpose
-        permutation = list(range(leading))
-        permutation += [leading + labels.index(axis) for axis in wanted]
-        if permutation != list(range(field.ndim)):
-            field = field.transpose(permutation)
-        return field
+        # Evaluate Ky @ field @ Kx.T, contracting the smaller intermediate first.
+        # The static counts choose the order; matmul handles shared/paired batches.
+        nx_in, ny_in = self.n_in
+        nx_out, ny_out = self.n_out
+        if 1 / nx_in - 1 / nx_out <= 1 / ny_in - 1 / ny_out:
+            return kernel_y @ (field @ kernel_x)
+        return (kernel_y @ field) @ kernel_x
 
     def then(self, other) -> MFT:
         """Compose this transform with a compatible following MFT."""
@@ -368,23 +281,21 @@ class MFT(BaseOperation):
         if self.n_out != other.n_in:
             raise ValueError("this output counts must match other input counts.")
         kernels = tuple(
-            _prefix_matmul(second, first)
-            for first, second in zip(self.kernels, other.kernels)
+            second @ first for first, second in zip(self.kernels, other.kernels)
         )
         return MFT(kernels, alias=self.alias)
 
     def fuse_input(self, factors) -> MFT:
         """Return a transform with separable input factors fused into its kernels.
 
-        ``factors`` is a bare vector for a one-dimensional transform or a tuple in
-        physical-axis order. Each factor ends in the matching input count and its
-        batch aligns from the left with the corresponding kernel batch.
+        ``factors`` is a tuple in physical ``(x, y)`` order. Each factor ends in the
+        matching input count; its batch broadcasts with the kernel batch.
         """
         factors = _as_arrays(getattr(factors, "factors", factors), "factors", 1)
         if len(factors) != self.ndim:
             raise ValueError(f"factors must contain {self.ndim} arrays.")
         kernels = tuple(
-            _prefix_factor(kernel, factor, output=False)
+            self._fuse_factor(kernel, factor, output=False)
             for kernel, factor in zip(self.kernels, factors)
         )
         return MFT(kernels, alias=self.alias)
@@ -392,22 +303,22 @@ class MFT(BaseOperation):
     def fuse_output(self, factors) -> MFT:
         """Return a transform with separable output factors fused into its kernels.
 
-        ``factors`` is a bare vector for a one-dimensional transform or a tuple in
-        physical-axis order. Each factor ends in the matching output count and its
-        batch aligns from the left with the corresponding kernel batch.
+        ``factors`` is a tuple in physical ``(x, y)`` order. Each factor ends in the
+        matching output count; its batch broadcasts with the kernel batch.
         """
         factors = _as_arrays(getattr(factors, "factors", factors), "factors", 1)
         if len(factors) != self.ndim:
             raise ValueError(f"factors must contain {self.ndim} arrays.")
         kernels = tuple(
-            _prefix_factor(kernel, factor, output=True)
+            self._fuse_factor(kernel, factor, output=True)
             for kernel, factor in zip(self.kernels, factors)
         )
         return MFT(kernels, alias=self.alias)
 
     def fuse_scale(self, factor) -> MFT:
-        """Return a transform with one overall prefix-batched factor fused in."""
-        kernels = (_prefix_scale(self.kernels[0], factor), *self.kernels[1:])
+        """Return a transform with a broadcast overall scale fused into one kernel."""
+        factor = np.asarray(factor)
+        kernels = (self.kernels[0] * factor[..., None, None], *self.kernels[1:])
         return MFT(kernels, alias=self.alias)
 
     @classmethod
@@ -416,10 +327,10 @@ class MFT(BaseOperation):
 
         Parameters
         ----------
-        axes_in, axes_out : tuple[Array, ...]
-            Input and output coordinate vectors in physical-axis order. Each vector
-            ends in its sample count; leading dimensions broadcast during kernel
-            construction. Both tuples must contain the same number of axes.
+        axes_in, axes_out : tuple[Array, Array]
+            Input and output coordinate vectors in physical ``(x, y)`` order. Each
+            vector ends in its sample count; leading dimensions broadcast during
+            kernel construction. Both tuples must contain two axes.
         alpha : Array or tuple[Array, ...]
             Phase coefficient in ``exp(1j * alpha * x_out * x_in)``. A tuple sets
             one coefficient per axis; a shared scalar or array applies to all axes.
@@ -442,8 +353,8 @@ class MFT(BaseOperation):
 
         Parameters
         ----------
-        grid_in, grid_out : GridSpec
-            Complete grids with matching dimensionality and indexing='xy'. Their
+        grid_in, grid_out : Grid
+            Complete two-dimensional grids with indexing='xy'. Their
             axes supply SI-valued coordinate vectors in physical-axis order.
         alpha : Array or tuple[Array, ...]
             Coefficient of ``x_out * x_in`` in the complex exponential, with units
@@ -458,13 +369,20 @@ class MFT(BaseOperation):
         MFT
             Callable transform with coordinate phases and weights stored in kernels.
         """
-        if grid_in.indexing != "xy" or grid_out.indexing != "xy":
-            raise ValueError("MFT grids must use indexing='xy'.")
         return cls.from_axes(grid_in.axes, grid_out.axes, alpha, weight)
 
     @staticmethod
-    def _squeeze_batch(kernel):
-        """Remove trailing singleton prefix axes that inhibit shared GEMMs."""
-        while kernel.ndim > 2 and kernel.shape[-3] == 1:
-            kernel = np.squeeze(kernel, -3)
-        return kernel
+    def _fuse_factor(kernel, factor, *, output) -> Array:
+        """Fuse one sampled vector into a kernel with ordinary batch broadcasting."""
+        kernel = np.asarray(kernel)
+        factor = np.asarray(factor)
+        size = kernel.shape[-2 if output else -1]
+        if factor.shape[-1] != size:
+            plane = "output" if output else "input"
+            raise ValueError(
+                f"{plane} factor length must match the kernel {plane} size."
+            )
+
+        if output:
+            return factor[..., :, None] * kernel
+        return kernel * factor[..., None, :]

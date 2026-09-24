@@ -1,471 +1,358 @@
-"""Paraxial ABCD matrix objects, constructors, and diagnostics."""
+"""Parametric paraxial matrices and their ordered composition."""
 
 from __future__ import annotations
 
-from abc import abstractmethod
-from typing import Any
+from collections import OrderedDict
 
 import jax.numpy as np
 from jax import Array, core
-import numpy as onp
 import zodiax as zdx
 
-from ..helpers import list2dictionary
+from ..sequential import list2dictionary
 
-__all__ = [
-    "ABCD",
-    "ABCDElement",
-    "ABCDFreeSpace",
-    "ABCDLens",
-    "ABCDMirror",
-    "ABCDFraunhofer",
-    "ABCDChain",
-    "abcd_surface_power",
-    "abcd_lens",
-    "abcd_mirror",
-    "abcd_free_space",
-    "abcd_fraunhofer",
-    "compose_abcd",
-    "is_surface",
-    "is_free_space",
-    "abcd_effective_focal_length",
-    "abcd_paraxial_power",
-    "abcd_geometric_magnification",
-    "abcd_angular_magnification",
-    "abcd_distance",
-    "abcd_front_focal_length",
-    "abcd_back_focal_length",
-    "abcd_unimodularity",
-]
+__all__ = ["ABCD", "ABCDChain", "abcd_determinant", "abcd_is_unimodular"]
 
 
-def _validate_finite(value, name):
-    """Check concrete inputs in Python; traced values add no compiled checks."""
-    value = np.asarray(value)
-    if isinstance(value, core.Tracer):
+def abcd_determinant(matrix) -> Array:
+    """Return AD - BC for an array of matrices ending in (2, 2)."""
+    matrix = np.asarray(matrix)
+    a, b = matrix[..., 0, 0], matrix[..., 0, 1]
+    c, d = matrix[..., 1, 0], matrix[..., 1, 1]
+    return a * d - b * c
+
+
+def abcd_is_unimodular(matrix, tol=None) -> Array:
+    """Return a boolean per matrix whose determinant is within tol of one.
+
+    The default absolute tolerance is 100 machine epsilons for the matrix dtype,
+    matching ABCD's other classification methods. Integer matrices use float.
+    """
+    matrix = np.asarray(matrix)
+    if not np.issubdtype(matrix.dtype, np.inexact):
+        matrix = matrix.astype(float)
+    determinant = abcd_determinant(matrix)
+    return np.abs(determinant - 1) <= ABCD._tolerance(tol, matrix.dtype)
+
+
+def _validate_value(value, name, *, positive=False, nonzero=False):
+    """Check concrete parameters in Python, adding no compiled runtime checks."""
+    if isinstance(value, (zdx.Expression, core.Tracer)):
         return value
-    if not onp.all(onp.isfinite(onp.asarray(value))):
-        raise ValueError(f"{name} must contain finite values.")
+    value = np.asarray(value)
+    invalid = ~np.isfinite(value)
+    if positive:
+        invalid |= value <= 0
+    if nonzero:
+        invalid |= value == 0
+    invalid = np.any(invalid)
+    if not isinstance(invalid, core.Tracer) and invalid:
+        domain = "finite"
+        if positive:
+            domain += " and positive"
+        elif nonzero:
+            domain += " and non-zero"
+        raise ValueError(f"{name} must be {domain}.")
     return value
 
 
-def _validate_nonzero(value, name):
-    """Check finite non-zero values outside JAX tracing."""
-    value = np.asarray(value)
-    if isinstance(value, core.Tracer):
-        return value
-    concrete = onp.asarray(value)
-    if onp.any(~onp.isfinite(concrete) | (concrete == 0)):
-        raise ValueError(f"{name} must be finite and non-zero.")
-    return value
+class ABCD(zdx.Expression):
+    """A matrix supplied directly or generated from one physical parameter.
 
+    Resolve to a real array with shape (..., 2, 2). Physical parameters remain
+    editable leaves until resolution and may themselves be expressions. Distances,
+    focal lengths and mirror radii are in metres; power is in reciprocal metres.
+    Leading parameter dimensions batch independent matrices.
 
-def _validate_nonnegative(value, name):
-    """Check finite non-negative values outside JAX tracing."""
-    value = np.asarray(value)
-    if isinstance(value, core.Tracer):
-        return value
-    concrete = onp.asarray(value)
-    if onp.any(~onp.isfinite(concrete) | (concrete < 0)):
-        raise ValueError(f"{name} must contain finite non-negative values.")
-    return value
+    Supply exactly one definition. An unused field is None and is omitted from
+    the ordinary object representation. No derived matrix is cached alongside a
+    physical parameter. Diagnostics evaluate context-free definitions; for local
+    context, resolve first and inspect ABCD(matrix).
 
+    Examples
+    --------
+    ```python
+    import dLux.utils as dlu
 
-def _stack_matrix(a, b, c, d) -> Array:
-    """Stack broadcast coefficients into arrays ending in ``(2, 2)``."""
-    a, b, c, d = np.broadcast_arrays(a, b, c, d)
-    values = np.stack((a, b, c, d), axis=-1)
-    return values.reshape(a.shape + (2, 2))
-
-
-def _as_tolerance(tol, dtype) -> Array:
-    """Return a finite tolerance, defaulting to a dtype-aware numerical margin."""
-    if tol is None:
-        tol = 100 * np.finfo(dtype).eps
-    return _validate_nonnegative(np.asarray(tol, dtype=float), "tol")
-
-
-class ABCD(zdx.Module):
-    """A paraxial ray-transfer matrix stored as one direct array leaf.
-
-    Leading dimensions batch independent matrices. Construction validates real,
-    finite coefficients but deliberately does not require determinant one:
-    non-unimodular matrices may represent intentional scaling or numerical drift.
-    Physical LCT propagators apply their stricter unimodularity contract separately.
-
-    Parameters
-    ----------
-    matrix : ArrayLike or object
-        Real finite array ending in ``(2, 2)``, another :class:`ABCD`, or an object
-        exposing a matrix through ``matrix`` or ``abcd``. Leading dimensions may
-        batch matrices.
+    lens = dlu.ABCD(lens=0.5)
+    print(lens)                       # ABCD(lens=f32[])
+    matrix = lens.resolve()           # [[1, 0], [-2, 1]]
+    system = dlu.ABCDChain({"space": dlu.ABCD(free_space=0.2), "lens": lens})
+    matrix = system.resolve()
+    ```
     """
 
-    matrix: Array
+    matrix: Array | zdx.Expression | None = None
+    free_space: Array | zdx.Expression | None = None
+    lens: Array | zdx.Expression | None = None
+    power: Array | zdx.Expression | None = None
+    radius: Array | zdx.Expression | None = None
+    fraunhofer: Array | zdx.Expression | None = None
 
-    def __init__(self, matrix, *, alias=None):
-        """Initialise a ray-transfer matrix.
+    def __init__(
+        self,
+        matrix=None,
+        *,
+        free_space=None,
+        lens=None,
+        power=None,
+        radius=None,
+        fraunhofer=None,
+        alias=None,
+    ):
+        """Store one direct matrix or physical matrix definition.
 
         Parameters
         ----------
-        matrix : ArrayLike or object
-            Real finite array ending in shape ``(2, 2)``, another :class:`ABCD`, or
-            an object exposing a matrix through ``matrix`` or ``abcd``.
-            Unimodularity is not enforced.
+        matrix : Array or Expression, optional
+            Real array ending in (2, 2), or an expression producing one.
+        free_space : Array or Expression, optional
+            Signed translation distance in metres, including zero.
+        lens : Array or Expression, optional
+            Nonzero thin-lens focal length in metres.
+        power : Array or Expression, optional
+            Thin-surface optical power in reciprocal metres, including zero.
+        radius : Array or Expression, optional
+            Nonzero spherical-mirror radius in metres; its power is 2 / radius.
+        fraunhofer : Array or Expression, optional
+            Nonzero focal Fourier-transform scale in metres.
+        alias : mapping or sequence of pairs, optional
+            User-defined Zodiax parameter aliases.
         """
-        if isinstance(matrix, ABCD):
-            matrix = matrix.matrix
+        # Require exactly one matrix definition before storing physical parameters.
+        definitions = (matrix, free_space, lens, power, radius, fraunhofer)
+        if sum(value is not None for value in definitions) != 1:
+            raise ValueError("Supply exactly one ABCD matrix or physical definition.")
+
+        self.matrix = matrix
+        if matrix is not None and not isinstance(matrix, zdx.Expression):
+            self.matrix = ABCD.validate(matrix)
+        self.free_space = zdx.as_array(free_space, dtype=float)
+        self.lens = zdx.as_array(lens, dtype=float)
+        self.power = zdx.as_array(power, dtype=float)
+        self.radius = zdx.as_array(radius, dtype=float)
+        self.fraunhofer = zdx.as_array(fraunhofer, dtype=float)
+        self.alias = alias
+
+        # Check finite values and the nonzero scales used as divisors.
+        for name in ("free_space", "lens", "power", "radius", "fraunhofer"):
+            value = getattr(self, name)
+            if value is not None:
+                _validate_value(
+                    value, name, nonzero=name in ("lens", "radius", "fraunhofer")
+                )
+
+    @property
+    def a(self) -> Array:
+        """Upper-left coefficient of the realised matrix."""
+        return self.evaluate()[..., 0, 0]
+
+    @property
+    def b(self) -> Array:
+        """Upper-right coefficient of the realised matrix."""
+        return self.evaluate()[..., 0, 1]
+
+    @property
+    def c(self) -> Array:
+        """Lower-left coefficient of the realised matrix."""
+        return self.evaluate()[..., 1, 0]
+
+    @property
+    def d(self) -> Array:
+        """Lower-right coefficient of the realised matrix."""
+        return self.evaluate()[..., 1, 1]
+
+    @property
+    def determinant(self) -> Array:
+        """Return A D - B C for each matrix."""
+        return abcd_determinant(self.evaluate())
+
+    @property
+    def effective_focal_length(self) -> Array:
+        """Effective focal length -1 / C in metres."""
+        return -1 / self.c
+
+    @property
+    def paraxial_power(self) -> Array:
+        """Paraxial optical power -C in reciprocal metres."""
+        return -self.c
+
+    @property
+    def geometric_magnification(self) -> Array:
+        """Transverse geometric magnification A."""
+        return self.a
+
+    @property
+    def angular_magnification(self) -> Array:
+        """Angular magnification D."""
+        return self.d
+
+    @property
+    def distance(self) -> Array:
+        """Effective free-space distance B in metres."""
+        return self.b
+
+    @property
+    def front_focal_length(self) -> Array:
+        """Signed front focal length D / C in metres."""
+        matrix = self.evaluate()
+        return matrix[..., 1, 1] / matrix[..., 1, 0]
+
+    @property
+    def back_focal_length(self) -> Array:
+        """Signed back focal length -A / C in metres."""
+        matrix = self.evaluate()
+        return -matrix[..., 0, 0] / matrix[..., 1, 0]
+
+    def evaluate(self, **context) -> Array:
+        """Resolve the selected physical parameter and form its matrix."""
+        if self.matrix is not None:
+            matrix = zdx.resolve(self.matrix, **context)
+            return ABCD.validate(matrix)
+        if self.free_space is not None:
+            distance = zdx.resolve(self.free_space, **context)
+            return ABCD._stack(1, distance, 0, 1)
+        if self.fraunhofer is not None:
+            focal_length = zdx.resolve(self.fraunhofer, **context)
+            return ABCD._stack(0, focal_length, -1 / focal_length, 0)
+
+        # Lens and mirror definitions share the thin-surface power matrix.
+        if self.lens is not None:
+            power = 1 / zdx.resolve(self.lens, **context)
+        elif self.radius is not None:
+            power = 2 / zdx.resolve(self.radius, **context)
         else:
-            candidate = getattr(matrix, "matrix", None)
-            matrix = getattr(matrix, "abcd", matrix) if candidate is None else candidate
-            matrix = getattr(matrix, "matrix", matrix)
+            power = zdx.resolve(self.power, **context)
+        return ABCD._stack(1, 0, -power, 1)
+
+    def is_surface(self, tol=None) -> Array:
+        """Return where A=D=1 and B=0 within the supplied tolerance."""
+        matrix = self.evaluate()
+        tol = ABCD._tolerance(tol, matrix.dtype)
+        return (
+            (np.abs(matrix[..., 0, 0] - 1) <= tol)
+            & (np.abs(matrix[..., 0, 1]) <= tol)
+            & (np.abs(matrix[..., 1, 1] - 1) <= tol)
+        )
+
+    def is_free_space(self, tol=None) -> Array:
+        """Return where A=D=1, C=0 and the distance B is nonzero."""
+        matrix = self.evaluate()
+        tol = ABCD._tolerance(tol, matrix.dtype)
+        return (
+            (np.abs(matrix[..., 0, 0] - 1) <= tol)
+            & (np.abs(matrix[..., 0, 1]) > tol)
+            & (np.abs(matrix[..., 1, 0]) <= tol)
+            & (np.abs(matrix[..., 1, 1] - 1) <= tol)
+        )
+
+    def is_unimodular(self, tol=None) -> Array:
+        """Return where the determinant is one within tolerance."""
+        return abcd_is_unimodular(self.evaluate(), tol)
+
+    def inverse(self, **context) -> ABCD:
+        """Return the optical system traversed from its other end.
+
+        The longitudinal axis points along the reversed propagation direction.
+        For a unit determinant, this swaps A and D while retaining B and C.
+        Use ``np.linalg.inv(self.resolve(**context))`` for the matrix inverse.
+        """
+        matrix = self.evaluate(**context)
+        a, b = matrix[..., 0, 0], matrix[..., 0, 1]
+        c, d = matrix[..., 1, 0], matrix[..., 1, 1]
+        determinant = abcd_determinant(matrix)
+        determinant = _validate_value(determinant, "ABCD determinant", nonzero=True)
+        return ABCD(ABCD._stack(d, b, c, a) / determinant[..., None, None])
+
+    def then(self, other) -> ABCDChain:
+        """Retain both definitions in physical application order."""
+        return ABCDChain([self, other])
+
+    @classmethod
+    def identity(cls) -> ABCD:
+        """Construct a direct identity matrix."""
+        return cls(np.eye(2))
+
+    @staticmethod
+    def validate(matrix, *, unimodular=False) -> Array:
+        """Return a real float matrix with trailing shape (2, 2).
+
+        Concrete values must be finite. Set unimodular=True for physical LCT
+        propagation, requiring determinant one within the shared dtype tolerance.
+        Shape/type checks also work under JIT; value checks run only for concrete
+        inputs and add no compiled callbacks. Resolve Expressions before calling.
+        """
         matrix = np.asarray(matrix)
         if matrix.shape[-2:] != (2, 2):
             raise ValueError("matrix must end in shape (2, 2).")
         if np.issubdtype(matrix.dtype, np.complexfloating):
             raise ValueError("matrix must be real-valued.")
-        self.matrix = _validate_finite(matrix.astype(float), "matrix")
-        self.alias = alias
+        matrix = _validate_value(matrix.astype(float), "matrix")
 
-    @property
-    def a(self) -> Array:
-        """Return the upper-left matrix coefficient."""
-        return self.matrix[..., 0, 0]
+        # Arbitrary ABCD arrays are allowed; only physical propagation requires AD-BC=1.
+        if unimodular and not isinstance(matrix, core.Tracer):
+            invalid = ~np.all(abcd_is_unimodular(matrix))
+            if not isinstance(invalid, core.Tracer) and invalid:
+                raise ValueError(
+                    "ABCD must be finite and unimodular for physical LCT propagation."
+                )
+        return matrix
 
-    @property
-    def b(self) -> Array:
-        """Return the upper-right matrix coefficient."""
-        return self.matrix[..., 0, 1]
+    @staticmethod
+    def _stack(a, b, c, d) -> Array:
+        """Broadcast four coefficients into arrays ending in (2, 2)."""
+        a, b, c, d = np.broadcast_arrays(a, b, c, d)
+        return np.stack((a, b, c, d), axis=-1).reshape(a.shape + (2, 2))
 
-    @property
-    def c(self) -> Array:
-        """Return the lower-left matrix coefficient."""
-        return self.matrix[..., 1, 0]
-
-    @property
-    def d(self) -> Array:
-        """Return the lower-right matrix coefficient."""
-        return self.matrix[..., 1, 1]
-
-    @property
-    def determinant(self) -> Array:
-        """Return ``A D - B C`` for every matrix in the leading batch."""
-        return self.a * self.d - self.b * self.c
-
-    @property
-    def effective_focal_length(self) -> Array:
-        """Return effective focal length ``-1 / C`` in metres."""
-        return -1 / self.c
-
-    @property
-    def paraxial_power(self) -> Array:
-        """Return paraxial optical power ``-C`` in reciprocal metres."""
-        return -self.c
-
-    @property
-    def geometric_magnification(self) -> Array:
-        """Return transverse geometric magnification ``A``."""
-        return self.a
-
-    @property
-    def angular_magnification(self) -> Array:
-        """Return angular magnification ``D``."""
-        return self.d
-
-    @property
-    def distance(self) -> Array:
-        """Return effective free-space distance ``B`` in metres."""
-        return self.b
-
-    @property
-    def front_focal_length(self) -> Array:
-        """Return the signed front focal length ``D / C`` in metres."""
-        return self.d / self.c
-
-    @property
-    def back_focal_length(self) -> Array:
-        """Return the signed back focal length ``-A / C`` in metres."""
-        return -self.a / self.c
-
-    @classmethod
-    def identity(cls) -> ABCD:
-        """Construct the identity transform."""
-        return cls(np.eye(2))
-
-    @classmethod
-    def surface_power(cls, power) -> ABCD:
-        """Construct a thin surface with optical power ``power`` in ``1 / m``."""
-        power = np.asarray(power, dtype=float)
-        one = np.ones_like(power)
-        zero = np.zeros_like(power)
-        return cls(_stack_matrix(one, zero, -power, one))
-
-    @classmethod
-    def free_space(cls, distance) -> ABCD:
-        """Construct free-space propagation over ``distance`` metres."""
-        distance = np.asarray(distance, dtype=float)
-        one = np.ones_like(distance)
-        zero = np.zeros_like(distance)
-        return cls(_stack_matrix(one, distance, zero, one))
-
-    @classmethod
-    def lens(cls, focal_length) -> ABCD:
-        """Construct a thin lens with ``focal_length`` metres."""
-        focal_length = _validate_nonzero(
-            np.asarray(focal_length, dtype=float),
-            "focal_length",
-        )
-        return cls.surface_power(1 / focal_length)
-
-    @classmethod
-    def mirror(cls, radius) -> ABCD:
-        """Construct a spherical mirror with curvature radius ``radius`` metres."""
-        radius = _validate_nonzero(np.asarray(radius, dtype=float), "radius")
-        return cls.surface_power(2 / radius)
-
-    @classmethod
-    def fraunhofer(cls, focal_length) -> ABCD:
-        """Construct the focal Fourier transform of a thin lens."""
-        focal_length = _validate_nonzero(
-            np.asarray(focal_length, dtype=float),
-            "focal_length",
-        )
-        zero = np.zeros_like(focal_length)
-        return cls(_stack_matrix(zero, focal_length, -1 / focal_length, zero))
-
-    @classmethod
-    def compose(cls, matrices) -> ABCD:
-        """Compose an ordered sequence as ``M_n @ ... @ M_2 @ M_1``.
-
-        An empty sequence returns :meth:`identity`. Items may be :class:`ABCD`
-        objects or real arrays ending in ``(2, 2)``.
-        """
-        matrix = np.eye(2)
-        for item in matrices:
-            item = item if isinstance(item, ABCD) else cls(item)
-            matrix = item.matrix @ matrix
-        return cls(matrix)
-
-    def is_surface(self, tol=None) -> Array:
-        """Return where ``A=D=1`` and ``B=0`` within ``tol``."""
-        tol = _as_tolerance(tol, self.matrix.dtype)
-        return (
-            (np.abs(self.a - 1) <= tol)
-            & (np.abs(self.b) <= tol)
-            & (np.abs(self.d - 1) <= tol)
-        )
-
-    def is_free_space(self, tol=None) -> Array:
-        """Return where the matrix is non-zero-distance free space within ``tol``."""
-        tol = _as_tolerance(tol, self.matrix.dtype)
-        return (
-            (np.abs(self.a - 1) <= tol)
-            & (np.abs(self.b) > tol)
-            & (np.abs(self.c) <= tol)
-            & (np.abs(self.d - 1) <= tol)
-        )
-
-    def is_unimodular(self, tol=None) -> Array:
-        """Return where the determinant differs from one by no more than ``tol``."""
-        tol = _as_tolerance(tol, self.matrix.dtype)
-        return np.abs(self.determinant - 1) <= tol
-
-    def inverse(self) -> ABCD:
-        """Return the inverse ray-transfer matrix."""
-        determinant = _validate_nonzero(self.determinant, "ABCD determinant")
-        inverse = _stack_matrix(self.d, -self.b, -self.c, self.a)
-        return ABCD(inverse / determinant[..., None, None])
-
-    def then(self, other) -> ABCD:
-        """Return the physical composition that applies ``self`` then ``other``."""
-        other = other if isinstance(other, ABCD) else ABCD(other)
-        return ABCD(other.matrix @ self.matrix)
-
-
-class ABCDElement(zdx.Expression):
-    """Deferred definition of one paraxial ray-transfer matrix.
-
-    Element parameters may themselves be Zodiax expressions. Evaluation realises a
-    concrete :class:`ABCD` only at the consuming propagation boundary.
-    """
-
-    @abstractmethod
-    def evaluate(self, **context: Any) -> ABCD:
-        """Evaluate this element into a concrete ray-transfer matrix."""
-
-    @property
-    def abcd(self) -> Array:
-        """Return the context-free concrete matrix for compatibility."""
-        return self().matrix
-
-
-class ABCDFreeSpace(ABCDElement):
-    """Deferred free-space translation over a signed distance in metres."""
-
-    distance: Any
-
-    def __init__(self, distance, *, alias=None):
-        """Initialise a deferred free-space matrix definition."""
-        self.distance = zdx.as_array(distance, dtype=float)
-        self.alias = alias
-
-    def evaluate(self, **context: Any) -> ABCD:
-        """Resolve the distance and construct its free-space matrix."""
-        return ABCD.free_space(zdx.resolve(self.distance, **context))
-
-
-class ABCDLens(ABCDElement):
-    """Deferred ideal thin-lens definition with focal length in metres."""
-
-    focal_length: Any
-
-    def __init__(self, focal_length, *, alias=None):
-        """Initialise a deferred thin-lens matrix definition."""
-        self.focal_length = zdx.as_array(focal_length, dtype=float)
-        self.alias = alias
-
-    def evaluate(self, **context: Any) -> ABCD:
-        """Resolve the focal length and construct its thin-lens matrix."""
-        return ABCD.lens(zdx.resolve(self.focal_length, **context))
-
-
-class ABCDMirror(ABCDElement):
-    """Deferred spherical-mirror definition with radius in metres."""
-
-    radius: Any
-
-    def __init__(self, radius, *, alias=None):
-        """Initialise a deferred spherical-mirror matrix definition."""
-        self.radius = zdx.as_array(radius, dtype=float)
-        self.alias = alias
-
-    def evaluate(self, **context: Any) -> ABCD:
-        """Resolve the radius and construct its spherical-mirror matrix."""
-        return ABCD.mirror(zdx.resolve(self.radius, **context))
-
-
-class ABCDFraunhofer(ABCDElement):
-    """Deferred focal Fourier transform with focal length in metres."""
-
-    focal_length: Any
-
-    def __init__(self, focal_length, *, alias=None):
-        """Initialise a deferred focal Fourier matrix definition."""
-        self.focal_length = zdx.as_array(focal_length, dtype=float)
-        self.alias = alias
-
-    def evaluate(self, **context: Any) -> ABCD:
-        """Resolve the focal length and construct its focal Fourier matrix."""
-        return ABCD.fraunhofer(zdx.resolve(self.focal_length, **context))
+    @staticmethod
+    def _tolerance(tol, dtype):
+        """Use a dtype-aware tolerance unless the caller supplies one."""
+        if tol is None:
+            return 100 * np.finfo(dtype).eps
+        tol = np.asarray(tol, dtype=float)
+        _validate_value(tol, "tol")
+        invalid = np.any(tol < 0)
+        if not isinstance(invalid, core.Tracer) and invalid:
+            raise ValueError("tol must be non-negative.")
+        return tol
 
 
 class ABCDChain(zdx.Expression):
-    """Deferred ordered composition of concrete or expression ABCD definitions."""
+    """Named matrices resolved and multiplied in physical application order.
 
-    elements: dict[str, Any]
+    For elements [first, second], the result is second @ first. Arrays and matrix
+    expressions may be mixed; leading matrix dimensions broadcast normally.
+    """
+
+    elements: OrderedDict[str, Array | zdx.Expression]
 
     def __init__(self, elements, *, alias=None):
-        """Initialise a named ordered ABCD definition sequence."""
-        elements = (
+        """Store a nonempty mapping or sequence of optionally named matrices."""
+        entries = (
             list(elements.items()) if isinstance(elements, dict) else list(elements)
         )
-        self.elements = list2dictionary(
-            elements,
-            ordered=True,
-            allowed_types=(ABCD, zdx.Expression),
-        )
-        if not self.elements:
+        elements = list2dictionary(entries, ordered=True)
+        if not elements:
             raise ValueError("elements must contain at least one ABCD definition.")
+        for name, value in elements.items():
+            if not isinstance(value, zdx.Expression):
+                elements[name] = ABCD.validate(value)
+        self.elements = elements
         self.alias = alias
 
-    def evaluate(self, **context: Any) -> ABCD:
-        """Resolve and compose all elements in physical application order."""
-        elements = [
-            zdx.resolve(element, **context) for element in self.elements.values()
-        ]
-        return ABCD.compose(elements)
+    def evaluate(self, **context) -> Array:
+        """Resolve elements and accumulate M_n @ ... @ M_1."""
+        elements = zdx.resolve(self.elements, **context)
+        matrix = np.eye(2)
+        for element in elements.values():
+            matrix = element @ matrix
+        return matrix
 
-    @property
-    def abcd(self) -> Array:
-        """Return the context-free concrete composed matrix for compatibility."""
-        return self().matrix
+    def then(self, other) -> ABCDChain:
+        """Append a definition while retaining this named chain."""
+        elements = list(self.elements.items())
+        elements.append(other)
+        return ABCDChain(elements, alias=self.alias)
 
-
-def abcd_surface_power(power) -> Array:
-    """Return the matrix of a thin surface with power in reciprocal metres."""
-    return ABCD.surface_power(power).matrix
-
-
-def abcd_lens(focal_length) -> Array:
-    """Return the matrix of a thin lens with focal length in metres."""
-    return ABCD.lens(focal_length).matrix
-
-
-def abcd_mirror(radius) -> Array:
-    """Return the matrix of a spherical mirror with radius in metres."""
-    return ABCD.mirror(radius).matrix
-
-
-def abcd_free_space(distance) -> Array:
-    """Return the matrix of free-space propagation over a distance in metres."""
-    return ABCD.free_space(distance).matrix
-
-
-def abcd_fraunhofer(focal_length) -> Array:
-    """Return the matrix of a physical focal Fourier transform."""
-    return ABCD.fraunhofer(focal_length).matrix
-
-
-def compose_abcd(matrices) -> Array:
-    """Compose an ordered matrix sequence as ``M_n @ ... @ M_1``."""
-    return ABCD.compose(matrices).matrix
-
-
-def is_surface(matrix, tol=1e-8) -> Array:
-    """Return where a matrix is a same-plane thin powered surface."""
-    return ABCD(matrix).is_surface(tol)
-
-
-def is_free_space(matrix, tol=1e-8) -> Array:
-    """Return where a matrix is non-zero-distance free space."""
-    return ABCD(matrix).is_free_space(tol)
-
-
-def abcd_effective_focal_length(matrix) -> Array:
-    """Return effective focal length ``-1 / C`` in metres."""
-    return ABCD(matrix).effective_focal_length
-
-
-def abcd_paraxial_power(matrix) -> Array:
-    """Return paraxial optical power ``-C`` in reciprocal metres."""
-    return ABCD(matrix).paraxial_power
-
-
-def abcd_geometric_magnification(matrix) -> Array:
-    """Return transverse geometric magnification ``A``."""
-    return ABCD(matrix).geometric_magnification
-
-
-def abcd_angular_magnification(matrix) -> Array:
-    """Return angular magnification ``D``."""
-    return ABCD(matrix).angular_magnification
-
-
-def abcd_distance(matrix) -> Array:
-    """Return effective free-space distance ``B`` in metres."""
-    return ABCD(matrix).distance
-
-
-def abcd_front_focal_length(matrix) -> Array:
-    """Return signed front focal length ``D / C`` in metres."""
-    return ABCD(matrix).front_focal_length
-
-
-def abcd_back_focal_length(matrix) -> Array:
-    """Return signed back focal length ``-A / C`` in metres."""
-    return ABCD(matrix).back_focal_length
-
-
-def abcd_unimodularity(matrix) -> Array:
-    """Return the determinant ``A D - B C``."""
-    return ABCD(matrix).determinant
+    def inverse(self, **context) -> ABCD:
+        """Return this optical chain traversed from its other end."""
+        return ABCD(self.evaluate(**context)).inverse()

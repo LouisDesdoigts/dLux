@@ -1,14 +1,15 @@
 """Numerical propagators and callable array operations.
 
 Propagators accept (field, grid_in, wavelength), returning an array by default or
-(array, GridSpec) with grid_out=True. Array operations and Sequential are ordinary
-Zodiax Modules. Layers inherit the numerical classes and adapt Wavefront inputs.
+(array, Grid) with return_grid=True. Preparation returns one array operation or an
+unbound Series. Layers adapt the numerical classes to Wavefront inputs.
 """
 
-from ..helpers import reexport
-from ..sequential import Sequential
+from .. import reexport
+from ..sequential import Sequential, Series
 from . import abcd
-from .fft import FFT
+from .fft import FFT, fourier_shift
+from .asm import ASM
 from .mft import (
     MFT,
     mft_kernel,
@@ -16,7 +17,7 @@ from .mft import (
     mft_phase_parameter,
     mft_sampling_parameter,
 )
-from .operations import BaseOperation, Chirp, Resize
+from .operations import Chirp, Resize
 from .propagators import (
     BasePropagator,
     LCT,
@@ -29,11 +30,13 @@ from .propagators import (
 
 __all__ = [
     "abcd",
-    "BaseOperation",
+    "Series",
     "Resize",
     "Chirp",
     "MFT",
     "FFT",
+    "ASM",
+    "fourier_shift",
     "Sequential",
     "mft_kernel",
     "mft_kernels",
