@@ -1,79 +1,49 @@
-"""Public utility functions used across dLux modules."""
+"""Shared optical calculations, sampling grids, and numerical parameterisations.
 
-from .helpers import reexport
+Classes and array functions are available through ``import dLux.utils as dlu``.
+Released function interfaces and old module paths are retained through compat.
+FFT and MFT are numerical classes. Their released array-function interfaces live
+in ``utils.compat``.
+"""
 
-# Import as modules
-from . import (
-    coordinates,
-    helpers,
-    interpolation,
-    math,
-    optics,
-    units,
-    array_ops,
-    polynomials,
-    source,
-    geometry,
-    misc,
-    norms,
-    apertures,
-    fourier,
-    polarisation,
-    source_estimation,
-)
 
-_modules = (
-    coordinates,
-    helpers,
-    interpolation,
-    units,
-    optics,
-    math,
-    array_ops,
-    polynomials,
-    source,
-    geometry,
-    misc,
-    norms,
-    apertures,
-    fourier,
-    polarisation,
-    source_estimation,
-)
+def reexport(modules: tuple[object, ...], namespace: dict[str, object]) -> list[str]:
+    """Re-export the public symbols from a collection of modules."""
+    exported = []
+    seen = set()
+    for module in modules:
+        for name in getattr(module, "__all__", ()):
+            namespace[name] = getattr(module, name)
+            if name not in seen:
+                exported.append(name)
+                seen.add(name)
+    return exported
 
-_module_names = [
-    "coordinates",
-    "helpers",
-    "interpolation",
-    "math",
-    "optics",
-    "units",
+
+from . import batching, sequential
+from . import numerical, grids, bases, sampled
+from .grids import array_ops
+
+__all__ = [
+    "batching",
+    "sequential",
+    "sampled",
+    "numerical",
+    "grids",
+    "bases",
     "array_ops",
-    "polynomials",
-    "source",
-    "geometry",
-    "misc",
-    "norms",
-    "apertures",
-    "fourier",
-    "polarisation",
-    "source_estimation",
 ]
-__all__ = _module_names + reexport(_modules, globals())
+__all__ += reexport((batching, sequential, sampled, numerical, bases), globals())
+__all__ += reexport(grids._modules, globals())
 
-# Numerical objects depend on the already available array utilities.
-from . import grids, propagation, sequential
-from .propagation import _legacy
+from . import optical, propagation, astrometry, photometry
 
-__all__ += ["grids", "propagation"]
-__all__ += reexport((grids, propagation, sequential), globals())
+__all__ += ["optical", "propagation", "astrometry", "photometry"]
+__all__ += reexport((optical, propagation, astrometry, photometry), globals())
 
-# Parametric expressions build on the array utilities and sampling grids above.
-from . import parametrics
+# Compatibility owns the released import paths and functional conveniences.
+from .compat.registration import register
 
-__all__ += ["parametrics"] + reexport((parametrics,), globals())
-
-# Preserve the released array-call interfaces at the utility root. Prepared
-# FFT/MFT objects are available explicitly in dlu.propagation.
-__all__ += reexport((_legacy,), globals())
+__all__ += register(globals())
 __all__ = list(dict.fromkeys(__all__))
+del register

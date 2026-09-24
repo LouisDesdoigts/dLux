@@ -1,50 +1,41 @@
-"""Public package interface for dLux."""
+"""Public package interface for dLux.
+
+Utility classes and functions are available directly here or through ``dLux.utils``.
+Current APIs take precedence over released compatibility constructors.
+"""
 
 import importlib.metadata
-from .utils import grids, parametrics
-from .utils.propagation import abcd as _abcd
-from .utils.helpers import reexport
-from .utils import propagation as _propagation
-from .utils import sequential as _sequential
+from . import utils, prebuilt
+from . import fields, layers, systems, compat
+from .systems import sources as sources
 
 __version__ = importlib.metadata.version("dLux")
 
-from . import (
-    fields,
-    layers,
-    systems,
-    sources,
-    prebuilt,
-    compatibility,
-)
-
-_modules = (
-    _abcd,
-    _sequential,
-    parametrics,
-    layers,
-    systems,
-    sources,
-    fields,
-    grids,
-    prebuilt,
-    compatibility,
-)
-
-_module_names = [
-    "propagation",
-    "parametrics",
-    "layers",
+# Export utilities first so current core implementations take precedence over
+# duplicate helpers retained by the utility compatibility facade.
+_modules = (utils, layers, systems, prebuilt, fields)
+__all__ = [
     "utils",
+    "prebuilt",
+    "fields",
+    "layers",
     "systems",
     "sources",
-    "fields",
-    "grids",
-    "prebuilt",
-    "compatibility",
+    "compat",
 ]
-__all__ = _module_names + reexport(_modules, globals())
+__all__ += utils.reexport(_modules, globals())
 
-# Keep the numerical facade distinct from the layers' propagation module export.
-propagation = _propagation
-del _propagation
+# Keep module names unambiguous: optical utilities live here, optical layers in
+# layers.optical, and the released coordinates import path retains its adapter.
+optical = utils.optical
+coordinates = compat.coordinates
+__all__ = list(dict.fromkeys(__all__))
+
+from .compat.registration import register_modules, legacy_attribute
+
+register_modules()
+__all__ += [name for name in compat.__all__ if name not in __all__]
+
+
+def __getattr__(name):
+    return legacy_attribute(name, compat, __name__)

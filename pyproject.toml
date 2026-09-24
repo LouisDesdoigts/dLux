@@ -25,15 +25,17 @@ keywords = [
     "telescope", 
     "dLux"
 ]
-dependencies = ["zodiax>=0.5", "abcdLux>=0.0.2", "interpax"]
+dependencies = ["zodiax>=0.6.0", "interpax"]
 
 [project.optional-dependencies]
 tests = [
+    "abcdLux>=0.0.2", # Independent propagation reference used only by tests.
     "pytest",
     "pytest-cov",
 ]
 
 dev = [
+    "abcdLux>=0.0.2",
     "pytest",
     "pytest-cov",
     "black",
@@ -65,7 +67,7 @@ lines-after-imports = 2
 testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers"]
 markers = [
-    "slow: tests excluded from the default fast development loop",
+    "slow: slower checks; exclude with -m 'not slow' for a fast development run",
 ]
 
 [tool.coverage.run]

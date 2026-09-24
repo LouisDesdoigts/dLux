@@ -11,7 +11,7 @@ def make_grid():
     """Return a factory for small two-dimensional coordinate specifications."""
 
     def factory(n=8, d=0.1, c=0.0, unit="m"):
-        return dl.GridSpec(n=n, d=d, c=c, unit=unit).broadcast(2)
+        return dl.Grid(n=n, d=d, c=c, unit=unit)
 
     return factory
 
@@ -27,8 +27,7 @@ def make_wavefront(make_grid):
         polarised=False,
     ):
         grid = make_grid() if grid is None else grid
-        wavefront = dl.PolarisedWavefront if polarised else dl.Wavefront
-        return wavefront(wavelength, grid, phasor)
+        return dl.Wavefront(wavelength, grid, phasor, jones=True if polarised else None)
 
     return factory
 
