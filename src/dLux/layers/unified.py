@@ -50,6 +50,8 @@ class ResizeLayer(UnifiedLayer):
         ----------
         npixels : int or tuple[int, ...]
             Output sizes in physical-axis order.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.npixels = dlu.as_size(npixels, name="npixels")
 
@@ -82,6 +84,8 @@ class DownsampleLayer(UnifiedLayer):
         ----------
         n : int or tuple[int, ...]
             Downsampling factors in physical-axis order.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.n = dlu.as_size(n, name="n")
 
@@ -114,6 +118,8 @@ class FlipLayer(UnifiedLayer):
         ----------
         axes : int or tuple[int, ...]
             Array axes to reverse.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.axes = axes
         axes = self.axes if isinstance(self.axes, tuple) else (self.axes,)
@@ -166,6 +172,8 @@ class InterpolateLayer(UnifiedLayer):
             Interpolate complex values through their complex representation.
         fill : float, Array, zodiax.Expression, or None
             Outside value, resolved from the target context. None extrapolates.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if not isinstance(transformation, dlu.BaseCoordTransform):
             raise TypeError("transformation must be a BaseCoordTransform.")
@@ -219,6 +227,8 @@ class NormaliseLayer(UnifiedLayer):
             Normalise the total power or maximum intensity.
         value : float, Array, or zodiax.Expression
             Target normalisation value.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.mode = str(mode)
         self.value = zdx.as_array(value, dtype=float)

@@ -31,6 +31,19 @@ class Wavefront(dlu.Field):
     ``array``, ``field`` and ``phasor`` expose this stored coherent factor; call
     ``materialise()`` for the complete spatial Jones field. Intensity and Stokes
     calculations always include the uniform matrix without expanding it spatially.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Create unit-power samples and propagate to an angular image grid.
+    pupil = dl.Grid(8, diam=1.0, unit="m")
+    wavefront = dl.Wavefront(600e-9, pupil)
+    focused = wavefront.propagate(dl.Propagator(dl.Grid(8, d=0.1, unit="arcsec")))
+    print(focused)
+    psf = focused.to_psf()
+    ```
     """
 
     # Inherited fields
@@ -73,6 +86,16 @@ class Wavefront(dlu.Field):
             ``(*batch, 2, 2)``. Leading axes broadcast against the field batches.
             For a field shaped (S, W, ny, nx), wavelength-only matrices use
             (W, 2, 2), while source-only matrices use (S, 1, 2, 2).
+        npixels : int or None
+            Deprecated square-grid sample count; prefer Grid(n=...).
+        diameter : float or None
+            Deprecated pupil extent in metres; prefer Grid(diam=..., unit="m").
+        pixel_scale : float or None
+            Deprecated spatial spacing in metres; prefer Grid(d=..., unit="m").
+        center : ArrayLike or None
+            Deprecated physical (x, y) centre; prefer Grid(c=...).
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Released sampling arguments construct this same grid-based field.
         if not isinstance(grid, dlu.Grid) or any(

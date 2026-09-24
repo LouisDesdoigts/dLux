@@ -233,14 +233,6 @@ class ResizeSpec(Spec):
     resize = dl.ResizeSpec(n=96)
     resized = resize.resize(array)
     ```
-
-    Parameters
-    ----------
-    n : int, tuple[int, int], or None
-        Explicit output sizes in physical-axis order. Mutually exclusive with
-        non-unit ``pad`` or ``crop``.
-    pad, crop : int or tuple[int, int]
-        Integer factors applied before and after an operation.
     """
 
     n: tuple[int, int] | None = None
@@ -395,17 +387,6 @@ class FFTSpec(ResizeSpec):
     coordinate, not an integer pixel offset. Padding and cropping preserve parity
     and sample positions; the propagator evaluates a shifted Fourier window using
     a phase ramp when a centre is supplied.
-
-    Parameters
-    ----------
-    n : int, tuple[int, int], or None
-        Explicit FFT working and output counts. Mutually exclusive with non-unit
-        ``pad`` or ``crop``.
-    pad, crop : int or tuple[int, int]
-        Integer working-size and output-crop factors.
-    c : ArrayLike, Expression, or None
-        Optional final output centre in the consuming propagator's natural SI
-        coordinate.
     """
 
     # Inherited fields
@@ -416,7 +397,25 @@ class FFTSpec(ResizeSpec):
     c: Array | zdx.Expression | None = None
 
     def __init__(self, n=None, pad=1, crop=1, c=None, *, alias=None):
-        """Initialise FFT counts and an optional physical output centre."""
+        """Initialise FFT counts and an optional physical output centre.
+
+        Parameters
+        ----------
+        n : int or sequence of ints or None
+            Static sample counts in physical-axis order. A scalar repeats on all
+            axes; None leaves counts unspecified.
+        pad : int or pair of ints
+            Positive integer working-size multiplier in physical (x, y) order;
+            default one.
+        crop : int or pair of ints
+            Positive integer output-size divisor in physical (x, y) order; default
+            one.
+        c : ArrayLike or Expression or None
+            Requested Fourier output-window centre in its output-grid unit. None
+            leaves the native centre; offsets may be fractional.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         super().__init__(n=n, pad=pad, crop=crop, alias=alias)
         self.c = zdx.as_array(c, dtype=float)
 

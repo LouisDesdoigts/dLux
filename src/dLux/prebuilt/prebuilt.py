@@ -31,6 +31,18 @@ class ZernikeDef(Def, dlu.Unitful):
     Modes are dimensionless, optionally clipped and normalised on a support.
     Coefficients carry the amplitude in ``unit``. The unit conversion is applied
     after contraction, keeping sampled modes well-scaled for coefficient solves.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Supplying a grid samples the modes once and creates editable coefficients.
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    definition = dl.ZernikeDef([4, 5, 6], diameter=1.0, unit="nm")
+    basis = definition(grid)
+    print(basis)
+    ```
     """
 
     # Inherited fields
@@ -74,6 +86,49 @@ class ZernikeDef(Def, dlu.Unitful):
         ``n_sides=0`` selects circular modes; values at least three select polygons.
         ``norm`` optionally selects l1, l2, max, rms or p2v mode normalisation.
         Omitted coefficients start at zero; ``empty=True`` instead retains None.
+
+        Parameters
+        ----------
+        nolls : sequence of ints or None
+            One-based Noll indices. Supply exactly one of nolls, order or orders.
+        order : int or None
+            Maximum radial order, including lower orders; alternative to nolls and
+            orders.
+        orders : sequence of ints or None
+            Selected radial orders; alternative to nolls and order.
+        coeffs : Array or Expression or None
+            Expansion coefficients with the mode axis last. None creates editable
+            zeros unless empty=True.
+        diameter : ArrayLike or Expression or None
+            Aperture diameter in SI coordinate units; None uses 2.0 during
+            evaluation.
+        n_sides : int
+            Zero selects circular modes; values of at least three select the
+            polygonal mapping.
+        oversize : ArrayLike or Expression
+            Fractional diameter enlargement; zero leaves diameter unchanged.
+        norm : str or None
+            Optional per-mode support normalisation: l1, l2, max, rms or p2v. None
+            retains standard mode amplitudes.
+        method : str
+            Radial mode evaluation strategy: padded (default) or mapped.
+        empty : bool
+            Retain coeffs=None instead of allocating zeros when true; false by
+            default.
+        unit : str or None
+            Output coefficient unit, for example nm. Conversion is applied after
+            mode contraction; coordinates have their own grid unit.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        support : Array or Expression or None
+            Optional mode-support mask on the evaluation grid. None uses the natural
+            aperture support.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.nolls = tuple(dlu.Zernike.indices(nolls, order, orders))
         self.coeffs = dlu.initialise_coeffs(coeffs, (len(self.nolls),), empty=empty)

@@ -31,6 +31,25 @@ class OpticalSystem(Sequential):
     source modelling. Both return arrays by default; ``return_psf=True`` retains
     sampling and ``return_wf=True`` returns the complex field. Calling the system
     on an existing Wavefront still applies its layers in order.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    # A named layer sequence retains the established propagation interface.
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    system = dl.OpticalSystem({
+        "pupil": dl.Optic(transmission=dl.Circle(1.0), normalise=True),
+        "focus": dl.Propagator(dl.Grid(8, d=0.1, unit="arcsec")),
+    }, grid)
+    mono = system.propagate_mono(600e-9)
+    psf = system.propagate(np.array([550e-9, 650e-9]), return_psf=True)
+    image = system.model(dl.PointSource(flux=1000, spectrum=dl.Spectrum(
+        bandpass=dl.BandPass(range=(550, 650), n=2, unit="nm"))))
+    print(psf)
+    ```
     """
 
     # Inherited fields
@@ -39,7 +58,19 @@ class OpticalSystem(Sequential):
     grid: dlu.Grid | None = None
 
     def __init__(self, layers=(), grid=None, *, alias=None):
-        """Store layers and entrance grid; grid is optional for Wavefront input."""
+        """Store layers and entrance grid; grid is optional for Wavefront input.
+
+        Parameters
+        ----------
+        layers : mapping or sequence
+            Optical layers, numerical propagators or nested named sequences in
+            propagation order.
+        grid : Grid or None
+            Entrance sampling for propagate/model. May be omitted when applying the
+            system to an existing Wavefront.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         super().__init__(layers, (OpticalLayer, dlu.BasePropagator), alias=alias)
         if grid is not None and not isinstance(grid, dlu.Grid):
             raise TypeError("grid must be a Grid.")

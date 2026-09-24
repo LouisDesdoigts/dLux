@@ -156,17 +156,6 @@ class Distortion(BaseCoordTransform):
     powers = transform.powers
     coeffs = transform.distortion
     ```
-
-    Parameters
-    ----------
-    order : int or None
-        Maximum total polynomial order.
-    distortion : Array, Expression, or None
-        Distortion coefficients with trailing shape matching ``powers``.
-    orders : sequence[int] or None
-        Explicit total polynomial orders, mutually exclusive with ``order``.
-    powers : Array or None
-        Non-negative integer powers with shape ``(2, n_terms)``.
     """
 
     powers: Array
@@ -193,6 +182,8 @@ class Distortion(BaseCoordTransform):
             Selected positive total orders. Use (2, 3) to omit linear terms.
         powers : Array or None
             Explicit exponents with shape ``(2, n_terms)``.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if sum(value is not None for value in (order, orders, powers)) > 1:
             raise ValueError("Provide only one of order, orders, or powers.")
@@ -247,13 +238,6 @@ class AffineMap(BaseCoordTransform):
     Matrix, offset, and coordinate leading dimensions use paired JAX broadcasting.
     This is the low-level direct representation; use `Affine` for semantic
     translation, rotation, scale, and shear parameters.
-
-    Parameters
-    ----------
-    matrix : Array, Expression, or None
-        Matrix with trailing shape ``(2, 2)``. Defaults to identity.
-    offset : Array, Expression, or None
-        Offset with trailing shape ``(2,)``. Defaults to zero.
     """
 
     matrix: Array | zdx.Expression
@@ -268,6 +252,8 @@ class AffineMap(BaseCoordTransform):
             Matrix with trailing shape ``(2, 2)``; defaults to identity.
         offset : Array, Expression, or None
             Translation with trailing shape ``(2,)``; defaults to zero.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         matrix = np.eye(2) if matrix is None else zdx.as_array(matrix, dtype=float)
         offset = np.zeros(2) if offset is None else zdx.as_array(offset, dtype=float)
@@ -322,19 +308,6 @@ class Affine(BaseCoordTransform):
     # Access the equivalent affine matrix and offset
     matrix, offset = transform.coeffs
     ```
-
-    Parameters
-    ----------
-    translation : ArrayLike, Expression, or None
-        Two-dimensional physical translation.
-    rotation : ArrayLike, Expression, or None
-        Counter-clockwise coordinate rotation in radians; any leading batch shape.
-    scale : ArrayLike, Expression, or None
-        Scalar or two-dimensional coordinate scale.
-    shear : ArrayLike, Expression, or None
-        Two-dimensional shear coefficients.
-    order : tuple[str, ...]
-        Order in which the supplied transformations are composed.
     """
 
     translation: Array | zdx.Expression | None = None
@@ -368,6 +341,8 @@ class Affine(BaseCoordTransform):
         order : tuple[str, ...]
             Unique composition order drawn from translation, rotation, scale, and
             shear.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.translation = self._vector(translation, "translation")
         self.rotation = zdx.as_array(rotation, dtype=float)

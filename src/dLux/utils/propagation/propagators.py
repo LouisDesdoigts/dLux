@@ -57,7 +57,13 @@ class BasePropagator(zdx.Module):
     """
 
     def __init__(self, *, alias=None):
-        """Store optional Zodiax parameter-path aliases."""
+        """Store optional Zodiax parameter-path aliases.
+
+        Parameters
+        ----------
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.alias = alias
 
     def __call__(self, field, grid_in, wavelength, *, return_grid=False, **context):
@@ -445,6 +451,19 @@ class FFTPropagator(Propagator):
     input sampling, and the physical transform. A custom ABCD completely determines
     the propagation, including its Fourier sign; ``inverse`` has no effect. This
     also works for traced matrices and batches with different signs of B.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    relay = dl.FFTPropagator(dl.FFTSpec(pad=2))
+    output, grid_out = relay(np.ones((8, 8), dtype=complex), grid, 600e-9,
+                             return_grid=True)
+    print(grid_out)
+    ```
     """
 
     _sampling: ClassVar[type] = FFTSpec
@@ -638,13 +657,18 @@ class FreeSpace(BasePropagator):
     Use :class:`Propagator` with a free-space ABCD matrix for direct propagation
     onto an arbitrary Cartesian output grid.
 
-    Parameters
-    ----------
-    distance : ArrayLike
-        Signed free-space distance in metres.
-    resize : ResizeSpec or None
-        FFT working and output topology. ``None`` uses a unit
-        :class:`~dLux.utils.grids.ResizeSpec`.
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    grid = dl.Grid(8, d=10e-6, unit="m")
+    relay = dl.FreeSpace(distance=0.01)
+    operation = relay.prepare(grid, 600e-9)
+    output = operation(np.ones((8, 8), dtype=complex))
+    print(output.shape)
+    ```
     """
 
     distance: Any
@@ -715,16 +739,6 @@ class SpectralPropagator(LCT):
     A defocused Fourier-relay matrix describes Fresnel propagation. Its
     A=-defocus/f term vanishes at exact focus: use the direct focal transform there.
     Different finite intermediate grids need not produce identical discretised fields.
-
-    Parameters
-    ----------
-    abcd : ABCD, ArrayLike, or Expression
-        Unimodular paraxial ray-transfer matrix. The spectral form also requires
-        non-zero ``A``.
-    grid_freq : Grid or FFTSpec
-        Explicit or native intermediate spatial-frequency sampling.
-    grid_out : Grid
-        Explicit physical output sampling.
     """
 
     abcd: Any

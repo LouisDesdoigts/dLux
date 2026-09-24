@@ -35,6 +35,18 @@ class Flux(zdx.Module):
     unit: str = "photons"
 
     def __init__(self, value=1.0, unit="photons", *, alias=None):
+        """Store an integrated incident photon count.
+
+        Parameters
+        ----------
+        value : ArrayLike or Expression
+            Integrated incident photon count, scalar or component array; default
+            one.
+        unit : str
+            Only photons is supported. Other physical flux units are not converted.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if unit != "photons":
             raise ValueError(
                 f"Only flux unit 'photons' is supported; received {unit!r}."
@@ -70,6 +82,15 @@ class ContrastFlux(zdx.Expression):
     The numerical result may represent relative brightness. A normalised Source
     interprets it as incident photons in the calculation's BandPass, before
     filter and QE losses.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    flux = dl.ContrastFlux(primary=1000, contrast=[-1, -2])
+    print(flux.resolve())  # Primary first, followed by the companion counts.
+    ```
     """
 
     primary: Array | zdx.Expression
@@ -77,6 +98,21 @@ class ContrastFlux(zdx.Expression):
     log: bool = True
 
     def __init__(self, primary=1.0, contrast=None, *, log=True, alias=None):
+        """Store primary brightness and relative companion contrasts.
+
+        Parameters
+        ----------
+        primary : ArrayLike or Expression
+            Primary brightness, default one; output starts with this value.
+        contrast : ArrayLike or Expression or None
+            Scalar or companion vector of log10(companion/primary); None gives one
+            equal-brightness companion.
+        log : bool
+            True (default) uses logarithmic contrasts; false uses linear
+            companion/primary ratios.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.log = bool(log)
         if contrast is None:
             contrast = 0.0 if self.log else 1.0

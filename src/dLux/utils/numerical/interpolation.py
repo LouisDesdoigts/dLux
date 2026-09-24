@@ -47,6 +47,21 @@ class Interp(zdx.Expression):
 
     Interpolation only calculates sample values. It does not normalise arrays,
     conserve flux, or compensate for coordinate stretching.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    # Bind samples, then query points or an output grid.
+    grid = dl.Grid(8, diam=1.0)
+    values = dl.Gaussian(std=0.2, grid=grid).resolve()
+    operation = dl.Interp(values, grid, dl.Grid(12, diam=1.0), fill=0)
+    print(operation)
+    resampled = operation.resolve()
+    points = operation.sample((np.array([0.0, 0.1]), np.array([0.0, 0.1])))
+    ```
     """
 
     array: Array | zdx.Expression | None = None
@@ -89,6 +104,43 @@ class Interp(zdx.Expression):
         ``fill=None`` extrapolates outside the source. A supplied value fills
         outside instead, including zero, complex values or NaN. Queries are never
         snapped to the knot endpoints.
+
+        Parameters
+        ----------
+        array : Array or Expression or None
+            Source values with trailing sampled axes; preceding dimensions are
+            batches. None supplies them at application.
+        grid_in : UnitSpec, Array, tuple of Arrays or None
+            Source sampling, with at least two increasing knots per axis. Tuples are
+            in physical (x, y, z) order; None uses centred unit pixels.
+        grid_out : UnitSpec or None
+            Destination for apply/resolve; omitted counts match the source. None
+            lets explicit apply use source coordinates.
+        ndim : int
+            Number of trailing sampled axes: 1, 2 (default), or 3.
+        method : str
+            Interpolation method; cubic2 is the default C2 spline. Linear connects
+            adjacent samples with straight segments.
+        rotation : ArrayLike or Expression or None
+            2D coordinate rotation in radians. Positive values rotate the sampled
+            object clockwise.
+        scale : ArrayLike or Expression or None
+            2D coordinate scale, scalar or (x, y). Mutually exclusive with
+            transform.
+        shift : ArrayLike or Expression or None
+            2D physical (x, y) displacement in coordinate units. Mutually exclusive
+            with transform.
+        transform : BaseCoordTransform or None
+            Explicit 2D coordinate map; mutually exclusive with rotation, scale and
+            shift.
+        complex : bool
+            True interpolates real/imaginary parts; false interpolates
+            amplitude/phase. Real arrays use one value channel.
+        fill : ArrayLike or Expression or None
+            Value outside source support; None (default) extrapolates without
+            changing query points.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if ndim not in (1, 2, 3):
             raise ValueError("ndim must be 1, 2 or 3.")

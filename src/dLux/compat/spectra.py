@@ -47,6 +47,17 @@ class Spectrum(_IntegratedSpectrum):
     weights: Array
 
     def __init__(self, wavelengths, weights=None):
+        """Store released relative sample weights and emit a deprecation warning.
+
+        Parameters
+        ----------
+        wavelengths : ArrayLike
+            Non-empty wavelength vector in metres. These identify discrete samples,
+            not density integration bins.
+        weights : ArrayLike or None
+            Relative counts with wavelength last. None gives equal weights; each
+            leading spectrum is normalised to unit sum at construction.
+        """
         warn_deprecated(
             "compat.Spectrum(wavelengths, weights)",
             "dlu.Spectrum",
@@ -77,6 +88,17 @@ class PolySpectrum(_IntegratedSpectrum):
     coefficients: Array
 
     def __init__(self, wavelengths, coefficients):
+        """Store the released polynomial convention and emit a deprecation warning.
+
+        Parameters
+        ----------
+        wavelengths : ArrayLike
+            Non-empty wavelength vector in metres for the discrete relative counts.
+        coefficients : ArrayLike
+            One-dimensional polynomial coefficients in ascending degree order,
+            including the constant term. Evaluation uses metre wavelengths directly;
+            resulting weights are normalised to unit sum.
+        """
         warn_deprecated(
             "compat.PolySpectrum",
             "dlu.PolySpectrum",

@@ -347,6 +347,15 @@ class InvertibleShape(Shape):
             Return the complementary transmission when true.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         if edge is not None and not isinstance(edge, Soft):
             edge = Soft(edge)
@@ -464,6 +473,15 @@ class Circle(InvertibleShape):
             Return the complementary transmission when true.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         super().__init__(
             edge, invert, grid=grid, transform=transform, strict=strict, alias=alias
@@ -525,6 +543,15 @@ class Square(InvertibleShape):
             Return the complementary transmission when true.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         super().__init__(
             edge, invert, grid=grid, transform=transform, strict=strict, alias=alias
@@ -588,6 +615,15 @@ class Rectangle(InvertibleShape):
             Return the complementary transmission when true.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         super().__init__(
             edge, invert, grid=grid, transform=transform, strict=strict, alias=alias
@@ -656,6 +692,15 @@ class RegularPolygon(InvertibleShape):
             Return the complementary transmission when true.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         super().__init__(
             edge, invert, grid=grid, transform=transform, strict=strict, alias=alias
@@ -726,6 +771,15 @@ class ConvexPolygon(InvertibleShape):
             Return the complementary transmission when true.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         super().__init__(
             edge, invert, grid=grid, transform=transform, strict=strict, alias=alias
@@ -801,6 +855,15 @@ class Spider(InvertibleShape):
             Return the complementary transmission when true.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         super().__init__(
             edge, invert, grid=grid, transform=transform, strict=strict, alias=alias
@@ -845,6 +908,15 @@ class Complement(Shape):
             Shape whose evaluated transmission is inverted.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         if not isinstance(shape, Shape):
             raise TypeError("shape must be a Shape.")

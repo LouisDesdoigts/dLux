@@ -30,6 +30,19 @@ class Zernike(Sampled):
     ``n_sides=0`` selects the circular definition; values at least three select
     the polygonal (Polike) mapping. Support and normalisation apply to each mode,
     while coefficient amplitudes and units belong to the containing Basis.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Keep mode geometry separate from fitted OPD coefficients.
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    modes = dl.Zernike([4, 5, 6], diameter=1.0)
+    opd = dl.Basis(modes, coeffs=[10.0, 0.0, 0.0], unit="nm")
+    print(opd.resolve(grid=grid).shape)
+    print(dl.Zernike.names[4])
+    ```
     """
 
     # Inherited fields
@@ -119,6 +132,47 @@ class Zernike(Sampled):
         ``method`` chooses padded or equal-width mapped radial groups. Geometry,
         support and transform may contain Expressions. Centres have a fixed shape
         ``(n_apertures, 2)``; their values remain differentiable.
+
+        Parameters
+        ----------
+        nolls : sequence of ints or None
+            One-based Noll indices. Supply exactly one of nolls, order or orders.
+        order : int or None
+            Maximum radial order, including lower orders; alternative to nolls and
+            orders.
+        orders : sequence of ints or None
+            Selected radial orders; alternative to nolls and order.
+        diameter : ArrayLike or Expression or None
+            Aperture diameter in SI coordinate units; None uses 2.0 during
+            evaluation.
+        n_sides : int
+            Zero selects circular modes; values of at least three select the
+            polygonal mapping.
+        oversize : ArrayLike or Expression
+            Fractional diameter enlargement; zero leaves diameter unchanged.
+        norm : str or None
+            Optional per-mode support normalisation: l1, l2, max, rms or p2v. None
+            retains standard mode amplitudes.
+        method : str
+            Radial evaluation strategy: padded (default) or mapped. Polynomial
+            factors are prepared at construction; mode arrays are not.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        support : Array or Expression or None
+            Optional mode-support mask on the evaluation grid. None uses the natural
+            aperture support.
+        centers : Array or None
+            Aperture centres shaped (A, 2) in SI coordinate units; adds an aperture
+            axis before the modes.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Precompute radial groups and remember how to restore the requested mode order.
         selected = self.indices(nolls, order, orders)

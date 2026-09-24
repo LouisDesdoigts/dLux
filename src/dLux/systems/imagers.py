@@ -279,6 +279,26 @@ class Imager(zdx.Module):
     lists and Scenes add incoherently; named model-input dictionaries select independent
     outputs. Entrance normalisation is conditional on the aperture; later optical,
     filter and detector losses retain their scale.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    imager = dl.Imager(
+        dl.Grid(8, diam=1.0, unit="m"), dl.Grid(8, d=0.1, unit="arcsec"),
+        dl.Optic(transmission=dl.Circle(1.0), normalise=True),
+        source=dl.PointSource(flux=1000),
+        bandpass=dl.BandPass(range=(550, 650), n=2, unit="nm"),
+    )
+    # Inspect the same model at optical, photometric and detector stages.
+    psf = imager.psf()
+    weights = imager.photometry()
+    intensity = imager.intensity()
+    print(imager.model())
+    # Override one input for a single calculation.
+    companion_image = imager.model(source=dl.PointSource(position=[0.2, 0], flux=100))
+    ```
     """
 
     pupil_grid: dlu.Grid
@@ -582,6 +602,33 @@ class Imager(zdx.Module):
         A Source contributes its positions only. Lists and Scenes retain their
         structure; named source/filter/bandpass dictionaries select independent
         outputs. Other keyword inputs follow ``model``'s override contract.
+
+        Parameters
+        ----------
+        source : Source, Scene, list, mapping or None
+            Replacement illumination. None uses the stored source. Lists and Scenes
+            add contributions at the intensity stage; dictionaries select named outputs.
+        bandpass : BandPass, Array or None
+            Replacement optical sampling. A BandPass provides integration edges;
+            wavelength arrays in metres support only wavefront and PSF calculations.
+            None uses stored sampling or the source spectrum's native sampling.
+        pupil : OpticalLayer, Sequential or None
+            Replacement grid-preserving pupil, optionally beginning with SparseOptic.
+        optics : OpticalLayer, Sequential or None
+            Alternative spelling of pupil; do not supply both.
+        **kwargs
+            Optional model replacements: pupil (or optics), pupil_grid, image_grid,
+            detector, filter, jitter and oversample. None retains stored values.
+            Spectrum replaces a single source's spectrum. Additional context supplies
+            inputs for deferred expressions. Named source/filter/bandpass dictionaries
+            pair matching keys; they never form a Cartesian product.
+
+        Returns
+        -------
+        Wavefront or collection
+            Unweighted fields with source axes before wavelength axes and trailing
+            spatial axes. Explicit Jones axes precede the spatial axes. Source lists
+            and Scenes retain their structure; named channels return dictionaries.
         """
         return self._run(
             "wavefront", source, bandpass=bandpass, pupil=pupil, optics=optics, **kwargs
@@ -602,6 +649,35 @@ class Imager(zdx.Module):
         The BandPass centres set optical wavelengths. Spectra, fluxes, filters,
         resolved profiles, jitter and detector
         response do not change this result. Sampling remains optically oversampled.
+
+        Parameters
+        ----------
+        source : Source, Scene, list, mapping or None
+            Replacement illumination. None uses the stored source. Lists and Scenes
+            add contributions at the intensity stage; dictionaries select named outputs.
+        bandpass : BandPass, Array or None
+            Replacement optical sampling. A BandPass provides integration edges;
+            wavelength arrays in metres support only wavefront and PSF calculations.
+            None uses stored sampling or the source spectrum's native sampling.
+        pupil : OpticalLayer, Sequential or None
+            Replacement grid-preserving pupil, optionally beginning with SparseOptic.
+        optics : OpticalLayer, Sequential or None
+            Alternative spelling of pupil; do not supply both.
+        stokes : Array or None
+            Input [I, Q, U, V]; None means unpolarised unit input.
+        **kwargs
+            Optional model replacements: pupil (or optics), pupil_grid, image_grid,
+            detector, filter, jitter and oversample. None retains stored values.
+            Spectrum replaces a single source's spectrum. Additional context supplies
+            inputs for deferred expressions. Named source/filter/bandpass dictionaries
+            pair matching keys; they never form a Cartesian product.
+
+        Returns
+        -------
+        PSF or collection
+            Unweighted real point responses shaped (C, L, ny, nx), retaining optical
+            oversampling. Source lists/Scenes retain their structure; named channels
+            return dictionaries. No spectral weighting or detector operation is applied.
         """
         return self._run(
             "psf",
@@ -619,6 +695,31 @@ class Imager(zdx.Module):
         Each Weights value has shape (source, wavelength). Incident brightness,
         filter transmission and detector QE enter once here. Lists and Scenes keep
         their structure, so their different spectra remain independently inspectable.
+
+        Parameters
+        ----------
+        source : Source, Scene, list, mapping or None
+            Replacement illumination. None uses the stored source. Lists and Scenes
+            add contributions at the intensity stage; dictionaries select named outputs.
+        bandpass : BandPass, Array or None
+            Replacement optical sampling. A BandPass provides integration edges;
+            wavelength arrays in metres support only wavefront and PSF calculations.
+            None uses stored sampling or the source spectrum's native sampling.
+        filter : Filter, Array, Expression, mapping or None
+            Replacement absolute response; None retains the stored filter.
+        **kwargs
+            Optional model replacements: pupil (or optics), pupil_grid, image_grid,
+            detector, filter, jitter and oversample. None retains stored values.
+            Spectrum replaces a single source's spectrum. Additional context supplies
+            inputs for deferred expressions. Named source/filter/bandpass dictionaries
+            pair matching keys; they never form a Cartesian product.
+
+        Returns
+        -------
+        Weights or collection
+            Integrated counts shaped (C, L), including source flux, filter and QE.
+            Requires a BandPass. Source collections retain their structure; no optical
+            propagation is performed.
         """
         return self._run(
             "photometry", source, bandpass=bandpass, filter=filter, **kwargs
@@ -632,6 +733,33 @@ class Imager(zdx.Module):
         Source contributions add incoherently. Resolved morphology, optional
         complex field resampling and image jitter are included, but pixel
         integration, detector layers, gain and noise belong to ``image``.
+
+        Parameters
+        ----------
+        source : Source, Scene, list, mapping or None
+            Replacement illumination. None uses the stored source. Lists and Scenes
+            add contributions at the intensity stage; dictionaries select named outputs.
+        bandpass : BandPass, Array or None
+            Replacement optical sampling. A BandPass provides integration edges;
+            wavelength arrays in metres support only wavefront and PSF calculations.
+            None uses stored sampling or the source spectrum's native sampling.
+        optics : OpticalLayer, Sequential or None
+            Alternative spelling of pupil; do not supply both.
+        filter : Filter, Array, Expression, mapping or None
+            Replacement absolute response; None retains the stored filter.
+        **kwargs
+            Optional model replacements: pupil (or optics), pupil_grid, image_grid,
+            detector, filter, jitter and oversample. None retains stored values.
+            Spectrum replaces a single source's spectrum. Additional context supplies
+            inputs for deferred expressions. Named source/filter/bandpass dictionaries
+            pair matching keys; they never form a Cartesian product.
+
+        Returns
+        -------
+        Intensity or dict
+            Fine expected photoelectrons after summing source contributions, resolved
+            profiles and image blur. Detector layers, pixel integration, gain and
+            noise are not yet applied.
         """
         return self._run(
             "intensity",
@@ -643,11 +771,55 @@ class Imager(zdx.Module):
         )
 
     def image(self, source=None, *, bandpass=None, filter=None, **kwargs):
-        """Return the expected detector Image from the same staged calculation."""
+        """Return the expected detector Image from the same staged calculation.
+
+        Parameters
+        ----------
+        source : Source, Scene, list, mapping or None
+            Replacement illumination. None uses the stored source. Lists and Scenes
+            add contributions at the intensity stage; dictionaries select named outputs.
+        bandpass : BandPass, Array or None
+            Replacement optical sampling. A BandPass provides integration edges;
+            wavelength arrays in metres support only wavefront and PSF calculations.
+            None uses stored sampling or the source spectrum's native sampling.
+        filter : Filter, Array, Expression, mapping or None
+            Replacement absolute response; None retains the stored filter.
+        **kwargs
+            Optional model replacements: pupil (or optics), pupil_grid, image_grid,
+            detector, filter, jitter and oversample. None retains stored values.
+            Spectrum replaces a single source's spectrum. Additional context supplies
+            inputs for deferred expressions. Named source/filter/bandpass dictionaries
+            pair matching keys; they never form a Cartesian product.
+
+        Returns
+        -------
+        Image or dict
+            Expected detector samples after response layers, pixel integration and
+            gain. No random noise is drawn. Named channels return a dictionary.
+        """
         return self._run("image", source, bandpass=bandpass, filter=filter, **kwargs)
 
     def simulate(self, key, source=None, *, n_frames=1, **kwargs):
-        """Draw photon counts, read noise and gain after summing source intensities."""
+        """Draw photon counts, read noise and gain after summing source intensities.
+
+        Parameters
+        ----------
+        key : jax.Array
+            JAX random key; separate keys are derived for channels and frames.
+        source : Source, Scene, list, mapping or None
+            Replacement illumination, or None to retain the stored source.
+        n_frames : int
+            Positive number of independent frames to average; defaults to one.
+        **kwargs
+            Modelling overrides accepted by model, including BandPass, filter,
+            pupil, image sampling and Detector. None retains stored values.
+
+        Returns
+        -------
+        Image or dict[str, Image]
+            Mean of simulated detector frames, after photon noise, read noise and gain.
+            The input model and its expected intensity are unchanged.
+        """
         return self._run("image", source, key=key, n_frames=n_frames, **kwargs)
 
     def model(
@@ -673,6 +845,40 @@ class Imager(zdx.Module):
         outputs. Matching names pair, scalar inputs are shared, and missing entries
         use stored defaults. There is no Cartesian product between dictionaries.
         Overrides apply to an immutable copy before shared links are populated.
+
+        Parameters
+        ----------
+        source : Source, Scene, list, mapping or None
+            Replacement illumination. None uses the stored source; lists and Scenes
+            add intensities, while mappings select separate named outputs.
+        bandpass : BandPass or None
+            Optical bin centres and integration edges. None uses the stored bandpass
+            or source spectrum's BandPass. Bare wavelengths cannot define photometry.
+        filter : Filter, Array, Expression, mapping or None
+            Replacement absolute transmission, without renormalising losses.
+        pupil, optics : OpticalLayer, Sequential or None
+            Replacement pupil, using either spelling. Must preserve the pupil grid;
+            a SparseOptic may appear first. Do not supply both arguments.
+        pupil_grid, image_grid : Grid or None
+            Replacement complete pupil and native image sampling. Pupil units are
+            lengths; image units may be angles or lengths with a physical relay.
+        detector : Detector or None
+            Replacement QE, spatial response, sampling and readout definition.
+        jitter : Array, Expression or None
+            Replacement centred image-blur kernel on the native pixel scale.
+        oversample : int, pair of ints or None
+            Optical subpixel factors; integration returns to native image pixels.
+        stokes : Array or None
+            Input [I, Q, U, V]; None uses unpolarised unit input.
+        **context
+            Inputs required by deferred expressions. A spectrum override replaces
+            one source's spectrum; named input maps are matched by key.
+
+        Returns
+        -------
+        Image or dict[str, Image]
+            Expected detector samples. No random noise is drawn; use simulate for
+            Poisson counts and read noise. The stored model is unchanged.
         """
         return self._run(
             "image",
@@ -1011,6 +1217,23 @@ class Coronagraph(Imager):
     The focal mask is the identity outside ``focal_grid``. Spatially resolved
     source kernels are unsupported; explicit point-source components are allowed.
     All photometric, detector and image methods are inherited from Imager.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    pupil_grid = dl.Grid(8, diam=1.0, unit="m")
+    focal_grid = dl.Grid(8, d=0.05, unit="arcsec")
+    coronagraph = dl.Coronagraph(
+        pupil_grid, focal_grid, dl.Grid(8, d=0.1, unit="arcsec"),
+        pupil=dl.Optic(transmission=dl.Circle(1.0), normalise=True),
+        focal=dl.Optic(transmission=dl.Complement(dl.Circle(1e-7))),
+        lyot=dl.Optic(transmission=dl.Circle(0.9)),
+        source=dl.PointSource(), bandpass=dl.BandPass(600, unit="nm"),
+    )
+    print(coronagraph.psf())
+    ```
     """
 
     # Inherited fields
@@ -1050,6 +1273,44 @@ class Coronagraph(Imager):
         ``pupil`` and ``lyot`` preserve pupil sampling. ``focal``
         preserves its compact focal grid. Both propagators must use explicit MFT
         grids. Remaining inputs have the same meaning as in Imager.
+
+        Parameters
+        ----------
+        pupil_grid : Grid
+            Complete physical entrance-pupil sampling, with length units.
+        focal_grid : Grid
+            Complete sampling of the compact focal-plane mask.
+        image_grid : Grid
+            Native detector-pixel sampling. Angular units define an angular relay;
+            length units need a pupil focal_length or ABCD matrix.
+        pupil : OpticalLayer, Sequential or None
+            Local entrance-pupil operations. None transmits the initial field;
+            Imager owns subsequent propagation.
+        focal : OpticalLayer or Sequential
+            Required local focal-mask operation preserving focal_grid sampling.
+        lyot : OpticalLayer, Sequential or None
+            Optional local Lyot-plane operation on the pupil sampling; no separate
+            Lyot grid is needed.
+        source : Source, Scene, list, mapping or None
+            Stored illumination. Lists and Scenes add incoherently; mappings select
+            named outputs. None defers selection to modelling.
+        filter : Filter, Array, Expression or None
+            Absolute spectral transmission. None is unity; numerical values are
+            promoted to Filter.
+        bandpass : BandPass, Axis, Array or None
+            Native spectral sampling; raw wavelength vectors use metres. None
+            evaluates an analytic shape directly on requested wavelengths.
+        detector : Detector or None
+            Spatial response, pixel integration, spectral QE and readout settings.
+            None uses deterministic unit-gain detection.
+        jitter : Array, Expression or None
+            Centred unit-sum image-blur kernel. None applies no blur; pixel-valued
+            widths refer to native image pixels.
+        oversample : int or pair of ints
+            Positive subpixel factors in physical (x, y) order; one uses the
+            requested pixels directly.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         super().__init__(
             pupil_grid,
@@ -1127,6 +1388,20 @@ class Interferometer(Imager):
     copies at its aperture centres, where source tilt includes the relative piston.
     The MFT combines these fields coherently; inherited Imager methods then handle
     source photometry, resolved profiles and detector operations.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    aperture = dl.SparseOptic(centers=[[-0.2, 0], [0.2, 0]],
+                              transmission=dl.Circle(0.2), normalise=True)
+    interferometer = dl.Interferometer(
+        dl.Grid(8, diam=0.25, unit="m"), dl.Grid(8, d=0.1, unit="arcsec"), aperture,
+        source=dl.PointSource(), bandpass=dl.BandPass(600, unit="nm"),
+    )
+    print(interferometer.psf())
+    ```
     """
 
     # Inherited fields
@@ -1164,6 +1439,41 @@ class Interferometer(Imager):
         ``propagator`` optionally supplies a custom MFT relay; its output sampling
         follows grid_out and the Imager's oversampling factor. None derives the
         usual imaging MFT from the output grid and pupil focal length.
+
+        Parameters
+        ----------
+        grid_in : Grid
+            Complete physical grid sampling each local aperture patch.
+        grid_out : Grid
+            Common image grid on which propagated aperture fields are summed
+            coherently.
+        aperture : SparseOptic
+            Local aperture transmission/OPD and global aperture centres.
+        focal_plane : OpticalLayer, Sequential or None
+            Optional local operation after coherent combination on the output grid.
+        propagator : Propagator, SpectralPropagator or None
+            Optional forward MFT relay matching grid_out; None derives it from the
+            aperture and output grid.
+        source : Source, Scene, list, mapping or None
+            Stored illumination. Lists and Scenes add incoherently; mappings select
+            named outputs. None defers selection to modelling.
+        filter : Filter, Array, Expression or None
+            Absolute spectral transmission. None is unity; numerical values are
+            promoted to Filter.
+        bandpass : BandPass, Axis, Array or None
+            Native spectral sampling; raw wavelength vectors use metres. None
+            evaluates an analytic shape directly on requested wavelengths.
+        detector : Detector or None
+            Spatial response, pixel integration, spectral QE and readout settings.
+            None uses deterministic unit-gain detection.
+        jitter : Array, Expression or None
+            Centred unit-sum image-blur kernel. None applies no blur; pixel-valued
+            widths refer to native image pixels.
+        oversample : int or pair of ints
+            Positive subpixel factors in physical (x, y) order; one uses the
+            requested pixels directly.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.relay = (
             None if propagator is None else _focal_propagator(grid_out, propagator)

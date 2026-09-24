@@ -413,6 +413,16 @@ class JonesChain(Series, BaseJones):
     Calling it with a matrix applies the chain to that input. An empty chain is
     identity. Stored responses may be expressions
     or already-resolved arrays with shape (..., 2, 2), broadcasting leading axes.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    chain = dl.JonesChain({"polariser": dl.Jones.LinearPolariser(),
+                           "plate": dl.Jones.HalfWavePlate(angle=0.2)})
+    print(chain.resolve())
+    ```
     """
 
     # Inherited fields

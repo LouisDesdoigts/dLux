@@ -20,12 +20,17 @@ class PSF(intensity.Intensity):
     an optical system owns spectral integration because only it can determine
     whether the realised spatial grids are compatible.
 
-    Parameters
-    ----------
-    data : Array
-        Real point-response values with shape ``(..., ny, nx)``.
-    grid : Grid
-        Continuous spatial sampling matched to the final array axes.
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # A PSF is an unweighted optical response; flux enters the intensity.
+    wavefront = dl.Wavefront(600e-9, dl.Grid(8, diam=1.0, unit="m"))
+    psf = wavefront.to_psf()
+    signal = psf.to_intensity(flux=1000)
+    print(signal)
+    ```
     """
 
     # Inherited fields
@@ -59,6 +64,11 @@ class PSF(intensity.Intensity):
         positions : Array or None
             Radian positions shaped (components, 2), in response-array order.
             Source brightness and spectral weights are not stored on a PSF.
+        pixel_scale : float or None
+            Deprecated scalar image spacing used by compatibility construction.
+            Prefer an explicit Grid.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if not isinstance(grid, dlu.Grid) or pixel_scale is not None:
             from ..compat.sampling import psf_sampling

@@ -23,58 +23,18 @@ class Intensity(dlu.Field):
     counts, or another deterministic detector-domain signal. Their interpretation
     is set by the preceding model rather than enforced by this container.
 
-    Parameters
-    ----------
-    data : Array
-        Real sampled values with shape ``(..., ny, nx)``. Leading axes are preserved
-        as vectorisation axes.
-    grid : Grid
-        Spatial sampling whose physical ``(x, y)`` sizes must match the final array
-        axes in reversed ``(nx, ny)`` order.
-
     Examples
     --------
-    Construct an intensity and apply deterministic detector transformations:
-
     ```python
+    import dLux as dl
     import jax.numpy as np
 
-    import dLux as dl
-    import dLux.utils as dlu
-
-    # Construct deterministic intensity data on a detector grid
-    grid = dl.Grid(n=64, d=10, unit="um")
-    data = dlu.gaussian(std=8, npixels=(64, 64), extent=32)
-    intensity = dl.Intensity(data=data, grid=grid)
-
-    # Apply individual detector layers
-    intensity = dl.Jitter(0.5)(intensity)
-    intensity = dl.SensitivityLayer(response=0.8)(intensity)
-    intensity = dl.BiasLayer(bias=5.0)(intensity)
-
-    # Apply common deterministic field operations
-    intensity = intensity.normalise(value=1e5)
-    intensity = intensity.rotate(np.deg2rad(5))
-    intensity = intensity.downsample(2)
-    ```
-
-    Convert a propagated wavefront into an intensity:
-
-    ```python
-    import dLux as dl
-    import dLux.utils as dlu
-
-    # Construct and propagate a wavefront
-    pupil_grid = dl.Grid(n=128, diam=1.0, unit="m")
-    focal_grid = dl.Grid(n=64, d=10, unit="mas")
-    wavefront = dl.Wavefront(wavelength=650e-9, grid=pupil_grid)
-
-    optic = dl.SimpleCircular(diameter=1.0)(pupil_grid)
-    propagator = dl.PropagatorLayer(focal_grid)
-    wavefront = propagator(optic(wavefront))
-
-    # Convert the wavefront into deterministic intensity
-    intensity = wavefront.to_intensity()
+    # Apply a response to expected counts, then produce detector pixels.
+    grid = dl.Grid(8, d=0.1, unit="arcsec")
+    signal = dl.Intensity(np.ones((8, 8)) * 10, grid)
+    signal = dl.SensitivityLayer(response=0.8)(signal)
+    image = dl.Detector(downsample=2)(signal)
+    print(image)
     ```
     """
 
@@ -92,6 +52,8 @@ class Intensity(dlu.Field):
             Real values with shape ``(..., ny, nx)``. Leading axes are retained.
         grid : Grid
             Spatial grid matched against the final ``(ny, nx)`` array axes.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.array = zdx.as_array(data, dtype=float)
         if self.data.ndim < 2:

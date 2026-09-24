@@ -145,6 +145,28 @@ class SparseOptic(Optic):
             with its own output grid; its sparse pupil must leave grid_out unset.
         alias : mapping or sequence of pairs, optional
             User-defined Zodiax parameter aliases.
+        amplitude : Array or Expression or None
+            Real amplitude multiplier broadcast over the spatial samples. None is
+            unity.
+        jones : None
+            Local Jones terms are not supported by SparseOptic; apply a separate
+            Optic to the field.
+        thickness : Array or Expression or None
+            Material thickness in metres. Applied with n as excess optical path (n -
+            1) * thickness.
+        n : Array or Expression or None
+            Dimensionless material index, paired with thickness.
+        focal_length : Array or Expression or None
+            Relay focal length in metres. Required to connect physical pupil and
+            focal-plane lengths without a custom ABCD matrix.
+        defocus : Array or Expression or None
+            Axial displacement of the output plane in metres; None means zero.
+        abcd : Array or Expression or None
+            Custom canonical matrix with shape (..., 2, 2), defining relay scale and
+            direction.
+        inverse : bool or None
+            Use inverse propagation for true. Forward is the default; a custom ABCD
+            matrix sets this to None.
         """
         # Check centres and keep definitions dynamic until their local frame is known.
         centers = zdx.as_array(centers, dtype=float)

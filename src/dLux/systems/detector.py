@@ -26,7 +26,16 @@ class DetectorSystem(dlu.Sequential):
     layers: OrderedDict
 
     def __init__(self, layers=(), *, alias=None):
-        """Store named detector layers or nested compatible sequences."""
+        """Store named detector layers or nested compatible sequences.
+
+        Parameters
+        ----------
+        layers : mapping or sequence
+            Detector layers, optionally named, applied to expected Intensity in
+            order.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         super().__init__(layers, DetectorLayer, alias=alias)
 
     def apply(self, intensity, **context):
@@ -47,6 +56,19 @@ class Detector(zdx.Module):
     wavefront; ``layers`` acts on expected photoelectrons before pixel integration.
     Simulation then draws Poisson counts, adds read noise in electrons, and applies
     gain in output units per electron. Imager owns spectral weighting, including QE.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    # QE is used by photometry; spatial response and readout happen here.
+    grid = dl.Grid(8, d=0.1, unit="arcsec")
+    signal = dl.Intensity(np.ones((8, 8)), grid)
+    detector = dl.Detector(layers=[dl.SensitivityLayer(0.9)], downsample=2, gain=2)
+    print(detector(signal))
+    ```
     """
 
     layers: OrderedDict

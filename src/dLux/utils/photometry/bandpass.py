@@ -62,6 +62,18 @@ class BandPass(grids.UnitSpec):
 
     In an Imager, n is the number of optical propagations. Fine spectral sampling
     belongs to the Spectrum, Filter and QE definitions used to calculate weights.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Endpoints bound three equal bins; wavelengths are their centres.
+    band = dl.BandPass(range=(500, 800), n=3, unit="nm")
+    print(band)
+    print(band.wavelengths)
+    print(band.edges)
+    ```
     """
 
     range: tuple[float, float] = eqx.field(static=True, converter=_fixed_range)
@@ -81,6 +93,36 @@ class BandPass(grids.UnitSpec):
         unit="m",
         alias=None,
     ):
+        """Define fixed, equal-width wavelength bins or one monochromatic point.
+
+        Parameters
+        ----------
+        wl : float or None
+            Fixed Python central wavelength in unit. With no delta_wl and n=1,
+            represents a monochromatic point.
+        delta_wl : float or None
+            Fixed Python full interval width in unit; needed for multiple samples
+            with wl.
+        n : int
+            Positive number of equal-width bins, default one. In Imager this is the
+            number of optical wavelength samples.
+        min : float or None
+            Fixed Python lower outer edge in unit. Supply together with max,
+            separately from other representations.
+        max : float or None
+            Fixed Python upper outer edge in unit, paired with min.
+        range : tuple of float or None
+            Fixed Python (lower, upper) outer edges in unit. Mutually exclusive with
+            wl/delta_wl, min/max and wavelengths.
+        wavelengths : ArrayLike or UnitSpec or None
+            Regular wavelength centres used at construction to infer static
+            endpoints and count. Traced arrays cannot define this metadata.
+        unit : str
+            Wavelength unit, default m. Stored endpoints use this unit; returned
+            coordinates and widths use metres.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.unit = self.validate_unit(unit, dimension="length")
         if isinstance(n, bool) or not isinstance(n, Integral) or n < 1:
             raise ValueError("n must be a positive integer.")

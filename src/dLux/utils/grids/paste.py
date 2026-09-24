@@ -149,6 +149,8 @@ class PasteSpec(Spec):
             shape as ``starts``.
         d : Array
             Output pixel scales in SI units and physical ``(x, y)`` order.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Store fixed stamp sizes and one placement/offset pair per aperture.
         self.n = dlu.as_size(n, 2, "n")

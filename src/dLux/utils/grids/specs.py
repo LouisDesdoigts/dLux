@@ -80,6 +80,29 @@ class UnitSpec(Spec, Unitful):
     def __init__(
         self, n=None, d=None, c=None, unit=None, diam=None, *, ndim=None, alias=None
     ):
+        """Store regular sampling metadata without generating coordinates.
+
+        Parameters
+        ----------
+        n : int or sequence of ints or None
+            Static sample counts in physical-axis order. A scalar repeats on all
+            axes; None leaves counts unspecified.
+        d : ArrayLike or Expression or None
+            Positive per-axis spacing in unit. Scalars repeat on all axes; leading
+            dimensions broadcast.
+        c : ArrayLike or Expression or None
+            Per-axis centre in unit; None means zero. Leading dimensions broadcast.
+        unit : str or None
+            Unit name for the stored numerical values; None leaves them unitless.
+        diam : ArrayLike or Expression or None
+            Full cell extent in unit, giving d=diam/n. Requires n and is mutually
+            exclusive with d.
+        ndim : int or None
+            Coordinate dimension, fixed by concrete Grid/Axis classes or inferred
+            from metadata.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if d is not None and diam is not None:
             raise ValueError("Provide only one of d or diam.")
         if diam is not None and n is None:
@@ -295,6 +318,16 @@ class Axis(UnitSpec):
     Supply n, d and c, or give regular values from which those parameters are
     recovered. Values use unit; axes and coordinates expose SI coordinates.
     Counts are fixed topology and values are always calculated from n, d and c.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    axis = dl.Axis(n=5, d=10, c=600, unit="nm")
+    print(axis)
+    print(axis.axes[0])  # SI wavelength coordinates.
+    ```
     """
 
     # Inherited fields
@@ -305,6 +338,26 @@ class Axis(UnitSpec):
     c: Array | zdx.Expression | None = None
 
     def __init__(self, values=None, unit="m", *, n=None, d=None, c=None, alias=None):
+        """Define one regular axis from samples or sampling metadata.
+
+        Parameters
+        ----------
+        values : ArrayLike or None
+            Non-empty regularly spaced coordinate vector in unit. Mutually exclusive
+            with n, d and c.
+        unit : str or None
+            Coordinate unit; defaults to metres. Returned axes use SI units.
+        n : int or None
+            Number of samples on this one-dimensional axis; None leaves it
+            unspecified.
+        d : ArrayLike or Expression or None
+            Positive per-axis spacing in unit. Scalars repeat on all axes; leading
+            dimensions broadcast.
+        c : ArrayLike or Expression or None
+            Per-axis centre in unit; None means zero. Leading dimensions broadcast.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if values is not None:
             if any(value is not None for value in (n, d, c)):
                 raise ValueError("Supply values or n, d and c.")

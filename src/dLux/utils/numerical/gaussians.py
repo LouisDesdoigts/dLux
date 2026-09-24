@@ -249,6 +249,15 @@ class Gaussian(Sampled):
             unit; default zero. Leading axes broadcast with the profile and grid.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         self.std = zdx.as_array(std, dtype=float)
         self.mean = zdx.as_array(mean, dtype=float)
@@ -351,6 +360,15 @@ class CorrelatedGaussian(Sampled):
             unit; default zero. Leading axes broadcast with the profile and grid.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         self.stds = zdx.as_array(stds, dtype=float)
         self.corr = zdx.as_array(corr, dtype=float)
@@ -481,6 +499,15 @@ class EllipticalGaussian(Sampled):
             unit; default zero. Leading axes broadcast with the profile and grid.
         alias : mapping or None
             Optional parameter aliases; default None.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject conflicting runtime sampling or transforms when true; false
+            allows runtime overrides.
         """
         self.major = zdx.as_array(major, dtype=float)
         self.ratio = zdx.as_array(ratio, dtype=float)

@@ -91,6 +91,19 @@ class BaseSpectrum(zdx.Module):
     flux: Array | zdx.Expression | Flux | None = None
 
     def __init__(self, bandpass=None, flux=1.0, *, alias=None):
+        """Store native spectral sampling and incident brightness.
+
+        Parameters
+        ----------
+        bandpass : BandPass, Axis, Array or None
+            Native spectral sampling; raw wavelength vectors use metres. None
+            evaluates an analytic shape directly on requested wavelengths.
+        flux : Array, Expression, Flux or None
+            Integrated photons in each calculation BandPass; default one. None
+            preserves absolute photon density per metre.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if isinstance(bandpass, grids.UnitSpec):
             if bandpass.ndim != 1:
                 raise ValueError("Spectral sampling must be one-dimensional.")
@@ -137,6 +150,19 @@ class Spectrum(BaseSpectrum):
     Cubic2 interpolation is the default for sampled shapes.
     Calling with wavelengths returns point values; a BandPass produces Weights.
     ``from_weights`` constructs Weights directly for already-integrated counts.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Native spectral detail and optical integration bins can differ.
+    native = dl.BandPass(range=(500, 800), n=5, unit="nm")
+    spectrum = dl.Spectrum([1, 2, 3, 2, 1], native, flux=1000)
+    optical = dl.BandPass(range=(500, 800), n=3, unit="nm")
+    print(spectrum(optical))
+    density = spectrum.sample(optical.wavelengths)
+    ```
     """
 
     # Inherited fields
@@ -157,6 +183,31 @@ class Spectrum(BaseSpectrum):
         unit="m",
         alias=None,
     ):
+        """Store a sampled or analytic photon-density shape and brightness.
+
+        Parameters
+        ----------
+        value : ArrayLike or Expression
+            Density shape, with wavelength last. Arrays and fixed bases need native
+            sampling; scalar and analytic definitions may omit it.
+        bandpass : BandPass, Axis, Array or None
+            Native spectral sampling; raw wavelength vectors use metres. None
+            evaluates an analytic shape directly on requested wavelengths.
+        flux : Array, Expression, Flux or None
+            Total incident photons over the calculation BandPass; default one. None
+            retains absolute density per metre.
+        method : str
+            Interpolation method; cubic2 is the default C2 spline. Linear connects
+            adjacent samples with straight segments.
+        wavelengths : ArrayLike or None
+            Regular wavelength centres in unit, converted to a BandPass with
+            inferred outer bin edges. Mutually exclusive with bandpass.
+        unit : str
+            Unit of the wavelengths shortcut, default m. A supplied bandpass owns
+            its unit.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if wavelengths is not None:
             if bandpass is not None:
                 raise ValueError("Supply bandpass or wavelengths, not both.")
@@ -186,11 +237,44 @@ class PolySpectrum(Spectrum):
     The reference interval maps to u in [-1, 1], independently of the query range.
     Zero coefficients give a flat spectrum. Flux is the integrated brightness;
     coefficients change shape only. Values outside the reference interval are zero.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    band = dl.BandPass(range=(500, 800), n=5, unit="nm")
+    spectrum = dl.PolySpectrum(band, coeffs=[0.2, 0.05], flux=1000)
+    print(spectrum)
+    weights = spectrum(band)
+    ```
     """
 
     def __init__(
         self, bandpass, coeffs=None, flux=1.0, *, degree=1, method="cubic2", alias=None
     ):
+        """Construct a polynomial spectral shape on a fixed reference interval.
+
+        Parameters
+        ----------
+        bandpass : BandPass
+            Finite reference interval mapping wavelength to [-1, 1], fixed
+            independently of the query range.
+        coeffs : ArrayLike, Expression or None
+            Coefficients of u, u², ...; None creates degree zeros. A supplied vector
+            sets the degree.
+        flux : Array, Expression, Flux or None
+            Incident photons integrated over the calculation band, default one; None
+            retains absolute density.
+        degree : int
+            Positive highest polynomial degree when coefficients are omitted;
+            defaults to one.
+        method : str
+            Interpolation method; cubic2 is the default C2 spline. Linear connects
+            adjacent samples with straight segments.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if not isinstance(bandpass, BandPass) or bandpass.min == bandpass.max:
             raise ValueError("PolySpectrum requires a finite reference BandPass.")
         if coeffs is not None and not isinstance(coeffs, zdx.Expression):
@@ -222,6 +306,18 @@ class Filter(zdx.Module):
     samples the response on that object's bandpass, retaining absolute losses.
     QE uses this same class. Wavelength units belong to the native sampling.
     Cubic2 interpolation is the default; use method="linear" for straight segments.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    native = dl.BandPass(range=(500, 800), n=5, unit="nm")
+    filter = dl.Filter([0, 0.6, 0.9, 0.6, 0], native)
+    response = filter.sample(native.wavelengths)
+    effective_width = filter.integrate(native)  # Metres, not photons.
+    print(filter)
+    ```
     """
 
     value: Array | zdx.Expression
@@ -240,6 +336,31 @@ class Filter(zdx.Module):
         alias=None,
     ):
         # Translate the older knots spelling once; only native sampling is stored.
+        """Store a dimensionless response and optional native sampling.
+
+        Parameters
+        ----------
+        value : ArrayLike or Expression
+            Dimensionless response with wavelength last, scalar or sampled on native
+            sampling.
+        bandpass : BandPass, Axis, Array or None
+            Native spectral sampling; raw wavelength vectors use metres. None
+            evaluates an analytic shape directly on requested wavelengths.
+        wavelengths : ArrayLike or None
+            Regular wavelength centres in unit, used to construct native BandPass
+            sampling.
+        method : str
+            Interpolation method; cubic2 is the default C2 spline. Linear connects
+            adjacent samples with straight segments.
+        knots : UnitSpec or ArrayLike or None
+            Alternative native calibration coordinates. Raw values use unit and stop
+            at their first/last knot; do not combine with bandpass or wavelengths.
+        unit : str
+            Unit of raw knots or wavelengths, default m. A supplied sampling object
+            owns its unit.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if knots is not None:
             if bandpass is not None or wavelengths is not None:
                 raise ValueError("Supply bandpass, wavelengths or knots separately.")
@@ -326,6 +447,17 @@ class Blackbody(BaseSpectrum):
     By default the spectrum contains one photon over the chosen BandPass.
     sample returns photon radiance; flux=None retains that absolute scale, which
     requires the source's apparent solid angle and observing factors separately.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Temperature changes the photon-spectrum shape; flux sets its total.
+    band = dl.BandPass(range=(500, 800), n=3, unit="nm")
+    spectrum = dl.Blackbody(5000, flux=1000)
+    print(spectrum(band))
+    ```
     """
 
     # Inherited fields
@@ -335,6 +467,22 @@ class Blackbody(BaseSpectrum):
     temperature: Array | zdx.Expression
 
     def __init__(self, temperature, bandpass=None, flux=1.0, *, alias=None):
+        """Store a temperature and optional spectral sampling and brightness.
+
+        Parameters
+        ----------
+        temperature : ArrayLike or Expression
+            Blackbody temperature in kelvin. Photon-density shape is evaluated at
+            metre wavelengths.
+        bandpass : BandPass, Axis, Array or None
+            Native spectral sampling; raw wavelength vectors use metres. None
+            evaluates an analytic shape directly on requested wavelengths.
+        flux : Array, Expression, Flux or None
+            Integrated incident photons, default one. None retains the blackbody
+            function's absolute photon-density scale.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         super().__init__(bandpass, flux, alias=alias)
         self.temperature = zdx.as_array(temperature, dtype=float)
         if not isinstance(self.temperature, zdx.Expression):

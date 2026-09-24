@@ -150,6 +150,19 @@ class Sequential(BaseLayer):
     Components are stored in ``layers`` so existing structural parameter paths remain
     valid; ``steps`` provides a generic read-only view. An empty sequence is the
     identity.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    import zodiax as zdx
+
+    sequence = dl.Sequential({"scale": zdx.Map(s=2), "offset": zdx.Map(b=1)})
+    print(sequence(np.array([1.0, 2.0])))
+    result, stages = sequence.debug(np.array([1.0, 2.0]))
+    ```
     """
 
     layers: OrderedDict
@@ -229,6 +242,18 @@ class Series(Sequential, zdx.Expression):
     exposes the same calculation through Expression resolution. Without an input,
     resolution retains the series as a reusable operator; no input leaf is stored.
     Subclasses may supply their own starting value in evaluate.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    import zodiax as zdx
+
+    series = dl.Series({"scale": zdx.Map(s=2), "offset": zdx.Map(b=1)})
+    print(series.resolve(target=np.array([1.0, 2.0])))
+    ```
     """
 
     # Inherited fields
@@ -251,6 +276,17 @@ class Combine(zdx.Expression):
 
     Sum and product are arithmetic reductions. Union clips the sum to [0, 1],
     while intersection multiplies transmissions. Child outputs broadcast together.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    annulus = dl.Combine([dl.Circle(1.0), dl.Complement(dl.Circle(0.3))],
+                         operation="product")
+    print(annulus.resolve(grid=grid).shape)
+    ```
     """
 
     parametrics: dict[str, zdx.Expression]

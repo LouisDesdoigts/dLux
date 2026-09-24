@@ -48,11 +48,6 @@ class Resize(BaseLayer):
 
     Input and output counts must have matching odd/even parity on every axis.
     Padding and cropping are symmetric, retaining the physical centre.
-
-    Parameters
-    ----------
-    n : int or tuple[int, int]
-        Positive output counts in physical (x, y) order; a scalar defines a square.
     """
 
     n: tuple[int, int]
@@ -82,11 +77,6 @@ class Chirp(BaseLayer):
     Each sampled chirp has shape ``chirp_batch + (n_axis,)`` and chirps follow
     physical (x, y) order. Leading dimensions use ordinary JAX broadcasting with
     the field batch, including expansion through explicit singleton axes.
-
-    Parameters
-    ----------
-    factors : sequence[Array]
-        Two sampled complex chirps in (x, y) order.
     """
 
     factors: tuple[Array, Array]

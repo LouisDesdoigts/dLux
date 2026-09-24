@@ -83,6 +83,19 @@ class ComplexLayer(OpticalLayer):
     phase: Array | zdx.Expression | None = None
 
     def __init__(self, amplitude=None, phase=None, *, alias=None):
+        """Store independent amplitude and phase modulation.
+
+        Parameters
+        ----------
+        amplitude : Array or Expression or None
+            Real amplitude multiplier broadcast over the spatial samples. None is
+            unity.
+        phase : Array or Expression or None
+            Additional phase in radians, broadcast over spatial samples. None is
+            zero.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.amplitude = zdx.as_array(amplitude, dtype=float)
         self.phase = zdx.as_array(phase, dtype=float)
         self.alias = alias
@@ -114,6 +127,22 @@ class BaseOptic(OpticalLayer):
     normalise: bool | None = None
 
     def __init__(self, transmission=None, opd=None, normalise=None, *, alias=None):
+        """Store amplitude transmission, OPD and optional power normalisation.
+
+        Parameters
+        ----------
+        transmission : Array or Expression or None
+            Real amplitude transmission, scalar or sampled on the local grid. None
+            transmits unchanged.
+        opd : Array or Expression or None
+            Optical path difference in metres, scalar or sampled on the local grid.
+            None is zero.
+        normalise : bool or None
+            When true, normalise field power after scalar optical effects, before
+            Jones operations. False or None retains its scale.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         transmission = zdx.as_array(transmission)
         if not isinstance(transmission, zdx.Expression) and np.iscomplexobj(
             transmission
@@ -160,6 +189,19 @@ class RefractiveLayer(OpticalLayer):
     n: Array | zdx.Expression | None = None
 
     def __init__(self, thickness=None, n=None, *, alias=None):
+        """Store material thickness and refractive index.
+
+        Parameters
+        ----------
+        thickness : Array or Expression or None
+            Material thickness in metres. Applied with n as excess optical path (n -
+            1) * thickness.
+        n : Array or Expression or None
+            Dimensionless material index, optionally complex for absorption. Without
+            both n and thickness no material phase is applied.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.thickness = zdx.as_array(thickness, dtype=float)
         self.n = zdx.as_array(n)
         self.alias = alias
@@ -184,6 +226,16 @@ class JonesLayer(OpticalLayer):
     jones: Array | zdx.Expression | None = None
 
     def __init__(self, jones=None, *, alias=None):
+        """Store a uniform or spatially varying Jones operator.
+
+        Parameters
+        ----------
+        jones : Array or Expression or None
+            Uniform (2, 2) or spatial (ny, nx, 2, 2) Jones operator. None leaves
+            polarisation unchanged.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.jones = zdx.as_array(jones)
         self.alias = alias
 
@@ -207,6 +259,17 @@ class PropagatorLayer(OpticalLayer, dlu.Propagator):
     Grid, focal length, defocus, ABCD and inverse parameters are inherited directly.
     Wavefront owns the wavelength, population and Jones-axis adaptation. Alternative
     numerical algorithms can be applied with ``wavefront.propagate(definition)``.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    relay = dl.PropagatorLayer(dl.Grid(8, d=0.1, unit="arcsec"))
+    focused = relay(dl.Wavefront(600e-9, grid))
+    print(focused)
+    ```
     """
 
     # Inherited fields
@@ -226,6 +289,26 @@ class PropagatorLayer(OpticalLayer, dlu.Propagator):
         inverse=False,
         alias=None,
     ):
+        """Construct PropagatorLayer with the following inputs.
+
+        Parameters
+        ----------
+        grid_out : Grid or None
+            Destination sampling. None leaves output sampling to the operation.
+        focal_length : Array or Expression or None
+            Relay focal length in metres. Required to connect physical pupil and
+            focal-plane lengths without a custom ABCD matrix.
+        defocus : Array or Expression or None
+            Axial displacement of the output plane in metres; None means zero.
+        abcd : Array or Expression or None
+            Custom canonical matrix with shape (..., 2, 2), defining relay scale and
+            direction.
+        inverse : bool or None
+            Use inverse propagation for true. Forward is the default; a custom ABCD
+            matrix sets this to None.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         dlu.Propagator.__init__(
             self,
             grid_out,
@@ -260,6 +343,19 @@ class Optic(BaseOptic, ComplexLayer, RefractiveLayer, JonesLayer, PropagatorLaye
     A supplied ``grid_out`` propagates the resulting field after these effects.
     None retains the incident sampling. Focal length defines the relay, not a
     second local lens phase.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # The OPD can be a fitted basis rather than a sampled array.
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    opd = dl.Basis(dl.Zernike([4, 5, 6], diameter=1.0), unit="nm")
+    optic = dl.Optic(transmission=dl.Circle(1.0), opd=opd, normalise=True)
+    print(optic)
+    wavefront = optic(dl.Wavefront(600e-9, grid))
+    ```
     """
 
     # Inherited fields
@@ -306,6 +402,58 @@ class Optic(BaseOptic, ComplexLayer, RefractiveLayer, JonesLayer, PropagatorLaye
         ``dynamic=True`` asks definitions for runtime expressions. Otherwise a
         supplied grid permits sampling at construction. Arrays and Expressions
         are retained; factories are not stored in the optic.
+
+        Parameters
+        ----------
+        transmission : Array or Expression or None
+            Real amplitude transmission, scalar or sampled on the local grid. None
+            transmits unchanged.
+        opd : Array or Expression or None
+            Optical path difference in metres, scalar or sampled on the local grid.
+            None is zero.
+        phase : Array or Expression or None
+            Additional phase in radians, broadcast over spatial samples. None is
+            zero.
+        normalise : bool or None
+            When true, normalise field power after scalar optical effects, before
+            Jones operations. False or None retains its scale.
+        amplitude : Array or Expression or None
+            Real amplitude multiplier broadcast over the spatial samples. None is
+            unity.
+        jones : Array or Expression or None
+            Uniform (2, 2) or spatial (ny, nx, 2, 2) Jones operator. None leaves
+            polarisation unchanged.
+        thickness : Array or Expression or None
+            Material thickness in metres. Applied with n as excess optical path (n -
+            1) * thickness.
+        n : Array or Expression or None
+            Dimensionless material index; requires thickness to produce excess
+            optical path.
+        grid : Grid or None
+            Grid used to construct definitions and evaluate local numerical
+            expressions; does not resample supplied arrays.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        dynamic : bool
+            Keep constructor definitions dependent on runtime sampling when true;
+            false samples eligible definitions on a supplied grid.
+        grid_out : Grid or None
+            Propagate after local effects when supplied; None applies only the local
+            optic.
+        focal_length : Array or Expression or None
+            Relay focal length in metres. Required to connect physical pupil and
+            focal-plane lengths without a custom ABCD matrix.
+        defocus : Array or Expression or None
+            Axial displacement of the output plane in metres; None means zero.
+        abcd : Array or Expression or None
+            Custom canonical matrix with shape (..., 2, 2), defining relay scale and
+            direction.
+        inverse : bool or None
+            Use inverse propagation for true. Forward is the default; a custom ABCD
+            matrix sets this to None.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Choose sampling before constructing deferred optical definitions.
         if grid is not None and not isinstance(grid, dlu.Grid):
@@ -421,13 +569,6 @@ class Optic(BaseOptic, ComplexLayer, RefractiveLayer, JonesLayer, PropagatorLaye
 class TiltLayer(OpticalLayer, dlu.Unitful):
     """Tilt a wavefront by two angular coordinates.
 
-    Parameters
-    ----------
-    angles : ArrayLike
-        Two angular offsets in ``(x, y)`` order.
-    unit : str
-        Angular unit associated with ``angles``.
-
     Examples
     --------
     Apply one physical angular offset across a chromatic wavefront:
@@ -460,6 +601,8 @@ class TiltLayer(OpticalLayer, dlu.Unitful):
             Two-component ``(x, y)`` angular offset.
         unit : str
             Supported angular unit for ``angles``.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.angles = zdx.as_array(angles, dtype=float)
         if not isinstance(self.angles, zdx.Expression) and self.angles.shape != (2,):
@@ -485,12 +628,15 @@ class WedgeLayer(OpticalLayer):
     refractive index is resolved at the incident wavelength and converted into OPD
     before being applied to the wavefront.
 
-    Parameters
-    ----------
-    angle : ArrayLike
-        Two wedge angles in radians along the physical ``(x, y)`` axes.
-    n : Array or Expression
-        Wavelength-dependent or fixed refractive index.
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.Grid(8, diam=1.0, unit="m")
+    wedge = dl.WedgeLayer(angle=[0.01, 0.0], n=1.5)
+    print(wedge(dl.Wavefront(600e-9, grid)))
+    ```
     """
 
     angle: Array | zdx.Expression
@@ -505,6 +651,8 @@ class WedgeLayer(OpticalLayer):
             Two-component wedge slope.
         n : Array or Expression
             Refractive index evaluated at the wavefront wavelength.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.angle = zdx.as_array(angle, dtype=float)
         if not isinstance(self.angle, zdx.Expression) and self.angle.shape != (2,):

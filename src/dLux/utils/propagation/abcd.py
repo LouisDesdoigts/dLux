@@ -321,12 +321,31 @@ class ABCDChain(zdx.Expression):
 
     For elements [first, second], the result is second @ first. Arrays and matrix
     expressions may be mixed; leading matrix dimensions broadcast normally.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    chain = dl.ABCDChain({"space": dl.ABCD(free_space=0.1),
+                          "lens": dl.ABCD(lens=0.2)})
+    print(chain.resolve())
+    ```
     """
 
     elements: OrderedDict[str, Array | zdx.Expression]
 
     def __init__(self, elements, *, alias=None):
-        """Store a nonempty mapping or sequence of optionally named matrices."""
+        """Store a nonempty mapping or sequence of optionally named matrices.
+
+        Parameters
+        ----------
+        elements : mapping or sequence
+            ABCD definitions in physical application order, optionally named. Later
+            matrices multiply on the left.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         entries = (
             list(elements.items()) if isinstance(elements, dict) else list(elements)
         )

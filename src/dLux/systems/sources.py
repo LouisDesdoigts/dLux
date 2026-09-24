@@ -24,6 +24,18 @@ class Source(zdx.Module):
 
     Sources store definitions. Imager owns spectral integration, propagation,
     resolved-profile convolution and detection.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Geometry and spectral shape are independent definitions.
+    positions = dl.Companions(separation=[0.2, 0.4], pa=[0, 90])
+    source = dl.Source(dl.Blackbody(5000), positions, flux=[1000, 100, 10])
+    print(source)
+    print(source.resolve_positions())
+    ```
     """
 
     spectrum: dlu.BaseSpectrum
@@ -48,6 +60,25 @@ class Source(zdx.Module):
         flux may be Expressions.
         Absolute density is declared by Spectrum(flux=None); Source stores no
         separate normalisation flag or brightness leaf.
+
+        Parameters
+        ----------
+        spectrum : BaseSpectrum, Array or Expression
+            Incident spectral shape. Raw values become Spectrum; an existing
+            spectrum retains its brightness unless overridden.
+        positions : Array or Expression or None
+            Radian positions shaped (C, 2), or one (2,) pair. None creates one on-
+            axis component.
+        flux : Array, Expression, Flux or None
+            Integrated incident photons in the calculation BandPass, before losses.
+            None retains the existing spectral brightness.
+        wavelengths : ArrayLike or None
+            Alternative explicit wavelength sampling; do not also supply bandpass.
+        weights : ArrayLike or None
+            Deprecated integrated-sample input, translated by compat. Prefer a
+            Spectrum with native sampling.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if wavelengths is not None or weights is not None:
             from ..compat.sources import source_spectrum
@@ -119,7 +150,18 @@ class Source(zdx.Module):
 
 
 class PointSource(Source):
-    """One point source with a spectrum, position and incident photon flux."""
+    """One point source with a spectrum, position and incident photon flux.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Position defaults to arcseconds, and flux to the spectrum's total photons.
+    source = dl.PointSource(position=[0.1, 0.0], spectrum=dl.Blackbody(5000), flux=1000)
+    print(source)
+    ```
+    """
 
     # Inherited fields
     spectrum: dlu.BaseSpectrum
@@ -140,6 +182,30 @@ class PointSource(Source):
 
         Flux follows the spectrum's current-BandPass convention. A spectrum with
         flux=None supplies its own absolute photon density.
+
+        Parameters
+        ----------
+        *args
+            Deprecated positional spectral constructor arguments, translated by
+            compat. Use named spectrum and position for new code.
+        spectrum : BaseSpectrum, Array or Expression
+            Incident spectral shape. Raw values become Spectrum; an existing
+            spectrum retains its brightness unless overridden.
+        position : ArrayLike or Expression or None
+            Physical (x, y) position; None is the optical axis.
+        flux : Array, Expression, Flux or None
+            Integrated incident photons in the calculation BandPass, before losses.
+            None retains the existing spectral brightness.
+        unit : str
+            Angular position unit; arcsec by default. Stored astrometry resolves to
+            radians.
+        wavelengths : ArrayLike or None
+            Alternative explicit wavelength sampling; do not also supply bandpass.
+        weights : ArrayLike or None
+            Deprecated integrated-sample input, translated by compat. Prefer a
+            Spectrum with native sampling.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if args or wavelengths is not None or weights is not None:
             from ..compat.sources import point_spectrum
@@ -156,6 +222,16 @@ class BinarySource(Source):
     receives ``primary_flux * 10**contrast`` by default (log=False uses a ratio).
     Positions and fluxes are ordinary Expressions, so Imager handles this class
     exactly like Source.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Contrast is log10(companion / primary); the primary is at position.
+    source = dl.BinarySource(separation=0.2, pa=90, primary_flux=1000, contrast=-1)
+    print(source.resolve_positions())
+    ```
     """
 
     # Inherited fields
@@ -188,6 +264,42 @@ class BinarySource(Source):
         Flux is primary incident photons over the current BandPass and contrast is
         log10(companion/primary); log=False accepts a linear ratio.
         Omitted contrast gives equal brightness. Numerical inputs may be Expressions.
+
+        Parameters
+        ----------
+        spectrum : BaseSpectrum, Array or Expression
+            Incident spectral shape. Raw values become Spectrum; an existing
+            spectrum retains its brightness unless overridden.
+        position : ArrayLike or Expression or None
+            Physical (x, y) position; None is the optical axis.
+        separation : ArrayLike or Expression
+            Scalar primary-to-companion separation in unit.
+        pa : ArrayLike or Expression
+            Position angle in degrees from +y towards +x; broadcasts against
+            separation.
+        primary_flux : ArrayLike or Expression or None
+            Primary incident photons. None retains the spectrum flux; companion
+            counts are set by contrast.
+        contrast : float or Expression or None
+            log10(companion/primary) by default; log=False accepts a linear ratio.
+            None gives equal brightness.
+        unit : str
+            Angular position/separation unit; arcsec by default. PA always uses
+            degrees.
+        log : bool
+            Interpret contrast logarithmically when true (default).
+        wavelengths : ArrayLike or None
+            Alternative explicit wavelength sampling; do not also supply bandpass.
+        weights : ArrayLike or None
+            Deprecated integrated-sample input, translated by compat. Prefer a
+            Spectrum with native sampling.
+        mean_flux : float or None
+            Deprecated mean-brightness spelling translated by compat; prefer
+            primary_flux.
+        position_angle : float or None
+            Deprecated position-angle spelling translated by compat; prefer pa.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if any(
             value is not None
@@ -233,6 +345,17 @@ class ResolvedSource(Source):
     The profile owns its angular sampling and normalisation. Spectrum.flux supplies
     brightness, and positions locate the profile centres. Imager samples this
     definition and renders it through the optical model.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # A continuous angular profile is sampled by the imaging system.
+    profile = dl.Profile(dl.Gaussian(std=1e-7))
+    source = dl.ResolvedSource(flux=1000, profile=profile)
+    print(source)
+    ```
     """
 
     # Inherited fields
@@ -260,6 +383,37 @@ class ResolvedSource(Source):
         A coordinate-dependent Expression can wait for sampling from Imager.
         Arrays require a grid; a Field or Profile already owns its sampling.
         Local profile coordinates are relative to each source position.
+
+        Parameters
+        ----------
+        spectrum : BaseSpectrum, Array or Expression
+            Incident spectral shape. Raw values become Spectrum; an existing
+            spectrum retains its brightness unless overridden.
+        positions : Array or Expression or None
+            Radian positions shaped (C, 2), or one (2,) pair. None creates one on-
+            axis component.
+        flux : Array, Expression, Flux or None
+            Integrated incident photons in the calculation BandPass, before losses.
+            None retains the existing spectral brightness.
+        profile : Profile, Array, Expression or None
+            Resolved spatial density shared by the source components; array values
+            use profile_grid.
+        profile_grid : Grid or None
+            Native sampling of an array-valued profile. Expressions may use runtime
+            sampling.
+        wavelengths : ArrayLike or None
+            Alternative explicit wavelength sampling; do not also supply bandpass.
+        weights : ArrayLike or None
+            Deprecated integrated-sample input, translated by compat. Prefer a
+            Spectrum with native sampling.
+        distribution : ArrayLike or None
+            Deprecated resolved-profile spelling translated by compat; prefer
+            profile.
+        position : ArrayLike or None
+            Deprecated single-position spelling; use positions or PointSource
+            geometry.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if distribution is not None or position is not None:
             from ..compat.sources import resolved_inputs
@@ -296,6 +450,19 @@ class Scene(zdx.Module):
     Nested Scenes can group a companion and its disk, for example. Imager adds
     source intensities and applies detector noise once to the combined image.
     Each child retains its own spectrum, brightness and optional profile.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Named source contributions are summed incoherently by an Imager.
+    scene = dl.Scene({
+        "primary": dl.PointSource(flux=1000),
+        "companion": dl.PointSource(position=[0.2, 0.0], flux=100),
+    })
+    print(scene)
+    ```
     """
 
     sources: dict[str, Source | Scene]
@@ -308,6 +475,17 @@ class Scene(zdx.Module):
 
         Values are Source or Scene objects. Position defaults to zero and may be
         an Expression. Names provide ordinary immutable parameter paths.
+
+        Parameters
+        ----------
+        sources : mapping of str to Source or Scene
+            Named contributions added incoherently. Names identify components, not
+            separate output images.
+        position : ArrayLike or Expression or None
+            Shared (x, y) angular offset in radians; None leaves component positions
+            unchanged.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Check named sources before storing the scene and its shared offset.
         if isinstance(sources, (list, tuple)):

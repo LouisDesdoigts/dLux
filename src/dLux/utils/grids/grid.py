@@ -22,19 +22,6 @@ class Grid(UnitSpec):
     are ordered in reverse, so a specification with
     ``n=(nx, ny)`` produces coordinate arrays with shape ``(2, ny, nx)``.
 
-    Parameters
-    ----------
-    n : int, tuple[int, int], or None
-        Number of samples along each physical axis.
-    d : ArrayLike or None
-        Pixel scales in ``unit`` along each physical axis.
-    c : ArrayLike or None
-        Grid centers in ``unit`` along each physical axis.
-    unit : str or None
-        Physical or angular unit associated with ``d`` and ``c``.
-    diam : ArrayLike or None
-        Alternative physical extent used to calculate ``d = diam / n``.
-
     Examples
     --------
     Construct and manipulate unit-aware sampling grids:
@@ -99,7 +86,26 @@ class Grid(UnitSpec):
     c: Array | zdx.Expression | None = None
 
     def __init__(self, n=None, d=None, c=None, unit=None, diam=None, *, alias=None):
-        """Store regular sampling with physical (x, y) and array (y, x) axes."""
+        """Store regular sampling with physical (x, y) and array (y, x) axes.
+
+        Parameters
+        ----------
+        n : int or sequence of ints or None
+            Static sample counts in physical-axis order. A scalar repeats on all
+            axes; None leaves counts unspecified.
+        d : ArrayLike or Expression or None
+            Positive per-axis spacing in unit. Scalars repeat on all axes; leading
+            dimensions broadcast.
+        c : ArrayLike or Expression or None
+            Per-axis centre in unit; None means zero. Leading dimensions broadcast.
+        unit : str or None
+            Unit name for the stored numerical values; None leaves them unitless.
+        diam : ArrayLike or Expression or None
+            Full cell extent in unit, giving d=diam/n. Requires n and is mutually
+            exclusive with d.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         super().__init__(n=n, d=d, c=c, unit=unit, diam=diam, ndim=2, alias=alias)
 
     @property

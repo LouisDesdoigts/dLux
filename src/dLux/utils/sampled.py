@@ -32,7 +32,22 @@ class Sampled(zdx.Expression):
     strict: bool = eqx.field(static=True, default=False)
 
     def __init__(self, grid=None, transform=None, strict=False, *, alias=None):
-        """Store sampling and a map called as transform(coordinates, **context)."""
+        """Store sampling and a map called as transform(coordinates, **context).
+
+        Parameters
+        ----------
+        grid : Grid, Axis or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        transform : callable or None
+            Map evaluation coordinates into the input frame. None leaves coordinates
+            unchanged.
+        strict : bool
+            Reject replacement of stored sampling or transforms when true; false
+            allows runtime overrides. Immutable set updates remain available.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if grid is not None and not isinstance(grid, grids.UnitSpec):
             raise TypeError("grid must be a sampling UnitSpec or None.")
         if transform is not None and not callable(transform):

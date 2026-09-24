@@ -196,23 +196,6 @@ class ApertureBuilder(Def):
     numeric constructors and act as templates which assemble these definitions.
     Grid defines two spatial axes; scalar counts and spacings describe a square.
 
-    Parameters
-    ----------
-    primary : Shape
-        Transmissive primary geometry.
-    obscurations : list or tuple of Shape
-        Geometry removed from the primary transmission.
-    opd : Def, ParametricBasis, or None
-        An OPD factory sampled over the primary support, or a complete expansion
-        retained with its coefficients and units.
-    key : Array or None
-        Default JAX random key for coefficient initialisation. A call-time key
-        overrides this value.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
-    grid : Grid or None
-        Default construction sampling. A call-time grid replaces it.
-
     Returns
     -------
     transmission : Array
@@ -298,6 +281,8 @@ class ApertureBuilder(Def):
             Default JAX random key for coefficient initialisation.
         grid : Grid or None
             Default sampling for build and call; a call-time grid replaces it.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Validate the primary and obscuration geometry
         if not isinstance(primary, dlu.Shape):
@@ -471,24 +456,6 @@ class ApertureBuilder(Def):
 class SparseApertureBuilder(ApertureBuilder):
     """Repeat one local aperture shape over explicit ``(x, y)`` centres.
 
-    Parameters
-    ----------
-    subaperture : Shape
-        Geometry shared by every local aperture.
-    centers : ArrayLike
-        Centre coordinates with shape ``(n_apertures, 2)``.
-    obscurations : list or tuple of Shape
-        Local geometry repeated inside every sub-aperture.
-    global_obscurations : list or tuple of Shape
-        Geometry removed after assembling the full global pupil.
-    opd : Def, ParametricBasis, or None
-        Optional OPD definition evaluated independently over each sub-aperture.
-    key : Array or None
-        Default JAX random key for coefficient initialisation. A call-time key
-        overrides this value.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
-
     Notes
     -----
     Calling the builder returns one globally sampled compound pupil by default.
@@ -571,6 +538,11 @@ class SparseApertureBuilder(ApertureBuilder):
             Positive hard-edge sampling factors in physical ``(x, y)`` order.
         key : Array or None
             Default JAX random key for coefficient initialisation.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Validate and store the sub-aperture centres
         centers = zdx.as_array(centers, dtype=float)
@@ -716,22 +688,6 @@ class SparseApertureBuilder(ApertureBuilder):
 class SimpleCircular(ApertureBuilder):
     """Pedagogical circular pupil assembled with a compact numeric API.
 
-    Parameters
-    ----------
-    diameter : float
-        Primary diameter in metres.
-    secondary_diameter : float or None
-        Optional central obscuration diameter.
-    spider_width, spider_angles
-        Optional radial support width and one-dimensional angles in degrees. Both
-        must be supplied together.
-    opd : Def, ParametricBasis, or None
-        Optional OPD definition evaluated over the pupil support.
-    key : Array or None
-        Default JAX random key for OPD coefficient initialisation.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
-
     Examples
     --------
     Construct a circular pupil with a secondary, supports, and low-order OPD:
@@ -795,6 +751,11 @@ class SimpleCircular(ApertureBuilder):
             Hard-edge sampling factors.
         key : Array or None
             Default JAX random key for OPD coefficient initialisation.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if (spider_width is None) != (spider_angles is None):
             raise ValueError("spider_width and spider_angles must both be provided.")
@@ -815,30 +776,6 @@ class SegmentedHex(SparseApertureBuilder):
     ``segment_diameter`` is the point-to-point diameter of the circumscribed circle;
     ``segment_f2f`` is the flat-to-flat width. Exactly one must be provided.
     Obscurations are global structures applied across the assembled pupil.
-
-    Parameters
-    ----------
-    nrings : int
-        Number of hexagonal rings including the central segment.
-    segment_diameter, segment_f2f : float or None
-        Alternative segment-size conventions; exactly one is required.
-    gap : float
-        Non-negative edge-to-edge gap between adjacent segments.
-    remove_center : bool
-        Remove the central segment after generating the complete tiling.
-    obscurations : list or tuple of Shape
-        Global geometry removed from the assembled pupil.
-    paste_method : str
-        Compact-stamp assembly strategy. ``"scan"`` is sequential and
-        memory-efficient; ``"scatter"`` uses per-pixel indices to expose more
-        parallelism at higher memory cost. Benchmark both for large systems because
-        performance depends on the hardware and pupil sampling.
-    opd : Def, ParametricBasis, or None
-        Optional OPD definition evaluated independently over each segment.
-    key : Array or None
-        Default JAX random key for per-segment coefficient initialisation.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
 
     Notes
     -----
@@ -923,6 +860,11 @@ class SegmentedHex(SparseApertureBuilder):
             ``"scan"`` for lower memory or ``"scatter"`` for greater parallelism.
         key : Array or None
             Default JAX random key for per-segment coefficient initialisation.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Resolve and validate the construction options
         if (segment_diameter is None) == (segment_f2f is None):
@@ -1105,19 +1047,6 @@ class NRMLike(SparseApertureBuilder):
     This helper deliberately excludes global stops and obscurations. Sparse
     materialisation always gives every hole independent OPD coefficients.
 
-    Parameters
-    ----------
-    centers : ArrayLike
-        Hole centres with shape ``(n_holes, 2)`` in ``(x, y)`` order.
-    hole : Shape
-        The single local geometry shared by every hole.
-    opd : Def, ParametricBasis, or None
-        Optional OPD definition evaluated independently over each hole.
-    key : Array or None
-        Default JAX random key for per-hole coefficient initialisation.
-    oversample : int or tuple of int
-        Sampling factor used before downsampling hard-edged geometry.
-
     Returns
     -------
     Array or tuple of Array
@@ -1188,6 +1117,11 @@ class NRMLike(SparseApertureBuilder):
             Hard-edge sampling factors.
         key : Array or None
             Default JAX random key for per-hole coefficient initialisation.
+        grid : Grid or None
+            Optional stored sampling; caller context supplies sampling when it is
+            absent.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if not isinstance(hole, dlu.Shape):
             raise TypeError("hole must be a Shape.")

@@ -88,16 +88,18 @@ class FFT(BaseLayer):
     to index zero before the transform and zero frequency shifts back to the centre.
     Set ``centered=False`` for raw transforms used inside convolution series.
 
-    Parameters
-    ----------
-    n : int or tuple[int, int]
-        Transform counts in (x, y) order; a scalar defines a square. The final
-        input shape must match (ny, nx).
-    inverse : bool or Array[bool]
-        Use the inverse Fourier sign. Array directions broadcast with the leading
-        field batch, allowing different directions and explicit outer batches.
-    centered : bool
-        Apply centred input and output conventions.
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    field = np.ones((8, 8), dtype=complex)
+    operation = dl.FFT(8)
+    transformed = operation(field)
+    restored = dl.FFT(8, inverse=True)(transformed)
+    print(np.allclose(field, restored))
+    ```
     """
 
     n: tuple[int, int]

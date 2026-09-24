@@ -318,19 +318,6 @@ class PastedBasis(ParametricBasis):
     This representation is normally produced by segmented aperture builders. It is
     public so specialised builders can retain dense local modes and avoid storing a
     global mostly-zero basis.
-
-    Parameters
-    ----------
-    basis : Array
-        Basis stamps with shape ``(n_stamps, *basis_shape, ny, nx)``.
-    spec : PasteSpec
-        Placement and sampling contract shared by every compact stamp.
-    coeffs : Array, zodiax.Expression, or None
-        Coefficients ending in ``(n_stamps, *basis_shape)``; earlier axes are
-        independent batches. They default to zero without batch axes.
-    method : str
-        ``"scan"`` for bounded-memory placement or ``"scatter"`` for parallel
-        placement using flattened pixel indices.
     """
 
     # Inherited fields

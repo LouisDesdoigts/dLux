@@ -18,12 +18,35 @@ class Weights(zdx.Module):
     renormalising or applying integration widths again. After QE, the values are
     expected detected counts. Raw metre vectors are accepted for numerical results
     such as irregular integrated bins; ordinary imaging uses a BandPass.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    band = dl.BandPass(range=(500, 800), n=3, unit="nm")
+    weights = dl.Weights([100, 200, 100], band)
+    print(weights.integrate())  # Counts are already integrated; no extra widths.
+    ```
     """
 
     value: Array
     bandpass: BandPass | Array
 
     def __init__(self, value, bandpass, *, alias=None):
+        """Pair integrated counts with the wavelengths they represent.
+
+        Parameters
+        ----------
+        value : ArrayLike
+            Already-integrated counts shaped (..., n_wavelengths); no extra
+            wavelength-width factor is applied.
+        bandpass : BandPass or ArrayLike
+            Bin sampling or a non-empty metre wavelength vector matching the final
+            value axis. Raw vectors may be irregular.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.value = zdx.as_array(value, dtype=float)
         self.bandpass = (
             bandpass if isinstance(bandpass, BandPass) else _wavelengths(bandpass)

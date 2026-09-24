@@ -15,6 +15,14 @@ class Zernike(dlu.Zernike):
     """
 
     def __init__(self, j):
+        """Translate one released Noll index to a current mode generator.
+
+        Parameters
+        ----------
+        j : int
+            One-based Noll index. The initial diameter is 2, matching unit-radius
+            coordinates. Construction emits a deprecation warning.
+        """
         warn_deprecated(
             "Zernike(j)",
             "dlu.Zernike",
@@ -32,6 +40,14 @@ class ZernikeBasis(dlu.Zernike):
     """A current mode generator with the released calculate_basis method."""
 
     def __init__(self, js):
+        """Translate released mode selection to a current Zernike definition.
+
+        Parameters
+        ----------
+        js : sequence of ints
+            One-based Noll indices. The initial diameter is 2; calculate_basis
+            returns a mode stack. Construction emits a deprecation warning.
+        """
         warn_deprecated("ZernikeBasis", "dlu.Zernike", "Zernike(nolls=js)")
         super().__init__(nolls=js, diameter=2.0)
 

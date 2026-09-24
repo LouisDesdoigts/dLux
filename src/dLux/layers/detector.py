@@ -57,12 +57,6 @@ class SensitivityLayer(DetectorLayer):
     The resolved response follows ordinary JAX broadcasting against
     ``intensity.data``.
 
-    Parameters
-    ----------
-    response : Array or Expression
-        Multiplicative detector response. Expression values are evaluated against
-        the input intensity.
-
     Examples
     --------
     Apply a spatially varying pixel-response map:
@@ -97,6 +91,8 @@ class SensitivityLayer(DetectorLayer):
         response : Array or Expression
             Scalar or spatial response broadcast against the intensity data, or a
             parametric resolved from the detector context.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.response = zdx.as_array(response, dtype=float)
 
@@ -118,11 +114,6 @@ class ConvolveLayer(DetectorLayer):
     ``kernel`` may be a fixed array or Expression resolving to shape ``(ny, nx)``.
     It is applied independently over the final two intensity axes and is not
     normalised automatically. Leading intensity axes are preserved.
-
-    Parameters
-    ----------
-    kernel : Array or Expression
-        Two-dimensional convolution kernel in array ``(y, x)`` order.
 
     Examples
     --------
@@ -156,6 +147,8 @@ class ConvolveLayer(DetectorLayer):
         kernel : Array or Expression
             Fixed two-dimensional ``(y, x)`` kernel or a parametric resolving to one.
             The kernel is not normalised automatically.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.kernel = zdx.as_array(kernel, dtype=float)
 
@@ -177,11 +170,6 @@ class ConvolveLayer(DetectorLayer):
 
 class BiasLayer(DetectorLayer):
     """Add a scalar, spatial, or parametric bias to an intensity.
-
-    Parameters
-    ----------
-    bias : Array or Expression
-        Additive detector signal broadcast against the input intensity.
 
     Examples
     --------
@@ -217,6 +205,8 @@ class BiasLayer(DetectorLayer):
         bias : Array or Expression
             Scalar or spatial signal broadcast against the intensity data, or a
             parametric resolved from the detector context.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.bias = zdx.as_array(bias, dtype=float)
 
@@ -237,11 +227,6 @@ class GainLayer(DetectorLayer):
     A Expression receives intensity data as its ``coordinates`` before being
     multiplied into the data. This enables nonlinear responses while retaining the
     same broadcasting contract as scalar and spatial gains.
-
-    Parameters
-    ----------
-    gain : Array or Expression
-        Multiplicative gain or context-dependent nonlinear response.
 
     Examples
     --------
@@ -275,6 +260,8 @@ class GainLayer(DetectorLayer):
         gain : Array or Expression
             Multiplicative response. Expressions receive intensity data through
             ``coordinates`` and may therefore describe nonlinear gain.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.gain = zdx.as_array(gain, dtype=float)
 
@@ -297,11 +284,6 @@ class GainLayer(DetectorLayer):
 
 class SaturationLayer(DetectorLayer):
     """Limit intensity values to a scalar, spatial, or parametric maximum.
-
-    Parameters
-    ----------
-    limit : Array or Expression
-        Maximum retained intensity, broadcast over the input data.
 
     Examples
     --------
@@ -341,6 +323,8 @@ class SaturationLayer(DetectorLayer):
         limit : Array or Expression
             Scalar or spatial maximum broadcast against the intensity data, or a
             parametric resolved from the detector context.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         self.limit = zdx.as_array(limit, dtype=float)
 

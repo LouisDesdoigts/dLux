@@ -176,19 +176,17 @@ class MFT(BaseLayer):
     are the only leaves; sizes and field shapes are derived from them. The final two
     field axes are spatial; all preceding axes are numerical batches.
 
-    Parameters
-    ----------
-    kernels : tuple[Array, Array]
-        Two kernels in physical ``(x, y)`` order. Every kernel must end in positive
-        ``(n_out, n_in)`` dimensions.
-
     Examples
     --------
-    Construct and apply a two-dimensional transform from coordinate axes:
-
     ```python
-    transform = MFT.from_axes((x_in, y_in), (x_out, y_out), alpha=-2 * np.pi)
-    output = transform(field)
+    import dLux as dl
+    import jax.numpy as np
+
+    # Supply physical-order axes and an explicit Fourier phase coefficient.
+    axis = np.linspace(-0.5, 0.5, 8)
+    operation = dl.MFT.from_axes((axis, axis), (axis, axis), alpha=-2 * np.pi)
+    output = operation(np.ones((8, 8), dtype=complex))
+    print(output.shape)
     ```
     """
 

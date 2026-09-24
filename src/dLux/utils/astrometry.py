@@ -22,6 +22,17 @@ class Positions(zdx.Expression, Unitful):
     unit: str
 
     def __init__(self, value, unit="arcsec", *, alias=None):
+        """Store angular positions for conversion to radians.
+
+        Parameters
+        ----------
+        value : ArrayLike or Expression
+            One (2,) position or non-empty (C, 2) array in unit.
+        unit : str
+            Angular unit; arcsec by default. Evaluation returns radians.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.value = zdx.as_array(value, dtype=float)
         if not isinstance(self.value, zdx.Expression):
             shape = self.value.shape
@@ -49,6 +60,18 @@ class Point(zdx.Expression, Unitful):
     unit: str = "rad"
 
     def __init__(self, position=None, *, unit="rad", alias=None):
+        """Store one angular position, defaulting to the optical axis.
+
+        Parameters
+        ----------
+        position : ArrayLike or Expression or None
+            Physical (x, y) position; None is the optical axis.
+        unit : str
+            Angular coordinate unit; rad by default. Evaluation returns a (1, 2)
+            radian array.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         self.position = zdx.as_array(
             np.zeros(2) if position is None else position, dtype=float
         )
@@ -72,6 +95,16 @@ class Companions(Point):
     angles run from physical ``+y`` towards ``+x`` in degrees.
     Scalar separation or angle broadcasts across its companion vector. Empty
     vectors describe the primary alone.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    positions = dl.Companions(separation=[0.2, 0.4], pa=[0, 90], unit="arcsec")
+    print(positions)
+    print(positions.resolve())  # Primary followed by companions, in radians.
+    ```
     """
 
     # Inherited fields
@@ -84,6 +117,23 @@ class Companions(Point):
     def __init__(
         self, position=None, separation=(), pa=0.0, *, unit="arcsec", alias=None
     ):
+        """Store a primary position and relative companion geometry.
+
+        Parameters
+        ----------
+        position : ArrayLike or Expression or None
+            Physical (x, y) position; None is the optical axis.
+        separation : ArrayLike or Expression
+            Primary-to-companion separation in unit. Scalars or companion vectors
+            are accepted.
+        pa : ArrayLike or Expression
+            Position angle in degrees from +y towards +x; broadcasts against
+            separation.
+        unit : str
+            Angular position/separation unit; arcsec by default. PA remains degrees.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         super().__init__(position, unit=unit, alias=alias)
         self.separation = zdx.as_array(separation, dtype=float)
         self.pa = zdx.as_array(pa, dtype=float)
@@ -119,6 +169,21 @@ class Binary(Companions):
     def __init__(
         self, position=None, separation=0.0, pa=0.0, *, unit="arcsec", alias=None
     ):
+        """Store scalar binary geometry about the primary.
+
+        Parameters
+        ----------
+        position : ArrayLike or Expression or None
+            Physical (x, y) position; None is the optical axis.
+        separation : float or Expression
+            Single primary-to-companion separation in unit.
+        pa : float or Expression
+            Single position angle in degrees from +y towards +x.
+        unit : str
+            Angular position/separation unit; arcsec by default. PA remains degrees.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         super().__init__(position, separation, pa, unit=unit, alias=alias)
         for name in ("separation", "pa"):
             value = getattr(self, name)

@@ -18,6 +18,20 @@ class Optic(CurrentOptic):
     """
 
     def __init__(self, transmission=None, opd=None, phase=None, normalise=False):
+        """Retain released modulation broadcasting and warn about migration.
+
+        Parameters
+        ----------
+        transmission : ArrayLike or Expression or None
+            Real amplitude transmission; None is unity. Released singleton spatial
+            axes may expand to the broadcast modulation shape.
+        opd : ArrayLike or Expression or None
+            Optical path difference in metres; None is zero.
+        phase : ArrayLike or Expression or None
+            Additional phase in radians; None is zero.
+        normalise : bool
+            Set transmitted power to one when true; false by default.
+        """
         warn_deprecated("compat.Optic", "Optic", "Optic(transmission=..., opd=...)")
         super().__init__(transmission, opd, phase, normalise)
         shapes = [

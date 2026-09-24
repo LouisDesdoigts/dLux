@@ -23,6 +23,21 @@ class ASM(Series):
     layers: OrderedDict
 
     def __init__(self, transfer, n_in=None, n_out=None, *, alias=None):
+        """Build a prepared forward-transform, transfer and inverse-transform series.
+
+        Parameters
+        ----------
+        transfer : tuple of Arrays
+            Separable complex Fourier transfer vectors in physical (x, y) order,
+            using raw FFT frequency order.
+        n_in : int, pair of ints or None
+            Input counts in (x, y) order; None uses transfer lengths. Resizing
+            preserves centre and parity.
+        n_out : int, pair of ints or None
+            Output counts in (x, y) order; None retains input counts.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         transfer = Chirp(transfer)
         n_fft = transfer.n
         n_in = n_fft if n_in is None else as_size(n_in, 2, "n_in")

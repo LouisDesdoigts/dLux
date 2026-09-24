@@ -21,15 +21,6 @@ class SoummerFPMLayer(OpticalLayer):
     propagator is configured for inverse propagation when returning the modified
     field to the input pupil grid.
 
-    Parameters
-    ----------
-    optic : zodiax.Module
-        Callable optical layer or composition, such as ``Sequential``, applied on
-        the sampled focal grid. It must return a wavefront on that same grid and
-        act as the identity outside the compact region represented by the grid.
-    propagator : dlu.Propagator
-        Forward numerical propagator with explicit output sampling.
-
     References
     ----------
     Soummer, R., Pueyo, L., Sivaramakrishnan, A., & Vanderbei, R. J. (2007),
@@ -81,6 +72,8 @@ class SoummerFPMLayer(OpticalLayer):
             It must preserve focal sampling; complex and Jones masks are supported.
         propagator : dlu.Propagator
             MFT-based focal propagator used forward and in reverse.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if not isinstance(optic, zdx.Module) or not callable(
             getattr(optic, "apply", None)

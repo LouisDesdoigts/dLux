@@ -21,6 +21,19 @@ class Photometry(zdx.Module):
     BandPass defines integration widths; responses multiply without normalisation.
     Spectrum owns incident brightness and normalisation; filter and detector losses
     are applied afterwards without changing that scale.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    band = dl.BandPass(range=(500, 800), n=3, unit="nm")
+    photometry = dl.Photometry(dl.Blackbody(5000, flux=1000),
+                               filter=dl.Filter(0.8), qe=dl.Filter(0.9))
+    weights = photometry(band)
+    print(weights)
+    total = weights.integrate()
+    ```
     """
 
     spectrum: BaseSpectrum | Weights | None = None
@@ -33,6 +46,20 @@ class Photometry(zdx.Module):
         ``spectrum=None`` uses a flat shape containing one photon, or permits
         response-only use through response or apply. QE has the same curve contract
         as a filter; it needs no separate class.
+
+        Parameters
+        ----------
+        spectrum : BaseSpectrum, Weights, Array, Expression or None
+            Incident spectrum; None uses a flat one-photon shape. Existing Weights
+            receive point-sampled responses without reintegration.
+        filter : Filter, Array, Expression or None
+            Absolute spectral transmission. None is unity; numerical values are
+            promoted to Filter.
+        qe : Filter, Array, Expression or None
+            Detector quantum efficiency with the same response contract as Filter.
+            None is unity.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         if spectrum is None or isinstance(spectrum, (BaseSpectrum, Weights)):
             self.spectrum = spectrum

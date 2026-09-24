@@ -25,6 +25,17 @@ class Profile(zdx.Module):
     final two spatial axes are integrated and normalised; earlier axes are batches.
     Grids supply SI coordinates, including their centre, without recentering.
     Ordinary resolution prepares stored parameters and retains this sampling owner.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    grid = dl.Grid(8, d=0.1, unit="arcsec")
+    profile = dl.Profile(dl.Gaussian(std=1e-7))
+    masses = profile.sample(grid)
+    print(masses.shape)  # Pixel masses, with unit sum by default.
+    ```
     """
 
     profile: Array | zdx.Expression
@@ -41,6 +52,23 @@ class Profile(zdx.Module):
         ``normalise=False``, output masses retain the density's scale and include
         the SI pixel area. Density samples must be non-negative with nonzero sum;
         no clipping or runtime value checks are added.
+
+        Parameters
+        ----------
+        profile : Field, Array or Expression
+            Spatial density or sampled profile; arrays need their input grid to
+            locate samples.
+        grid : Grid or None
+            Native density sampling for arrays. None lets an analytic expression
+            evaluate on the requested output grid.
+        oversample : int or pair of ints
+            Positive subpixel factors in physical (x, y) order; one uses the
+            requested pixels directly.
+        normalise : bool
+            Normalise integrated pixel masses to unit sum when true (default); false
+            retains density scale and pixel area.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         # Unpack sampled Fields; raw density arrays must carry their own source grid.
         if isinstance(profile, grids.Field):
@@ -196,6 +224,18 @@ class Jitter(zdx.Expression, Unitful):
     Expression for another profile; it receives local ``coordinates`` and
     ``pixel_scale`` in this Jitter's unit.
     Kernel values are dimensionless masses with final shape (ny, nx).
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+
+    # Pixel units refer to native image pixels, even with optical oversampling.
+    grid = dl.Grid(9, d=0.1, unit="arcsec")
+    jitter = dl.Jitter(0.5, kernel_size=5)
+    print(jitter)
+    kernel = jitter.resolve(grid=grid)
+    ```
     """
 
     profile: zdx.Expression

@@ -31,6 +31,19 @@ class Field(zdx.Module):
     NumPy order, while grid values use physical-axis order; all preceding axes are
     preserved as vectorisation axes. Field operations are immutable and return a new
     object carrying sampling consistent with the transformed data.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    # Sampled values retain their own coordinate grid.
+    grid = dl.Grid(8, diam=1.0)
+    field = dl.Field(dl.Gaussian(std=0.2, grid=grid).resolve(), grid)
+    print(field.resample(dl.Grid(12, diam=1.0)))
+    values = field.sample((np.array([0.0, 0.1]), np.array([0.0, 0.1])))
+    ```
     """
 
     array: Array
@@ -46,6 +59,8 @@ class Field(zdx.Module):
             ordinary batches. The input numerical dtype is retained.
         grid : UnitSpec
             Coordinate sampling matched to the array's final grid.ndim axes.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
         """
         array = zdx.as_array(array)
         if not isinstance(grid, UnitSpec):

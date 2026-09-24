@@ -20,6 +20,21 @@ class Image(intensity_module.Intensity):
     sampling is retained. Arithmetic and resampling use the ordinary Field API.
     Noise methods draw samples; their parameters are explicit inputs and no
     probability distribution is attached to the result.
+
+    Examples
+    --------
+    ```python
+    import dLux as dl
+    import jax.numpy as np
+
+    import jax.random as jr
+
+    # Keep expected detector samples separate from a noisy realisation.
+    grid = dl.Grid(8, d=0.1, unit="arcsec")
+    image = dl.Image(np.ones((8, 8)) * 10, grid)
+    simulated = image.simulate(jr.key(0), n_frames=2, read_noise=1.0)
+    print(simulated)
+    ```
     """
 
     # Inherited fields
@@ -33,6 +48,18 @@ class Image(intensity_module.Intensity):
         *,
         alias=None,
     ):
+        """Wrap detector samples or retain the sampling of an Intensity.
+
+        Parameters
+        ----------
+        data : Array or Intensity
+            Real (..., ny, nx) detector samples, or an Intensity whose sampling is
+            retained.
+        grid : Grid or None
+            Required with an array; omit when data is an Intensity.
+        alias : mapping or sequence of pairs, optional
+            Explicit Zodiax parameter-path aliases; None defines no aliases.
+        """
         if isinstance(data, intensity_module.Intensity):
             if grid is not None:
                 raise ValueError("grid must not be supplied with an Intensity.")
