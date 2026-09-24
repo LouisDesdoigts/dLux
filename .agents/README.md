@@ -19,3 +19,14 @@ The canonical skills are:
 - `dlux-testing`: behavioural, numerical, and differentiable validation;
 - `dlux-documentation`: docstrings, tutorials, generation scripts, API pages, and UMLs;
 - `dlux-usage`: building models, simulations, optimisation, and inference with dLux.
+
+Shared API facts live in [development/contracts.md](dlux-development/contracts.md).
+Read only the sections relevant to the task. The implementation and the user's current
+accepted decisions take precedence if this map drifts; update the map, not the code,
+when the code already implements the agreed contract.
+
+Documentation ownership is recorded in
+[documentation/generation.md](dlux-documentation/generation.md). In particular,
+`docs/tutorials/` is exported; `docs/overviews/` is authored. Release progress, test
+counts and unresolved design proposals belong in local review records, not permanent
+skill instructions. Updating these guides does not authorise committing them.

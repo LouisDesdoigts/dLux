@@ -1,84 +1,85 @@
 # dLux agent guide
 
-This file defines the repository-wide working agreement for AI-assisted development
-in dLux. It is intentionally vendor-neutral. Use the task-specific material under
-`.agents/` when it matches the work; do not load unrelated skills or references.
-
-Available workflows are:
-
-- `dlux-development` for package implementation, API design, compatibility, and releases;
-- `dlux-testing` for behavioural, numerical, and transformation validation;
-- `dlux-documentation` for docstrings, tutorials, API generation, and UML diagrams;
-- `dlux-usage` for building models, instruments, simulations, and inference with dLux.
+This repository develops a research-oriented, differentiable optics package. Code
+should be understandable and extendable by a new postgraduate student with limited
+Python experience. Prefer visible numerical steps and small, useful contracts over
+framework machinery that tries to prevent every possible misuse.
 
 ## Working agreement
 
-- Inspect the affected source, tests, neighbouring modules, and relevant history
-  before proposing a new pattern.
-- Establish the public and physical contract before changing an API, including units,
-  shapes, axes, normalisation, vectorisation, and differentiation where relevant.
-- Prefer the smallest coherent change and discuss broad redesigns before implementing
-  them. Preserve unrelated user work.
-- During exploratory API development, do not update tests until the direction is
-  approved. Once approved, test public behaviour rather than implementation details.
-- Do not commit unless explicitly asked. Before a requested commit, inspect the full
-  diff and run validation proportional to the change.
+- Follow the user's current scope. Code, tests, documentation and compatibility can
+  be separate passes; permission for one does not imply a rewrite of all four.
+- Preserve existing local work. Do not commit or push without an explicit request.
+  Do not include agent guidance, review notes or exploratory files in a requested
+  code commit unless the user also asks for those files.
+- Read the implementation and its consumers before changing an interface. State
+  meaningful units, shapes, normalisation and ownership before implementing it.
+- Make clear, small improvements directly within an authorised review. Record
+  substantial or ambiguous design changes for discussion instead of silently
+  broadening the architecture.
+- Treat `docs/tutorials/**` as exported output, including its overview/index Markdown.
+  Edit notebooks or source indexes in the tutorial repository and export/synchronise;
+  never patch those generated pages directly. Module Overviews under `docs/overviews/`
+  are separate authored guides.
+- Treat accepted development changes as the current API. Do not preserve abandoned,
+  unreleased designs merely because an old test, notebook or guide uses them.
 
-## Package boundaries
+## Skills
 
-- `dLux.utils` is the independent, functional numerical foundation. It must not
-  import the core object model. Internal core code calls utilities through
-  `import dLux.utils as dlu`.
-- Core modules own fields, grids, sources, and systems. `dLux.parametric` owns
-  differentiable or context-resolved values; `dLux.layers` owns transformations
-  applied to fields or detector data.
-- `builders` owns setup-time construction. `prebuilt` owns named templates composed
-  from the general builders and must document their fidelity.
-- Declare public objects through module `__all__` exports and document them at source.
-- Put module imports at module scope. Resolve unclear ownership instead of hiding
-  circular imports inside functions where a cleaner design is available.
+Read the relevant workflow and its linked references:
 
-## Code and API principles
+- [Development](.agents/dlux-development/SKILL.md): implementation and architecture.
+- [Testing](.agents/dlux-testing/SKILL.md): behavioral and numerical validation.
+- [Documentation](.agents/dlux-documentation/SKILL.md): user explanations and generation.
+- [Usage](.agents/dlux-usage/SKILL.md): models, simulations and inference.
 
-- Optimise for a new graduate student being able to read, verify, and extend the code.
-- Lay non-trivial calculations out as an algorithmic recipe: concise logical blocks,
-  separated by whitespace and introduced by useful comments.
-- Keep adjacent lines visually balanced. Preserve trailing commas in intentional
-  multiline structures, but keep a complete operation on one line when it fits
-  clearly.
-- Use concise domain names and avoid abstractions that do not encode a shared concept,
-  invariant, extension point, or meaningful reuse.
-- Put `__init__` first in every concrete class. Keep module-level functions before
-  classes and order classes from base contracts to concrete implementations.
-- Separate construction-time topology and validation from compiled numerical
-  evaluation. Do not add runtime checks or JAX control flow without considering their
-  tracing, compilation, and execution costs.
-- Preserve units, physical-axis ordering, leading dimensions, normalisation ownership,
-  and differentiability explicitly. Never infer a physical inverse from a convenient
-  numerical operation without deriving and validating it.
-- Use British scientific vocabulary in prose and new APIs while retaining the exact
-  spelling of existing public identifiers.
+The current ownership and numerical contracts are collected in
+[contracts.md](.agents/dlux-development/contracts.md). Check actual source when
+working in an area that has changed; report conflicts rather than restoring stale
+behaviour. Keep shared contracts in this reference instead of copying them into
+all four skills.
 
-## Documentation and generated files
+## Implementation principles
 
-- Give substantial public APIs complete contracts and concise examples. Keep simple
-  wrappers and private helpers brief unless they carry a non-obvious contract.
-- Treat API Markdown, UML diagrams, and exported tutorial Markdown as generated files.
-  Update docstrings, exports, notebooks, or generators and then regenerate them.
-- Keep exploratory notebooks and working Markdown untracked unless publication is
-  explicitly requested.
+- Ordinary models inherit `zodiax.Module`. Use Expressions for definitions that can
+  resolve to arrays and domain base classes only when they provide a useful shared
+  contract. Do not reintroduce a dLux Base alias or empty marker hierarchy.
+- Use ordinary assignments in constructors and inherited immutable updates elsewhere.
+  No generic field-assignment helpers, custom `.set()` interception, automatic aliases,
+  or blanket `**kwargs` constructor forwarding.
+- Convert numerical leaves with `zdx.as_array`, preserving Expressions and allowed
+  None values. Request Python dtype categories such as `float` or `complex`; precision
+  comes from JAX configuration, not per-class precision arguments.
+- Use `jax.numpy as np`; do not import ordinary NumPy in package code. Do not add
+  `equinox.error_if`, callbacks, or runtime validation frameworks. Useful shape and
+  setup checks are welcome; invalid use may fail naturally.
+- Keep numerical parameters differentiable and topology explicit. Simple Python
+  loops over a small fixed collection are often clearer and trace away under JIT.
+- Preserve Equinox printing. Declare meaningful defaults on fields, so ordinary
+  settings disappear from the representation without custom printing or pdoc. Keep
+  interpolation methods visible even at their constructor default; printing and
+  static/JIT choices are separate decisions.
+- Prefer `import dLux.utils as dlu` in core. Inside utility subpackages use clear
+  relative ownership imports to avoid facade cycles. Utilities normally own numerical
+  work, but a hard ban on core imports must not force unnecessary abstractions.
+- Reuse existing interpolation, sampling, basis and propagation operations. Keep
+  one-use helpers near their caller; a generic helper file is not a destination for
+  calculations that already have an owner.
 
-## Validation
+## Validation and reporting
 
-- Run focused tests while iterating and the full suite before a requested commit.
-- Exercise eager, JIT, vectorised, and differentiated paths only where the public
-  contract promises them. Coverage is a diagnostic, not a reason for low-value tests.
-- Format with `black .` and lint with `ruff check .`; inspect the result for degraded
-  visual layout rather than treating formatter output as the design target.
-- Run the fast test suite with `pytest`; include slow tests only when the affected
-  contract requires them.
-- Build documentation with `zensical build --strict` after changing documentation,
-  public exports, generated API pages, or navigation.
+During design, use small local experiments without rewriting tests unless authorised.
+Once test updates are requested, migrate them to the accepted API and preserve
+meaningful behavioural checks. Do not retain obsolete APIs just to satisfy tests,
+blanket-skip failures, or loosen tolerances to hide an unexplained mismatch.
 
-Before finishing, review every modified function for clear stages, package ownership,
-physical correctness, and consistency with the surrounding dLux code.
+Use the intended project environment and verify the actual import locations. Run
+focused checks while editing, then the full suite when the task requests it. Do not repeatedly run the full suite
+  during an unsettled design pass. Report
+whether sibling checkouts or installed dependency releases were used. Distinguish
+passing assertions, coverage gates, and a remote Python-version matrix.
+
+Format and lint changed Python files, then review the result for readability. Do not
+run repository-wide formatting that touches unrelated work. Do not regenerate or
+build documentation during a code-only task. Keep review notes local unless the user
+asks to publish them.

@@ -1,67 +1,73 @@
-# Documentation content
+# dLux explanations and API content
 
-Use five complementary forms:
+Write for users who want to build and fit an optical model, including new postgraduate
+students who do not know Zodiax. Explain what they can do before teaching internals.
+Use the current [contracts](../dlux-development/contracts.md) and check source when an
+example comes from an older API.
 
-- beginner tutorials provide an ordered path through the dLux mental model;
-- how-to guides answer one concrete task;
-- advanced case studies solve realistic scientific or instrumental problems;
-- concept pages explain architecture and numerical conventions;
-- API pages define stable public contracts.
+## Module Overviews
 
-Public documentation should state units, shapes, axes, normalisation, leading
-dimensions, limitations, and relevant differentiability. Add concise executable
-examples to core classes and behaviours where the interaction is not obvious.
-A public class or method must document its complete local contract. Links may provide
-broader context, but users must not need to leave the API they are reading to learn an
-argument, return value, unit, shape, default, limitation, or basic usage. Do not use
-placeholder descriptions such as "as defined by", "arguments follow", or "see the
-base implementation" for public inputs.
+Start with a few realistic, concentrated examples. Each numbered section should briefly
+say what it demonstrates. Use existing dLux utilities rather than constructing arbitrary
+vectors or recreating numerical machinery for setup. For example, generate a small
+Zernike basis, place it in Basis, then show that an Optic accepts either that definition
+or the corresponding array. Show ordinary object representations without special
+printing settings or type-name assertions.
 
-Treat documentation coverage as four separate responsibilities:
+Add complexity only when it illustrates a user task. A first example does not need Map,
+Units, aliases, unbound operators or external State. Explain dynamic coordinate-dependent
+parameterisations when they become useful. Public internal construction results such as
+pasted-basis metadata need not be taught as user-managed APIs.
 
-- the class docstring explains the concept, physical meaning, limitations, and main
-  interactions;
-- the constructor docstring defines every construction argument and its contract;
-- each public method documents its complete local calling and return contract;
-- the module overview explains how its related objects form a normal workflow.
+Show a small representative set of convenience constructors, then a table of the
+remaining equivalent patterns. Diagrams should reflect real current classes and show
+where call/apply/evaluate are defined. Separate large numerical-transform diagrams when
+one full inheritance graph would obscure the overview.
 
-Completing one responsibility does not establish the others. Audit them separately.
+Put advanced subclassing and API contracts after the core use cases. Prefer compact
+input/output type-and-shape tables with short summaries over long prose-only lists.
+These contracts should be useful foundations for tests.
 
-Examples should be minimal walkthroughs of the documented class and its principal
-behaviours. Divide multi-stage examples into short commented blocks, use realistic
-physical units, and identify important output types. Avoid unrelated package
-machinery, but include every setup step required for the example to execute on its
-own. Small components need one focused use; major system classes should show their
-distinct primary entry points.
+## Docstrings
 
-Add examples to principal user entry points and behaviour whose interaction is not
-obvious. Do not add them mechanically to abstract extension points, compatibility
-aliases, obvious wrappers or shapes, or internal construction objects. Develop
-substantial examples one class at a time, review their narrative, and execute them
-against the checked-out source.
+Audit four responsibilities separately: the class explains the concept and physical
+contract; its constructor documents construction arguments; methods explain their
+local inputs and outputs; the module overview teaches a normal workflow.
 
-Document every public concrete-class constructor. Constructor docstrings must cover
-all arguments, accepted types, shapes, units, defaults, exclusive combinations,
-broadcasting, validation, and important construction-time effects. Simple
-constructors may be concise, but still need a useful `Parameters` section; a summary
-that merely restates "initialise" is insufficient. Keep the broader conceptual and
-physical contract on the class docstring.
+Use NumPy-style Parameters and Returns sections. Every public concrete constructor
+must document its arguments, including accepted objects, units, shapes, defaults,
+exclusive combinations and important construction-time effects. Inherited constructors
+can retain their complete parent documentation. Do not replace a useful contract with
+an "initialise" summary or a link that requires reading another implementation.
 
-Apply the same ownership test to every class method: a method should either be a
-deliberate public API with a complete usable contract, or an implementation detail
-with a private name. Do not privatise useful behaviour merely to avoid documenting
-it. Public method documentation must let a user call the method without reading its
-implementation, including accepted objects, units, shapes and axis order, defaults,
-return types and containers, immutable update behaviour, and important limitations.
-One-line summaries are sufficient only for genuinely obvious properties or wrappers.
-When an override preserves an inherited contract exactly, prefer inheriting the base
-documentation over replacing it with a less informative summary.
+Substantial classes need a small complete runnable example under Examples, using a
+Python code fence. Introduce the object, demonstrate its main use, and name the result.
+For system entry points, show the distinct modelling stages. Include imports and setup;
+avoid undefined placeholder arrays. Small shapes, obvious wrappers, abstract bases and
+internal construction objects do not each need a redundant example.
 
-Audit convenience constructors and aliases against the canonical API. Remove
-unreleased redundant routes; retain released routes only through the compatibility
-policy, with an actionable migration warning where they are deprecated.
+Methods must state meaningful return types, units, axis order, normalisation and
+limitations. Obvious properties or exact wrappers may use one precise sentence.
+Preserve an inherited method's contract when an override does not change it. Avoid
+mechanical boilerplate and do not claim checks or behaviour the code does not implement.
 
-The documentation landing page should explain these routes, expose the stable version,
-link the package and UML maps, point directly to the utilities guide, and end with
-clear next steps. Tutorial metadata should drive the finder, navigation, prerequisites,
-CI tier, and gallery rather than duplicating those facts manually.
+Use British scientific vocabulary, preserve identifier spelling, and do not leave a
+blank line before closing quotes. Run examples against the checkout, including existing
+examples affected by API changes. Reference `origin/reparametrisation`'s documentation
+pass (`05d40548`, `57abb0c9`, `cace96f7`) for the established format, not its obsolete APIs.
+
+Keep Imager's unweighted PSF separate from its photometry and detector image.
+OpticalSystem deliberately retains default array returns and weighted propagation;
+do not describe its return flags as identical to Imager's stage methods.
+Sources store definitions; systems model them. Keep numerical introductions focused
+on the numerical class without unnecessary Wavefront or Optic setup.
+
+## Source ownership
+
+Authored Module Overviews are edited directly. Generated API listings/UML pages are
+regenerated through their script. Every page under `docs/tutorials/`, including
+overview/index Markdown, is maintained in the tutorial repository and exported or
+synchronised again. Root migration and changelog pages are authored release guides,
+not notebook exports. Do not create a second introductory tutorial in a standalone
+Markdown page to avoid the notebook workflow. Scope these workflows to the user's
+task; a code-only review does not authorise rewriting the documentation tree.

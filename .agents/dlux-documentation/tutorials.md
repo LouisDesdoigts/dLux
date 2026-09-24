@@ -2,7 +2,9 @@
 
 Tutorial notebooks live in the external
 [`dLux_tutorials`](https://github.com/LouisDesdoigts/dLux_tutorials) repository and are
-the source of truth for their exported pages. Review the existing published notebooks
+the source of truth for their exported pages. Locate and verify the intended checkout
+and branch before editing; a local directory name does not establish that it matches
+published main. When the user requests main, start from main rather than local drafts. Review the existing published notebooks
 before introducing a new narrative or plotting pattern; the phase-retrieval,
 detector-calibration, optical-system, and coronagraph tutorials are the principal style
 references.
@@ -27,6 +29,12 @@ The expected workflow is:
 5. Move or synchronise those generated files into the corresponding dLux documentation
    location, then build the dLux documentation with `zensical build --strict`.
 
+Section `overview.md` files are authored in the tutorial repository; the exporter
+copies them and translates notebook links. They are generated/synchronised outputs
+under dLux's `docs/tutorials/`, just like notebook pages. The current directory export
+covers introductory, basics and advanced sections; export an old tutorial explicitly
+when needed. The exporter reads existing outputs; it does not execute notebooks.
+
 Never edit an exported tutorial Markdown page or its generated assets inside the dLux
 documentation tree. Fix content in the source notebook; fix systematic export problems
 in `dLux_tutorials/export.py`; then regenerate and replace the derived files. Do not
@@ -35,18 +43,17 @@ change and leave the notebook inconsistent with the published documentation.
 
 ## Notebook setup
 
-Begin each notebook with a small reusable setup cell containing its imports and the
-shared Matplotlib configuration. Keep this cell easy to copy between tutorials and
-change it only when the tutorial genuinely needs different behaviour.
+Keep imports and required setup small. Lead with the optical task; include shared
+Matplotlib configuration only when the notebook needs plots, and keep it separate
+from model construction.
 
-Start the setup cell with ``## COLLAPSE: Plotting setup`` so imports, plotting
-defaults, colormaps, and reusable presentation helpers remain available without
-dominating the exported tutorial.
+A plotting-only setup cell can use ``## COLLAPSE: Plotting setup`` so display
+configuration does not dominate the exported tutorial. Do not hide essential model
+imports or introduce array print settings as introductory setup.
 
-The shared setup should establish the default intensity map, lower image origin,
-figure resolution, typography, normalisations, and copies of any colormaps whose bad
-values are customised. Do not scatter global plotting configuration throughout the
-notebook.
+Use only plotting setup the example needs. Keep shared choices in one place, but do
+not make typography, global print settings or a plotting framework prerequisites for
+understanding a small model.
 
 ## Scientific plots
 
@@ -72,7 +79,7 @@ quantity or comparison rather than restate the surrounding prose. Inspect every
 rendered figure for clipping, unreadable labels, misleading ranges, and colour bars
 that do not match the plotted data.
 
-Use a baseline figure size of 5 inches in both width and height per image panel. For
+A useful starting figure size is 5 inches in both width and height per image panel. For
 example, a two-panel, one-row image comparison should normally begin at
 ``figsize=(10, 5)``. Keep colour bars attached to the axes they
 describe; where Matplotlib's ordinary layout changes the image size or leaves an

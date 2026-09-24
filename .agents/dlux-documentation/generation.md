@@ -1,41 +1,51 @@
-# Documentation generation and UMLs
+# Documentation ownership, generation and UMLs
 
-Treat generated documentation as derived state:
+Check the source of a page before editing it. A file under docs is not necessarily an
+authored document, and a root-level page is not necessarily a notebook export.
 
-- API pages derive from public exports and source docstrings;
-- UML and package diagrams derive from module ownership and inheritance;
-- tutorial Markdown and figures derive from executed notebooks;
-- tutorial indexes and navigation should derive from validated metadata where possible.
+| Output/location | Source of truth | Editing route |
+| --- | --- | --- |
+| Class/method API content | Source docstrings | Edit docstrings; build the site |
+| `docs/API/**` and generated UML | Public exports and `docs/scripts/generate_api_mds.py` | Fix generator/exports, then regenerate |
+| `docs/overviews/**/overview.md` | Authored Module Overviews | Edit directly; execute examples and refresh shown results |
+| `docs/tutorials/**` Markdown/assets | Tutorial notebooks and source indexes | Edit upstream source, export, then synchronise |
+| `docs/migration.md` | Authored release migration guide | Check replacements against current code and the released reference |
+| `CHANGELOG.md` | Authored release notes | Edit this file; `docs/changelog.md` includes it |
+| Other root docs pages | Varies: authored guide, snippet include or link placeholder | Inspect content, history and navigation before changing |
+| `site/` | Built site | Rebuild; do not edit or commit build output |
 
-Inspect and update the generator when output structure is wrong. Regenerate all
-affected pages after moving, renaming, exporting, or changing inheritance of public
-objects. Check diagram nodes, links, hover content, section maps, and landing-page
-routes as well as whether the build succeeds.
+Do not manually repair tutorial exports, even for a small code fix or index link.
+Do not automatically publish an untracked stub just because local navigation names it.
+Avoid parallel guides teaching the same workflow; link to the maintained owner.
 
-The API Markdown and UML diagrams share one source generator. Run it before every
-documentation build that can affect public objects, module ownership, inheritance,
-API navigation, or diagrams:
+## API generation
+
+When exports, source locations, class structure or generated diagrams change, run:
 
 ```bash
-python docs/scripts/generate_api_mds.py
-zensical build --strict
+PYTHONPATH=src python docs/scripts/generate_api_mds.py
+PYTHONPATH=src python -m zensical build --strict
 ```
 
-These are distinct validation stages. API generation checks derived structure;
-Zensical checks the assembled site; rendered inspection checks layout, links, and
-visual clarity; notebook execution checks tutorial behaviour. Do not report one as
-evidence that the others passed. Source docstring changes may leave generated API
-Markdown unchanged because the documentation engine resolves them during the build.
+Use a verified project interpreter containing the dependencies and documentation tools.
+The current generator uses the Fields, Layers, Prebuilt, Systems, Utils and Compat
+sections, follows nested utility packages, and skips excluded experiments. Its class
+rendering merges constructor documentation with the class and exposes inherited
+constructor contracts. Keep one constructor argument table rather than duplicating
+it in the class summary. Module Overviews remain separate from generated API pages.
 
-Before running documentation tools, verify that one environment contains both the
-project dependencies and the documentation toolchain. Do not install missing tools
-into the system or base Python as an automatic fallback. Report an environment
-mismatch when the intended project environment cannot perform the build.
+Source docstring changes alone can leave generated Markdown unchanged because the
+renderer reads them at build time. Regenerate only when derived structure is affected.
+Check diagram links/anchors, defining methods, layout and actual inheritance. A page
+count or successful build does not establish that its examples work.
 
-Do not treat a successful Zensical build against stale generated pages as sufficient.
-Inspect the regenerated diagrams at documentation width and confirm that their
-structure, labels, links, and hover summaries remain readable.
+## Validation and publication
 
-Execute notebooks into a build directory. Keep source outputs controlled, use stable
-asset names, reject oversized payloads and broken links, and preserve separate smoke,
-full, and extended execution tiers.
+Execute affected authored examples against the intended package, then build and inspect
+the rendered pages. Notebook execution, export, strict build, link validation and visual
+inspection are distinct checks. Report only those performed. Do not install tools into
+the system/base environment as an automatic fallback.
+
+Before a documentation commit, check the selected tree, not only the development
+checkout: navigation must not depend on untracked drafts, excluded experimental APIs
+or unrelated local edits. Leave agent guidance and review records out unless requested.
