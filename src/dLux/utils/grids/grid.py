@@ -107,6 +107,45 @@ class Grid(UnitSpec):
         """A Grid always describes two physical coordinate dimensions."""
         return 2
 
+    def check_sampling(self, other, message="Grid sampling must match."):
+        """Check equivalent physical sampling during setup; return this grid.
+
+        Expressions remain deferred. Traced arrays receive structural checks only;
+        numerical equality is checked eagerly without compiled runtime callbacks.
+        """
+        if self.n != other.n or self.d is None or other.d is None:
+            raise ValueError(message)
+        if dlu.unit_dimension(self.unit) != dlu.unit_dimension(other.unit):
+            raise ValueError(message)
+
+        # Compare spacing and centres in SI units, allowing broadcast metadata.
+        values = (self.d, self.c, other.d, other.c)
+        if any(isinstance(value, zdx.Expression) for value in values):
+            return self
+        first_center = np.zeros_like(self.d) if self.c is None else self.c
+        second_center = np.zeros_like(other.d) if other.c is None else other.c
+        try:
+            np.broadcast_shapes(self.d.shape, other.d.shape)
+            np.broadcast_shapes(first_center.shape, second_center.shape)
+        except ValueError as error:
+            raise ValueError(message) from error
+
+        first_factor = dlu.unit_factor(self.unit)
+        second_factor = dlu.unit_factor(other.unit)
+        spacing_equal = np.allclose(
+            self.d * first_factor, other.d * second_factor, rtol=1e-6, atol=0
+        )
+        center_equal = np.allclose(
+            first_center * first_factor,
+            second_center * second_factor,
+            rtol=1e-6,
+            atol=0,
+        )
+        equal = spacing_equal & center_equal
+        if not isinstance(equal, core.Tracer) and not bool(equal):
+            raise ValueError(message)
+        return self
+
     def frequency(self, n=None) -> Grid:
         """Return the centred FFT dual grid in reciprocal SI units.
 

@@ -259,6 +259,7 @@ class Polynomial(Sampled, ParametricBasis):
         transform=None,
         strict=False,
         unit=None,
+        empty=False,
         alias=None,
     ):
         """Initialise coefficients and fixed polynomial term topology.
@@ -284,6 +285,8 @@ class Polynomial(Sampled, ParametricBasis):
             Map the evaluation coordinates before expanding monomials.
         strict : bool
             Reject runtime replacement of stored sampling or a stored transform.
+        empty : bool
+            Retain omitted coefficients as None; otherwise initialise stored zeros.
         unit : str or None
             Output unit, converted after contraction. None leaves values unchanged.
         alias : mapping or None
@@ -293,7 +296,7 @@ class Polynomial(Sampled, ParametricBasis):
         self.powers = polynomial_powers(degree, ndim, powers=powers, degrees=degrees)
         if self.powers.shape[1] == 0:
             raise ValueError("Polynomial requires at least one term.")
-        self.coeffs = initialise_coeffs(coeffs, (self.powers.shape[1],))
+        self.coeffs = initialise_coeffs(coeffs, (self.powers.shape[1],), empty=empty)
         self.unit = self.validate_unit(unit)
 
     @property
@@ -342,6 +345,8 @@ class Polynomial(Sampled, ParametricBasis):
             **context,
         )
         coeffs = zdx.resolve(self.coeffs, **context)
+        if coeffs is None or isinstance(coeffs, zdx.Expression):
+            raise zdx.Unresolved("Polynomial coefficients need their required context.")
         values = eval_polynomial(context["coordinates"], coeffs, self.powers)
         return values * unit_factor(self.unit)
 

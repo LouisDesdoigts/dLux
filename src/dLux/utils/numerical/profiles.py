@@ -136,10 +136,8 @@ class Profile(zdx.Module):
         # Custom Gaussian subclasses retain their own log_profile calculation.
         if type(profile) is Gaussian:
             local = profile.sampling_context(ndim=2, **context)
-            profile = profile.resolve_children(**local)
-            logarithms = self._discrete_log_gaussian(
-                local["coordinates"], profile.mean, profile.std, 2
-            )
+            mean, std = zdx.resolve((profile.mean, profile.std), **local)
+            logarithms = self._discrete_log_gaussian(local["coordinates"], mean, std, 2)
             return softmax(logarithms, axis=axis)
 
         # Inspect the class: Module attribute raising could otherwise pick up a child

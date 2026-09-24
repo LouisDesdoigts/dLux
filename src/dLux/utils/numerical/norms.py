@@ -166,5 +166,5 @@ class Norm(zdx.Expression):
 
     def evaluate(self, **context):
         """Resolve stored operands and return their measurement as a JAX array."""
-        self = self.resolve_children(**context)
-        return norm(self.x, self.mode, self.weights, self.axis, self.keepdims)
+        x, weights = zdx.resolve((self.x, self.weights), **context)
+        return norm(x, self.mode, weights, self.axis, self.keepdims)

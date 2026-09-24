@@ -1,4 +1,4 @@
-"""Tests for dLux.grids."""
+"""Regular grids, resize specifications and coordinate transforms."""
 
 import jax
 import jax.numpy as np
@@ -8,27 +8,59 @@ import zodiax as zdx
 import dLux as dl
 import dLux.utils as dlu
 
-from .helpers import assert_differentiable, assert_jittable
+from tests.helpers import assert_differentiable, assert_jittable, assert_tree_allclose
 
 
 class TestSpecifications:
-    @pytest.mark.parametrize("n", [(1,), (3,), (1, 4), (3, 1, 2)])
-    @pytest.mark.parametrize("indexing", ["xy", "ij"])
-    def test_dimension_generic_coordinates(self, n, indexing):
+    def test_sampling_equivalence_uses_physical_units_and_broadcast_metadata(self):
+        grid = dl.Grid(4, d=(1, 2), c=(3, 4), unit="mm")
+        equivalent = dl.Grid(
+            4,
+            d=np.array([[0.001, 0.002], [0.001, 0.002]]),
+            c=(0.003, 0.004),
+            unit="m",
+        )
+        assert grid.check_sampling(equivalent) is grid
+        assert equivalent.check_sampling(grid) is equivalent
+
+        # Unknown values stay deferred until the owner supplies their context.
+        deferred = grid.set(d=zdx.StateRef("spacing"))
+        assert deferred.check_sampling(grid) is deferred
+        resolved = deferred.resolve(state=zdx.State(spacing=np.array([1.0, 2.0])))
+        assert np.array_equal(resolved.d, grid.d)
+        assert resolved.check_sampling(grid) is resolved
+
+    @pytest.mark.parametrize(
+        "other",
+        [
+            dl.Grid(6, d=(1, 2), unit="mm"),
+            dl.Grid(4, unit="mm"),
+            dl.Grid(4, d=(1, 2), unit="rad"),
+            dl.Grid(4, d=(2, 2), unit="mm"),
+            dl.Grid(4, d=(1, 2), c=(1, 0), unit="mm"),
+            dl.Grid(4, d=np.ones((3, 2)), unit="mm"),
+        ],
+        ids=["counts", "incomplete", "dimension", "spacing", "centre", "batches"],
+    )
+    def test_sampling_mismatch_validation_tails(self, other):
+        grid = dl.Grid(4, d=np.array([[1.0, 2.0], [1.0, 2.0]]), unit="mm")
+        with pytest.raises(ValueError, match="Wrong pupil sampling"):
+            grid.check_sampling(other, "Wrong pupil sampling")
+
+    @pytest.mark.parametrize("n", [(1, 1), (3, 1), (1, 4), (3, 2)])
+    def test_two_dimensional_coordinates(self, n):
         d = np.arange(1, len(n) + 1, dtype=float)
         c = d / 3
-        grid = dl.GridSpec(n, d, c, unit="mm", indexing=indexing)
+        grid = dl.Grid(n, d, c, unit="mm")
         axes = tuple(
             (np.linspace(-(size - 1) / 2, (size - 1) / 2, size) * step + center) * 1e-3
             for size, step, center in zip(n, d, c)
         )
-        expected = np.stack(np.meshgrid(*axes, indexing="ij"))
-        if indexing == "xy":
-            expected = expected.transpose((0,) + tuple(range(1, len(n) + 1))[::-1])
+        expected = np.stack(np.meshgrid(*axes, indexing="xy"))
 
         output = assert_jittable(lambda value: value.coordinates, grid)
 
-        assert grid.shape == (n[::-1] if indexing == "xy" else n)
+        assert grid.shape == n[::-1]
         assert output.shape == (len(n),) + grid.shape
         assert np.allclose(output, expected)
         assert all(np.allclose(actual, axis) for actual, axis in zip(grid.axes, axes))
@@ -36,7 +68,7 @@ class TestSpecifications:
     def test_broadcast_metadata_matches_independent_grids(self):
         d = np.asarray([[[1.0, 2.0]], [[2.0, 3.0]]])
         c = np.asarray([[[0.0, 1.0], [2.0, -1.0], [1.0, 0.0]]])
-        grid = dl.GridSpec((4, 3), d, c, unit="mm")
+        grid = dl.Grid((4, 3), d, c, unit="mm")
         coordinates, extent = assert_jittable(
             lambda value: (value.coordinates, value.extent()), grid
         )
@@ -44,7 +76,7 @@ class TestSpecifications:
             [
                 np.stack(
                     [
-                        dl.GridSpec(grid.n, spacing, center, "mm").coordinates
+                        dl.Grid(grid.n, spacing, center, "mm").coordinates
                         for center in c[0]
                     ]
                 )
@@ -62,7 +94,7 @@ class TestSpecifications:
         assert np.allclose(shared.extent(), bounds)
 
     def test_coordinate_gradients_and_vectorisation(self):
-        grid = dl.GridSpec((3, 1), (2.0, 3.0), (1.0, 2.0), "mm")
+        grid = dl.Grid((3, 1), (2.0, 3.0), (1.0, 2.0), "mm")
         gradient = assert_differentiable(lambda value: value.coordinates, grid)
 
         assert np.allclose(gradient.d, np.asarray((8e-6, 0.0)), atol=1e-10)
@@ -73,13 +105,14 @@ class TestSpecifications:
         assert np.allclose(mapped, grid.set(c=centres).coordinates)
 
     def test_scalar_sampling_and_field_promotion(self):
-        grid = dl.GridSpec(4, 2.0, unit="mm")
+        grid = dl.Grid(4, 2.0, unit="mm")
         image = dl.Intensity(np.ones((4, 4)), grid)
-        partial = dl.GridSpec(d=2.0, unit="mm").match_shape((3, 4))
+        partial = dl.Grid(d=2.0, unit="mm").match_shape((3, 4))
 
-        assert grid.coordinates.shape == (1, 4)
+        assert grid.n == (4, 4)
+        assert grid.coordinates.shape == (2, 4, 4)
         assert image.grid.coordinates.shape == (2, 4, 4)
-        assert np.allclose(image.coordinates, grid.broadcast(2).coordinates)
+        assert np.allclose(image.coordinates, grid.coordinates)
         assert partial.coordinates.shape == (2, 3, 4)
         assert np.allclose(partial.d, np.asarray((2.0, 2.0)))
 
@@ -89,15 +122,15 @@ class TestSpecifications:
         ids=["scalar-diameter", "axis-diameters"],
     )
     def test_contextual_sampling_keeps_physical_units(self, width, spacing):
-        grid = dl.GridSpec(
+        grid = dl.Grid(
             n=(4, 3),
             diam=zdx.StateRef("width"),
             c=zdx.StateRef("centre"),
             unit="mm",
         )
         state = zdx.State(width=np.asarray(width), centre=1.0)
-        sampled = assert_jittable(lambda value: grid.sampled(state=value), state)
-        expected = dl.GridSpec((4, 3), spacing, 1.0, "mm")
+        sampled = assert_jittable(lambda value: grid.resolve(state=value), state)
+        expected = dl.Grid((4, 3), spacing, 1.0, "mm")
 
         assert isinstance(grid.d, zdx.Expression)
         assert sampled.unit == "mm"
@@ -107,13 +140,11 @@ class TestSpecifications:
             zdx.resolve(grid, state=state).coordinates, expected.coordinates
         )
 
-    @pytest.mark.parametrize(
-        "old, new", [(4, 5), (5, 4), (4, 6), (6, 4), (4, 7), (7, 4)]
-    )
+    @pytest.mark.parametrize("old, new", [(4, 6), (6, 4), (5, 7), (7, 5)])
     def test_resize_samples_preserves_retained_coordinates(self, old, new):
-        grid = dl.GridSpec(old, 0.2, 0.7, "mm")
+        grid = dl.Grid(old, 0.2, 0.7, "mm")
         resized = grid.resize_samples(new)
-        coordinates = dlu.resize_samples(grid.axes[0], (new,), fill=np.nan)
+        coordinates = dlu.resize(grid.axes[0], (new,), fill=np.nan)
         retained = np.isfinite(coordinates)
 
         assert np.allclose(resized.axes[0][retained], coordinates[retained])
@@ -121,7 +152,7 @@ class TestSpecifications:
         assert np.allclose(grid.resize(new).c, grid.c)
 
     def test_frequency_grid_matches_fft_bins(self):
-        grid = dl.GridSpec((4, 5), (2.0, 3.0), (1.0, -2.0), "mm")
+        grid = dl.Grid((4, 5), (2.0, 3.0), (1.0, -2.0), "mm")
         frequency = assert_jittable(lambda value: value.frequency(), grid)
 
         assert frequency.unit == "1/m"
@@ -130,13 +161,13 @@ class TestSpecifications:
             assert np.allclose(axis, expected)
 
     def test_coordinate_interface(self):
-        spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), c=(0.1, -0.2), unit="m")
+        spec = dl.Grid(n=(6, 4), d=(0.2, 0.3), c=(0.1, -0.2), unit="m")
 
         output = assert_jittable(
             lambda value: (
                 value.coordinates,
                 value.axes,
-                value.axes_for((4, 4)),
+                value.resize((4, 4)).axes,
                 value.fov,
                 value.extent(),
             ),
@@ -148,7 +179,7 @@ class TestSpecifications:
         assert spec.ndim == 2
 
     def test_broadcast_and_mapped_centres(self):
-        base = dl.GridSpec(n=4, d=0.1, c=0.0, unit="m").broadcast(2)
+        base = dl.Grid(n=4, d=0.1, c=0.0, unit="m")
         mapped = base.set(c=np.asarray([[0.0, 0.0], [0.1, -0.1]]))
 
         assert base.coordinates.shape == (2, 4, 4)
@@ -156,23 +187,22 @@ class TestSpecifications:
         assert mapped.coordinates.shape == (2, 2, 4, 4)
 
     def test_match_shape(self):
-        grid = dl.GridSpec(d=0.1, unit="m")
+        grid = dl.Grid(d=0.1, unit="m")
         matched = grid.match_shape((6, 8))
 
         assert matched.n == (8, 6)
         assert matched.d.shape == (2,)
-        assert dl.GridSpec((8, 6), 0.1).match_shape((6, 8)).n == (8, 6)
+        assert dl.Grid((8, 6), 0.1).match_shape((6, 8)).n == (8, 6)
 
-        with pytest.raises(ValueError, match="shape must match grid.n"):
-            dl.GridSpec((8, 6), 0.1).match_shape((8, 6))
+        with pytest.raises(ValueError, match="shape must match its sampling UnitSpec"):
+            dl.Grid((8, 6), 0.1).match_shape((8, 6))
 
     def test_sampling_spec_contracts(self):
-        pad = dl.ResizeSpec(pad=2, crop=3, c=(0.1, -0.1))
-        resize = dl.ResizeSpec((8, 6), c=0.0).broadcast(2)
+        pad = dl.ResizeSpec(pad=2, crop=3)
+        resize = dl.ResizeSpec((8, 6))
 
-        assert pad.pad == (2,) and pad.crop == (3,)
+        assert pad.pad == (2, 2) and pad.crop == (3, 3)
         assert resize.n == (8, 6)
-        assert resize.c.shape == ()
         array = np.ones((6, 6))
         assert pad.pad_array(array).shape == (12, 12)
         assert pad.crop_array(array).shape == (2, 2)
@@ -181,7 +211,7 @@ class TestSpecifications:
         assert resize.resize(array).shape == (6, 8)
 
     def test_paste_spec_contract(self):
-        grid = dl.GridSpec(n=(8, 6), d=0.5, unit="m").broadcast(2)
+        grid = dl.Grid(n=(8, 6), d=0.5, unit="m")
         centers = np.asarray(((-0.5, 0.0), (0.5, 0.0)))
         spec = dl.PasteSpec.from_grid(grid, centers, extent=0.4)
         arrays = np.ones((2, 5, 5))
@@ -190,7 +220,8 @@ class TestSpecifications:
         scatter = spec.paste(arrays, "scatter")
 
         assert spec.n == (8, 6)
-        assert spec.shape == (5, 5)
+        assert spec.stamp_shape == (5, 5)
+        assert spec.shape == (6, 8)
         assert spec.coordinates.shape == (2, 2, 5, 5)
         assert np.array_equal(scan, scatter)
         assert_jittable(lambda value, array: value.paste(array), spec, arrays)
@@ -199,7 +230,7 @@ class TestSpecifications:
             dl.PasteSpec((4, 4), (3, 3), [[3, 0]], [[0.0, 0.0]], [1.0, 1.0])
 
     def test_explicit_resize_contract(self):
-        spec = dl.ResizeSpec((8, 6)).broadcast(2)
+        spec = dl.ResizeSpec((8, 6))
         array = np.ones((4, 4))
 
         assert spec.explicit
@@ -224,8 +255,8 @@ class TestSpecifications:
         x = np.linspace(-3.5e-3, 3.5e-3, 8)
         y = np.linspace(-2.5e-3, 2.5e-3, 6)
 
-        spec = dl.GridSpec.from_axes((x, y), unit="mm")
-        batched = dl.GridSpec.from_axes(
+        spec = dl.Grid.from_axes((x, y), unit="mm")
+        batched = dl.Grid.from_axes(
             (np.stack((x, x + 1e-3)), np.stack((y, y - 2e-3))),
             unit="mm",
         )
@@ -237,22 +268,22 @@ class TestSpecifications:
         assert batched.d.shape == batched.c.shape == (2, 2)
         assert np.allclose(batched.c, np.asarray(((0.0, 0.0), (1.0, -2.0))))
 
-    def test_grid_from_axes_broadcasts_and_retains_indexing(self):
+    def test_grid_from_axes_broadcasts_in_xy_order(self):
         x = np.asarray((-1.0, 0.0, 1.0)) * 1e-3
         y = np.asarray(((0.0, 2.0), (1.0, 3.0))) * 1e-3
-        grid = dl.GridSpec.from_axes((x, y), unit="mm", indexing="ij")
+        grid = dl.Grid.from_axes((x, y), unit="mm")
 
-        assert grid.coordinates.shape == (2, 2, 3, 2)
+        assert grid.coordinates.shape == (2, 2, 2, 3)
         assert np.allclose(grid.axes[0], np.broadcast_to(x, (2, 3)))
         assert np.allclose(grid.axes[1], y)
 
     @pytest.mark.parametrize("axes", [(), (1.0,), ([1.0],), ([],)])
     def test_grid_from_axes_requires_sampled_vectors(self, axes):
         with pytest.raises(ValueError, match="coordinate|samples"):
-            dl.GridSpec.from_axes(axes)
+            dl.Grid.from_axes(axes)
 
     def test_grid_sampling_transforms(self):
-        spec = dl.GridSpec(n=(8, 6), d=(0.1, 0.2), unit="m")
+        spec = dl.Grid(n=(8, 6), d=(0.1, 0.2), unit="m")
 
         resized = spec.resize((10, 8))
         downsampled = spec.downsample((2, 3))
@@ -272,7 +303,7 @@ class TestSpecifications:
     def test_batched_metadata_sampling_transforms(self):
         d = np.asarray(((0.1, 0.2), (0.3, 0.4)))
         c = np.asarray(((0.0, 0.1), (-0.1, 0.2)))
-        spec = dl.GridSpec(n=(8, 6), d=d, c=c, unit="m")
+        spec = dl.Grid(n=(8, 6), d=d, c=c, unit="m")
 
         resized = spec.resize((10, 8))
         downsampled = spec.downsample((2, 3))
@@ -293,11 +324,11 @@ class TestSpecifications:
         assert np.allclose(resampled.c, c)
 
     def test_incomplete_spec_contracts(self):
-        empty = dl.GridSpec()
-        size_only = dl.GridSpec(n=4)
-        spacing_only = dl.GridSpec(d=0.1)
+        empty = dl.Grid()
+        size_only = dl.Grid(n=4)
+        spacing_only = dl.Grid(d=0.1)
 
-        assert empty.ndim == 0
+        assert empty.ndim == size_only.ndim == spacing_only.ndim == 2
         with pytest.raises(ValueError, match="n and d"):
             size_only.downsample(2)
         with pytest.raises(ValueError, match="n and d"):
@@ -305,51 +336,41 @@ class TestSpecifications:
         with pytest.raises(ValueError, match="n must"):
             _ = spacing_only.shape
         with pytest.raises(ValueError, match="n must"):
-            _ = spacing_only.xs
+            _ = spacing_only.axes
         with pytest.raises(ValueError, match="n must"):
             _ = spacing_only.coordinates
         with pytest.raises(ValueError, match="n and d"):
             _ = size_only.fov
         with pytest.raises(ValueError, match="d must"):
-            size_only.axes_for((4,))
-
-    def test_axis_aliases(self):
-        spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), unit="m")
-
-        assert all(np.allclose(left, right) for left, right in zip(spec.axes, spec.xs))
-        with pytest.raises(ValueError, match="dimensionality"):
-            spec.axes_for((4,))
+            size_only.resize((4,)).axes
 
     def test_units_and_differentiation(self):
-        spec = dl.GridSpec(n=(4, 6), d=(2.0, 3.0), unit="mm")
+        spec = dl.Grid(n=(4, 6), d=(2.0, 3.0), unit="mm")
 
         assert np.max(np.abs(spec.coordinates)) < 0.01
         assert np.allclose(spec.fov, np.asarray((8.0, 18.0)))
         assert_differentiable(lambda value: value.coordinates, spec)
 
     def test_diameter_sampling(self):
-        spec = dl.GridSpec(n=(4, 6), diam=(2.0, 3.0), unit="m")
+        spec = dl.Grid(n=(4, 6), diam=(2.0, 3.0), unit="m")
 
         assert np.allclose(spec.d, np.asarray((0.5, 0.5)))
         assert all(np.isclose(axis.mean(), 0.0) for axis in spec.axes)
         assert spec.coordinates.shape == (2, 6, 4)
 
     def test_rectangular_axes_contract(self):
-        spec = dl.GridSpec(n=(6, 4), d=(0.2, 0.3), unit="m")
+        spec = dl.Grid(n=(6, 4), d=(0.2, 0.3), unit="m")
 
         assert tuple(axis.shape for axis in spec.axes) == ((6,), (4,))
-        assert tuple(x.shape for x in spec.xs) == ((6,), (4,))
+        assert tuple(x.shape for x in spec.axes) == ((6,), (4,))
         assert np.allclose(spec.extent(), np.asarray((-0.6, 0.6, -0.6, 0.6)))
 
-    def test_extent_expansion_and_units(self):
-        spec = dl.GridSpec(n=4, d=2.0, c=1.0, unit="mm")
+    def test_extent_units(self):
+        spec = dl.Grid(n=4, d=2.0, c=1.0, unit="mm")
 
-        native = assert_jittable(lambda value: value.extent(2), spec)
+        native = assert_jittable(lambda value: value.extent(), spec)
         assert np.allclose(native, np.asarray((-3.0, 5.0, -3.0, 5.0)))
-        assert np.allclose(spec.extent(2, unit="m"), 1e-3 * native)
-
-        with pytest.raises(ValueError, match="cannot be smaller"):
-            spec.broadcast(2).extent(1)
+        assert np.allclose(spec.extent(unit="m"), 1e-3 * native)
 
     @pytest.mark.parametrize(
         ("kwargs", "error"),
@@ -366,20 +387,114 @@ class TestSpecifications:
     )
     def test_validation(self, kwargs, error):
         with pytest.raises(error):
-            dl.GridSpec(**kwargs)
+            dl.Grid(**kwargs)
 
         with pytest.raises(ValueError):
             dl.ResizeSpec(pad=0)
 
         with pytest.raises(ValueError):
             dl.ResizeSpec(n=4, pad=2)
-        with pytest.raises(ValueError):
-            dl.ResizeSpec().broadcast(0)
-        with pytest.raises(ValueError):
-            dl.GridSpec().broadcast(0)
+
+
+class TestSamplingOperations:
+    @pytest.mark.parametrize("width", [None, 20.0])
+    def test_singleton_bandpass_resize_keeps_its_interval(self, width):
+        bandpass = dlu.BandPass(wl=500.0, delta_wl=width, n=1, unit="nm")
+        resized = assert_jittable(
+            lambda value: (value.resize(1), value.resize_samples(1)), bandpass
+        )
+
+        for result in resized:
+            assert_tree_allclose(result, bandpass)
+            assert result.d == width
+
+    @pytest.mark.parametrize("old, new", [(4, 6), (6, 4), (5, 7), (7, 5)])
+    def test_resize_samples_preserves_coordinates(self, old, new):
+        axis = dlu.Axis(n=old, d=0.2, c=0.7, unit="mm")
+        resized = assert_jittable(lambda value: value.resize_samples(new), axis)
+        coordinates = dlu.resize(axis.axes[0], (new,), fill=np.nan)
+        retained = np.isfinite(coordinates)
+
+        assert isinstance(resized, dlu.Axis)
+        assert resized.n == (new,)
+        assert resized.unit == axis.unit
+        assert np.allclose(resized.axes[0][retained], coordinates[retained])
+        assert axis.n == (old,)
+
+    def test_downsampling_matches_block_centres_and_preserves_extent(self):
+        axis = dlu.Axis(n=6, d=2.0, c=3.0, unit="mm")
+        coarse, fine = assert_jittable(
+            lambda value: (value.downsample(2), value.oversample(2)), axis
+        )
+
+        expected = axis.axes[0].reshape(3, 2).mean(-1)
+        assert coarse.n == (3,)
+        assert fine.n == (12,)
+        assert np.allclose(coarse.axes[0], expected)
+        assert np.allclose(coarse.fov, axis.fov)
+        assert np.allclose(fine.fov, axis.fov)
+        assert np.allclose(fine.downsample(2).axes[0], axis.axes[0])
+
+        gradient = assert_differentiable(
+            lambda value: value.downsample(2).coordinates, axis
+        )
+        assert np.allclose(gradient.d, 32e-6, atol=1e-10)
+        assert np.allclose(gradient.c, 18e-6, atol=1e-10)
+
+    def test_sampling_preserves_independent_axis_batches(self):
+        axis = dlu.Axis(
+            n=6,
+            d=np.asarray([[0.2], [0.4]]),
+            c=np.asarray([[1.0], [2.0]]),
+            unit="mm",
+        )
+        sampled = assert_jittable(lambda value: value.downsample(2), axis)
+        expected = axis.axes[0].reshape(2, 3, 2).mean(-1)
+
+        assert sampled.coordinates.shape == (2, 1, 3)
+        assert np.allclose(sampled.axes[0], expected)
+        assert np.allclose(sampled.c, axis.c)
+
+    @pytest.mark.parametrize("sampling", [dlu.Axis, dlu.Grid])
+    def test_resizing_keeps_partial_sampling(self, sampling):
+        shape_only = sampling(n=4)
+        resized = assert_jittable(lambda value: value.resize_samples(6), shape_only)
+        assert resized.d is None
+        assert resized.n == (6,) * shape_only.ndim
+
+        defined_later = sampling(n=4, d=zdx.StateRef("spacing"))
+        resized = defined_later.resize_samples(6)
+        assert isinstance(resized.d, zdx.Expression)
+        resolved = assert_jittable(
+            lambda state: resized.resolve(state=state), zdx.State(spacing=0.5)
+        )
+        assert np.allclose(resolved.d_si, 0.5)
+
+    def test_geometric_resize_and_sample_resize_are_distinct(self):
+        axis = dlu.Axis(n=4, d=1.0, c=2.0, unit=None)
+        assert np.allclose(axis.resize(5).axes[0], np.arange(5.0))
+        with pytest.raises(ValueError, match="parity"):
+            axis.resize_samples(5)
+        with pytest.raises(ValueError, match="divide"):
+            axis.downsample(3)
 
 
 class TestTransforms:
+    @pytest.mark.parametrize("angle", [-0.3, 0.3, np.pi / 2])
+    def test_rotation_turns_coordinates_anticlockwise(self, angle):
+        coordinates = dl.Grid((7, 5), 0.2).coordinates
+        transform = dl.Affine(rotation=angle)
+        values = assert_jittable(lambda op: op(coordinates), transform)
+
+        x, y = coordinates
+        expected = np.stack(
+            [
+                np.cos(angle) * x - np.sin(angle) * y,
+                np.sin(angle) * x + np.cos(angle) * y,
+            ]
+        )
+        assert np.allclose(values, expected, atol=1e-7)
+
     @pytest.fixture
     def coordinates(self):
         return dlu.pixel_coords(6, 1.0)
@@ -426,9 +541,8 @@ class TestTransforms:
         with pytest.warns(DeprecationWarning, match="dLux 0.17.0"):
             applied = transform.apply(coordinates)
         assert np.allclose(transform(coordinates), applied)
-        spec = dl.GridSpec(n=6, d=1 / 6, unit="m").broadcast(2)
-        with pytest.raises((TypeError, ValueError)):
-            transform(spec)
+        spec = dl.Grid(n=6, d=1 / 6, unit="m")
+        assert np.allclose(transform(spec), transform(spec.coordinates))
         with pytest.raises((TypeError, ValueError)):
             dl.Affine()()
         with pytest.raises(ValueError, match="Provide coordinates"):
@@ -436,9 +550,8 @@ class TestTransforms:
         with pytest.raises(ValueError, match="shape"):
             dl.Affine()(np.ones((2, 6)))
 
-        grid = dl.GridSpec(n=(4, 5, 6), d=0.1)
-        with pytest.raises(ValueError, match="only 2D"):
-            grid.transformed(dl.Affine())
+        with pytest.raises(ValueError, match="2 dimensions"):
+            dl.Grid(n=(4, 5, 6), d=0.1)
 
     def test_transform_dictionary(self, coordinates):
         transforms = {
@@ -447,7 +560,7 @@ class TestTransforms:
         }
         chain = dl.TransformChain(transforms)
 
-        assert list(chain.transformations) == list(transforms)
+        assert list(chain.layers) == list(transforms)
         assert_jittable(chain, coordinates)
 
     def test_vectorised_distortion(self, coordinates):
@@ -492,7 +605,6 @@ class TestTransforms:
     @pytest.mark.parametrize(
         "constructor",
         [
-            lambda: dl.Affine(rotation=[[1.0]]),
             lambda: dl.Affine(scale=0.0),
             lambda: dl.Affine(order=("rotation", "rotation")),
             lambda: dl.AffineMap(matrix=np.ones((3, 3))),
@@ -507,3 +619,27 @@ class TestTransforms:
     def test_validation(self, constructor):
         with pytest.raises(ValueError):
             constructor()
+
+
+def test_transformed_grid_identity():
+    grid = dl.Grid((3, 5), 1)
+    assert np.array_equal(grid.transformed(), grid.coordinates)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda: dl.Grid(d=1).frequency(),
+        lambda: dl.Grid(3, 1, unit="rad").frequency(),
+        lambda: dl.Grid.from_axes(([1.0], [1.0, 2.0])),
+        lambda: dl.Grid(3, 1).transformed(np.eye(2)),
+        lambda: dl.Grid(3).d_si,
+        lambda: dl.Grid(d=1).resize_samples(3),
+        lambda: dl.Axis([1.0, 2.0], n=2),
+        lambda: dl.Axis([]),
+    ],
+)
+def test_grid_validation_tails(operation):
+    """Coverage tails: partial definitions and invalid sampling requests."""
+    with pytest.raises((TypeError, ValueError)):
+        operation()

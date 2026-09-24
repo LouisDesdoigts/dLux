@@ -7,7 +7,7 @@ import jax.numpy as np
 from jax import Array, vmap
 import zodiax as zdx
 
-from .basis import Basis, initialise_coeffs
+from .basis import Basis
 
 __all__ = ["soft_binarise", "CLIMBBasis"]
 
@@ -144,6 +144,7 @@ class CLIMBBasis(zdx.Expression):
         values=(0.0, 1.0),
         oversample=3,
         *,
+        empty=False,
         alias=None,
     ):
         """Initialise a CLIMB-softened explicit basis.
@@ -155,12 +156,14 @@ class CLIMBBasis(zdx.Expression):
         coeffs : Array, zodiax.Expression, or None
             Basis coefficients, defaulting to zeros.
         shape : tuple[int, ...] or None
-            Coefficient-axis shape, inferred from concrete coefficients. Required
-            if coefficients are omitted or have no known shape.
+            Coefficient-axis shape, inferred from concrete coefficients or the basis
+            dimensions before its two spatial axes.
         values : tuple[float, float]
             Lower and upper values used by soft binarisation.
         oversample : int
             Internal soft-binarisation oversampling factor.
+        empty : bool
+            Leave the latent expansion empty when coefficients are omitted.
         alias : mapping or None
             Optional parameter aliases.
         """
@@ -171,9 +174,9 @@ class CLIMBBasis(zdx.Expression):
         if shape is None and isinstance(coeffs, Array):
             shape = coeffs.shape
         if shape is None:
-            raise ValueError("shape is required when coeffs has no known shape.")
+            shape = basis.shape[:-2]
         shape = tuple(shape)
-        self.expansion = Basis(basis, initialise_coeffs(coeffs, shape), axes=len(shape))
+        self.expansion = Basis(basis, coeffs, shape=shape, axes=len(shape), empty=empty)
 
         # Require a square latent image with two output levels and divisible sampling.
         output_shape = basis.shape[len(shape) :]
@@ -200,6 +203,8 @@ class CLIMBBasis(zdx.Expression):
         lower and upper values.
         """
         self = self.resolve_children(**kwargs)
+        if isinstance(self.expansion, zdx.Expression):
+            raise zdx.Unresolved("The latent basis needs coefficients and sampling.")
         binary = soft_binarise(self.expansion, self.oversample)
         low, high = self.values
         return low + (high - low) * binary

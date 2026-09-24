@@ -26,13 +26,6 @@ __all__ = [
 ]
 
 
-def _spatial_counts(shape) -> tuple[int, int]:
-    """Read physical (x, y) counts from final array axes (..., y, x)."""
-    if len(shape) < 2:
-        raise ValueError("Resizing requires two spatial array axes.")
-    return tuple(shape[-2:][::-1])
-
-
 def as_size(value, ndim=None, name="size"):
     """Return positive integer sizes as a static tuple."""
     if isinstance(value, Integral):
@@ -331,7 +324,7 @@ class ResizeSpec(Spec):
         Apply both padding and cropping factors, or use the explicit target ``n``.
         Leading batch axes do not affect the result.
         """
-        return self.counts(_spatial_counts(shape))[1]
+        return self.counts(self._spatial_counts(shape))[1]
 
     def crop_size(self, shape) -> tuple[int, int]:
         """Return physical-axis sizes after applying only crop factors.
@@ -339,7 +332,7 @@ class ResizeSpec(Spec):
         ``shape`` follows array order ``(..., ny, nx)``. The input may already be
         padded; only its current final two sizes and the crop factors are used.
         """
-        return self._crop_counts(_spatial_counts(shape))
+        return self._crop_counts(self._spatial_counts(shape))
 
     def pad_array(self, array: Array, fill: float = 0.0) -> Array:
         """Centrally pad the final two spatial axes.
@@ -348,7 +341,7 @@ class ResizeSpec(Spec):
         its pad factor. ``fill`` supplies values outside the original array and
         leading axes are preserved.
         """
-        target = self._pad_counts(_spatial_counts(array.shape))
+        target = self._pad_counts(self._spatial_counts(array.shape))
         return pad_to(array, target, fill)
 
     def crop_array(self, array: Array) -> Array:
@@ -376,6 +369,13 @@ class ResizeSpec(Spec):
         ``fill`` is used only for padded values. Leading axes are preserved.
         """
         return resize(array, self.output_size(array.shape), fill)
+
+    @staticmethod
+    def _spatial_counts(shape) -> tuple[int, int]:
+        """Read physical (x, y) counts from final array axes (..., y, x)."""
+        if len(shape) < 2:
+            raise ValueError("Resizing requires two spatial array axes.")
+        return tuple(shape[-2:][::-1])
 
 
 class FFTSpec(ResizeSpec):

@@ -122,20 +122,6 @@ def remove_layer(layers: dict, key: str) -> dict:
     return layers
 
 
-def _steps(steps, step_type=None):
-    """Name components and validate their callable contract recursively."""
-    entries = list(steps.items()) if isinstance(steps, dict) else steps
-    named = list2dictionary(entries, True)
-    for step in named.values():
-        if isinstance(step, Sequential):
-            _steps(step.steps, step_type)
-        elif not isinstance(step, zdx.Module) or not callable(step):
-            raise TypeError("Sequential steps must be callable Zodiax Modules.")
-        elif step_type is not None and not isinstance(step, step_type):
-            raise TypeError(f"Expected {step_type}, got {type(step)}.")
-    return named
-
-
 class BaseLayer(zdx.Module):
     """An immutable operation on an array, field, or other compatible target.
 
@@ -180,7 +166,7 @@ class Sequential(BaseLayer):
         alias : mapping or sequence of pairs, optional
             Zodiax parameter aliases.
         """
-        self.layers = _steps(layers, layer_type)
+        self.layers = self._named_steps(layers, layer_type)
         self.alias = alias
 
     @property
@@ -215,11 +201,25 @@ class Sequential(BaseLayer):
     def insert_layer(self, layer, index, layer_type=None):
         """Insert a named or unnamed component, optionally checking its type."""
         layers = insert_layer(self.layers, layer, index, ())
-        return self.set(layers=_steps(layers, layer_type))
+        return self.set(layers=self._named_steps(layers, layer_type))
 
     def remove_layer(self, key):
         """Return a copy with the named component removed."""
         return self.set(layers=remove_layer(self.layers, key))
+
+    @staticmethod
+    def _named_steps(steps, step_type=None):
+        """Name components and validate their callable contract recursively."""
+        entries = list(steps.items()) if isinstance(steps, dict) else steps
+        named = list2dictionary(entries, True)
+        for step in named.values():
+            if isinstance(step, Sequential):
+                Sequential._named_steps(step.steps, step_type)
+            elif not isinstance(step, zdx.Module) or not callable(step):
+                raise TypeError("Sequential steps must be callable Zodiax Modules.")
+            elif step_type is not None and not isinstance(step, step_type):
+                raise TypeError(f"Expected {step_type}, got {type(step)}.")
+        return named
 
 
 class Series(Sequential, zdx.Expression):
@@ -292,8 +292,8 @@ class Combine(zdx.Expression):
         multiplies transmissions. The output has the common broadcast shape. Children
         must produce arrays with scientifically compatible units for the operation.
         """
-        self = self.resolve_children(**context)
-        values = np.stack(np.broadcast_arrays(*self.parametrics.values()))
+        parametrics = zdx.resolve(self.parametrics, **context)
+        values = np.stack(np.broadcast_arrays(*parametrics.values()))
         if self.operation in ("product", "intersection"):
             return values.prod(0)
         output = values.sum(0)

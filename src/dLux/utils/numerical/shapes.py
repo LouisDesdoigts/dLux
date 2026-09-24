@@ -88,8 +88,7 @@ def spider_distance(coords: Array, width: float, angle: float) -> Array:
     Width uses the coordinate unit and angle is in degrees. Negative distances
     lie inside the arm; zero degrees extends along the negative y axis.
     """
-    # Affine rotates the object, so negate the old coordinate-rotation angle.
-    coords = dlu.Affine(rotation=-np.deg2rad(angle))(coords)
+    coords = dlu.Affine(rotation=np.deg2rad(angle))(coords)
     dist_from_vert = np.abs(coords[..., 0, :, :]) - width / 2
     dist_from_horz = coords[..., 1, :, :]
     return np.maximum(dist_from_vert, dist_from_horz)
@@ -305,7 +304,8 @@ class Soft(zdx.Module):
         pixel_scale = np.asarray(pixel_scale)
         if pixel_scale.ndim:
             pixel_scale = pixel_scale.max(-1)
-        return pixel_scale * self.pixels / 2
+        pixels = zdx.resolve(self.pixels, **context)
+        return pixel_scale * pixels / 2
 
 
 class InvertibleShape(Shape):
@@ -481,7 +481,8 @@ class Circle(InvertibleShape):
 
     def distance(self, coordinates, **context):
         """Return the signed distance to the circular boundary."""
-        diameter = np.asarray(self.diameter)[..., None, None]
+        diameter = zdx.resolve(self.diameter, **context)
+        diameter = np.asarray(diameter)[..., None, None]
         return circ_distance(coordinates, diameter / 2)
 
 
@@ -540,7 +541,8 @@ class Square(InvertibleShape):
 
     def distance(self, coordinates, **context):
         """Return the maximum signed distance to the square's edges."""
-        width = np.asarray(self.width)[..., None, None]
+        width = zdx.resolve(self.width, **context)
+        width = np.asarray(width)[..., None, None]
         return square_distance(coordinates, width)
 
 
@@ -605,8 +607,9 @@ class Rectangle(InvertibleShape):
 
     def distance(self, coordinates, **context):
         """Return the maximum signed distance to the rectangle's edges."""
+        width, height = zdx.resolve((self.width, self.height), **context)
         return rectangle_distance(
-            coordinates, self.width[..., None, None], self.height[..., None, None]
+            coordinates, width[..., None, None], height[..., None, None]
         )
 
 
@@ -673,7 +676,8 @@ class RegularPolygon(InvertibleShape):
 
     def distance(self, coordinates, **context):
         """Return the maximum signed edge distance in the coordinate unit."""
-        diameter = np.asarray(self.diameter)[..., None, None]
+        diameter = zdx.resolve(self.diameter, **context)
+        diameter = np.asarray(diameter)[..., None, None]
         unit_coordinates = coordinates / diameter[..., None, :, :]
         return reg_polygon_distance(unit_coordinates, self.nsides, 0.5) * diameter
 
@@ -735,7 +739,8 @@ class ConvexPolygon(InvertibleShape):
 
     def distance(self, coordinates, **context):
         """Return signed edge distances, assuming sequential convex vertices."""
-        return convex_polygon_distance(coordinates, self.vertices)
+        vertices = zdx.resolve(self.vertices, **context)
+        return convex_polygon_distance(coordinates, vertices)
 
     def evaluate_hard(self, coordinates, **context):
         """Return polygon support, including samples exactly on its boundary."""
@@ -811,9 +816,10 @@ class Spider(InvertibleShape):
 
     def distance(self, coordinates, **context):
         """Return the minimum signed distance across the radial support arms."""
-        width = np.asarray(self.width)[..., None, None]
+        width, angles = zdx.resolve((self.width, self.angles), **context)
+        width = np.asarray(width)[..., None, None]
         distances = vmap(lambda angle: spider_distance(coordinates, width, angle))
-        return distances(self.angles).min(0)
+        return distances(angles).min(0)
 
 
 class Complement(Shape):
@@ -886,5 +892,5 @@ class Complement(Shape):
         context = self.sampling_context(
             grid, coordinates=coordinates, transform=transform, ndim=2, **context
         )
-        self = self.resolve_children(**context)
-        return 1 - self.shape
+        shape = zdx.resolve(self.shape, **context)
+        return 1 - shape

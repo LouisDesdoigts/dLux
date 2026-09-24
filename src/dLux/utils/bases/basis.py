@@ -40,6 +40,10 @@ def eval_basis(basis: Array, coeffs: Array, axes: int | None = None) -> Array:
         Positive contraction-axis count. ``None`` contracts every coefficient axis,
         preserving the original unbatched utility convention.
     """
+    # An explicitly empty expansion waits until coefficients are supplied.
+    if coeffs is None:
+        raise zdx.Unresolved("Basis coefficients have not been supplied.")
+
     # Require resolved arrays, then check the coefficient contraction shapes.
     if isinstance(basis, zdx.Expression) or isinstance(coeffs, zdx.Expression):
         raise zdx.Unresolved(
@@ -101,13 +105,16 @@ def solve_basis(array: Array, basis: Array, axes: int | None = None) -> Array:
     return coeffs.reshape(batch_shape + coefficient_shape)
 
 
-def initialise_coeffs(coeffs, shape):
+def initialise_coeffs(coeffs, shape, *, empty=False):
     """Return editable coefficients for a non-empty intrinsic ``shape`` tuple.
 
-    None creates zeros of that shape. Array-like inputs become JAX arrays and
-    must end in ``shape``; leading axes remain batches. Expressions are retained
+    None creates zeros of that shape unless ``empty=True`` retains None.
+    Array-like inputs become JAX arrays and must end in ``shape``; leading axes
+    remain batches. Expressions are retained
     unchanged, with their shapes left for evaluation to check.
     """
+    if coeffs is None and empty:
+        return None
     coeffs = np.zeros(shape) if coeffs is None else zdx.as_array(coeffs)
     if isinstance(coeffs, Array) and coeffs.shape[-len(shape) :] != tuple(shape):
         raise ValueError(f"coeffs must end in the shape {shape}.")
@@ -148,8 +155,9 @@ class Basis(ParametricBasis):
 
     ``basis`` has leading coefficient axes followed by arbitrary output axes.
     ``coeffs`` ends in the same coefficient shape; preceding axes are independent
-    batches when axes is explicit. By default, all supplied coefficient dimensions
-    are contracted. Use ``jax.vmap`` for paired basis and coefficient batches.
+    batches when axes is explicit or the generator advertises ``coeffs_shape``.
+    Otherwise, all supplied coefficient dimensions are contracted by default.
+    Use ``jax.vmap`` for paired basis and coefficient batches.
     Evaluation does not normalise basis vectors or their output. Local ``solve``
     returns minimum-norm least-squares coefficients, including for deficient bases.
     ``solve`` returns physical coefficients, leaving stored transforms unchanged.
@@ -173,12 +181,20 @@ class Basis(ParametricBasis):
     # Inherited fields
     unit: str | None = eqx.field(kw_only=True, default=None)
 
-    coeffs: Array | zdx.Expression
+    coeffs: Array | zdx.Expression | None
     basis: Array | zdx.Expression
     axes: int = eqx.field(static=True, default=1)
 
     def __init__(
-        self, basis, coeffs=None, *, axes=None, shape=None, unit=None, alias=None
+        self,
+        basis,
+        coeffs=None,
+        *,
+        axes=None,
+        shape=None,
+        empty=False,
+        unit=None,
+        alias=None,
     ):
         """Initialise a sampled linear expansion.
 
@@ -192,25 +208,38 @@ class Basis(ParametricBasis):
             batches are retained. None creates stored zero coefficients at
             construction, using the sampled basis dimensions or explicit shape.
         axes : int or None
-            Number of coefficient axes, fixed at construction. None uses coeffs.ndim
-            for supplied arrays, or len(shape) when shape is supplied. With neither,
+            Number of coefficient axes, fixed at construction. None uses a generator
+            coeffs_shape first, then coeffs.ndim or len(shape). With neither,
             omitted coefficients use one axis. Supply axes explicitly to retain
             leading coefficient batches, or axes/shape for expression coefficients.
         shape : tuple of int or None
             Coefficient shape for a generated basis when coeffs is omitted. It
             contains exactly axes positive dimensions. Sampled arrays supply this
-            shape directly. The generator is never evaluated during construction.
+            shape directly. A generator can instead expose ``coeffs_shape``, a tuple
+            of intrinsic coefficient dimensions; it is never evaluated here.
+        empty : bool
+            Leave omitted coefficients as None instead of allocating zeros. Supplied
+            coefficients are retained. Fill an empty expansion with ``set(coeffs=...)``.
         unit : str or None
             Output unit, converted after contraction. None leaves values unchanged.
         alias : mapping or None
             Optional parameter aliases.
         """
+        # A generator may advertise its intrinsic coefficient shape without sampling.
+        # This is an optional public contract, independent of the generator's class.
+        basis = zdx.as_array(basis)
+        generated_shape = getattr(basis, "coeffs_shape", None)
+        if shape is None and generated_shape is not None:
+            shape = generated_shape
+
         # Infer the coefficient domain from arrays or an explicit construction shape.
         coeffs = zdx.as_array(coeffs)
         if shape is not None:
             shape = tuple(index(size) for size in shape)
         if axes is None:
-            if isinstance(coeffs, Array):
+            if generated_shape is not None:
+                axes = len(generated_shape)
+            elif isinstance(coeffs, Array):
                 axes = coeffs.ndim
             elif shape is not None:
                 axes = len(shape)
@@ -225,13 +254,18 @@ class Basis(ParametricBasis):
         self.axes = index(axes)
         if self.axes < 1:
             raise ValueError("axes must be a positive integer.")
-        self.basis = zdx.as_array(basis)
+        self.basis = basis
         self.unit = self.validate_unit(unit)
         self.alias = alias
 
         if shape is not None:
             if len(shape) != self.axes or any(size < 1 for size in shape):
                 raise ValueError("shape must contain axes positive dimensions.")
+
+        if generated_shape is not None and tuple(shape) != tuple(generated_shape):
+            raise ValueError(
+                f"shape must match the generator's coeffs_shape {generated_shape}."
+            )
 
         # Arrays tell us the coefficient dimensions immediately. A generated
         # basis needs them from its constructor, without sampling the generator.
@@ -245,14 +279,14 @@ class Basis(ParametricBasis):
 
         # Keep supplied coefficients, or initialise zeros for the known shape.
         if shape is None:
-            if coeffs is None:
+            if coeffs is None and not empty:
                 raise ValueError(
                     "Provide coeffs or shape for a generated basis so its "
-                    "coefficients can be initialised at construction."
+                    "coefficients can be initialised, or use empty=True."
                 )
             self.coeffs = coeffs
         else:
-            self.coeffs = initialise_coeffs(coeffs, shape)
+            self.coeffs = initialise_coeffs(coeffs, shape, empty=empty)
 
     @property
     def coeffs_ndim(self) -> int:
@@ -315,6 +349,7 @@ class PastedBasis(ParametricBasis):
         coeffs=None,
         method="scan",
         *,
+        empty=False,
         unit=None,
         alias=None,
     ):
@@ -328,6 +363,8 @@ class PastedBasis(ParametricBasis):
             Fixed placement geometry for the compact stamps.
         coeffs : Array, zodiax.Expression, or None
             Coefficients with shape ``(..., n_stamps, *basis_shape)``.
+        empty : bool
+            Retain omitted coefficients as None; otherwise initialise stored zeros.
         method : str
             ``"scan"`` for lower memory or ``"scatter"`` for parallel placement.
         unit : str or None
@@ -353,7 +390,7 @@ class PastedBasis(ParametricBasis):
 
         # The stamp index is part of the coefficient domain, not an independent batch.
         shape = basis.shape[:-2]
-        self.coeffs = initialise_coeffs(coeffs, shape)
+        self.coeffs = initialise_coeffs(coeffs, shape, empty=empty)
         self.shape = shape
         self.basis = basis
         self.spec = spec
@@ -371,7 +408,7 @@ class PastedBasis(ParametricBasis):
         """Expand per-stamp coefficients and add overlapping stamps globally."""
         self = self.resolve_children(**context)
         coeffs = self.coeffs
-        if isinstance(coeffs, zdx.Expression):
+        if coeffs is None or isinstance(coeffs, zdx.Expression):
             raise zdx.Unresolved("Basis coefficients need their required context.")
         ndim = self.coeffs_ndim
         if coeffs.shape[-ndim:] != self.shape:

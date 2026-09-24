@@ -286,8 +286,8 @@ class Gaussian(Sampled):
         context = self.sampling_context(
             grid, coordinates=coordinates, transform=transform, ndim=2, **context
         )
-        self = self.resolve_children(**context)
-        return log_gaussian(context["coordinates"], self.mean, self.std, 2)
+        mean, std = zdx.resolve((self.mean, self.std), **context)
+        return log_gaussian(context["coordinates"], mean, std, 2)
 
 
 class CorrelatedGaussian(Sampled):
@@ -396,9 +396,9 @@ class CorrelatedGaussian(Sampled):
         context = self.sampling_context(
             grid, coordinates=coordinates, transform=transform, ndim=2, **context
         )
-        self = self.resolve_children(**context)
-        covariance = correlated_covariance(self.stds, self.corr)
-        return log_mv_gaussian(context["coordinates"], self.mean, covariance, 2)
+        mean, stds, corr = zdx.resolve((self.mean, self.stds, self.corr), **context)
+        covariance = correlated_covariance(stds, corr)
+        return log_mv_gaussian(context["coordinates"], mean, covariance, 2)
 
     @classmethod
     def from_cov(
@@ -529,6 +529,8 @@ class EllipticalGaussian(Sampled):
         context = self.sampling_context(
             grid, coordinates=coordinates, transform=transform, ndim=2, **context
         )
-        self = self.resolve_children(**context)
-        covariance = elliptical_covariance(self.major, self.ratio, self.angle)
-        return log_mv_gaussian(context["coordinates"], self.mean, covariance, 2)
+        mean, major, ratio, angle = zdx.resolve(
+            (self.mean, self.major, self.ratio, self.angle), **context
+        )
+        covariance = elliptical_covariance(major, ratio, angle)
+        return log_mv_gaussian(context["coordinates"], mean, covariance, 2)

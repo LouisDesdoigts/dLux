@@ -294,8 +294,8 @@ class Affine(BaseCoordTransform):
     """An affine coordinate transform with semantic parameters.
 
     Translation, rotation, scale, and shear map coordinates into a transformed
-    object's local frame. Positive rotation turns the object anticlockwise in
-    physical (x, y), so the coordinate map uses the opposite angle. Operations
+    object's local frame. Positive rotation turns coordinates anticlockwise in
+    physical (x, y), so a sampled optical object turns clockwise. Operations
     on coordinates are composed in the order supplied by ``order``.
     Parameter and coordinate leading dimensions use paired JAX broadcasting.
 
@@ -328,7 +328,7 @@ class Affine(BaseCoordTransform):
     translation : ArrayLike, Expression, or None
         Two-dimensional physical translation.
     rotation : ArrayLike, Expression, or None
-        Counter-clockwise object rotation in radians; any leading batch shape.
+        Counter-clockwise coordinate rotation in radians; any leading batch shape.
     scale : ArrayLike, Expression, or None
         Scalar or two-dimensional coordinate scale.
     shear : ArrayLike, Expression, or None
@@ -360,7 +360,7 @@ class Affine(BaseCoordTransform):
         translation : ArrayLike, Expression, or None
             Physical ``(x, y)`` translation into the object's local frame.
         rotation : ArrayLike, Expression, or None
-            Counter-clockwise object angle in radians; any leading batch shape.
+            Counter-clockwise coordinate angle in radians; any leading batch shape.
         scale : ArrayLike, Expression, or None
             Non-zero scalar or ``(x, y)`` coordinate scale.
         shear : ArrayLike, Expression, or None
@@ -442,8 +442,8 @@ class Affine(BaseCoordTransform):
                 operation = np.broadcast_to(np.eye(3), value.shape + (3, 3))
                 cosine, sine = np.cos(value), np.sin(value)
                 operation = operation.at[..., 0, 0].set(cosine)
-                operation = operation.at[..., 0, 1].set(sine)
-                operation = operation.at[..., 1, 0].set(-sine)
+                operation = operation.at[..., 0, 1].set(-sine)
+                operation = operation.at[..., 1, 0].set(sine)
                 operation = operation.at[..., 1, 1].set(cosine)
             else:
                 if name == "scale":

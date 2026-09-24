@@ -17,86 +17,6 @@ from ..batching import broadcast_batch, broadcast_batches, flatten_batch
 __all__ = ["Interp", "interp"]
 
 
-def _prepare(array, axes, method, complex):
-    """Prepare one Interpax object, with complex components as value channels."""
-    ndim = len(axes)
-    constructor = (ipx.Interpolator1D, ipx.Interpolator2D, ipx.Interpolator3D)[ndim - 1]
-
-    # Interpax interpolates trailing value channels together.
-    if np.iscomplexobj(array):
-        values, _ = from_complex(array, complex, axis=-1)
-    else:
-        values = np.asarray(array, dtype=np.result_type(array, 1.0))[..., None]
-
-    # One value contains the sampled axes and a final component channel.
-    # Interpax takes knots in array order (z, y, x), opposite to physical order.
-    value_ndim = ndim + 1
-    dimensions = (value_ndim,) + (1,) * ndim
-    values, *knots = broadcast_batches(values, *axes[::-1], ndims=dimensions)
-    batch = values.shape[:-value_ndim]
-
-    # Each vmap call constructs one interpolation table.
-    values = flatten_batch(values, value_ndim)
-    knots = tuple(flatten_batch(knot, 1) for knot in knots)
-
-    build = lambda values, *knots: constructor(
-        *knots, values, method=method, extrap=True
-    )
-    prepared = eqx.filter_vmap(build)(values, *knots)
-    return jtu.map(
-        lambda value: (
-            value.reshape(batch + value.shape[1:]) if eqx.is_array(value) else value
-        ),
-        prepared,
-    )
-
-
-def _sample(interpolator, coordinates, ndim, complex, fill):
-    """Pair source/query batches and let Interpax calculate the sample values."""
-    source_batch = interpolator.f.shape[: -ndim - 1]
-    query_shape = coordinates.shape[-ndim:]
-    batch = np.broadcast_shapes(source_batch, coordinates.shape[: -ndim - 1])
-
-    # Each mapped call sees one table and one coordinate grid. All interpolation
-    # coefficients live in the Interpax object, including any prepared snapshot.
-    def broadcast(value):
-        if not eqx.is_array(value):
-            return value
-        ndim = value.ndim - len(source_batch)
-        value = broadcast_batch(value, batch, ndim)
-        return flatten_batch(value, ndim)
-
-    prepared = jtu.map(broadcast, interpolator)
-    queries = broadcast_batch(coordinates, batch, ndim + 1)
-    queries = flatten_batch(queries, ndim + 1)
-    if fill is not None:
-        fill = broadcast_batch(fill, batch, ndim=0).reshape(-1)
-
-    def sample(table, query, fill):
-        # Interpax takes array-axis order (z, y, x). Only reshape/reorder the
-        # components; evaluate the exact requested coordinates.
-        points = query.reshape(ndim, -1)[::-1]
-        values = table(*points)
-        if values.shape[-1] == 2:
-            result = to_complex(values, complex, axis=-1)
-        else:
-            result = values[..., 0]
-
-        # None keeps the extrapolated values. Apply a supplied fill after complex
-        # reconstruction so it also works with amplitude/phase interpolation.
-        if fill is not None:
-            knots = tuple(getattr(table, name) for name in "xyz"[:ndim])
-            lower = np.stack([axis[0] for axis in knots])[:, None]
-            upper = np.stack([axis[-1] for axis in knots])[:, None]
-            inside = np.all((points >= lower) & (points <= upper), axis=0)
-            result = np.where(inside, result, fill)
-        return result.reshape(query_shape)
-
-    # Batch the table's arrays; share its Python settings (axis, extrapolation).
-    values = eqx.filter_vmap(sample)(prepared, queries, fill)
-    return values.reshape(batch + query_shape)
-
-
 def interp(image, knot_coords, sample_coords, method="linear", fill=None, complex=True):
     """Interpolate a 2D array using physical (x, y) coordinate grids.
 
@@ -118,6 +38,8 @@ class Interp(zdx.Expression):
     coordinates; raw vectors and queries must use the same units.
 
     ``Interp(rotation=angle)(array)`` samples transformed pixel coordinates.
+    Positive angles rotate coordinates anticlockwise, turning the sampled object
+    clockwise in physical (x, y), as in the released interpolation API.
     ``Interp(array, grid_in).sample(coordinates)`` queries a bound source.
     ``prepare()`` stores an Interpax snapshot for reuse. Re-prepare after changing
     source values, sampling, method or complex mode. Prepare inside differentiated
@@ -132,7 +54,7 @@ class Interp(zdx.Expression):
     grid_out: grids.UnitSpec | None = None
     transform: grids.BaseCoordTransform | None = None
     ndim: int = eqx.field(static=True, default=2)
-    method: str = eqx.field(static=True, default="cubic2")
+    method: str
     complex: bool = eqx.field(static=True, default=True)
     fill: Array | zdx.Expression | None = None
     interpolator: ipx.AbstractInterpolator | None = None
@@ -314,7 +236,7 @@ class Interp(zdx.Expression):
             if axis.ndim == 0 or axis.shape[-1] != size:
                 raise ValueError("Source axis vectors must match the array shape.")
 
-        interpolator = _prepare(array, axes, self.method, self.complex)
+        interpolator = source._build(array, axes)
         return source.set(interpolator=interpolator)
 
     def sample(self, coordinates, **context):
@@ -363,9 +285,88 @@ class Interp(zdx.Expression):
         fill = zdx.resolve(operation.fill, **local)
         if operation.transform is not None:
             coordinates = operation.transform(coordinates, **context)
-        interpolator = operation.interpolator
-        values = _sample(interpolator, coordinates, ndim, self.complex, fill)
+        values = operation._interpolate(coordinates, fill)
 
         if point_shape is not None:
             values = values.reshape(values.shape[: -self.ndim] + point_shape)
         return values
+
+    def _build(self, array, axes):
+        """Prepare one Interpax object, with complex components as value channels."""
+        ndim = self.ndim
+        constructors = (ipx.Interpolator1D, ipx.Interpolator2D, ipx.Interpolator3D)
+        constructor = constructors[ndim - 1]
+
+        # Interpax interpolates trailing value channels together.
+        if np.iscomplexobj(array):
+            values, _ = from_complex(array, self.complex, axis=-1)
+        else:
+            values = np.asarray(array, dtype=np.result_type(array, 1.0))[..., None]
+
+        # One value contains the sampled axes and a final component channel.
+        # Interpax takes knots in array order (z, y, x), opposite to physical order.
+        value_ndim = ndim + 1
+        dimensions = (value_ndim,) + (1,) * ndim
+        values, *knots = broadcast_batches(values, *axes[::-1], ndims=dimensions)
+        batch = values.shape[:-value_ndim]
+
+        # Each vmap call constructs one interpolation table.
+        values = flatten_batch(values, value_ndim)
+        knots = tuple(flatten_batch(knot, 1) for knot in knots)
+
+        build = lambda values, *knots: constructor(
+            *knots, values, method=self.method, extrap=True
+        )
+        prepared = eqx.filter_vmap(build)(values, *knots)
+        return jtu.map(
+            lambda value: (
+                value.reshape(batch + value.shape[1:]) if eqx.is_array(value) else value
+            ),
+            prepared,
+        )
+
+    def _interpolate(self, coordinates, fill):
+        """Pair source/query batches and let Interpax calculate the sample values."""
+        interpolator, ndim = self.interpolator, self.ndim
+        source_batch = interpolator.f.shape[: -ndim - 1]
+        query_shape = coordinates.shape[-ndim:]
+        batch = np.broadcast_shapes(source_batch, coordinates.shape[: -ndim - 1])
+
+        # Each mapped call sees one table and one coordinate grid. All interpolation
+        # coefficients live in the Interpax object, including any prepared snapshot.
+        def broadcast(value):
+            if not eqx.is_array(value):
+                return value
+            ndim = value.ndim - len(source_batch)
+            value = broadcast_batch(value, batch, ndim)
+            return flatten_batch(value, ndim)
+
+        prepared = jtu.map(broadcast, interpolator)
+        queries = broadcast_batch(coordinates, batch, ndim + 1)
+        queries = flatten_batch(queries, ndim + 1)
+        if fill is not None:
+            fill = broadcast_batch(fill, batch, ndim=0).reshape(-1)
+
+        def sample(table, query, fill):
+            # Interpax takes array-axis order (z, y, x). Only reshape/reorder the
+            # components; evaluate the exact requested coordinates.
+            points = query.reshape(ndim, -1)[::-1]
+            values = table(*points)
+            if values.shape[-1] == 2:
+                result = to_complex(values, self.complex, axis=-1)
+            else:
+                result = values[..., 0]
+
+            # None keeps the extrapolated values. Apply a supplied fill after complex
+            # reconstruction so it also works with amplitude/phase interpolation.
+            if fill is not None:
+                knots = tuple(getattr(table, name) for name in "xyz"[:ndim])
+                lower = np.stack([axis[0] for axis in knots])[:, None]
+                upper = np.stack([axis[-1] for axis in knots])[:, None]
+                inside = np.all((points >= lower) & (points <= upper), axis=0)
+                result = np.where(inside, result, fill)
+            return result.reshape(query_shape)
+
+        # Batch the table's arrays; share its Python settings (axis, extrapolation).
+        values = eqx.filter_vmap(sample)(prepared, queries, fill)
+        return values.reshape(batch + query_shape)

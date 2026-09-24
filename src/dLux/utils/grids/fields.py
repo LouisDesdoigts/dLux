@@ -347,7 +347,7 @@ class Field(zdx.Module):
         )
 
     def rotate(self, angle, method="cubic2", complex=True):
-        """Rotate about the coordinate origin using Interp's rotation convention."""
+        """Rotate the sampled field clockwise by angle radians about the origin."""
         return self.interpolate(
             transforms.Affine(rotation=np.asarray(angle)), method, complex
         )
