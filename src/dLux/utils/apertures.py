@@ -12,6 +12,7 @@ __all__ = [
     "hst_like",
     "jwst_like",
     "euclid_like",
+    "scexao_like",
 ]
 
 
@@ -703,3 +704,122 @@ def euclid_like(
 
     # Return the aperture and basis
     return aperture, basis
+
+
+def scexao_like(
+    npixels: int,
+    diameter: float = 7.95,  # m
+    oversample: int = 5,
+    secondary_diameter: float | None = 2.44065,  # m
+    array_diameter: float | None = None,  # m
+    spider_width: float | None = 0.184,  # m
+    spider_angles: list | tuple | Array | None = [-38.25, -141.75, 141.75, 38.25],
+    spider_offset: float | None = 0.659,  # m
+    actuator_mask_diameter: float | None = 0.583,  # m
+    actuator_mask_offset: list | tuple | Array | None = np.asarray([1.77, 1.412]),
+    zernike_nolls: list | tuple | Array | None = None,
+    zernike_oversize: float = 0.01,
+    return_support: bool = False,
+) -> Array | tuple[Array, ...]:
+    """
+    Builds a scexao_like circular aperture model with bad actuator mask
+
+    Parameters
+    ----------
+    npixels : int
+        The output size of the aperture arrays.
+    diameter : float = 7.95
+        The full aperture diameter.
+    oversample : int = 5
+        The oversampling factor used to build soft pixel edges.
+    secondary_diameter : float | None = 2.44065
+        Optional central obscuration diameter.
+    array_diameter : float | None = None
+        Optional diameter of the array. If None, defaults to `diameter`.
+    spider_width : float | None = 0.184
+        Optional spider vane width.
+    spider_angles : list | tuple | Array | None = [-38.25, -141.75, 141.75, 38.25]
+        Angles of spider vanes in degrees.
+    spider_offset : float | None = 0.659
+        Where the spiders connect to the x axis, as a distance from the origin
+    actuator_mask_diameter: float | None = 0.583
+        Diameter of the bad actuator mask
+    actuator_mask_offset: list | tuple | Array | None = np.asarray([1.77, 1.412])
+        Location of the bad actuator mask
+    zernike_nolls : list | tuple | Array | None = None
+        Optional Noll indices for Zernike basis generation.
+    zernike_oversize : float = 0.01
+        Fractional oversize of the Zernike basis diameter.
+    return_support : bool = False
+        Whether to return the aperture support mask along with the transmission and
+        basis. Only relevant if Zernike basis is requested.
+
+    Returns
+    -------
+    transmission : Array
+        The scexao-like aperture transmission.
+    transmission, basis : tuple[Array, Array]
+        Returned when ``zernike_nolls`` is provided.
+    transmission, basis, support : tuple[Array, Array, Array]
+        Returned when ``zernike_nolls`` is provided and ``return_support=True``.
+    """
+    if (spider_width is None) != (spider_angles is None):
+        raise ValueError(
+            "`spider_width` and `spider_angles` must both be provided or both be None."
+        )
+
+    # Get the oversampled primary aperture
+    coord_diam = diameter if array_diameter is None else array_diameter
+    coords = dlu.pixel_coords(npixels * oversample, diameter=coord_diam)
+    layers = [dlu.circle(coords, diameter / 2)]
+
+    # Add the secondary if requested
+    if secondary_diameter is not None and secondary_diameter > 0:
+        layers.append(dlu.circle(coords, secondary_diameter / 2, invert=True))
+
+    # Add the spiders if requested
+    if spider_width is not None and spider_angles is not None:
+        if spider_offset is not None:
+            spider_x_offsets = np.asarray(
+                [spider_offset, spider_offset, -spider_offset, -spider_offset]
+            )
+            x_shift_fn = lambda x_pos: dlu.translate_coords(
+                coords, np.array([x_pos, 0])
+            )
+            spider_angles = np.asarray(spider_angles)
+            layers += [
+                dlu.spider(x_shift_fn(x_offset), spider_width, [angle])
+                for angle, x_offset in zip(spider_angles, spider_x_offsets)
+            ]
+
+    # Add the bad actuator mask
+    if actuator_mask_offset is not None and actuator_mask_diameter is not None:
+        layers.append(
+            dlu.circle(
+                dlu.translate_coords(coords, actuator_mask_offset),
+                actuator_mask_diameter / 2,
+                invert=True,
+            )
+        )
+
+    # Get the combined transmission of the layers
+    transmission = dlu.combine(layers, oversample)
+
+    if zernike_nolls is None:
+        return transmission
+
+    # Get the non-oversampled Zernike basis for the primary aperture
+    coords = dlu.pixel_coords(npixels, diameter=coord_diam)
+    z_diam = diameter * (1.0 + zernike_oversize)
+    basis = dlu.zernike_basis(zernike_nolls, coords, z_diam)
+
+    # Mask the basis by the primary aperture (not including secondary or spiders)
+    support = dlu.downsample(layers[0], oversample) > 0
+    basis = basis * support[None, ...]
+
+    # Return the transmission, basis, and support if requested
+    if return_support:
+        return transmission, basis, support
+
+    # Return the transmission and basis
+    return transmission, basis
