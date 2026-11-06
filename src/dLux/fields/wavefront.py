@@ -657,7 +657,11 @@ class Wavefront(dlu.Field):
             jones = self._uniform_jones(jones)[..., None, None, :, :]
         if np.broadcast_shapes(jones.shape, phasor.shape) != phasor.shape:
             raise ValueError("Jones matrices must broadcast to the existing field.")
-        phasor = jones @ phasor
+        # Expand the two-term contraction to avoid large flattened complex GEMMs.
+        phasor = (
+            jones[..., :, 0, None] * phasor[..., None, 0, :]
+            + jones[..., :, 1, None] * phasor[..., None, 1, :]
+        )
         return wavefront.set(phasor=np.moveaxis(phasor, (-2, -1), (-4, -3)))
 
     def stokes(self, input_stokes=None) -> Array:
