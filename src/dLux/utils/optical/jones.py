@@ -19,12 +19,6 @@ from ..sequential import Series, list2dictionary
 __all__ = ["BaseJones", "Jones", "JonesMatrix", "JonesChain"]
 
 
-# Convert flattened coherency matrices to Stokes [I, Q, U, V]. The V sign retains
-# the convention used by dLux's circular polarisers and Jones wavefront fields.
-_STOKES = np.array([[1, 0, 0, 1], [1, 0, 0, -1], [0, 1, 1, 0], [0, -1j, 1j, 0]])
-_COHERENCY = np.conj(_STOKES.T) / 2
-
-
 class BaseJones(zdx.Expression):
     """A Jones response resolving to an array of shape ``(..., 2, 2)``.
 
@@ -104,7 +98,27 @@ class BaseJones(zdx.Expression):
         matrix = self.populate().evaluate(**context)
         product = np.einsum("...ik,...jl->...ijkl", matrix, np.conj(matrix))
         product = product.reshape(matrix.shape[:-2] + (4, 4))
-        return (_STOKES @ product @ _COHERENCY).real
+
+        # Apply the sparse basis changes without dense complex GEMMs over pixels.
+        # Keep V = 2 Im(C_xy), as used by the circular polarisers and wavefronts.
+        rows = np.stack(
+            (
+                product[..., 0, :] + product[..., 3, :],
+                product[..., 0, :] - product[..., 3, :],
+                product[..., 1, :] + product[..., 2, :],
+                1j * (product[..., 2, :] - product[..., 1, :]),
+            ),
+            axis=-2,
+        )
+        return np.stack(
+            (
+                (rows[..., 0] + rows[..., 3]).real,
+                (rows[..., 0] - rows[..., 3]).real,
+                (rows[..., 1] + rows[..., 2]).real,
+                (rows[..., 2] - rows[..., 1]).imag,
+            ),
+            axis=-1,
+        ) / 2
 
     def to_stokes(self, stokes=None, **context) -> Array:
         """Return output Stokes [I, Q, U, V] with shape (..., 4).
