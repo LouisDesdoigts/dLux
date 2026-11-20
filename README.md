@@ -47,6 +47,7 @@ If you have any other projects that use dLux and would like to be added to this 
  - [Optical Design Maximising Fisher Information](https://arxiv.org/abs/2406.08704)
  - [Amigo: a Data-Driven Calibration of the JWST Interferometer](https://arxiv.org/abs/2510.09806)
  - [Image reconstruction with the JWST Interferometer](https://arxiv.org/abs/2510.10924)
+ - [Differentiable design of the PIAA-ZWFS: A flexible wavefront sensor that approaches the fundamental limit](https://www.aanda.org/articles/aa/full_html/2026/11/aa61079-26/aa61079-26.html)
 
 If you have any other papers that use dLux and would like to be added to this list, please let us know!
 
