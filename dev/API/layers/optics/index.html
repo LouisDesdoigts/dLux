@@ -15,6 +15,7 @@
         <link rel="canonical" href="https://louisdesdoigts.github.io/dlux/dev/API/layers/optics/">
       
       
+      
         <link rel="prev" href="../optical_layers/">
       
       
@@ -25,7 +26,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.60">
+      <meta name="generator" content="zensical-0.1.2">
     
     
       
@@ -36,12 +37,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ebb7f775.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.b60ce83d.min.css">
       
       
 
@@ -81,14 +82,11 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <label class="md-overlay" for="__drawer" aria-hidden="true"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#optics" class="md-skip">
-          Skip to content
-        </a>
-      
+      <a href="#__skip" class="md-skip">
+        Skip to content
+      </a>
     </div>
     <div data-md-component="announce">
       
@@ -111,9 +109,10 @@
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
 
     </a>
-    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+    <label class="md-header__button md-icon" for="__drawer">
       
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+      <span class="md-visually-hidden">Navigation</span>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -165,9 +164,10 @@
     
       
       
-        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+        <label class="md-header__button md-icon" for="__search">
           
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+          <span class="md-visually-hidden">Search</span>
         </label>
         <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
   <button type="button" class="md-search__button">
@@ -322,18 +322,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_2">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Tutorials
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -357,10 +358,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -384,10 +385,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -411,10 +412,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -438,10 +439,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -465,10 +466,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -492,10 +493,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -519,10 +520,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -546,10 +547,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -573,10 +574,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -600,10 +601,11 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -654,18 +656,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -723,18 +726,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_1">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3_1">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Core API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -758,10 +762,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -785,10 +789,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -812,10 +816,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -839,10 +843,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -866,10 +870,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -893,10 +897,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -920,10 +924,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -947,10 +951,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -974,10 +978,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1001,10 +1005,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1028,18 +1032,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
     
@@ -1093,18 +1098,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_2">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_3_2">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Layers API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1128,10 +1134,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1155,10 +1161,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1182,10 +1188,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1209,10 +1215,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1236,10 +1242,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
     
@@ -1332,10 +1338,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1359,10 +1365,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1386,18 +1392,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1465,18 +1472,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3_3">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Utils API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1500,10 +1508,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1527,10 +1535,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1554,10 +1562,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1581,10 +1589,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1608,10 +1616,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1635,10 +1643,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1662,10 +1670,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1689,10 +1697,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1716,10 +1724,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1743,10 +1751,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1770,10 +1778,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1797,10 +1805,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1824,10 +1832,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1851,10 +1859,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1878,10 +1886,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1905,18 +1913,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -2012,8 +2022,10 @@
             <div class="md-content" data-md-component="content">
               
               <article class="md-content__inner md-typeset">
+                <a id="__skip" tabindex="-1"></a>
                 
                   
+
   
     <a href="https://github.com/LouisDesdoigts/dlux/edit/main/docs/API/layers/optics.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
@@ -2049,7 +2061,7 @@
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.layers.optical_layers.TransmissiveLayer&lt;/code&gt;" href="../optical_layers/#dLux.layers.optical_layers.TransmissiveLayer">TransmissiveLayer</a></code>, <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.layers.optical_layers.AberratedLayer&lt;/code&gt;" href="../optical_layers/#dLux.layers.optical_layers.AberratedLayer">AberratedLayer</a></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="dLux.layers.optical_layers.TransmissiveLayer" href="../optical_layers/#dLux.layers.optical_layers.TransmissiveLayer">TransmissiveLayer</a></code>, <code><a class="autorefs autorefs-internal" title="dLux.layers.optical_layers.AberratedLayer" href="../optical_layers/#dLux.layers.optical_layers.AberratedLayer">AberratedLayer</a></code></p>
 
 
 
@@ -2085,7 +2097,7 @@ the input wavefront, with optional normalisation afterward.</p>
           <tr class="doc-section-item">
             <td><code><span title="dLux.layers.optics.Optic.opd">opd</span></code></td>
             <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="metres">metres</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, metres)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2096,7 +2108,7 @@ the input wavefront, with optional normalisation afterward.</p>
           <tr class="doc-section-item">
             <td><code><span title="dLux.layers.optics.Optic.phase">phase</span></code></td>
             <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="radians">radians</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, radians)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2332,7 +2344,7 @@ the input wavefront, with optional normalisation afterward.</p>
                 <code>wavefront</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2358,7 +2370,7 @@ the input wavefront, with optional normalisation afterward.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2446,7 +2458,7 @@ the input wavefront, with optional normalisation afterward.</p>
                 <code>transmission</code>
             </td>
             <td>
-                  <code><span title="jax.Array">Array</span> | <a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.parametric.Parametric&lt;/code&gt;" href="../../core/parametric/#dLux.parametric.Parametric">Parametric</a></code>
+                  <code><span title="jax.Array">Array</span> | <a class="autorefs autorefs-internal" title="dLux.parametric.Parametric" href="../../core/parametric/#dLux.parametric.Parametric">Parametric</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2618,7 +2630,7 @@ the input wavefront, with optional normalisation afterward.</p>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.layers.optical_layers.TransmissiveLayer&lt;/code&gt;" href="../optical_layers/#dLux.layers.optical_layers.TransmissiveLayer">TransmissiveLayer</a></code>, <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.layers.optical_layers.BasisLayer&lt;/code&gt;" href="../optical_layers/#dLux.layers.optical_layers.BasisLayer">BasisLayer</a></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="dLux.layers.optical_layers.TransmissiveLayer" href="../optical_layers/#dLux.layers.optical_layers.TransmissiveLayer">TransmissiveLayer</a></code>, <code><a class="autorefs autorefs-internal" title="dLux.layers.optical_layers.BasisLayer" href="../optical_layers/#dLux.layers.optical_layers.BasisLayer">BasisLayer</a></code></p>
 
 
 
@@ -2655,7 +2667,7 @@ optionally applies a transmission and normalisation.</p>
           <tr class="doc-section-item">
             <td><code><span title="dLux.layers.optics.BasisOptic.basis">basis</span></code></td>
             <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="metres">metres</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, metres)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2907,7 +2919,7 @@ optionally applies a transmission and normalisation.</p>
                 <code>wavefront</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2933,7 +2945,7 @@ optionally applies a transmission and normalisation.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../../core/wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3057,7 +3069,7 @@ optionally applies a transmission and normalisation.</p>
                 <code>transmission</code>
             </td>
             <td>
-                  <code><span title="jax.Array">Array</span> | <a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.parametric.Parametric&lt;/code&gt;" href="../../core/parametric/#dLux.parametric.Parametric">Parametric</a></code>
+                  <code><span title="jax.Array">Array</span> | <a class="autorefs autorefs-internal" title="dLux.parametric.Parametric" href="../../core/parametric/#dLux.parametric.Parametric">Parametric</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3229,7 +3241,7 @@ optionally applies a transmission and normalisation.</p>
 </footer>
       
     </div>
-    <div class="md-dialog" data-md-component="dialog">
+    <div class="md-dialog" data-md-component="dialog" role="status" aria-atomic="true">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
@@ -3237,10 +3249,14 @@ optionally applies a transmission and normalisation.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
+      
+      
+        
+        
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"redirect":null,"search":"../../../assets/javascripts/workers/search.719e0d91.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.3cb411a8.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

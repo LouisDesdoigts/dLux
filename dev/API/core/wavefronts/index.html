@@ -15,6 +15,7 @@
         <link rel="canonical" href="https://louisdesdoigts.github.io/dlux/dev/API/core/wavefronts/">
       
       
+      
         <link rel="prev" href="../spectra/">
       
       
@@ -25,7 +26,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.0.60">
+      <meta name="generator" content="zensical-0.1.2">
     
     
       
@@ -36,12 +37,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ce62732f.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ebb7f775.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.b60ce83d.min.css">
       
       
 
@@ -81,14 +82,11 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <label class="md-overlay" for="__drawer" aria-hidden="true"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#wavefronts" class="md-skip">
-          Skip to content
-        </a>
-      
+      <a href="#__skip" class="md-skip">
+        Skip to content
+      </a>
     </div>
     <div data-md-component="announce">
       
@@ -111,9 +109,10 @@
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
 
     </a>
-    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+    <label class="md-header__button md-icon" for="__drawer">
       
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+      <span class="md-visually-hidden">Navigation</span>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -165,9 +164,10 @@
     
       
       
-        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+        <label class="md-header__button md-icon" for="__search">
           
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+          <span class="md-visually-hidden">Search</span>
         </label>
         <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
   <button type="button" class="md-search__button">
@@ -322,18 +322,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_2">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Tutorials
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -357,10 +358,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -384,10 +385,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -411,10 +412,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -438,10 +439,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -465,10 +466,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -492,10 +493,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -519,10 +520,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -546,10 +547,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -573,10 +574,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -600,10 +601,11 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -654,18 +656,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
     
@@ -725,18 +728,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_1">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_3_1">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Core API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -760,10 +764,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -787,10 +791,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -814,10 +818,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -841,10 +845,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -868,10 +872,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -895,10 +899,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -922,10 +926,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -949,10 +953,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -976,10 +980,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1003,10 +1007,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
     
@@ -1088,18 +1092,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1151,18 +1156,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3_2">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Layers API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1186,10 +1192,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1213,10 +1219,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1240,10 +1246,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1267,10 +1273,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1294,10 +1300,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1321,10 +1327,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1348,10 +1354,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1375,18 +1381,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1454,18 +1461,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3_3">
+              <span class="md-nav__icon md-icon"></span>
+              
   
   Utils API
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1489,10 +1497,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1516,10 +1524,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1543,10 +1551,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1570,10 +1578,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1597,10 +1605,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1624,10 +1632,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1651,10 +1659,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1678,10 +1686,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1705,10 +1713,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1732,10 +1740,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1759,10 +1767,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1786,10 +1794,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1813,10 +1821,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1840,10 +1848,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1867,10 +1875,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1894,18 +1902,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -2001,8 +2011,10 @@
             <div class="md-content" data-md-component="content">
               
               <article class="md-content__inner md-typeset">
+                <a id="__skip" tabindex="-1"></a>
                 
                   
+
   
     <a href="https://github.com/LouisDesdoigts/dlux/edit/main/docs/API/core/wavefronts.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
@@ -2063,7 +2075,7 @@ through an optical system. All wavefronts assume square arrays.</p>
           <tr class="doc-section-item">
             <td><code><span title="dLux.wavefronts.Wavefront.wavelength">wavelength</span></code></td>
             <td>
-                  <code>(<span title="float">float</span>, <span title="meters">meters</span>)</code>
+                  <code>(<span title="float">float</span>, meters)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2074,11 +2086,11 @@ through an optical system. All wavefronts assume square arrays.</p>
           <tr class="doc-section-item">
             <td><code><span title="dLux.wavefronts.Wavefront.phasor">phasor</span></code></td>
             <td>
-                  <code><span title="jax.Array">Array</span>[<a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;nb&quot;&gt;complex&lt;/span&gt;&lt;/code&gt;
+                  <code><span title="jax.Array">Array</span>[<a class="autorefs autorefs-internal" title="complex
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.complex">complex</a>]</code>
+  
+      property
+   (dLux.wavefronts.Wavefront.complex)" href="./#dLux.wavefronts.Wavefront.complex">complex</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2089,7 +2101,7 @@ through an optical system. All wavefronts assume square arrays.</p>
           <tr class="doc-section-item">
             <td><code><span title="dLux.wavefronts.Wavefront.pixel_scale">pixel_scale</span></code></td>
             <td>
-                  <code>(<span title="float">float</span>, <span title="meters">meters</span> / <span title="pixel">pixel</span>)</code>
+                  <code>(<span title="float">float</span>, meters / pixel)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2109,11 +2121,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;diameter&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="diameter
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.diameter">diameter</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.diameter)" href="./#dLux.wavefronts.Wavefront.diameter">diameter</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2124,11 +2136,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;npixels&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="npixels
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.npixels">npixels</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.npixels)" href="./#dLux.wavefronts.Wavefront.npixels">npixels</a></code></td>
             <td>
                   <code>(<span title="int">int</span>, <span title="property">property</span>)</code>
             </td>
@@ -2139,11 +2151,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;real&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="real
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.real">real</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.real)" href="./#dLux.wavefronts.Wavefront.real">real</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2154,11 +2166,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;imaginary&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="imaginary
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.imaginary">imaginary</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.imaginary)" href="./#dLux.wavefronts.Wavefront.imaginary">imaginary</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2169,11 +2181,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;amplitude&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="amplitude
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.amplitude">amplitude</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.amplitude)" href="./#dLux.wavefronts.Wavefront.amplitude">amplitude</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2184,11 +2196,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;phase&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="phase
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.phase">phase</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.phase)" href="./#dLux.wavefronts.Wavefront.phase">phase</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2199,11 +2211,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;nb&quot;&gt;complex&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="complex
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.complex">complex</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.complex)" href="./#dLux.wavefronts.Wavefront.complex">complex</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2214,11 +2226,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;polar&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="polar
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.polar">polar</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.polar)" href="./#dLux.wavefronts.Wavefront.polar">polar</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2229,11 +2241,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;psf&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="psf
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.psf">psf</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.psf)" href="./#dLux.wavefronts.Wavefront.psf">psf</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2244,11 +2256,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;wavenumber&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="wavenumber
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.wavenumber">wavenumber</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.wavenumber)" href="./#dLux.wavefronts.Wavefront.wavenumber">wavenumber</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2259,11 +2271,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;ndim&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="ndim
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.ndim">ndim</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.ndim)" href="./#dLux.wavefronts.Wavefront.ndim">ndim</a></code></td>
             <td>
                   <code>(<span title="int">int</span>, <span title="property">property</span>)</code>
             </td>
@@ -2274,11 +2286,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;power&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="power
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.power">power</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.power)" href="./#dLux.wavefronts.Wavefront.power">power</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -2289,13 +2301,13 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;spec&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="spec
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.spec">spec</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.spec)" href="./#dLux.wavefronts.Wavefront.spec">spec</a></code></td>
             <td>
-                  <code>(<a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.coordinates.CoordSpec&lt;/code&gt;" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a>, <span title="property">property</span>)</code>
+                  <code>(<a class="autorefs autorefs-internal" title="dLux.coordinates.CoordSpec" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a>, <span title="property">property</span>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2304,11 +2316,11 @@ through an optical system. All wavefronts assume square arrays.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;xs&lt;/span&gt;&lt;/code&gt;
+            <td><code><a class="autorefs autorefs-internal" title="xs
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.xs">xs</a></code></td>
+  
+      property
+   (dLux.wavefronts.Wavefront.xs)" href="./#dLux.wavefronts.Wavefront.xs">xs</a></code></td>
             <td>
                   <code>(<span title="jax.Array">Array</span>, <span title="property">property</span>)</code>
             </td>
@@ -4275,7 +4287,7 @@ number of pixels.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>diameter</code></td>            <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="meters">meters</span> or <span title="radians">radians</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, meters or radians)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4685,7 +4697,7 @@ of the complex wavefront.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>spec</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.coordinates.CoordSpec&lt;/code&gt;" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.coordinates.CoordSpec" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4731,7 +4743,7 @@ current wavefront state.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavenumber</code></td>            <td>
-                  <code>(<span title="jax.Array">Array</span>, 1 / <span title="meters">meters</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, 1 / meters)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4911,7 +4923,7 @@ are ignored.</p>
                 <code>wavelength</code>
             </td>
             <td>
-                  <code>(<span title="float">float</span>, <span title="meters">meters</span>)</code>
+                  <code>(<span title="float">float</span>, meters)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5292,7 +5304,7 @@ by exp(1j * k * opd), where k = 2*pi / wavelength. Supports broadcasting.</p>
                 <code>opd</code>
             </td>
             <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="meters">meters</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, meters)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5318,7 +5330,7 @@ by exp(1j * k * opd), where k = 2*pi / wavelength. Supports broadcasting.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5404,7 +5416,7 @@ by exp(1j * phase). Supports broadcasting.</p>
                 <code>phase</code>
             </td>
             <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="radians">radians</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, radians)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5430,7 +5442,7 @@ by exp(1j * phase). Supports broadcasting.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5685,7 +5697,7 @@ optional scaling factor for numerical stability.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5768,11 +5780,11 @@ optional scaling factor for numerical stability.</p>
                 <code>phasor</code>
             </td>
             <td>
-                  <code><span title="jax.Array">Array</span>[<a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;nb&quot;&gt;complex&lt;/span&gt;&lt;/code&gt;
+                  <code><span title="jax.Array">Array</span>[<a class="autorefs autorefs-internal" title="complex
 
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="./#dLux.wavefronts.Wavefront.complex">complex</a>]</code>
+  
+      property
+   (dLux.wavefronts.Wavefront.complex)" href="./#dLux.wavefronts.Wavefront.complex">complex</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5788,7 +5800,7 @@ optional scaling factor for numerical stability.</p>
                 <code>wavelength</code>
             </td>
             <td>
-                  <code>(<span title="float">float</span>, <span title="meters">meters</span>)</code>
+                  <code>(<span title="float">float</span>, meters)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5864,7 +5876,7 @@ optional scaling factor for numerical stability.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6001,7 +6013,7 @@ optional scaling factor for numerical stability.</p>
                 <code>transformation</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.coordinates.BaseCoordTransform&lt;/code&gt;" href="../coordinates/#dLux.coordinates.BaseCoordTransform">BaseCoordTransform</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.coordinates.BaseCoordTransform" href="../coordinates/#dLux.coordinates.BaseCoordTransform">BaseCoordTransform</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6076,7 +6088,7 @@ and phase components.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6250,7 +6262,7 @@ and phase components.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6431,7 +6443,7 @@ backward through the system.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6680,7 +6692,7 @@ backward through the system.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6877,7 +6889,7 @@ backward through the system.</p>
                 <code>spec_out</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.coordinates.CoordSpec&lt;/code&gt;" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.coordinates.CoordSpec" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6938,7 +6950,7 @@ propagate backward through the system.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7193,7 +7205,7 @@ propagate backward through the system.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7273,7 +7285,7 @@ real and imaginary components by passing in complex=True.</p>
                 <code>angle</code>
             </td>
             <td>
-                  <code>(<span title="jax.Array">Array</span>, <span title="radians">radians</span>)</code>
+                  <code>(<span title="jax.Array">Array</span>, radians)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7333,7 +7345,7 @@ amplitude and phase components.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7524,7 +7536,7 @@ interpolate the amplitude and phase components.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7657,7 +7669,7 @@ interpolate the amplitude and phase components.</p>
                 <code>spec</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.coordinates.CoordSpec&lt;/code&gt;" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.coordinates.CoordSpec" href="../coordinates/#dLux.coordinates.CoordSpec">CoordSpec</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7683,7 +7695,7 @@ interpolate the amplitude and phase components.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7809,7 +7821,7 @@ prefixed forms like "mrad", "mas", etc (as supported by utils/units.py).</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>wavefront</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.wavefronts.Wavefront&lt;/code&gt;" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="./#dLux.wavefronts.Wavefront">Wavefront</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7905,7 +7917,7 @@ prefixed forms like "mrad", "mas", etc (as supported by utils/units.py).</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>psf</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;dLux.psfs.PSF&lt;/code&gt;" href="../psfs/#dLux.psfs.PSF">PSF</a></code>
+                  <code><a class="autorefs autorefs-internal" title="dLux.psfs.PSF" href="../psfs/#dLux.psfs.PSF">PSF</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8003,7 +8015,7 @@ pixel scale.</p>
 </footer>
       
     </div>
-    <div class="md-dialog" data-md-component="dialog">
+    <div class="md-dialog" data-md-component="dialog" role="status" aria-atomic="true">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
@@ -8011,10 +8023,14 @@ pixel scale.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
+      
+      
+        
+        
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"redirect":null,"search":"../../../assets/javascripts/workers/search.719e0d91.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.88ee1349.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.3cb411a8.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

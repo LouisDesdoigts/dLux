@@ -4,39 +4,6 @@
         <loc>https://louisdesdoigts.github.io/dlux/dev/</loc>
       </url>
       <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/phase_retrieval/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/apertures/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/calibration/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/mask_design/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/coronagraphs/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/abcd_fresnel/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/asm/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/sparse_propagation/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/optical_systems/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/sources/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/overview/</loc>
-      </url>
-      <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/coordinates/</loc>
       </url>
       <url>
@@ -47,6 +14,9 @@
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/optical_systems/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/overview/</loc>
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/parametric/</loc>
@@ -67,9 +37,6 @@
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/core/wavefronts/</loc>
       </url>
       <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/overview/</loc>
-      </url>
-      <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/abcd_propagators/</loc>
       </url>
       <url>
@@ -85,13 +52,13 @@
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/optics/</loc>
       </url>
       <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/overview/</loc>
+      </url>
+      <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/propagators/</loc>
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/layers/unified_layers/</loc>
-      </url>
-      <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/API/utils/overview/</loc>
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/utils/apertures/</loc>
@@ -127,6 +94,9 @@
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/utils/optics/</loc>
       </url>
       <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/API/utils/overview/</loc>
+      </url>
+      <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/utils/propagation/</loc>
       </url>
       <url>
@@ -139,12 +109,45 @@
         <loc>https://louisdesdoigts.github.io/dlux/dev/API/utils/zernikes/</loc>
       </url>
       <url>
-        <loc>https://louisdesdoigts.github.io/dlux/dev/faq/</loc>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/abcd_fresnel/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/apertures/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/asm/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/calibration/</loc>
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/changelog/</loc>
       </url>
       <url>
         <loc>https://louisdesdoigts.github.io/dlux/dev/contributing/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/coronagraphs/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/faq/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/installation/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/mask_design/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/optical_systems/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/phase_retrieval/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/sources/</loc>
+      </url>
+      <url>
+        <loc>https://louisdesdoigts.github.io/dlux/dev/sparse_propagation/</loc>
       </url>
 </urlset>
