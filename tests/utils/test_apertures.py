@@ -593,3 +593,42 @@ class TestEuclidLike:
         )
         assert isinstance(result, tuple)
         assert len(result) == 3
+
+
+class TestSCExAOLike:
+    """Tests for SCExAO-like aperture preset."""
+
+    def test_basic(self, npixels, oversample):
+        """SCExAO-like aperture returns transmission."""
+        trans = apertures_utils.scexao_like(npixels=npixels, oversample=oversample)
+        assert trans.shape == (npixels, npixels)
+        assert (trans >= 0).all() and (trans <= 1).all()
+
+    def test_array_diameter(self, npixels, oversample):
+        """Increasing the array diameter pads the SCExAO-like aperture."""
+        trans = apertures_utils.scexao_like(npixels=npixels, oversample=oversample)
+        padded = apertures_utils.scexao_like(
+            npixels=npixels, oversample=oversample, array_diameter=2.42
+        )
+
+        assert padded.shape == trans.shape
+        assert padded.sum() < trans.sum()
+
+    def test_with_zernike(self, npixels, oversample):
+        """SCExAO-like with Zernike basis."""
+        result = apertures_utils.scexao_like(
+            npixels=npixels, oversample=oversample, zernike_nolls=[1, 2]
+        )
+        assert isinstance(result, tuple)
+        assert len(result) == 2
+
+    def test_with_zernike_and_support(self, npixels, oversample):
+        """SCExAO-like with Zernike and support."""
+        result = apertures_utils.scexao_like(
+            npixels=npixels,
+            oversample=oversample,
+            zernike_nolls=[1, 2],
+            return_support=True,
+        )
+        assert isinstance(result, tuple)
+        assert len(result) == 3

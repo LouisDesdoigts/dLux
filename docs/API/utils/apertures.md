@@ -20,3 +20,6 @@
 
 ???+ info "euclid_like"
     ::: dLux.utils.apertures.euclid_like
+
+???+ info "scexao_like"
+    ::: dLux.utils.apertures.scexao_like
