@@ -47,7 +47,10 @@ def pad_to(array: Array, npixels: int, fill: float = 0.0) -> Array:
             f"target is {npixels} pixels. Padding requires npixels >= {npixels_in}."
         )
 
-    return np.pad(array, (npixels - npixels_in) // 2, constant_values=fill)
+    # Apply the padding
+    pad = (npixels - npixels_in) // 2
+    width = (*[(0, 0)] * (array.ndim - 2), (pad, pad), (pad, pad))
+    return np.pad(array, width, constant_values=fill)
 
 
 def crop_to(array: Array, npixels: int) -> Array:
@@ -87,7 +90,7 @@ def crop_to(array: Array, npixels: int) -> Array:
         )
 
     start, stop = (npixels_in - npixels) // 2, (npixels_in + npixels) // 2
-    return array[start:stop, start:stop]
+    return array[..., start:stop, start:stop]
 
 
 def resize(array: Array, npixels: int, fill: float = 0.0) -> Array:
@@ -140,23 +143,18 @@ def downsample(array: Array, n: int, mean: bool = True) -> Array:
     array : Array
         The downsampled array.
     """
-    if array.shape[0] != array.shape[1]:
+    if array.shape[-2] != array.shape[-1]:
         raise ValueError(f"Input array has shape {array.shape}, which is not square")
-    if array.shape[0] % n != 0:
+    if array.shape[-1] % n != 0:
         raise ValueError(
-            f"Input array has {array.shape[0]} pixels, which is not divisible "
+            f"Input array has {array.shape[-1]} pixels, which is not divisible "
             f"by {n}"
         )
 
     method = np.mean if mean else np.sum
-    size_in = array.shape[0]
+    leading = array.shape[:-2]
+    size_in = array.shape[-1]
     size_out = size_in // n
 
-    # Downsample first dimension
-    array = method(array.reshape((size_in * size_out, n)), 1)
-    array = array.reshape(size_in, size_out).T
-
-    # Downsample second dimension
-    array = method(array.reshape((size_out * size_out, n)), 1)
-    array = array.reshape(size_out, size_out).T
-    return array
+    array = array.reshape(leading + (size_out, n, size_out, n))
+    return method(method(array, -1), -2)
