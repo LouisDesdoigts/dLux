@@ -1,4 +1,6 @@
 
+
+
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -16,6 +18,7 @@
       
       
       
+      
         <link rel="prev" href="../overview/">
       
       
@@ -26,7 +29,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="zensical-0.1.2">
+      <meta name="generator" content="zensical-0.1.3">
     
     
       
@@ -37,12 +40,13 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.ebb7f775.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.e2cf241e.min.css">
       
         
           
         
         <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.b60ce83d.min.css">
+      
       
       
 
@@ -1583,6 +1587,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#dLux.utils.apertures.scexao_like" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        scexao_like
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2174,8 +2189,7 @@ assigned to more than one segment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
-<span class="normal">118</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
@@ -2207,7 +2221,8 @@ assigned to more than one segment.</p>
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">non_redundant_support</span><span class="p">(</span><span class="n">apertures</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">150</span>
+<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">non_redundant_support</span><span class="p">(</span><span class="n">apertures</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns a non-redundant support mask for overlapping sub-apertures.</span>
 
@@ -2487,8 +2502,7 @@ basis. Only relevant if Zernike basis is requested.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">153</span>
-<span class="normal">154</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
@@ -2576,7 +2590,8 @@ basis. Only relevant if Zernike basis is requested.</p>
 <span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">circular_aperture</span><span class="p">(</span>
+<span class="normal">242</span>
+<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">circular_aperture</span><span class="p">(</span>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
@@ -2968,8 +2983,7 @@ clipped only by the binary segment mask.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
-<span class="normal">246</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -3096,7 +3110,8 @@ clipped only by the binary segment mask.</p>
 <span class="normal">370</span>
 <span class="normal">371</span>
 <span class="normal">372</span>
-<span class="normal">373</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">segmented_aperture</span><span class="p">(</span>
+<span class="normal">373</span>
+<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">segmented_aperture</span><span class="p">(</span>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">nrings</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -3455,8 +3470,7 @@ basis. Only relevant if Zernike basis is requested.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">376</span>
-<span class="normal">377</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
@@ -3548,7 +3562,8 @@ basis. Only relevant if Zernike basis is requested.</p>
 <span class="normal">466</span>
 <span class="normal">467</span>
 <span class="normal">468</span>
-<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sparse_aperture</span><span class="p">(</span>
+<span class="normal">469</span>
+<span class="normal">470</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sparse_aperture</span><span class="p">(</span>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">centers</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="n">Array</span><span class="p">,</span>
@@ -3886,8 +3901,7 @@ basis. Only relevant if Zernike basis is requested.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">472</span>
-<span class="normal">473</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">473</span>
 <span class="normal">474</span>
 <span class="normal">475</span>
 <span class="normal">476</span>
@@ -3945,7 +3959,8 @@ basis. Only relevant if Zernike basis is requested.</p>
 <span class="normal">528</span>
 <span class="normal">529</span>
 <span class="normal">530</span>
-<span class="normal">531</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">hst_like</span><span class="p">(</span>
+<span class="normal">531</span>
+<span class="normal">532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">hst_like</span><span class="p">(</span>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.4</span><span class="p">,</span>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
@@ -4298,8 +4313,7 @@ basis. Only relevant if Zernike basis is requested.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">534</span>
-<span class="normal">535</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">535</span>
 <span class="normal">536</span>
 <span class="normal">537</span>
 <span class="normal">538</span>
@@ -4370,7 +4384,8 @@ basis. Only relevant if Zernike basis is requested.</p>
 <span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
-<span class="normal">606</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jwst_like</span><span class="p">(</span>
+<span class="normal">606</span>
+<span class="normal">607</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jwst_like</span><span class="p">(</span>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">6.6</span><span class="p">,</span>
     <span class="n">nrings</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
@@ -4692,8 +4707,7 @@ basis. Only relevant if Zernike basis is requested.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">609</span>
-<span class="normal">610</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">610</span>
 <span class="normal">611</span>
 <span class="normal">612</span>
 <span class="normal">613</span>
@@ -4788,7 +4802,8 @@ basis. Only relevant if Zernike basis is requested.</p>
 <span class="normal">702</span>
 <span class="normal">703</span>
 <span class="normal">704</span>
-<span class="normal">705</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euclid_like</span><span class="p">(</span>
+<span class="normal">705</span>
+<span class="normal">706</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euclid_like</span><span class="p">(</span>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.21</span><span class="p">,</span>
     <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
@@ -4890,6 +4905,531 @@ basis. Only relevant if Zernike basis is requested.</p>
     </div>
 
 </div></details>
+<details class="info" open="open">
+<summary>scexao_like</summary>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dLux.utils.apertures.scexao_like" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">dLux</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">apertures</span><span class="o">.</span><span class="n">scexao_like</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="mf">7.95</span><span class="p">,</span> <span class="n">oversample</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">secondary_diameter</span><span class="o">=</span><span class="mf">2.44065</span><span class="p">,</span> <span class="n">array_diameter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spider_width</span><span class="o">=</span><span class="mf">0.184</span><span class="p">,</span> <span class="n">spider_angles</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">38.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">141.75</span><span class="p">,</span> <span class="mf">141.75</span><span class="p">,</span> <span class="mf">38.25</span><span class="p">],</span> <span class="n">spider_offset</span><span class="o">=</span><span class="mf">0.659</span><span class="p">,</span> <span class="n">actuator_mask_diameter</span><span class="o">=</span><span class="mf">0.583</span><span class="p">,</span> <span class="n">actuator_mask_offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">1.77</span><span class="p">,</span> <span class="mf">1.412</span><span class="p">]),</span> <span class="n">zernike_nolls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zernike_oversize</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">return_support</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#dLux.utils.apertures.scexao_like" class="headerlink" title="Permanent link">¤</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Builds a scexao_like circular aperture model with bad actuator mask</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>npixels</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The output size of the aperture arrays.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>diameter</code>
+            </td>
+            <td>
+                  <code>float = 7.95</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The full aperture diameter.</p>
+              </div>
+            </td>
+            <td>
+                  <code>7.95</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>oversample</code>
+            </td>
+            <td>
+                  <code>int = 5</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The oversampling factor used to build soft pixel edges.</p>
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>secondary_diameter</code>
+            </td>
+            <td>
+                  <code>float | None = 2.44065</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional central obscuration diameter.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2.44065</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>array_diameter</code>
+            </td>
+            <td>
+                  <code>float | None = None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional diameter of the array. If None, defaults to <code>diameter</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>spider_width</code>
+            </td>
+            <td>
+                  <code>float | None = 0.184</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional spider vane width.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.184</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>spider_angles</code>
+            </td>
+            <td>
+                  <code>list | tuple | Array | None = [-38.25, -141.75, 141.75, 38.25]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Angles of spider vanes in degrees.</p>
+              </div>
+            </td>
+            <td>
+                  <code>[-38.25, -141.75, 141.75, 38.25]</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>spider_offset</code>
+            </td>
+            <td>
+                  <code>float | None = 0.659</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Where the spiders connect to the x axis, as a distance from the origin</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.659</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>actuator_mask_diameter</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Diameter of the bad actuator mask</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.583</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>actuator_mask_offset</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span> | <span title="tuple">tuple</span> | <span title="jax.Array">Array</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Location of the bad actuator mask</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="jax.numpy.asarray">asarray</span>([1.77, 1.412])</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>zernike_nolls</code>
+            </td>
+            <td>
+                  <code>list | tuple | Array | None = None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional Noll indices for Zernike basis generation.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>zernike_oversize</code>
+            </td>
+            <td>
+                  <code>float = 0.01</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Fractional oversize of the Zernike basis diameter.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.01</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>return_support</code>
+            </td>
+            <td>
+                  <code>bool = False</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to return the aperture support mask along with the transmission and
+basis. Only relevant if Zernike basis is requested.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>transmission</code></td>            <td>
+                  <code><span title="jax.Array">Array</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The scexao-like aperture transmission.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code>transmission, basis : tuple[Array, Array]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Returned when <code>zernike_nolls</code> is provided.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code>transmission, basis, support : tuple[Array, Array, Array]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Returned when <code>zernike_nolls</code> is provided and <code>return_support=True</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>dLux/utils/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span>
+<span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
+<span class="normal">823</span>
+<span class="normal">824</span>
+<span class="normal">825</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">scexao_like</span><span class="p">(</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.95</span><span class="p">,</span>  <span class="c1"># m</span>
+    <span class="n">oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">secondary_diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">2.44065</span><span class="p">,</span>  <span class="c1"># m</span>
+    <span class="n">array_diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># m</span>
+    <span class="n">spider_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.184</span><span class="p">,</span>  <span class="c1"># m</span>
+    <span class="n">spider_angles</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">38.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">141.75</span><span class="p">,</span> <span class="mf">141.75</span><span class="p">,</span> <span class="mf">38.25</span><span class="p">],</span>
+    <span class="n">spider_offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.659</span><span class="p">,</span>  <span class="c1"># m</span>
+    <span class="n">actuator_mask_diameter</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.583</span><span class="p">,</span>  <span class="c1"># m</span>
+    <span class="n">actuator_mask_offset</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">1.77</span><span class="p">,</span> <span class="mf">1.412</span><span class="p">]),</span>
+    <span class="n">zernike_nolls</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="n">Array</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">zernike_oversize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">return_support</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Builds a scexao_like circular aperture model with bad actuator mask</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    npixels : int</span>
+<span class="sd">        The output size of the aperture arrays.</span>
+<span class="sd">    diameter : float = 7.95</span>
+<span class="sd">        The full aperture diameter.</span>
+<span class="sd">    oversample : int = 5</span>
+<span class="sd">        The oversampling factor used to build soft pixel edges.</span>
+<span class="sd">    secondary_diameter : float | None = 2.44065</span>
+<span class="sd">        Optional central obscuration diameter.</span>
+<span class="sd">    array_diameter : float | None = None</span>
+<span class="sd">        Optional diameter of the array. If None, defaults to `diameter`.</span>
+<span class="sd">    spider_width : float | None = 0.184</span>
+<span class="sd">        Optional spider vane width.</span>
+<span class="sd">    spider_angles : list | tuple | Array | None = [-38.25, -141.75, 141.75, 38.25]</span>
+<span class="sd">        Angles of spider vanes in degrees.</span>
+<span class="sd">    spider_offset : float | None = 0.659</span>
+<span class="sd">        Where the spiders connect to the x axis, as a distance from the origin</span>
+<span class="sd">    actuator_mask_diameter: float | None = 0.583</span>
+<span class="sd">        Diameter of the bad actuator mask</span>
+<span class="sd">    actuator_mask_offset: list | tuple | Array | None = np.asarray([1.77, 1.412])</span>
+<span class="sd">        Location of the bad actuator mask</span>
+<span class="sd">    zernike_nolls : list | tuple | Array | None = None</span>
+<span class="sd">        Optional Noll indices for Zernike basis generation.</span>
+<span class="sd">    zernike_oversize : float = 0.01</span>
+<span class="sd">        Fractional oversize of the Zernike basis diameter.</span>
+<span class="sd">    return_support : bool = False</span>
+<span class="sd">        Whether to return the aperture support mask along with the transmission and</span>
+<span class="sd">        basis. Only relevant if Zernike basis is requested.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transmission : Array</span>
+<span class="sd">        The scexao-like aperture transmission.</span>
+<span class="sd">    transmission, basis : tuple[Array, Array]</span>
+<span class="sd">        Returned when ``zernike_nolls`` is provided.</span>
+<span class="sd">    transmission, basis, support : tuple[Array, Array, Array]</span>
+<span class="sd">        Returned when ``zernike_nolls`` is provided and ``return_support=True``.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">spider_width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">spider_angles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"`spider_width` and `spider_angles` must both be provided or both be None."</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Get the oversampled primary aperture</span>
+    <span class="n">coord_diam</span> <span class="o">=</span> <span class="n">diameter</span> <span class="k">if</span> <span class="n">array_diameter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">array_diameter</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span> <span class="o">*</span> <span class="n">oversample</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">coord_diam</span><span class="p">)</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">dlu</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span>
+
+    <span class="c1"># Add the secondary if requested</span>
+    <span class="k">if</span> <span class="n">secondary_diameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">secondary_diameter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">secondary_diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+    <span class="c1"># Add the spiders if requested</span>
+    <span class="k">if</span> <span class="n">spider_width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">spider_angles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">spider_offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spider_x_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">spider_offset</span><span class="p">,</span> <span class="n">spider_offset</span><span class="p">,</span> <span class="o">-</span><span class="n">spider_offset</span><span class="p">,</span> <span class="o">-</span><span class="n">spider_offset</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">x_shift_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x_pos</span><span class="p">:</span> <span class="n">dlu</span><span class="o">.</span><span class="n">translate_coords</span><span class="p">(</span>
+                <span class="n">coords</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">spider_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spider_angles</span><span class="p">)</span>
+            <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="n">dlu</span><span class="o">.</span><span class="n">spider</span><span class="p">(</span><span class="n">x_shift_fn</span><span class="p">(</span><span class="n">x_offset</span><span class="p">),</span> <span class="n">spider_width</span><span class="p">,</span> <span class="p">[</span><span class="n">angle</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">x_offset</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">spider_angles</span><span class="p">,</span> <span class="n">spider_x_offsets</span><span class="p">)</span>
+            <span class="p">]</span>
+
+    <span class="c1"># Add the bad actuator mask</span>
+    <span class="k">if</span> <span class="n">actuator_mask_offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">actuator_mask_diameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">dlu</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span>
+                <span class="n">dlu</span><span class="o">.</span><span class="n">translate_coords</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">actuator_mask_offset</span><span class="p">),</span>
+                <span class="n">actuator_mask_diameter</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Get the combined transmission of the layers</span>
+    <span class="n">transmission</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="n">oversample</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zernike_nolls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">transmission</span>
+
+    <span class="c1"># Get the non-oversampled Zernike basis for the primary aperture</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">coord_diam</span><span class="p">)</span>
+    <span class="n">z_diam</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">zernike_oversize</span><span class="p">)</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">zernike_basis</span><span class="p">(</span><span class="n">zernike_nolls</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">z_diam</span><span class="p">)</span>
+
+    <span class="c1"># Mask the basis by the primary aperture (not including secondary or spiders)</span>
+    <span class="n">support</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">oversample</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">basis</span> <span class="o">*</span> <span class="n">support</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+    <span class="c1"># Return the transmission, basis, and support if requested</span>
+    <span class="k">if</span> <span class="n">return_support</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">transmission</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">support</span>
+
+    <span class="c1"># Return the transmission and basis</span>
+    <span class="k">return</span> <span class="n">transmission</span><span class="p">,</span> <span class="n">basis</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div></details>
 
 
 
@@ -4954,7 +5494,8 @@ basis. Only relevant if Zernike basis is requested.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.top","navigation.indexes","content.code.copy","toc.integrate","content.action.edit","content.action.view"],"redirect":null,"search":"../../../assets/javascripts/workers/search.719e0d91.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.3cb411a8.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.9e76c64c.min.js"></script>
+      
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
